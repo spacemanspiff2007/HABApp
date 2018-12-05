@@ -1,3 +1,4 @@
 .idea
 __pycache__
 /log.log
+/conf/log
