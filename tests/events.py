@@ -29,6 +29,7 @@ class TestCases(unittest.TestCase):
         self.assertIsInstance(event, ItemStateChangedEvent)
         self.assertEqual(event.item, 'Ping')
         self.assertEqual(event.value, '1')
+        self.assertEqual(event.old_value, None)
 
     def test_ItemAddedEvent(self):
         event = get_event({'topic': 'smarthome/items/TestColor_OFF/added', 'payload': '{"type":"Color","name":"TestColor_OFF","tags":[],"groupNames":["TestGroup"]}', 'type': 'ItemAddedEvent'})
@@ -36,11 +37,18 @@ class TestCases(unittest.TestCase):
         self.assertEqual(event.item, 'TestColor_OFF')
 
     def test_ItemStateChangedEvent(self):
-        d = {'topic': 'smarthome/items/TestDateTimeTOGGLE/statechanged', 'payload': '{"type":"DateTime","value":"2018-11-19T09:47:08.277+0100","oldType":"DateTime","oldValue":"2018-11-19T09:46:38.273+0100"}', 'type': 'ItemStateChangedEvent'}
+        d = {'topic': 'smarthome/items/TestDateTimeTOGGLE/statechanged', 'payload': '{"type":"DateTime","value":"2018-11-21T19:47:08.277+0100","oldType":"DateTime","oldValue":"2018-11-19T09:46:38.273+0100"}', 'type': 'ItemStateChangedEvent'}
         event = get_event(d)
         self.assertIsInstance(event, ItemStateChangedEvent)
         self.assertEqual(event.item, 'TestDateTimeTOGGLE')
-        self.assertEqual(event.value, datetime.datetime(2018, 11, 19,9,47,8,277000))
+        # use this so we don't validate the timezone
+        self.assertIsInstance(event.value, datetime.datetime)
+        self.assertEqual(event.value.year, 2018)
+        self.assertEqual(event.value.month, 11)
+        self.assertEqual(event.value.day, 21)
+        self.assertEqual(event.value.hour, 19)
+        self.assertEqual(event.value.minute, 47)
+        self.assertEqual(event.value.second, 8)
 
 
 
