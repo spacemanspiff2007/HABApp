@@ -11,11 +11,11 @@ setuptools.setup(
     author="spaceman_spiff",
     # author_email="",
     description="Easy auomations with openHAB.\nHABApp allows the creation of rules in pure python.",
-    keywords = 'openHAB',
+    keywords='openHAB',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/spacemanspiff2007/HABApp",
-    include_package_data = True,
+    include_package_data=True,
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

@@ -137,7 +137,7 @@ class Config:
 
         # fix filenames
         for handler, handler_cfg in cfg.get('handlers', {}).items():
-            if not 'filename' in handler_cfg:
+            if 'filename' not in handler_cfg:
                 continue
 
             #make Filenames absolute path in the log folder if not specified
