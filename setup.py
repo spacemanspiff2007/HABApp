@@ -1,8 +1,6 @@
-from pathlib import Path
 import setuptools
 
-readme = Path(__file__).with_name('readme.md')
-with open(readme, "r") as fh:
+with open("readme.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
