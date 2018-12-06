@@ -45,7 +45,7 @@ _yaml_param.default_flow_style = False
 _yaml_param.default_style = False
 _yaml_param.width = 1000000
 _yaml_param.allow_unicode = True
-
+_yaml_param.sort_base_mapping_type_on_output = False
 
 
 log = logging.getLogger('HABApp.Config')

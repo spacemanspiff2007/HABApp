@@ -1,6 +1,9 @@
-import asyncio, os, sys
 import argparse
-import signal, concurrent
+import asyncio
+import concurrent
+import os
+import signal
+import sys
 from pathlib import Path
 
 import HABApp

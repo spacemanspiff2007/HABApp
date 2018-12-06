@@ -2,7 +2,9 @@ import asyncio
 import logging
 import time
 
-import aiohttp, ujson, itertools
+import aiohttp
+import itertools
+import ujson
 from aiohttp_sse_client import client as sse_client
 
 import HABApp
@@ -11,6 +13,14 @@ import HABApp.openhab.events
 from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.Core.Connection')
+
+def is_ignored( e) -> bool:
+    if isinstance(e, aiohttp.ClientPayloadError) or \
+        isinstance(e, ConnectionError) or \
+        isinstance(e, aiohttp.ClientConnectorError):
+        return True
+    return False
+
 
 class Connection:
     def __init__(self, parent):
@@ -31,7 +41,11 @@ class Connection:
         self.__tasks = []
 
         #Add the ping listener, this works because connect is the last step
-        listener = HABApp.core.EventBusListener( self.runtime.config.ping_item, self.ping_received, HABApp.openhab.events.ItemStateEvent)
+        listener = HABApp.core.EventBusListener(
+            self.runtime.config.ping_item,
+            self.ping_received,
+            HABApp.openhab.events.ItemStateEvent
+        )
         self.runtime.events.add_listener(listener)
 
         self.runtime.shutdown.register_func(self.shutdown)
@@ -97,11 +111,14 @@ class Connection:
         log.debug('Started SSE listener')
         while not self.runtime.shutdown.requested:
             try:
-                async with sse_client.EventSource( self.__get_url("/rest/events?topics=smarthome/items/"), session=self.__session) as event_source:
+                async with sse_client.EventSource(
+                        self.__get_url("/rest/events?topics=smarthome/items/"),
+                        session=self.__session
+                ) as event_source:
                     async for event in event_source:
                         self.runtime.events.post_event(event.data)
             except Exception as e:
-                if isinstance(e, aiohttp.ClientPayloadError) or isinstance(e, ConnectionError) or isinstance(e, aiohttp.ClientConnectorError):
+                if is_ignored(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -121,13 +138,16 @@ class Connection:
 
         while True:
             try:
-                resp = await self.__session.get(self.__get_url('rest/items'), params={'recursive' : 'false', 'fields' : 'state,type,name,editable'})
+                resp = await self.__session.get(
+                    self.__get_url('rest/items'),
+                    json={'recursive' : 'false', 'fields' : 'state,type,name,editable'}
+                )
                 if resp.status == 200:
                     data = await resp.text()
                     self.runtime.all_items.set_items(data)
                     break
             except Exception as e:
-                if isinstance(e, aiohttp.ClientPayloadError) or isinstance(e, ConnectionError) or isinstance(e, aiohttp.ClientConnectorError):
+                if is_ignored(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -142,7 +162,7 @@ class Connection:
             resp = await future
             #print(resp.request_info)
         except Exception as e:
-            if isinstance(e, aiohttp.ClientPayloadError) or isinstance(e, ConnectionError) or isinstance(e, aiohttp.ClientConnectorError):
+            if is_ignored(e):
                 log.warning(e)
                 return None
             raise
@@ -173,8 +193,6 @@ class Connection:
             fut = self.__session.put(f'{url:s}/{item}/state', data=state)
             asyncio.ensure_future( self.__check_request_result(fut, state))
 
-            #asyncio.ensure_future(self.__check_outgoing_comm(self.__session, 'put',f'{url:s}/{item}/state', state))
-
     @PrintException
     async def async_send_command(self):
         log.debug('Started sendCommand worker')
@@ -192,7 +210,7 @@ class Connection:
     @PrintException
     async def async_create_item(self, item_type, item_name, label = "", category = "", tags = [], groups = []):
 
-        payload = {'type' : item_type, 'name' : item_name}
+        payload = {'type': item_type, 'name' : item_name}
         if label:
             payload['label'] = label
         if label:

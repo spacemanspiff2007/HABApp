@@ -9,7 +9,7 @@ setuptools.setup(
     name="HABApp",
     version="0.0.1",
     author="spaceman_spiff",
-    #author_email="",
+    # author_email="",
     description="Easy auomations with openHAB.\nHABApp allows the creation of rules in pure python.",
     keywords = 'openHAB',
     long_description=long_description,

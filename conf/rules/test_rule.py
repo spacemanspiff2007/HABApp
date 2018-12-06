@@ -8,6 +8,8 @@ class MyRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
         self.listen_event( 'TestSwitchTOGGLE', self.cb, ItemStateEvent)
+        self.listen_event( 'TestContactTOGGLE', self.cb, ItemStateEvent)
+        self.listen_event( 'TestDateTimeTOGGLE', self.cb, ItemStateEvent)
 
         self.run_on_day_of_week( datetime.time(14,34,20), ['Mo'], self.cb, 'run_on_day_of_week')
 
