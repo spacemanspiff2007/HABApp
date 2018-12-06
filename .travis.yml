@@ -1,0 +1,20 @@
+sudo: false
+language: python
+
+matrix:
+  include:
+    - python: 3.6
+      env: TOXENV=flake
+
+    - python: 3.6
+      env: TOXENV=py36
+
+    - python: 3.7
+      dist: xenial
+      env: TOXENV=py37
+
+install:
+  - pip install tox
+
+script:
+  - tox

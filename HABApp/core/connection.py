@@ -1,8 +1,10 @@
 import asyncio
+import itertools
 import logging
 import time
+import ujson
 
-import aiohttp, ujson, itertools
+import aiohttp
 from aiohttp_sse_client import client as sse_client
 
 import HABApp
@@ -12,31 +14,44 @@ from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.Core.Connection')
 
+
+def is_ignored(e) -> bool:
+    if isinstance(e, aiohttp.ClientPayloadError) or \
+            isinstance(e, ConnectionError) or \
+            isinstance(e, aiohttp.ClientConnectorError):
+        return True
+    return False
+
+
 class Connection:
     def __init__(self, parent):
         assert isinstance(parent, HABApp.Runtime)
-        self.runtime : HABApp.Runtime = parent
+        self.runtime: HABApp.Runtime = parent
 
-        self.__session : aiohttp.ClientSession = None
+        self.__session: aiohttp.ClientSession = None
 
         self.queue_send_command = asyncio.Queue()
-        self.queue_post_update  = asyncio.Queue()
+        self.queue_post_update = asyncio.Queue()
 
-        self.__host = self.runtime.config.connection['host']
-        self.__port = self.runtime.config.connection['port']
+        self.__host: str = self.runtime.config.connection['host']
+        self.__port: str = self.runtime.config.connection['port']
 
         self.__ping_sent = 0
-        self.__ping_received  = 0
+        self.__ping_received = 0
 
         self.__tasks = []
 
-        #Add the ping listener, this works because connect is the last step
-        listener = HABApp.core.EventBusListener( self.runtime.config.ping_item, self.ping_received, HABApp.openhab.events.ItemStateEvent)
+        # Add the ping listener, this works because connect is the last step
+        listener = HABApp.core.EventBusListener(
+            self.runtime.config.ping_item,
+            self.ping_received,
+            HABApp.openhab.events.ItemStateEvent
+        )
         self.runtime.events.add_listener(listener)
 
         self.runtime.shutdown.register_func(self.shutdown)
 
-    def __get_url(self, url : str):
+    def __get_url(self, url: str):
         r = f'http://{self.__host:s}:{self.__port:d}'
         return r + url if url.startswith('/') else r + '/' + url
 
@@ -90,18 +105,21 @@ class Connection:
 
         self.__session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=99999999999999999),
-            json_serialize = ujson.dumps,
+            json_serialize=ujson.dumps,
             auth=auth
         )
 
         log.debug('Started SSE listener')
         while not self.runtime.shutdown.requested:
             try:
-                async with sse_client.EventSource( self.__get_url("/rest/events?topics=smarthome/items/"), session=self.__session) as event_source:
+                async with sse_client.EventSource(
+                        self.__get_url("/rest/events?topics=smarthome/items/"),
+                        session=self.__session
+                ) as event_source:
                     async for event in event_source:
                         self.runtime.events.post_event(event.data)
             except Exception as e:
-                if isinstance(e, aiohttp.ClientPayloadError) or isinstance(e, ConnectionError) or isinstance(e, aiohttp.ClientConnectorError):
+                if is_ignored(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -109,7 +127,7 @@ class Connection:
 
             await asyncio.sleep(3)
 
-        #close session
+        # close session
         await self.__session.close()
         return None
 
@@ -121,13 +139,16 @@ class Connection:
 
         while True:
             try:
-                resp = await self.__session.get(self.__get_url('rest/items'), params={'recursive' : 'false', 'fields' : 'state,type,name,editable'})
+                resp = await self.__session.get(
+                    self.__get_url('rest/items'),
+                    json={'recursive': 'false', 'fields': 'state,type,name,editable'}
+                )
                 if resp.status == 200:
                     data = await resp.text()
                     self.runtime.all_items.set_items(data)
                     break
             except Exception as e:
-                if isinstance(e, aiohttp.ClientPayloadError) or isinstance(e, ConnectionError) or isinstance(e, aiohttp.ClientConnectorError):
+                if is_ignored(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -136,20 +157,20 @@ class Connection:
             await asyncio.sleep(3)
 
     @PrintException
-    async def __check_request_result( self, future, data=None):
+    async def __check_request_result(self, future, data=None):
 
         try:
             resp = await future
-            #print(resp.request_info)
+            # print(resp.request_info)
         except Exception as e:
-            if isinstance(e, aiohttp.ClientPayloadError) or isinstance(e, ConnectionError) or isinstance(e, aiohttp.ClientConnectorError):
+            if is_ignored(e):
                 log.warning(e)
                 return None
             raise
 
-        #IO -> Quit
+        # IO -> Quit
         if resp.status >= 300:
-            #Log Error Message
+            # Log Error Message
             msg = f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}'
             if data:
                 msg += f' {data}'
@@ -158,7 +179,6 @@ class Connection:
                 log.warning(line)
 
         return resp.status
-
 
     @PrintException
     async def async_post_update(self):
@@ -171,9 +191,7 @@ class Connection:
             self.queue_post_update.task_done()
 
             fut = self.__session.put(f'{url:s}/{item}/state', data=state)
-            asyncio.ensure_future( self.__check_request_result(fut, state))
-
-            #asyncio.ensure_future(self.__check_outgoing_comm(self.__session, 'put',f'{url:s}/{item}/state', state))
+            asyncio.ensure_future(self.__check_request_result(fut, state))
 
     @PrintException
     async def async_send_command(self):
@@ -186,13 +204,12 @@ class Connection:
             self.queue_send_command.task_done()
 
             fut = self.__session.post(f'{url:s}/{item}', data=state)
-            asyncio.ensure_future( self.__check_request_result(fut, state))
-
+            asyncio.ensure_future(self.__check_request_result(fut, state))
 
     @PrintException
-    async def async_create_item(self, item_type, item_name, label = "", category = "", tags = [], groups = []):
+    async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
 
-        payload = {'type' : item_type, 'name' : item_name}
+        payload = {'type': item_type, 'name': item_name}
         if label:
             payload['label'] = label
         if label:

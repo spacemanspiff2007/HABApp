@@ -45,7 +45,7 @@ _yaml_param.default_flow_style = False
 _yaml_param.default_style = False
 _yaml_param.width = 1000000
 _yaml_param.allow_unicode = True
-
+_yaml_param.sort_base_mapping_type_on_output = False
 
 
 log = logging.getLogger('HABApp.Config')
@@ -137,7 +137,7 @@ class Config:
 
         # fix filenames
         for handler, handler_cfg in cfg.get('handlers', {}).items():
-            if not 'filename' in handler_cfg:
+            if 'filename' not in handler_cfg:
                 continue
 
             #make Filenames absolute path in the log folder if not specified

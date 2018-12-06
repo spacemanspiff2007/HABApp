@@ -1,10 +1,12 @@
-import asyncio, logging
+import asyncio
 import concurrent.futures
+import logging
 
-import HABApp.util
 import HABApp.config
 import HABApp.core
 import HABApp.rule_manager
+import HABApp.util
+
 
 class Runtime:
     def __init__(self, config_folder):

@@ -48,6 +48,7 @@ class ScheduledCallback:
             return False
 
         self.is_finished = True
+        return self.is_due
 
     def execute(self, workers : ThreadPoolExecutor):
         if not self.is_due:
