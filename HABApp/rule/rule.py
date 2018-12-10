@@ -38,14 +38,14 @@ class Rule:
     def post_Update(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.queue_post_update.put((item_name, value)),
+            self.__runtime.connection.async_post_update(str(item_name), value),
             self.__runtime.loop
         )
 
     def send_Command(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.queue_send_command.put((item_name, value)),
+            self.__runtime.connection.async_send_command(str(item_name), value),
             self.__runtime.loop
         )
 

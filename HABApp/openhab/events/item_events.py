@@ -13,6 +13,7 @@ class ItemStateEvent(BaseItemEvent):
     def __repr__(self):
         return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
 
+
 class ItemStateChangedEvent(BaseItemEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
