@@ -1,12 +1,11 @@
 import logging
-import ujson, traceback
+import traceback
 import typing
+import ujson
 
 import HABApp
-
-from HABApp.util import PrintException
 from HABApp.openhab.events import get_event
-
+from HABApp.util import PrintException
 from . import EventBusListener
 
 log = logging.getLogger('HABApp.Events')

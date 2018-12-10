@@ -51,6 +51,3 @@ def map_items(openhab_type : str, openhab_value : str):
         return s
 
     raise ValueError(f'Unknown Type for {openhab_type}: {openhab_value}')
-
-
-#def map_commands(openhab_type : str, openhab_value : str):
