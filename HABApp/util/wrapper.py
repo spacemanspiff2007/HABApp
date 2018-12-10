@@ -21,13 +21,6 @@ log_worker = logging.getLogger('HABApp.Worker')
 
 def WorkerRuleWrapper(func, rule_instance):
 
-    if not rule_instance.rule_name:
-        _class_name = str(type(rule_instance))
-        if _class_name.startswith("<class '<run_path>."):
-            _class_name = _class_name[19:-2]
-    else:
-        _class_name = rule_instance.rule_name
-
     @functools.wraps(func)
     def f(*args, **kwargs):
         __start = time.time()
@@ -39,5 +32,5 @@ def WorkerRuleWrapper(func, rule_instance):
 
         __dur = time.time() - __start
         if __dur > 0.8:
-            log_worker.warning(f'Execution of {_class_name}.{func.__name__} took too long: {__dur:.1f}s')
+            log_worker.warning(f'Execution of {rule_instance.rule_name}.{func.__name__} took too long: {__dur:.1f}s')
     return f
