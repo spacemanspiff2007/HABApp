@@ -66,7 +66,7 @@ class RuleManager:
         return asyncio.gather(self.process_scheduled_events())
 
 
-    def get_rule(self, rule_name) -> typing.Union[list, HABApp.Rule]:
+    def get_rule(self, rule_name):
         found = []
         for file in self.files.values():
             if rule_name in file.rules:
