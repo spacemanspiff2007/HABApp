@@ -9,8 +9,14 @@ from pathlib import Path
 import HABApp
 
 parser = argparse.ArgumentParser(description='Start HABApp')
-parser.add_argument("-c", "--config", help='Path to configuration folder (where the config.yml is located)"', default=None)
+parser.add_argument(
+    '-c',
+    '--config',
+    help='Path to configuration folder (where the config.yml is located)"',
+    default=None
+)
 args = parser.parse_args()
+
 
 def find_config_folder() -> Path:
     check_path = [
@@ -36,6 +42,7 @@ def find_config_folder() -> Path:
     print('Please create file or specify a different folder with the "-c" arg switch.')
     sys.exit(1)
 
+
 try:
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
@@ -46,6 +53,7 @@ try:
     def shutdown_handler(sig, frame):
         print('Shutting down ...')
         app.shutdown.request()
+
 
     # register shutdown helper
     signal.signal(signal.SIGINT, shutdown_handler)

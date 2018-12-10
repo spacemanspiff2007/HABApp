@@ -1,17 +1,18 @@
-import logging, asyncio
-import traceback, datetime, typing
+import asyncio
+import datetime
+import logging
+import traceback
+import typing
 from pathlib import Path
-
-import HABApp
-from .rule_file import RuleFile
-
-from HABApp.util import SimpleFileWatcher, PrintException
 
 from watchdog.observers import Observer
 
-
+import HABApp
+from HABApp.util import SimpleFileWatcher, PrintException
+from .rule_file import RuleFile
 
 log = logging.getLogger('HABApp.Rules')
+
 
 class RuleManager:
 
@@ -39,6 +40,7 @@ class RuleManager:
         #asyncio.gather(self.process_scheduled_events())
         #asyncio.ensure_future(self.process_scheduled_events())
 
+
     @PrintException
     async def process_scheduled_events(self):
 
@@ -58,20 +60,25 @@ class RuleManager:
 
             await asyncio.sleep(0.2)
 
+
     @PrintException
     def get_async(self):
         return asyncio.gather(self.process_scheduled_events())
 
 
-    def get_rule(self, rule_name):
+    def get_rule(self, rule_name) -> typing.Union[list, HABApp.Rule]:
+        found = []
         for file in self.files.values():
-            try:
-                return file.rules[rule_name]
-            except KeyError:
-                raise KeyError(f'No Rule with name {rule_name} found!')
+            if rule_name in file.rules:
+                found.append(file.rules[rule_name])
+        if not found:
+            raise KeyError(f'No Rule with name "{rule_name}" found!')
+        return found if len(found) > 1 else found[0]
+
 
     def __file_event(self, path):
         self.runtime.workers.submit(self.add_file, path)
+
 
     def add_file(self, path : Path):
         log.debug( f'Loading file: {path}')

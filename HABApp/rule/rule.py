@@ -14,10 +14,13 @@ import HABApp.util
 class Rule:
     def __init__(self ):
 
-        #get the variables from the caller
+        # get the variables from the caller
         __vars = sys._getframe(1).f_globals
         __runtime__   = __vars['__HABAPP__RUNTIME__']
         __rule_file__ = __vars['__HABAPP__RULE_FILE__']
+
+        # this is a list which contains all rules of this file
+        __vars['__HABAPP__RULES'].append(self)
 
         assert isinstance(__runtime__, HABApp.Runtime)
         self.__runtime = __runtime__
