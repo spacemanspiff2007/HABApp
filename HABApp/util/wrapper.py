@@ -5,6 +5,8 @@ import traceback
 
 
 def PrintException( func):
+
+    @functools.wraps(func)
     def f(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -16,11 +18,15 @@ def PrintException( func):
 
 log_worker = logging.getLogger('HABApp.Worker')
 
+
 def WorkerRuleWrapper(func, rule_instance):
 
-    _class_name = str(type(rule_instance))
-    if _class_name.startswith("<class '<run_path>."):
-        _class_name = _class_name[19:-2]
+    if not rule_instance.rule_name:
+        _class_name = str(type(rule_instance))
+        if _class_name.startswith("<class '<run_path>."):
+            _class_name = _class_name[19:-2]
+    else:
+        _class_name = rule_instance.rule_name
 
     @functools.wraps(func)
     def f(*args, **kwargs):
