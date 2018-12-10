@@ -1,6 +1,6 @@
 import unittest, datetime
 
-from context import HABApp
+from .context import HABApp
 from HABApp.openhab.events import ItemStateEvent, ItemAddedEvent, ItemCommandEvent, ItemStateChangedEvent, get_event
 
 

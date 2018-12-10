@@ -213,18 +213,24 @@ class Rule:
 
     def get_rule(self, rule_name): #todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)
-        return self.__rule_file.rule_manager.get_rule(rule_name)
+        return self.__runtime.rule_manager.get_rule(rule_name)
 
 
     @HABApp.util.PrintException
     def _process_sheduled_events(self, now):
+        clean_events = False
         for future_event in self.__future_events:   # type: HABApp.util.ScheduledCallback
             future_event.check_due(now)
             future_event.execute(self.__runtime.workers)
+            if future_event.is_finished:
+                future_event = True
 
         # remove finished events
-        self.__future_events = [ k for k in self.__future_events if not k.is_finished]
+        if clean_events:
+            self.__future_events = [ k for k in self.__future_events if not k.is_finished]
+        return None
 
+    @HABApp.util.PrintException
     def _cleanup(self):
         for listener in self.__event_listener:
             self.__runtime.events.remove_listener(listener)
