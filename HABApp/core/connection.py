@@ -15,7 +15,7 @@ from HABApp.util import PrintException
 log = logging.getLogger('HABApp.Core.Connection')
 
 
-def is_ignored(e) -> bool:
+def is_ignored_exception(e) -> bool:
     if isinstance(e, aiohttp.ClientPayloadError) or \
             isinstance(e, ConnectionError) or \
             isinstance(e, aiohttp.ClientConnectorError):
@@ -119,7 +119,7 @@ class Connection:
                     async for event in event_source:
                         self.runtime.events.post_event(event.data)
             except Exception as e:
-                if is_ignored(e):
+                if is_ignored_exception(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -148,7 +148,7 @@ class Connection:
                     self.runtime.all_items.set_items(data)
                     break
             except Exception as e:
-                if is_ignored(e):
+                if is_ignored_exception(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -163,7 +163,7 @@ class Connection:
             resp = await future
             # print(resp.request_info)
         except Exception as e:
-            if is_ignored(e):
+            if is_ignored_exception(e):
                 log.warning(e)
                 return None
             raise

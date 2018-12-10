@@ -22,14 +22,7 @@ class Items:
         return name in self.item_state
 
     def set_state(self, name, state):
-
         self.item_state[name] = state
-
-        # try:
-        #     self.items[name].update_state( state)
-        # except KeyError:
-        #     # todo: vll. kann das ja einfach erstellt werden
-        #     log.warning( f'Item {name} not in registry ({state})')
 
     @PrintException
     def set_items(self, data):
