@@ -31,8 +31,8 @@ class Connection:
 
         self.__session: aiohttp.ClientSession = None
 
-        self.__host: str = self.runtime.config.connection['host']
-        self.__port: str = self.runtime.config.connection['port']
+        self.__host: str = self.runtime.config.openhab.connection.host
+        self.__port: str = self.runtime.config.openhab.connection.port
 
         self.__ping_sent = 0
         self.__ping_received = 0
@@ -41,7 +41,7 @@ class Connection:
 
         # Add the ping listener, this works because connect is the last step
         listener = HABApp.core.EventBusListener(
-            self.runtime.config.ping_item,
+            self.runtime.config.openhab.ping.item,
             self.ping_received,
             HABApp.openhab.events.ItemStateEvent
         )
@@ -83,7 +83,7 @@ class Connection:
     async def async_ping(self):
         log.debug('Started ping')
 
-        while self.runtime.config.ping_enabled:
+        while self.runtime.config.openhab.ping.enabled:
 
             await self.async_post_update(
                 self.runtime.config.ping_item,
@@ -97,10 +97,10 @@ class Connection:
         "This is the worker thread who creates the connection"
 
         auth = None
-        if self.runtime.config.connection['user'] or self.runtime.config.connection['pass']:
+        if self.runtime.config.openhab.connection.user or self.runtime.config.openhab.connection.password:
             auth = aiohttp.BasicAuth(
-                self.runtime.config.connection['user'],
-                self.runtime.config.connection['pass']
+                self.runtime.config.openhab.connection.user,
+                self.runtime.config.openhab.connection.password
             )
 
         self.__session = aiohttp.ClientSession(

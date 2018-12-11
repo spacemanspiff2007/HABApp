@@ -16,6 +16,8 @@ parser.add_argument(
     default=None
 )
 args = parser.parse_args()
+if args.config is not None:
+    args.config = Path(args.config).resolve()
 
 
 def find_config_folder() -> Path:
@@ -25,7 +27,7 @@ def find_config_folder() -> Path:
         Path.home() / 'HABApp',                                #
     ]
     if args.config is not None:
-        check_path = [Path(args.config)]
+        check_path = [args.config]
 
     for p in check_path:
         p = p.resolve()
@@ -36,11 +38,16 @@ def find_config_folder() -> Path:
         if f.is_file():
             return p
 
-    # we have nothing found -> exit
+    # we have specified a folder, if the config does not exist we will create it
+    if args.config is not None and args.config.is_dir():
+        return args.config
+
+    # we have nothing found and nothing specified -> exit
     print('Config file "config.yml" not found!')
     print('Checked folders:\n - ' + '\n - '.join(str(k) for k in check_path if str(k) != 'HABApp'))
-    print('Please create file or specify a different folder with the "-c" arg switch.')
+    print('Please create file or specify a folder with the "-c" arg switch.')
     sys.exit(1)
+
 
 
 try:
