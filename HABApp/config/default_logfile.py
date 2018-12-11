@@ -12,7 +12,7 @@ handlers:
   HABApp_default:
     class: logging.handlers.RotatingFileHandler
     filename: 'HABApp.log'
-    maxBytes: 10_000_000
+    maxBytes: 10_485_760
     backupCount: '3'
     encoding: 'utf-8'
 
