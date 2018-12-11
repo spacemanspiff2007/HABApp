@@ -1,44 +1,27 @@
 import logging
 import logging.config
 import re
+import time
 from pathlib import Path
-from HABApp.util import SimpleFileWatcher, CallbackHelper
 
 import ruamel.yaml
-from voluptuous import Schema, Required, MultipleInvalid, Coerce, Invalid, Optional
-
+from voluptuous import Schema, MultipleInvalid, Invalid
 from watchdog.observers import Observer
 
+from HABApp.util import SimpleFileWatcher, CallbackHelper
+from .configentry import ConfigEntry, ConfigEntryContainer
+from .default_logfile import get_default_logfile
 
 def TimeZoneValidator(msg=None):
     __re = re.compile('[+-]\d{4}')
     def f(v):
         v = str(v)
-        if __re.match(v):
+        if __re.fullmatch(v):
             return v
         else:
             raise Invalid(msg or ( f"incorrect timezone ({v})! Example: +1000 or -1030"))
     return f
 
-
-valid_config = Schema({
-    Required('ping') : {
-        Required('enabled') : bool,
-        Required('item'): str,
-    },
-    Required('directories') : {
-        Required('logging') : str,
-        Required('rules'): str,
-    },
-    Required('connection') :{
-        Required('host'): str,
-        Required('port'): Coerce(int),
-        Required('user', default=''): str,
-        Required('pass', default=''): str,
-    },
-    Required('timezone') : TimeZoneValidator(),
-    Required('async timeout'): Coerce(int),
-})
 
 _yaml_param = ruamel.yaml.YAML(typ='safe')
 _yaml_param.default_flow_style = False
@@ -50,27 +33,62 @@ _yaml_param.sort_base_mapping_type_on_output = False
 
 log = logging.getLogger('HABApp.Config')
 
+
+class Directories(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.logging = 'log'
+        self.rules   = 'rules'
+
+
+class Ping(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.enabled = False
+        self.item = ''
+        self.interval = 10
+
+
+class General(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.timezone = ''
+        self._entry_validators['timezone'] = TimeZoneValidator()
+
+
+class Connection(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.host = 'localhost'
+        self.port = 8080
+        self.user = ''
+        self.password = ''
+
+        self._entry_kwargs['user'] = {'default' : ''}
+        self._entry_kwargs['password'] = {'default' : ''}
+
+
+class Openhab(ConfigEntryContainer):
+    def __init__(self):
+        self.ping = Ping()
+        self.connection = Connection()
+        self.general = General()
+
+
 class Config:
 
-    def __init__(self, config_folder : Path= None, shutdown_helper : CallbackHelper = None):
+    def __init__(self, config_folder : Path, shutdown_helper : CallbackHelper = None):
         assert isinstance(config_folder, Path)
         assert config_folder.is_dir(), config_folder
         self.folder_conf = config_folder
 
-        self.folder_log : Path = None
+        # these are the accessible config entries
+        self.directories = Directories()
+        self.openhab = Openhab()
 
-        self.ping_enabled = False
-        self.ping_item    = ''
-
-        self.directories = {}
-        self.connection = {}
-        self.timezone = None
-
-        self.async_timeout : int
-
-        self.config = {}
-
-        self.__once = False
+        # if the config does not exist it will be created
+        self.__check_create_config()
+        self.__check_create_logging()
 
         # folder watcher
         self.__folder_watcher = Observer()
@@ -91,39 +109,61 @@ class Config:
             self.load_log()
         return None
 
+    def __check_create_config(self):
+        __file = self.folder_conf / 'config.yml'
+        if __file.is_file():
+            return None
 
+        cfg = {}
+        self.directories.insert_data(cfg)
+        self.openhab.insert_data(cfg)
+
+        print( f'Creating {__file.name} in {__file.parent}')
+        with open(__file, 'w', encoding='utf-8') as file:
+            _yaml_param.dump(cfg, file)
+
+        time.sleep(0.1)
+        return None
+
+
+    def __check_create_logging(self):
+        __file = self.folder_conf / 'logging.yml'
+        if __file.is_file():
+            return None
+
+        print(f'Creating {__file.name} in {__file.parent}')
+        with open(__file, 'w', encoding='utf-8') as file:
+            file.write(get_default_logfile())
+
+        time.sleep(0.1)
+        return None
 
     def load_cfg(self):
         with open(self.folder_conf / 'config.yml', 'r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
         try:
-            cfg = valid_config(cfg)
+            _s = {}
+            self.directories.update_schema(_s)
+            self.openhab.update_schema(_s)
+            cfg = Schema(_s)(cfg)
         except MultipleInvalid as e:
             log.error( f'Error loading config:')
             log.error( e)
             return
 
-        self.timezone = cfg['timezone']
-        self.directories = cfg['directories']
-        self.connection = cfg['connection']
+        self.directories.load_data(cfg)
+        self.openhab.load_data(cfg)
 
-        self.ping_enabled = cfg['ping']['enabled']
-        self.ping_item    = cfg['ping']['item']
-        self.config = cfg
-
-        self.async_timeout = cfg['async timeout']
-
-        # make abs Path for all directories
-        for k, v in self.directories.items():
+        # make Path absolute for all directory entries
+        for k, v in self.directories.iter_entry():
             __entry  = Path(v)
             if not __entry.is_absolute():
                 __entry = self.folder_conf / __entry
-                self.directories[k] = __entry.resolve()
+                self.directories.__dict__[k] = __entry.resolve()
 
-        self.folder_log = Path(cfg['directories']['logging'])
-        if not self.folder_log.is_dir():
-            print( f'Creating log-dir: {self.folder_log}')
-            self.folder_log.mkdir()
+        if not self.directories.logging.is_dir():
+            print( f'Creating log-dir: {self.directories.logging}')
+            self.directories.logging.mkdir()
 
         log.debug('Loaded HABApp config')
 
@@ -143,7 +183,7 @@ class Config:
             #make Filenames absolute path in the log folder if not specified
             p = Path(handler_cfg['filename'])
             if not p.is_absolute():
-                p = (self.folder_log / p).resolve()
+                p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 
         #load prepared logging

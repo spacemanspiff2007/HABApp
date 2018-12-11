@@ -22,13 +22,13 @@ class RuleManager:
 
         self.files = {} # type: typing.Dict[str, RuleFile]
 
-        for f in self.runtime.config.directories['rules'].iterdir():
+        for f in self.runtime.config.directories.rules.iterdir():
             if f.name.endswith('.py'):
                 self.runtime.workers.submit(self.add_file, f)
 
         # folder watcher
         self.__folder_watcher = Observer()
-        self.__folder_watcher.schedule(SimpleFileWatcher(self.__file_event, file_ending='.py'), str(self.runtime.config.directories['rules']))
+        self.__folder_watcher.schedule(SimpleFileWatcher(self.__file_event, file_ending='.py'), str(self.runtime.config.directories.rules))
         self.__folder_watcher.start()
 
         #proper shutdown
