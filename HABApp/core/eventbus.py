@@ -13,7 +13,7 @@ log = logging.getLogger('HABApp.Events')
 
 class EventBus:
     def __init__(self, parent):
-        assert isinstance(parent, HABApp.habapp.Runtime)
+        assert isinstance(parent, HABApp.runtime.Runtime)
         self.runtime = parent
 
         self.__event_listener = {}  # type: typing.Dict[str, typing.List[EventBusListener]]

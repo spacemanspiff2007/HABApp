@@ -1,7 +1,7 @@
 import HABApp.util
 
 from HABApp.rule import Rule
-from HABApp.habapp import Runtime
+from HABApp.runtime import Runtime
 
 
 import HABApp.openhab

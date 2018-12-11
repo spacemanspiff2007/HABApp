@@ -13,7 +13,7 @@ log = logging.getLogger('HABApp.Items')
 
 class Items:
     def __init__(self, parent):
-        assert isinstance(parent, HABApp.habapp.Runtime)
+        assert isinstance(parent, HABApp.runtime.Runtime)
         self.runtime = parent
 
         self.item_state = {}
