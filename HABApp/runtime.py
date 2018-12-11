@@ -13,7 +13,7 @@ class Runtime:
 
         self.shutdown = HABApp.util.CallbackHelper('Shutdown', logging.getLogger('HABApp.Shutdown'))
 
-        self.config     = HABApp.config.Config(config_folder=config_folder, shutdown_helper = self.shutdown)
+        self.config     = HABApp.config.Config(config_folder=config_folder, shutdown_helper=self.shutdown)
         self.events     = HABApp.core.EventBus(self)
         self.connection = HABApp.core.Connection(self)
         self.all_items  = HABApp.core.Items(self)

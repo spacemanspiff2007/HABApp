@@ -14,10 +14,13 @@ import HABApp.util
 class Rule:
     def __init__(self ):
 
-        #get the variables from the caller
+        # get the variables from the caller
         __vars = sys._getframe(1).f_globals
         __runtime__   = __vars['__HABAPP__RUNTIME__']
         __rule_file__ = __vars['__HABAPP__RULE_FILE__']
+
+        # this is a list which contains all rules of this file
+        __vars['__HABAPP__RULES'].append(self)
 
         assert isinstance(__runtime__, HABApp.Runtime)
         self.__runtime = __runtime__
@@ -38,14 +41,14 @@ class Rule:
     def post_Update(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.queue_post_update.put((item_name, value)),
+            self.__runtime.connection.async_post_update(str(item_name), value),
             self.__runtime.loop
         )
 
     def send_Command(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.queue_send_command.put((item_name, value)),
+            self.__runtime.connection.async_send_command(str(item_name), value),
             self.__runtime.loop
         )
 
@@ -213,18 +216,24 @@ class Rule:
 
     def get_rule(self, rule_name): #todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)
-        return self.__rule_file.rule_manager.get_rule(rule_name)
+        return self.__runtime.rule_manager.get_rule(rule_name)
 
 
     @HABApp.util.PrintException
     def _process_sheduled_events(self, now):
+        clean_events = False
         for future_event in self.__future_events:   # type: HABApp.util.ScheduledCallback
             future_event.check_due(now)
             future_event.execute(self.__runtime.workers)
+            if future_event.is_finished:
+                future_event = True
 
         # remove finished events
-        self.__future_events = [ k for k in self.__future_events if not k.is_finished]
+        if clean_events:
+            self.__future_events = [ k for k in self.__future_events if not k.is_finished]
+        return None
 
+    @HABApp.util.PrintException
     def _cleanup(self):
         for listener in self.__event_listener:
             self.__runtime.events.remove_listener(listener)

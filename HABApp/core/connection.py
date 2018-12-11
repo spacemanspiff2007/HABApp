@@ -15,7 +15,7 @@ from HABApp.util import PrintException
 log = logging.getLogger('HABApp.Core.Connection')
 
 
-def is_ignored(e) -> bool:
+def is_ignored_exception(e) -> bool:
     if isinstance(e, aiohttp.ClientPayloadError) or \
             isinstance(e, ConnectionError) or \
             isinstance(e, aiohttp.ClientConnectorError):
@@ -24,17 +24,15 @@ def is_ignored(e) -> bool:
 
 
 class Connection:
+
     def __init__(self, parent):
         assert isinstance(parent, HABApp.Runtime)
         self.runtime: HABApp.Runtime = parent
 
         self.__session: aiohttp.ClientSession = None
 
-        self.queue_send_command = asyncio.Queue()
-        self.queue_post_update = asyncio.Queue()
-
-        self.__host: str = self.runtime.config.connection['host']
-        self.__port: str = self.runtime.config.connection['port']
+        self.__host: str = self.runtime.config.openhab.connection.host
+        self.__port: str = self.runtime.config.openhab.connection.port
 
         self.__ping_sent = 0
         self.__ping_received = 0
@@ -43,7 +41,7 @@ class Connection:
 
         # Add the ping listener, this works because connect is the last step
         listener = HABApp.core.EventBusListener(
-            self.runtime.config.ping_item,
+            self.runtime.config.openhab.ping.item,
             self.ping_received,
             HABApp.openhab.events.ItemStateEvent
         )
@@ -51,9 +49,11 @@ class Connection:
 
         self.runtime.shutdown.register_func(self.shutdown)
 
-    def __get_url(self, url: str):
-        r = f'http://{self.__host:s}:{self.__port:d}'
-        return r + url if url.startswith('/') else r + '/' + url
+    def __get_url(self, url: str, *args, **kwargs):
+
+        prefix = f'http://{self.__host:s}:{self.__port:d}{ "" if url.startswith("/") else "/":s}'
+        url = url.format(*args, **kwargs)
+        return prefix + url
 
     def shutdown(self):
         for k in self.__tasks:
@@ -62,11 +62,10 @@ class Connection:
     @PrintException
     def get_async(self):
 
+        # These Tasks run in the Background and have to be canceled on shutdown
         self.__tasks = [
             asyncio.ensure_future(self.async_listen_for_sse_events()),
             asyncio.ensure_future(self.async_ping()),
-            asyncio.ensure_future(self.async_post_update()),
-            asyncio.ensure_future(self.async_send_command()),
         ]
 
         return asyncio.gather(
@@ -84,10 +83,11 @@ class Connection:
     async def async_ping(self):
         log.debug('Started ping')
 
-        while self.runtime.config.ping_enabled:
-            self.queue_post_update.put_nowait(
-                (self.runtime.config.ping_item,
-                 f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0')
+        while self.runtime.config.openhab.ping.enabled:
+
+            await self.async_post_update(
+                self.runtime.config.ping_item,
+                f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0'
             )
             self.__ping_sent = time.time()
             await asyncio.sleep(10)
@@ -97,10 +97,10 @@ class Connection:
         "This is the worker thread who creates the connection"
 
         auth = None
-        if self.runtime.config.connection['user'] or self.runtime.config.connection['pass']:
+        if self.runtime.config.openhab.connection.user or self.runtime.config.openhab.connection.password:
             auth = aiohttp.BasicAuth(
-                self.runtime.config.connection['user'],
-                self.runtime.config.connection['pass']
+                self.runtime.config.openhab.connection.user,
+                self.runtime.config.openhab.connection.password
             )
 
         self.__session = aiohttp.ClientSession(
@@ -119,7 +119,7 @@ class Connection:
                     async for event in event_source:
                         self.runtime.events.post_event(event.data)
             except Exception as e:
-                if is_ignored(e):
+                if is_ignored_exception(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -148,7 +148,7 @@ class Connection:
                     self.runtime.all_items.set_items(data)
                     break
             except Exception as e:
-                if is_ignored(e):
+                if is_ignored_exception(e):
                     log.warning(f'SSE request Error: {e}')
                 else:
                     log.error(f'SSE request Error: {e}')
@@ -163,7 +163,7 @@ class Connection:
             resp = await future
             # print(resp.request_info)
         except Exception as e:
-            if is_ignored(e):
+            if is_ignored_exception(e):
                 log.warning(e)
                 return None
             raise
@@ -181,30 +181,17 @@ class Connection:
         return resp.status
 
     @PrintException
-    async def async_post_update(self):
-        log.debug('Started postUpdate worker')
-        url = self.__get_url('rest/items')
-        await asyncio.sleep(1)
+    async def async_post_update(self, item, state):
 
-        while True:
-            item, state = await self.queue_post_update.get()
-            self.queue_post_update.task_done()
-
-            fut = self.__session.put(f'{url:s}/{item}/state', data=state)
-            asyncio.ensure_future(self.__check_request_result(fut, state))
+        fut = self.__session.put(self.__get_url('rest/items/{item:s}/state', item=item), data=state)
+        asyncio.ensure_future(self.__check_request_result(fut, state))
 
     @PrintException
-    async def async_send_command(self):
-        log.debug('Started sendCommand worker')
-        url = self.__get_url('rest/items')
-        await asyncio.sleep(1)
+    async def async_send_command(self, item, state):
 
-        while True:
-            item, state = await self.queue_send_command.get()
-            self.queue_send_command.task_done()
+        fut = self.__session.post(self.__get_url('rest/items/{item:s}', item=item), data=state)
+        asyncio.ensure_future(self.__check_request_result(fut, state))
 
-            fut = self.__session.post(f'{url:s}/{item}', data=state)
-            asyncio.ensure_future(self.__check_request_result(fut, state))
 
     @PrintException
     async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
@@ -219,13 +206,13 @@ class Connection:
         if label:
             payload['groupnames'] = groups
 
-        fut = self.__session.put(self.__get_url(f'rest/items/{item_name}'), json=payload)
+        fut = self.__session.put(self.__get_url('rest/items/{:s}', item_name), json=payload)
         ret = await self.__check_request_result(fut, payload)
         return ret == 200 or ret == 201
 
     @PrintException
     async def async_remove_item(self, item_name):
 
-        fut = self.__session.delete(self.__get_url(f'rest/items/{item_name}'))
+        fut = self.__session.delete(self.__get_url('rest/items/{:s}', item_name))
         ret = await self.__check_request_result(fut)
         return ret == 200 or ret == 201

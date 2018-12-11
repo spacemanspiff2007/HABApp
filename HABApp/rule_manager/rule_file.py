@@ -1,10 +1,7 @@
 import logging
 from pathlib import Path
 import runpy
-import voluptuous
-
-from HABApp.util.wrapper import WorkerRuleWrapper
-import HABApp.rule
+import collections
 
 log = logging.getLogger(f'HABApp.Rules')
 
@@ -26,24 +23,31 @@ class RuleFile:
 
     def load(self):
 
+        created_rules = []
         file_globals = runpy.run_path(self.path, init_globals={
             '__HABAPP__RUNTIME__': self.rule_manager.runtime,
-            '__HABAPP__RULE_FILE__': self
+            '__HABAPP__RULE_FILE__': self,
+            '__HABAPP__RULES' : created_rules
         })
 
-        # search for rule instances
-        found_rules = {}
-        for k, v in file_globals.items():
-            if isinstance(v, HABApp.Rule):
-                found_rules[k] = v
-
-        len_found = len(found_rules)
+        len_found = len(created_rules)
         if not len_found:
             log.warning(f'Found no instances of HABApp.Rule in {str(self.path)}')
         else:
-            for k, v in found_rules.items():
-                rule_name = v.rule_name if v.rule_name else f'{str(type(v))[19:-2]:s}.{k:s}'
-                self.rules[rule_name] = v
+            ctr = collections.defaultdict(lambda : 1)
+            for rule in created_rules:
+                rule_name = rule.rule_name
+                if not rule_name:
+                    # create unique name
+                    __class_name = f'{str(type(rule))[19:-2]:s}'
+                    rule_name = f'{__class_name:s}.{ctr[__class_name]}'
+                    ctr[__class_name] += 1
+
+                # rule name must be unique for every file
+                if rule_name in self.rules:
+                    raise ValueError(f'Rule name must be unique!\n"{rule_name}" is already used!')
+
+                self.rules[rule_name] = rule
                 log.info(f'Added rule "{rule_name}" from {self.path.name}')
 
         return None

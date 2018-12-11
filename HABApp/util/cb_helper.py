@@ -1,7 +1,10 @@
-import traceback, logging, itertools
+import itertools
+import logging
+import traceback
+
 
 class CallbackHelper:
-    def __init__(self, name = '', logger = None):
+    def __init__(self, name='', logger=None):
         self.__cb_funcs = []
         self.__cb_last = []
 
@@ -15,8 +18,6 @@ class CallbackHelper:
         self.__name = name
 
         self.requested = False
-        self.finished = False
-
 
     def register_func(self, func, last=False):
         assert callable(func)
@@ -33,14 +34,13 @@ class CallbackHelper:
 
         for func in itertools.chain(self.__cb_funcs, self.__cb_last):
             try:
-                self.__log.debug( f'Calling {func.__name__}')
+                self.__log.debug(f'Calling {func.__name__}')
                 func()
-                self.__log.debug( f'{func.__name__} done!')
+                self.__log.debug(f'{func.__name__} done!')
             except Exception as ex:
                 tb = traceback.format_exc().splitlines()
                 for line in tb:
                     self.__log.error(line)
 
-        self.finished = True
         self.__log.debug(f'{self.__name} finished')
         return None

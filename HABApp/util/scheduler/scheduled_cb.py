@@ -1,10 +1,5 @@
-import typing
-from datetime import datetime, timedelta, time
-
-if typing.TYPE_CHECKING:
-    from concurrent.futures import ThreadPoolExecutor
-
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, time
 
 
 class ScheduledCallback:

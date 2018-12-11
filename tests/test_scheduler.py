@@ -1,7 +1,7 @@
 import unittest, typing
 from datetime import datetime, timedelta
 
-from context import HABApp
+from .context import HABApp
 from HABApp.util import scheduler
 
 

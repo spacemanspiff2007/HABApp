@@ -1,12 +1,11 @@
 import logging
-import ujson, traceback
+import traceback
 import typing
+import ujson
 
 import HABApp
-
-from HABApp.util import PrintException
 from HABApp.openhab.events import get_event
-
+from HABApp.util import PrintException
 from . import EventBusListener
 
 log = logging.getLogger('HABApp.Events')
@@ -14,7 +13,7 @@ log = logging.getLogger('HABApp.Events')
 
 class EventBus:
     def __init__(self, parent):
-        assert isinstance(parent, HABApp.habapp.Runtime)
+        assert isinstance(parent, HABApp.runtime.Runtime)
         self.runtime = parent
 
         self.__event_listener = {}  # type: typing.Dict[str, typing.List[EventBusListener]]

@@ -1,4 +1,7 @@
-version : 1
+
+def get_default_logfile() -> str:
+    return """version : 1
+
 
 formatters:
   HABApp_format:
@@ -9,7 +12,7 @@ handlers:
   HABApp_default:
     class: logging.handlers.RotatingFileHandler
     filename: 'HABApp.log'
-    maxBytes: 10_000_000
+    maxBytes: 10_485_760
     backupCount: '3'
     encoding: 'utf-8'
 
@@ -33,22 +36,18 @@ handlers:
     target: EventFile
     level: DEBUG
 
+
 loggers:
   HABApp:
-    level: DEBUG
-    handlers:
-      - HABApp_default
-    propagate: False
-
-  HABApp.Shutdown:
-    level: DEBUG
+    level: INFO
     handlers:
       - HABApp_default
     propagate: False
 
   HABApp.Events:
-    level: DEBUG
+    level: INFO
     handlers:
       - BufferEventFile
     propagate: False
 
+"""
