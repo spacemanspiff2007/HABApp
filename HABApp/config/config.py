@@ -52,7 +52,7 @@ class Ping(ConfigEntry):
 class General(ConfigEntry):
     def __init__(self):
         super().__init__()
-        self.timezone = ''
+        self.timezone = '+1000'
         self._entry_validators['timezone'] = TimeZoneValidator()
 
 
@@ -139,7 +139,11 @@ class Config:
         return None
 
     def load_cfg(self):
-        with open(self.folder_conf / 'config.yml', 'r', encoding='utf-8') as file:
+        __cfg = self.folder_conf / 'config.yml'
+        if not __cfg.is_file():
+            return
+
+        with open( __cfg, 'r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
         try:
             _s = {}
@@ -172,7 +176,11 @@ class Config:
         if self.directories is None:
             return None
 
-        with open(self.folder_conf / 'logging.yml', 'r', encoding='utf-8') as file:
+        _logfile = self.folder_conf / 'logging.yml'
+        if not _logfile.is_file():
+            return None
+
+        with open(_logfile, 'r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
 
         # fix filenames
