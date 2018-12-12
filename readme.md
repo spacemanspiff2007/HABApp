@@ -11,12 +11,14 @@ The installation is very easy. This module can be installed through pip (or pip3
 pip install HABApp
 ```
 However it is recommended to create a virtual environment, first.
+Once the virtual environment is activated the habapp-command can be used to run it.
 
 # Usage
 ## First start
 It is recommended to specify a folder before first start.
 ```
 python -m HABApp -c /Path/to/Config/Folder/
+habapp -c /Path/to/Config/Folder/              (only in activated virtual environment)
 ```
 This will also create some dummy configuration files:
 - _config.yml_: Used to configure the behaviour of HABApp
