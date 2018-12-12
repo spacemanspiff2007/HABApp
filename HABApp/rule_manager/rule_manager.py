@@ -28,17 +28,17 @@ class RuleManager:
 
         # folder watcher
         self.__folder_watcher = Observer()
-        self.__folder_watcher.schedule(SimpleFileWatcher(self.__file_event, file_ending='.py'), str(self.runtime.config.directories.rules))
+        self.__folder_watcher.schedule(
+            SimpleFileWatcher(self.__file_event, file_ending='.py'),
+            str(self.runtime.config.directories.rules)
+        )
         self.__folder_watcher.start()
 
-        #proper shutdown
+        # proper shutdown
         self.runtime.shutdown.register_func(self.__folder_watcher.stop)
         self.runtime.shutdown.register_func(self.__folder_watcher.join)
 
         self.__process_last_sec = 60
-
-        #asyncio.gather(self.process_scheduled_events())
-        #asyncio.ensure_future(self.process_scheduled_events())
 
 
     @PrintException

@@ -1,4 +1,5 @@
-import unittest, typing
+import unittest
+import typing
 from datetime import datetime, timedelta
 
 from .context import HABApp
@@ -9,6 +10,7 @@ class CExecutor:
     def submit(self, callback, *args, **kwargs):
         callback(*args, **kwargs)
 executor = CExecutor()
+
 
 class TestCases(unittest.TestCase):
 

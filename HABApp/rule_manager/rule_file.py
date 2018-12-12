@@ -24,7 +24,7 @@ class RuleFile:
     def load(self):
 
         created_rules = []
-        file_globals = runpy.run_path(self.path, init_globals={
+        runpy.run_path(self.path, init_globals={
             '__HABAPP__RUNTIME__': self.rule_manager.runtime,
             '__HABAPP__RULE_FILE__': self,
             '__HABAPP__RULES' : created_rules
