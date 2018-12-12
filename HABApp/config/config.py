@@ -13,7 +13,7 @@ from .configentry import ConfigEntry, ConfigEntryContainer
 from .default_logfile import get_default_logfile
 
 def TimeZoneValidator(msg=None):
-    __re = re.compile('[+-]\d{4}')
+    __re = re.compile(r'[+-]\d{4}')
     def f(v):
         v = str(v)
         if __re.fullmatch(v):
@@ -97,11 +97,11 @@ class Config:
         self.__folder_watcher.schedule(SimpleFileWatcher(self.__file_changed, file_ending='.yml'), str(self.folder_conf))
         self.__folder_watcher.start()
 
-        #proper shutdown
+        # proper shutdown
         shutdown_helper.register_func(self.__folder_watcher.stop)
         shutdown_helper.register_func(self.__folder_watcher.join, last=True)
 
-        #Load Config initially
+        # Load Config initially
         self.__file_changed('ALL')
 
     def __file_changed(self, path):
@@ -185,12 +185,12 @@ class Config:
             if 'filename' not in handler_cfg:
                 continue
 
-            #make Filenames absolute path in the log folder if not specified
+            # make Filenames absolute path in the log folder if not specified
             p = Path(handler_cfg['filename'])
             if not p.is_absolute():
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 
-        #load prepared logging
+        # load prepared logging
         logging.config.dictConfig(cfg)
         log.debug('Loaded logging config')

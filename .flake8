@@ -6,6 +6,8 @@ ignore =
     E203,
     # E203 whitespace before ':'
     E221,
+    # E251 unexpected spaces around keyword / parameter equals
+    E251
     # E303 too many blank lines
     E303
 

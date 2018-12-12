@@ -38,6 +38,7 @@ class CallbackHelper:
                 func()
                 self.__log.debug(f'{func.__name__} done!')
             except Exception as ex:
+                self.__log.error(ex)
                 tb = traceback.format_exc().splitlines()
                 for line in tb:
                     self.__log.error(line)
