@@ -10,10 +10,10 @@ if readme.is_file():
 
 setuptools.setup(
     name="HABApp",
-    version="0.0.1",
+    version="0.0.2",
     author="spaceman_spiff",
     # author_email="",
-    description="Easy auomations with openHAB.\nHABApp allows the creation of rules in pure python.",
+    description="Easy automation with openHAB. Create home automation rules in python.",
     keywords='openHAB,habapp',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,7 +23,7 @@ setuptools.setup(
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3 :: Only"
+        "Programming Language :: Python :: 3 :: Only",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
