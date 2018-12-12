@@ -2,7 +2,7 @@ from pathlib import Path
 import setuptools
 
 readme = Path(__file__).with_name('readme.md')
-with open(readme, "r") as fh:
+with open(readme, "r", encoding='utf-8') as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -11,12 +11,11 @@ setuptools.setup(
     author="spaceman_spiff",
     # author_email="",
     description="Easy auomations with openHAB.\nHABApp allows the creation of rules in pure python.",
-    keywords='openHAB',
+    keywords='openHAB,habapp',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/spacemanspiff2007/HABApp",
-    include_package_data=True,
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=['tests*']),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.6",
