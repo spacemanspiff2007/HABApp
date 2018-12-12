@@ -1,9 +1,12 @@
 from pathlib import Path
 import setuptools
 
+# don't load file for tox-builds
 readme = Path(__file__).with_name('readme.md')
-with open(readme, "r", encoding='utf-8') as fh:
-    long_description = fh.read()
+long_description = ''
+if readme.is_file():
+    with open(readme, "r", encoding='utf-8') as fh:
+        long_description = fh.read()
 
 setuptools.setup(
     name="HABApp",
