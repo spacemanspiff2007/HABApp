@@ -1,8 +1,8 @@
-import asyncio, random
+import asyncio
+import datetime
+import random
 import sys
 import typing
-import datetime
-import locale
 
 import HABApp
 import HABApp.core
@@ -237,5 +237,3 @@ class Rule:
     def _cleanup(self):
         for listener in self.__event_listener:
             self.__runtime.events.remove_listener(listener)
-
-

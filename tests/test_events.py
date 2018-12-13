@@ -20,23 +20,14 @@ class TestCases(unittest.TestCase):
         self.assertEqual(event.item, 'Ping')
         self.assertEqual(event.value, '1')
 
-    def test_ItemAddedEvent(self):
+    def test_ItemAddedEvent1(self):
         event = get_event({'topic': 'smarthome/items/TestString/added',
                            'payload': '{"type":"String","name":"TestString","tags":[],"groupNames":["TestGroup"]}',
                            'type': 'ItemAddedEvent'})
         self.assertIsInstance(event, ItemAddedEvent)
         self.assertEqual(event.item, 'TestString')
 
-    def test_ItemStateChangedEvent(self):
-        event = get_event({'topic': 'smarthome/items/Ping/statechanged',
-                           'payload': '{"type":"String","value":"1","oldType":"UnDef","oldValue":"NULL"}',
-                           'type': 'ItemStateChangedEvent'})
-        self.assertIsInstance(event, ItemStateChangedEvent)
-        self.assertEqual(event.item, 'Ping')
-        self.assertEqual(event.value, '1')
-        self.assertEqual(event.old_value, None)
-
-    def test_ItemAddedEvent(self):
+    def test_ItemAddedEvent2(self):
         event = get_event({
             'topic': 'smarthome/items/TestColor_OFF/added',
             'payload': '{"type":"Color","name":"TestColor_OFF","tags":[],"groupNames":["TestGroup"]}',
@@ -45,7 +36,16 @@ class TestCases(unittest.TestCase):
         self.assertIsInstance(event, ItemAddedEvent)
         self.assertEqual(event.item, 'TestColor_OFF')
 
-    def test_ItemStateChangedEvent(self):
+    def test_ItemStateChangedEvent1(self):
+        event = get_event({'topic': 'smarthome/items/Ping/statechanged',
+                           'payload': '{"type":"String","value":"1","oldType":"UnDef","oldValue":"NULL"}',
+                           'type': 'ItemStateChangedEvent'})
+        self.assertIsInstance(event, ItemStateChangedEvent)
+        self.assertEqual(event.item, 'Ping')
+        self.assertEqual(event.value, '1')
+        self.assertEqual(event.old_value, None)
+
+    def test_ItemStateChangedEvent2(self):
         d = {
             'topic': 'smarthome/items/TestDateTimeTOGGLE/statechanged',
             'payload': '{"type":"DateTime","value":"2018-11-21T19:47:08.277+0100","oldType":"DateTime","oldValue":"2018-11-19T09:46:38.273+0100"}',

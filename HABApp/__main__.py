@@ -50,28 +50,33 @@ def find_config_folder() -> Path:
 
 
 
-try:
-    loop = asyncio.get_event_loop()
-    loop.set_debug(True)
-
-    app = HABApp.Runtime(find_config_folder())
-
-
-    def shutdown_handler(sig, frame):
-        print('Shutting down ...')
-        app.shutdown.request()
-
-
-    # register shutdown helper
-    signal.signal(signal.SIGINT, shutdown_handler)
-    signal.signal(signal.SIGTERM, shutdown_handler)
-
-    # start workers
+def main() -> int:
     try:
-        loop.run_until_complete(app.get_async())
-    except concurrent.futures._base.CancelledError:
-        pass
-except Exception as e:
-    raise e
-finally:
-    loop.close()
+        loop = asyncio.get_event_loop()
+        loop.set_debug(True)
+
+        app = HABApp.Runtime(find_config_folder())
+
+        def shutdown_handler(sig, frame):
+            print('Shutting down ...')
+            app.shutdown.request()
+
+        # register shutdown helper
+        signal.signal(signal.SIGINT, shutdown_handler)
+        signal.signal(signal.SIGTERM, shutdown_handler)
+
+        # start workers
+        try:
+            loop.run_until_complete(app.get_async())
+        except concurrent.futures._base.CancelledError:
+            pass
+    except Exception as e:
+        print(e)
+        return e
+    finally:
+        loop.close()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

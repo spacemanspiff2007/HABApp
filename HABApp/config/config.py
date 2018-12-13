@@ -13,7 +13,7 @@ from .configentry import ConfigEntry, ConfigEntryContainer
 from .default_logfile import get_default_logfile
 
 def TimeZoneValidator(msg=None):
-    __re = re.compile('[+-]\d{4}')
+    __re = re.compile(r'[+-]\d{4}')
     def f(v):
         v = str(v)
         if __re.fullmatch(v):
@@ -81,6 +81,8 @@ class Config:
         assert isinstance(config_folder, Path)
         assert config_folder.is_dir(), config_folder
         self.folder_conf = config_folder
+        self.file_conf_habapp  = self.folder_conf / 'config.yml'
+        self.file_conf_logging = self.folder_conf / 'logging.yml'
 
         # these are the accessible config entries
         self.directories = Directories()
@@ -95,11 +97,11 @@ class Config:
         self.__folder_watcher.schedule(SimpleFileWatcher(self.__file_changed, file_ending='.yml'), str(self.folder_conf))
         self.__folder_watcher.start()
 
-        #proper shutdown
+        # proper shutdown
         shutdown_helper.register_func(self.__folder_watcher.stop)
         shutdown_helper.register_func(self.__folder_watcher.join, last=True)
 
-        #Load Config initially
+        # Load Config initially
         self.__file_changed('ALL')
 
     def __file_changed(self, path):
@@ -110,16 +112,15 @@ class Config:
         return None
 
     def __check_create_config(self):
-        __file = self.folder_conf / 'config.yml'
-        if __file.is_file():
+        if self.file_conf_habapp.is_file():
             return None
 
         cfg = {}
         self.directories.insert_data(cfg)
         self.openhab.insert_data(cfg)
 
-        print( f'Creating {__file.name} in {__file.parent}')
-        with open(__file, 'w', encoding='utf-8') as file:
+        print( f'Creating {self.file_conf_habapp.name} in {self.file_conf_habapp.parent}')
+        with open(self.file_conf_habapp, 'w', encoding='utf-8') as file:
             _yaml_param.dump(cfg, file)
 
         time.sleep(0.1)
@@ -127,23 +128,22 @@ class Config:
 
 
     def __check_create_logging(self):
-        __file = self.folder_conf / 'logging.yml'
-        if __file.is_file():
+        if self.file_conf_logging.is_file():
             return None
 
-        print(f'Creating {__file.name} in {__file.parent}')
-        with open(__file, 'w', encoding='utf-8') as file:
+        print(f'Creating {self.file_conf_logging.name} in {self.file_conf_logging.parent}')
+        with open(self.file_conf_logging, 'w', encoding='utf-8') as file:
             file.write(get_default_logfile())
 
         time.sleep(0.1)
         return None
 
     def load_cfg(self):
-        __cfg = self.folder_conf / 'config.yml'
-        if not __cfg.is_file():
+        # File has to exist - check because we also get FileDelete events
+        if not self.file_conf_habapp.is_file():
             return
 
-        with open( __cfg, 'r', encoding='utf-8') as file:
+        with open( self.file_conf_habapp, 'r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
         try:
             _s = {}
@@ -173,14 +173,11 @@ class Config:
 
 
     def load_log(self):
-        if self.directories is None:
+        # File has to exist - check because we also get FileDelete events
+        if not self.file_conf_logging.is_file():
             return None
 
-        _logfile = self.folder_conf / 'logging.yml'
-        if not _logfile.is_file():
-            return None
-
-        with open(_logfile, 'r', encoding='utf-8') as file:
+        with open(self.file_conf_logging, 'r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
 
         # fix filenames
@@ -188,12 +185,12 @@ class Config:
             if 'filename' not in handler_cfg:
                 continue
 
-            #make Filenames absolute path in the log folder if not specified
+            # make Filenames absolute path in the log folder if not specified
             p = Path(handler_cfg['filename'])
             if not p.is_absolute():
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 
-        #load prepared logging
+        # load prepared logging
         logging.config.dictConfig(cfg)
         log.debug('Loaded logging config')

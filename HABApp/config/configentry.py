@@ -1,6 +1,5 @@
-import inspect
-
 from voluptuous import Required, Coerce, Optional
+
 
 class ConfigEntry:
     def __init__(self):
@@ -46,7 +45,7 @@ class ConfigEntry:
         _dict[self._entry_name] = _insert
 
     def load_data(self, _dict):
-        if not self._entry_name in _dict:
+        if self._entry_name not in _dict:
             return None
 
         notify = False
