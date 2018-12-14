@@ -28,7 +28,7 @@ class Rule:
         assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file = __rule_file__
 
-        self.__event_listener = []  # type: typing.List[HABApp.core.EventBusListener]
+        self.__event_listener = []  # type: typing.List[HABApp.core.EventListener]
         self.__future_events = []   # type: typing.List[HABApp.util.ScheduledCallback]
 
         self.rule_name = ""
@@ -59,7 +59,7 @@ class Rule:
         :return: True or False
         """
         assert isinstance(item_name, str), type(item_name)
-        self.__runtime.all_items.item_exists(item_name)
+        HABApp.core.Items.item_exists(item_name)
 
     def item_state(self, item_name):
         """
@@ -67,7 +67,7 @@ class Rule:
         :param item_name: Name of the item
         :return: state or None
         """
-        return self.__runtime.all_items.item_state.get(item_name)
+        return HABApp.core.Items.get_item(item_name)
 
     def item_create(self, item_type, item_name, label ="", category ="", tags = [], groups = []):
         """
@@ -105,11 +105,11 @@ class Rule:
         return future.result(self.__runtime.config.async_timeout)
 
 
-    def listen_event(self, item_name : str, callback, even_type) -> HABApp.core.EventBusListener:
+    def listen_event(self, item_name : str, callback, even_type) -> HABApp.core.EventListener:
         cb = HABApp.util.WorkerRuleWrapper(callback, self)
-        listener = HABApp.core.EventBusListener(item_name, cb, even_type)
+        listener = HABApp.core.EventListener(item_name, cb, even_type)
         self.__event_listener.append(listener)
-        self.__runtime.events.add_listener(listener)
+        HABApp.core.Events.add_listener(listener)
         return listener
 
 
@@ -236,4 +236,4 @@ class Rule:
     @HABApp.util.PrintException
     def _cleanup(self):
         for listener in self.__event_listener:
-            self.__runtime.events.remove_listener(listener)
+            HABApp.core.Events.remove_listener(listener)

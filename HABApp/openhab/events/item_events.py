@@ -47,6 +47,8 @@ class ItemAddedEvent(BaseItemEvent):
         self.item = self._payload['name']
         self.type = self._payload['type']
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__} item: {self.item}, type: {self.type}>'
 
 class ItemUpdatedEvent(BaseItemEvent):
     def __init__(self, _in_dict):
@@ -54,3 +56,6 @@ class ItemUpdatedEvent(BaseItemEvent):
 
         # smarthome/items/NAME/updated
         self.item = self._topic[16:-8]
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
