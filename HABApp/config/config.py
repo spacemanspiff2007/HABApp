@@ -102,7 +102,9 @@ class Config:
         shutdown_helper.register_func(self.__folder_watcher.join, last=True)
 
         # Load Config initially
+        self.first_start = True
         self.__file_changed('ALL')
+        self.first_start = False
 
     def __file_changed(self, path):
         if path == 'ALL' or path.name == 'config.yml':
@@ -190,6 +192,13 @@ class Config:
             if not p.is_absolute():
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
+
+                # Delete old Log-Files on startup
+                if self.first_start and p.is_file():
+                    try:
+                        p.unlink()
+                    finally:
+                        pass
 
         # load prepared logging
         logging.config.dictConfig(cfg)

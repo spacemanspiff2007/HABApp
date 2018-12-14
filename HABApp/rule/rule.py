@@ -224,7 +224,7 @@ class Rule:
         clean_events = False
         for future_event in self.__future_events:   # type: HABApp.util.ScheduledCallback
             future_event.check_due(now)
-            future_event.execute(self.__runtime.workers)
+            future_event.execute(HABApp.core.Workers)
             if future_event.is_finished:
                 future_event = True
 

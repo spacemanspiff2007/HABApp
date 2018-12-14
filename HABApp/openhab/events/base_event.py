@@ -1,4 +1,3 @@
-import datetime
 import ujson
 
 class BaseItemEvent:

@@ -14,7 +14,7 @@ from HABApp.util import PrintException
 
 from HABApp.openhab.events import get_event
 
-log = logging.getLogger('HABApp.Core.Connection')
+log = logging.getLogger('HABApp.openhab.Connection')
 
 
 def is_ignored_exception(e) -> bool:

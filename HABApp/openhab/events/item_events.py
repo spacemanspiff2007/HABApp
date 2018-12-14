@@ -1,4 +1,4 @@
-from .map_events import map_events
+from .map_events import map_event_types
 from .base_event import BaseItemEvent
 
 
@@ -8,7 +8,7 @@ class ItemStateEvent(BaseItemEvent):
 
         # smarthome/items/NAME/state
         self.item  = self._topic[16:-6]
-        self.value = map_events(self._payload['type'], self._payload['value'])
+        self.value = map_event_types(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
@@ -20,8 +20,8 @@ class ItemStateChangedEvent(BaseItemEvent):
 
         # smarthome/items/Ping/statechanged
         self.item = self._topic[16:-13]
-        self.value = map_events(self._payload['type'], self._payload['value'])
-        self.old_value = map_events(self._payload['oldType'], self._payload['oldValue'])
+        self.value = map_event_types(self._payload['type'], self._payload['value'])
+        self.old_value = map_event_types(self._payload['oldType'], self._payload['oldValue'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}, old_value: {self.old_value}>'
@@ -33,7 +33,7 @@ class ItemCommandEvent(BaseItemEvent):
 
         # smarthome/items/NAME/command
         self.item = self._topic[16:-8]
-        self.value = map_events(self._payload['type'], self._payload['value'])
+        self.value = map_event_types(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
