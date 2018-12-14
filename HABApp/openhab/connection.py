@@ -125,7 +125,10 @@ class Connection:
                                 log._log(logging.DEBUG, event, [])
                             event = get_event(event)
 
-                            HABApp.core.Events.post_event(event.item, event)
+                            HABApp.core.Events.post_event(
+                                event.item, event,
+                                update_state=True if isinstance(event, HABApp.openhab.events.ItemUpdatedEvent) else False
+                            )
                         except Exception as e:
                             log.error("{}".format(e))
                             for l in traceback.format_exc().splitlines():
@@ -146,6 +149,22 @@ class Connection:
         return None
 
     @PrintException
+    def __update_all_items(self, data):
+            data = ujson.loads(data)  # type: list
+            for _dict in data:
+                # print(_dict)
+                __item = HABApp.openhab.map_items(_dict['type'], _dict['state'])
+                HABApp.core.Items.set_state(_dict['name'], __item)
+
+            # remove items which are no longer available
+            ist = set(HABApp.core.Items.items.keys())
+            soll = {k['name'] for k in data}
+            for k in ist - soll:
+                HABApp.core.Items.pop_item(k)
+
+            log.info(f'Updated all items')
+
+    @PrintException
     async def async_get_all_items(self):
 
         # we need to wait so the session object is available
@@ -159,8 +178,7 @@ class Connection:
                 )
                 if resp.status == 200:
                     data = await resp.text()
-                    # todo: update items
-                    # self.runtime.all_items.set_items(data)
+                    self.__update_all_items(data)
                     break
             except Exception as e:
                 if is_ignored_exception(e):

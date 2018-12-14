@@ -33,7 +33,7 @@ class EventBus:
         self.__event_listener = {}  # type: typing.Dict[str, typing.List[EventListener]]
 
     @PrintException
-    def post_event(self, event, update_state=False):
+    def post_event(self, name, event, update_state=False):
 
         log.info(event)
 
@@ -43,7 +43,7 @@ class EventBus:
             self.__items.set_state(event.item, event.value)
 
         # Notify all listeners
-        for listener in self.__event_listener.get(event.item, []):
+        for listener in self.__event_listener.get(name, []):
             if listener.event_matches(event):
                 self.__workers.submit(listener.callback, event)
         return None

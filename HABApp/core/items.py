@@ -50,20 +50,3 @@ class Items:
 
     def pop_item(self, name) -> Item:
         return self.items.pop(name)
-
-    @PrintException
-    def set_items(self, data):
-        # todo: move this to openhab
-        data = ujson.loads(data) # type: list
-        for _dict in data:
-            # print(_dict)
-            __item = HABApp.openhab.map_items(_dict['type'], _dict['state'])
-            self.item_state[_dict['name']] = __item
-
-        # remove items which are no longer available
-        ist = set(self.item_state.keys())
-        soll = { k['name'] for k in data}
-        for k in ist - soll:
-            self.item_state.pop(k)
-
-        log.info( f'Updated all items')
