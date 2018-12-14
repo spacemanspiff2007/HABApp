@@ -75,6 +75,63 @@ class Openhab(ConfigEntryContainer):
         self.general = General()
 
 
+def MqttTopicValidator(msg=None):
+    def f(v):
+        if isinstance(v, str):
+            return [(v, 0)]
+
+        ret = []
+        for i, val in enumerate(v):
+            qos = 0
+            if i < len(v) - 1:
+                qos = v[i+1]
+
+            if not isinstance(val, str) and not isinstance(val, int):
+                raise Invalid(msg or (f"Topics must consist of int and string!"))
+
+            if not isinstance(val, str):
+                continue
+
+            ret.append((val, qos if isinstance(qos, int) else 0))
+        return ret
+    return f
+
+
+class Subscribe(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self._entry_is_required = True
+        self.topics = ['#', 0]
+
+        self._entry_validators['topics'] = MqttTopicValidator()
+        self._entry_kwargs['topics'] = {'default': [('#', 0)]}
+        self._entry_kwargs['default_qos'] = {'default': 0}
+
+
+class Publish(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.qos = 0
+        self.retain = False
+
+class mqtt(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.client_id = ''
+        self.tls = True
+        self.tls_insecure = False
+
+        self._entry_kwargs['tls_insecure'] = {'default': False}
+
+class Mqtt(ConfigEntryContainer):
+    def __init__(self):
+        self.connection = Connection()
+        self.subscribe = Subscribe()
+        self.publish = Publish()
+
+
+
+
 class Config:
 
     def __init__(self, config_folder : Path, shutdown_helper : CallbackHelper = None):
@@ -87,6 +144,7 @@ class Config:
         # these are the accessible config entries
         self.directories = Directories()
         self.openhab = Openhab()
+        self.mqtt = Mqtt()
 
         # if the config does not exist it will be created
         self.__check_create_config()
@@ -120,6 +178,7 @@ class Config:
         cfg = {}
         self.directories.insert_data(cfg)
         self.openhab.insert_data(cfg)
+        self.mqtt.insert_data(cfg)
 
         print( f'Creating {self.file_conf_habapp.name} in {self.file_conf_habapp.parent}')
         with open(self.file_conf_habapp, 'w', encoding='utf-8') as file:
@@ -151,6 +210,7 @@ class Config:
             _s = {}
             self.directories.update_schema(_s)
             self.openhab.update_schema(_s)
+            self.mqtt.update_schema(_s)
             cfg = Schema(_s)(cfg)
         except MultipleInvalid as e:
             log.error( f'Error loading config:')
