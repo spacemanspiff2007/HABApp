@@ -2,7 +2,7 @@ import asyncio
 import itertools
 import logging
 import time
-import ujson
+import ujson, traceback
 
 import aiohttp
 from aiohttp_sse_client import client as sse_client
@@ -11,6 +11,8 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.util import PrintException
+
+from HABApp.openhab.events import get_event
 
 log = logging.getLogger('HABApp.Core.Connection')
 
@@ -40,12 +42,12 @@ class Connection:
         self.__tasks = []
 
         # Add the ping listener, this works because connect is the last step
-        listener = HABApp.core.EventBusListener(
+        listener = HABApp.core.EventListener(
             self.runtime.config.openhab.ping.item,
             self.ping_received,
             HABApp.openhab.events.ItemStateEvent
         )
-        self.runtime.events.add_listener(listener)
+        HABApp.core.Events.add_listener(listener)
 
         self.runtime.shutdown.register_func(self.shutdown)
 
@@ -117,7 +119,19 @@ class Connection:
                         session=self.__session
                 ) as event_source:
                     async for event in event_source:
-                        self.runtime.events.post_event(event.data)
+                        try:
+                            event = ujson.loads(event.data)
+                            if log.isEnabledFor(logging.DEBUG):
+                                log._log(logging.DEBUG, event, [])
+                            event = get_event(event)
+
+                            HABApp.core.Events.post_event(event.item, event)
+                        except Exception as e:
+                            log.error("{}".format(e))
+                            for l in traceback.format_exc().splitlines():
+                                log.error(l)
+                            return None
+
             except Exception as e:
                 if is_ignored_exception(e):
                     log.warning(f'SSE request Error: {e}')
@@ -145,7 +159,8 @@ class Connection:
                 )
                 if resp.status == 200:
                     data = await resp.text()
-                    self.runtime.all_items.set_items(data)
+                    # todo: update items
+                    # self.runtime.all_items.set_items(data)
                     break
             except Exception as e:
                 if is_ignored_exception(e):
