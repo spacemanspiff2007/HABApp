@@ -24,7 +24,7 @@ class RuleManager:
 
         for f in self.runtime.config.directories.rules.iterdir():
             if f.name.endswith('.py'):
-                self.runtime.workers.submit(self.add_file, f)
+                HABApp.core.Workers.submit(self.add_file, f)
 
         # folder watcher
         self.__folder_watcher = Observer()
@@ -77,7 +77,7 @@ class RuleManager:
 
 
     def __file_event(self, path):
-        self.runtime.workers.submit(self.add_file, path)
+        HABApp.core.Workers.submit(self.add_file, path)
 
 
     def add_file(self, path : Path):

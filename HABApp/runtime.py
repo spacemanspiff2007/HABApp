@@ -14,11 +14,7 @@ class Runtime:
         self.shutdown = HABApp.util.CallbackHelper('Shutdown', logging.getLogger('HABApp.Shutdown'))
 
         self.config     = HABApp.config.Config(config_folder=config_folder, shutdown_helper=self.shutdown)
-        # self.events     = HABApp.core.EventBus(self)
-        # self.all_items  = HABApp.core.get_AllItems()
         self.connection = HABApp.openhab.Connection(self)
-
-        self.workers = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
 
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
 

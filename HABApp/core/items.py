@@ -1,14 +1,6 @@
 import datetime
 import logging
 import typing
-import ujson
-
-import HABApp
-import HABApp.openhab
-from HABApp.util import PrintException
-
-if typing.TYPE_CHECKING:
-    import HABApp.openhab.items
 
 log = logging.getLogger('HABApp.Items')
 
