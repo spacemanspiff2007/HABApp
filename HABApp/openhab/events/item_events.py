@@ -39,7 +39,6 @@ class ItemCommandEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
 
 
-
 class ItemAddedEvent(BaseItemEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
@@ -49,6 +48,7 @@ class ItemAddedEvent(BaseItemEvent):
 
     def __repr__(self):
         return f'<{self.__class__.__name__} item: {self.item}, type: {self.type}>'
+
 
 class ItemUpdatedEvent(BaseItemEvent):
     def __init__(self, _in_dict):
