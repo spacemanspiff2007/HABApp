@@ -1,25 +1,29 @@
+import HABApp.core
+
 from .map_events import map_event_types
 from .base_event import BaseItemEvent
 
 
-class ItemStateEvent(BaseItemEvent):
+class ItemStateEvent(BaseItemEvent, HABApp.core.ValueUpdateEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
         # smarthome/items/NAME/state
-        self.item  = self._topic[16:-6]
+        self.item = self._topic[16:-6]
+        self.name = self.item
         self.value = map_event_types(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
 
 
-class ItemStateChangedEvent(BaseItemEvent):
+class ItemStateChangedEvent(BaseItemEvent, HABApp.core.ValueChangeEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
         # smarthome/items/Ping/statechanged
         self.item = self._topic[16:-13]
+        self.name = self.item
         self.value = map_event_types(self._payload['type'], self._payload['value'])
         self.old_value = map_event_types(self._payload['oldType'], self._payload['oldValue'])
 

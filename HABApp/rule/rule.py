@@ -67,7 +67,7 @@ class Rule:
         :param item_name: Name of the item
         :return: state or None
         """
-        return HABApp.core.Items.get_item(item_name)
+        return HABApp.core.Items.get_item(item_name).state
 
     def item_create(self, item_type, item_name, label ="", category ="", tags = [], groups = []):
         """
@@ -217,6 +217,10 @@ class Rule:
     def get_rule(self, rule_name): #todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
+
+    def mqtt_publish(self, topic, payload=None, qos=None, retain=None):
+        assert isinstance(topic, str), type(str)
+        self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
 
 
     @HABApp.util.PrintException

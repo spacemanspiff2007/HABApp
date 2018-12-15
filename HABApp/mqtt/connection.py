@@ -4,26 +4,33 @@ import paho.mqtt.client as mqtt
 
 import HABApp
 from HABApp.util import PrintException
-from .events import MqttChange, MqttUpdate
 
 log = logging.getLogger('HABApp.mqtt.connection')
-log_msg = logging.getLogger('HABApp.mqtt.message')
+log_msg = logging.getLogger('HABApp.mqtt.messages')
 
 class MqttConnection:
     def __init__(self, parent):
         assert isinstance(parent, HABApp.Runtime)
         self.runtime: HABApp.Runtime = parent
 
+        self.connected = False
         self.client : mqtt.Client = None
 
         self.subscription = []
         self.cache = {}
+        
+        self.runtime.config.mqtt.subscribe.subscribe_for_changes(self.subscription_changed)
+        self.runtime.config.mqtt.connection.subscribe_for_changes(self.connect)
+
 
     def connect(self):
-
         if not self.runtime.config.mqtt.connection.host:
             log.info('MQTT disabled')
             return None
+
+        if self.connected:
+            log.info('disconnecting')
+            self.client.disconnect()
         
         self.client = mqtt.Client(
             client_id=self.runtime.config.mqtt.connection.client_id,
@@ -60,14 +67,17 @@ class MqttConnection:
 
         self.client.loop_start()
         
-        self.runtime.config.mqtt.subscribe.subscribe_for_changes(self.subscription_changed)
 
+    @PrintException
     def subscription_changed(self):
+        if not self.connected:
+            return None
+        
         if self.subscription:
-            unsub = [k[0] for k in self.subscription]
-            for t in unsub:
-                log.debug(f'Unsubscribing from "{topic}"')
-            self.client.unsubscribe(unsub)
+            unsubscribe = [k[0] for k in self.subscription]
+            for t in unsubscribe:
+                log.debug(f'Unsubscribing from "{t}"')
+            self.client.unsubscribe(unsubscribe)
         
         topics = self.runtime.config.mqtt.subscribe.topics
         default_qos = self.runtime.config.mqtt.subscribe.qos
@@ -76,23 +86,29 @@ class MqttConnection:
             log.debug( f'Subscribing to "{topic}" (QoS {qos:d})')
         self.client.subscribe(self.subscription)
 
+    @PrintException
     def on_connect(self, client, userdata, flags, rc):
         log.log(logging.INFO if not rc else logging.ERROR, mqtt.connack_string(rc))
         if rc:
             return None
+        self.connected = True
 
         self.cache.clear()
         self.subscription.clear()
         self.subscription_changed()
 
+    @PrintException
     def on_disconnect(self, client, userdata, flags, rc):
         log.log( logging.INFO if not rc else logging.ERROR, "Unexpected disconnection")
+        self.connected = False
 
     @PrintException
     def process_msg(self, client, userdata, message : mqtt.MQTTMessage):
         topic = message.topic
         payload = message.payload.decode("utf-8")
-        log_msg.debug( f'{topic} ({message.qos}): {payload}')
+        
+        if log_msg.isEnabledFor(logging.DEBUG):
+            log_msg._log( logging.DEBUG,  f'{topic} ({message.qos}): {payload}', [])
 
         # try to cast to int/float
         try:
@@ -106,12 +122,17 @@ class MqttConnection:
         __was = self.cache.get(topic, None)
         self.cache[topic] = payload
         
-        HABApp.core.Events.post_event(topic, MqttUpdate(topic, payload), update_state=True)
+        HABApp.core.Events.post_event(topic, HABApp.core.ValueUpdateEvent(topic, payload))
         if __was is not None and __was != payload:
-            HABApp.core.Events.post_event(topic, MqttChange(topic, payload))
+            HABApp.core.Events.post_event(topic, HABApp.core.ValueChangeEvent(topic, payload, __was))
 
+    def publish(self, topic, payload, qos, retain):
+        
+        if qos is None:
+            qos = self.runtime.config.mqtt.publish.qos
+        if retain is None:
+            retain = self.runtime.config.mqtt.publish.retain
 
-    def publish(self, topic, payload=None, qos=0, retain=False):
         info = self.client.publish( topic, payload, qos, retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
-            log.warning( f'Could not publish to "{topic}": {info.rc}! {info.}')
+            log.warning( f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
