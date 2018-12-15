@@ -41,14 +41,14 @@ class Rule:
     def post_Update(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_post_update(str(item_name), value),
+            self.__runtime.openhab_connection.async_post_update(str(item_name), value),
             self.__runtime.loop
         )
 
     def send_Command(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_send_command(str(item_name), value),
+            self.__runtime.openhab_connection.async_send_command(str(item_name), value),
             self.__runtime.loop
         )
 
@@ -90,7 +90,7 @@ class Rule:
         assert isinstance(groups, list), type(groups)
 
         future = asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_create_item(item_type, item_name, label, category, tags, groups),
+            self.__runtime.openhab_connection.async_create_item(item_type, item_name, label, category, tags, groups),
             self.__runtime.loop
         )
 
@@ -99,7 +99,7 @@ class Rule:
     def remove_item(self, item_name : str):
         assert isinstance(item_name, str), type(item_name)
         future = asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_remove_item(item_name),
+            self.__runtime.openhab_connection.async_remove_item(item_name),
             self.__runtime.loop
         )
         return future.result(self.__runtime.config.async_timeout)

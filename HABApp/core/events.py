@@ -40,7 +40,10 @@ class EventBus:
         # Update Item Registry BEFORE doing the callbacks
         # Requires that event has member 'item' and 'value'
         if update_state is True:
-            self.__items.set_state(event.item, event.value)
+            try:
+                self.__items.set_state(event.item, event.value)
+            except AttributeError:
+                self.__items.set_state(event.topic, event.value)
 
         # Notify all listeners
         for listener in self.__event_listener.get(name, []):
