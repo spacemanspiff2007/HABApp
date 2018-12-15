@@ -3,7 +3,7 @@ from voluptuous import Required, Coerce, Optional
 
 class ConfigEntry:
     def __init__(self):
-        self._entry_is_required = False
+        self._entry_is_required = True
         self._entry_name = self.__class__.__name__.lower()
         self._entry_kwargs = {}
         self._entry_validators = {}

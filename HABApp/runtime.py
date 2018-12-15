@@ -14,7 +14,10 @@ class Runtime:
         self.shutdown = HABApp.util.CallbackHelper('Shutdown', logging.getLogger('HABApp.Shutdown'))
 
         self.config     = HABApp.config.Config(config_folder=config_folder, shutdown_helper=self.shutdown)
-        self.connection = HABApp.openhab.Connection(self)
+
+        self.openhab_connection = HABApp.openhab.Connection(self)
+        self.mqtt_connection = HABApp.mqtt.MqttConnection(self)
+        self.mqtt_connection.connect()
 
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
 
@@ -23,6 +26,6 @@ class Runtime:
     @HABApp.util.PrintException
     def get_async(self):
         return asyncio.gather(
-            self.connection.get_async(),
+            self.openhab_connection.get_async(),
             self.rule_manager.get_async(),
         )

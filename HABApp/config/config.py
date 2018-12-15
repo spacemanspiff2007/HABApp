@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 import ruamel.yaml
-from voluptuous import Schema, MultipleInvalid, Invalid
+from voluptuous import Schema, MultipleInvalid, Invalid, All, Length
 from watchdog.observers import Observer
 
 from HABApp.util import SimpleFileWatcher, CallbackHelper
@@ -91,16 +91,39 @@ def MqttTopicValidator(msg=None):
 
             if not isinstance(val, str):
                 continue
+                
+            if isinstance(qos, int):
+                if qos not in [0, 1, 2]:
+                    raise Invalid(msg or (f"QoS must be 0,1,2"))
+            else:
+                qos = None
 
-            ret.append((val, qos if isinstance(qos, int) else 0))
+            ret.append((val, qos))
         return ret
     return f
+
+class MqttConnection(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self._entry_name = 'connection'
+        self.client_id = 'HABApp'
+        self.host = ''
+        self.port = 8883
+        self.user = ''
+        self.password = ''
+        self.tls = True
+        self.tls_insecure = False
+
+        self._entry_validators['client_id'] = All(str, Length(min=1))
+
+        self._entry_kwargs['password'] = {'default': ''}
+        self._entry_kwargs['tls_insecure'] = {'default': False}
 
 
 class Subscribe(ConfigEntry):
     def __init__(self):
         super().__init__()
-        self._entry_is_required = True
+        self.qos = 0
         self.topics = ['#', 0]
 
         self._entry_validators['topics'] = MqttTopicValidator()
@@ -125,7 +148,7 @@ class mqtt(ConfigEntry):
 
 class Mqtt(ConfigEntryContainer):
     def __init__(self):
-        self.connection = Connection()
+        self.connection = MqttConnection()
         self.subscribe = Subscribe()
         self.publish = Publish()
 
@@ -219,6 +242,7 @@ class Config:
 
         self.directories.load_data(cfg)
         self.openhab.load_data(cfg)
+        self.mqtt.load_data(cfg)
 
         # make Path absolute for all directory entries
         for k, v in self.directories.iter_entry():
