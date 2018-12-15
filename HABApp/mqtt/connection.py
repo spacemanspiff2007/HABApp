@@ -1,4 +1,4 @@
-import logging
+import logging, ujson
 import paho.mqtt.client as mqtt
 
 
@@ -120,14 +120,21 @@ class MqttConnection:
         if log_msg.isEnabledFor(logging.DEBUG):
             log_msg._log( logging.DEBUG,  f'{topic} ({message.qos}): {payload}', [])
 
-        # try to cast to int/float
-        try:
-            payload = int(payload)
-        except ValueError:
+        # load json
+        if payload.startswith('{') and payload.endswith('}'):
             try:
-                payload = float(payload)
+                payload = ujson.loads(payload)
             except ValueError:
                 pass
+        else:
+            # try to cast to int/float
+            try:
+                payload = int(payload)
+            except ValueError:
+                try:
+                    payload = float(payload)
+                except ValueError:
+                    pass
       
         __was = self.value_cache.get(topic, None)
         self.value_cache[topic] = payload
