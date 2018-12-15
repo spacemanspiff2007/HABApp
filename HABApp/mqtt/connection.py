@@ -13,24 +13,32 @@ class MqttConnection:
         assert isinstance(parent, HABApp.Runtime)
         self.runtime: HABApp.Runtime = parent
 
+        self.loop_started = False
         self.connected = False
+        
         self.client : mqtt.Client = None
 
-        self.subscription = []
-        self.cache = {}
+        self.subscriptions = []
+        self.value_cache = {}
         
+        # config changes
         self.runtime.config.mqtt.subscribe.subscribe_for_changes(self.subscription_changed)
         self.runtime.config.mqtt.connection.subscribe_for_changes(self.connect)
+        
+        # shutdown
+        self.runtime.shutdown.register_func(self.disconnect)
 
 
     def connect(self):
         if not self.runtime.config.mqtt.connection.host:
             log.info('MQTT disabled')
+            self.disconnect()
             return None
 
         if self.connected:
             log.info('disconnecting')
             self.client.disconnect()
+            self.connected = False
         
         self.client = mqtt.Client(
             client_id=self.runtime.config.mqtt.connection.client_id,
@@ -65,7 +73,9 @@ class MqttConnection:
             keepalive=60
         )
 
-        self.client.loop_start()
+        if not self.loop_started:
+            self.client.loop_start()
+        self.loop_started = True
         
 
     @PrintException
@@ -73,18 +83,18 @@ class MqttConnection:
         if not self.connected:
             return None
         
-        if self.subscription:
-            unsubscribe = [k[0] for k in self.subscription]
+        if self.subscriptions:
+            unsubscribe = [k[0] for k in self.subscriptions]
             for t in unsubscribe:
                 log.debug(f'Unsubscribing from "{t}"')
             self.client.unsubscribe(unsubscribe)
         
         topics = self.runtime.config.mqtt.subscribe.topics
         default_qos = self.runtime.config.mqtt.subscribe.qos
-        self.subscription = [(topic, qos if qos is not None else default_qos) for topic, qos in topics]
-        for topic, qos in self.subscription:
+        self.subscriptions = [(topic, qos if qos is not None else default_qos) for topic, qos in topics]
+        for topic, qos in self.subscriptions:
             log.debug( f'Subscribing to "{topic}" (QoS {qos:d})')
-        self.client.subscribe(self.subscription)
+        self.client.subscribe(self.subscriptions)
 
     @PrintException
     def on_connect(self, client, userdata, flags, rc):
@@ -93,8 +103,8 @@ class MqttConnection:
             return None
         self.connected = True
 
-        self.cache.clear()
-        self.subscription.clear()
+        self.value_cache.clear()
+        self.subscriptions.clear()
         self.subscription_changed()
 
     @PrintException
@@ -119,8 +129,8 @@ class MqttConnection:
             except ValueError:
                 pass
       
-        __was = self.cache.get(topic, None)
-        self.cache[topic] = payload
+        __was = self.value_cache.get(topic, None)
+        self.value_cache[topic] = payload
         
         HABApp.core.Events.post_event(topic, HABApp.core.ValueUpdateEvent(topic, payload))
         if __was is not None and __was != payload:
@@ -136,3 +146,11 @@ class MqttConnection:
         info = self.client.publish( topic, payload, qos, retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
             log.warning( f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
+
+    def disconnect(self):
+        if self.connected:
+            self.client.disconnect()
+            self.connected = False
+        if self.loop_started:
+            self.client.loop_stop()
+            self.loop_started = False
