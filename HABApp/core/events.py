@@ -6,12 +6,32 @@ from HABApp.util import PrintException
 log = logging.getLogger('HABApp.Events')
 
 
+class ValueUpdateEvent:
+    def __init__(self, name = None, value = None):
+        self.name : str = name
+        self.value = value
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+
+
+class ValueChangeEvent:
+    def __init__(self, name = None, value = None, old_value = None):
+        self.name : str = name
+        self.value = value
+        self.old_value = old_value
+    
+    def __repr__(self):
+        return f'<{self.__class__.__name__} topic: {self.name}, value: {self.value}, old_value: {self.old_value}>'
+
+
+
 class EventListener:
-    def __init__(self, item_name, callback, event_type = None):
-        assert isinstance(item_name, str), type(str)
+    def __init__(self, name, callback, event_type = None):
+        assert isinstance(name, str), type(str)
         assert callable(callback)
 
-        self.item_name : str = item_name
+        self.name : str = name
         self.callback = callback
 
         self.event_filter = event_type
@@ -38,12 +58,8 @@ class EventBus:
         log.info(event)
 
         # Update Item Registry BEFORE doing the callbacks
-        # Requires that event has member 'item' and 'value'
-        if update_state is True:
-            try:
-                self.__items.set_state(event.item, event.value)
-            except AttributeError:
-                self.__items.set_state(event.topic, event.value)
+        if isinstance(event, ValueUpdateEvent):
+            self.__items.set_state(event.name, event.value)
 
         # Notify all listeners
         for listener in self.__event_listener.get(name, []):
@@ -54,22 +70,22 @@ class EventBus:
     def remove_listener(self, listener : EventListener):
         assert isinstance(listener, EventListener)
 
-        item_listeners = self.__event_listener.get(listener.item_name, [])
+        item_listeners = self.__event_listener.get(listener.name, [])
         if listener not in item_listeners:
             return None
         item_listeners.remove(listener)
-        log.debug(f'Removed event listener for {listener.item_name} (type {listener.event_filter})')
+        log.debug(f'Removed event listener for {listener.name} (type {listener.event_filter})')
 
     def add_listener(self, listener : EventListener):
         assert isinstance(listener, EventListener)
 
         # don't add the same listener twice
-        item_listeners = self.__event_listener.get(listener.item_name, [])
+        item_listeners = self.__event_listener.get(listener.name, [])
         if listener in item_listeners:
             return None
 
         item_listeners.append( listener)
-        self.__event_listener[listener.item_name] = item_listeners
+        self.__event_listener[listener.name] = item_listeners
 
-        log.debug(f'Added Event listener for {listener.item_name} (type {listener.event_filter})')
+        log.debug(f'Added Event listener for {listener.name} (type {listener.event_filter})')
         return None

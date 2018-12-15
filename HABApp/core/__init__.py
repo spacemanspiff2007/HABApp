@@ -1,7 +1,7 @@
 import concurrent.futures as __futures
 
 from .events import EventBus as __EventBus
-from .events import EventListener
+from .events import EventListener, ValueUpdateEvent, ValueChangeEvent
 from .items import Items as __Items
 from .items import Item
 
