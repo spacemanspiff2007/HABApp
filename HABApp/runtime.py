@@ -1,5 +1,4 @@
 import asyncio
-import concurrent.futures
 import logging
 
 import HABApp.config
@@ -13,10 +12,14 @@ class Runtime:
 
         self.shutdown = HABApp.util.CallbackHelper('Shutdown', logging.getLogger('HABApp.Shutdown'))
 
-        self.config     = HABApp.config.Config(config_folder=config_folder, shutdown_helper=self.shutdown)
+        self.config = HABApp.config.Config(config_folder=config_folder, shutdown_helper=self.shutdown)
 
+        # OpenHAB
         self.openhab_connection = HABApp.openhab.Connection(self)
+
+        # MQTT
         self.mqtt_connection = HABApp.mqtt.MqttConnection(self)
+        self.shutdown.register_func(self.mqtt_connection.disconnect)
         self.mqtt_connection.connect()
 
         self.rule_manager = HABApp.rule_manager.RuleManager(self)

@@ -53,7 +53,7 @@ class EventBus:
         self.__event_listener = {}  # type: typing.Dict[str, typing.List[EventListener]]
 
     @PrintException
-    def post_event(self, name, event, update_state=False):
+    def post_event(self, name, event):
 
         log.info(event)
 
