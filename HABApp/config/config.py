@@ -40,6 +40,11 @@ class Directories(ConfigEntry):
         self.logging = 'log'
         self.rules   = 'rules'
 
+        # The type gets changed after runtime to Path
+        # So it is required to hardcode this here
+        self._entry_validators['logging'] = str
+        self._entry_validators['rules'] = str
+
 
 class Ping(ConfigEntry):
     def __init__(self):

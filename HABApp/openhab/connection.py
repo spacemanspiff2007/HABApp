@@ -3,6 +3,7 @@ import itertools
 import logging
 import time
 import ujson, traceback
+import concurrent.futures
 
 import aiohttp
 from aiohttp_sse_client import client as sse_client
@@ -20,7 +21,8 @@ log = logging.getLogger('HABApp.openhab.Connection')
 def is_ignored_exception(e) -> bool:
     if isinstance(e, aiohttp.ClientPayloadError) or \
             isinstance(e, ConnectionError) or \
-            isinstance(e, aiohttp.ClientConnectorError):
+            isinstance(e, aiohttp.ClientConnectorError) or \
+            isinstance(e, concurrent.futures._base.CancelledError): # kommt wenn wir einen task canceln
         return True
     return False
 
@@ -33,8 +35,8 @@ class Connection:
 
         self.__session: aiohttp.ClientSession = None
 
-        self.__host: str = self.runtime.config.openhab.connection.host
-        self.__port: str = self.runtime.config.openhab.connection.port
+        self.__host: str = ''
+        self.__port: str = ''
 
         self.__ping_sent = 0
         self.__ping_received = 0
@@ -42,14 +44,21 @@ class Connection:
         self.__tasks = []
 
         # Add the ping listener, this works because connect is the last step
-        listener = HABApp.core.EventListener(
-            self.runtime.config.openhab.ping.item,
-            self.ping_received,
-            HABApp.openhab.events.ItemStateEvent
-        )
-        HABApp.core.Events.add_listener(listener)
+        if self.runtime.config.openhab.ping.enabled:
+            listener = HABApp.core.EventListener(
+                self.runtime.config.openhab.ping.item,
+                self.ping_received,
+                HABApp.openhab.events.ItemStateEvent
+            )
+            HABApp.core.Events.add_listener(listener)
 
         self.runtime.shutdown.register_func(self.shutdown)
+
+        # todo: currently this does not work
+        # # reload config
+        # self.runtime.config.openhab.connection.subscribe_for_changes(
+        #     lambda : asyncio.run_coroutine_threadsafe(self.__create_session(), self.runtime.loop).result()
+        # )
 
     def __get_url(self, url: str, *args, **kwargs):
 
@@ -83,20 +92,34 @@ class Connection:
 
     @PrintException
     async def async_ping(self):
-        log.debug('Started ping')
+        # we need to wait so the session object is available
+        await asyncio.sleep(1)
+        if self.__session is None:
+            return None
 
+        log.debug('Started ping')
         while self.runtime.config.openhab.ping.enabled:
 
             await self.async_post_update(
-                self.runtime.config.ping_item,
+                self.runtime.config.openhab.ping.item,
                 f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0'
             )
             self.__ping_sent = time.time()
             await asyncio.sleep(10)
 
-    @PrintException
-    async def async_listen_for_sse_events(self):
-        "This is the worker thread who creates the connection"
+    async def __create_session(self):
+
+        # If we are already connected properly disconnect
+        if self.__session is not None:
+            await self.__session.close()
+            self.__session = None
+
+        self.__host: str = self.runtime.config.openhab.connection.host
+        self.__port: str = self.runtime.config.openhab.connection.port
+
+        # do not run without host
+        if self.__host == '':
+            return None
 
         auth = None
         if self.runtime.config.openhab.connection.user or self.runtime.config.openhab.connection.password:
@@ -110,6 +133,15 @@ class Connection:
             json_serialize=ujson.dumps,
             auth=auth
         )
+
+    @PrintException
+    async def async_listen_for_sse_events(self):
+        "This is the worker thread who creates the connection"
+
+        await self.__create_session()
+        if self.__host is None:
+            log.info('OpenHAB disabled')
+            return None
 
         log.debug('Started SSE listener')
         while not self.runtime.shutdown.requested:
@@ -126,9 +158,7 @@ class Connection:
                             event = get_event(event)
 
                             HABApp.core.Events.post_event(
-                                event.item, event,
-                                update_state=True if isinstance(event, HABApp.openhab.events.ItemUpdatedEvent) else False
-                            )
+                                event.item, event)
                         except Exception as e:
                             log.error("{}".format(e))
                             for l in traceback.format_exc().splitlines():
@@ -136,10 +166,11 @@ class Connection:
                             return None
 
             except Exception as e:
-                if is_ignored_exception(e):
-                    log.warning(f'SSE request Error: {e}')
-                else:
-                    log.error(f'SSE request Error: {e}')
+                lvl = logging.WARNING if is_ignored_exception(e) else logging.ERROR
+                log.log(lvl, f'SSE request Error: {e}')
+                for l in traceback.format_exc().splitlines():
+                    log.log(lvl, l)
+                if lvl == logging.ERROR:
                     raise
 
             await asyncio.sleep(3)
@@ -169,6 +200,8 @@ class Connection:
 
         # we need to wait so the session object is available
         await asyncio.sleep(1)
+        if self.__session is None:
+            return None
 
         while True:
             try:

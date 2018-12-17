@@ -152,7 +152,7 @@ class MqttConnection:
 
         info = self.client.publish( topic, payload, qos, retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
-            log.warning( f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
+            log.error( f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
 
     def disconnect(self):
         if self.connected:
