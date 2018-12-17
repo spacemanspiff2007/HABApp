@@ -20,3 +20,4 @@ exclude =
     dist,
     conf,
     __init__.py
+    tests/context.py
