@@ -1,6 +1,7 @@
 import time, datetime, random
 import HABApp
 #import HABApp.
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.openhab.events.item_events import ItemStateEvent
 
 class MyRule(HABApp.Rule):
@@ -67,8 +68,9 @@ class MyRule(HABApp.Rule):
 
     def cb(self, event):
         print( f'CALLBACK: {event}')
-        assert isinstance(event, ItemStateEvent)
+        assert isinstance(event, ValueUpdateEvent)
         # self.post_Update('MyOtherItem', 'test')
+        self.mqtt_publish( 'test/topic1', event.value + 1)
 
 
         #time.sleep(0.6)

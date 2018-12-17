@@ -10,11 +10,11 @@ if readme.is_file():
 
 setuptools.setup(
     name="HABApp",
-    version="0.0.2",
+    version="0.0.3",
     author="spaceman_spiff",
     # author_email="",
-    description="Easy automation with openHAB. Create home automation rules in python.",
-    keywords='openHAB,habapp',
+    description="Easy automation with openHAB and/or MQTT. Create home automation rules in python.",
+    keywords='openHAB,habapp,mqtt,home,automation',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/spacemanspiff2007/HABApp",
