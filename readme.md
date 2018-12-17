@@ -55,13 +55,18 @@ Examples:
 self.listen_event(item_name, callback, None)
 self.listen_event(item_name, callback, even_type)
 
-# Interact with openhab
+# Interact with openhab (if configured)
 self.post_Update(item_name, value)
 self.send_Command(item_name, value)
 self.item_exists(item_name)
 self.item_state(item_name)
 self.item_create(item_type, item_name)
 self.remove_item(item_name)
+
+# MQTT (if configured)
+# Node: subscribing is possible through the config
+#       Changes get picked up without a restart
+self.mqtt_publish(self, topic, payload, qos=None, retain=None)
 
 # Time intervalls
 self.run_every( date_time, interval, callback)
