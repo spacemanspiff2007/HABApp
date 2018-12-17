@@ -20,7 +20,7 @@ class RuleManager:
         assert isinstance(parent, HABApp.Runtime)
         self.runtime = parent
 
-        self.files = {} # type: typing.Dict[str, RuleFile]
+        self.files = {}  # type: typing.Dict[str, RuleFile]
 
         for f in self.runtime.config.directories.rules.iterdir():
             if f.name.endswith('.py'):
