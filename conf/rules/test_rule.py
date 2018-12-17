@@ -68,6 +68,8 @@ class MyRule(HABApp.Rule):
     def cb(self, event):
         print( f'CALLBACK: {event}')
         assert isinstance(event, ItemStateEvent)
+        # self.post_Update('MyOtherItem', 'test')
+
 
         #time.sleep(0.6)
 

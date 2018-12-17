@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 import ruamel.yaml
-from voluptuous import Schema, MultipleInvalid, Invalid
+from voluptuous import Schema, MultipleInvalid, Invalid, All, Length
 from watchdog.observers import Observer
 
 from HABApp.util import SimpleFileWatcher, CallbackHelper
@@ -39,6 +39,11 @@ class Directories(ConfigEntry):
         super().__init__()
         self.logging = 'log'
         self.rules   = 'rules'
+
+        # The type gets changed after runtime to Path
+        # So it is required to hardcode this here
+        self._entry_validators['logging'] = str
+        self._entry_validators['rules'] = str
 
 
 class Ping(ConfigEntry):
@@ -75,6 +80,86 @@ class Openhab(ConfigEntryContainer):
         self.general = General()
 
 
+def MqttTopicValidator(msg=None):
+    def f(v):
+        if isinstance(v, str):
+            return [(v, 0)]
+
+        ret = []
+        for i, val in enumerate(v):
+            qos = 0
+            if i < len(v) - 1:
+                qos = v[i+1]
+
+            if not isinstance(val, str) and not isinstance(val, int):
+                raise Invalid(msg or (f"Topics must consist of int and string!"))
+
+            if not isinstance(val, str):
+                continue
+                
+            if isinstance(qos, int):
+                if qos not in [0, 1, 2]:
+                    raise Invalid(msg or (f"QoS must be 0,1,2"))
+            else:
+                qos = None
+
+            ret.append((val, qos))
+        return ret
+    return f
+
+class MqttConnection(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self._entry_name = 'connection'
+        self.client_id = 'HABApp'
+        self.host = ''
+        self.port = 8883
+        self.user = ''
+        self.password = ''
+        self.tls = True
+        self.tls_insecure = False
+
+        self._entry_validators['client_id'] = All(str, Length(min=1))
+
+        self._entry_kwargs['password'] = {'default': ''}
+        self._entry_kwargs['tls_insecure'] = {'default': False}
+
+
+class Subscribe(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.qos = 0
+        self.topics = ['#', 0]
+
+        self._entry_validators['topics'] = MqttTopicValidator()
+        self._entry_kwargs['topics'] = {'default': [('#', 0)]}
+        self._entry_kwargs['default_qos'] = {'default': 0}
+
+
+class Publish(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.qos = 0
+        self.retain = False
+
+class mqtt(ConfigEntry):
+    def __init__(self):
+        super().__init__()
+        self.client_id = ''
+        self.tls = True
+        self.tls_insecure = False
+
+        self._entry_kwargs['tls_insecure'] = {'default': False}
+
+class Mqtt(ConfigEntryContainer):
+    def __init__(self):
+        self.connection = MqttConnection()
+        self.subscribe = Subscribe()
+        self.publish = Publish()
+
+
+
+
 class Config:
 
     def __init__(self, config_folder : Path, shutdown_helper : CallbackHelper = None):
@@ -87,6 +172,7 @@ class Config:
         # these are the accessible config entries
         self.directories = Directories()
         self.openhab = Openhab()
+        self.mqtt = Mqtt()
 
         # if the config does not exist it will be created
         self.__check_create_config()
@@ -102,7 +188,9 @@ class Config:
         shutdown_helper.register_func(self.__folder_watcher.join, last=True)
 
         # Load Config initially
+        self.first_start = True
         self.__file_changed('ALL')
+        self.first_start = False
 
     def __file_changed(self, path):
         if path == 'ALL' or path.name == 'config.yml':
@@ -118,6 +206,7 @@ class Config:
         cfg = {}
         self.directories.insert_data(cfg)
         self.openhab.insert_data(cfg)
+        self.mqtt.insert_data(cfg)
 
         print( f'Creating {self.file_conf_habapp.name} in {self.file_conf_habapp.parent}')
         with open(self.file_conf_habapp, 'w', encoding='utf-8') as file:
@@ -149,6 +238,7 @@ class Config:
             _s = {}
             self.directories.update_schema(_s)
             self.openhab.update_schema(_s)
+            self.mqtt.update_schema(_s)
             cfg = Schema(_s)(cfg)
         except MultipleInvalid as e:
             log.error( f'Error loading config:')
@@ -157,6 +247,7 @@ class Config:
 
         self.directories.load_data(cfg)
         self.openhab.load_data(cfg)
+        self.mqtt.load_data(cfg)
 
         # make Path absolute for all directory entries
         for k, v in self.directories.iter_entry():
@@ -190,6 +281,13 @@ class Config:
             if not p.is_absolute():
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
+
+                # Delete old Log-Files on startup
+                if self.first_start and p.is_file():
+                    try:
+                        p.unlink()
+                    finally:
+                        pass
 
         # load prepared logging
         logging.config.dictConfig(cfg)

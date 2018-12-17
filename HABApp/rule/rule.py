@@ -28,7 +28,7 @@ class Rule:
         assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file = __rule_file__
 
-        self.__event_listener = []  # type: typing.List[HABApp.core.EventBusListener]
+        self.__event_listener = []  # type: typing.List[HABApp.core.EventListener]
         self.__future_events = []   # type: typing.List[HABApp.util.ScheduledCallback]
 
         self.rule_name = ""
@@ -41,14 +41,14 @@ class Rule:
     def post_Update(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_post_update(str(item_name), value),
+            self.__runtime.openhab_connection.async_post_update(str(item_name), value),
             self.__runtime.loop
         )
 
     def send_Command(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_send_command(str(item_name), value),
+            self.__runtime.openhab_connection.async_send_command(str(item_name), value),
             self.__runtime.loop
         )
 
@@ -59,7 +59,7 @@ class Rule:
         :return: True or False
         """
         assert isinstance(item_name, str), type(item_name)
-        self.__runtime.all_items.item_exists(item_name)
+        HABApp.core.Items.item_exists(item_name)
 
     def item_state(self, item_name):
         """
@@ -67,7 +67,7 @@ class Rule:
         :param item_name: Name of the item
         :return: state or None
         """
-        return self.__runtime.all_items.item_state.get(item_name)
+        return HABApp.core.Items.get_item(item_name).state
 
     def item_create(self, item_type, item_name, label ="", category ="", tags = [], groups = []):
         """
@@ -90,7 +90,7 @@ class Rule:
         assert isinstance(groups, list), type(groups)
 
         future = asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_create_item(item_type, item_name, label, category, tags, groups),
+            self.__runtime.openhab_connection.async_create_item(item_type, item_name, label, category, tags, groups),
             self.__runtime.loop
         )
 
@@ -99,17 +99,17 @@ class Rule:
     def remove_item(self, item_name : str):
         assert isinstance(item_name, str), type(item_name)
         future = asyncio.run_coroutine_threadsafe(
-            self.__runtime.connection.async_remove_item(item_name),
+            self.__runtime.openhab_connection.async_remove_item(item_name),
             self.__runtime.loop
         )
         return future.result(self.__runtime.config.async_timeout)
 
 
-    def listen_event(self, item_name : str, callback, even_type) -> HABApp.core.EventBusListener:
+    def listen_event(self, item_name : str, callback, even_type) -> HABApp.core.EventListener:
         cb = HABApp.util.WorkerRuleWrapper(callback, self)
-        listener = HABApp.core.EventBusListener(item_name, cb, even_type)
+        listener = HABApp.core.EventListener(item_name, cb, even_type)
         self.__event_listener.append(listener)
-        self.__runtime.events.add_listener(listener)
+        HABApp.core.Events.add_listener(listener)
         return listener
 
 
@@ -218,13 +218,17 @@ class Rule:
         assert isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
+    def mqtt_publish(self, topic, payload=None, qos=None, retain=None):
+        assert isinstance(topic, str), type(str)
+        self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
+
 
     @HABApp.util.PrintException
     def _process_sheduled_events(self, now):
         clean_events = False
         for future_event in self.__future_events:   # type: HABApp.util.ScheduledCallback
             future_event.check_due(now)
-            future_event.execute(self.__runtime.workers)
+            future_event.execute(HABApp.core.Workers)
             if future_event.is_finished:
                 future_event = True
 
@@ -236,4 +240,4 @@ class Rule:
     @HABApp.util.PrintException
     def _cleanup(self):
         for listener in self.__event_listener:
-            self.__runtime.events.remove_listener(listener)
+            HABApp.core.Events.remove_listener(listener)
