@@ -1,9 +1,13 @@
 # HABApp
-_Easy automations with openHAB_
-
+_Easy automation with openHAB and/or MQTT_
 [![Build Status](https://travis-ci.org/spacemanspiff2007/HABApp.svg?branch=master)](https://travis-ci.org/spacemanspiff2007/HABApp)
 
+HABApp is a asyncio/multithread application that connects to an openhab instance and/or a MQTT broker.
+It is possible to create rules that listen to events from these instances and then react accordingly.
+
 ## Goals
+The goal of this application is to provide a simple way to create home automation rules in python.
+With full syntax highlighting and descriptive names it should almost never be required to look something up in the documentation
 
 # Installation
 The installation is very easy. This module can be installed through pip (or pip3 on linux):
@@ -31,22 +35,38 @@ This rule will automatically be reloaded when the file changes.
 A simple rule could look like this
 ```python
 import HABApp
-from HABApp.openhab.events.item_events import ItemStateEvent
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 
 class MyRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
         # Subscribe to ItemStateEvent for item TestSwitchTOGGLE
-        self.listen_event( 'TestSwitchTOGGLE', self.cb, ItemStateEvent)
+        self.listen_event( 'TestSwitchTOGGLE', self.cb, ValueUpdateEvent)
 
     def cb(self, event):
+        assert isinstance(event, ValueUpdateEvent)
         print( f'CALLBACK: {event}')
-        assert isinstance(event, ItemStateEvent)
         self.post_Update('MyOtherItem', 'test')
 
 MyRule()
+
+# MQTT example
+class MyMQTTRule(HABApp.Rule):
+    def __init__(self):
+        super().__init__()
+
+        # Subscribe to topic but only process changes
+        self.listen_event( 'test/topic1', self.cb, ValueChangeEvent)
+
+    def cb(self, event):
+        assert isinstance(event, ValueChangeEvent)
+        self.mqtt_publish( 'test/topic2', event.value + 1)
+
+MyMQTTRule()
+
 ```
+
 More functionality is available through class functions.
 It is recommended to use an editor with syntax highlighting.
 Examples:
@@ -64,8 +84,8 @@ self.item_create(item_type, item_name)
 self.remove_item(item_name)
 
 # MQTT (if configured)
-# Node: subscribing is possible through the config
-#       Changes get picked up without a restart
+# Node: subscribing is possible through the config,
+#       changes to mqtt config entries get picked up without a restart
 self.mqtt_publish(self, topic, payload, qos=None, retain=None)
 
 # Time intervalls
