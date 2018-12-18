@@ -72,14 +72,22 @@ It is recommended to use an editor with syntax highlighting.
 Examples:
 ```python
 # Listen for events
-self.listen_event(item_name, callback, None)
-self.listen_event(item_name, callback, even_type)
+self.listen_event(name, callback)               # Callback on any event
+self.listen_event(name, callback, even_type)    # Callback if event is instance of event_type
+
+# HAPApp item cache
+# Lookups are almost instant so this can be used to get states inside of rules
+self.item_state(item_name)
+self.item_exists(item_name)
+
+# Post an event to the HABApp event bus.
+# Can be used to post and react to custom events together with self.listen_event
+self.post_event(name, event)
+
 
 # Interact with openhab (if configured)
 self.post_Update(item_name, value)
 self.send_Command(item_name, value)
-self.item_exists(item_name)
-self.item_state(item_name)
 self.item_create(item_type, item_name)
 self.remove_item(item_name)
 
