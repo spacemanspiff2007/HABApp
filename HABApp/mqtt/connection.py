@@ -120,8 +120,8 @@ class MqttConnection:
         if log_msg.isEnabledFor(logging.DEBUG):
             log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload}', [])
 
-        # load json
-        if payload.startswith('{') and payload.endswith('}'):
+        # load json dict and list
+        if payload.startswith('{') and payload.endswith('}') or payload.startswith('[') and payload.endswith(']'):
             try:
                 payload = ujson.loads(payload)
             except ValueError:
