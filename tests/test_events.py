@@ -49,8 +49,9 @@ class TestCases(unittest.TestCase):
     def test_ItemStateChangedEvent2(self):
         d = {
             'topic': 'smarthome/items/TestDateTimeTOGGLE/statechanged',
-            'payload': '{"type":"DateTime","value":"2018-11-21T19:47:08.277+0100","oldType":"DateTime","oldValue":"2018-11-19T09:46:38.273+0100"}',
-             'type': 'ItemStateChangedEvent'}
+            'payload': '{"type":"DateTime","value":"2018-11-21T19:47:08.277+0100",'
+                       '"oldType":"DateTime","oldValue":"2018-11-19T09:46:38.273+0100"}',
+            'type': 'ItemStateChangedEvent'}
         event = get_event(d)
         self.assertIsInstance(event, ItemStateChangedEvent)
         self.assertEqual(event.item, 'TestDateTimeTOGGLE')
