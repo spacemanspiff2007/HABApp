@@ -1,9 +1,10 @@
 import asyncio
+import concurrent.futures
 import itertools
 import logging
 import time
-import ujson, traceback
-import concurrent.futures
+import traceback
+import ujson
 
 import aiohttp
 from aiohttp_sse_client import client as sse_client
@@ -11,9 +12,8 @@ from aiohttp_sse_client import client as sse_client
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.util import PrintException
-
 from HABApp.openhab.events import get_event
+from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.openhab.Connection')
 
@@ -22,7 +22,7 @@ def is_ignored_exception(e) -> bool:
     if isinstance(e, aiohttp.ClientPayloadError) or \
             isinstance(e, ConnectionError) or \
             isinstance(e, aiohttp.ClientConnectorError) or \
-            isinstance(e, concurrent.futures._base.CancelledError): # kommt wenn wir einen task canceln
+            isinstance(e, concurrent.futures._base.CancelledError):  # kommt wenn wir einen task canceln
         return True
     return False
 
