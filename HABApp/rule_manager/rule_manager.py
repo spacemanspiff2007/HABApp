@@ -56,7 +56,7 @@ class RuleManager:
             for file in self.files.values():
                 assert isinstance(file, RuleFile), type(file)
                 for rule in file.iterrules():
-                    rule._process_sheduled_events(now)
+                    rule._process_scheduled_events(now)
 
             await asyncio.sleep(0.2)
 

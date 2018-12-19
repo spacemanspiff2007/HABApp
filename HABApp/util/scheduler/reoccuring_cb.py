@@ -5,6 +5,8 @@ from .scheduled_cb import ScheduledCallback
 
 class ReoccuringScheduledCallback(ScheduledCallback):
 
+    CALL_ONCE = False
+
     def __init__(self, date_time, interval, callback, *args, **kwargs):
         super().__init__(date_time, callback, *args, **kwargs)
 
@@ -17,10 +19,12 @@ class ReoccuringScheduledCallback(ScheduledCallback):
         super().check_due(now)
         if self.is_due:
             self.next_call += self.time_interval
-        self.is_finished = False
 
 
 class DayOfWeekScheduledCallback(ScheduledCallback):
+
+    CALL_ONCE = False
+
     def __init__(self, datetime_time, weekdays, callback, *args, **kwargs):
         super().__init__(datetime_time, callback, *args, **kwargs)
 
@@ -36,7 +40,6 @@ class DayOfWeekScheduledCallback(ScheduledCallback):
 
     def check_due(self, now: datetime):
         super().check_due(now)
-        self.is_finished = False
         if self.is_due:
             self.next_call += timedelta(days=1)
             while not self.next_call.isoweekday() in self.weekdays:
