@@ -2,13 +2,14 @@ import unittest
 import typing
 from datetime import datetime, timedelta
 
-from .context import HABApp
 from HABApp.util import scheduler
 
 
 class CExecutor:
     def submit(self, callback, *args, **kwargs):
         callback(*args, **kwargs)
+
+
 executor = CExecutor()
 
 
@@ -18,9 +19,8 @@ class TestCases(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
         self.called = False
-        self.last_args : typing.Optional[typing.List] = None
-        self.last_kwargs : typing.Optional[typing.Dict] = None
-
+        self.last_args: typing.Optional[typing.List] = None
+        self.last_kwargs: typing.Optional[typing.Dict] = None
 
     def setUp(self):
         self.called = False
@@ -45,8 +45,8 @@ class TestCases(unittest.TestCase):
 
         # func call
         self.assertIs(self.called, True)
-        self.assertEqual( self.last_args, ('T1',))
-        self.assertEqual( self.last_kwargs, { 'F2' : 'F2'})
+        self.assertEqual(self.last_args, ('T1',))
+        self.assertEqual(self.last_kwargs, {'F2': 'F2'})
 
         self.assertEqual(shed.is_finished, True)
 

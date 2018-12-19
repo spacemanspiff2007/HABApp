@@ -35,7 +35,7 @@ class Rule:
 
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
-            return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self.__runtime.config.timezone
+            return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self.__runtime.config.openhab.general.timezone
         return str(_in)
 
     def item_exists(self, item_name) -> bool:
@@ -236,13 +236,13 @@ class Rule:
         self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
 
     @HABApp.util.PrintException
-    def _process_sheduled_events(self, now):
+    def _process_scheduled_events(self, now):
         clean_events = False
         for future_event in self.__future_events:  # type: HABApp.util.ScheduledCallback
             future_event.check_due(now)
             future_event.execute(HABApp.core.Workers)
             if future_event.is_finished:
-                future_event = True
+                clean_events = True
 
         # remove finished events
         if clean_events:

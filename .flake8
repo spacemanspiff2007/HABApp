@@ -19,5 +19,5 @@ exclude =
     build,
     dist,
     conf,
-    __init__.py
+    __init__.py,
     tests/context.py
