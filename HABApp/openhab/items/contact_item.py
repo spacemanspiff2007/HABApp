@@ -1,5 +1,6 @@
 from .base_item import BaseItem
 
+
 class ContactItem(BaseItem):
     OPEN = 'OPEN'
     CLOSED = 'CLOSED'
