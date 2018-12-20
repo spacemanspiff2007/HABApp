@@ -1,4 +1,5 @@
-import logging, codecs
+import codecs
+import logging
 import logging.config
 import re
 import time

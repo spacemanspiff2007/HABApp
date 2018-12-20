@@ -50,7 +50,7 @@ class EventBus:
         self.__items = Items
         self.__workers = Workers
 
-        self.__event_listener: typing.Dict[str, typing.List[EventListener]]= {}
+        self.__event_listener: typing.Dict[str, typing.List[EventListener]] = {}
 
     @PrintException
     def post_event(self, name, event):
