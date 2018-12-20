@@ -55,5 +55,4 @@ class ScheduledCallback:
         return True
 
     def cancel(self):
-        self.is_due = False
         self.is_finished = True

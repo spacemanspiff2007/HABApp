@@ -14,7 +14,6 @@ handlers:
     filename: 'HABApp.log'
     maxBytes: 10_485_760
     backupCount: '3'
-    encoding: 'utf-8'
 
     formatter: HABApp_format
     level: DEBUG
@@ -24,7 +23,6 @@ handlers:
     filename: 'events.log'
     maxBytes: 10_485_760
     backupCount: 3
-    encoding: 'utf-8'
 
     formatter: HABApp_format
     level: DEBUG
