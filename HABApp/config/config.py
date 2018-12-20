@@ -12,8 +12,10 @@ from HABApp.util import SimpleFileWatcher, CallbackHelper
 from .configentry import ConfigEntry, ConfigEntryContainer
 from .default_logfile import get_default_logfile
 
+
 def TimeZoneValidator(msg=None):
     __re = re.compile(r'[+-]\d{4}')
+
     def f(v):
         v = str(v)
         if __re.fullmatch(v):
@@ -89,14 +91,14 @@ def MqttTopicValidator(msg=None):
         for i, val in enumerate(v):
             qos = 0
             if i < len(v) - 1:
-                qos = v[i+1]
+                qos = v[i + 1]
 
             if not isinstance(val, str) and not isinstance(val, int):
                 raise Invalid(msg or (f"Topics must consist of int and string!"))
 
             if not isinstance(val, str):
                 continue
-                
+
             if isinstance(qos, int):
                 if qos not in [0, 1, 2]:
                     raise Invalid(msg or (f"QoS must be 0,1,2"))
@@ -106,6 +108,7 @@ def MqttTopicValidator(msg=None):
             ret.append((val, qos))
         return ret
     return f
+
 
 class MqttConnection(ConfigEntry):
     def __init__(self):
@@ -142,6 +145,7 @@ class Publish(ConfigEntry):
         self.qos = 0
         self.retain = False
 
+
 class mqtt(ConfigEntry):
     def __init__(self):
         super().__init__()
@@ -150,6 +154,7 @@ class mqtt(ConfigEntry):
         self.tls_insecure = False
 
         self._entry_kwargs['tls_insecure'] = {'default': False}
+
 
 class Mqtt(ConfigEntryContainer):
     def __init__(self):
@@ -180,7 +185,9 @@ class Config:
 
         # folder watcher
         self.__folder_watcher = Observer()
-        self.__folder_watcher.schedule(SimpleFileWatcher(self.__file_changed, file_ending='.yml'), str(self.folder_conf))
+        self.__folder_watcher.schedule(
+            SimpleFileWatcher(self.__file_changed, file_ending='.yml'), str(self.folder_conf)
+        )
         self.__folder_watcher.start()
 
         # proper shutdown

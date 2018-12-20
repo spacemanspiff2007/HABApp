@@ -20,7 +20,7 @@ class ValueChangeEvent:
         self.name : str = name
         self.value = value
         self.old_value = old_value
-    
+
     def __repr__(self):
         return f'<{self.__class__.__name__} topic: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
@@ -50,7 +50,7 @@ class EventBus:
         self.__items = Items
         self.__workers = Workers
 
-        self.__event_listener = {}  # type: typing.Dict[str, typing.List[EventListener]]
+        self.__event_listener: typing.Dict[str, typing.List[EventListener]]= {}
 
     @PrintException
     def post_event(self, name, event):
