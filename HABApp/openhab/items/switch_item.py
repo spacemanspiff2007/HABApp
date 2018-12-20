@@ -1,12 +1,13 @@
 from .base_item import BaseItem
 
+
 class SwitchItem(BaseItem):
     ON = 'ON'
     OFF = 'OFF'
 
     def update_state(self, _str):
         if _str is not None and _str != SwitchItem.ON and _str != SwitchItem.OFF:
-            raise ValueError( f'Invalid value for SwitchItem: {_str}')
+            raise ValueError(f'Invalid value for SwitchItem: {_str}')
         self.state = _str
 
     def is_on(self):

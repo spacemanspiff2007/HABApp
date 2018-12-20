@@ -28,8 +28,8 @@ class Rule:
         assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file = __rule_file__
 
-        self.__event_listener = []  # type: typing.List[HABApp.core.EventListener]
-        self.__future_events = []  # type: typing.List[HABApp.util.ScheduledCallback]
+        self.__event_listener: typing.List[HABApp.core.EventListener] = []
+        self.__future_events: typing.List[HABApp.util.ScheduledCallback] = []
 
         self.rule_name = ""
 
