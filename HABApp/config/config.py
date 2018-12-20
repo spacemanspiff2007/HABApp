@@ -1,4 +1,4 @@
-import logging
+import logging, codecs
 import logging.config
 import re
 import time
@@ -273,6 +273,13 @@ class Config:
 
         # fix filenames
         for handler, handler_cfg in cfg.get('handlers', {}).items():
+
+            # fix encoding for FileHandlers - we always log utf-8
+            if 'file' in handler_cfg.get('class', '').lower():
+                enc = handler_cfg.get('encoding', '')
+                if enc != 'utf-8':
+                    handler_cfg['encoding'] = 'utf-8'
+
             if 'filename' not in handler_cfg:
                 continue
 
@@ -285,7 +292,9 @@ class Config:
                 # Delete old Log-Files on startup
                 if self.first_start and p.is_file():
                     try:
-                        p.unlink()
+                        # default is utf-8 logging so we append BOM
+                        with open(p, mode='wb') as f:
+                            f.write(codecs.BOM_UTF8)
                     finally:
                         pass
 
