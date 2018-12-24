@@ -102,7 +102,7 @@ def MqttTopicValidator(msg=None):
 
             if isinstance(qos, int):
                 if qos not in [0, 1, 2]:
-                    raise Invalid(msg or (f"QoS must be 0,1,2"))
+                    raise Invalid(msg or (f"QoS must be 0, 1 or 2"))
             else:
                 qos = None
 
