@@ -2,7 +2,8 @@ import datetime
 import unittest
 
 # from .context import HABApp
-from HABApp.openhab.events import ItemStateEvent, ItemAddedEvent, ItemCommandEvent, ItemStateChangedEvent, get_event
+from HABApp.openhab.events import ItemStateEvent, ItemAddedEvent, ItemCommandEvent,\
+    ItemStateChangedEvent, ItemStatePredictedEvent, get_event
 
 
 class TestCases(unittest.TestCase):
@@ -45,6 +46,14 @@ class TestCases(unittest.TestCase):
         self.assertEqual(event.item, 'Ping')
         self.assertEqual(event.value, '1')
         self.assertEqual(event.old_value, None)
+
+    def test_ItemStatePredictedEvent(self):
+        event = get_event({'topic': 'smarthome/items/Buero_Lampe_Vorne_W/statepredicted',
+                           'payload': '{"predictedType":"Percent","predictedValue":"10","isConfirmation":false}',
+                           'type': 'ItemStatePredictedEvent'})
+        self.assertIsInstance(event, ItemStatePredictedEvent)
+        self.assertEqual(event.item, 'Buero_Lampe_Vorne_W')
+        self.assertEqual(event.value, 10.0)
 
     def test_ItemStateChangedEvent2(self):
         d = {

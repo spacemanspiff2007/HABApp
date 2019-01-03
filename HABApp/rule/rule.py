@@ -253,3 +253,6 @@ class Rule:
     def _cleanup(self):
         for listener in self.__event_listener:
             HABApp.core.Events.remove_listener(listener)
+            
+        for event in self.__future_events:
+            event.cancel()

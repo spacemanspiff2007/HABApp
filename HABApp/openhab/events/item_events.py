@@ -63,3 +63,17 @@ class ItemUpdatedEvent(BaseItemEvent):
 
     def __repr__(self):
         return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
+
+
+class ItemStatePredictedEvent(BaseItemEvent):
+    def __init__(self, _in_dict):
+        super().__init__(_in_dict)
+
+        # 'smarthome/items/NAME/statepredicted'
+        self.item = self._topic[16:-15]
+
+        self.name = self.item
+        self.value = map_event_types(self._payload['predictedType'], self._payload['predictedValue'])
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
