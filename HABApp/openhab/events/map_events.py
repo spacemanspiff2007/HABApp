@@ -13,8 +13,14 @@ def map_event_types(openhab_type: str, openhab_value: str):
     if openhab_type == "Number":
         return int(openhab_value)
 
-    if openhab_type == "Decimal":
+    if openhab_type == 'Percent':
         return float(openhab_value)
+
+    if openhab_type == "Decimal":
+        try:
+            return int(openhab_value)
+        except ValueError:
+            return float(openhab_value)
 
     if openhab_type == "DateTime":
         # 2018-11-19T09:47:38.284+0100

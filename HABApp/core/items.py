@@ -33,6 +33,9 @@ class Items:
     def item_exists(self, name) -> bool:
         return name in self.items
 
+    def get_items(self) -> list:
+        return list(self.items.keys())
+
     def set_state(self, name, new_state):
         try:
             self.items[name].set_state(new_state)
