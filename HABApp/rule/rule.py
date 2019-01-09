@@ -9,6 +9,7 @@ import HABApp.core
 import HABApp.openhab.events
 import HABApp.rule_manager
 import HABApp.util
+from .watched_item import WatchedItem
 
 
 class Rule:
@@ -30,6 +31,7 @@ class Rule:
 
         self.__event_listener: typing.List[HABApp.core.EventListener] = []
         self.__future_events: typing.List[HABApp.util.ScheduledCallback] = []
+        self.__watched_items: typing.List[ WatchedItem] = []
 
         self.rule_name = ""
 
@@ -54,6 +56,19 @@ class Rule:
         :return: state or None
         """
         return HABApp.core.Items.get_item(item_name).state
+
+    def item_watch(self, item_name, seconds_constant, watch_only_changes = True) -> WatchedItem:
+        assert isinstance(item_name, str)
+        assert isinstance(seconds_constant, int)
+        assert isinstance(watch_only_changes, bool)
+        
+        item = WatchedItem(
+            name=item_name,
+            constant_time=seconds_constant,
+            watch_changes=watch_only_changes
+        )
+        self.__watched_items.append(item)
+        return item
 
     def post_event(self, name, event):
         """
@@ -236,7 +251,18 @@ class Rule:
         self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
 
     @HABApp.util.PrintException
-    def _process_scheduled_events(self, now):
+    def _process_events(self, now):
+        
+        # watch items
+        clean_items = False
+        for item in self.__watched_items:
+            item.check(now)
+            if item.is_canceled:
+                clean_items = True
+        if clean_items:
+            self.__watched_items = [k for k in self.__watched_items if not k.is_canceled]
+        
+        # sheduled events
         clean_events = False
         for future_event in self.__future_events:  # type: HABApp.util.ScheduledCallback
             future_event.check_due(now)
@@ -256,3 +282,6 @@ class Rule:
 
         for event in self.__future_events:
             event.cancel()
+        self.__future_events.clear()
+        
+        self.__watched_items.clear()

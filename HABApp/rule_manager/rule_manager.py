@@ -1,6 +1,8 @@
 import asyncio
 import datetime
 import logging
+import threading
+import time
 import traceback
 import typing
 from pathlib import Path
@@ -8,7 +10,7 @@ from pathlib import Path
 from watchdog.observers import Observer
 
 import HABApp
-from HABApp.util import SimpleFileWatcher, PrintException
+from HABApp.util import PrintException, SimpleFileWatcher
 from .rule_file import RuleFile
 
 log = logging.getLogger('HABApp.Rules')
@@ -22,9 +24,17 @@ class RuleManager:
 
         self.files: typing.Dict[str, RuleFile] = {}
 
-        for f in self.runtime.config.directories.rules.iterdir():
-            if f.name.endswith('.py'):
-                HABApp.core.Workers.submit(self.add_file, f)
+        # serialize loading
+        self.__lock = threading.Lock()
+
+        # if we load immediately we don't have the items from openhab in itemcache
+        def delayed_load():
+            time.sleep(5)
+            for f in self.runtime.config.directories.rules.iterdir():
+                if f.name.endswith('.py'):
+                    HABApp.core.Workers.submit(self.add_file, f)
+                
+        HABApp.core.Workers.submit(delayed_load)
 
         # folder watcher
         self.__folder_watcher = Observer()
@@ -39,7 +49,6 @@ class RuleManager:
         self.runtime.shutdown.register_func(self.__folder_watcher.join)
 
         self.__process_last_sec = 60
-
 
     @PrintException
     async def process_scheduled_events(self):
@@ -56,7 +65,7 @@ class RuleManager:
             for file in self.files.values():
                 assert isinstance(file, RuleFile), type(file)
                 for rule in file.iterrules():
-                    rule._process_scheduled_events(now)
+                    rule._process_events(now)
 
             await asyncio.sleep(0.2)
 
@@ -83,19 +92,24 @@ class RuleManager:
     def add_file(self, path : Path):
         log.debug( f'Loading file: {path}')
 
+        file = None
         try:
-            # unload old callbacks
-            path_str = str(path)
-            if path_str in self.files:
-                for rule in self.files[path_str].iterrules():   # type: HABApp.Rule
-                    rule._cleanup()
-
-            file = RuleFile(self, path)
-            file.load()
-            self.files[path_str] = file
+            # serialize loading
+            with self.__lock:
+                
+                # unload old callbacks
+                path_str = str(path)
+                if path_str in self.files:
+                    for rule in self.files[path_str].iterrules():   # type: HABApp.Rule
+                        rule._cleanup()
+    
+                file = RuleFile(self, path)
+                self.files[path_str] = file
+                file.load()
         except Exception:
             log.error(f"Could not load {path}!")
             for l in traceback.format_exc().splitlines():
                 log.error(l)
+            return None
 
         log.debug(f'File {path} successfully loaded!')

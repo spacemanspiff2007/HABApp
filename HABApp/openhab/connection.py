@@ -16,7 +16,7 @@ from HABApp.openhab.events import get_event
 from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.openhab.Connection')
-
+log_events = logging.getLogger('HABApp.Events.openhab')
 
 def is_ignored_exception(e) -> bool:
     if isinstance(e, aiohttp.ClientPayloadError) or \
@@ -153,8 +153,8 @@ class Connection:
                     async for event in event_source:
                         try:
                             event = ujson.loads(event.data)
-                            if log.isEnabledFor(logging.DEBUG):
-                                log._log(logging.DEBUG, event, [])
+                            if log_events.isEnabledFor(logging.DEBUG):
+                                log_events._log(logging.DEBUG, event, [])
                             event = get_event(event)
 
                             HABApp.core.Events.post_event(
