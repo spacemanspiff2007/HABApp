@@ -7,7 +7,7 @@ import HABApp
 from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.mqtt.connection')
-log_msg = logging.getLogger('HABApp.mqtt.messages')
+log_msg = logging.getLogger('HABApp.Events.mqtt')
 
 
 class MqttConnection:
