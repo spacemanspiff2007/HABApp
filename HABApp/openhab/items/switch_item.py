@@ -38,7 +38,7 @@ class SwitchItem(Item):
             return False
 
         return NotImplemented
-        
+
     def __ne__(self, other):
         res = self.__eq__(other)
         if res is NotImplemented:

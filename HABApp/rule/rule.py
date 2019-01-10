@@ -258,7 +258,7 @@ class Rule:
 
     @HABApp.util.PrintException
     def _process_events(self, now):
-        
+
         # watch items
         clean_items = False
         for item in self.__watched_items:
@@ -267,7 +267,7 @@ class Rule:
                 clean_items = True
         if clean_items:
             self.__watched_items = [k for k in self.__watched_items if not k.is_canceled]
-        
+
         # sheduled events
         clean_events = False
         for future_event in self.__future_events:  # type: HABApp.util.ScheduledCallback
@@ -289,5 +289,5 @@ class Rule:
         for event in self.__future_events:
             event.cancel()
         self.__future_events.clear()
-        
+
         self.__watched_items.clear()

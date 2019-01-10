@@ -1,7 +1,9 @@
-import unittest, datetime, time
+import datetime
+import unittest
 
 import HABApp.util.timeframe
 from HABApp.util import TimeFrame
+
 
 def get_date(name, h, m, s=0):
     __date = {
@@ -15,6 +17,7 @@ def get_date(name, h, m, s=0):
     }
 
     return datetime.datetime(*__date[name], h, m, s)
+
 
 class Basic(unittest.TestCase):
 
@@ -135,6 +138,7 @@ class Basic(unittest.TestCase):
 
     def test_invalid_sec2(self):
         self.assertRaises(ValueError, lambda: TimeFrame('13:59:59-13:59:59'))
+
 
 if __name__ == '__main__':
     unittest.main()
