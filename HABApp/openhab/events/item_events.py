@@ -62,7 +62,7 @@ class ItemUpdatedEvent(BaseItemEvent):
         self.item = self._topic[16:-8]
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
+        return f'<{self.__class__.__name__} item: {self.item}>'
 
 
 class ItemStatePredictedEvent(BaseItemEvent):
