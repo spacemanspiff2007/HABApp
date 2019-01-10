@@ -53,7 +53,7 @@ class Rule:
         :return: True or False
         """
         assert isinstance(item_name, str), type(item_name)
-        HABApp.core.Items.item_exists(item_name)
+        return HABApp.core.Items.item_exists(item_name)
 
     def item_state(self, item_name):
         """
