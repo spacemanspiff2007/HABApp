@@ -29,6 +29,3 @@ class Color:
 
     def __repr__(self):
         return f'<Color Hue: {self.hue}°, Saturation: {self.saturation}%, Value: {self.value}%>'
-
-    def _openhab_val(self):
-        return f'{self.hue:.1f},{self.saturation:.1f},{self.value:.1f}'

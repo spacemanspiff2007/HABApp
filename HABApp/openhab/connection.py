@@ -156,9 +156,16 @@ class Connection:
                             if log_events.isEnabledFor(logging.DEBUG):
                                 log_events._log(logging.DEBUG, event, [])
                             event = get_event(event)
-
-                            HABApp.core.Events.post_event(
-                                event.item, event)
+                            
+                            if isinstance(event, HABApp.openhab.events.ItemAddedEvent) or \
+                                    isinstance(event, HABApp.openhab.events.ItemUpdatedEvent):
+                                item = HABApp.openhab.map_items( event.name, event.type, 'NULL')
+                                HABApp.core.Items.set_item(item)
+                            elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
+                                HABApp.core.Items.pop_item(event.name)
+                            
+                            HABApp.core.Events.post_event( event.name, event)
+                            
                         except Exception as e:
                             log.error("{}".format(e))
                             for l in traceback.format_exc().splitlines():
@@ -183,9 +190,8 @@ class Connection:
     def __update_all_items(self, data):
             data = ujson.loads(data)  # type: list
             for _dict in data:
-                # print(_dict)
-                __item = HABApp.openhab.map_items(_dict['type'], _dict['state'])
-                HABApp.core.Items.set_state(_dict['name'], __item)
+                __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
+                HABApp.core.Items.set_item(__item)
 
             # remove items which are no longer available
             ist = set(HABApp.core.Items.items.keys())

@@ -1,11 +1,21 @@
+import threading
+
 
 class Threshold:
-    def __init__(self, lower_threshold, upper_threshold):
+    def __init__(self, upper_threshold, lower_threshold):
+        """This is a simple Schmitt Trigger implementation.
+        If the value is >= upper_threshold is_higher will return true.
+        The return value will stay true until the value goes below lower_threshold.
+        
+        :param upper_threshold:
+        :param lower_threshold:
+        """
         assert upper_threshold > lower_threshold, f'{upper_threshold} > {lower_threshold}'
-        self.lower_threshold = lower_threshold
         self.upper_threshold = upper_threshold
+        self.lower_threshold = lower_threshold
         
         self.__over_upper = False
+        self.__lock = threading.Lock()
     
     @property
     def current_threshold(self):
@@ -13,19 +23,14 @@ class Threshold:
     
     def is_higher(self, value) -> bool:
         
-        if value >= self.upper_threshold:
-            self.__over_upper = True
-            return True
-        
-        if self.__over_upper:
-            if value >= self.lower_threshold:
-                return True
-            else:
+        with self.__lock:
+            if value >= self.upper_threshold:
+                self.__over_upper = True
+
+            if value < self.lower_threshold:
                 self.__over_upper = False
-            
-        return False
         
+        return self.__over_upper
     
     def is_lower(self, value) -> bool:
         return not self.is_higher(value)
-        
