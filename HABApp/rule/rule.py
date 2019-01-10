@@ -9,6 +9,7 @@ import HABApp.core
 import HABApp.openhab.events
 import HABApp.rule_manager
 import HABApp.util
+import HABApp.classes
 from .watched_item import WatchedItem
 
 
@@ -38,6 +39,11 @@ class Rule:
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
             return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self.__runtime.config.openhab.general.timezone
+        elif isinstance(_in, HABApp.core.Item):
+            return str(_in.state)
+        elif isinstance(_in, HABApp.classes.Color):
+            return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
+        
         return str(_in)
 
     def item_exists(self, item_name) -> bool:

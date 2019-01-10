@@ -1,14 +1,20 @@
-from .base_item import BaseItem
+from HABApp.core.items import Item
 
 
-class SwitchItem(BaseItem):
+class SwitchItem(Item):
     ON = 'ON'
     OFF = 'OFF'
 
-    def update_state(self, _str):
-        if _str is not None and _str != SwitchItem.ON and _str != SwitchItem.OFF:
-            raise ValueError(f'Invalid value for SwitchItem: {_str}')
-        self.state = _str
+    @classmethod
+    def from_str(self, name, value):
+        item = SwitchItem(name=name)
+        item.set_state(value)
+        return item
+
+    def set_state(self, new_state):
+        if new_state is not None and new_state != SwitchItem.ON and new_state != SwitchItem.OFF:
+            raise ValueError(f'Invalid value for SwitchItem: {new_state}')
+        super().set_state(new_state)
 
     def is_on(self):
         return True if self.state == SwitchItem.ON else False
@@ -18,3 +24,23 @@ class SwitchItem(BaseItem):
 
     def __str__(self):
         return self.state
+
+    def __eq__(self, other):
+        if isinstance(other, SwitchItem):
+            return self.state == other.state
+        elif isinstance(other, str):
+            return self.state == other
+        elif isinstance(other, int):
+            if other and self.is_on():
+                return True
+            if not other and self.is_off():
+                return True
+            return False
+
+        return NotImplemented
+        
+    def __ne__(self, other):
+        res = self.__eq__(other)
+        if res is NotImplemented:
+            return res
+        return not res
