@@ -32,7 +32,7 @@ class RuleFile:
                 '__HABAPP__RULES' : created_rules
             })
         except Exception as e:
-            log.error(f"Could not load {self.path}!")
+            log.error(f"Could not load {self.path}: {e}!")
             for l in traceback.format_exc().splitlines()[-5:]:
                 log.error(l)
 

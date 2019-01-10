@@ -44,7 +44,7 @@ class ItemCommandEvent(BaseItemEvent):
 class ItemAddedEvent(BaseItemEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
-        
+
         # {'topic': 'smarthome/items/NAME/added'
         # 'payload': '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}'
         # 'type': 'ItemAddedEvent'}

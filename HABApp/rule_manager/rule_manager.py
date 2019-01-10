@@ -96,13 +96,13 @@ class RuleManager:
         try:
             # serialize loading
             with self.__lock:
-                
+
                 # unload old callbacks
                 path_str = str(path)
                 if path_str in self.files:
                     for rule in self.files[path_str].iterrules():   # type: HABApp.Rule
                         rule._cleanup()
-    
+
                 file = RuleFile(self, path)
                 self.files[path_str] = file
                 file.load()

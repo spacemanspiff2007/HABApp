@@ -5,6 +5,7 @@ from HABApp.core.items import Item
 
 from . import SwitchItem, ContactItem
 
+
 def map_items(name, openhab_type : str, openhab_value : str):
     assert isinstance(openhab_type, str), type(openhab_type)
     assert isinstance(openhab_value, str), type(openhab_value)

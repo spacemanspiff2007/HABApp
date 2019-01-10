@@ -1,4 +1,5 @@
-import datetime, re
+import datetime
+import re
 
 # function which generates the datetime obj
 _TIME_FUNC = datetime.datetime.now
@@ -37,9 +38,9 @@ class TimeFrame(object):
         self.time_start = None  # type: tuple
         self.time_stop = None  # type: tuple
         self.weekdays = []  # type: list[int]
-        
+
         self.__log_func = log_function
-        
+
         m = _RE_VALID.search(desc)
         if not m or len(m.groups()) != 2:
             raise ValueError('Invalid format!')
@@ -55,7 +56,7 @@ class TimeFrame(object):
         for day in self.weekdays:
             self.desc_weeks += _WEEKDAY_NAMES[day] + ","
         self.desc_time = '{:2d}:{:02d}:{:02d}-{:2d}:{:02d}:{:02d}'.format(self.time_start[0], self.time_start[1],
-                                                                          self.time_start[2], \
+                                                                          self.time_start[2],
                                                                           self.time_stop[0], self.time_stop[1],
                                                                           self.time_stop[2])
 
@@ -66,7 +67,7 @@ class TimeFrame(object):
                 raise ValueError('Hour must be 0 - 23!')
             if not 0 <= t[1] <= 59 or not 0 <= t[2] <= 59:
                 raise ValueError('Minutes and seconds must be 0 - 59!')
-        
+
         t1 = self.time_start[0] * 3600 + self.time_start[1] * 60 + self.time_start[2]
         t2 = self.time_stop[0] * 3600 + self.time_stop[1] * 60 + self.time_stop[2]
 
@@ -134,7 +135,7 @@ class TimeFrame(object):
 
         date_now = _TIME_FUNC()
         assert isinstance(date_now, datetime.datetime), type(date_now)
-        
+
         self.__log('Def : {:s}{:s}'.format(self.desc_weeks, self.desc_time))
         __now_str = 'Now :{:>{width}s},{:2d}:{:02d}:{:02d}'.format(_WEEKDAY_NAMES[date_now.weekday()], date_now.hour,
                                                                    date_now.minute, date_now.second,

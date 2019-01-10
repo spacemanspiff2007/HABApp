@@ -29,8 +29,9 @@ class Item:
         ret = f'<{self.__class__.__name__}'
         for k in ['name', 'state', 'last_change', 'last_update']:
             ret += f' {k}: {getattr(self, k)}'
-            
+
         return ret + '>'
+
 
 class Items:
     def __init__(self):
@@ -39,11 +40,14 @@ class Items:
     def item_exists(self, name) -> bool:
         return name in self.items
 
-    def get_item_names(self) -> typing.List[str]:
-        return list(self.items.keys())
+    def get_item(self, name) -> Item:
+        return self.items[name]
 
     def get_items(self) -> typing.List[Item]:
         return list(self.items.values())
+
+    def get_item_names(self) -> typing.List[str]:
+        return list(self.items.keys())
 
     def set_state(self, name, new_state):
         try:
@@ -52,9 +56,6 @@ class Items:
             item = Item(name)
             item.set_state(new_state)
             self.items[name] = item
-
-    def get_item(self, name) -> Item:
-        return self.items[name]
 
     def set_item(self, item):
         assert isinstance(item, Item), type(item)
