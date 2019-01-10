@@ -43,7 +43,7 @@ class Rule:
             return str(_in.state)
         elif isinstance(_in, HABApp.classes.Color):
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
-        
+
         return str(_in)
 
     def item_exists(self, item_name) -> bool:
@@ -67,11 +67,11 @@ class Rule:
         assert isinstance(item_name, str)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
-        
+
         item = WatchedItem(
             name=item_name,
             constant_time=seconds_constant,
-            watch_changes=watch_only_changes
+            watch_only_changes=watch_only_changes
         )
         self.__watched_items.append(item)
         return item

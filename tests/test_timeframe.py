@@ -3,7 +3,7 @@ import unittest, datetime, time
 import HABApp.util.timeframe
 from HABApp.util import TimeFrame
 
-def get_date( name, h, m, s = 0):
+def get_date(name, h, m, s=0):
     __date = {
         "mo": (2019, 1, 7),
         "di": (2019, 1, 1),
@@ -13,9 +13,8 @@ def get_date( name, h, m, s = 0):
         "sa": (2019, 1, 5),
         "so": (2019, 1, 6),
     }
-    
+
     return datetime.datetime(*__date[name], h, m, s)
-    
 
 class Basic(unittest.TestCase):
 
@@ -58,7 +57,6 @@ class Basic(unittest.TestCase):
             self.assertEqual(t.is_now(), False)
             HABApp.util.timeframe._TIME_FUNC = lambda: get_date(d, 9, 32)
             self.assertEqual(t.is_now(), False)
-
 
     def test_weekdays(self):
         t = TimeFrame('weekdays,8:30:00-9:31:00')
@@ -122,24 +120,21 @@ class Basic(unittest.TestCase):
             self.assertEqual(t.is_now(), False)
             HABApp.util.timeframe._TIME_FUNC = lambda: get_date(d, 9, 32)
             self.assertEqual(t.is_now(), False)
-        
-
 
     def test_invalid_day(self):
         self.assertRaises(ValueError, lambda: TimeFrame('asdf,8:30:00-9:30:00'))
 
     def test_invalid_hour(self):
         self.assertRaises(ValueError, lambda: TimeFrame('25:30:00-9:30:00'))
-        
+
     def test_invalid_min(self):
         self.assertRaises(ValueError, lambda: TimeFrame('13:60:00'))
-        
+
     def test_invalid_sec1(self):
         self.assertRaises(ValueError, lambda: TimeFrame('13:59:60'))
-        
+
     def test_invalid_sec2(self):
         self.assertRaises(ValueError, lambda: TimeFrame('13:59:59-13:59:59'))
-
 
 if __name__ == '__main__':
     unittest.main()

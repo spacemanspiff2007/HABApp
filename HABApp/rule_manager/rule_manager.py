@@ -33,7 +33,7 @@ class RuleManager:
             for f in self.runtime.config.directories.rules.iterdir():
                 if f.name.endswith('.py'):
                     HABApp.core.Workers.submit(self.add_file, f)
-                
+
         HABApp.core.Workers.submit(delayed_load)
 
         # folder watcher

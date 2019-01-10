@@ -18,6 +18,7 @@ from HABApp.util import PrintException
 log = logging.getLogger('HABApp.openhab.Connection')
 log_events = logging.getLogger('HABApp.Events.openhab')
 
+
 def is_ignored_exception(e) -> bool:
     if isinstance(e, aiohttp.ClientPayloadError) or \
             isinstance(e, ConnectionError) or \
