@@ -16,13 +16,13 @@ class Threshold:
         
         self.__over_upper = False
         self.__lock = threading.Lock()
-    
+
     @property
     def current_threshold(self):
         return self.lower_threshold if self.__over_upper else self.upper_threshold
-    
+
     def is_higher(self, value) -> bool:
-        
+
         with self.__lock:
             if value >= self.upper_threshold:
                 self.__over_upper = True
@@ -31,6 +31,6 @@ class Threshold:
                 self.__over_upper = False
         
         return self.__over_upper
-    
+
     def is_lower(self, value) -> bool:
         return not self.is_higher(value)
