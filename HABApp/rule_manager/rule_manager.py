@@ -39,8 +39,9 @@ class RuleManager:
         # folder watcher
         self.__folder_watcher = Observer()
         self.__folder_watcher.schedule(
-            SimpleFileWatcher(self.__file_event, file_ending='.py'),
-            str(self.runtime.config.directories.rules)
+            SimpleFileWatcher(self.__file_event, file_ending='.py', ),
+            path=str(self.runtime.config.directories.rules),
+            recursive=True
         )
         self.__folder_watcher.start()
 
@@ -86,7 +87,9 @@ class RuleManager:
 
 
     def __file_event(self, path):
-        HABApp.core.Workers.submit(self.add_file, path)
+        assert isinstance(path, Path), type(path)
+        if path.is_file():
+            HABApp.core.Workers.submit(self.add_file, path)
 
 
     def add_file(self, path : Path):

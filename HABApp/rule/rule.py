@@ -55,13 +55,24 @@ class Rule:
         assert isinstance(item_name, str), type(item_name)
         return HABApp.core.Items.item_exists(item_name)
 
-    def item_state(self, item_name):
+    def item_state(self, item_name, default=None):
         """
-        Return the item state
-        :param item_name: Name of the item
-        :return: state or None
+        Return the state of the item.
+        :param item_name:
+        :param default: If the item does not exist or is None this value will be returned (has to be != None)
+        :return: state of the specified item
         """
-        return HABApp.core.Items.get_item(item_name).state
+        if default is None:
+            return HABApp.core.Items.get_item(item_name).state
+        
+        try:
+            state = HABApp.core.Items.get_item(item_name).state
+        except KeyError:
+            return default
+        
+        if state is None:
+            return default
+        return state
 
     def item_watch(self, item_name, seconds_constant, watch_only_changes = True) -> WatchedItem:
         assert isinstance(item_name, str)
