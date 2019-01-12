@@ -245,7 +245,7 @@ class Rule:
         future_event = HABApp.util.ScheduledCallback(date_time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
-    
+
     def run_in(self, seconds, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
         "Just a helper function to make it more clear"
         return self.run_at(seconds, callback, *args, **kwargs)
