@@ -46,7 +46,7 @@ class RuleFile:
                 if not rule_name:
                     # create unique name
                     __class_name = f'{str(type(rule))[19:-2]:s}'
-                    rule_name = f'{__class_name:s}.{ctr[__class_name]}'
+                    rule_name = f'{__class_name:s}.{ctr[__class_name]}' if ctr[__class_name] > 1 else f'{__class_name:s}'
                     ctr[__class_name] += 1
 
                 # rule name must be unique for every file
