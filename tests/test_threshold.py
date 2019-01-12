@@ -1,12 +1,10 @@
 import unittest
-import typing
-from datetime import datetime, timedelta
 
 from HABApp.util import Threshold
 
 
 class TestCases(unittest.TestCase):
-    
+
     def test_constructor(self):
         t = Threshold(10, 20)
         self.assertEqual(t.current_threshold, 20)
@@ -21,7 +19,7 @@ class TestCases(unittest.TestCase):
         self.assertTrue(21 > t)
         self.assertTrue(20 > t)
         self.assertTrue(11 > t)
-        
+
         # unter untere Grenze
         self.assertFalse(9 > t)
         self.assertFalse(19 > t)
@@ -29,12 +27,12 @@ class TestCases(unittest.TestCase):
     def test_b(self):
         t = Threshold(10, 20)
         self.assertEqual(t.current_threshold, 20)
-    
+
         self.assertFalse(19 >= t)
         # Über obere Grenze
         self.assertTrue(20 >= t)
         self.assertTrue(10 >= t)
-    
+
         # unter untere Grenze
         self.assertFalse(9 >= t)
         self.assertFalse(19 >= t)

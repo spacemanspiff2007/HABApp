@@ -30,7 +30,7 @@ class RuleManager:
         # if we load immediately we don't have the items from openhab in itemcache
         def delayed_load():
             time.sleep(5)
-            for f in self.runtime.config.directories.rules.iterdir():
+            for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     HABApp.core.Workers.submit(self.add_file, f)
 

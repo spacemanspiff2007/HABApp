@@ -157,16 +157,18 @@ class Connection:
                             if log_events.isEnabledFor(logging.DEBUG):
                                 log_events._log(logging.DEBUG, event, [])
                             event = get_event(event)
-                            
+
+                            # Events which change the ItemRegistry
                             if isinstance(event, HABApp.openhab.events.ItemAddedEvent) or \
                                     isinstance(event, HABApp.openhab.events.ItemUpdatedEvent):
                                 item = HABApp.openhab.map_items( event.name, event.type, 'NULL')
                                 HABApp.core.Items.set_item(item)
                             elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
                                 HABApp.core.Items.pop_item(event.name)
-                            
+
+                            # Send Event to Event Bus
                             HABApp.core.Events.post_event( event.name, event)
-                            
+
                         except Exception as e:
                             log.error("{}".format(e))
                             for l in traceback.format_exc().splitlines():
