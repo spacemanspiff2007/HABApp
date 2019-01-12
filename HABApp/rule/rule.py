@@ -87,6 +87,17 @@ class Rule:
         self.__watched_items.append(item)
         return item
 
+    def item_watch_and_listen(self, item_name, seconds_constant, callback,
+                              watch_only_changes = True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
+
+        watched_item = self.item_watch(item_name, seconds_constant, watch_only_changes)
+        event_listener = self.listen_event(
+            item_name,
+            callback,
+            HABApp.core.ValueNoChangeEvent if watch_only_changes else HABApp.core.ValueNoUpdateEvent
+        )
+        return watched_item, event_listener
+
     def post_event(self, name, event):
         """
         Post an Event to the Event Bus
