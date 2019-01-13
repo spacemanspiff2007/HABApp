@@ -98,6 +98,9 @@ class Rule:
         )
         return watched_item, event_listener
 
+    def get_item(self, item_name) -> HABApp.core.Item:
+        return HABApp.core.Items.get_item(item_name)
+
     def post_event(self, name, event):
         """
         Post an Event to the Event Bus
