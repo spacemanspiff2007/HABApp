@@ -11,7 +11,7 @@ def map_items(name, openhab_type : str, openhab_value : str):
     assert isinstance(openhab_value, str), type(openhab_value)
 
     value = openhab_value
-    if openhab_value == 'NULL':
+    if openhab_value == 'NULL' or openhab_value == 'UNDEF':
         value = None
 
     # Specific classes
