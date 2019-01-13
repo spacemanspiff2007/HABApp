@@ -55,7 +55,7 @@ class Rule:
         assert isinstance(item_name, str), type(item_name)
         return HABApp.core.Items.item_exists(item_name)
 
-    def item_state(self, item_name, default=None):
+    def get_item_state(self, item_name, default=None):
         """
         Return the state of the item.
         :param item_name:
@@ -166,7 +166,7 @@ class Rule:
 
         return future.result(self.__runtime.config.async_timeout)
 
-    def remove_item(self, item_name: str):
+    def item_remove(self, item_name: str):
         assert isinstance(item_name, str), type(item_name)
         future = asyncio.run_coroutine_threadsafe(
             self.__runtime.openhab_connection.async_remove_item(item_name),
