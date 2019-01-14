@@ -15,8 +15,9 @@ class Item:
         self.name = name
         self.state = None
 
-        self.last_change: datetime.datetime = None
-        self.last_update: datetime.datetime = None
+        _now = datetime.datetime.now()
+        self.last_change: datetime.datetime = _now
+        self.last_update: datetime.datetime = _now
 
     def set_state(self, new_state):
         _now = datetime.datetime.now()

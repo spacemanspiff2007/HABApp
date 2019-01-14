@@ -190,8 +190,9 @@ class Connection:
         return None
 
     @PrintException
-    def __update_all_items(self, data):
+    def __update_all_items(self, data) -> int:
             data = ujson.loads(data)  # type: list
+            found_items = len(data)
             for _dict in data:
                 __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
                 HABApp.core.Items.set_item(__item)
@@ -202,7 +203,8 @@ class Connection:
             for k in ist - soll:
                 HABApp.core.Items.pop_item(k)
 
-            log.info(f'Updated all items')
+            log.info(f'Updated {found_items:d} items')
+            return found_items
 
     @PrintException
     async def async_get_all_items(self):
@@ -220,8 +222,9 @@ class Connection:
                 )
                 if resp.status == 200:
                     data = await resp.text()
-                    self.__update_all_items(data)
-                    break
+                    found = self.__update_all_items(data)
+                    if found:
+                        break
             except Exception as e:
                 if is_ignored_exception(e):
                     log.warning(f'SSE request Error: {e}')
