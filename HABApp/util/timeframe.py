@@ -22,7 +22,7 @@ _RE_TIME = re.compile(r'^(\d+):(\d+)(?::(\d+))?$')
 
 class TimeFrame(object):
 
-    def __init__(self, timespan, sunday_checks_holiday=True, log_function=None):
+    def __init__(self, timespan, log_function=None):
         """
         Creates TimeFrame object.
 
@@ -47,8 +47,6 @@ class TimeFrame(object):
 
         self.__get_days(m.group(1))
         self.__get_time(m.group(2))
-
-        self.check_holidays = True if sunday_checks_holiday and 6 in self.weekdays else False
 
         self.__check_time()
 
