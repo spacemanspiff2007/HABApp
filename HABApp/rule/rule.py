@@ -15,6 +15,7 @@ from .watched_item import WatchedItem
 
 log = logging.getLogger('HABApp.Rule')
 
+
 class Rule:
     def __init__(self):
 
@@ -297,10 +298,10 @@ class Rule:
             if not HABApp.core.Items.item_exists(item.name):
                 log.warning(f'Item "{item.name}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
-        
+
         for item in self.__watched_items:
             if not HABApp.core.Items.item_exists(item.name):
-                log.warning(f'Item "{name}" does not exist (yet)! '
+                log.warning(f'Item "{item.name}" does not exist (yet)! '
                             f'self.item_watch in "{self.rule_name}" may not work as intended.')
 
     @HABApp.util.PrintException
