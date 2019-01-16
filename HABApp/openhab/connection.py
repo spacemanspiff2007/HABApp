@@ -16,6 +16,7 @@ from HABApp.openhab.events import get_event
 from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.openhab.Connection')
+log_events = logging.getLogger('HABApp.Events.openhab')
 
 
 def is_ignored_exception(e) -> bool:
@@ -153,12 +154,21 @@ class Connection:
                     async for event in event_source:
                         try:
                             event = ujson.loads(event.data)
-                            if log.isEnabledFor(logging.DEBUG):
-                                log._log(logging.DEBUG, event, [])
+                            if log_events.isEnabledFor(logging.DEBUG):
+                                log_events._log(logging.DEBUG, event, [])
                             event = get_event(event)
 
-                            HABApp.core.Events.post_event(
-                                event.item, event)
+                            # Events which change the ItemRegistry
+                            if isinstance(event, HABApp.openhab.events.ItemAddedEvent) or \
+                                    isinstance(event, HABApp.openhab.events.ItemUpdatedEvent):
+                                item = HABApp.openhab.map_items( event.name, event.type, 'NULL')
+                                HABApp.core.Items.set_item(item)
+                            elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
+                                HABApp.core.Items.pop_item(event.name)
+
+                            # Send Event to Event Bus
+                            HABApp.core.Events.post_event( event.name, event)
+
                         except Exception as e:
                             log.error("{}".format(e))
                             for l in traceback.format_exc().splitlines():
@@ -180,12 +190,12 @@ class Connection:
         return None
 
     @PrintException
-    def __update_all_items(self, data):
+    def __update_all_items(self, data) -> int:
             data = ujson.loads(data)  # type: list
+            found_items = len(data)
             for _dict in data:
-                # print(_dict)
-                __item = HABApp.openhab.map_items(_dict['type'], _dict['state'])
-                HABApp.core.Items.set_state(_dict['name'], __item)
+                __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
+                HABApp.core.Items.set_item(__item)
 
             # remove items which are no longer available
             ist = set(HABApp.core.Items.items.keys())
@@ -193,7 +203,8 @@ class Connection:
             for k in ist - soll:
                 HABApp.core.Items.pop_item(k)
 
-            log.info(f'Updated all items')
+            log.info(f'Updated {found_items:d} items')
+            return found_items
 
     @PrintException
     async def async_get_all_items(self):
@@ -211,8 +222,9 @@ class Connection:
                 )
                 if resp.status == 200:
                     data = await resp.text()
-                    self.__update_all_items(data)
-                    break
+                    found = self.__update_all_items(data)
+                    if found:
+                        break
             except Exception as e:
                 if is_ignored_exception(e):
                     log.warning(f'SSE request Error: {e}')

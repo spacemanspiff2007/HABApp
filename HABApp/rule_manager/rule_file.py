@@ -1,7 +1,8 @@
-import logging
-from pathlib import Path
-import runpy
 import collections
+import logging
+import runpy
+import traceback
+from pathlib import Path
 
 log = logging.getLogger(f'HABApp.Rules')
 
@@ -21,14 +22,23 @@ class RuleFile:
         for rule in self.rules.values():
             yield rule
 
+    def check_all_rules(self):
+        for name, rule in self.rules.items():
+            rule._check_rule()
+
     def load(self):
 
         created_rules = []
-        runpy.run_path(self.path, init_globals={
-            '__HABAPP__RUNTIME__': self.rule_manager.runtime,
-            '__HABAPP__RULE_FILE__': self,
-            '__HABAPP__RULES' : created_rules
-        })
+        try:
+            runpy.run_path(self.path, init_globals={
+                '__HABAPP__RUNTIME__': self.rule_manager.runtime,
+                '__HABAPP__RULE_FILE__': self,
+                '__HABAPP__RULES' : created_rules
+            })
+        except Exception as e:
+            log.error(f"Could not load {self.path}: {e}!")
+            for l in traceback.format_exc().splitlines()[-5:]:
+                log.error(l)
 
         len_found = len(created_rules)
         if not len_found:
@@ -36,11 +46,13 @@ class RuleFile:
         else:
             ctr = collections.defaultdict(lambda : 1)
             for rule in created_rules:
-                rule_name = rule.rule_name
+                rule_name = rule.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
                 if not rule_name:
                     # create unique name
                     __class_name = f'{str(type(rule))[19:-2]:s}'
-                    rule_name = f'{__class_name:s}.{ctr[__class_name]}'
+                    __classes_found = ctr[__class_name]
+                    rule_name = f'{__class_name:s}.{__classes_found}' if __classes_found > 1 else f'{__class_name:s}'
+                    rule.rule_name = rule_name
                     ctr[__class_name] += 1
 
                 # rule name must be unique for every file

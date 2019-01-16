@@ -3,13 +3,17 @@ import datetime
 import random
 import sys
 import typing
+import logging
 
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
 import HABApp.rule_manager
 import HABApp.util
+import HABApp.classes
+from .watched_item import WatchedItem
 
+log = logging.getLogger('HABApp.Rule')
 
 class Rule:
     def __init__(self):
@@ -30,12 +34,18 @@ class Rule:
 
         self.__event_listener: typing.List[HABApp.core.EventListener] = []
         self.__future_events: typing.List[HABApp.util.ScheduledCallback] = []
+        self.__watched_items: typing.List[ WatchedItem] = []
 
         self.rule_name = ""
 
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
             return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self.__runtime.config.openhab.general.timezone
+        elif isinstance(_in, HABApp.core.Item):
+            return str(_in.state)
+        elif isinstance(_in, HABApp.classes.Color):
+            return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
+
         return str(_in)
 
     def item_exists(self, item_name) -> bool:
@@ -45,15 +55,53 @@ class Rule:
         :return: True or False
         """
         assert isinstance(item_name, str), type(item_name)
-        HABApp.core.Items.item_exists(item_name)
+        return HABApp.core.Items.item_exists(item_name)
 
-    def item_state(self, item_name):
+    def get_item_state(self, item_name, default=None):
         """
-        Return the item state
-        :param item_name: Name of the item
-        :return: state or None
+        Return the state of the item.
+        :param item_name:
+        :param default: If the item does not exist or is None this value will be returned (has to be != None)
+        :return: state of the specified item
         """
-        return HABApp.core.Items.get_item(item_name).state
+        if default is None:
+            return HABApp.core.Items.get_item(item_name).state
+
+        try:
+            state = HABApp.core.Items.get_item(item_name).state
+        except KeyError:
+            return default
+
+        if state is None:
+            return default
+        return state
+
+    def item_watch(self, item_name, seconds_constant, watch_only_changes = True) -> WatchedItem:
+        assert isinstance(item_name, str)
+        assert isinstance(seconds_constant, int)
+        assert isinstance(watch_only_changes, bool)
+
+        item = WatchedItem(
+            name=item_name,
+            constant_time=seconds_constant,
+            watch_only_changes=watch_only_changes
+        )
+        self.__watched_items.append(item)
+        return item
+
+    def item_watch_and_listen(self, item_name, seconds_constant, callback,
+                              watch_only_changes = True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
+
+        watched_item = self.item_watch(item_name, seconds_constant, watch_only_changes)
+        event_listener = self.listen_event(
+            item_name,
+            callback,
+            HABApp.core.ValueNoChangeEvent if watch_only_changes else HABApp.core.ValueNoUpdateEvent
+        )
+        return watched_item, event_listener
+
+    def get_item(self, item_name) -> HABApp.core.Item:
+        return HABApp.core.Items.get_item(item_name)
 
     def post_event(self, name, event):
         """
@@ -120,7 +168,7 @@ class Rule:
 
         return future.result(self.__runtime.config.async_timeout)
 
-    def remove_item(self, item_name: str):
+    def item_remove(self, item_name: str):
         assert isinstance(item_name, str), type(item_name)
         future = asyncio.run_coroutine_threadsafe(
             self.__runtime.openhab_connection.async_remove_item(item_name),
@@ -147,7 +195,7 @@ class Rule:
 
         # names of weekdays in local language
         lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
-        lookup = {datetime.date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)}
+        lookup.update( {datetime.date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
 
         # abreviations in German and English
         lookup.update({"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7})
@@ -214,6 +262,10 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
+    def run_in(self, seconds, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
+        "Just a helper function to make it more clear"
+        return self.run_at(seconds, callback, *args, **kwargs)
+
     def run_soon(self, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
         """
         Run the callback as soon as possible (typically in the next second).
@@ -236,7 +288,34 @@ class Rule:
         self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
 
     @HABApp.util.PrintException
-    def _process_scheduled_events(self, now):
+    def _check_rule(self):
+        # Check if item exists
+        if not HABApp.core.Items.items:
+            return None
+
+        for item in self.__event_listener:
+            if not HABApp.core.Items.item_exists(item.name):
+                log.warning(f'Item "{item.name}" does not exist (yet)! '
+                            f'self.listen_event in "{self.rule_name}" may not work as intended.')
+        
+        for item in self.__watched_items:
+            if not HABApp.core.Items.item_exists(item.name):
+                log.warning(f'Item "{name}" does not exist (yet)! '
+                            f'self.item_watch in "{self.rule_name}" may not work as intended.')
+
+    @HABApp.util.PrintException
+    def _process_events(self, now):
+
+        # watch items
+        clean_items = False
+        for item in self.__watched_items:
+            item.check(now)
+            if item.is_canceled:
+                clean_items = True
+        if clean_items:
+            self.__watched_items = [k for k in self.__watched_items if not k.is_canceled]
+
+        # sheduled events
         clean_events = False
         for future_event in self.__future_events:  # type: HABApp.util.ScheduledCallback
             future_event.check_due(now)
@@ -253,3 +332,9 @@ class Rule:
     def _cleanup(self):
         for listener in self.__event_listener:
             HABApp.core.Events.remove_listener(listener)
+
+        for event in self.__future_events:
+            event.cancel()
+        self.__future_events.clear()
+
+        self.__watched_items.clear()

@@ -9,12 +9,11 @@ class ItemStateEvent(BaseItemEvent, HABApp.core.ValueUpdateEvent):
         super().__init__(_in_dict)
 
         # smarthome/items/NAME/state
-        self.item = self._topic[16:-6]
-        self.name = self.item
+        self.name = self._topic[16:-6]
         self.value = map_event_types(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
 class ItemStateChangedEvent(BaseItemEvent, HABApp.core.ValueChangeEvent):
@@ -22,13 +21,12 @@ class ItemStateChangedEvent(BaseItemEvent, HABApp.core.ValueChangeEvent):
         super().__init__(_in_dict)
 
         # smarthome/items/Ping/statechanged
-        self.item = self._topic[16:-13]
-        self.name = self.item
+        self.name = self._topic[16:-13]
         self.value = map_event_types(self._payload['type'], self._payload['value'])
         self.old_value = map_event_types(self._payload['oldType'], self._payload['oldValue'])
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}, old_value: {self.old_value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
 
 class ItemCommandEvent(BaseItemEvent):
@@ -36,22 +34,25 @@ class ItemCommandEvent(BaseItemEvent):
         super().__init__(_in_dict)
 
         # smarthome/items/NAME/command
-        self.item = self._topic[16:-8]
+        self.name = self._topic[16:-8]
         self.value = map_event_types(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
 class ItemAddedEvent(BaseItemEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
-        self.item = self._payload['name']
+        # {'topic': 'smarthome/items/NAME/added'
+        # 'payload': '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}'
+        # 'type': 'ItemAddedEvent'}
+        self.name = self._payload['name']
         self.type = self._payload['type']
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} item: {self.item}, type: {self.type}>'
+        return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
 
 
 class ItemUpdatedEvent(BaseItemEvent):
@@ -59,7 +60,34 @@ class ItemUpdatedEvent(BaseItemEvent):
         super().__init__(_in_dict)
 
         # smarthome/items/NAME/updated
-        self.item = self._topic[16:-8]
+        # 'payload': '[{"type":"Switch","name":"Test","tags":[],"groupNames":[]},
+        #              {"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
+        # 'type': 'ItemUpdatedEvent'
+        self.name = self._topic[16:-8]
+        self.type = self._payload[1]['type']
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} item: {self.item}, value: {self.value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
+
+
+class ItemRemovedEvent(BaseItemEvent):
+    def __init__(self, _in_dict):
+        super().__init__(_in_dict)
+
+        # smarthome/items/Test/removed
+        self.name = self._topic[16:-8]
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}>'
+
+
+class ItemStatePredictedEvent(BaseItemEvent):
+    def __init__(self, _in_dict):
+        super().__init__(_in_dict)
+
+        # 'smarthome/items/NAME/statepredicted'
+        self.name = self._topic[16:-15]
+        self.value = map_event_types(self._payload['predictedType'], self._payload['predictedValue'])
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'

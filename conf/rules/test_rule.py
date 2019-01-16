@@ -53,7 +53,7 @@ class MyRule(HABApp.Rule):
         ts_start = time.time()
         while True:
             for k in self.item_list:
-                if self.item_state(k) != self.__b_val:
+                if self.get_item_state(k) != self.__b_val:
                     break
             else:
                 break

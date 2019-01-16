@@ -15,8 +15,9 @@ class Item:
         self.name = name
         self.state = None
 
-        self.last_change: datetime.datetime = None
-        self.last_update: datetime.datetime = None
+        _now = datetime.datetime.now()
+        self.last_change: datetime.datetime = _now
+        self.last_update: datetime.datetime = _now
 
     def set_state(self, new_state):
         _now = datetime.datetime.now()
@@ -24,6 +25,13 @@ class Item:
             self.last_change = _now
         self.last_update = _now
         self.state = new_state
+
+    def __repr__(self):
+        ret = f'<{self.__class__.__name__}'
+        for k in ['name', 'state', 'last_change', 'last_update']:
+            ret += f' {k}: {getattr(self, k)}'
+
+        return ret + '>'
 
 
 class Items:
@@ -33,6 +41,15 @@ class Items:
     def item_exists(self, name) -> bool:
         return name in self.items
 
+    def get_item(self, name) -> Item:
+        return self.items[name]
+
+    def get_items(self) -> typing.List[Item]:
+        return list(self.items.values())
+
+    def get_item_names(self) -> typing.List[str]:
+        return list(self.items.keys())
+
     def set_state(self, name, new_state):
         try:
             self.items[name].set_state(new_state)
@@ -41,8 +58,9 @@ class Items:
             item.set_state(new_state)
             self.items[name] = item
 
-    def get_item(self, name) -> Item:
-        return self.items[name]
+    def set_item(self, item):
+        assert isinstance(item, Item), type(item)
+        self.items[item.name] = item
 
     def pop_item(self, name) -> Item:
         return self.items.pop(name)

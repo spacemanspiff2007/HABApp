@@ -1,8 +1,10 @@
 from .map_events import map_event_types
 from .base_event import BaseItemEvent
-from .item_events import ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, ItemUpdatedEvent
+from .item_events import ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,\
+    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent
 
-EVENT_LIST = [ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, ItemUpdatedEvent]
+EVENT_LIST = [ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,
+              ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent]
 
 __event_lookup = { k.__name__ : k for k in EVENT_LIST}
 
