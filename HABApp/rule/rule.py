@@ -3,6 +3,7 @@ import datetime
 import random
 import sys
 import typing
+import logging
 
 import HABApp
 import HABApp.core
@@ -12,6 +13,7 @@ import HABApp.util
 import HABApp.classes
 from .watched_item import WatchedItem
 
+log = logging.getLogger('HABApp.Rule')
 
 class Rule:
     def __init__(self):
@@ -284,6 +286,22 @@ class Rule:
     def mqtt_publish(self, topic, payload=None, qos=None, retain=None):
         assert isinstance(topic, str), type(str)
         self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
+
+    @HABApp.util.PrintException
+    def _check_rule(self):
+        # Check if item exists
+        if not HABApp.core.Items.items:
+            return None
+
+        for item in self.__event_listener:
+            if not HABApp.core.Items.item_exists(item.name):
+                log.warning(f'Item "{item.name}" does not exist (yet)! '
+                            f'self.listen_event in "{self.rule_name}" may not work as intended.')
+        
+        for item in self.__watched_items:
+            if not HABApp.core.Items.item_exists(item.name):
+                log.warning(f'Item "{name}" does not exist (yet)! '
+                            f'self.item_watch in "{self.rule_name}" may not work as intended.')
 
     @HABApp.util.PrintException
     def _process_events(self, now):

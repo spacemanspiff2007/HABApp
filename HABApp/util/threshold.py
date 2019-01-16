@@ -14,11 +14,11 @@ class Threshold:
         assert self.lower_threshold <= self.upper_threshold
 
         self.__threshold = self.upper_threshold
-    
+
     def is_on(self, value):
         self.check_value(value)
         return self.__threshold == self.lower_threshold
-    
+
     def is_off(self, value):
         return not self.is_on(value)
 
