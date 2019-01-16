@@ -1,30 +1,18 @@
 import codecs
 import logging
 import logging.config
-import re
 import time
 from pathlib import Path
 
 import ruamel.yaml
-from voluptuous import Schema, MultipleInvalid, Invalid, All, Length
+from voluptuous import MultipleInvalid, Schema
 from watchdog.observers import Observer
 
-from HABApp.util import SimpleFileWatcher, CallbackHelper
-from .configentry import ConfigEntry, ConfigEntryContainer
+from HABApp.util import CallbackHelper, SimpleFileWatcher
+from ._conf_mqtt import Mqtt
+from ._conf_openhab import Openhab
+from .configentry import ConfigEntry
 from .default_logfile import get_default_logfile
-
-
-def TimeZoneValidator(msg=None):
-    __re = re.compile(r'[+-]\d{4}')
-
-    def f(v):
-        v = str(v)
-        if __re.fullmatch(v):
-            return v
-        else:
-            raise Invalid(msg or ( f"incorrect timezone ({v})! Example: +1000 or -1030"))
-    return f
-
 
 _yaml_param = ruamel.yaml.YAML(typ='safe')
 _yaml_param.default_flow_style = False
@@ -49,120 +37,6 @@ class Directories(ConfigEntry):
         self._entry_validators['rules'] = str
 
 
-class Ping(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.enabled = False
-        self.item = ''
-        self.interval = 10
-
-
-class General(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.timezone = '+1000'
-        self._entry_validators['timezone'] = TimeZoneValidator()
-
-
-class Connection(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.host = 'localhost'
-        self.port = 8080
-        self.user = ''
-        self.password = ''
-
-        self._entry_kwargs['user'] = {'default' : ''}
-        self._entry_kwargs['password'] = {'default' : ''}
-
-
-class Openhab(ConfigEntryContainer):
-    def __init__(self):
-        self.ping = Ping()
-        self.connection = Connection()
-        self.general = General()
-
-
-def MqttTopicValidator(msg=None):
-    def f(v):
-        if isinstance(v, str):
-            return [(v, 0)]
-
-        ret = []
-        for i, val in enumerate(v):
-            qos = 0
-            if i < len(v) - 1:
-                qos = v[i + 1]
-
-            if not isinstance(val, str) and not isinstance(val, int):
-                raise Invalid(msg or (f"Topics must consist of int and string!"))
-
-            if not isinstance(val, str):
-                continue
-
-            if isinstance(qos, int):
-                if qos not in [0, 1, 2]:
-                    raise Invalid(msg or (f"QoS must be 0, 1 or 2"))
-            else:
-                qos = None
-
-            ret.append((val, qos))
-        return ret
-    return f
-
-
-class MqttConnection(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self._entry_name = 'connection'
-        self.client_id = 'HABApp'
-        self.host = ''
-        self.port = 8883
-        self.user = ''
-        self.password = ''
-        self.tls = True
-        self.tls_insecure = False
-
-        self._entry_validators['client_id'] = All(str, Length(min=1))
-
-        self._entry_kwargs['password'] = {'default': ''}
-        self._entry_kwargs['tls_insecure'] = {'default': False}
-
-
-class Subscribe(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.qos = 0
-        self.topics = ['#', 0]
-
-        self._entry_validators['topics'] = MqttTopicValidator()
-        self._entry_kwargs['topics'] = {'default': [('#', 0)]}
-        self._entry_kwargs['default_qos'] = {'default': 0}
-
-
-class Publish(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.qos = 0
-        self.retain = False
-
-
-class mqtt(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.client_id = ''
-        self.tls = True
-        self.tls_insecure = False
-
-        self._entry_kwargs['tls_insecure'] = {'default': False}
-
-
-class Mqtt(ConfigEntryContainer):
-    def __init__(self):
-        self.connection = MqttConnection()
-        self.subscribe = Subscribe()
-        self.publish = Publish()
-
 
 
 
@@ -177,8 +51,8 @@ class Config:
 
         # these are the accessible config entries
         self.directories = Directories()
-        self.openhab = Openhab()
         self.mqtt = Mqtt()
+        self.openhab = Openhab()
 
         # if the config does not exist it will be created
         self.__check_create_config()

@@ -108,7 +108,7 @@ class MqttConnection:
         self.subscription_changed()
 
     @PrintException
-    def on_disconnect(self, client, userdata, flags, rc):
+    def on_disconnect(self, client, userdata, rc):
         log.log(logging.INFO if not rc else logging.ERROR, "Unexpected disconnection")
         self.connected = False
 
@@ -154,7 +154,7 @@ class MqttConnection:
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
             log.error(f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
 
-    def disconnect(self):
+    def disconnect(self, rc):
         if self.connected:
             self.client.disconnect()
             self.connected = False
