@@ -116,3 +116,6 @@ class RuleManager:
             return None
 
         log.debug(f'File {path} successfully loaded!')
+
+        # Do simple checks which prevent errors
+        file.check_all_rules()

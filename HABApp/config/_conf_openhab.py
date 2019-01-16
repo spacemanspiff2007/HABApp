@@ -7,14 +7,14 @@ from .configentry import ConfigEntry, ConfigEntryContainer
 
 def TimeZoneValidator(msg=None):
     __re = re.compile(r'[+-]\d{4}')
-    
+
     def f(v):
         v = str(v)
         if __re.fullmatch(v):
             return v
         else:
             raise Invalid(msg or (f"incorrect timezone ({v})! Example: +1000 or -1030"))
-    
+
     return f
 
 
@@ -40,7 +40,7 @@ class Connection(ConfigEntry):
         self.port = 8080
         self.user = ''
         self.password = ''
-        
+
         self._entry_kwargs['user'] = {'default': ''}
         self._entry_kwargs['password'] = {'default': ''}
 

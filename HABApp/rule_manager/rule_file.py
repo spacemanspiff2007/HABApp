@@ -22,6 +22,10 @@ class RuleFile:
         for rule in self.rules.values():
             yield rule
 
+    def check_all_rules(self):
+        for name, rule in self.rules.items():
+            rule._check_rule()
+
     def load(self):
 
         created_rules = []
@@ -48,6 +52,7 @@ class RuleFile:
                     __class_name = f'{str(type(rule))[19:-2]:s}'
                     __classes_found = ctr[__class_name]
                     rule_name = f'{__class_name:s}.{__classes_found}' if __classes_found > 1 else f'{__class_name:s}'
+                    rule.rule_name = rule_name
                     ctr[__class_name] += 1
 
                 # rule name must be unique for every file
