@@ -75,9 +75,15 @@ Examples:
 self.listen_event(name, callback)               # Callback on any event
 self.listen_event(name, callback, even_type)    # Callback if event is instance of event_type
 
+# Watch if items do not change a specific ammount of time and then generate an event
+self.item_watch(item_name, seconds_constant, watch_only_changes = True)
+# This also registers an event listener with a corresponding event
+self.item_watch_and_listen(item_name, seconds_constant, callback, watch_only_changes = True)
+
 # HAPApp item cache
 # Lookups are almost instant so this can be used to get states inside of rules
-self.item_state(item_name)
+self.get_item_state(item_name)
+self.get_item(item_name)
 self.item_exists(item_name)
 
 # Post an event to the HABApp event bus.
