@@ -20,7 +20,7 @@ class SwitchItem(Item):
         return True if self.state == SwitchItem.ON else False
 
     def is_off(self):
-        return True if self.state == SwitchItem.ON else False
+        return True if self.state == SwitchItem.OFF else False
 
     def __str__(self):
         return self.state
