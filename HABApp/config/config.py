@@ -3,6 +3,7 @@ import logging
 import logging.config
 import time
 from pathlib import Path
+import sys
 
 import ruamel.yaml
 from voluptuous import MultipleInvalid, Schema
@@ -30,11 +31,13 @@ class Directories(ConfigEntry):
         super().__init__()
         self.logging = 'log'
         self.rules   = 'rules'
+        self.lib     = 'lib'
 
         # The type gets changed after runtime to Path
         # So it is required to hardcode this here
         self._entry_validators['logging'] = str
         self._entry_validators['rules'] = str
+        self._entry_validators['lib'] = str
 
 
 
@@ -143,6 +146,13 @@ class Config:
             self.directories.logging.mkdir()
 
         log.debug('Loaded HABApp config')
+        
+        # Set path for libraries
+        if self.directories.lib.is_dir():
+            lib_path = str(self.directories.lib)
+            if not lib_path in sys.path:
+                sys.path.insert(0, lib_path)
+                log.debug( f'Added library folder "{lib_path}" to path')
 
 
     def load_log(self):
