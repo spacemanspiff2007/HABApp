@@ -146,11 +146,11 @@ class Config:
             self.directories.logging.mkdir()
 
         log.debug('Loaded HABApp config')
-        
+
         # Set path for libraries
         if self.directories.lib.is_dir():
             lib_path = str(self.directories.lib)
-            if not lib_path in sys.path:
+            if lib_path not in sys.path:
                 sys.path.insert(0, lib_path)
                 log.debug( f'Added library folder "{lib_path}" to path')
 
