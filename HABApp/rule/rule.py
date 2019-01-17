@@ -15,13 +15,19 @@ from .watched_item import WatchedItem
 
 log = logging.getLogger('HABApp.Rule')
 
+
 class Rule:
     def __init__(self):
 
         # get the variables from the caller
-        __vars = sys._getframe(1).f_globals
-        __runtime__ = __vars['__HABAPP__RUNTIME__']
-        __rule_file__ = __vars['__HABAPP__RULE_FILE__']
+        depth = 1
+        while True:
+            __vars = sys._getframe(depth).f_globals
+            depth += 1
+            if '__HABAPP__RUNTIME__' in __vars:
+                __runtime__ = __vars['__HABAPP__RUNTIME__']
+                __rule_file__ = __vars['__HABAPP__RULE_FILE__']
+                break
 
         # this is a list which contains all rules of this file
         __vars['__HABAPP__RULES'].append(self)
@@ -76,6 +82,19 @@ class Rule:
             return default
         return state
 
+    def set_item_state(self, item_name, value):
+        assert isinstance(item_name, str)
+        
+        try:
+            old_state = HABApp.core.Items.get_item(item_name).state
+        except KeyError:
+            old_state = None
+            
+        self.post_event(item_name, HABApp.core.ValueUpdateEvent(name=item_name, value=value))
+        if old_state != value:
+            self.post_event(item_name, HABApp.core.ValueChangeEvent(name=item_name, value=value, old_value=old_state))
+        return None
+
     def item_watch(self, item_name, seconds_constant, watch_only_changes = True) -> WatchedItem:
         assert isinstance(item_name, str)
         assert isinstance(seconds_constant, int)
@@ -127,21 +146,21 @@ class Rule:
         HABApp.core.Events.add_listener(listener)
         return listener
 
-    def post_Update(self, item_name, value):
+    def post_update(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
             self.__runtime.openhab_connection.async_post_update(str(item_name), value),
             self.__runtime.loop
         )
 
-    def send_Command(self, item_name, value):
+    def send_command(self, item_name, value):
         value = self.__convert_to_oh_type(value)
         asyncio.run_coroutine_threadsafe(
             self.__runtime.openhab_connection.async_send_command(str(item_name), value),
             self.__runtime.loop
         )
 
-    def item_create(self, item_type, item_name, label="", category="", tags=[], groups=[]):
+    def create_openhab_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
         """
 
         :param item_type:
@@ -168,7 +187,7 @@ class Rule:
 
         return future.result(self.__runtime.config.async_timeout)
 
-    def item_remove(self, item_name: str):
+    def remove_openhab_item(self, item_name: str):
         assert isinstance(item_name, str), type(item_name)
         future = asyncio.run_coroutine_threadsafe(
             self.__runtime.openhab_connection.async_remove_item(item_name),
@@ -297,10 +316,10 @@ class Rule:
             if not HABApp.core.Items.item_exists(item.name):
                 log.warning(f'Item "{item.name}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
-        
+
         for item in self.__watched_items:
             if not HABApp.core.Items.item_exists(item.name):
-                log.warning(f'Item "{name}" does not exist (yet)! '
+                log.warning(f'Item "{item.name}" does not exist (yet)! '
                             f'self.item_watch in "{self.rule_name}" may not work as intended.')
 
     @HABApp.util.PrintException

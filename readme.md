@@ -45,9 +45,8 @@ class MyRule(HABApp.Rule):
         self.listen_event( 'TestSwitchTOGGLE', self.cb, ValueUpdateEvent)
 
     def cb(self, event):
-        assert isinstance(event, ValueUpdateEvent)
-        print( f'CALLBACK: {event}')
-        self.post_Update('MyOtherItem', 'test')
+        assert isinstance(event, ValueUpdateEvent)  # this will provide syntax highlighting for event
+        self.post_update('MyOtherItem', 'test')
 
 MyRule()
 
@@ -75,21 +74,30 @@ Examples:
 self.listen_event(name, callback)               # Callback on any event
 self.listen_event(name, callback, even_type)    # Callback if event is instance of event_type
 
+# Watch if items do not change a specific ammount of time and then generate an event
+self.item_watch(item_name, seconds_constant, watch_only_changes = True)
+# This also registers an event listener with a corresponding event
+self.item_watch_and_listen(item_name, seconds_constant, callback, watch_only_changes = True)
+
 # HAPApp item cache
 # Lookups are almost instant so this can be used to get states inside of rules
-self.item_state(item_name)
+self.get_item_state(item_name)
+self.get_item(item_name)
 self.item_exists(item_name)
+# This will locally create a new item
+self.set_item_state(item_name, value)
 
 # Post an event to the HABApp event bus.
 # Can be used to post and react to custom events together with self.listen_event
+# Also creates an item in the item cache
 self.post_event(name, event)
 
 
 # Interact with openhab (if configured)
-self.post_Update(item_name, value)
-self.send_Command(item_name, value)
-self.item_create(item_type, item_name)
-self.remove_item(item_name)
+self.post_update(item_name, value)
+self.send_command(item_name, value)
+self.create_openhab_item(item_type, item_name)
+self.remove_openhab_item(item_name)
 
 # MQTT (if configured)
 # Node: subscribing is possible through the config,
