@@ -84,12 +84,12 @@ class Rule:
 
     def set_item_state(self, item_name, value):
         assert isinstance(item_name, str)
-        
+
         try:
             old_state = HABApp.core.Items.get_item(item_name).state
         except KeyError:
             old_state = None
-            
+
         self.post_event(item_name, HABApp.core.ValueUpdateEvent(name=item_name, value=value))
         if old_state != value:
             self.post_event(item_name, HABApp.core.ValueChangeEvent(name=item_name, value=value, old_value=old_state))

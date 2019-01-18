@@ -74,18 +74,20 @@ Examples:
 self.listen_event(name, callback)               # Callback on any event
 self.listen_event(name, callback, even_type)    # Callback if event is instance of event_type
 
+
 # Watch if items do not change a specific ammount of time and then generate an event
 self.item_watch(item_name, seconds_constant, watch_only_changes = True)
 # This also registers an event listener with a corresponding event
 self.item_watch_and_listen(item_name, seconds_constant, callback, watch_only_changes = True)
+
 
 # HAPApp item cache
 # Lookups are almost instant so this can be used to get states inside of rules
 self.get_item_state(item_name)
 self.get_item(item_name)
 self.item_exists(item_name)
-# This will locally create a new item
-self.set_item_state(item_name, value)
+self.set_item_state(item_name, value)   # If the item does not exist it will be created
+
 
 # Post an event to the HABApp event bus.
 # Can be used to post and react to custom events together with self.listen_event
@@ -99,10 +101,12 @@ self.send_command(item_name, value)
 self.create_openhab_item(item_type, item_name)
 self.remove_openhab_item(item_name)
 
+
 # MQTT (if configured)
 # Node: subscribing is possible through the config,
 #       changes to mqtt config entries get picked up without a restart
 self.mqtt_publish(self, topic, payload, qos=None, retain=None)
+
 
 # Time intervalls
 self.run_every( date_time, interval, callback)
@@ -114,6 +118,7 @@ self.run_hourly(callback)
 self.run_minutely(callback)
 self.run_at(date_time, callback)
 self.run_soon(callback)
+
 
 # get another rule by name
 self.get_rule(rule_name)
