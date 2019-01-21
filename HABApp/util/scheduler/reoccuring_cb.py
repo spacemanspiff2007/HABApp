@@ -48,9 +48,9 @@ class DayOfWeekScheduledCallback(ScheduledCallback):
 
 class WorkdayScheduledCallback(DayOfWeekScheduledCallback):
     def __init__(self, datetime_time, callback, *args, **kwargs):
-        super().__init__(datetime_time, callback, *args, weekdays=[1, 2, 3, 4, 5], **kwargs)
+        super().__init__(datetime_time, [1, 2, 3, 4, 5], callback, *args, **kwargs)
 
 
 class WeekendScheduledCallback(DayOfWeekScheduledCallback):
     def __init__(self, datetime_time, callback, *args, **kwargs):
-        super().__init__(datetime_time, callback, *args, weekdays=[6, 7], **kwargs)
+        super().__init__(datetime_time, [6, 7], callback, *args, **kwargs)
