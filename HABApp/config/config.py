@@ -9,6 +9,7 @@ import ruamel.yaml
 from voluptuous import MultipleInvalid, Schema
 from watchdog.observers import Observer
 
+import HABApp
 from HABApp.util import CallbackHelper, SimpleFileWatcher
 from ._conf_mqtt import Mqtt
 from ._conf_openhab import Openhab
@@ -193,3 +194,5 @@ class Config:
         # load prepared logging
         logging.config.dictConfig(cfg)
         log.debug('Loaded logging config')
+
+        logging.getLogger('HABApp').info(f'HABApp Version {HABApp.VERSION}')

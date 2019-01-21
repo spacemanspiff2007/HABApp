@@ -30,7 +30,7 @@ class TestCases(unittest.TestCase):
 
         self.assertFalse(19 >= t)
         # Über obere Grenze
-        self.assertTrue(20 >= t)
+        self.assertTrue(21 >= t)
         self.assertTrue(10 >= t)
 
         # unter untere Grenze
