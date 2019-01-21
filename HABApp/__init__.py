@@ -1,3 +1,5 @@
+VERSION = '0.1.2'
+
 import HABApp.util
 
 from HABApp.rule import Rule
