@@ -194,6 +194,5 @@ class Config:
         # load prepared logging
         logging.config.dictConfig(cfg)
         log.debug('Loaded logging config')
-        
-        logging.getLogger('HABApp').info(f'HABApp Version {HABApp.VERSION}')
 
+        logging.getLogger('HABApp').info(f'HABApp Version {HABApp.VERSION}')
