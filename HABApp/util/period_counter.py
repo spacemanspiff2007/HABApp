@@ -11,7 +11,7 @@ class PeriodCounter:
         self.__lock = threading.Lock()
         # funcs which gets called when the counter changes
         self.__on_change = set()
-        
+
         self.__timestamps = []
 
     def on_change(self, func, unregister=False):
@@ -43,7 +43,7 @@ class PeriodCounter:
             count_was = len(self.__timestamps)
             self.__clean_timestamps(add=True)
             count_new = len(self.__timestamps)
-        
+
         if count_was != count_new:
             for func in self.__on_change:
                 func(count_new)
@@ -55,9 +55,9 @@ class PeriodCounter:
             count_was = len(self.__timestamps)
             self.__clean_timestamps(add=False)
             count_new = len(self.__timestamps)
-    
+
         if count_was != count_new:
             for func in self.__on_change:
                 func(count_new)
-                
+
         return count_new
