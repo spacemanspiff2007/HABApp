@@ -117,6 +117,7 @@ self.run_daily(callback)
 self.run_hourly(callback)
 self.run_minutely(callback)
 self.run_at(date_time, callback)
+self.run_in(seconds, callback)
 self.run_soon(callback)
 
 

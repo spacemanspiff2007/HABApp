@@ -12,9 +12,7 @@ class ScheduledCallback:
         # next time the callback will be executed
         __now = datetime.now()
 
-        if isinstance(date_time, int):
-            date_time = __now + timedelta(seconds=date_time)
-        elif isinstance(date_time, time):
+        if isinstance(date_time, time):
             date_time = __now.replace(hour=date_time.hour, minute=date_time.minute, second=date_time.second)
             if date_time < __now:
                 date_time += timedelta(days=1)
