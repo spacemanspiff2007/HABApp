@@ -34,7 +34,6 @@ setuptools.setup(
         'aiohttp-sse-client',
         'ruamel.yaml',
         'paho-mqtt',
-        'ujson',
         'voluptuous',
         'watchdog',
     ],
