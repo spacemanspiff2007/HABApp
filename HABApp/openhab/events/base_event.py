@@ -1,4 +1,4 @@
-import ujson
+import json
 
 
 class BaseItemEvent:
@@ -7,7 +7,7 @@ class BaseItemEvent:
         assert isinstance(_in_dict, dict), type(_in_dict)
         self._topic = _in_dict['topic']
         self._type = _in_dict['type']
-        self._payload = ujson.loads(_in_dict['payload'])
+        self._payload = json.loads(_in_dict['payload'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} _topic: {self._topic} _type: {self._type}, _payload: {self._payload}>'

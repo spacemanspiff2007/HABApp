@@ -1,5 +1,5 @@
 import logging
-import ujson
+import json
 
 import paho.mqtt.client as mqtt
 
@@ -123,7 +123,7 @@ class MqttConnection:
         # load json dict and list
         if payload.startswith('{') and payload.endswith('}') or payload.startswith('[') and payload.endswith(']'):
             try:
-                payload = ujson.loads(payload)
+                payload = json.loads(payload)
             except ValueError:
                 pass
         else:
