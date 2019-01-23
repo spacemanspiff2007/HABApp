@@ -29,6 +29,15 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/spacemanspiff2007/HABApp",
     packages=setuptools.find_packages(exclude=['tests*']),
+    install_requires=[
+        'aiohttp',
+        'aiohttp-sse-client',
+        'ruamel.yaml',
+        'paho-mqtt',
+        'ujson',
+        'voluptuous',
+        'watchdog',
+    ],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.6",
