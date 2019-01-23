@@ -4,7 +4,7 @@ import itertools
 import logging
 import time
 import traceback
-import json
+import ujson
 
 import aiohttp
 from aiohttp_sse_client import client as sse_client
@@ -131,6 +131,7 @@ class Connection:
 
         self.__session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=99999999999999999),
+            json_serialize=ujson.dumps,
             auth=auth
         )
 
@@ -152,7 +153,7 @@ class Connection:
                 ) as event_source:
                     async for event in event_source:
                         try:
-                            event = json.loads(event.data)
+                            event = ujson.loads(event.data)
                             if log_events.isEnabledFor(logging.DEBUG):
                                 log_events._log(logging.DEBUG, event, [])
                             event = get_event(event)
@@ -189,7 +190,7 @@ class Connection:
 
     @PrintException
     def __update_all_items(self, data) -> int:
-            data = json.loads(data)  # type: list
+            data = ujson.loads(data)  # type: list
             found_items = len(data)
             for _dict in data:
                 __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
