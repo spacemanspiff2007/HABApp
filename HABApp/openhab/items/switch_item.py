@@ -13,7 +13,7 @@ class SwitchItem(Item):
 
     def set_state(self, new_state):
         if new_state is not None and new_state != SwitchItem.ON and new_state != SwitchItem.OFF:
-            raise ValueError(f'Invalid value for SwitchItem: {new_state}')
+            raise ValueError(f'Invalid value for SwitchItem {self.name}: {new_state}')
         super().set_state(new_state)
 
     def is_on(self):

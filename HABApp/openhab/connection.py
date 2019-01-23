@@ -173,7 +173,6 @@ class Connection:
                             log.error("{}".format(e))
                             for l in traceback.format_exc().splitlines():
                                 log.error(l)
-                            return None
 
             except Exception as e:
                 lvl = logging.WARNING if is_ignored_exception(e) else logging.ERROR
