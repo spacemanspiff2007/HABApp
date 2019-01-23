@@ -42,7 +42,9 @@ class Rule:
         self.__future_events: typing.List[HABApp.util.ScheduledCallback] = []
         self.__watched_items: typing.List[ WatchedItem] = []
 
-        self.rule_name = ""
+        # so the user can set this before calling __init__
+        if not hasattr(self, 'rule_name'):
+            self.rule_name = ""
 
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
@@ -233,6 +235,12 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
+    def run_on_every_day(self, time, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
+        cb = HABApp.util.WorkerRuleWrapper(callback, self)
+        future_event = HABApp.util.DayOfWeekScheduledCallback(time, [1, 2, 3, 4, 5, 6, 7], cb, *args, **kwargs)
+        self.__future_events.append(future_event)
+        return future_event
+
     def run_on_workdays(self, time, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
         cb = HABApp.util.WorkerRuleWrapper(callback, self)
         future_event = HABApp.util.WorkdayScheduledCallback(time, cb, *args, **kwargs)
@@ -255,7 +263,7 @@ class Rule:
         """
         start = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(0, 24 * 3600 - 1))
         interval = datetime.timedelta(days=1)
-        self.run_every(start, interval, callback, *args, **kwargs)
+        return self.run_every(start, interval, callback, *args, **kwargs)
 
     def run_hourly(self, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
         """
@@ -267,12 +275,12 @@ class Rule:
         """
         start = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(0, 3600 - 1))
         interval = datetime.timedelta(seconds=3600)
-        self.run_every(start, interval, callback, *args, **kwargs)
+        return self.run_every(start, interval, callback, *args, **kwargs)
 
     def run_minutely(self, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
         start = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(0, 60 - 1))
         interval = datetime.timedelta(seconds=60)
-        self.run_every(start, interval, callback, *args, **kwargs)
+        return self.run_every(start, interval, callback, *args, **kwargs)
 
     def run_at(self, date_time, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
         "Run a function at a specified date_time"
@@ -282,8 +290,14 @@ class Rule:
         return future_event
 
     def run_in(self, seconds, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
-        "Just a helper function to make it more clear"
-        return self.run_at(seconds, callback, *args, **kwargs)
+        """Run a function in x seconds"""
+        assert isinstance(seconds, int), f'{seconds} ({type(seconds)})'
+        date_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
+
+        cb = HABApp.util.WorkerRuleWrapper(callback, self)
+        future_event = HABApp.util.ScheduledCallback(date_time, cb, *args, **kwargs)
+        self.__future_events.append(future_event)
+        return future_event
 
     def run_soon(self, callback, *args, **kwargs) -> HABApp.util.ScheduledCallback:
         """

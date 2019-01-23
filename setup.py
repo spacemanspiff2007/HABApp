@@ -1,7 +1,15 @@
-import HABApp
-
 from pathlib import Path
 import setuptools
+
+# Load version number
+version = {}
+with open("HABApp/__version__.py") as fp:
+    exec(fp.read(), version)
+assert version
+assert version['__VERSION__']
+__VERSION__ = version['__VERSION__']
+print(f'Version: {__VERSION__}')
+print('')
 
 # don't load file for tox-builds
 readme = Path(__file__).with_name('readme.md')
@@ -12,7 +20,7 @@ if readme.is_file():
 
 setuptools.setup(
     name="HABApp",
-    version=HABApp.VERSION,
+    version=__VERSION__,
     author="spaceman_spiff",
     # author_email="",
     description="Easy automation with openHAB and/or MQTT. Create home automation rules in python.",
@@ -21,6 +29,15 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/spacemanspiff2007/HABApp",
     packages=setuptools.find_packages(exclude=['tests*']),
+    install_requires=[
+        'aiohttp',
+        'aiohttp-sse-client',
+        'ruamel.yaml',
+        'paho-mqtt',
+        'ujson',
+        'voluptuous',
+        'watchdog',
+    ],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.6",
