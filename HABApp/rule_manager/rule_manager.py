@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import logging
+import math
 import threading
 import time
 import traceback
@@ -58,8 +59,9 @@ class RuleManager:
 
             now = datetime.datetime.now()
 
-            # process only once per sec
+            # process only once per second
             if now.second == self.__process_last_sec:
+                await asyncio.sleep(0.1)
                 continue
             self.__process_last_sec = now.second
 
@@ -68,7 +70,12 @@ class RuleManager:
                 for rule in file.iterrules():
                     rule._process_events(now)
 
-            await asyncio.sleep(0.2)
+            # sleep longer, try to sleep until the next full second
+            end = datetime.datetime.now()
+            if end.second == self.__process_last_sec:
+                frac, whole = math.modf(time.time())
+                sleep_time = 1 - frac + 0.005   # prevent rounding error and add a little bit of security
+                await asyncio.sleep( sleep_time)
 
 
     @PrintException

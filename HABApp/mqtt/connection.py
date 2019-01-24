@@ -154,7 +154,7 @@ class MqttConnection:
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
             log.error(f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
 
-    def disconnect(self, rc):
+    def disconnect(self):
         if self.connected:
             self.client.disconnect()
             self.connected = False
