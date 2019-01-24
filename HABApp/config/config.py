@@ -182,14 +182,14 @@ class Config:
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 
-                # Delete old Log-Files on startup
-                if self.first_start and p.is_file():
-                    try:
-                        # default is utf-8 logging so we append BOM
-                        with open(p, mode='wb') as f:
-                            f.write(codecs.BOM_UTF8)
-                    finally:
-                        pass
+            # Delete old Log-Files on startup
+            if self.first_start and p.is_file():
+                try:
+                    # default is utf-8 logging so we write BOM
+                    with open(p, mode='wb') as f:
+                        f.write(codecs.BOM_UTF8)
+                finally:
+                    pass
 
         # load prepared logging
         logging.config.dictConfig(cfg)

@@ -33,6 +33,7 @@ class RuleManager:
             time.sleep(5)
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
+                    time.sleep(0.5)
                     HABApp.core.Workers.submit(self.add_file, f)
 
         HABApp.core.Workers.submit(delayed_load)
@@ -102,13 +103,13 @@ class RuleManager:
 
         exists = path.is_file()
 
-        log.debug( f'{"Loading" if exists else "Removing"} file: {path}')
-
         file = None
         try:
             # serialize loading
             with self.__lock:
                 path_str = str(path)
+
+                log.debug(f'{"Loading" if exists else "Removing"} file: {path}')
 
                 # unload old callbacks
                 did_unload = False
@@ -129,7 +130,7 @@ class RuleManager:
                 self.files[path_str] = file
                 file.load()
         except Exception:
-            log.error(f"Could not load {path}!")
+            log.error(f"Could not (fully) load {path}!")
             for l in traceback.format_exc().splitlines():
                 log.error(l)
             return None
