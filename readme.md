@@ -28,6 +28,8 @@ This will also create some dummy configuration files:
 - _config.yml_: Used to configure the behaviour of HABApp
 - _logging.yml_ : Used to setup logging
 
+For more information check the [HABApp wiki](https://github.com/spacemanspiff2007/HABApp/wiki)!
+
 ## Creating rules
 Create a python file in the rules directory (see _config.yml_)
 This rule will automatically be reloaded when the file changes.
