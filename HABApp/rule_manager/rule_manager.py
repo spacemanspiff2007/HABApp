@@ -95,23 +95,35 @@ class RuleManager:
 
     def __file_event(self, path):
         assert isinstance(path, Path), type(path)
-        if path.is_file():
-            HABApp.core.Workers.submit(self.add_file, path)
+        HABApp.core.Workers.submit(self.add_file, path)
 
 
     def add_file(self, path : Path):
-        log.debug( f'Loading file: {path}')
+
+        exists = path.is_file()
+
+        log.debug( f'{"Loading" if exists else "Removing"} file: {path}')
 
         file = None
         try:
             # serialize loading
             with self.__lock:
+                path_str = str(path)
 
                 # unload old callbacks
-                path_str = str(path)
+                did_unload = False
                 if path_str in self.files:
                     for rule in self.files[path_str].iterrules():   # type: HABApp.Rule
+                        did_unload = True
                         rule._cleanup()
+
+                # print message only if we did something
+                if did_unload:
+                    log.debug(f'File {path_str} successfully unloaded!')
+
+                # If the file doesn't exist we can stop after unloading it
+                if not exists:
+                    return None
 
                 file = RuleFile(self, path)
                 self.files[path_str] = file
@@ -122,7 +134,7 @@ class RuleManager:
                 log.error(l)
             return None
 
-        log.debug(f'File {path} successfully loaded!')
+        log.debug(f'File {path_str} successfully loaded!')
 
         # Do simple checks which prevent errors
         file.check_all_rules()
