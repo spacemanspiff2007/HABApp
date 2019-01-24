@@ -308,7 +308,8 @@ class Rule:
         :return:
         """
         cb = HABApp.util.WorkerRuleWrapper(callback, self)
-        future_event = HABApp.util.ScheduledCallback(datetime.datetime.now(), cb, *args, **kwargs)
+        future_event = HABApp.util.ScheduledCallback(
+            datetime.datetime.now() + datetime.timedelta(milliseconds=5), cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
