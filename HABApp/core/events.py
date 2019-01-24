@@ -22,7 +22,7 @@ class ValueChangeEvent:
         self.old_value = old_value
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} topic: {self.name}, value: {self.value}, old_value: {self.old_value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
 
 class ValueNoChangeEvent:
