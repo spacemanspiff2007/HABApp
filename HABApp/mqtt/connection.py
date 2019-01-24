@@ -1,5 +1,5 @@
 import logging
-import json
+import ujson
 
 import paho.mqtt.client as mqtt
 
@@ -123,7 +123,7 @@ class MqttConnection:
         # load json dict and list
         if payload.startswith('{') and payload.endswith('}') or payload.startswith('[') and payload.endswith(']'):
             try:
-                payload = json.loads(payload)
+                payload = ujson.loads(payload)
             except ValueError:
                 pass
         else:
@@ -154,7 +154,7 @@ class MqttConnection:
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
             log.error(f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
 
-    def disconnect(self, rc):
+    def disconnect(self):
         if self.connected:
             self.client.disconnect()
             self.connected = False
