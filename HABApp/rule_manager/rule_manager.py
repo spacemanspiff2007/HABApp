@@ -117,6 +117,7 @@ class RuleManager:
                     for rule in self.files[path_str].iterrules():   # type: HABApp.Rule
                         did_unload = True
                         rule._cleanup()
+                    self.files.pop(path_str)
 
                 # print message only if we did something
                 if did_unload:
