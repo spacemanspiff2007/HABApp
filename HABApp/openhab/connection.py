@@ -190,20 +190,20 @@ class Connection:
 
     @PrintException
     def __update_all_items(self, data) -> int:
-            data = ujson.loads(data)  # type: list
-            found_items = len(data)
-            for _dict in data:
-                __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
-                HABApp.core.Items.set_item(__item)
+        data = ujson.loads(data)  # type: list
+        found_items = len(data)
+        for _dict in data:
+            __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
+            HABApp.core.Items.set_item(__item)
 
-            # remove items which are no longer available
-            ist = set(HABApp.core.Items.items.keys())
-            soll = {k['name'] for k in data}
-            for k in ist - soll:
-                HABApp.core.Items.pop_item(k)
+        # remove items which are no longer available
+        ist = set(HABApp.core.Items.items.keys())
+        soll = {k['name'] for k in data}
+        for k in ist - soll:
+            HABApp.core.Items.pop_item(k)
 
-            log.info(f'Updated {found_items:d} items')
-            return found_items
+        log.info(f'Updated {found_items:d} items')
+        return found_items
 
     @PrintException
     async def async_get_all_items(self):
