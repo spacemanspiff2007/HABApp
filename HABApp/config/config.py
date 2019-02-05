@@ -34,15 +34,6 @@ class Directories(ConfigEntry):
         self.rules   = 'rules'
         self.lib     = 'lib'
 
-        # The type gets changed after runtime to Path
-        # So it is required to hardcode this here
-        self._entry_validators['logging'] = str
-        self._entry_validators['rules'] = str
-        self._entry_validators['lib'] = str
-
-
-
-
 
 class Config:
 
