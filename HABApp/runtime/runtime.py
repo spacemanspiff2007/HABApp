@@ -1,13 +1,13 @@
 import asyncio
-import logging
 
 import HABApp.config
 import HABApp.core
 import HABApp.rule_manager
 import HABApp.util
 
-from .shutdown_helper import ShutdownHelper
 from .file_watcher import SimpleFileWatcher
+from .shutdown_helper import ShutdownHelper
+
 
 class Runtime:
     def __init__(self, config_folder):

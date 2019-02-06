@@ -41,7 +41,7 @@ class SimpleFileWatcher:
         assert isinstance(shutdown_helper, ShutdownHelper)
 
         # we shall only start once!
-        assert self.__started == False
+        assert self.__started is False
         self.__started = True
 
         # start watching the folders
@@ -67,4 +67,4 @@ class SimpleFileWatcher:
             folder = str(folder)
         assert isinstance(folder, str), type(folder)
 
-        self.__observer.unschedule(self.__folders[folder])
+        self.__observer.unschedule(self.__folders.pop(folder))

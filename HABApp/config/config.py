@@ -57,7 +57,11 @@ class Config:
         self.__check_create_logging()
 
         # folder watcher
-        self.__runtime.file_watcher.watch_folder(folder=self.folder_conf, file_ending='.yml', callback=self.__file_changed)
+        self.__runtime.file_watcher.watch_folder(
+            folder=self.folder_conf,
+            file_ending='.yml',
+            callback=self.__file_changed
+        )
 
         # Load Config initially
         self.first_start = True
