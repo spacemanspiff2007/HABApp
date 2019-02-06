@@ -2,7 +2,7 @@ import unittest
 import typing
 from datetime import datetime, timedelta
 
-from HABApp.util import scheduler
+from HABApp.rule import scheduler
 
 
 class CExecutor:
