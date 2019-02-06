@@ -8,10 +8,8 @@ import traceback
 import typing
 from pathlib import Path
 
-from watchdog.observers import Observer
-
 import HABApp
-from HABApp.util import PrintException, SimpleFileWatcher
+from HABApp.util import PrintException
 from .rule_file import RuleFile
 
 log = logging.getLogger('HABApp.Rules')
@@ -39,17 +37,12 @@ class RuleManager:
         HABApp.core.Workers.submit(delayed_load)
 
         # folder watcher
-        self.__folder_watcher = Observer()
-        self.__folder_watcher.schedule(
-            SimpleFileWatcher(self.__file_event, file_ending='.py', ),
-            path=str(self.runtime.config.directories.rules),
+        self.runtime.file_watcher.watch_folder(
+            folder=self.runtime.config.directories.rules,
+            file_ending='.py',
+            callback=self.__file_event,
             recursive=True
         )
-        self.__folder_watcher.start()
-
-        # proper shutdown
-        self.runtime.shutdown.register_func(self.__folder_watcher.stop)
-        self.runtime.shutdown.register_func(self.__folder_watcher.join)
 
         self.__process_last_sec = 60
 

@@ -6,13 +6,18 @@ import HABApp.core
 import HABApp.rule_manager
 import HABApp.util
 
+from .shutdown_helper import ShutdownHelper
+from .file_watcher import SimpleFileWatcher
 
 class Runtime:
     def __init__(self, config_folder):
 
-        self.shutdown = HABApp.util.CallbackHelper('Shutdown', logging.getLogger('HABApp.Shutdown'))
+        self.shutdown = ShutdownHelper()
 
-        self.config = HABApp.config.Config(config_folder=config_folder, shutdown_helper=self.shutdown)
+        self.file_watcher = SimpleFileWatcher()
+        self.file_watcher.start(self.shutdown)
+
+        self.config = HABApp.config.Config(self, config_folder=config_folder)
 
         # OpenHAB
         self.openhab_connection = HABApp.openhab.Connection(self)

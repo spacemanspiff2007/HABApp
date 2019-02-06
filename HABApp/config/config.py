@@ -7,10 +7,8 @@ import sys
 
 import ruamel.yaml
 from voluptuous import MultipleInvalid, Schema
-from watchdog.observers import Observer
 
 from HABApp.__version__ import __VERSION__
-from HABApp.util import CallbackHelper, SimpleFileWatcher
 from ._conf_mqtt import Mqtt
 from ._conf_openhab import Openhab
 from .configentry import ConfigEntry
@@ -37,7 +35,12 @@ class Directories(ConfigEntry):
 
 class Config:
 
-    def __init__(self, config_folder : Path, shutdown_helper : CallbackHelper = None):
+    def __init__(self, runtime, config_folder : Path):
+
+        import HABApp.runtime
+        assert isinstance(runtime, HABApp.runtime.Runtime)
+        self.__runtime = runtime
+
         assert isinstance(config_folder, Path)
         assert config_folder.is_dir(), config_folder
         self.folder_conf = config_folder
@@ -54,15 +57,7 @@ class Config:
         self.__check_create_logging()
 
         # folder watcher
-        self.__folder_watcher = Observer()
-        self.__folder_watcher.schedule(
-            SimpleFileWatcher(self.__file_changed, file_ending='.yml'), str(self.folder_conf)
-        )
-        self.__folder_watcher.start()
-
-        # proper shutdown
-        shutdown_helper.register_func(self.__folder_watcher.stop)
-        shutdown_helper.register_func(self.__folder_watcher.join, last=True)
+        self.__runtime.file_watcher.watch_folder(folder=self.folder_conf, file_ending='.yml', callback=self.__file_changed)
 
         # Load Config initially
         self.first_start = True
