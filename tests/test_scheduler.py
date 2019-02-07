@@ -3,14 +3,8 @@ import typing
 from datetime import datetime, timedelta
 
 from HABApp.rule import scheduler
+from HABApp.core import WrappedFunction
 
-
-class CExecutor:
-    def submit(self, callback, *args, **kwargs):
-        callback(*args, **kwargs)
-
-
-executor = CExecutor()
 
 
 class TestCases(unittest.TestCase):
@@ -27,21 +21,36 @@ class TestCases(unittest.TestCase):
         self.last_args = None
         self.last_kwargs = None
 
+        self.worker = WrappedFunction._WORKERS
+
+        class CExecutor:
+            def submit(self, callback, *args, **kwargs):
+                callback(*args, **kwargs)
+        WrappedFunction._WORKERS = CExecutor()
+
+    def tearDown(self):
+        WrappedFunction._WORKERS = self.worker
+
     def call_func(self, *args, **kwargs):
         self.called = True
         self.last_args = args
         self.last_kwargs = kwargs
 
     def test_ScheduledCallback(self):
-        shed = scheduler.ScheduledCallback(datetime.now() + timedelta(seconds=1), self.call_func, 'T1', F2='F2')
+        shed = scheduler.ScheduledCallback(
+            datetime.now() + timedelta(seconds=1),
+            WrappedFunction(self.call_func),
+            'T1',
+            F2='F2'
+        )
         self.assertIs(shed.check_due(datetime.now()), False)
-        self.assertIs(shed.execute(executor), False)
+        self.assertIs(shed.execute(), False)
         self.assertIs(self.called, False)
         self.assertEqual(shed.is_finished, False)
 
         # recheck and run
         self.assertIs(shed.check_due(datetime.now() + timedelta(seconds=1)), True)
-        self.assertIs(shed.execute(executor), True)
+        self.assertIs(shed.execute(), True)
 
         # func call
         self.assertIs(self.called, True)

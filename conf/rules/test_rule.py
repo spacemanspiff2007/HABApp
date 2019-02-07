@@ -14,7 +14,7 @@ class MyRule(HABApp.Rule):
 
         self.run_on_day_of_week( datetime.time(14,34,20), ['Mo'], self.cb, 'run_on_day_of_week')
 
-        #self.run_every(5, 1, self.print_ts, 'Sec P1', asdf='P2')
+        self.run_every(datetime.datetime.now() + datetime.timedelta(seconds=5), 1, self.print_ts, 'Sec P1', asdf='P2')
 
         self.item_list = [ f"CreatedItem{k}" for k in range(200)]
 

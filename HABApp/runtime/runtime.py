@@ -24,12 +24,14 @@ class Runtime:
 
         # MQTT
         self.mqtt_connection = HABApp.mqtt.MqttConnection(self)
-        self.shutdown.register_func(self.mqtt_connection.disconnect)
         self.mqtt_connection.connect()
 
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
 
         self.loop = asyncio.get_event_loop()
+
+        # Shutdown workers
+        self.shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown)
 
     @HABApp.util.PrintException
     def get_async(self):

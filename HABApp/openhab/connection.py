@@ -48,7 +48,7 @@ class Connection:
         if self.runtime.config.openhab.ping.enabled:
             listener = HABApp.core.EventListener(
                 self.runtime.config.openhab.ping.item,
-                self.ping_received,
+                HABApp.core.WrappedFunction(self.ping_received),
                 HABApp.openhab.events.ItemStateEvent
             )
             HABApp.core.Events.add_listener(listener)

@@ -26,21 +26,24 @@ class RuleManager:
         # serialize loading
         self.__lock = threading.Lock()
 
+        # wrapper to load files
+        self.file_load_function = HABApp.core.WrappedFunction(self.add_file, logger=log)
+
         # if we load immediately we don't have the items from openhab in itemcache
         def delayed_load():
             time.sleep(5)
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     time.sleep(0.5)
-                    HABApp.core.Workers.submit(self.add_file, f)
+                    self.file_load_function.submit( f)
 
-        HABApp.core.Workers.submit(delayed_load)
+        HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).submit()
 
         # folder watcher
         self.runtime.file_watcher.watch_folder(
             folder=self.runtime.config.directories.rules,
             file_ending='.py',
-            callback=self.__file_event,
+            callback=self.file_load_function.submit,
             recursive=True
         )
 
@@ -87,14 +90,9 @@ class RuleManager:
         return found if len(found) > 1 else found[0]
 
 
-    def __file_event(self, path):
-        assert isinstance(path, Path), type(path)
-        HABApp.core.Workers.submit(self.add_file, path)
-
-
     def add_file(self, path : Path):
 
-        exists = path.is_file()
+        file_exists = path.is_file()
 
         file = None
         try:
@@ -102,7 +100,7 @@ class RuleManager:
             with self.__lock:
                 path_str = str(path)
 
-                log.debug(f'{"Loading" if exists else "Removing"} file: {path}')
+                log.debug(f'{"Loading" if file_exists else "Removing"} file: {path}')
 
                 # unload old callbacks
                 did_unload = False
@@ -117,7 +115,7 @@ class RuleManager:
                     log.debug(f'File {path_str} successfully unloaded!')
 
                 # If the file doesn't exist we can stop after unloading it
-                if not exists:
+                if not file_exists:
                     return None
 
                 file = RuleFile(self, path)

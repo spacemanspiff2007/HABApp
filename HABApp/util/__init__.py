@@ -1,4 +1,4 @@
-from .wrapper import PrintException, WorkerRuleWrapper
+from .wrapper import PrintException
 
 from .timeframe import TimeFrame
 

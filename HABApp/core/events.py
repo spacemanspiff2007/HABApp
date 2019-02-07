@@ -2,6 +2,7 @@ import logging
 import typing
 
 from HABApp.util import PrintException
+from .worker import WrappedFunction
 
 log = logging.getLogger('HABApp.Events')
 
@@ -48,26 +49,24 @@ class ValueNoUpdateEvent:
 class EventListener:
     def __init__(self, name, callback, event_type = None):
         assert isinstance(name, str), type(str)
-        assert callable(callback)
+        assert isinstance(callback, WrappedFunction)
 
         self.name : str = name
-        self.callback = callback
+        self.func = callback
 
         self.event_filter = event_type
 
-    def event_matches(self, event):
+    def notify_listeners(self, event):
         if self.event_filter is None or isinstance(event, self.event_filter):
-            return True
-        return False
-
+            self.func.submit(event)
+            return None
 
 
 class EventBus:
     def __init__(self):
 
-        from . import Items, Workers
+        from . import Items
         self.__items = Items
-        self.__workers = Workers
 
         self.__event_listener: typing.Dict[str, typing.List[EventListener]] = {}
 
@@ -82,8 +81,8 @@ class EventBus:
 
         # Notify all listeners
         for listener in self.__event_listener.get(name, []):
-            if listener.event_matches(event):
-                self.__workers.submit(listener.callback, event)
+            listener.notify_listeners(event)
+
         return None
 
     def remove_listener(self, listener : EventListener):
