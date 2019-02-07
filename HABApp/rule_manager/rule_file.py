@@ -73,7 +73,6 @@ class RuleFile:
         if not len_found:
             log.warning(f'Found no instances of HABApp.Rule in {str(self.path)}')
         else:
-            ctr = collections.defaultdict(lambda : 1)
             for rule in created_rules:
                 rule_name = rule.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
                 # ensure that we have a rule name

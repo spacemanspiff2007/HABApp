@@ -45,6 +45,9 @@ class Rule:
         self.__watched_items: typing.List[WatchedItem] = []
 
         # so the user can set this before calling __init__
+        if not hasattr(self, 'rule_name'):
+            self.rule_name = ''
+        # if nothing is set we suggest a name
         self.__rule_file.suggest_rule_name(self)
 
     def __convert_to_oh_type(self, _in):
