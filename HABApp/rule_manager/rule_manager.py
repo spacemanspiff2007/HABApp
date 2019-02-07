@@ -103,16 +103,8 @@ class RuleManager:
                 log.debug(f'{"Loading" if file_exists else "Removing"} file: {path}')
 
                 # unload old callbacks
-                did_unload = False
                 if path_str in self.files:
-                    for rule in self.files[path_str].iterrules():   # type: HABApp.Rule
-                        did_unload = True
-                        rule._cleanup()
-                    self.files.pop(path_str)
-
-                # print message only if we did something
-                if did_unload:
-                    log.debug(f'File {path_str} successfully unloaded!')
+                    self.files.pop(path_str).unload()
 
                 # If the file doesn't exist we can stop after unloading it
                 if not file_exists:

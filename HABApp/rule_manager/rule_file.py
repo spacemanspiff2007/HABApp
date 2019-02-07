@@ -26,6 +26,19 @@ class RuleFile:
         for name, rule in self.rules.items():
             rule._check_rule()
 
+    def unload(self):
+
+        # If we don't have any rules we can not unload
+        if not self.rules:
+            return None
+
+        # unload all registered callbacks
+        for rule in self.rules.values():  # type: HABApp.Rule
+            rule._cleanup()
+
+        log.debug(f'File {self.path} successfully unloaded!')
+        return None
+
     def load(self):
 
         created_rules = []
