@@ -45,8 +45,7 @@ class Rule:
         self.__watched_items: typing.List[WatchedItem] = []
 
         # so the user can set this before calling __init__
-        if not hasattr(self, 'rule_name'):
-            self.rule_name = ""
+        self.__rule_file.suggest_rule_name(self)
 
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
@@ -328,12 +327,6 @@ class Rule:
 
     @HABApp.util.PrintException
     def _check_rule(self):
-
-        # set name properly for future events which were made in self.__init__
-        for listener in self.__event_listener:
-            listener.func.name = self.__get_rule_name(listener.func._func)
-        for future_event in self.__future_events:  # type: ScheduledCallback
-            future_event._callback.name = self.__get_rule_name(future_event._callback._func)
 
         # Check if items do exists
         if not HABApp.core.Items.items:

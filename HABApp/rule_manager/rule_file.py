@@ -18,12 +18,28 @@ class RuleFile:
 
         self.rules = {}
 
+        self.class_ctr = collections.defaultdict(lambda : 1)
+
+    def suggest_rule_name(self, obj):
+
+        # if there is already a name set we make no suggestion
+        if getattr(obj, 'rule_name', '') != '':
+            return None
+
+        # create unique name
+        name = f'{str(type(obj))[19:-2]:s}'
+        found = self.class_ctr[name]
+        self.class_ctr[name] += 1
+
+        obj.rule_name = f'{name:s}.{found}' if found > 1 else f'{name:s}'
+        return None
+
     def iterrules(self):
         for rule in self.rules.values():
             yield rule
 
     def check_all_rules(self):
-        for name, rule in self.rules.items():
+        for rule in self.rules.values():
             rule._check_rule()
 
     def unload(self):
@@ -60,13 +76,8 @@ class RuleFile:
             ctr = collections.defaultdict(lambda : 1)
             for rule in created_rules:
                 rule_name = rule.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
-                if not rule_name:
-                    # create unique name
-                    __class_name = f'{str(type(rule))[19:-2]:s}'
-                    __classes_found = ctr[__class_name]
-                    rule_name = f'{__class_name:s}.{__classes_found}' if __classes_found > 1 else f'{__class_name:s}'
-                    rule.rule_name = rule_name
-                    ctr[__class_name] += 1
+                # ensure that we have a rule name
+                self.suggest_rule_name(rule)
 
                 # rule name must be unique for every file
                 if rule_name in self.rules:
