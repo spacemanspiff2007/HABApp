@@ -42,7 +42,7 @@ class Rule:
 
         self.__event_listener: typing.List[HABApp.core.EventListener] = []
         self.__future_events: typing.List[ScheduledCallback] = []
-        self.__watched_items: typing.List[ WatchedItem] = []
+        self.__watched_items: typing.List[WatchedItem] = []
 
         # so the user can set this before calling __init__
         if not hasattr(self, 'rule_name'):
@@ -144,7 +144,7 @@ class Rule:
         :param even_type: None for all events, class to only make a call on class instances
         :return: Instance of EventListener
         """
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         listener = HABApp.core.EventListener(name, cb, even_type)
         self.__event_listener.append(listener)
         HABApp.core.Events.add_listener(listener)
@@ -209,7 +209,7 @@ class Rule:
         :param kwargs:
         :return:
         """
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ReoccuringScheduledCallback(date_time, interval, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
@@ -232,25 +232,25 @@ class Rule:
                 continue
             weekdays[i] = lookup[val.lower()]
 
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(time, weekdays, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
     def run_on_every_day(self, time, callback, *args, **kwargs) -> ScheduledCallback:
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(time, [1, 2, 3, 4, 5, 6, 7], cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
     def run_on_workdays(self, time, callback, *args, **kwargs) -> ScheduledCallback:
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = WorkdayScheduledCallback(time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
     def run_on_weekends(self, time, callback, *args, **kwargs) -> ScheduledCallback:
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = WeekendScheduledCallback(time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
@@ -286,7 +286,7 @@ class Rule:
 
     def run_at(self, date_time, callback, *args, **kwargs) -> ScheduledCallback:
         "Run a function at a specified date_time"
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback(date_time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
@@ -296,7 +296,7 @@ class Rule:
         assert isinstance(seconds, int), f'{seconds} ({type(seconds)})'
         date_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
 
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback(date_time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
@@ -309,7 +309,7 @@ class Rule:
         :param kwargs:  kwargs for the callback
         :return:
         """
-        cb = HABApp.core.WrappedFunction(callback)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback(
             datetime.datetime.now() + datetime.timedelta(milliseconds=5), cb, *args, **kwargs)
         self.__future_events.append(future_event)
@@ -323,15 +323,25 @@ class Rule:
         assert isinstance(topic, str), type(str)
         self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
 
+    def __get_rule_name(self, callback):
+        return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None
+
     @HABApp.util.PrintException
     def _check_rule(self):
-        # Check if item exists
+
+        # set name properly for future events which were made in self.__init__
+        for listener in self.__event_listener:
+            listener.func.name = self.__get_rule_name(listener.func._func)
+        for future_event in self.__future_events:  # type: ScheduledCallback
+            future_event._callback.name = self.__get_rule_name(future_event._callback._func)
+
+        # Check if items do exists
         if not HABApp.core.Items.items:
             return None
 
-        for item in self.__event_listener:
-            if not HABApp.core.Items.item_exists(item.name):
-                log.warning(f'Item "{item.name}" does not exist (yet)! '
+        for listener in self.__event_listener:
+            if not HABApp.core.Items.item_exists(listener.name):
+                log.warning(f'Item "{listener.name}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
         for item in self.__watched_items:
