@@ -310,8 +310,7 @@ class Rule:
         :return:
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = ScheduledCallback(
-            datetime.datetime.now() + datetime.timedelta(milliseconds=5), cb, *args, **kwargs)
+        future_event = ScheduledCallback( None, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
@@ -370,14 +369,18 @@ class Rule:
     @HABApp.util.PrintException
     def _cleanup(self):
 
-        # important: set the dicts to none so we don't schedule a future event during _cleanup
+        # Important: set the dicts to None so we don't schedule a future event during _cleanup
+        # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
+        event_listeners = self.__event_listener
+        future_events = self.__future_events
 
-        for listener in self.__event_listener:
-            HABApp.core.Events.remove_listener(listener)
         self.__event_listener = None
-
-        for event in self.__future_events:
-            event.cancel()
         self.__future_events = None
-
         self.__watched_items = None
+
+        # Actually remove the listeners/events
+        for listener in event_listeners:
+            HABApp.core.Events.remove_listener(listener)
+
+        for event in future_events:
+            event.cancel()

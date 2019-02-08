@@ -13,6 +13,10 @@ class ScheduledCallback:
         # next time the callback will be executed
         __now = datetime.now()
 
+        # If we don't specify a datetime we start it now
+        if date_time is None:
+            date_time = __now
+
         if isinstance(date_time, time):
             date_time = __now.replace(hour=date_time.hour, minute=date_time.minute, second=date_time.second)
             if date_time < __now:

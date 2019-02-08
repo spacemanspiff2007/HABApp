@@ -22,7 +22,7 @@ class OpenhabBenchRule(HABApp.Rule):
         for k in self.item_list:
             self.create_openhab_item('string', k)
 
-        self.run_minutely(self.bench_start)
+        self.run_every(None, datetime.timedelta(minutes=5), self.bench_start)
         self.listen_event(self.item_list[-1], self.bench_stop, ValueChangeEvent)
 
     def bench_start(self):
