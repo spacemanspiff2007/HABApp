@@ -320,8 +320,7 @@ class Rule:
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     def mqtt_publish(self, topic, payload=None, qos=None, retain=None):
-        assert isinstance(topic, str), type(str)
-        self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
+        return self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
 
     def __get_rule_name(self, callback):
         return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None

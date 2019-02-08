@@ -1,8 +1,11 @@
 import collections
 import logging
-import runpy
+import runpy, typing
 import traceback
 from pathlib import Path
+
+if typing.TYPE_CHECKING:
+    import HABApp
 
 log = logging.getLogger(f'HABApp.Rules')
 
@@ -38,7 +41,7 @@ class RuleFile:
             yield rule
 
     def check_all_rules(self):
-        for rule in self.rules.values():
+        for rule in self.rules.values():  # type: HABApp.Rule
             rule._check_rule()
 
     def unload(self):
