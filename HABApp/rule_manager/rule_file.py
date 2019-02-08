@@ -20,19 +20,18 @@ class RuleFile:
 
         self.class_ctr = collections.defaultdict(lambda : 1)
 
-    def suggest_rule_name(self, obj):
+    def suggest_rule_name(self, obj) -> str:
 
         # if there is already a name set we make no suggestion
         if getattr(obj, 'rule_name', '') != '':
-            return None
+            return obj.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
 
         # create unique name
         name = f'{str(type(obj))[19:-2]:s}'
         found = self.class_ctr[name]
         self.class_ctr[name] += 1
 
-        obj.rule_name = f'{name:s}.{found}' if found > 1 else f'{name:s}'
-        return None
+        return f'{name:s}.{found:d}' if found > 1 else f'{name:s}'
 
     def iterrules(self):
         for rule in self.rules.values():
@@ -74,15 +73,14 @@ class RuleFile:
             log.warning(f'Found no instances of HABApp.Rule in {str(self.path)}')
         else:
             for rule in created_rules:
-                rule_name = rule.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
                 # ensure that we have a rule name
-                self.suggest_rule_name(rule)
+                rule.rule_name = self.suggest_rule_name(rule)
 
                 # rule name must be unique for every file
-                if rule_name in self.rules:
-                    raise ValueError(f'Rule name must be unique!\n"{rule_name}" is already used!')
+                if rule.rule_name in self.rules:
+                    raise ValueError(f'Rule name must be unique!\n"{rule.rule_name}" is already used!')
 
-                self.rules[rule_name] = rule
-                log.info(f'Added rule "{rule_name}" from {self.path.name}')
+                self.rules[rule.rule_name] = rule
+                log.info(f'Added rule "{rule.rule_name}" from {self.path.name}')
 
         return None

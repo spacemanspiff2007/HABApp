@@ -44,11 +44,9 @@ class Rule:
         self.__future_events: typing.List[ScheduledCallback] = []
         self.__watched_items: typing.List[WatchedItem] = []
 
-        # so the user can set this before calling __init__
-        if not hasattr(self, 'rule_name'):
-            self.rule_name = ''
-        # if nothing is set we suggest a name
-        self.__rule_file.suggest_rule_name(self)
+        # suggest a rule name if it is not
+        self.rule_name: str = self.__rule_file.suggest_rule_name(self)
+
 
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
