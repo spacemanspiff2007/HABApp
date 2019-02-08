@@ -1,7 +1,8 @@
 import collections
 import logging
-import runpy, typing
+import runpy
 import traceback
+import typing
 from pathlib import Path
 
 if typing.TYPE_CHECKING:

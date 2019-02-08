@@ -26,8 +26,10 @@ class RuleManager:
         # serialize loading
         self.__lock = threading.Lock()
 
-        # wrapper to load files
-        self.file_load_function = HABApp.core.WrappedFunction(self.add_file, logger=log)
+        # wrapper to load files, do not reuse an instantiated WrappedFunction because it will throw errors
+        # in the traceback module
+        def load_file_wrapper(path):
+            return HABApp.core.WrappedFunction(self.add_file, logger=log).submit(path)
 
         # if we load immediately we don't have the items from openhab in itemcache
         def delayed_load():
@@ -35,7 +37,7 @@ class RuleManager:
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     time.sleep(0.5)
-                    self.file_load_function.submit( f)
+                    load_file_wrapper( f)
 
         HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).submit()
 
@@ -43,7 +45,7 @@ class RuleManager:
         self.runtime.file_watcher.watch_folder(
             folder=self.runtime.config.directories.rules,
             file_ending='.py',
-            callback=self.file_load_function.submit,
+            callback=load_file_wrapper,
             recursive=True
         )
 

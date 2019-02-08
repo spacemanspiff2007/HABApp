@@ -369,11 +369,15 @@ class Rule:
 
     @HABApp.util.PrintException
     def _cleanup(self):
+
+        # important: set the dicts to none so we don't schedule a future event during _cleanup
+
         for listener in self.__event_listener:
             HABApp.core.Events.remove_listener(listener)
+        self.__event_listener = None
 
         for event in self.__future_events:
             event.cancel()
-        self.__future_events.clear()
+        self.__future_events = None
 
-        self.__watched_items.clear()
+        self.__watched_items = None
