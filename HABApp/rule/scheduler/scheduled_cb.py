@@ -13,14 +13,18 @@ class ScheduledCallback:
         # next time the callback will be executed
         __now = datetime.now()
 
-        # If we don't specify a datetime we start it now
         if date_time is None:
+            # If we don't specify a datetime we start it now
             date_time = __now
-
-        if isinstance(date_time, time):
+        elif isinstance(date_time, timedelta):
+            # if it is a timedelta add it to now to easily speciy points in the future
+            date_time = __now + timedelta
+        elif isinstance(date_time, time):
+            # if it is a time object it specifies a time of day.
             date_time = __now.replace(hour=date_time.hour, minute=date_time.minute, second=date_time.second)
             if date_time < __now:
                 date_time += timedelta(days=1)
+
         assert isinstance(date_time, datetime), type(date_time)
 
         if ScheduledCallback.VALIDATE_CALLBACK_DATETIME:
