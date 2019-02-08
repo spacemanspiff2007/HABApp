@@ -189,7 +189,7 @@ class Rule:
             self.__runtime.loop
         )
 
-        return future.result(self.__runtime.config.async_timeout)
+        return future.result()
 
     def remove_openhab_item(self, item_name: str):
         assert isinstance(item_name, str), type(item_name)
@@ -197,7 +197,7 @@ class Rule:
             self.__runtime.openhab_connection.async_remove_item(item_name),
             self.__runtime.loop
         )
-        return future.result(self.__runtime.config.async_timeout)
+        return future.result()
 
     def run_every(self, date_time, interval, callback, *args, **kwargs) -> ScheduledCallback:
         """
