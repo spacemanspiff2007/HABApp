@@ -30,14 +30,16 @@ class FolderWatcher:
         shutdown_helper.register_func(self.__observer.join, last=True)
         return None
 
-    def watch_folder(self, folder: pathlib.Path, file_ending: str, event_target, watch_subfolders = False, worker_factory=None):
+    def watch_folder(self, folder: pathlib.Path, file_ending: str, event_target,
+                     watch_subfolders = False, worker_factory=None):
         assert isinstance(folder, pathlib.Path)
         assert folder.is_dir()
 
         folder = str(folder)
         assert folder not in self.__folders, folder
 
-        handler = SimpleFileEventHandler(event_target=event_target, file_ending=file_ending, worker_factory=worker_factory)
+        handler = SimpleFileEventHandler(event_target=event_target, file_ending=file_ending,
+                                         worker_factory=worker_factory)
         self.__folders[folder] = self.__observer.schedule(handler, path=folder, recursive=watch_subfolders)
 
     def unwatch_folder(self, folder):

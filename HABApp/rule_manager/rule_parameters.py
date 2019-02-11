@@ -1,16 +1,14 @@
-import asyncio
-import datetime
 import logging
-import math
 import threading
-import ruamel.yaml
 import traceback
 import typing
 from pathlib import Path
 
+import ruamel.yaml
+
 import HABApp
-from HABApp.util import PrintException
 from HABApp.runtime import FileEventTarget
+from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.RuleParameters')
 
@@ -23,6 +21,7 @@ _yml_setup.sort_base_mapping_type_on_output = False
 
 
 class RuleParameters(FileEventTarget):
+
     @PrintException
     def __init__(self, parent):
         assert isinstance(parent, HABApp.Runtime)
@@ -71,7 +70,6 @@ class RuleParameters(FileEventTarget):
         log.debug(f'Removed params from {path.name}!')
 
     def add_file(self, path : Path):
-
         try:
             with self.__lock:
                 with open(path, 'r', encoding='utf-8') as file:
@@ -115,7 +113,7 @@ class RuleParameters(FileEventTarget):
                 log.info(f'Updated {filename}')
                 with open(filename, 'w', encoding='utf-8') as file:
                     _yml_setup.dump(data, file)
-
+        return None
 
     def get_param(self, file, *keys):
         try:

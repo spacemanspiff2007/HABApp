@@ -68,4 +68,3 @@ class SimpleFileEventHandler(FileSystemEventHandler):
 
         if event.dest_path.endswith(self.__file_ending):
             self._get_func(self.target.add_file)(Path(event.dest_path))
-

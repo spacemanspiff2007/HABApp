@@ -30,10 +30,10 @@ log = logging.getLogger('HABApp.Config')
 class Directories(ConfigEntry):
     def __init__(self):
         super().__init__()
-        self.logging:Path = 'log'
-        self.rules:Path   = 'rules'
-        self.lib:Path     = 'lib'
-        self.param:Path   = 'param'
+        self.logging: Path = 'log'
+        self.rules: Path   = 'rules'
+        self.lib: Path     = 'lib'
+        self.param: Path   = 'param'
 
 
 class Config(FileEventTarget):

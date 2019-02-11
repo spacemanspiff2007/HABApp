@@ -8,7 +8,7 @@ class RuleParameter:
         self.filename = filename
         self.keys = keys
 
-        # as a convenience try to create the file structure
+        # as a convenience try to create the file and the file structure
         self.__runtime.rule_params.add_param(self.filename, *self.keys)
 
     def get_value(self):
