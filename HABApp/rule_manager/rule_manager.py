@@ -8,16 +8,15 @@ import traceback
 import typing
 from pathlib import Path
 
-from watchdog.observers import Observer
-
 import HABApp
-from HABApp.util import PrintException, SimpleFileWatcher
+from HABApp.util import PrintException
 from .rule_file import RuleFile
+from HABApp.runtime import FileEventTarget
 
 log = logging.getLogger('HABApp.Rules')
 
 
-class RuleManager:
+class RuleManager(FileEventTarget):
 
     def __init__(self, parent):
         assert isinstance(parent, HABApp.Runtime)
@@ -34,22 +33,18 @@ class RuleManager:
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     time.sleep(0.5)
-                    HABApp.core.Workers.submit(self.add_file, f)
+                    HABApp.core.WrappedFunction(self.add_file, logger=log).submit( f)
 
-        HABApp.core.Workers.submit(delayed_load)
+        HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).submit()
 
         # folder watcher
-        self.__folder_watcher = Observer()
-        self.__folder_watcher.schedule(
-            SimpleFileWatcher(self.__file_event, file_ending='.py', ),
-            path=str(self.runtime.config.directories.rules),
-            recursive=True
+        self.runtime.folder_watcher.watch_folder(
+            folder=self.runtime.config.directories.rules,
+            file_ending='.py',
+            event_target=self,
+            worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).submit,
+            watch_subfolders=True
         )
-        self.__folder_watcher.start()
-
-        # proper shutdown
-        self.runtime.shutdown.register_func(self.__folder_watcher.stop)
-        self.runtime.shutdown.register_func(self.__folder_watcher.join)
 
         self.__process_last_sec = 60
 
@@ -83,7 +78,7 @@ class RuleManager:
     def get_async(self):
         return asyncio.gather(self.process_scheduled_events())
 
-
+    @PrintException
     def get_rule(self, rule_name):
         found = []
         for file in self.files.values():
@@ -93,41 +88,35 @@ class RuleManager:
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]
 
+    @PrintException
+    def reload_file(self, path: Path):
+        self.remove_file(path)
+        self.add_file(path)
 
-    def __file_event(self, path):
-        assert isinstance(path, Path), type(path)
-        HABApp.core.Workers.submit(self.add_file, path)
+    @PrintException
+    def remove_file(self, path: Path):
+        try:
+            with self.__lock:
+                path_str = str(path)
+                log.debug(f'Removing file: {path}')
+                if path_str in self.files:
+                    self.files.pop(path_str).unload()
+        except Exception:
+            log.error(f"Could not remove {path}!")
+            for l in traceback.format_exc().splitlines():
+                log.error(l)
+            return None
 
-
+    @PrintException
     def add_file(self, path : Path):
 
-        exists = path.is_file()
-
-        file = None
         try:
             # serialize loading
             with self.__lock:
                 path_str = str(path)
 
-                log.debug(f'{"Loading" if exists else "Removing"} file: {path}')
-
-                # unload old callbacks
-                did_unload = False
-                if path_str in self.files:
-                    for rule in self.files[path_str].iterrules():   # type: HABApp.Rule
-                        did_unload = True
-                        rule._cleanup()
-
-                # print message only if we did something
-                if did_unload:
-                    log.debug(f'File {path_str} successfully unloaded!')
-
-                # If the file doesn't exist we can stop after unloading it
-                if not exists:
-                    return None
-
-                file = RuleFile(self, path)
-                self.files[path_str] = file
+                log.debug(f'Loading file: {path}')
+                self.files[path_str] = file = RuleFile(self, path)
                 file.load()
         except Exception:
             log.error(f"Could not (fully) load {path}!")

@@ -143,7 +143,10 @@ class MqttConnection:
         if __was is not None and __was != payload:
             HABApp.core.Events.post_event(topic, HABApp.core.ValueChangeEvent(topic, payload, __was))
 
-    def publish(self, topic, payload, qos, retain):
+    def publish(self, topic, payload, qos, retain) -> mqtt.MQTTMessageInfo:
+
+        if self.client is None:
+            raise ConnectionError(f'Mqtt client not connected')
 
         if qos is None:
             qos = self.runtime.config.mqtt.publish.qos
@@ -153,6 +156,7 @@ class MqttConnection:
         info = self.client.publish(topic, payload, qos, retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
             log.error(f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
+        return info
 
     def disconnect(self):
         if self.connected:
@@ -161,3 +165,5 @@ class MqttConnection:
         if self.loop_started:
             self.client.loop_stop()
             self.loop_started = False
+
+        self.client = None

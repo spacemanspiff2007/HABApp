@@ -1,3 +1,5 @@
+import pathlib
+
 from voluptuous import Required, Coerce, Optional
 
 
@@ -26,9 +28,16 @@ class ConfigEntry:
         for name, value in self.iter_entry():
 
             # datatype
-            _type = self._entry_validators.get(name, type(value))
-            if _type is int or _type is float:
-                _type = Coerce(_type)
+            if name in self._entry_validators:
+                _type = self._entry_validators[name]
+            else:
+                _type = type(value)
+                if _type is int or _type is float:
+                    _type = Coerce(_type)
+
+                # we do not load Path objects, we load the strings
+                if isinstance(value, pathlib.Path):
+                    _type = str
 
             # name
             __name = {'schema' : name}

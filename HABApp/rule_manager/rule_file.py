@@ -2,7 +2,11 @@ import collections
 import logging
 import runpy
 import traceback
+import typing
 from pathlib import Path
+
+if typing.TYPE_CHECKING:
+    import HABApp
 
 log = logging.getLogger(f'HABApp.Rules')
 
@@ -18,13 +22,41 @@ class RuleFile:
 
         self.rules = {}
 
+        self.class_ctr = collections.defaultdict(lambda : 1)
+
+    def suggest_rule_name(self, obj) -> str:
+
+        # if there is already a name set we make no suggestion
+        if getattr(obj, 'rule_name', '') != '':
+            return obj.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
+
+        # create unique name
+        name = f'{str(type(obj))[19:-2]:s}'
+        found = self.class_ctr[name]
+        self.class_ctr[name] += 1
+
+        return f'{name:s}.{found:d}' if found > 1 else f'{name:s}'
+
     def iterrules(self):
         for rule in self.rules.values():
             yield rule
 
     def check_all_rules(self):
-        for name, rule in self.rules.items():
+        for rule in self.rules.values():  # type: HABApp.Rule
             rule._check_rule()
+
+    def unload(self):
+
+        # If we don't have any rules we can not unload
+        if not self.rules:
+            return None
+
+        # unload all registered callbacks
+        for rule in self.rules.values():  # type: HABApp.Rule
+            rule._cleanup()
+
+        log.debug(f'File {self.path} successfully unloaded!')
+        return None
 
     def load(self):
 
@@ -44,22 +76,15 @@ class RuleFile:
         if not len_found:
             log.warning(f'Found no instances of HABApp.Rule in {str(self.path)}')
         else:
-            ctr = collections.defaultdict(lambda : 1)
             for rule in created_rules:
-                rule_name = rule.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
-                if not rule_name:
-                    # create unique name
-                    __class_name = f'{str(type(rule))[19:-2]:s}'
-                    __classes_found = ctr[__class_name]
-                    rule_name = f'{__class_name:s}.{__classes_found}' if __classes_found > 1 else f'{__class_name:s}'
-                    rule.rule_name = rule_name
-                    ctr[__class_name] += 1
+                # ensure that we have a rule name
+                rule.rule_name = self.suggest_rule_name(rule)
 
                 # rule name must be unique for every file
-                if rule_name in self.rules:
-                    raise ValueError(f'Rule name must be unique!\n"{rule_name}" is already used!')
+                if rule.rule_name in self.rules:
+                    raise ValueError(f'Rule name must be unique!\n"{rule.rule_name}" is already used!')
 
-                self.rules[rule_name] = rule
-                log.info(f'Added rule "{rule_name}" from {self.path.name}')
+                self.rules[rule.rule_name] = rule
+                log.info(f'Added rule "{rule.rule_name}" from {self.path.name}')
 
         return None

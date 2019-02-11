@@ -7,14 +7,14 @@ import sys
 
 import ruamel.yaml
 from voluptuous import MultipleInvalid, Schema
-from watchdog.observers import Observer
 
 from HABApp.__version__ import __VERSION__
-from HABApp.util import CallbackHelper, SimpleFileWatcher
 from ._conf_mqtt import Mqtt
 from ._conf_openhab import Openhab
 from .configentry import ConfigEntry
 from .default_logfile import get_default_logfile
+
+from HABApp.runtime import FileEventTarget
 
 _yaml_param = ruamel.yaml.YAML(typ='safe')
 _yaml_param.default_flow_style = False
@@ -30,23 +30,20 @@ log = logging.getLogger('HABApp.Config')
 class Directories(ConfigEntry):
     def __init__(self):
         super().__init__()
-        self.logging = 'log'
-        self.rules   = 'rules'
-        self.lib     = 'lib'
-
-        # The type gets changed after runtime to Path
-        # So it is required to hardcode this here
-        self._entry_validators['logging'] = str
-        self._entry_validators['rules'] = str
-        self._entry_validators['lib'] = str
+        self.logging: Path = 'log'
+        self.rules: Path   = 'rules'
+        self.lib: Path     = 'lib'
+        self.param: Path   = 'param'
 
 
+class Config(FileEventTarget):
 
+    def __init__(self, runtime, config_folder : Path):
 
+        import HABApp.runtime
+        assert isinstance(runtime, HABApp.runtime.Runtime)
+        self.__runtime = runtime
 
-class Config:
-
-    def __init__(self, config_folder : Path, shutdown_helper : CallbackHelper = None):
         assert isinstance(config_folder, Path)
         assert config_folder.is_dir(), config_folder
         self.folder_conf = config_folder
@@ -63,27 +60,29 @@ class Config:
         self.__check_create_logging()
 
         # folder watcher
-        self.__folder_watcher = Observer()
-        self.__folder_watcher.schedule(
-            SimpleFileWatcher(self.__file_changed, file_ending='.yml'), str(self.folder_conf)
+        self.__runtime.folder_watcher.watch_folder(
+            folder=self.folder_conf,
+            file_ending='.yml',
+            event_target=self
         )
-        self.__folder_watcher.start()
-
-        # proper shutdown
-        shutdown_helper.register_func(self.__folder_watcher.stop)
-        shutdown_helper.register_func(self.__folder_watcher.join, last=True)
 
         # Load Config initially
         self.first_start = True
-        self.__file_changed('ALL')
+        self.add_file(self.file_conf_habapp)
+        self.add_file(self.file_conf_logging)
         self.first_start = False
 
-    def __file_changed(self, path):
-        if path == 'ALL' or path.name == 'config.yml':
+    def add_file(self, path: Path):
+        self.reload_file(path)
+
+    def reload_file(self, path: Path):
+        if path.name == 'config.yml':
             self.load_cfg()
-        if path == 'ALL' or path.name == 'logging.yml':
+        if path.name == 'logging.yml':
             self.load_log()
-        return None
+
+    def remove_file(self, path: Path):
+        pass
 
     def __check_create_config(self):
         if self.file_conf_habapp.is_file():

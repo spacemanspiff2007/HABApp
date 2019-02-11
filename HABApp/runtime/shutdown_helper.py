@@ -3,19 +3,10 @@ import logging
 import traceback
 
 
-class CallbackHelper:
-    def __init__(self, name='', logger=None):
+class ShutdownHelper:
+    def __init__(self, name=''):
         self.__cb_funcs = []
         self.__cb_last = []
-
-        if logger is None:
-            logger = logging.getLogger('CallbackHelper')
-        assert isinstance(logger, logging._loggerClass)
-        self.__log = logger
-
-        if not name:
-            name = self.__class__.__name__
-        self.__name = name
 
         self.requested = False
 
@@ -26,22 +17,24 @@ class CallbackHelper:
         else:
             self.__cb_funcs.append(func)
 
-    def request(self):
+    def request_shutdown(self):
         "Request execution of all functions"
-        self.__log.debug(f'{self.__name} started')
+
+        log = logging.getLogger('HABApp.Shutdown')
+        log.debug('Requested shutdown')
 
         self.requested = True
 
         for func in itertools.chain(self.__cb_funcs, self.__cb_last):
             try:
-                self.__log.debug(f'Calling {func.__name__}')
+                log.debug(f'Calling {func.__name__}')
                 func()
-                self.__log.debug(f'{func.__name__} done!')
+                log.debug(f'{func.__name__} done!')
             except Exception as ex:
-                self.__log.error(ex)
+                log.error(ex)
                 tb = traceback.format_exc().splitlines()
                 for line in tb:
-                    self.__log.error(line)
+                    log.error(line)
 
-        self.__log.debug(f'{self.__name} finished')
+        log.debug('Shutdown complete')
         return None
