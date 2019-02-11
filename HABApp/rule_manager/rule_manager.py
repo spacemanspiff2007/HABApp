@@ -11,11 +11,12 @@ from pathlib import Path
 import HABApp
 from HABApp.util import PrintException
 from .rule_file import RuleFile
+from HABApp.runtime import FileEventTarget
 
 log = logging.getLogger('HABApp.Rules')
 
 
-class RuleManager:
+class RuleManager(FileEventTarget):
 
     def __init__(self, parent):
         assert isinstance(parent, HABApp.Runtime)
@@ -26,27 +27,23 @@ class RuleManager:
         # serialize loading
         self.__lock = threading.Lock()
 
-        # wrapper to load files, do not reuse an instantiated WrappedFunction because it will throw errors
-        # in the traceback module
-        def load_file_wrapper(path):
-            return HABApp.core.WrappedFunction(self.add_file, logger=log).submit(path)
-
         # if we load immediately we don't have the items from openhab in itemcache
         def delayed_load():
             time.sleep(5)
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     time.sleep(0.5)
-                    load_file_wrapper( f)
+                    HABApp.core.WrappedFunction(self.add_file, logger=log).submit( f)
 
         HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).submit()
 
         # folder watcher
-        self.runtime.file_watcher.watch_folder(
+        self.runtime.folder_watcher.watch_folder(
             folder=self.runtime.config.directories.rules,
             file_ending='.py',
-            callback=load_file_wrapper,
-            recursive=True
+            event_target=self,
+            worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).submit,
+            watch_subfolders=True
         )
 
         self.__process_last_sec = 60
@@ -81,7 +78,7 @@ class RuleManager:
     def get_async(self):
         return asyncio.gather(self.process_scheduled_events())
 
-
+    @PrintException
     def get_rule(self, rule_name):
         found = []
         for file in self.files.values():
@@ -91,29 +88,35 @@ class RuleManager:
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]
 
+    @PrintException
+    def reload_file(self, path: Path):
+        self.remove_file(path)
+        self.add_file(path)
 
+    @PrintException
+    def remove_file(self, path: Path):
+        try:
+            with self.__lock:
+                path_str = str(path)
+                log.debug(f'Removing file: {path}')
+                if path_str in self.files:
+                    self.files.pop(path_str).unload()
+        except Exception:
+            log.error(f"Could not remove {path}!")
+            for l in traceback.format_exc().splitlines():
+                log.error(l)
+            return None
+
+    @PrintException
     def add_file(self, path : Path):
 
-        file_exists = path.is_file()
-
-        file = None
         try:
             # serialize loading
             with self.__lock:
                 path_str = str(path)
 
-                log.debug(f'{"Loading" if file_exists else "Removing"} file: {path}')
-
-                # unload old callbacks
-                if path_str in self.files:
-                    self.files.pop(path_str).unload()
-
-                # If the file doesn't exist we can stop after unloading it
-                if not file_exists:
-                    return None
-
-                file = RuleFile(self, path)
-                self.files[path_str] = file
+                log.debug(f'Loading file: {path}')
+                self.files[path_str] = file = RuleFile(self, path)
                 file.load()
         except Exception:
             log.error(f"Could not (fully) load {path}!")

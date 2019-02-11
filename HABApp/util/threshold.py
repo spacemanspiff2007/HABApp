@@ -11,7 +11,7 @@ class Threshold:
         vals = sorted([threshold1, threshold2])
         self.lower_threshold = vals[0]
         self.upper_threshold = vals[1]
-        assert self.lower_threshold <= self.upper_threshold
+        assert self.lower_threshold < self.upper_threshold
 
         self.__threshold = self.upper_threshold
 

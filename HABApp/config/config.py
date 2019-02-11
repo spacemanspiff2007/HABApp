@@ -14,6 +14,8 @@ from ._conf_openhab import Openhab
 from .configentry import ConfigEntry
 from .default_logfile import get_default_logfile
 
+from HABApp.runtime import FileEventTarget
+
 _yaml_param = ruamel.yaml.YAML(typ='safe')
 _yaml_param.default_flow_style = False
 _yaml_param.default_style = False
@@ -28,12 +30,13 @@ log = logging.getLogger('HABApp.Config')
 class Directories(ConfigEntry):
     def __init__(self):
         super().__init__()
-        self.logging = 'log'
-        self.rules   = 'rules'
-        self.lib     = 'lib'
+        self.logging:Path = 'log'
+        self.rules:Path   = 'rules'
+        self.lib:Path     = 'lib'
+        self.param:Path   = 'param'
 
 
-class Config:
+class Config(FileEventTarget):
 
     def __init__(self, runtime, config_folder : Path):
 
@@ -57,23 +60,29 @@ class Config:
         self.__check_create_logging()
 
         # folder watcher
-        self.__runtime.file_watcher.watch_folder(
+        self.__runtime.folder_watcher.watch_folder(
             folder=self.folder_conf,
             file_ending='.yml',
-            callback=self.__file_changed
+            event_target=self
         )
 
         # Load Config initially
         self.first_start = True
-        self.__file_changed('ALL')
+        self.add_file(self.file_conf_habapp)
+        self.add_file(self.file_conf_logging)
         self.first_start = False
 
-    def __file_changed(self, path):
-        if path == 'ALL' or path.name == 'config.yml':
+    def add_file(self, path: Path):
+        self.reload_file(path)
+
+    def reload_file(self, path: Path):
+        if path.name == 'config.yml':
             self.load_cfg()
-        if path == 'ALL' or path.name == 'logging.yml':
+        if path.name == 'logging.yml':
             self.load_log()
-        return None
+
+    def remove_file(self, path: Path):
+        pass
 
     def __check_create_config(self):
         if self.file_conf_habapp.is_file():

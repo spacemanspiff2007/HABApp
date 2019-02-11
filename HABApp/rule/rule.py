@@ -12,6 +12,7 @@ import HABApp.rule_manager
 import HABApp.util
 import HABApp.classes
 from .watched_item import WatchedItem
+from .rule_parameter import RuleParameter
 from .scheduler import ReoccuringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback
 
@@ -313,6 +314,10 @@ class Rule:
         future_event = ScheduledCallback( None, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
+
+    def get_rule_parameter(self, file, *keys) -> RuleParameter:
+        assert isinstance(file, str), type(file)
+        return RuleParameter(self.__runtime, file, *keys)
 
     def get_rule(self, rule_name):  # todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)

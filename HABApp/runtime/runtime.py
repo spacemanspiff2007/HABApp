@@ -5,7 +5,7 @@ import HABApp.core
 import HABApp.rule_manager
 import HABApp.util
 
-from .file_watcher import SimpleFileWatcher
+from .folder_watcher import FolderWatcher
 from .shutdown_helper import ShutdownHelper
 
 
@@ -14,8 +14,8 @@ class Runtime:
 
         self.shutdown = ShutdownHelper()
 
-        self.file_watcher = SimpleFileWatcher()
-        self.file_watcher.start(self.shutdown)
+        self.folder_watcher = FolderWatcher()
+        self.folder_watcher.start(self.shutdown)
 
         self.config = HABApp.config.Config(self, config_folder=config_folder)
 
@@ -27,6 +27,7 @@ class Runtime:
         self.mqtt_connection.connect()
 
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
+        self.rule_params = HABApp.rule_manager.RuleParameters(self)
 
         self.loop = asyncio.get_event_loop()
 

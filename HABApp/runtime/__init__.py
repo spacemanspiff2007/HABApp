@@ -1,2 +1,2 @@
-from .file_watcher import SimpleFileWatcher
+from .folder_watcher import FileEventTarget
 from .runtime import Runtime
