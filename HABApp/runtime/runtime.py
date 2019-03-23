@@ -20,7 +20,7 @@ class Runtime:
         self.config = HABApp.config.Config(self, config_folder=config_folder)
 
         # OpenHAB
-        self.openhab_connection = HABApp.openhab.Connection(self)
+        self.openhab_connection = HABApp.openhab.OpenhabConnection(self)
 
         # MQTT
         self.mqtt_connection = HABApp.mqtt.MqttConnection(self)
@@ -37,6 +37,6 @@ class Runtime:
     @HABApp.util.PrintException
     def get_async(self):
         return asyncio.gather(
-            self.openhab_connection.get_async(),
+            self.openhab_connection.start(),
             self.rule_manager.get_async(),
         )

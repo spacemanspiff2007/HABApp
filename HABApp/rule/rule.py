@@ -153,17 +153,11 @@ class Rule:
 
     def post_update(self, item_name, value):
         value = self.__convert_to_oh_type(value)
-        asyncio.run_coroutine_threadsafe(
-            self.__runtime.openhab_connection.async_post_update(str(item_name), value),
-            self.__runtime.loop
-        )
+        self.__runtime.openhab_connection.post_update(item_name, value)
 
     def send_command(self, item_name, value):
         value = self.__convert_to_oh_type(value)
-        asyncio.run_coroutine_threadsafe(
-            self.__runtime.openhab_connection.async_send_command(str(item_name), value),
-            self.__runtime.loop
-        )
+        self.__runtime.openhab_connection.send_command(item_name, value)
 
     def create_openhab_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
         """
@@ -185,20 +179,12 @@ class Rule:
         assert isinstance(tags, list), type(tags)
         assert isinstance(groups, list), type(groups)
 
-        future = asyncio.run_coroutine_threadsafe(
-            self.__runtime.openhab_connection.async_create_item(item_type, item_name, label, category, tags, groups),
-            self.__runtime.loop
-        )
+        return self.__runtime.openhab_connection.create_item(item_type, item_name, label, category, tags, groups)
 
-        return future.result()
 
     def remove_openhab_item(self, item_name: str):
         assert isinstance(item_name, str), type(item_name)
-        future = asyncio.run_coroutine_threadsafe(
-            self.__runtime.openhab_connection.async_remove_item(item_name),
-            self.__runtime.loop
-        )
-        return future.result()
+        return self.__runtime.openhab_connection.remove_item(item_name)
 
     def run_every(self, date_time, interval, callback, *args, **kwargs) -> ScheduledCallback:
         """

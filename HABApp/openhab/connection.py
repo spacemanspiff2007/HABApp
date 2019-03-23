@@ -1,12 +1,6 @@
+import aiohttp, ujson, logging, traceback, typing
 import asyncio
-import concurrent.futures
-import itertools
-import logging
-import time
-import traceback
-import ujson
-
-import aiohttp
+from asyncio import Future
 from aiohttp_sse_client import client as sse_client
 
 import HABApp
@@ -15,118 +9,107 @@ import HABApp.openhab.events
 from HABApp.openhab.events import get_event
 from HABApp.util import PrintException
 
-log = logging.getLogger('HABApp.openhab.Connection')
-log_events = logging.getLogger('HABApp.Events.openhab')
+log = logging.getLogger('HABApp.openhab.connection')
+
+class HttpConnectionEventHandler:
+    def on_connected(self):
+        raise NotImplementedError()
+
+    def on_disconnected(self):
+        raise NotImplementedError()
+
+    def on_sse_event(self, event: dict):
+        raise NotImplementedError()
 
 
-def is_ignored_exception(e) -> bool:
-    if isinstance(e, aiohttp.ClientPayloadError) or \
-            isinstance(e, ConnectionError) or \
-            isinstance(e, aiohttp.ClientConnectorError) or \
-            isinstance(e, concurrent.futures._base.CancelledError):  # kommt wenn wir einen task canceln
-        return True
-    return False
+class HttpConnection:
 
+    def __init__(self, event_handler, config):
+        assert isinstance(event_handler, HttpConnectionEventHandler)
+        self.event_handler: HttpConnectionEventHandler = event_handler
 
-class Connection:
+        assert isinstance(config, HABApp.config.Config)
+        self.config: HABApp.config.Config = config
 
-    def __init__(self, parent):
-        assert isinstance(parent, HABApp.Runtime)
-        self.runtime: HABApp.Runtime = parent
+        self.is_online = False
 
         self.__session: aiohttp.ClientSession = None
 
         self.__host: str = ''
         self.__port: str = ''
 
-        self.__ping_sent = 0
-        self.__ping_received = 0
+        self.__wait = 5
 
-        self.__tasks = []
+        self.async_try_uuid: asyncio.Future = None
 
-        # Add the ping listener, this works because connect is the last step
-        if self.runtime.config.openhab.ping.enabled:
-            listener = HABApp.core.EventListener(
-                self.runtime.config.openhab.ping.item,
-                HABApp.core.WrappedFunction(self.ping_received),
-                HABApp.openhab.events.ItemStateEvent
-            )
-            HABApp.core.Events.add_listener(listener)
-
-        self.runtime.shutdown.register_func(self.shutdown)
-
-        # todo: currently this does not work
-        # # reload config
-        # self.runtime.config.openhab.connection.subscribe_for_changes(
-        #     lambda : asyncio.run_coroutine_threadsafe(self.__create_session(), self.runtime.loop).result()
-        # )
-
-    def __get_url(self, url: str, *args, **kwargs):
-
-        prefix = f'http://{self.__host:s}:{self.__port:d}{ "" if url.startswith("/") else "/":s}'
+    def __get_openhab_url(self, url: str, *args, **kwargs) -> str:
+        assert not url.startswith('/')
         url = url.format(*args, **kwargs)
-        return prefix + url
+        return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
 
-    def shutdown(self):
-        for k in self.__tasks:
-            k.cancel()
+    def _is_disconnect_exception(self, e) -> bool:
+        if not isinstance(e, (aiohttp.ClientPayloadError, aiohttp.ClientConnectorError)):
+            return False
 
-    @PrintException
-    def get_async(self):
+        if self.is_online:
+            self.__wait = 5
+            self.is_online = False
+            self.event_handler.on_disconnected()
 
-        # These Tasks run in the Background and have to be canceled on shutdown
-        self.__tasks = [
-            asyncio.ensure_future(self.async_listen_for_sse_events()),
-            asyncio.ensure_future(self.async_ping()),
-        ]
+            if not self.async_try_uuid.done():
+                self.async_try_uuid.cancel()
+            self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
+        return True
 
-        return asyncio.gather(
-            *itertools.chain(
-                self.__tasks,
-                [asyncio.ensure_future(self.async_get_all_items())]
-            )
-        )
+    async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ aiohttp.client.ClientResponse]:
+        try:
+            resp = await future
+        except Exception as e:
+            is_disconnect = self._is_disconnect_exception(e)
+            log.log(logging.WARNING if is_disconnect else logging.ERROR, f'{e}')
+            if is_disconnect:
+                raise
+            else:
+                return None
 
-    @PrintException
-    def ping_received(self, event):
-        self.__ping_received = time.time()
+        # IO -> Quit
+        if resp.status >= 300:
+            # Log Error Message
+            additional_info = f' ({additional_info})' if additional_info else ""
+            log.warning(f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}{additional_info}')
+            for line in str(resp).splitlines():
+                log.warning(line)
 
-    @PrintException
-    async def async_ping(self):
-        # we need to wait so the session object is available
-        await asyncio.sleep(1)
-        if self.__session is None:
+        return resp
+
+    def cancel_connect(self):
+        if not self.async_try_uuid:
             return None
 
-        log.debug('Started ping')
-        while self.runtime.config.openhab.ping.enabled:
+        if not self.async_try_uuid.done():
+            self.async_try_uuid.cancel()
 
-            await self.async_post_update(
-                self.runtime.config.openhab.ping.item,
-                f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0'
-            )
-            self.__ping_sent = time.time()
-            await asyncio.sleep(10)
+    async def try_connect(self):
 
-    async def __create_session(self):
+        self.cancel_connect()
 
         # If we are already connected properly disconnect
         if self.__session is not None:
             await self.__session.close()
             self.__session = None
 
-        self.__host: str = self.runtime.config.openhab.connection.host
-        self.__port: str = self.runtime.config.openhab.connection.port
+        self.__host: str = self.config.openhab.connection.host
+        self.__port: str = self.config.openhab.connection.port
 
         # do not run without host
         if self.__host == '':
             return None
 
         auth = None
-        if self.runtime.config.openhab.connection.user or self.runtime.config.openhab.connection.password:
+        if self.config.openhab.connection.user or self.config.openhab.connection.password:
             auth = aiohttp.BasicAuth(
-                self.runtime.config.openhab.connection.user,
-                self.runtime.config.openhab.connection.password
+                self.config.openhab.connection.user,
+                self.config.openhab.connection.password
             )
 
         self.__session = aiohttp.ClientSession(
@@ -135,161 +118,90 @@ class Connection:
             auth=auth
         )
 
-    @PrintException
-    async def async_listen_for_sse_events(self):
-        "This is the worker thread who creates the connection"
+        self.async_try_uuid = asyncio.ensure_future(self._try_uuid())
 
-        await self.__create_session()
-        if self.__host is None:
-            log.info('OpenHAB disabled')
-            return None
+    async def _try_uuid(self):
 
-        log.debug('Started SSE listener')
-        while not self.runtime.shutdown.requested:
-            try:
-                async with sse_client.EventSource(
-                        self.__get_url("/rest/events?topics=smarthome/items/"),
-                        session=self.__session
-                ) as event_source:
-                    async for event in event_source:
-                        try:
-                            event = ujson.loads(event.data)
-                            if log_events.isEnabledFor(logging.DEBUG):
-                                log_events._log(logging.DEBUG, event, [])
-                            event = get_event(event)
+        # sleep before reconnect
+        self.__wait *= 2
+        self.__wait = min(self.__wait, 180)
+        await asyncio.sleep(self.__wait)
 
-                            # Events which change the ItemRegistry
-                            if isinstance(event, HABApp.openhab.events.ItemAddedEvent) or \
-                                    isinstance(event, HABApp.openhab.events.ItemUpdatedEvent):
-                                item = HABApp.openhab.map_items( event.name, event.type, 'NULL')
-                                HABApp.core.Items.set_item(item)
-                            elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
-                                HABApp.core.Items.pop_item(event.name)
+        log.debug('Trying to connect to OpenHAB ...')
+        uuid = await self.async_get_uuid()
+        log.info( f'Connected to OpenHAB instance {uuid}')
+        self.is_online = True
+        self.event_handler.on_connected()
 
-                            # Send Event to Event Bus
-                            HABApp.core.Events.post_event( event.name, event)
-
-                        except Exception as e:
-                            log.error("{}".format(e))
-                            for l in traceback.format_exc().splitlines():
-                                log.error(l)
-
-            except Exception as e:
-                lvl = logging.WARNING if is_ignored_exception(e) else logging.ERROR
-                log.log(lvl, f'SSE request Error: {e}')
-                for l in traceback.format_exc().splitlines():
-                    log.log(lvl, l)
-                if lvl == logging.ERROR:
-                    raise
-
-            await asyncio.sleep(3)
-
-        # close session
-        await self.__session.close()
-        return None
-
-    @PrintException
-    def __update_all_items(self, data) -> int:
-        data = ujson.loads(data)  # type: list
-        found_items = len(data)
-        for _dict in data:
-            __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
-            HABApp.core.Items.set_item(__item)
-
-        # remove items which are no longer available
-        ist = set(HABApp.core.Items.items.keys())
-        soll = {k['name'] for k in data}
-        for k in ist - soll:
-            HABApp.core.Items.pop_item(k)
-
-        log.info(f'Updated {found_items:d} items')
-        return found_items
-
-    @PrintException
-    async def async_get_all_items(self):
-
-        # we need to wait so the session object is available
-        await asyncio.sleep(1)
-        if self.__session is None:
-            return None
-
-        while True:
-            try:
-                resp = await self.__session.get(
-                    self.__get_url('rest/items'),
-                    json={'recursive': 'false', 'fields': 'state,type,name,editable'}
-                )
-                if resp.status == 200:
-                    data = await resp.text()
-                    found = self.__update_all_items(data)
-                    if found:
-                        break
-            except Exception as e:
-                if is_ignored_exception(e):
-                    log.warning(f'SSE request Error: {e}')
-                else:
-                    log.error(f'SSE request Error: {e}')
-                    raise
-
-            await asyncio.sleep(3)
-
-    @PrintException
-    async def __check_request_result(self, future, data=None):
-
+    async def async_process_sse_events(self):
         try:
-            resp = await future
-            # print(resp.request_info)
+            # cache so we don't have to look up every event
+            call = self.event_handler.on_sse_event
+
+            async with sse_client.EventSource(
+                    self.__get_openhab_url("rest/events?topics=smarthome/items/"),
+                    session=self.__session
+            ) as event_source:
+                async for event in event_source:
+                    event = ujson.loads(event.data)
+
+                    # Log sse event
+                    if log.isEnabledFor(logging.DEBUG):
+                        log._log(logging.DEBUG, event, [])
+
+                    # process
+                    call(event)
+
         except Exception as e:
-            if is_ignored_exception(e):
-                log.warning(e)
-                return None
-            raise
+            disconnect = self._is_disconnect_exception(e)
+            lvl = logging.WARNING if disconnect else logging.ERROR
+            log.log(lvl, f'SSE request Error: {e}')
+            for l in traceback.format_exc().splitlines():
+                log.log(lvl, l)
+            if not disconnect:
+                raise
 
-        # IO -> Quit
-        if resp.status >= 300:
-            # Log Error Message
-            msg = f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}'
-            if data:
-                msg += f' {data}'
-            log.warning(msg)
-            for line in str(resp).splitlines():
-                log.warning(line)
-
-        return resp.status
-
-    @PrintException
     async def async_post_update(self, item, state):
+        fut = self.__session.put(self.__get_openhab_url('rest/items/{item:s}/state', item=item), data=state)
+        asyncio.ensure_future(self._check_http_response(fut))
 
-        fut = self.__session.put(self.__get_url('rest/items/{item:s}/state', item=item), data=state)
-        asyncio.ensure_future(self.__check_request_result(fut, state))
-
-    @PrintException
     async def async_send_command(self, item, state):
+        fut = self.__session.post(self.__get_openhab_url('rest/items/{item:s}', item=item), data=state)
+        asyncio.ensure_future(self._check_http_response(fut))
 
-        fut = self.__session.post(self.__get_url('rest/items/{item:s}', item=item), data=state)
-        asyncio.ensure_future(self.__check_request_result(fut, state))
+    async def async_remove_item(self, item_name) -> bool:
+        fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}', item_name))
+        ret = await self._check_http_response(fut)
+        return ret.status < 300
 
+    async def async_get_uuid(self) -> str:
+        fut = self.__session.get(self.__get_openhab_url('rest/uuid'))
+        resp = await self._check_http_response(fut)
+        return (await resp.text()) if resp else resp
 
-    @PrintException
-    async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
+    async def async_get_items(self) -> typing.Optional[list]:
+        fut = self.__session.get(
+            self.__get_openhab_url('rest/items'),
+            json={'recursive': 'false', 'fields': 'state,type,name,editable'}
+        )
+        resp = await self._check_http_response(fut)
+        if resp is None:
+            return None
+        return ujson.loads(await resp.text())
+
+    async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]) -> bool:
 
         payload = {'type': item_type, 'name': item_name}
         if label:
             payload['label'] = label
-        if label:
+        if category:
             payload['category'] = category
-        if label:
+        if tags:
             payload['tags'] = tags
-        if label:
+        if groups:
             payload['groupnames'] = groups
 
-        fut = self.__session.put(self.__get_url('rest/items/{:s}', item_name), json=payload)
-        ret = await self.__check_request_result(fut, payload)
-        return ret == 200 or ret == 201
+        fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', item_name), json=payload)
+        ret = await self._check_http_response(fut, payload)
+        return ret.status < 300
 
-    @PrintException
-    async def async_remove_item(self, item_name):
-
-        fut = self.__session.delete(self.__get_url('rest/items/{:s}', item_name))
-        ret = await self.__check_request_result(fut)
-        return ret == 200 or ret == 201

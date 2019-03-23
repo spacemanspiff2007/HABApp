@@ -31,6 +31,7 @@ class General(ConfigEntry):
         super().__init__()
         self.timezone = '+1000'
         self._entry_validators['timezone'] = TimeZoneValidator()
+        self.listen_only = False
 
 
 class Connection(ConfigEntry):
