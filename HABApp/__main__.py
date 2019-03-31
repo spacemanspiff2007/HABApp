@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import concurrent
 import os
+import logging, traceback, typing
 import signal
 import sys
 from pathlib import Path
@@ -50,7 +51,10 @@ def find_config_folder() -> Path:
 
 
 
-def main() -> int:
+def main() -> typing.Union[int, str]:
+    loop = None
+    log = logging.getLogger('HABApp')
+
     try:
         loop = asyncio.get_event_loop()
         loop.set_debug(True)
@@ -71,8 +75,10 @@ def main() -> int:
         except concurrent.futures._base.CancelledError:
             pass
     except Exception as e:
-        print(e)
-        return e
+        for line in traceback.format_exc().splitlines():
+            log.error(line)
+            print(e)
+        return str(e)
     finally:
         loop.close()
     return 0

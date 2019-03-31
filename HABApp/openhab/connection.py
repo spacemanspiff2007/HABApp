@@ -32,15 +32,23 @@ class HttpConnection:
         self.config: HABApp.config.Config = config
 
         self.is_online = False
+        self.is_read_only = False
 
         self.__session: aiohttp.ClientSession = None
 
         self.__host: str = ''
         self.__port: str = ''
 
-        self.__wait = 5
+        self.__wait = 0
 
         self.async_try_uuid: asyncio.Future = None
+
+        # automatically update config
+        self.__update_config_general()
+        self.config.openhab.general.subscribe_for_changes(self.__update_config_general)
+
+    def __update_config_general(self):
+        self.is_read_only = self.config.openhab.general.listen_only
 
     def __get_openhab_url(self, url: str, *args, **kwargs) -> str:
         assert not url.startswith('/')
@@ -123,9 +131,10 @@ class HttpConnection:
     async def _try_uuid(self):
 
         # sleep before reconnect
+        await asyncio.sleep(self.__wait)
         self.__wait *= 2
         self.__wait = min(self.__wait, 180)
-        await asyncio.sleep(self.__wait)
+        self.__wait = max(5, 0)
 
         log.debug('Trying to connect to OpenHAB ...')
         uuid = await self.async_get_uuid()
@@ -162,14 +171,26 @@ class HttpConnection:
                 raise
 
     async def async_post_update(self, item, state):
+
+        if self.config.openhab.general.listen_only:
+            return False
+
         fut = self.__session.put(self.__get_openhab_url('rest/items/{item:s}/state', item=item), data=state)
         asyncio.ensure_future(self._check_http_response(fut))
 
     async def async_send_command(self, item, state):
+
+        if self.config.openhab.general.listen_only:
+            return False
+
         fut = self.__session.post(self.__get_openhab_url('rest/items/{item:s}', item=item), data=state)
         asyncio.ensure_future(self._check_http_response(fut))
 
     async def async_remove_item(self, item_name) -> bool:
+
+        if self.config.openhab.general.listen_only:
+            return False
+
         fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}', item_name))
         ret = await self._check_http_response(fut)
         return ret.status < 300
@@ -190,6 +211,10 @@ class HttpConnection:
         return ujson.loads(await resp.text())
 
     async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]) -> bool:
+
+        if self.config.openhab.general.listen_only:
+            return False
+
 
         payload = {'type': item_type, 'name': item_name}
         if label:

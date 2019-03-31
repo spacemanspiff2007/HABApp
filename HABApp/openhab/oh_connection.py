@@ -92,10 +92,10 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         log.debug('Started ping')
         while self.runtime.config.openhab.ping.enabled:
-            asyncio.ensure_future(self.connection.async_post_update(
+            self.post_update(
                 self.runtime.config.openhab.ping.item,
                 f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0'
-            ))
+            )
 
             self.__ping_sent = time.time()
             await asyncio.sleep(10)
@@ -150,7 +150,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
     @PrintException
     def post_update(self, item, state):
-        if not self.connection.is_online:
+        if not self.connection.is_online or self.connection.is_read_only:
             return None
 
         asyncio.run_coroutine_threadsafe(
@@ -160,7 +160,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
     @PrintException
     def send_command(self, item, state):
-        if not self.connection.is_online:
+        if not self.connection.is_online or self.connection.is_read_only:
             return None
 
         asyncio.run_coroutine_threadsafe(
@@ -171,7 +171,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
     @PrintException
     def create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
-        if not self.connection.is_online:
+        if not self.connection.is_online or self.connection.is_read_only:
             return None
 
         fut = asyncio.run_coroutine_threadsafe(
@@ -182,7 +182,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
     @PrintException
     def remove_item(self, item_name):
-        if not self.connection.is_online:
+        if not self.connection.is_online or self.connection.is_read_only:
             return None
 
         fut = asyncio.run_coroutine_threadsafe(
