@@ -1,15 +1,20 @@
-import aiohttp, ujson, logging, traceback, typing
 import asyncio
-from asyncio import Future
+import logging
+import traceback
+import typing
+
+import aiohttp
+import ujson
+from aiohttp.client import ClientResponse
 from aiohttp_sse_client import client as sse_client
 
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.openhab.events import get_event
-from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.openhab.connection')
+log_events = logging.getLogger('HABApp.Events.openhab')
+
 
 class HttpConnectionEventHandler:
     def on_connected(self):
@@ -69,7 +74,7 @@ class HttpConnection:
             self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
         return True
 
-    async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ aiohttp.client.ClientResponse]:
+    async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ ClientResponse]:
         try:
             resp = await future
         except Exception as e:
@@ -155,8 +160,8 @@ class HttpConnection:
                     event = ujson.loads(event.data)
 
                     # Log sse event
-                    if log.isEnabledFor(logging.DEBUG):
-                        log._log(logging.DEBUG, event, [])
+                    if log_events.isEnabledFor(logging.DEBUG):
+                        log_events._log(logging.DEBUG, event, [])
 
                     # process
                     call(event)
@@ -229,4 +234,3 @@ class HttpConnection:
         fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', item_name), json=payload)
         ret = await self._check_http_response(fut, payload)
         return ret.status < 300
-

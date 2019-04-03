@@ -1,24 +1,16 @@
 import asyncio
-import concurrent.futures
-import itertools
 import logging
 import time
 import traceback
-import ujson
-
-import aiohttp
-from aiohttp_sse_client import client as sse_client
 
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.openhab.events import get_event
 from HABApp.util import PrintException
-
 from .connection import HttpConnection, HttpConnectionEventHandler
 
 log = logging.getLogger('HABApp.openhab.Connection')
-log_events = logging.getLogger('HABApp.Events.openhab')
 
 
 
@@ -106,10 +98,6 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         # Lookup corresponding OpenHAB event
         event = get_event(event)
-
-        # log event
-        if log_events.isEnabledFor(logging.DEBUG):
-            log_events.log(logging.DEBUG, f'{event}')
 
         # Events which change the ItemRegistry
         if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):

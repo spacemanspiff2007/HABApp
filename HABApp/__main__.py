@@ -1,10 +1,12 @@
 import argparse
 import asyncio
 import concurrent
+import logging
 import os
-import logging, traceback, typing
 import signal
 import sys
+import traceback
+import typing
 from pathlib import Path
 
 import HABApp
