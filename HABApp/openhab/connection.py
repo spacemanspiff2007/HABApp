@@ -16,6 +16,10 @@ log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.Events.openhab')
 
 
+class OpenhabDisconnectedError(Exception):
+    pass
+
+
 class HttpConnectionEventHandler:
     def on_connected(self):
         raise NotImplementedError()
@@ -69,6 +73,7 @@ class HttpConnection:
             self.is_online = False
             self.event_handler.on_disconnected()
 
+            # Try reconnect
             if not self.async_try_uuid.done():
                 self.async_try_uuid.cancel()
             self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
@@ -81,7 +86,7 @@ class HttpConnection:
             is_disconnect = self._is_disconnect_exception(e)
             log.log(logging.WARNING if is_disconnect else logging.ERROR, f'{e}')
             if is_disconnect:
-                raise
+                raise OpenhabDisconnectedError()
             else:
                 return None
 
@@ -142,10 +147,17 @@ class HttpConnection:
         self.__wait = max(5, 0)
 
         log.debug('Trying to connect to OpenHAB ...')
-        uuid = await self.async_get_uuid()
+        try:
+            uuid = await self.async_get_uuid()
+        except OpenhabDisconnectedError:
+            self.async_try_uuid = asyncio.ensure_future(self._try_uuid())
+            log.info(f'... offline!')
+            return None
+
         log.info( f'Connected to OpenHAB instance {uuid}')
         self.is_online = True
         self.event_handler.on_connected()
+        return None
 
     async def async_process_sse_events(self):
         try:
@@ -203,6 +215,8 @@ class HttpConnection:
     async def async_get_uuid(self) -> str:
         fut = self.__session.get(self.__get_openhab_url('rest/uuid'))
         resp = await self._check_http_response(fut)
+        if resp.status >= 300:
+            raise OpenhabDisconnectedError()
         return (await resp.text()) if resp else resp
 
     async def async_get_items(self) -> typing.Optional[list]:
