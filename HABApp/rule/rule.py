@@ -136,12 +136,12 @@ class Rule:
         assert isinstance(name, str), type(name)
         return HABApp.core.Events.post_event(name, event)
 
-    def listen_event(self, name: str, callback, even_type=None) -> HABApp.core.EventListener:
+    def listen_event(self, name: str, callback, even_type=HABApp.core.events.AllEvents) -> HABApp.core.EventListener:
         """
         Register and event listener
-        :param name: name to listen to
+        :param name: name to listen to or '' for all event names
         :param callback: callback
-        :param even_type: None for all events, class to only make a call on class instances
+        :param even_type: class to only make a call on class instances
         :return: Instance of EventListener
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))

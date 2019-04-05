@@ -1,6 +1,5 @@
 import argparse
 import asyncio
-import concurrent
 import logging
 import os
 import signal
@@ -74,7 +73,7 @@ def main() -> typing.Union[int, str]:
         # start workers
         try:
             loop.run_until_complete(app.get_async())
-        except concurrent.futures._base.CancelledError:
+        except asyncio.CancelledError:
             pass
     except Exception as e:
         for line in traceback.format_exc().splitlines():

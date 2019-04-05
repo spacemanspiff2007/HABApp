@@ -3,7 +3,7 @@ import random
 import time
 
 import HABApp
-from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, AllEvents
 from HABApp.openhab.events import ItemStateEvent
 
 
@@ -71,6 +71,7 @@ class MyRule(HABApp.Rule):
 
         self.run_every(datetime.datetime.now() + datetime.timedelta(seconds=5), 1, self.print_ts, 'Sec P1', asdf='P2')
 
+        self.listen_event('', self.process_any_update, ValueUpdateEvent)
 
     def print_ts(self, arg, asdf = None):
         print( f'{time.time():.3f} : {arg}, {asdf}')
@@ -80,7 +81,6 @@ class MyRule(HABApp.Rule):
     def cb(self, event):
         print( f'CALLBACK: {event}')
         assert isinstance(event, ValueUpdateEvent)
-
         #time.sleep(0.6)
 
         # s = time.time()
@@ -90,6 +90,9 @@ class MyRule(HABApp.Rule):
         #
         # self.post_Update('TestString8', "11")
         # print( f'dauer: {time.time() - s}')
+
+    def process_any_update(self, event):
+        print(f'on_any_event: {event}')
 
 
 a = MyRule()

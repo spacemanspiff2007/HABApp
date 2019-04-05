@@ -1,10 +1,15 @@
 import logging
 import typing
+import itertools
 
 from HABApp.util import PrintException
 from .worker import WrappedFunction
 
 log = logging.getLogger('HABApp.Events')
+
+
+class AllEvents:
+    pass
 
 
 class ValueUpdateEvent:
@@ -47,19 +52,27 @@ class ValueNoUpdateEvent:
 
 
 class EventListener:
-    def __init__(self, name, callback, event_type = None):
-        assert isinstance(name, str), type(str)
+    def __init__(self, name, callback, event_type=AllEvents):
+        assert isinstance(name, str), type(name)
         assert isinstance(callback, WrappedFunction)
 
-        self.name : str = name
+        self.name: str = name
         self.func = callback
 
         self.event_filter = event_type
 
     def notify_listeners(self, event):
-        if self.event_filter is None or isinstance(event, self.event_filter):
+
+        if self.event_filter is AllEvents or isinstance(event, self.event_filter):
             self.func.submit(event)
             return None
+
+        # Make it possible to specify multiple classes
+        if isinstance(self.event_filter, list) or isinstance(self.event_filter, set):
+            for cls in self.event_filter:
+                if isinstance(event, cls):
+                    self.func.submit(event)
+                    return None
 
 
 class EventBus:
@@ -80,7 +93,7 @@ class EventBus:
             self.__items.set_state(event.name, event.value)
 
         # Notify all listeners
-        for listener in self.__event_listener.get(name, []):
+        for listener in itertools.chain(self.__event_listener.get(name, []), self.__event_listener.get('', [])):
             listener.notify_listeners(event)
 
         return None
@@ -92,7 +105,7 @@ class EventBus:
         if listener not in item_listeners:
             return None
         item_listeners.remove(listener)
-        log.debug(f'Removed event listener for {listener.name} (type {listener.event_filter})')
+        log.debug(f'Removed event listener for "{listener.name}" (type {listener.event_filter})')
 
     def add_listener(self, listener : EventListener):
         assert isinstance(listener, EventListener)
@@ -105,5 +118,5 @@ class EventBus:
         item_listeners.append( listener)
         self.__event_listener[listener.name] = item_listeners
 
-        log.debug(f'Added Event listener for {listener.name} (type {listener.event_filter})')
+        log.debug(f'Added Event listener for "{listener.name}" (type {listener.event_filter})')
         return None
