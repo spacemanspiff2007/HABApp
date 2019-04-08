@@ -1,6 +1,9 @@
+import typing
 from datetime import datetime, timedelta, time
 
 from HABApp.core.worker import WrappedFunction
+
+TYPING_DATE_TIME = typing.Union[None, datetime, timedelta, time]
 
 
 class ScheduledCallback:
@@ -8,7 +11,7 @@ class ScheduledCallback:
     VALIDATE_CALLBACK_DATETIME = True
     CALL_ONCE = True
 
-    def __init__(self, date_time, callback, *args, **kwargs):
+    def __init__(self, date_time: TYPING_DATE_TIME, callback, *args, **kwargs):
 
         # next time the callback will be executed
         __now = datetime.now()
@@ -18,7 +21,7 @@ class ScheduledCallback:
             date_time = __now
         elif isinstance(date_time, timedelta):
             # if it is a timedelta add it to now to easily speciy points in the future
-            date_time = __now + timedelta
+            date_time = __now + date_time
         elif isinstance(date_time, time):
             # if it is a time object it specifies a time of day.
             date_time = __now.replace(hour=date_time.hour, minute=date_time.minute, second=date_time.second)
