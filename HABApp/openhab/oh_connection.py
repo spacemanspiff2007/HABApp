@@ -115,6 +115,8 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         try:
             data = await self.connection.async_get_items()
+            if data is None:
+                return None
 
             found_items = len(data)
             for _dict in data:

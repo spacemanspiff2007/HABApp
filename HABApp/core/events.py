@@ -82,6 +82,7 @@ class EventBus:
         self.__items = Items
 
         self.__event_listener: typing.Dict[str, typing.List[EventListener]] = {}
+        self.__event_listener_all: typing.List[EventListener] = []
 
     @PrintException
     def post_event(self, name, event):
@@ -93,30 +94,38 @@ class EventBus:
             self.__items.set_state(event.name, event.value)
 
         # Notify all listeners
-        for listener in itertools.chain(self.__event_listener.get(name, []), self.__event_listener.get('', [])):
+        for listener in itertools.chain(self.__event_listener.get(name, []), self.__event_listener_all):
             listener.notify_listeners(event)
 
         return None
 
     def remove_listener(self, listener : EventListener):
         assert isinstance(listener, EventListener)
+        add_to_all = listener.name is None
 
-        item_listeners = self.__event_listener.get(listener.name, [])
+        item_listeners = self.__event_listener.get(listener.name, []) if not add_to_all else self.__event_listener_all
         if listener not in item_listeners:
             return None
         item_listeners.remove(listener)
-        log.debug(f'Removed event listener for "{listener.name}" (type {listener.event_filter})')
+
+        if add_to_all:
+            log.debug(f'Removed event listener for all names (type {listener.event_filter})')
+        else:
+            log.debug(f'Removed event listener for "{listener.name}" (type {listener.event_filter})')
 
     def add_listener(self, listener : EventListener):
         assert isinstance(listener, EventListener)
+        add_to_all = listener.name is None
 
         # don't add the same listener twice
-        item_listeners = self.__event_listener.get(listener.name, [])
+        item_listeners = self.__event_listener.get(listener.name, []) if not add_to_all else self.__event_listener_all
         if listener in item_listeners:
             return None
 
         item_listeners.append( listener)
-        self.__event_listener[listener.name] = item_listeners
-
-        log.debug(f'Added Event listener for "{listener.name}" (type {listener.event_filter})')
+        if add_to_all:
+            log.debug(f'Added Event listener for all names (type {listener.event_filter})')
+        else:
+            self.__event_listener[listener.name] = item_listeners
+            log.debug(f'Added Event listener for "{listener.name}" (type {listener.event_filter})')
         return None
