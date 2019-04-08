@@ -8,10 +8,10 @@ import HABApp.core
 import HABApp.openhab.events
 from HABApp.openhab.events import get_event
 from HABApp.util import PrintException
-from .connection import HttpConnection, HttpConnectionEventHandler
+from .http_connection import HttpConnection, HttpConnectionEventHandler
+from .oh_interface import OpenhabInterface
 
 log = logging.getLogger('HABApp.openhab.Connection')
-
 
 
 
@@ -22,11 +22,10 @@ class OpenhabConnection(HttpConnectionEventHandler):
         self.runtime: HABApp.Runtime = parent
 
         self.connection = HttpConnection(self, self.runtime.config)
+        self.interface = OpenhabInterface(self.connection, openhab_config=self.runtime.config.openhab)
 
         self.__ping_sent = 0
         self.__ping_received = 0
-
-        self.__tasks = []
 
         # Add the ping listener, this works because connect is the last step
         if self.runtime.config.openhab.ping.enabled:
@@ -84,7 +83,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         log.debug('Started ping')
         while self.runtime.config.openhab.ping.enabled:
-            self.post_update(
+            self.interface.post_update(
                 self.runtime.config.openhab.ping.item,
                 f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0'
             )
@@ -136,47 +135,3 @@ class OpenhabConnection(HttpConnectionEventHandler):
             for l in traceback.format_exc().splitlines():
                 log.error(l)
             return 0
-
-
-    @PrintException
-    def post_update(self, item, state):
-        if not self.connection.is_online or self.connection.is_read_only:
-            return None
-
-        asyncio.run_coroutine_threadsafe(
-            self.connection.async_post_update(item, state),
-            self.runtime.loop
-        )
-
-    @PrintException
-    def send_command(self, item, state):
-        if not self.connection.is_online or self.connection.is_read_only:
-            return None
-
-        asyncio.run_coroutine_threadsafe(
-            self.connection.async_send_command(item, state),
-            self.runtime.loop
-        )
-
-
-    @PrintException
-    def create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
-        if not self.connection.is_online or self.connection.is_read_only:
-            return None
-
-        fut = asyncio.run_coroutine_threadsafe(
-            self.connection.async_create_item(item_type, item_name, label, category, tags, groups),
-            self.runtime.loop
-        )
-        return fut.result()
-
-    @PrintException
-    def remove_item(self, item_name):
-        if not self.connection.is_online or self.connection.is_read_only:
-            return None
-
-        fut = asyncio.run_coroutine_threadsafe(
-            self.connection.async_remove_item(item_name),
-            self.runtime.loop
-        )
-        return fut.result()

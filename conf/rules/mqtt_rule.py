@@ -15,12 +15,12 @@ class MqttTestRule(HABApp.Rule):
         testing = True
         if testing:
             try:
-                self.mqtt_publish('test/test', 'Starting MqttTestRule')
+                self.mqtt.publish('test/test', 'Starting MqttTestRule')
             except ConnectionError as e:
                 return
 
         self.run_every(
-            datetime.datetime.now() + datetime.timedelta(seconds=10),
+            datetime.timedelta(seconds=10),
             interval=datetime.timedelta(seconds=20),
             callback=self.publish_rand_value
         )
@@ -29,7 +29,7 @@ class MqttTestRule(HABApp.Rule):
 
     def publish_rand_value(self):
         print('test mqtt_publish')
-        self.mqtt_publish('test/test', str(random.randint(0, 1000)))
+        self.mqtt.publish('test/test', str(random.randint(0, 1000)))
 
     def topic_changed(self, event):
         assert isinstance(event, ValueUpdateEvent), type(event)

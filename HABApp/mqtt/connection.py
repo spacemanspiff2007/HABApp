@@ -10,6 +10,14 @@ log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.Events.mqtt')
 
 
+class MqttInterface:
+    def __init__(self, connection):
+        self.__connection: MqttConnection = connection
+
+    def publish(self, topic: str, payload, qos=None, retain=None):
+        self.__connection.publish(topic, payload, qos, retain)
+
+
 class MqttConnection:
     def __init__(self, parent):
         assert isinstance(parent, HABApp.Runtime)
@@ -29,6 +37,8 @@ class MqttConnection:
 
         # shutdown
         self.runtime.shutdown.register_func(self.disconnect)
+
+        self.interface: MqttInterface = MqttInterface(self)
 
     def connect(self):
         if not self.runtime.config.mqtt.connection.host:

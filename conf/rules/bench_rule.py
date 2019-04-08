@@ -20,7 +20,7 @@ class OpenhabBenchRule(HABApp.Rule):
 
     def prepare_bench(self):
         for k in self.item_list:
-            self.create_openhab_item('string', k)
+            self.openhab.create_item('string', k)
 
         self.run_every(None, datetime.timedelta(minutes=5), self.bench_start)
         self.listen_event(self.item_list[-1], self.bench_stop, ValueChangeEvent)
@@ -29,7 +29,7 @@ class OpenhabBenchRule(HABApp.Rule):
         self.__b_val = str(random.randint(0, 99999999))
         self.__b_start = time.time()
         for k in self.item_list:
-            self.post_update(k, self.__b_val)
+            self.openhab.post_update(k, self.__b_val)
         dur = time.time() - self.__b_start
         print(f'bench_start finish: {dur:.3f}')
 

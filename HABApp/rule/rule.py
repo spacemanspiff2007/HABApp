@@ -6,7 +6,7 @@ import logging
 
 import HABApp
 import HABApp.core
-import HABApp.openhab.events
+import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 import HABApp.classes
@@ -47,38 +47,32 @@ class Rule:
         # suggest a rule name if it is not
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
+        # interfaces
+        self.mqtt = self.__runtime.mqtt_connection.interface
+        self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface
+        self.openhab: HABApp.openhab.OpenhabInterface = self.oh
 
-    def __convert_to_oh_type(self, _in):
-        if isinstance(_in, datetime.datetime):
-            return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self.__runtime.config.openhab.general.timezone
-        elif isinstance(_in, HABApp.core.Item):
-            return str(_in.state)
-        elif isinstance(_in, HABApp.classes.Color):
-            return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
-
-        return str(_in)
-
-    def item_exists(self, item_name) -> bool:
+    def item_exists(self, name: str) -> bool:
         """
         Checks whether an item exists
-        :param item_name: Name of the item
+        :param name: Name of the item
         :return: True or False
         """
-        assert isinstance(item_name, str), type(item_name)
-        return HABApp.core.Items.item_exists(item_name)
+        assert isinstance(name, str), type(name)
+        return HABApp.core.Items.item_exists(name)
 
-    def get_item_state(self, item_name, default=None):
+    def get_item_state(self, name: str, default=None):
         """
         Return the state of the item.
-        :param item_name:
+        :param name:
         :param default: If the item does not exist or is None this value will be returned (has to be != None)
         :return: state of the specified item
         """
         if default is None:
-            return HABApp.core.Items.get_item(item_name).state
+            return HABApp.core.Items.get_item(name).state
 
         try:
-            state = HABApp.core.Items.get_item(item_name).state
+            state = HABApp.core.Items.get_item(name).state
         except KeyError:
             return default
 
@@ -86,45 +80,45 @@ class Rule:
             return default
         return state
 
-    def set_item_state(self, item_name, value):
-        assert isinstance(item_name, str)
+    def set_item_state(self, name: str, value):
+        assert isinstance(name, str)
 
         try:
-            old_state = HABApp.core.Items.get_item(item_name).state
+            old_state = HABApp.core.Items.get_item(name).state
         except KeyError:
             old_state = None
 
-        self.post_event(item_name, HABApp.core.ValueUpdateEvent(name=item_name, value=value))
+        self.post_event(name, HABApp.core.ValueUpdateEvent(name=name, value=value))
         if old_state != value:
-            self.post_event(item_name, HABApp.core.ValueChangeEvent(name=item_name, value=value, old_value=old_state))
+            self.post_event(name, HABApp.core.ValueChangeEvent(name=name, value=value, old_value=old_state))
         return None
 
-    def item_watch(self, item_name, seconds_constant, watch_only_changes=True) -> WatchedItem:
-        assert isinstance(item_name, str)
+    def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
+        assert isinstance(name, str)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
 
         item = WatchedItem(
-            name=item_name,
+            name=name,
             constant_time=seconds_constant,
             watch_only_changes=watch_only_changes
         )
         self.__watched_items.append(item)
         return item
 
-    def item_watch_and_listen(self, item_name, seconds_constant, callback,
+    def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
                               watch_only_changes = True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
 
-        watched_item = self.item_watch(item_name, seconds_constant, watch_only_changes)
+        watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
         event_listener = self.listen_event(
-            item_name,
+            name,
             callback,
             HABApp.core.ValueNoChangeEvent if watch_only_changes else HABApp.core.ValueNoUpdateEvent
         )
         return watched_item, event_listener
 
-    def get_item(self, item_name) -> HABApp.core.Item:
-        return HABApp.core.Items.get_item(item_name)
+    def get_item(self, name: str) -> HABApp.core.Item:
+        return HABApp.core.Items.get_item(name)
 
     def post_event(self, name, event):
         """
@@ -151,41 +145,6 @@ class Rule:
         self.__event_listener.append(listener)
         HABApp.core.Events.add_listener(listener)
         return listener
-
-    def post_update(self, item_name, value):
-        value = self.__convert_to_oh_type(value)
-        self.__runtime.openhab_connection.post_update(item_name, value)
-
-    def send_command(self, item_name, value):
-        value = self.__convert_to_oh_type(value)
-        self.__runtime.openhab_connection.send_command(item_name, value)
-
-    def create_openhab_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
-        """
-
-        :param item_type:
-        :param item_name:
-        :param label:
-        :param category:
-        :param tags:
-        :param groups:
-        :return: True if Successfull else False
-        """
-        assert isinstance(item_type, str), type(item_type)
-        item_type = item_type.title()
-        assert item_type in ['String', 'Number', 'Switch', 'Contact', 'Color', 'Contact'], item_type
-        assert isinstance(item_name, str), type(item_name)
-        assert isinstance(label, str), type(label)
-        assert isinstance(category, str), type(category)
-        assert isinstance(tags, list), type(tags)
-        assert isinstance(groups, list), type(groups)
-
-        return self.__runtime.openhab_connection.create_item(item_type, item_name, label, category, tags, groups)
-
-
-    def remove_openhab_item(self, item_name: str):
-        assert isinstance(item_name, str), type(item_name)
-        return self.__runtime.openhab_connection.remove_item(item_name)
 
     def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ScheduledCallback:
         """
@@ -301,17 +260,43 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def get_rule_parameter(self, file, *keys) -> RuleParameter:
-        assert isinstance(file, str), type(file)
-        return RuleParameter(self.__runtime, file, *keys)
+    def get_rule_parameter(self, file_name: str, *keys) -> RuleParameter:
+        assert isinstance(file_name, str), type(file_name)
+        return RuleParameter(self.__runtime, file_name, *keys)
 
-    def get_rule(self, rule_name):  # todo: einkommentieren mit python3.7 -> Rule:
+    def get_rule(self, rule_name: str):  # todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
-    def mqtt_publish(self, topic, payload=None, qos=None, retain=None):
-        return self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
+    # -----------------------------------------------------------------------------------------------------------------
+    # deprecated stuff
+    # -----------------------------------------------------------------------------------------------------------------
+    def post_update(self, name, value):
+        log.warning('self.post_update is deprecated! Use self.openhab.post_update or self.oh.post_update instead!')
+        self.openhab.post_update(name, value)
 
+    def send_command(self, name, value):
+        log.warning('self.send_command is deprecated! Use self.openhab.send_command or self.oh.send_command instead!')
+        self.openhab.send_command(name, value)
+
+    def create_openhab_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
+        log.warning('self.create_openhab_item is deprecated!'
+                    'Use self.openhab.create_item or self.oh.create_item instead!')
+        return self.openhab.create_item(item_type, item_name, label, category, tags, groups)
+
+
+    def remove_openhab_item(self, item_name: str):
+        log.warning('self.remove_openhab_item is deprecated!'
+                    'Use self.openhab.remove_item or self.oh.remove_item instead!')
+        return self.openhab.remove_item(item_name)
+
+    def mqtt_publish(self, topic: str, payload, qos=None, retain=None):
+        log.warning('self.mqtt_publish is deprecated! Use self.mqtt.publish instead!')
+        return self.mqtt.publish(topic, payload, qos, retain)
+
+    # -----------------------------------------------------------------------------------------------------------------
+    # internal functions
+    # -----------------------------------------------------------------------------------------------------------------
     def __get_rule_name(self, callback):
         return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None
 

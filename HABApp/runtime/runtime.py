@@ -12,6 +12,8 @@ from .shutdown_helper import ShutdownHelper
 class Runtime:
     def __init__(self, config_folder):
 
+        self.loop = asyncio.get_event_loop()
+
         self.shutdown = ShutdownHelper()
 
         self.folder_watcher = FolderWatcher()
@@ -29,7 +31,6 @@ class Runtime:
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
         self.rule_params = HABApp.rule_manager.RuleParameters(self)
 
-        self.loop = asyncio.get_event_loop()
 
         # Shutdown workers
         self.shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown)
