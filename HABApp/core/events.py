@@ -8,6 +8,7 @@ from .worker import WrappedFunction
 event_log = logging.getLogger('HABApp.Events')
 habapp_log = logging.getLogger('HABApp')
 
+
 class AllEvents:
     pass
 

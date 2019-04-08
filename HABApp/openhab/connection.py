@@ -19,8 +19,10 @@ log_events = logging.getLogger('HABApp.Events.openhab')
 class OpenhabDisconnectedError(Exception):
     pass
 
+
 class OpenhabNotReadyYet(Exception):
     pass
+
 
 class HttpConnectionEventHandler:
     def on_connected(self):

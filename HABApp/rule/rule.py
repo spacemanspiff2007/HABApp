@@ -17,6 +17,7 @@ from .scheduler import ReoccuringScheduledCallback, ScheduledCallback, WorkdaySc
 
 log = logging.getLogger('HABApp.Rule')
 
+
 class Rule:
     def __init__(self):
 
