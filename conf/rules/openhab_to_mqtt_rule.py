@@ -13,7 +13,7 @@ class MyOpenhabToMQTTRule(HABApp.Rule):
         testing = True
         if testing:
             try:
-                self.mqtt_publish('test/test', 'Starting MqttTestRule')
+                self.mqtt.publish('test/test', 'Starting MqttTestRule')
             except ConnectionError as e:
                 return
 
@@ -23,7 +23,7 @@ class MyOpenhabToMQTTRule(HABApp.Rule):
         assert isinstance(event, ItemStateEvent)
 
         print( f'/openhab/{event.name} <- {event.value}')
-        self.mqtt_publish( f'/openhab/{event.name}', event.value)
+        self.mqtt.publish( f'/openhab/{event.name}', event.value)
 
 a = MyOpenhabToMQTTRule()
 
