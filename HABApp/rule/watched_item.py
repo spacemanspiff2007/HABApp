@@ -10,7 +10,7 @@ class WatchedItem:
         assert isinstance(watch_only_changes, bool)
 
         self.name: str = name
-        self.const = datetime.timedelta(seconds=constant_time)
+        self.duration_const = datetime.timedelta(seconds=constant_time)
         self.executed = False
 
         self.__watch_only_changes = watch_only_changes
@@ -28,7 +28,7 @@ class WatchedItem:
 
         timestamp = item.last_change if self.__watch_only_changes else item.last_update
         duration = now - timestamp
-        if duration < self.const:
+        if duration < self.duration_const:
             self.executed = False
             return None
 
