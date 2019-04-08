@@ -1,15 +1,28 @@
-import aiohttp, ujson, logging, traceback, typing
 import asyncio
-from asyncio import Future
+import logging
+import traceback
+import typing
+
+import aiohttp
+import ujson
+from aiohttp.client import ClientResponse
 from aiohttp_sse_client import client as sse_client
 
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.openhab.events import get_event
-from HABApp.util import PrintException
 
 log = logging.getLogger('HABApp.openhab.connection')
+log_events = logging.getLogger('HABApp.Events.openhab')
+
+
+class OpenhabDisconnectedError(Exception):
+    pass
+
+
+class OpenhabNotReadyYet(Exception):
+    pass
+
 
 class HttpConnectionEventHandler:
     def on_connected(self):
@@ -55,32 +68,44 @@ class HttpConnection:
         url = url.format(*args, **kwargs)
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
 
+    def __set_offline(self):
+
+        if not self.is_online:
+            return None
+        self.is_online = False
+
+        self.__wait = 5
+        self.event_handler.on_disconnected()
+
+        # Try reconnect
+        if not self.async_try_uuid.done():
+            self.async_try_uuid.cancel()
+        self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
+
     def _is_disconnect_exception(self, e) -> bool:
         if not isinstance(e, (aiohttp.ClientPayloadError, aiohttp.ClientConnectorError)):
             return False
 
-        if self.is_online:
-            self.__wait = 5
-            self.is_online = False
-            self.event_handler.on_disconnected()
-
-            if not self.async_try_uuid.done():
-                self.async_try_uuid.cancel()
-            self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
+        self.__set_offline()
         return True
 
-    async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ aiohttp.client.ClientResponse]:
+    async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ ClientResponse]:
         try:
             resp = await future
         except Exception as e:
             is_disconnect = self._is_disconnect_exception(e)
             log.log(logging.WARNING if is_disconnect else logging.ERROR, f'{e}')
             if is_disconnect:
-                raise
+                raise OpenhabDisconnectedError()
             else:
                 return None
 
-        # IO -> Quit
+        # Server Errors if openhab is not ready yet
+        if resp.status >= 500:
+            self.__set_offline()
+            raise OpenhabNotReadyYet()
+
+        # Something went wrong - log error message
         if resp.status >= 300:
             # Log Error Message
             additional_info = f' ({additional_info})' if additional_info else ""
@@ -137,10 +162,17 @@ class HttpConnection:
         self.__wait = max(5, 0)
 
         log.debug('Trying to connect to OpenHAB ...')
-        uuid = await self.async_get_uuid()
+        try:
+            uuid = await self.async_get_uuid()
+        except OpenhabDisconnectedError or OpenhabNotReadyYet:
+            self.async_try_uuid = asyncio.ensure_future(self._try_uuid())
+            log.info(f'... offline!')
+            return None
+
         log.info( f'Connected to OpenHAB instance {uuid}')
         self.is_online = True
         self.event_handler.on_connected()
+        return None
 
     async def async_process_sse_events(self):
         try:
@@ -155,11 +187,14 @@ class HttpConnection:
                     event = ujson.loads(event.data)
 
                     # Log sse event
-                    if log.isEnabledFor(logging.DEBUG):
-                        log._log(logging.DEBUG, event, [])
+                    if log_events.isEnabledFor(logging.DEBUG):
+                        log_events._log(logging.DEBUG, event, [])
 
                     # process
                     call(event)
+
+        except asyncio.CancelledError:
+            pass
 
         except Exception as e:
             disconnect = self._is_disconnect_exception(e)
@@ -205,9 +240,8 @@ class HttpConnection:
             self.__get_openhab_url('rest/items'),
             json={'recursive': 'false', 'fields': 'state,type,name,editable'}
         )
+
         resp = await self._check_http_response(fut)
-        if resp is None:
-            return None
         return ujson.loads(await resp.text())
 
     async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]) -> bool:
@@ -229,4 +263,3 @@ class HttpConnection:
         fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', item_name), json=payload)
         ret = await self._check_http_response(fut, payload)
         return ret.status < 300
-

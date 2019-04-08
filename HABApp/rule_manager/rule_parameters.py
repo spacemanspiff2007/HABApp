@@ -72,7 +72,7 @@ class RuleParameters(FileEventTarget):
     def add_file(self, path : Path):
         try:
             with self.__lock:
-                with open(path, 'r', encoding='utf-8') as file:
+                with path.open( mode='r', encoding='utf-8') as file:
                     data = _yml_setup.load(file)
                 if data is None:
                     data = {}

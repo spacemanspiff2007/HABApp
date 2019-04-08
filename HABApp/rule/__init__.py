@@ -1,2 +1,2 @@
-from .scheduler import ReoccuringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, WeekendScheduledCallback, DayOfWeekScheduledCallback
+from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, WeekendScheduledCallback, DayOfWeekScheduledCallback
 from .rule import Rule
