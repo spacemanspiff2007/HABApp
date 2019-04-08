@@ -34,6 +34,8 @@ For more information check the [HABApp wiki](https://github.com/spacemanspiff200
 Create a python file in the rules directory (see _config.yml_)
 This rule will automatically be reloaded when the file changes.
 
+There are several working examples in [the conf folder](https://github.com/spacemanspiff2007/HABApp/tree/master/conf/rules)
+
 A simple rule could look like this
 ```python
 import HABApp
