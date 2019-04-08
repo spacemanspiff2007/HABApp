@@ -57,8 +57,10 @@ class TestCases(unittest.TestCase):
 
     def test_run_convenience_funcs(self):
         r = self.rule
+
         def cb():
             pass
+
         r.run_daily(cb)
         r.run_hourly(cb)
         r.run_minutely(cb)
@@ -66,11 +68,13 @@ class TestCases(unittest.TestCase):
 
     def test_run_scheduler(self):
         r = self.rule
+
         def cb():
             pass
+
         r.run_in(5, cb)
 
-        for t in [time(11, 30, 0), timedelta(seconds=30), None, datetime.now()]:
+        for t in [time(11, 30, 0), timedelta(seconds=30), None, datetime.now() + timedelta(seconds=1)]:
             r.run_at(t, cb)
 
 

@@ -15,7 +15,7 @@ class AllEvents:
 
 class ValueUpdateEvent:
     def __init__(self, name = None, value = None):
-        self.name : str = name
+        self.name: str = name
         self.value = value
 
     def __repr__(self):
@@ -24,7 +24,7 @@ class ValueUpdateEvent:
 
 class ValueChangeEvent:
     def __init__(self, name = None, value = None, old_value = None):
-        self.name : str = name
+        self.name: str = name
         self.value = value
         self.old_value = old_value
 
@@ -34,7 +34,7 @@ class ValueChangeEvent:
 
 class ValueNoChangeEvent:
     def __init__(self, name = None, value = None, seconds = None):
-        self.name : str = name
+        self.name: str = name
         self.value = value
         self.seconds: int = seconds
 
@@ -44,7 +44,7 @@ class ValueNoChangeEvent:
 
 class ValueNoUpdateEvent:
     def __init__(self, name = None, value = None, seconds = None):
-        self.name : str = name
+        self.name: str = name
         self.value = value
         self.seconds: int = seconds
 
