@@ -2,6 +2,7 @@ import HABApp
 from HABApp.openhab.events import ItemStateEvent
 
 class MyOpenhabToMQTTRule(HABApp.Rule):
+    """This Rule mirrors all updates from openhab to MQTT"""
 
     def __init__(self):
         super().__init__()

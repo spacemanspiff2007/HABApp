@@ -145,7 +145,7 @@ class MqttConnection:
 
     def publish(self, topic, payload, qos, retain) -> mqtt.MQTTMessageInfo:
 
-        if self.client is None:
+        if not self.connected:
             raise ConnectionError(f'Mqtt client not connected')
 
         if qos is None:
