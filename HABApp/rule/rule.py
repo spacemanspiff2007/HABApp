@@ -308,6 +308,10 @@ class Rule:
             return None
 
         for listener in self.__event_listener:
+            # Listener listens to all changes
+            if listener.name is None:
+                continue
+
             # check if specific item exists
             if not HABApp.core.Items.item_exists(listener.name):
                 log.warning(f'Item "{listener.name}" does not exist (yet)! '
