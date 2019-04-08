@@ -58,27 +58,27 @@ class Rule:
 
         return str(_in)
 
-    def item_exists(self, item_name) -> bool:
+    def item_exists(self, name) -> bool:
         """
         Checks whether an item exists
-        :param item_name: Name of the item
+        :param name: Name of the item
         :return: True or False
         """
-        assert isinstance(item_name, str), type(item_name)
-        return HABApp.core.Items.item_exists(item_name)
+        assert isinstance(name, str), type(name)
+        return HABApp.core.Items.item_exists(name)
 
-    def get_item_state(self, item_name, default=None):
+    def get_item_state(self, name: str, default=None):
         """
         Return the state of the item.
-        :param item_name:
+        :param name:
         :param default: If the item does not exist or is None this value will be returned (has to be != None)
         :return: state of the specified item
         """
         if default is None:
-            return HABApp.core.Items.get_item(item_name).state
+            return HABApp.core.Items.get_item(name).state
 
         try:
-            state = HABApp.core.Items.get_item(item_name).state
+            state = HABApp.core.Items.get_item(name).state
         except KeyError:
             return default
 
@@ -86,45 +86,45 @@ class Rule:
             return default
         return state
 
-    def set_item_state(self, item_name, value):
-        assert isinstance(item_name, str)
+    def set_item_state(self, name: str, value):
+        assert isinstance(name, str)
 
         try:
-            old_state = HABApp.core.Items.get_item(item_name).state
+            old_state = HABApp.core.Items.get_item(name).state
         except KeyError:
             old_state = None
 
-        self.post_event(item_name, HABApp.core.ValueUpdateEvent(name=item_name, value=value))
+        self.post_event(name, HABApp.core.ValueUpdateEvent(name=name, value=value))
         if old_state != value:
-            self.post_event(item_name, HABApp.core.ValueChangeEvent(name=item_name, value=value, old_value=old_state))
+            self.post_event(name, HABApp.core.ValueChangeEvent(name=name, value=value, old_value=old_state))
         return None
 
-    def item_watch(self, item_name, seconds_constant, watch_only_changes=True) -> WatchedItem:
-        assert isinstance(item_name, str)
+    def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
+        assert isinstance(name, str)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
 
         item = WatchedItem(
-            name=item_name,
+            name=name,
             constant_time=seconds_constant,
             watch_only_changes=watch_only_changes
         )
         self.__watched_items.append(item)
         return item
 
-    def item_watch_and_listen(self, item_name, seconds_constant, callback,
+    def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
                               watch_only_changes = True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
 
-        watched_item = self.item_watch(item_name, seconds_constant, watch_only_changes)
+        watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
         event_listener = self.listen_event(
-            item_name,
+            name,
             callback,
             HABApp.core.ValueNoChangeEvent if watch_only_changes else HABApp.core.ValueNoUpdateEvent
         )
         return watched_item, event_listener
 
-    def get_item(self, item_name) -> HABApp.core.Item:
-        return HABApp.core.Items.get_item(item_name)
+    def get_item(self, name: str) -> HABApp.core.Item:
+        return HABApp.core.Items.get_item(name)
 
     def post_event(self, name, event):
         """
@@ -301,15 +301,15 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def get_rule_parameter(self, file, *keys) -> RuleParameter:
-        assert isinstance(file, str), type(file)
-        return RuleParameter(self.__runtime, file, *keys)
+    def get_rule_parameter(self, file_name: str, *keys) -> RuleParameter:
+        assert isinstance(file_name, str), type(file_name)
+        return RuleParameter(self.__runtime, file_name, *keys)
 
-    def get_rule(self, rule_name):  # todo: einkommentieren mit python3.7 -> Rule:
+    def get_rule(self, rule_name: str):  # todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
-    def mqtt_publish(self, topic, payload=None, qos=None, retain=None):
+    def mqtt_publish(self, topic: str, payload, qos=None, retain=None):
         return self.__runtime.mqtt_connection.publish(topic, payload, qos, retain)
 
     def __get_rule_name(self, callback):

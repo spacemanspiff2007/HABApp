@@ -4,9 +4,12 @@ from HABApp.core import Events, Items, ValueNoChangeEvent, ValueNoUpdateEvent
 
 
 class WatchedItem:
-    def __init__(self, name, constant_time, watch_only_changes = False):
+    def __init__(self, name, constant_time: int, watch_only_changes=False):
+        assert isinstance(name, str)
+        assert isinstance(constant_time, int)
+        assert isinstance(watch_only_changes, bool)
 
-        self.name = name
+        self.name: str = name
         self.const = datetime.timedelta(seconds=constant_time)
         self.executed = False
 
