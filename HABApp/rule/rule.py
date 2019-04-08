@@ -99,7 +99,7 @@ class Rule:
             self.post_event(item_name, HABApp.core.ValueChangeEvent(name=item_name, value=value, old_value=old_state))
         return None
 
-    def item_watch(self, item_name, seconds_constant, watch_only_changes = True) -> WatchedItem:
+    def item_watch(self, item_name, seconds_constant, watch_only_changes=True) -> WatchedItem:
         assert isinstance(item_name, str)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
@@ -137,7 +137,8 @@ class Rule:
         return HABApp.core.Events.post_event(name, event)
 
     def listen_event(self, name: typing.Optional[str], callback,
-                     even_type=HABApp.core.events.AllEvents) -> HABApp.core.EventListener:
+                     even_type: typing.Union[HABApp.core.events.AllEvents, typing.Any] = HABApp.core.events.AllEvents
+                     ) -> HABApp.core.EventListener:
         """
         Register and event listener
         :param name: name to listen to or '' for all event names

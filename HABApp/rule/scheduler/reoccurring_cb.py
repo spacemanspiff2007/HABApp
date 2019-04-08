@@ -5,6 +5,7 @@ from .scheduled_cb import ScheduledCallback
 
 TYPING_TIME = typing.Union[datetime.time, datetime.timedelta, None]
 
+
 class ReoccurringScheduledCallback(ScheduledCallback):
 
     CALL_ONCE = False

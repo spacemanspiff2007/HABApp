@@ -1,22 +1,24 @@
 import unittest
-import typing
 from datetime import datetime, timedelta, time
 
 from HABApp.rule import Rule
-from HABApp.core import WrappedFunction
+
 
 class TestRuleFile:
     def suggest_rule_name(self, asdf):
         return ''
 
+
 __HABAPP__RUNTIME__ = None
 __HABAPP__RULE_FILE__ = TestRuleFile()
 __HABAPP__RULES = []
+
 
 def clear():
     global __HABAPP__RUNTIME__, __HABAPP__RULE_FILE__
     __HABAPP__RULE_FILE__ = TestRuleFile()
     __HABAPP__RULES.clear()
+
 
 class TestCases(unittest.TestCase):
 
@@ -53,6 +55,23 @@ class TestCases(unittest.TestCase):
         with self.assertRaises(AssertionError):
             r.run_every(datetime.now(), 30, lambda x : x)
 
+    def test_run_convenience_funcs(self):
+        r = self.rule
+        def cb():
+            pass
+        r.run_daily(cb)
+        r.run_hourly(cb)
+        r.run_minutely(cb)
+        r.run_soon(cb)
+
+    def test_run_scheduler(self):
+        r = self.rule
+        def cb():
+            pass
+        r.run_in(5, cb)
+
+        for t in [time(11, 30, 0), timedelta(seconds=30), None, datetime.now()]:
+            r.run_at(t, cb)
 
 
 if __name__ == '__main__':
