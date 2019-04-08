@@ -17,7 +17,7 @@ class MqttTestRule(HABApp.Rule):
         except ConnectionError as e:
             connected = False
 
-        # do not print connection erros all the time if we are not connected
+        # do not print connection errors all the time if we are not connected
         if not connected:
             return None
 
@@ -71,8 +71,6 @@ class MyRule(HABApp.Rule):
 
         self.run_every(datetime.datetime.now() + datetime.timedelta(seconds=5), 1, self.print_ts, 'Sec P1', asdf='P2')
 
-        self.listen_event('', self.process_any_update, ValueUpdateEvent)
-
     def print_ts(self, arg, asdf = None):
         print( f'{time.time():.3f} : {arg}, {asdf}')
         self.post_update('TestDateTime9', datetime.datetime.now())
@@ -90,10 +88,6 @@ class MyRule(HABApp.Rule):
         #
         # self.post_Update('TestString8', "11")
         # print( f'dauer: {time.time() - s}')
-
-    def process_any_update(self, event):
-        print(f'on_any_event: {event}')
-
 
 a = MyRule()
 

@@ -5,8 +5,8 @@ import itertools
 from HABApp.util import PrintException
 from .worker import WrappedFunction
 
-log = logging.getLogger('HABApp.Events')
-
+event_log = logging.getLogger('HABApp.Events')
+habapp_log = logging.getLogger('HABApp')
 
 class AllEvents:
     pass
@@ -53,7 +53,7 @@ class ValueNoUpdateEvent:
 
 class EventListener:
     def __init__(self, name, callback, event_type=AllEvents):
-        assert isinstance(name, str), type(name)
+        assert isinstance(name, str) or name is None, type(name)
         assert isinstance(callback, WrappedFunction)
 
         self.name: str = name
@@ -87,7 +87,7 @@ class EventBus:
     @PrintException
     def post_event(self, name, event):
 
-        log.info(event)
+        event_log.info(event)
 
         # Update Item Registry BEFORE doing the callbacks
         if isinstance(event, ValueUpdateEvent):
@@ -109,9 +109,9 @@ class EventBus:
         item_listeners.remove(listener)
 
         if add_to_all:
-            log.debug(f'Removed event listener for all names (type {listener.event_filter})')
+            habapp_log.debug(f'Removed event listener for all names (type {listener.event_filter})')
         else:
-            log.debug(f'Removed event listener for "{listener.name}" (type {listener.event_filter})')
+            habapp_log.debug(f'Removed event listener for "{listener.name}" (type {listener.event_filter})')
 
     def add_listener(self, listener : EventListener):
         assert isinstance(listener, EventListener)
@@ -124,8 +124,8 @@ class EventBus:
 
         item_listeners.append( listener)
         if add_to_all:
-            log.debug(f'Added Event listener for all names (type {listener.event_filter})')
+            habapp_log.debug(f'Added Event listener for all names (type {listener.event_filter})')
         else:
             self.__event_listener[listener.name] = item_listeners
-            log.debug(f'Added Event listener for "{listener.name}" (type {listener.event_filter})')
+            habapp_log.debug(f'Added Event listener for "{listener.name}" (type {listener.event_filter})')
         return None
