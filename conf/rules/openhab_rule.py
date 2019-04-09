@@ -26,9 +26,15 @@ class MyOpenhabRule(HABApp.Rule):
         assert isinstance(event, ValueChangeEvent)
         print( f'{event}')
 
+        # interaction is available through self.openhab or self.oh
+        self.openhab.send_command('TestItemCommand', 'ON')
+
     def item_command(self, event):
         assert isinstance(event, ItemCommandEvent)
         print( f'{event}')
+
+        # interaction is available through self.openhab or self.oh
+        self.oh.post_update('TestItemUpdate', 123)
 
 
 a = MyOpenhabRule()

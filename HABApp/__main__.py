@@ -10,6 +10,14 @@ from pathlib import Path
 
 import HABApp
 
+try:
+    # if installed we use uvloop because it seems to be much faster
+    # however this is untested
+    import uvloop
+    uvloop.install()
+except ModuleNotFoundError:
+    pass
+
 parser = argparse.ArgumentParser(description='Start HABApp')
 parser.add_argument(
     '-c',

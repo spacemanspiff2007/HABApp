@@ -10,12 +10,18 @@ The goal of this application is to provide a simple way to create home automatio
 With full syntax highlighting and descriptive names it should almost never be required to look something up in the documentation
 
 # Installation
+### Python environment
 The installation is very easy. This module can be installed through pip (or pip3 on linux):
 ```
 pip install HABApp
 ```
 However it is recommended to create a virtual environment, first.
 Once the virtual environment is activated the habapp-command can be used to run it.
+### Docker
+Installation through [docker](https://hub.docker.com/r/spacemanspiff2007/habapp) is also available:
+```
+docker pull spacemanspiff2007/habapp
+```
 
 # Usage
 ## First start
@@ -50,23 +56,23 @@ class MyRule(HABApp.Rule):
 
     def cb(self, event):
         assert isinstance(event, ValueUpdateEvent)  # this will provide syntax highlighting for event
-        self.post_update('MyOtherItem', 'test')
+        self.openhab.post_update('MyOtherItem', 'test')
 
 MyRule()
 
 # MQTT example
-class MyMQTTRule(HABApp.Rule):
+class MqttTestRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
-        # Subscribe to topic but only process changes
-        self.listen_event( 'test/topic1', self.cb, ValueChangeEvent)
+        self.listen_event('test/test', self.topic_changed, ValueChangeEvent)
 
-    def cb(self, event):
-        assert isinstance(event, ValueChangeEvent)
-        self.mqtt_publish( 'test/topic2', event.value + 1)
+    def topic_changed(self, event):
+        assert isinstance(event, ValueChangeEvent), type(event)
+        print( f'mqtt topic "test/test" changed to {event.value}')
+        self.mqtt.publish( 'test/test1', event.value)
 
-MyMQTTRule()
+MqttTestRule()
 
 ```
 
@@ -99,17 +105,17 @@ self.set_item_state(item_name, value)   # If the item does not exist it will be 
 self.post_event(name, event)
 
 
-# Interact with openhab (if configured)
-self.post_update(item_name, value)
-self.send_command(item_name, value)
-self.create_openhab_item(item_type, item_name)
-self.remove_openhab_item(item_name)
+# Interact with openhab (if configured) through self.openhab or self.oh
+self.openhab.post_update(item_name, value)
+self.openhab.send_command(item_name, value)
+self.openhab.create_openhab_item(item_type, item_name)
+self.openhab.remove_openhab_item(item_name)
 
 
 # MQTT (if configured)
 # Node: subscribing is possible through the config,
 #       changes to mqtt config entries get picked up without a restart
-self.mqtt_publish(self, topic, payload, qos=None, retain=None)
+self.mqtt.publish(self, topic, payload, qos=None, retain=None)
 
 
 # Time intervalls
