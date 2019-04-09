@@ -29,7 +29,7 @@ class Runtime:
         self.mqtt_connection.connect()
 
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
-        self.rule_params = HABApp.rule_manager.RuleParameters(self)
+        self.rule_params = HABApp.rule_manager.RuleParameters(self.config, self.folder_watcher)
 
 
         # Shutdown workers

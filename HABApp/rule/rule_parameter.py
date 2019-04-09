@@ -2,7 +2,7 @@ from ..rule_manager import RuleParameters
 
 
 class RuleParameter:
-    def __init__(self, rule_parameters: RuleParameters, filename: str, *keys):
+    def __init__(self, rule_parameters: RuleParameters, filename: str, *keys, default_value='ToDo'):
 
         assert isinstance(rule_parameters, RuleParameters), type(rule_parameters)
         self.__parameters: RuleParameters = rule_parameters
@@ -11,7 +11,7 @@ class RuleParameter:
         self.keys = keys
 
         # as a convenience try to create the file and the file structure
-        self.__parameters.add_param(self.filename, *self.keys)
+        self.__parameters.add_param(self.filename, *self.keys, default_value=default_value)
 
     def get_value(self):
         return self.__parameters.get_param(self.filename, *self.keys)

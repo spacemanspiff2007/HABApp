@@ -21,24 +21,29 @@ _yml_setup.sort_base_mapping_type_on_output = False
 
 
 class RuleParameters(FileEventTarget):
+    UNITTEST = False
 
     @PrintException
-    def __init__(self, parent):
-        assert isinstance(parent, HABApp.Runtime)
-        self.runtime = parent
+    def __init__(self, config, folder_watcher):
 
         # serialize loading
         self.__lock = threading.Lock()
 
         self.params: typing.Dict[str, dict] = {}
 
-        if not self.runtime.config.directories.param.is_dir():
-            log.info(f'Parameter files disabled. Folder {self.runtime.config.directories.param} does not exist!')
+        if RuleParameters.UNITTEST:
+            return
+        assert isinstance(config, HABApp.config.Config)
+        assert isinstance(folder_watcher, HABApp.runtime.folder_watcher.FolderWatcher)
+        self.config = config
+
+        if not self.config.directories.param.is_dir():
+            log.info(f'Parameter files disabled. Folder {self.config.directories.param} does not exist!')
             return
 
         # folder watcher
-        self.runtime.folder_watcher.watch_folder(
-            folder=self.runtime.config.directories.param,
+        folder_watcher.watch_folder(
+            folder=self.config.directories.param,
             file_ending='.yml',
             event_target=self,
             worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).submit,
@@ -47,7 +52,7 @@ class RuleParameters(FileEventTarget):
 
         # load all parameter files
         def load_all_files():
-            for f in self.runtime.config.directories.param.glob('**/*.yml'):
+            for f in self.config.directories.param.glob('**/*.yml'):
                 try:
                     self.add_file(f)
                 except Exception as e:
@@ -69,7 +74,7 @@ class RuleParameters(FileEventTarget):
 
         log.debug(f'Removed params from {path.name}!')
 
-    def add_file(self, path : Path):
+    def add_file(self, path: Path):
         try:
             with self.__lock:
                 with path.open( mode='r', encoding='utf-8') as file:
@@ -85,14 +90,26 @@ class RuleParameters(FileEventTarget):
 
         log.debug(f'Loaded params from {path.name}!')
 
-    def add_param(self, file, *keys):
+    def save_file(self, file: str):
+        assert isinstance(file, str), type(file)
+
+        if RuleParameters.UNITTEST:
+            return None
+
+        filename = self.config.directories.param / (file + '.yml')
+        with self.__lock:
+            log.info(f'Updated {filename}')
+            with filename.open('w', encoding='utf-8') as file:
+                _yml_setup.dump(self.params[file], file)
+
+    def add_param(self, file, *keys, default_value):
         save = False
 
         if file not in self.params:
             save = True
-            param = data = {}
+            self.params[file] = param = {}
         else:
-            param = data = self.params[file]
+            param = self.params[file]
 
         if keys:
             # Create structure
@@ -104,15 +121,11 @@ class RuleParameters(FileEventTarget):
 
             # Create value
             if keys[-1] not in param:
-                param[keys[-1]] = 'ToDo'
+                param[keys[-1]] = default_value
                 save = True
 
         if save:
-            filename = self.runtime.config.directories.param / (file + '.yml')
-            with self.__lock:
-                log.info(f'Updated {filename}')
-                with open(filename, 'w', encoding='utf-8') as file:
-                    _yml_setup.dump(data, file)
+            self.save_file(file)
         return None
 
     def get_param(self, file, *keys):
