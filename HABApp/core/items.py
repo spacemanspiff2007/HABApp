@@ -27,11 +27,10 @@ class Item:
         self.state = new_state
 
     def __repr__(self):
-        ret = f'<{self.__class__.__name__}'
+        ret = ''
         for k in ['name', 'state', 'last_change', 'last_update']:
-            ret += f' {k}: {getattr(self, k)}'
-
-        return ret + '>'
+            ret += f'{"," if ret else ""} {k}: {getattr(self, k)}'
+        return f'<{self.__class__.__name__}{ret:s}>'
 
 
 class Items:

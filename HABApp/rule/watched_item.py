@@ -37,8 +37,9 @@ class WatchedItem:
 
         Events.post_event(
             self.name,
-            (ValueNoChangeEvent if self.__watch_only_changes else ValueNoUpdateEvent)
-            (self.name, item.state, int(duration.total_seconds()))
+            (ValueNoChangeEvent if self.__watch_only_changes else ValueNoUpdateEvent)(
+                self.name, item.state, int(duration.total_seconds())
+            )
         )
         self.executed = True
 

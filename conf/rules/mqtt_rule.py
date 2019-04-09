@@ -1,6 +1,5 @@
 import datetime
 import random
-import time
 
 import HABApp
 from HABApp.core.events import ValueUpdateEvent
@@ -25,7 +24,7 @@ class MqttTestRule(HABApp.Rule):
             callback=self.publish_rand_value
         )
 
-        self.listen_event('test/test', self.topic_changed)
+        self.listen_event('test/test', self.topic_changed, ValueUpdateEvent)
 
     def publish_rand_value(self):
         print('test mqtt_publish')
