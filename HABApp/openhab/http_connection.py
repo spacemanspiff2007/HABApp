@@ -111,7 +111,7 @@ class HttpConnection:
             additional_info = f' ({additional_info})' if additional_info else ""
             log.warning(f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}{additional_info}')
             for line in str(resp).splitlines():
-                log.warning(line)
+                log.debug(line)
 
         return resp
 
@@ -215,7 +215,7 @@ class HttpConnection:
             return False
 
         fut = self.__session.put(self.__get_openhab_url('rest/items/{item:s}/state', item=item), data=state)
-        asyncio.ensure_future(self._check_http_response(fut))
+        asyncio.ensure_future(self._check_http_response(fut, additional_info=state))
 
     async def async_send_command(self, item, state):
 
@@ -223,7 +223,7 @@ class HttpConnection:
             return False
 
         fut = self.__session.post(self.__get_openhab_url('rest/items/{item:s}', item=item), data=state)
-        asyncio.ensure_future(self._check_http_response(fut))
+        asyncio.ensure_future(self._check_http_response(fut, additional_info=state))
 
     async def async_remove_item(self, item_name) -> bool:
 

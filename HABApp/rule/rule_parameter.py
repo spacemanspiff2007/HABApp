@@ -1,13 +1,16 @@
+import typing
+
 from ..rule_manager import RuleParameters
 
 
 class RuleParameter:
-    def __init__(self, rule_parameters: RuleParameters, filename: str, *keys, default_value='ToDo'):
+    def __init__(self, rule_parameters: RuleParameters, filename: str, *keys, default_value: typing.Any = 'ToDo'):
 
         assert isinstance(rule_parameters, RuleParameters), type(rule_parameters)
         self.__parameters: RuleParameters = rule_parameters
 
-        self.filename = filename
+        assert isinstance(filename, str)
+        self.filename:str = filename
         self.keys = keys
 
         # as a convenience try to create the file and the file structure
