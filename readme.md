@@ -10,12 +10,18 @@ The goal of this application is to provide a simple way to create home automatio
 With full syntax highlighting and descriptive names it should almost never be required to look something up in the documentation
 
 # Installation
+### Python environment
 The installation is very easy. This module can be installed through pip (or pip3 on linux):
 ```
 pip install HABApp
 ```
 However it is recommended to create a virtual environment, first.
 Once the virtual environment is activated the habapp-command can be used to run it.
+### Docker
+Installation through [docker](https://hub.docker.com/r/spacemanspiff2007/habapp) is also available:
+```
+docker pull spacemanspiff2007/habapp
+```
 
 # Usage
 ## First start
