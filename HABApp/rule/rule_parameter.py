@@ -1,18 +1,20 @@
-from ..runtime import Runtime
+from ..rule_manager import RuleParameters
 
 
 class RuleParameter:
-    def __init__(self, runtime, filename, *keys):
-        assert isinstance(runtime, Runtime)
-        self.__runtime = runtime
+    def __init__(self, rule_parameters: RuleParameters, filename: str, *keys):
+
+        assert isinstance(rule_parameters, RuleParameters), type(rule_parameters)
+        self.__parameters: RuleParameters = rule_parameters
+
         self.filename = filename
         self.keys = keys
 
         # as a convenience try to create the file and the file structure
-        self.__runtime.rule_params.add_param(self.filename, *self.keys)
+        self.__parameters.add_param(self.filename, *self.keys)
 
     def get_value(self):
-        return self.__runtime.rule_params.get_param(self.filename, *self.keys)
+        return self.__parameters.get_param(self.filename, *self.keys)
 
     def __eq__(self, other):
         return self.get_value() == other

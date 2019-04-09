@@ -267,7 +267,7 @@ class Rule:
 
     def get_rule_parameter(self, file_name: str, *keys) -> RuleParameter:
         assert isinstance(file_name, str), type(file_name)
-        return RuleParameter(self.__runtime, file_name, *keys)
+        return RuleParameter(self.__runtime.rule_params, file_name, *keys)
 
     def get_rule(self, rule_name: str):  # todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)
