@@ -6,13 +6,24 @@ import paho.mqtt.client as mqtt
 import HABApp
 from HABApp.util import PrintException
 
+from HABApp.runtime.shutdown_helper import ShutdownHelper
+from ..config import Mqtt as MqttConfig
+
 log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.Events.mqtt')
 
+
+class MqttValueUpdateEvent(HABApp.core.ValueUpdateEvent):
+    pass
+
+
+class MqttValueChangeEvent(HABApp.core.ValueChangeEvent):
+    pass
+
+
 class MqttConnection:
-    def __init__(self, parent):
-        assert isinstance(parent, HABApp.Runtime)
-        self.runtime: HABApp.Runtime = parent
+    def __init__(self, mqtt_config: MqttConfig, shutdown_helper: ShutdownHelper):
+        assert isinstance(mqtt_config, MqttConfig)
 
         self.loop_started = False
         self.connected = False
@@ -23,16 +34,17 @@ class MqttConnection:
         self.value_cache = {}
 
         # config changes
-        self.runtime.config.mqtt.subscribe.subscribe_for_changes(self.subscription_changed)
-        self.runtime.config.mqtt.connection.subscribe_for_changes(self.connect)
+        self.__config = mqtt_config
+        self.__config.subscribe.subscribe_for_changes(self.subscription_changed)
+        self.__config.connection.subscribe_for_changes(self.connect)
 
         # shutdown
-        self.runtime.shutdown.register_func(self.disconnect)
+        shutdown_helper.register_func(self.disconnect)
 
-        self.interface: HABApp.mqtt.MqttInterface = HABApp.mqtt.MqttInterface(self)
+        self.interface: HABApp.mqtt.MqttInterface = HABApp.mqtt.MqttInterface(self, self.__config)
 
     def connect(self):
-        if not self.runtime.config.mqtt.connection.host:
+        if not self.__config.connection.host:
             log.info('MQTT disabled')
             self.disconnect()
             return None
@@ -43,21 +55,21 @@ class MqttConnection:
             self.connected = False
 
         self.client = mqtt.Client(
-            client_id=self.runtime.config.mqtt.connection.client_id,
+            client_id=self.__config.connection.client_id,
             clean_session=False
         )
 
-        if self.runtime.config.mqtt.connection.tls:
+        if self.__config.connection.tls:
             self.client.tls_set()
 
-        if self.runtime.config.mqtt.connection.tls_insecure:
+        if self.__config.connection.tls_insecure:
             log.warning('Verification of server hostname in server certificate disabled!')
             log.warning('Use this only for testing, not for a real system!')
             self.client.tls_insecure_set(True)
 
         # set user if required
-        user = self.runtime.config.mqtt.connection.user
-        pw = self.runtime.config.mqtt.connection.password
+        user = self.__config.connection.user
+        pw = self.__config.connection.password
         if user:
             self.client.username_pw_set(
                 user,
@@ -70,8 +82,8 @@ class MqttConnection:
         self.client.on_message = self.process_msg
 
         self.client.connect_async(
-            self.runtime.config.mqtt.connection.host,
-            port=self.runtime.config.mqtt.connection.port,
+            self.__config.connection.host,
+            port=self.__config.connection.port,
             keepalive=60
         )
 
@@ -90,8 +102,8 @@ class MqttConnection:
                 log.debug(f'Unsubscribing from "{t}"')
             self.client.unsubscribe(unsubscribe)
 
-        topics = self.runtime.config.mqtt.subscribe.topics
-        default_qos = self.runtime.config.mqtt.subscribe.qos
+        topics = self.__config.subscribe.topics
+        default_qos = self.__config.subscribe.qos
         self.subscriptions = [(topic, qos if qos is not None else default_qos) for topic, qos in topics]
         for topic, qos in self.subscriptions:
             log.debug(f'Subscribing to "{topic}" (QoS {qos:d})')
@@ -137,40 +149,14 @@ class MqttConnection:
                 except ValueError:
                     pass
 
+        # we do not use the item registry here since we only check the state from the mqtt broker
+        # otherwise we would fire an MqttValueChangeEvent if the user would have done an Items.set_state(topic, 'asdf')
         __was = self.value_cache.get(topic, None)
         self.value_cache[topic] = payload
 
-        HABApp.core.Events.post_event(topic, HABApp.core.ValueUpdateEvent(topic, payload))
+        HABApp.core.Events.post_event(topic, MqttValueUpdateEvent(topic, payload))
         if __was is not None and __was != payload:
-            HABApp.core.Events.post_event(topic, HABApp.core.ValueChangeEvent(topic, payload, __was))
-
-    def subscribe(self, topic: str, qos=None) -> int:
-        assert isinstance(topic, str)
-        if not self.connected:
-            raise ConnectionError(f'Mqtt client not connected')
-
-        if qos is None:
-            qos = self.runtime.config.mqtt.subscribe.qos
-
-        res, mid = self.client.subscribe(topic, qos)
-        if res != mqtt.MQTT_ERR_SUCCESS:
-            log.error(f'Could not subscribe to "{topic}": {mqtt.error_string(res)}')
-        return res
-
-    def publish(self, topic, payload, qos, retain) -> mqtt.MQTTMessageInfo:
-
-        if not self.connected:
-            raise ConnectionError(f'Mqtt client not connected')
-
-        if qos is None:
-            qos = self.runtime.config.mqtt.publish.qos
-        if retain is None:
-            retain = self.runtime.config.mqtt.publish.retain
-
-        info = self.client.publish(topic, payload, qos, retain)
-        if info.rc != mqtt.MQTT_ERR_SUCCESS:
-            log.error(f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
-        return info
+            HABApp.core.Events.post_event(topic, MqttValueChangeEvent(topic, payload, __was))
 
     def disconnect(self):
         if self.connected:

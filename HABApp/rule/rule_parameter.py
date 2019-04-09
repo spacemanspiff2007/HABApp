@@ -10,7 +10,7 @@ class RuleParameter:
         self.__parameters: RuleParameters = rule_parameters
 
         assert isinstance(filename, str)
-        self.filename:str = filename
+        self.filename: str = filename
         self.keys = keys
 
         # as a convenience try to create the file and the file structure
