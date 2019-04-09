@@ -9,7 +9,7 @@ class TestRuleFile:
         return ''
 
 
-__HABAPP__RUNTIME__ = None
+__HABAPP__RUNTIME__ = 'UNITTEST'
 __HABAPP__RULE_FILE__ = TestRuleFile()
 __HABAPP__RULES = []
 

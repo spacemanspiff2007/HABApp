@@ -31,13 +31,18 @@ class Rule:
                 __rule_file__ = __vars['__HABAPP__RULE_FILE__']
                 break
 
+        # variable vor unittests
+        test = __runtime__ == 'UNITTEST'
+
         # this is a list which contains all rules of this file
         __vars['__HABAPP__RULES'].append(self)
 
-        # assert isinstance(__runtime__, HABApp.Runtime)
+        if not test:
+            assert isinstance(__runtime__, HABApp.Runtime)
         self.__runtime: HABApp.Runtime = __runtime__
 
-        # assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
+        if not test:
+            assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
         self.__event_listener: typing.List[HABApp.core.EventListener] = []
@@ -48,8 +53,8 @@ class Rule:
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
         # interfaces
-        self.mqtt = self.__runtime.mqtt_connection.interface
-        self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface
+        self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
+        self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
 
     def item_exists(self, name: str) -> bool:

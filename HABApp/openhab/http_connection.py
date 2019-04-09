@@ -164,9 +164,13 @@ class HttpConnection:
         log.debug('Trying to connect to OpenHAB ...')
         try:
             uuid = await self.async_get_uuid()
-        except OpenhabDisconnectedError or OpenhabNotReadyYet:
-            self.async_try_uuid = asyncio.ensure_future(self._try_uuid())
-            log.info(f'... offline!')
+        except Exception as e:
+            if isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
+                self.async_try_uuid = asyncio.ensure_future(self._try_uuid())
+                log.info(f'... offline!')
+            else:
+                for l in traceback.format_exc().splitlines():
+                    log.error(l)
             return None
 
         log.info( f'Connected to OpenHAB instance {uuid}')
@@ -233,7 +237,9 @@ class HttpConnection:
     async def async_get_uuid(self) -> str:
         fut = self.__session.get(self.__get_openhab_url('rest/uuid'))
         resp = await self._check_http_response(fut)
-        return (await resp.text()) if resp else resp
+        if resp.status >= 300:
+            raise OpenhabNotReadyYet()
+        return (await resp.text(encoding='utf-8')) if resp else resp
 
     async def async_get_items(self) -> typing.Optional[list]:
         fut = self.__session.get(
@@ -242,7 +248,7 @@ class HttpConnection:
         )
 
         resp = await self._check_http_response(fut)
-        return ujson.loads(await resp.text())
+        return ujson.loads(await resp.text(encoding='utf-8'))
 
     async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]) -> bool:
 
