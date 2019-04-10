@@ -1,3 +1,4 @@
+import typing
 import paho.mqtt.client as mqtt
 
 from .mqtt_connection import MqttConnection, log
@@ -5,6 +6,8 @@ from ..config import Mqtt as MqttConfig
 
 
 class MqttInterface:
+    RAISE_CONNECTION_ERRORS = True
+
     def __init__(self, connection: MqttConnection, config: MqttConfig):
         assert isinstance(connection, MqttConnection)
         assert isinstance(config, MqttConfig)
@@ -12,16 +15,36 @@ class MqttInterface:
         self.__connection: MqttConnection = connection
         self.__config: MqttConfig = config
 
-    def publish(self, topic: str, payload, qos: int = None, retain: bool = None) -> int:
-        """Publish a value under a certain topic.
-        If qos and/or retain is not set it will be loaded from the configuration"""
+    def __is_connected(self) -> bool:
+        if self.__connection.connected:
+            return True
+
+        if MqttInterface.RAISE_CONNECTION_ERRORS:
+            raise ConnectionError('Mqtt client not connected')
+        else:
+            log.error('Mqtt client not connected')
+            return False
+
+
+
+    def publish(self, topic: str, payload: typing.Any, qos: int = None, retain: bool = None) -> int:
+        """
+        Publish a value under a certain topic.
+        If qos and/or retain is not set the value from the configuration file will be used.
+
+        :param topic: MQTT topic
+        :param payload: MQTT Payload
+        :param qos: QoS
+        :param retain: retain message
+        :return: 0 if successful
+        """
 
         assert isinstance(topic, str), type(topic)
         assert isinstance(qos, int) or qos is None, type(qos)
         assert isinstance(retain, bool) or retain is None, type(retain)
 
-        if not self.__connection.connected:
-            raise ConnectionError(f'Mqtt client not connected')
+        if not self.__is_connected():
+            return mqtt.MQTT_ERR_NO_CONN
 
         if qos is None:
             qos = self.__config.publish.qos
@@ -34,13 +57,19 @@ class MqttInterface:
         return info
 
     def subscribe(self, topic: str, qos: int = None) -> int:
-        """Subscribe to a MQTT topic until the next disconnect"""
+        """
+        Subscribe to a MQTT topic. Subscriptions will be active until next disconnect
+
+        :param topic: MQTT topic to subscribe to
+        :param qos: QoS
+        :return: 0 if successful
+        """
 
         assert isinstance(topic, str), type(topic)
         assert isinstance(qos, int) or qos is None, type(qos)
 
-        if not self.__connection.connected:
-            raise ConnectionError(f'Mqtt client not connected')
+        if not self.__is_connected():
+            return mqtt.MQTT_ERR_NO_CONN
 
         # If no qos is specified load it from config
         if qos is None:
@@ -52,12 +81,17 @@ class MqttInterface:
         return res
 
     def unsubscribe(self, topic: str) -> int:
-        """Unsubscribe from a MQTT topic"""
+        """
+        Unsubscribe from a MQTT topic
+
+        :param topic: MQTT topic
+        :return: 0 if successful
+        """
 
         assert isinstance(topic, str), type(topic)
 
-        if not self.__connection.connected:
-            raise ConnectionError(f'Mqtt client not connected')
+        if not self.__is_connected():
+            return mqtt.MQTT_ERR_NO_CONN
 
         result, mid = self.__connection.client.unsubscribe(topic)
         if result != mqtt.MQTT_ERR_SUCCESS:
