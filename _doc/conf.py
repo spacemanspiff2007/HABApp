@@ -26,7 +26,14 @@ author = 'spacemanspiff2007'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = ''
+release = 'beta'
+try:
+	from HABApp.__version__ import __VERSION__
+	version = __VERSION__
+	print( f'Building doc for {version}')
+except Exception as e:
+    print('Exception', e)
+    version = 'dev'
 
 # -- General configuration ---------------------------------------------------
 
@@ -174,4 +181,3 @@ epub_exclude_files = ['search.html']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
-napoleon_use_param = True

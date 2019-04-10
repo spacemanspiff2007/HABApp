@@ -1,10 +1,6 @@
-.. HABApp documentation master file, created by
-   sphinx-quickstart on Wed Apr 10 09:18:31 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to HABApp's documentation!
-==================================
+Welcome to the HABApp documentation!
+====================================
 
 .. toctree::
    :maxdepth: 2
@@ -15,10 +11,11 @@ Welcome to HABApp's documentation!
    rule_examples
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. Commented out
+  Indices and tables
+  ==================
+  
+  * :ref:`genindex`
+  * :ref:`modindex`
+  * :ref:`search`
+  
