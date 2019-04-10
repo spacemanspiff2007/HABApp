@@ -1,19 +1,20 @@
 import datetime
+import logging
 import random
 import sys
 import typing
-import logging
 
 import HABApp
+import HABApp.classes
 import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-import HABApp.classes
-from .watched_item import WatchedItem
+from HABApp.core import AllEvents
 from .rule_parameter import RuleParameter
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
+from .watched_item import WatchedItem
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -101,6 +102,18 @@ class Rule:
         return None
 
     def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
+        """
+        Keep watch on a state of an item.
+        if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
+        `ValueNoChangeEvent` will be sent to the event bus.
+        if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
+        `ValueNoUpdateEvent` will be sent to the event bus.
+
+        :param name: item name that shall be watched
+        :param seconds_constant:
+        :param watch_only_changes:
+        :return:
+        """
         assert isinstance(name, str)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
@@ -114,7 +127,7 @@ class Rule:
         return item
 
     def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
-                              watch_only_changes = True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
+                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
 
         watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
         event_listener = self.listen_event(
@@ -139,7 +152,7 @@ class Rule:
         return HABApp.core.Events.post_event(name, event)
 
     def listen_event(self, name: typing.Optional[str], callback,
-                     even_type: typing.Union[HABApp.core.events.AllEvents, typing.Any] = HABApp.core.events.AllEvents
+                     even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventListener:
         """
         Register and event listener
@@ -159,7 +172,7 @@ class Rule:
         """
         Run a function every interval
 
-        :param date_time:
+        :param time:
         :param interval:
         :param callback:
         :param args:
