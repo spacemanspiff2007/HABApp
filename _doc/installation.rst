@@ -1,14 +1,16 @@
 
 
+==================================
 Installation
 ==================================
 
+----------------------------------
 Virtual environment
 ----------------------------------
 **Hint**
 On Windows use ``python`` instead of ``python3``
 
-#. Navigate to the folder where the virtual environment shall be created::
+#. Navigate to the folder where the virtual environment shall be created (e.g.)::
 
     cd /opt
 
@@ -43,9 +45,10 @@ On Windows use ``python`` instead of ``python3``
     habapp --config PATH_TO_CONFIGURATION_FOLDER
 
 
+----------------------------------
 Autostart on Linux
 ----------------------------------
-To automatically start HABApp after a reboot call::
+To automatically start HABApp from the virtual environment after a reboot call::
 
     nano /etc/systemd/system/habapp.service
 
@@ -76,3 +79,10 @@ It is now possible to start and check the status of HABApp with::
 
     sudo systemctl start habapp.service
     sudo systemctl status habapp.service
+
+----------------------------------
+Docker
+----------------------------------
+Installation through `Link docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is also available::
+
+    docker pull spacemanspiff2007/habapp
