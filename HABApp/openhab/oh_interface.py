@@ -42,15 +42,14 @@ class OpenhabInterface:
         )
 
     @PrintException
-    def send_command(self, item_name: str, state):
+    def send_command(self, item_name: str, command):
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
 
         asyncio.run_coroutine_threadsafe(
-            self.__connection.async_send_command(item_name, self.__convert_to_oh_type(state)),
+            self.__connection.async_send_command(item_name, self.__convert_to_oh_type(command)),
             self.__loop
         )
-
 
     @PrintException
     def create_item(self, item_type: str, item_name: str, label="", category="", tags=[], groups=[]):
@@ -74,6 +73,11 @@ class OpenhabInterface:
 
     @PrintException
     def remove_item(self, item_name: str):
+        """
+        Removes an item from the openHAB item registry
+
+        :param item_name: name
+        """
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
 

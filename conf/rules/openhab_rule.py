@@ -37,11 +37,4 @@ class MyOpenhabRule(HABApp.Rule):
         self.oh.post_update('TestItemUpdate', 123)
 
 
-a = MyOpenhabRule()
-
-
-
-
-
-
-
+MyOpenhabRule()

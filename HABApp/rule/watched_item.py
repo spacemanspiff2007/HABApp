@@ -22,7 +22,7 @@ class WatchedItem:
             return None
 
         try:
-            item = Items.get_item( self.name)
+            item = Items.get_item(self.name)
         except KeyError:
             return None
 

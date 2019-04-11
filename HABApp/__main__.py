@@ -18,49 +18,60 @@ try:
 except ModuleNotFoundError:
     pass
 
-parser = argparse.ArgumentParser(description='Start HABApp')
-parser.add_argument(
-    '-c',
-    '--config',
-    help='Path to configuration folder (where the config.yml is located)"',
-    default=None
-)
-args = parser.parse_args()
-if args.config is not None:
-    args.config = Path(args.config).resolve()
 
+def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
 
-def find_config_folder() -> Path:
     check_path = [
         Path(os.getcwd()) / 'HABApp',                          # current working dir
         Path(os.environ.get('VIRTUAL_ENV', '')) / 'HABApp',    # Virtual env dir
-        Path.home() / 'HABApp',                                #
+        Path.home() / 'HABApp',                                # User home
     ]
-    if args.config is not None:
-        check_path = [args.config]
+    check_path = [ k for k in check_path if k if str(k) != 'HABApp']
 
-    for p in check_path:
-        p = p.resolve()
-        if not p.is_dir():
+    # override automatic check if we have specified something
+    if arg_config_path is not None:
+        check_path = [arg_config_path]
+
+    for config_folder in check_path:
+        config_folder = config_folder.resolve()
+        if not config_folder.is_dir():
             continue
 
-        f = p / 'config.yml'
-        if f.is_file():
-            return p
+        config_file = config_folder / 'config.yml'
+        if config_file.is_file():
+            return config_folder
 
-    # we have specified a folder, if the config does not exist we will create it
-    if args.config is not None and args.config.is_dir():
-        return args.config
+    # we have specified a folder, but the config does not exist so we will create it
+    if arg_config_path is not None and arg_config_path.is_dir():
+        return arg_config_path
 
     # we have nothing found and nothing specified -> exit
     print('Config file "config.yml" not found!')
-    print('Checked folders:\n - ' + '\n - '.join(str(k) for k in check_path if str(k) != 'HABApp'))
+    print('Checked folders:\n - ' + '\n - '.join(str(k) for k in check_path))
     print('Please create file or specify a folder with the "-c" arg switch.')
     sys.exit(1)
 
 
+def get_command_line_args():
+    parser = argparse.ArgumentParser(description='Start HABApp')
+    parser.add_argument(
+        '-c',
+        '--config',
+        help='Path to configuration folder (where the config.yml is located)"',
+        default=None
+    )
+    parser.add_argument('--NoMQTTConnectionErrors', required=False, action='store_true')
+    return parser.parse_args()
+
 
 def main() -> typing.Union[int, str]:
+
+    args = get_command_line_args()
+    if args.config is not None:
+        args.config = Path(args.config).resolve()
+    if args.NoMQTTConnectionErrors is True:
+        HABApp.mqtt.MqttInterface._RAISE_CONNECTION_ERRORS = False
+
     loop = None
     log = logging.getLogger('HABApp')
 
@@ -68,7 +79,7 @@ def main() -> typing.Union[int, str]:
         loop = asyncio.get_event_loop()
         loop.set_debug(True)
 
-        app = HABApp.Runtime(find_config_folder())
+        app = HABApp.Runtime(config_folder=find_config_folder(args.config))
 
         def shutdown_handler(sig, frame):
             print('Shutting down ...')

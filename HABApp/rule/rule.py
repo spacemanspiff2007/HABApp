@@ -1,19 +1,20 @@
 import datetime
+import logging
 import random
 import sys
 import typing
-import logging
 
 import HABApp
+import HABApp.classes
 import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-import HABApp.classes
-from .watched_item import WatchedItem
+from HABApp.core import AllEvents
 from .rule_parameter import RuleParameter
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
+from .watched_item import WatchedItem
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -60,6 +61,7 @@ class Rule:
     def item_exists(self, name: str) -> bool:
         """
         Checks whether an item exists
+
         :param name: Name of the item
         :return: True or False
         """
@@ -69,6 +71,7 @@ class Rule:
     def get_item_state(self, name: str, default=None):
         """
         Return the state of the item.
+
         :param name:
         :param default: If the item does not exist or is None this value will be returned (has to be != None)
         :return: state of the specified item
@@ -99,6 +102,18 @@ class Rule:
         return None
 
     def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
+        """
+        Keep watch on a state of an item.
+        if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
+        `ValueNoChangeEvent` will be sent to the event bus.
+        if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
+        `ValueNoUpdateEvent` will be sent to the event bus.
+
+        :param name: item name that shall be watched
+        :param seconds_constant:
+        :param watch_only_changes:
+        :return:
+        """
         assert isinstance(name, str)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
@@ -112,7 +127,7 @@ class Rule:
         return item
 
     def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
-                              watch_only_changes = True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
+                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
 
         watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
         event_listener = self.listen_event(
@@ -128,6 +143,7 @@ class Rule:
     def post_event(self, name, event):
         """
         Post an Event to the Event Bus
+
         :param name: name to post event to
         :param event: Event class to be used (must be class instance)
         :return:
@@ -136,10 +152,11 @@ class Rule:
         return HABApp.core.Events.post_event(name, event)
 
     def listen_event(self, name: typing.Optional[str], callback,
-                     even_type: typing.Union[HABApp.core.events.AllEvents, typing.Any] = HABApp.core.events.AllEvents
+                     even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventListener:
         """
         Register and event listener
+
         :param name: name to listen to or '' for all event names
         :param callback: callback
         :param even_type: class to only make a call on class instances
@@ -154,7 +171,8 @@ class Rule:
     def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ScheduledCallback:
         """
         Run a function every interval
-        :param date_time:
+
+        :param time:
         :param interval:
         :param callback:
         :param args:
@@ -210,6 +228,7 @@ class Rule:
     def run_daily(self, callback, *args, **kwargs) -> ScheduledCallback:
         """
         Picks a random minute and second and runs the callback every hour
+
         :param callback:
         :param args:
         :param kwargs:
@@ -222,6 +241,7 @@ class Rule:
     def run_hourly(self, callback, *args, **kwargs) -> ScheduledCallback:
         """
         Picks a random minute and second and runs the callback every hour
+
         :param callback:
         :param args:
         :param kwargs:
@@ -237,7 +257,15 @@ class Rule:
         return self.run_every(start, interval, callback, *args, **kwargs)
 
     def run_at(self, date_time: TYPING_DATE_TIME, callback, *args, **kwargs) -> ScheduledCallback:
-        "Run a function at a specified date_time"
+        """
+        Run a function at a specified date_time"
+
+        :param date_time:
+        :param callback:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback(date_time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
@@ -255,6 +283,7 @@ class Rule:
     def run_soon(self, callback, *args, **kwargs) -> ScheduledCallback:
         """
         Run the callback as soon as possible (typically in the next second).
+
         :param callback:    function to call
         :param args:    args for the callback
         :param kwargs:  kwargs for the callback
