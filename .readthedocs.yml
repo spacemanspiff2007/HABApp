@@ -20,5 +20,4 @@ formats: all
 python:
   version: 3.7
   install:
-      - method: pip
-        path: sphinx-autodoc-typehints
+    - requirements: _doc/requirements.txt
