@@ -26,6 +26,7 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
         Path(os.environ.get('VIRTUAL_ENV', '')) / 'HABApp',    # Virtual env dir
         Path.home() / 'HABApp',                                # User home
     ]
+    check_path = [ k for k in check_path if k if str(k) != 'HABApp']
 
     # override automatic check if we have specified something
     if arg_config_path is not None:
@@ -46,7 +47,7 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
 
     # we have nothing found and nothing specified -> exit
     print('Config file "config.yml" not found!')
-    print('Checked folders:\n - ' + '\n - '.join(str(k) for k in check_path if str(k) != 'HABApp'))
+    print('Checked folders:\n - ' + '\n - '.join(str(k) for k in check_path))
     print('Please create file or specify a folder with the "-c" arg switch.')
     sys.exit(1)
 

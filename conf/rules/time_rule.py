@@ -34,10 +34,3 @@ class MyRule(HABApp.Rule):
 
 
 a = MyRule()
-
-
-
-
-
-
-

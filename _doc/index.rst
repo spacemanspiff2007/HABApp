@@ -6,6 +6,8 @@ Welcome to the HABApp documentation!
    :maxdepth: 2
    :caption: Contents:
    
+   installation
+   configuration
    rule
    openhab
    mqtt

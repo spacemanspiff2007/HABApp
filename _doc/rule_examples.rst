@@ -2,11 +2,11 @@
 Rule examples
 ==================================
 
-MQTT rule
-------------
-.. literalinclude:: ../conf/rules/mqtt_rule.py
+Using the scheduler
+--------------------
+.. literalinclude:: ../conf/rules/time_rule.py
 
 
-Mirror openHAB events to MQTT
-------------------------------------
+Mirror openHAB events to a MQTT Broker
+---------------------------------------
 .. literalinclude:: ../conf/rules/openhab_to_mqtt_rule.py
