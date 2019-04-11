@@ -6,7 +6,7 @@ from ..config import Mqtt as MqttConfig
 
 
 class MqttInterface:
-    RAISE_CONNECTION_ERRORS = True
+    _RAISE_CONNECTION_ERRORS = True
 
     def __init__(self, connection: MqttConnection, config: MqttConfig):
         assert isinstance(connection, MqttConnection)
@@ -19,7 +19,7 @@ class MqttInterface:
         if self.__connection.connected:
             return True
 
-        if MqttInterface.RAISE_CONNECTION_ERRORS:
+        if MqttInterface._RAISE_CONNECTION_ERRORS:
             raise ConnectionError('Mqtt client not connected')
         else:
             log.error('Mqtt client not connected')
@@ -34,8 +34,8 @@ class MqttInterface:
 
         :param topic: MQTT topic
         :param payload: MQTT Payload
-        :param qos: QoS
-        :param retain: retain message
+        :param qos: QoS, can be 0, 1 or 2. If not specified value from configuration file will be used.
+        :param retain: retain message. If not specified value from configuration file will be used.
         :return: 0 if successful
         """
 
@@ -61,7 +61,7 @@ class MqttInterface:
         Subscribe to a MQTT topic. Subscriptions will be active until next disconnect
 
         :param topic: MQTT topic to subscribe to
-        :param qos: QoS
+        :param qos: QoS, can be 0, 1 or 2.  If not specified value from configuration file will be used.
         :return: 0 if successful
         """
 

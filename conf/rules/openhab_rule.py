@@ -38,10 +38,3 @@ class MyOpenhabRule(HABApp.Rule):
 
 
 a = MyOpenhabRule()
-
-
-
-
-
-
-

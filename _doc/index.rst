@@ -7,6 +7,7 @@ Welcome to the HABApp documentation!
    :caption: Contents:
    
    rule
+   openhab
    mqtt
    rule_examples
 

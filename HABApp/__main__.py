@@ -69,7 +69,7 @@ def main() -> typing.Union[int, str]:
     if args.config is not None:
         args.config = Path(args.config).resolve()
     if args.NoMQTTConnectionErrors is True:
-        HABApp.mqtt.MqttInterface.RAISE_CONNECTION_ERRORS = False
+        HABApp.mqtt.MqttInterface._RAISE_CONNECTION_ERRORS = False
 
     loop = None
     log = logging.getLogger('HABApp')
