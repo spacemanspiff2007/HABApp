@@ -1,6 +1,7 @@
 # HABApp
 _Easy automation with openHAB and/or MQTT_
 [![Build Status](https://travis-ci.org/spacemanspiff2007/HABApp.svg?branch=master)](https://travis-ci.org/spacemanspiff2007/HABApp)
+[![Documentation Status](https://readthedocs.org/projects/habapp/badge/?version=latest)](https://habapp.readthedocs.io/en/latest/?badge=latest)
 
 HABApp is a asyncio/multithread application that connects to an openhab instance and/or a MQTT broker.
 It is possible to create rules that listen to events from these instances and then react accordingly.
