@@ -94,7 +94,7 @@ class Config(FileEventTarget):
         self.mqtt.insert_data(cfg)
 
         print( f'Creating {self.file_conf_habapp.name} in {self.file_conf_habapp.parent}')
-        with open(self.file_conf_habapp, 'w', encoding='utf-8') as file:
+        with self.file_conf_habapp.open('w', encoding='utf-8') as file:
             _yaml_param.dump(cfg, file)
 
         time.sleep(0.1)
@@ -106,7 +106,7 @@ class Config(FileEventTarget):
             return None
 
         print(f'Creating {self.file_conf_logging.name} in {self.file_conf_logging.parent}')
-        with open(self.file_conf_logging, 'w', encoding='utf-8') as file:
+        with self.file_conf_logging.open('w', encoding='utf-8') as file:
             file.write(get_default_logfile())
 
         time.sleep(0.1)
@@ -117,7 +117,7 @@ class Config(FileEventTarget):
         if not self.file_conf_habapp.is_file():
             return
 
-        with open( self.file_conf_habapp, 'r', encoding='utf-8') as file:
+        with self.file_conf_habapp.open('r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
         try:
             _s = {}
@@ -160,7 +160,7 @@ class Config(FileEventTarget):
         if not self.file_conf_logging.is_file():
             return None
 
-        with open(self.file_conf_logging, 'r', encoding='utf-8') as file:
+        with self.file_conf_logging.open('r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
 
         # fix filenames

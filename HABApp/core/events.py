@@ -3,7 +3,7 @@ import typing
 import itertools
 
 from HABApp.util import PrintException
-from .worker import WrappedFunction
+from . import WrappedFunction
 
 event_log = logging.getLogger('HABApp.Events')
 habapp_log = logging.getLogger('HABApp')
@@ -65,14 +65,14 @@ class EventListener:
     def notify_listeners(self, event):
 
         if self.event_filter is AllEvents or isinstance(event, self.event_filter):
-            self.func.submit(event)
+            self.func.run(event)
             return None
 
         # Make it possible to specify multiple classes
         if isinstance(self.event_filter, list) or isinstance(self.event_filter, set):
             for cls in self.event_filter:
                 if isinstance(event, cls):
-                    self.func.submit(event)
+                    self.func.run(event)
                     return None
 
 

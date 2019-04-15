@@ -33,16 +33,16 @@ class RuleManager(FileEventTarget):
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     time.sleep(0.5)
-                    HABApp.core.WrappedFunction(self.add_file, logger=log).submit( f)
+                    HABApp.core.WrappedFunction(self.add_file, logger=log).run(f)
 
-        HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).submit()
+        HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).run()
 
         # folder watcher
         self.runtime.folder_watcher.watch_folder(
             folder=self.runtime.config.directories.rules,
             file_ending='.py',
             event_target=self,
-            worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).submit,
+            worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).run,
             watch_subfolders=True
         )
 

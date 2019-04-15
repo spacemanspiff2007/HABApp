@@ -1,4 +1,4 @@
-from .worker import WrappedFunction
+from .wrappedfunction import WrappedFunction
 
 from .events import EventBus as __EventBus
 from .events import EventListener, ValueUpdateEvent, ValueChangeEvent, ValueNoChangeEvent, ValueNoUpdateEvent, AllEvents

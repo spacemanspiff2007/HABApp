@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime, timedelta, time
 
-from HABApp.core.worker import WrappedFunction
+from HABApp.core import WrappedFunction
 
 TYPING_DATE_TIME = typing.Union[None, datetime, timedelta, time]
 
@@ -59,7 +59,7 @@ class ScheduledCallback:
         if not self.is_due or self.is_finished:
             return False
 
-        self._callback.submit(*self._args, **self._kwargs)
+        self._callback.run(*self._args, **self._kwargs)
 
         if self.__class__.CALL_ONCE:
             self.is_finished = True
