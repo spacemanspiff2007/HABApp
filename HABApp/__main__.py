@@ -79,7 +79,7 @@ def main() -> typing.Union[int, str]:
         loop = asyncio.get_event_loop()
 
         loop.set_debug(True)
-        loop.slow_callback_duration = 0.01
+        loop.slow_callback_duration = 0.02
 
         app = HABApp.Runtime(config_folder=find_config_folder(args.config))
 
