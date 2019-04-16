@@ -17,7 +17,7 @@ Functions
 """"""""""""""""""""""""""""""
 
 .. py:class:: async_http
-         
+   
    .. py:method:: get(url: str, params: typing.Optional[Mapping[str, str]] = None, **kwargs: typing.Any)
        
        :param url: Request URL

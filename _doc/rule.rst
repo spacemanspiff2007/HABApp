@@ -11,9 +11,8 @@ Rule
 .. autoclass:: Rule
    :members:
 
-   :ivar async_http: :ref:`Async http connections <ref_async_io>`
-   :ivar mqtt: :ref:`MQTT interaction <ref_mqtt>`
-   :ivar openhab: :ref:`Openhab interaction <ref_openhab>`
-   :type openahb: py:class:`openhab`
-   :ivar oh: short alias for **openhab**
-   
+   :var async_http: :ref:`Async http connections <ref_async_io>`
+   :var mqtt: :ref:`MQTT interaction <ref_mqtt>`
+   :var openhab: :ref:`Openhab interaction <ref_openhab>`
+   :var oh: short alias for :py:class:`openhab` openhab
+  

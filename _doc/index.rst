@@ -10,8 +10,8 @@ Welcome to the HABApp documentation!
    installation
    configuration
    rule
-   openhab
-   mqtt
+   interface_openhab
+   interface_mqtt
    asyncio
    rule_examples
 

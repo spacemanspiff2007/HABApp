@@ -13,6 +13,7 @@ All interaction with the openHAB is done through the :py:attr:`self.oh` or :py:a
 
 Function parameters
 ------------------------------
+
 .. py:class:: openhab
    
    .. py:method:: post_update(item_name: str, state)
