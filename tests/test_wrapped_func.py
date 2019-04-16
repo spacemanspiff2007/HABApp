@@ -8,6 +8,7 @@ from HABApp.core import WrappedFunction
 def run_async(coro):
     asyncio.get_event_loop().run_until_complete(coro)
 
+
 class TestCases(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):

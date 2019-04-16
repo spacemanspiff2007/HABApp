@@ -165,9 +165,8 @@ class Rule:
         Register and event listener
 
         :param name: name to listen to or '' for all event names
-        :param callback: callback
-        :param even_type: class to only make a call on class instances
-        :return: Instance of EventListener
+        :param callback: callback that accepts one parameter which will contain the event
+        :param even_type: Filter the events to the passed class
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         listener = HABApp.core.EventListener(name, cb, even_type)
@@ -175,22 +174,22 @@ class Rule:
         HABApp.core.Events.add_listener(listener)
         return listener
 
-    def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
         Run a function every interval
 
         :param time:
         :param interval:
-        :param callback: |param_sched_cb|
-        :param args: |param_sched_cb_args|
-        :param kwargs: |param_sched_cb_kwargs|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ReoccurringScheduledCallback(time, interval, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_day_of_week(self, time: TYPING_TIME, weekdays, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_on_day_of_week(self, time: TYPING_TIME, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
 
         # names of weekdays in local language
         lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
@@ -213,49 +212,49 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_every_day(self, time: TYPING_TIME, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_on_every_day(self, time: TYPING_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(time, [1, 2, 3, 4, 5, 6, 7], cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_workdays(self, time: TYPING_TIME, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_on_workdays(self, time: TYPING_TIME, callback, *args, **kwargs) -> WorkdayScheduledCallback:
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = WorkdayScheduledCallback(time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_weekends(self, time: TYPING_TIME, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_on_weekends(self, time: TYPING_TIME, callback, *args, **kwargs) -> WeekendScheduledCallback:
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = WeekendScheduledCallback(time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_daily(self, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_daily(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
         Picks a random minute and second and runs the callback every hour
 
-        :param callback: |param_sched_cb|
-        :param args: |param_sched_cb_args|
-        :param kwargs: |param_sched_cb_kwargs|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
         """
         start = datetime.timedelta(seconds=random.randint(0, 24 * 3600 - 1))
         interval = datetime.timedelta(days=1)
         return self.run_every(start, interval, callback, *args, **kwargs)
 
-    def run_hourly(self, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_hourly(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
         Picks a random minute and second and runs the callback every hour
 
-        :param callback: |param_sched_cb|
-        :param args: |param_sched_cb_args|
-        :param kwargs: |param_sched_cb_kwargs|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
         """
         start = datetime.timedelta(seconds=random.randint(0, 3600 - 1))
         interval = datetime.timedelta(seconds=3600)
         return self.run_every(start, interval, callback, *args, **kwargs)
 
-    def run_minutely(self, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_minutely(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         start = datetime.timedelta(seconds=random.randint(0, 60 - 1))
         interval = datetime.timedelta(seconds=60)
         return self.run_every(start, interval, callback, *args, **kwargs)
@@ -265,9 +264,9 @@ class Rule:
         Run a function at a specified date_time"
 
         :param date_time:
-        :param callback: |param_sched_cb|
-        :param args: |param_sched_cb_args|
-        :param kwargs: |param_sched_cb_kwargs|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback(date_time, cb, *args, **kwargs)
@@ -275,7 +274,14 @@ class Rule:
         return future_event
 
     def run_in(self, seconds: int, callback, *args, **kwargs) -> ScheduledCallback:
-        """Run a function in x seconds"""
+        """
+        Run the callback in x seconds
+
+        :param int seconds: Wait time in seconds before calling the function
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
+        """
         assert isinstance(seconds, int), f'{seconds} ({type(seconds)})'
 
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
@@ -287,9 +293,9 @@ class Rule:
         """
         Run the callback as soon as possible (typically in the next second).
 
-        :param callback: |param_sched_cb|
-        :param args: |param_sched_cb_args|
-        :param kwargs: |param_sched_cb_kwargs|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback( None, cb, *args, **kwargs)
