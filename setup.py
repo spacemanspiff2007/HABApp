@@ -15,7 +15,7 @@ print('')
 readme = Path(__file__).with_name('readme.md')
 long_description = ''
 if readme.is_file():
-    with open(readme, "r", encoding='utf-8') as fh:
+    with readme.open("r", encoding='utf-8') as fh:
         long_description = fh.read()
 
 setuptools.setup(

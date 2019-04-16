@@ -54,6 +54,7 @@ class Rule:
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
         # interfaces
+        self.async_http: HABApp.async_http.AsyncHttpConnection = self.__runtime.async_http
         self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
         self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
@@ -62,17 +63,17 @@ class Rule:
         """
         Checks whether an item exists
 
-        :param name: Name of the item
+        :param name: item name
         :return: True or False
         """
         assert isinstance(name, str), type(name)
         return HABApp.core.Items.item_exists(name)
 
-    def get_item_state(self, name: str, default=None):
+    def get_item_state(self, name: str, default=None) -> typing.Any:
         """
         Return the state of the item.
 
-        :param name:
+        :param name: item name
         :param default: If the item does not exist or is None this value will be returned (has to be != None)
         :return: state of the specified item
         """
@@ -88,7 +89,13 @@ class Rule:
             return default
         return state
 
-    def set_item_state(self, name: str, value):
+    def set_item_state(self, name: str, value: typing.Any):
+        """
+
+        :param name: item name
+        :param value: value for new item state
+        :raises KeyError: item with specified name does not exist
+        """
         assert isinstance(name, str)
 
         try:
@@ -174,10 +181,9 @@ class Rule:
 
         :param time:
         :param interval:
-        :param callback:
-        :param args:
-        :param kwargs:
-        :return:
+        :param callback: |param_sched_cb|
+        :param args: |param_sched_cb_args|
+        :param kwargs: |param_sched_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ReoccurringScheduledCallback(time, interval, cb, *args, **kwargs)
@@ -229,10 +235,9 @@ class Rule:
         """
         Picks a random minute and second and runs the callback every hour
 
-        :param callback:
-        :param args:
-        :param kwargs:
-        :return:
+        :param callback: |param_sched_cb|
+        :param args: |param_sched_cb_args|
+        :param kwargs: |param_sched_cb_kwargs|
         """
         start = datetime.timedelta(seconds=random.randint(0, 24 * 3600 - 1))
         interval = datetime.timedelta(days=1)
@@ -242,10 +247,9 @@ class Rule:
         """
         Picks a random minute and second and runs the callback every hour
 
-        :param callback:
-        :param args:
-        :param kwargs:
-        :return:
+        :param callback: |param_sched_cb|
+        :param args: |param_sched_cb_args|
+        :param kwargs: |param_sched_cb_kwargs|
         """
         start = datetime.timedelta(seconds=random.randint(0, 3600 - 1))
         interval = datetime.timedelta(seconds=3600)
@@ -261,10 +265,9 @@ class Rule:
         Run a function at a specified date_time"
 
         :param date_time:
-        :param callback:
-        :param args:
-        :param kwargs:
-        :return:
+        :param callback: |param_sched_cb|
+        :param args: |param_sched_cb_args|
+        :param kwargs: |param_sched_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback(date_time, cb, *args, **kwargs)
@@ -284,10 +287,9 @@ class Rule:
         """
         Run the callback as soon as possible (typically in the next second).
 
-        :param callback:    function to call
-        :param args:    args for the callback
-        :param kwargs:  kwargs for the callback
-        :return:
+        :param callback: |param_sched_cb|
+        :param args: |param_sched_cb_args|
+        :param kwargs: |param_sched_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ScheduledCallback( None, cb, *args, **kwargs)

@@ -12,6 +12,7 @@ Welcome to the HABApp documentation!
    rule
    openhab
    mqtt
+   asyncio
    rule_examples
 
 
