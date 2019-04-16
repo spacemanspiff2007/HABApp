@@ -69,4 +69,8 @@ Example::
 
     async with self.async_http.get('http://httpbin.org/get') as resp:
         print(resp.status)
+        # get normal text
         print(await resp.text())
+        # load json and return a dict
+        print(await resp.json())
+        

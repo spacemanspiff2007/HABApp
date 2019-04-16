@@ -2,6 +2,7 @@ import datetime
 import logging
 import random
 import sys
+import warnings
 import typing
 
 import HABApp
@@ -244,7 +245,7 @@ class Rule:
 
     def run_hourly(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
-        Picks a random minute and second and runs the callback every hour
+        Picks a random minute and second and run the callback every hour
 
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
@@ -255,6 +256,13 @@ class Rule:
         return self.run_every(start, interval, callback, *args, **kwargs)
 
     def run_minutely(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
+        """
+        Picks a random minute and second and runs the callback every minute
+
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
+        """
         start = datetime.timedelta(seconds=random.randint(0, 60 - 1))
         interval = datetime.timedelta(seconds=60)
         return self.run_every(start, interval, callback, *args, **kwargs)
@@ -314,25 +322,35 @@ class Rule:
     # deprecated stuff
     # -----------------------------------------------------------------------------------------------------------------
     def post_update(self, name, value):
+        warnings.warn("The 'self.post_update' method is deprecated, "
+                      "use 'self.openhab.post_update' instead", DeprecationWarning, 2)
         log.warning('self.post_update is deprecated! Use self.openhab.post_update or self.oh.post_update instead!')
         self.openhab.post_update(name, value)
 
     def send_command(self, name, value):
+        warnings.warn("The 'self.send_command' method is deprecated, "
+                      "use 'self.openhab.send_command' instead", DeprecationWarning, 2)
         log.warning('self.send_command is deprecated! Use self.openhab.send_command or self.oh.send_command instead!')
         self.openhab.send_command(name, value)
 
     def create_openhab_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
+        warnings.warn("The 'self.create_openhab_item' method is deprecated, "
+                      "use 'self.openhab.create_item' instead", DeprecationWarning, 2)
         log.warning('self.create_openhab_item is deprecated!'
                     'Use self.openhab.create_item or self.oh.create_item instead!')
         return self.openhab.create_item(item_type, item_name, label, category, tags, groups)
 
 
     def remove_openhab_item(self, item_name: str):
+        warnings.warn("The 'self.remove_openhab_item' method is deprecated, "
+                      "use 'self.openhab.remove_item' instead", DeprecationWarning, 2)
         log.warning('self.remove_openhab_item is deprecated!'
                     'Use self.openhab.remove_item or self.oh.remove_item instead!')
         return self.openhab.remove_item(item_name)
 
     def mqtt_publish(self, topic: str, payload, qos=None, retain=None):
+        warnings.warn("The 'self.mqtt_publish' method is deprecated, "
+                      "use 'self.mqtt.publish' instead", DeprecationWarning, 2)
         log.warning('self.mqtt_publish is deprecated! Use self.mqtt.publish instead!')
         return self.mqtt.publish(topic, payload, qos, retain)
 

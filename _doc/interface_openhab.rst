@@ -36,11 +36,11 @@ Function parameters
    
       Adds a new item to the openhab item registry
    
-      :param item_type:	Item type
-      :param item_name:	Item name
-      :param label:		Item label
-      :param tags:		Item tags
-      :param groups:		Item groups
+      :param item_type: Item type
+      :param item_name: Item name
+      :param label:     Item label
+      :param tags:      Item tags
+      :param groups:    Item groups
    
    
    .. py:method:: remove_item(item_name: str)
