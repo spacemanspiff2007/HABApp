@@ -2,13 +2,20 @@ FROM python:3.7-alpine
 
 VOLUME [ "/config"]
 
-WORKDIR /usr/src/app
-
-# ujson won't compile without these libs
+# Install required dependencies
 RUN apk add --no-cache \
-   musl-dev \
-   gcc
+# Support for Timezones
+    tzdata \
+# ujson won't compile without these libs
+    musl-dev \
+    gcc
 
-RUN pip3 install HABApp
+# Always use latest versions
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+COPY . .
+
+# Install
+RUN pip3 install .
 
 CMD [ "python", "-m", "HABApp", "--config", "/config" ]

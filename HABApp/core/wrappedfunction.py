@@ -31,7 +31,11 @@ class WrappedFunction:
 
     def run(self, *args, **kwargs):
         if self.is_async:
-            asyncio.create_task(self.__async_run(*args, **kwargs))
+            try:
+                # this is only available from python 3.7
+                asyncio.create_task(self.__async_run(*args, **kwargs))
+            except AttributeError:
+                asyncio.ensure_future(self.__async_run(*args, **kwargs))
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)

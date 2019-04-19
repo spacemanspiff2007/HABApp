@@ -33,4 +33,4 @@ class MyRule(HABApp.Rule):
         print('Today is weekend!')
 
 
-a = MyRule()
+MyRule()
