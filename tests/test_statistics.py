@@ -1,6 +1,6 @@
 import unittest
 
-from HABApp.classes import Statistics
+from HABApp.util import Statistics
 
 
 class TestCases(unittest.TestCase):

@@ -46,7 +46,7 @@ class RuleParameters(FileEventTarget):
             folder=self.config.directories.param,
             file_ending='.yml',
             event_target=self,
-            worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).submit,
+            worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).run,
             watch_subfolders=False
         )
 
@@ -57,7 +57,7 @@ class RuleParameters(FileEventTarget):
                     self.add_file(f)
                 except Exception as e:
                     log.error(e)
-        HABApp.core.WrappedFunction(load_all_files, logger=log, name='Load all parameter files').submit()
+        HABApp.core.WrappedFunction(load_all_files, logger=log, name='Load all parameter files').run()
 
     def reload_file(self, path: Path):
         self.add_file(path)

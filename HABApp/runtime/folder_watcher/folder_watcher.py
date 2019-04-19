@@ -32,8 +32,8 @@ class FolderWatcher:
 
     def watch_folder(self, folder: pathlib.Path, file_ending: str, event_target,
                      watch_subfolders = False, worker_factory=None):
-        assert isinstance(folder, pathlib.Path)
-        assert folder.is_dir()
+        assert isinstance(folder, pathlib.Path), type(folder)
+        assert folder.is_dir(), folder
 
         folder = str(folder)
         assert folder not in self.__folders, folder

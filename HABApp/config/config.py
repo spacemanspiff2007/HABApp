@@ -94,8 +94,13 @@ class Config(FileEventTarget):
         self.mqtt.insert_data(cfg)
 
         print( f'Creating {self.file_conf_habapp.name} in {self.file_conf_habapp.parent}')
-        with open(self.file_conf_habapp, 'w', encoding='utf-8') as file:
+        with self.file_conf_habapp.open('w', encoding='utf-8') as file:
             _yaml_param.dump(cfg, file)
+
+        # Create default folder for rules, too
+        # Logging directories will get created elsewhere
+        # Param files are optional
+        self.directories.rules.mkdir()
 
         time.sleep(0.1)
         return None
@@ -106,7 +111,7 @@ class Config(FileEventTarget):
             return None
 
         print(f'Creating {self.file_conf_logging.name} in {self.file_conf_logging.parent}')
-        with open(self.file_conf_logging, 'w', encoding='utf-8') as file:
+        with self.file_conf_logging.open('w', encoding='utf-8') as file:
             file.write(get_default_logfile())
 
         time.sleep(0.1)
@@ -117,7 +122,7 @@ class Config(FileEventTarget):
         if not self.file_conf_habapp.is_file():
             return
 
-        with open( self.file_conf_habapp, 'r', encoding='utf-8') as file:
+        with self.file_conf_habapp.open('r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
         try:
             _s = {}
@@ -153,6 +158,11 @@ class Config(FileEventTarget):
             if lib_path not in sys.path:
                 sys.path.insert(0, lib_path)
                 log.debug( f'Added library folder "{lib_path}" to path')
+                
+                
+        # check if folders exist and print warnings
+        if not self.directories.rules.is_dir():
+            log.warning( f'Folder for rules files does not exist: {self.directories.rules}')
 
 
     def load_log(self):
@@ -160,7 +170,7 @@ class Config(FileEventTarget):
         if not self.file_conf_logging.is_file():
             return None
 
-        with open(self.file_conf_logging, 'r', encoding='utf-8') as file:
+        with self.file_conf_logging.open('r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
 
         # fix filenames

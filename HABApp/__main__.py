@@ -10,14 +10,6 @@ from pathlib import Path
 
 import HABApp
 
-try:
-    # if installed we use uvloop because it seems to be much faster
-    # however this is untested
-    import uvloop
-    uvloop.install()
-except ModuleNotFoundError:
-    pass
-
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
 
@@ -75,9 +67,19 @@ def main() -> typing.Union[int, str]:
     loop = None
     log = logging.getLogger('HABApp')
 
+    # if installed we use uvloop because it seems to be much faster (untested)
+    try:
+        import uvloop
+        uvloop.install()
+        print('Using uvloop')
+    except ModuleNotFoundError:
+        pass
+
     try:
         loop = asyncio.get_event_loop()
+
         loop.set_debug(True)
+        loop.slow_callback_duration = 0.02
 
         app = HABApp.Runtime(config_folder=find_config_folder(args.config))
 
