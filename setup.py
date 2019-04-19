@@ -24,7 +24,12 @@ setuptools.setup(
     author="spaceman_spiff",
     # author_email="",
     description="Easy automation with MQTT and/or openHAB. Create home automation rules in python.",
-    keywords='MQTT openHAB HABApp mqtt home automation',
+    keywords=[
+        'mqtt',
+        'openhab',
+        'habapp',
+        'home automation'
+    ],
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/spacemanspiff2007/HABApp",
@@ -44,11 +49,13 @@ setuptools.setup(
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
+        "Framework :: AsyncIO",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3 :: Only",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-        "Operating System :: OS Independent",
+        "Topic :: Home Automation"
     ],
     entry_points={
         'console_scripts': [

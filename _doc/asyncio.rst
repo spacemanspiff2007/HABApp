@@ -6,7 +6,7 @@ asyncio
 .. WARNING::
    | Please make sure you know what you are doing when using async functions!
    | If you have no asyncio experience please do not use this!
-     The use of blocking calls in async functions may prevent HABApp from working properly!
+     The use of blocking calls in async functions will prevent HABApp from working properly!
 
 
 
