@@ -1,7 +1,3 @@
-import re
-
-from voluptuous import Invalid
-
 from .configentry import ConfigEntry, ConfigEntryContainer
 
 
