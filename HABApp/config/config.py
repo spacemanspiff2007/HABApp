@@ -158,8 +158,7 @@ class Config(FileEventTarget):
             if lib_path not in sys.path:
                 sys.path.insert(0, lib_path)
                 log.debug( f'Added library folder "{lib_path}" to path')
-                
-                
+
         # check if folders exist and print warnings
         if not self.directories.rules.is_dir():
             log.warning( f'Folder for rules files does not exist: {self.directories.rules}')
