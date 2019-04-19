@@ -97,6 +97,11 @@ class Config(FileEventTarget):
         with self.file_conf_habapp.open('w', encoding='utf-8') as file:
             _yaml_param.dump(cfg, file)
 
+        # Create default folder for rules, too
+        # Logging directories will get created elsewhere
+        # Param files are optional
+        self.directories.rules.mkdir()
+
         time.sleep(0.1)
         return None
 
@@ -153,6 +158,11 @@ class Config(FileEventTarget):
             if lib_path not in sys.path:
                 sys.path.insert(0, lib_path)
                 log.debug( f'Added library folder "{lib_path}" to path')
+                
+                
+        # check if folders exist and print warnings
+        if not self.directories.rules.is_dir():
+            log.warning( f'Folder for rules files does not exist: {self.directories.rules}')
 
 
     def load_log(self):
