@@ -55,7 +55,7 @@ class Rule:
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
         # interfaces
-        self.async_http: HABApp.async_http.AsyncHttpConnection = self.__runtime.async_http
+        self.async_http: HABApp.async_http.AsyncHttpConnection = self.__runtime.async_http if not test else None
         self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
         self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
