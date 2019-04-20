@@ -86,3 +86,5 @@ Docker
 Installation through `Link docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is also available::
 
     docker pull spacemanspiff2007/habapp
+
+To have the proper timestamps in the logs set the ``TZ`` environment variable of the container accordingly (e.g. ``TZ=Europe/Berlin``).

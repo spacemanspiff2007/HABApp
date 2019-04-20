@@ -33,7 +33,6 @@ Configuration contents
             user: ''
             password: ''
         general:
-            timezone: '+1000'
             listen_only: False  # If True  HABApp will not change any value on the openhab instance.
                                 # Useful for testing rules from another machine.
    
