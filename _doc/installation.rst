@@ -7,8 +7,10 @@ Installation
 ----------------------------------
 Virtual environment
 ----------------------------------
-**Hint**
-On Windows use ``python`` instead of ``python3``
+.. hint::
+   HABApp requires at least Python 3.6
+.. hint::
+   On Windows use the ``python`` command instead of ``python3``
 
 #. Navigate to the folder where the virtual environment shall be created (e.g.)::
 
@@ -83,7 +85,7 @@ It is now possible to start and check the status of HABApp with::
 ----------------------------------
 Docker
 ----------------------------------
-Installation through `Link docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is also available::
+Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is also available::
 
     docker pull spacemanspiff2007/habapp
 

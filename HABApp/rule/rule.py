@@ -276,7 +276,7 @@ class Rule:
 
     def run_daily(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
-        Picks a random minute and second and runs the callback every hour
+        Picks a random hour, minute and second and runs the callback every day
 
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
