@@ -82,7 +82,7 @@ Example::
 Scheduler
 ------------------------------
 With the scheduler it is easy to call functions in the future or periodically.
-Do not use `time.sleep` but rather `self.run_in`.
+Do not use `time.sleep` but rather :meth:`~HABApp.Rule.run_in`.
 
 .. list-table::
    :widths: auto
@@ -123,6 +123,44 @@ Do not use `time.sleep` but rather `self.run_in`.
 
    * - :meth:`~HABApp.Rule.run_on_day_of_week`
      - Run a function at a specific time on specific days of the week
+
+Parameters
+------------------------------
+Parameters are values which can easily be changed without having to reload the rules.
+Values will be picked up during runtime as soon as they get edited in the corresponding file.
+This makes them perfect for boundaries.
+
+.. list-table::
+   :widths: auto
+   :header-rows: 1
+
+   * - Function
+     - Description
+
+   * - :meth:`~HABApp.Rule.get_rule_parameter`
+     - returns a parameter object
+
+Example::
+
+    def __init__(self):
+        super().__init__()
+
+        # construct parameter once, default_value can be anything
+        self.min_value = self.get_rule_parameter( 'p_file_testrule', 'min_value', default_value=10)
+
+        # deeper structuring is possible through specifying multiple keys
+        self.min_value_nested = self.get_rule_parameter(
+            'p_file_testrule',
+            'Rule A', 'subkey1', 'subkey2',
+            default_value=['a', 'b', 'c'] # defaults can also be dicts or lists
+        )
+
+    def on_change_event( event):
+        # the parameter can be used like a normal variable, comparison works as expected
+        if self.min_value < event.value:
+            pass
+
+
 
 
 All available functions

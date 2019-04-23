@@ -353,9 +353,16 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def get_rule_parameter(self, file_name: str, *keys) -> RuleParameter:
+    def get_rule_parameter(self, file_name: str, *keys, default_value='ToDo') -> RuleParameter:
+        """
+
+        :param file_name: Name of the file (without extension), will get created if it doesn't exist
+        :param keys: section name which value shall be loaded
+        :param default_value: if the corresponding entry in the file does not exist
+                              it will be created with default_value
+        """
         assert isinstance(file_name, str), type(file_name)
-        return RuleParameter(self.__runtime.rule_params, file_name, *keys)
+        return RuleParameter(self.__runtime.rule_params, file_name, *keys, default_value=default_value)
 
     def get_rule(self, rule_name: str):  # todo: einkommentieren mit python3.7 -> Rule:
         assert isinstance(rule_name, str), type(rule_name)
