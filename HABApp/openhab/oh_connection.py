@@ -95,18 +95,24 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
     def on_sse_event(self, event: dict):
 
-        # Lookup corresponding OpenHAB event
-        event = get_event(event)
+        try:
+            # Lookup corresponding OpenHAB event
+            event = get_event(event)
 
-        # Events which change the ItemRegistry
-        if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
-            item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
-            HABApp.core.Items.set_item(item)
-        elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
-            HABApp.core.Items.pop_item(event.name)
+            # Events which change the ItemRegistry
+            if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
+                item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
+                HABApp.core.Items.set_item(item)
+            elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
+                HABApp.core.Items.pop_item(event.name)
 
-        # Send Event to Event Bus
-        HABApp.core.Events.post_event(event.name, event)
+            # Send Event to Event Bus
+            HABApp.core.Events.post_event(event.name, event)
+
+        except Exception as e:
+            log.error(e)
+            for line in traceback.format_exc().splitlines():
+                log.error(line)
 
 
     @PrintException

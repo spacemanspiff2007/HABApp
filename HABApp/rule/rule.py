@@ -92,10 +92,13 @@ class Rule:
 
     def set_item_state(self, name: str, value: typing.Any):
         """
+        Set a new state for an item. State can be anything so it is possible to set custom class instances
+        and load them in another rule. Using this will also generate the appropriate event.
+
+        If the item doesn't exist it will be created
 
         :param name: item name
         :param value: value for new item state
-        :raises KeyError: item with specified name does not exist
         """
         assert isinstance(name, str)
 
@@ -111,7 +114,7 @@ class Rule:
 
     def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
         """
-        Keep watch on a state of an item.
+        Keep watch on the state of an item.
         if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
         `ValueNoChangeEvent` will be sent to the event bus.
         if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
@@ -136,6 +139,15 @@ class Rule:
 
     def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
                               watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
+        """
+        Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
+
+        :param name: item name
+        :param seconds_constant:
+        :param callback: callback that accepts one parameter which will contain the event
+        :param watch_only_changes:
+        :return:
+        """
 
         watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
         event_listener = self.listen_event(
@@ -163,11 +175,13 @@ class Rule:
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventListener:
         """
-        Register and event listener
+        Register an event listener
 
-        :param name: name to listen to or '' for all event names
+        :param name: name to listen to or None for all events
         :param callback: callback that accepts one parameter which will contain the event
-        :param even_type: Filter the events to the passed class
+        :param even_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
+            :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openhab
+            or mqtt.
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         listener = HABApp.core.EventListener(name, cb, even_type)
@@ -177,9 +191,9 @@ class Rule:
 
     def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
-        Run a function every interval
+        Run a function periodically
 
-        :param time:
+        :param time: |param_scheduled_time|
         :param interval:
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
@@ -191,6 +205,14 @@ class Rule:
         return future_event
 
     def run_on_day_of_week(self, time: TYPING_TIME, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+        """
+
+        :param time: |param_scheduled_time|
+        :param weekdays:
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
+        """
 
         # names of weekdays in local language
         lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
@@ -214,18 +236,39 @@ class Rule:
         return future_event
 
     def run_on_every_day(self, time: TYPING_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+        """
+
+        :param time: |param_scheduled_time|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
+        """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(time, [1, 2, 3, 4, 5, 6, 7], cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
     def run_on_workdays(self, time: TYPING_TIME, callback, *args, **kwargs) -> WorkdayScheduledCallback:
+        """
+
+        :param time: |param_scheduled_time|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
+        """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = WorkdayScheduledCallback(time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 
     def run_on_weekends(self, time: TYPING_TIME, callback, *args, **kwargs) -> WeekendScheduledCallback:
+        """
+
+        :param time: |param_scheduled_time|
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
+        """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = WeekendScheduledCallback(time, cb, *args, **kwargs)
         self.__future_events.append(future_event)
@@ -257,7 +300,7 @@ class Rule:
 
     def run_minutely(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
-        Picks a random minute and second and runs the callback every minute
+        Picks a random second and runs the callback every minute
 
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
@@ -269,7 +312,7 @@ class Rule:
 
     def run_at(self, date_time: TYPING_DATE_TIME, callback, *args, **kwargs) -> ScheduledCallback:
         """
-        Run a function at a specified date_time"
+        Run a function at a specified date_time
 
         :param date_time:
         :param callback: |param_scheduled_cb|

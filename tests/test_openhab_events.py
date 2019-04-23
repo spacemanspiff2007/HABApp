@@ -3,7 +3,7 @@ import unittest
 
 # from .context import HABApp
 from HABApp.openhab.events import ItemStateEvent, ItemAddedEvent, ItemCommandEvent,\
-    ItemStateChangedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, get_event
+    ItemStateChangedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, GroupItemStateChangedEvent, get_event
 
 
 class TestCases(unittest.TestCase):
@@ -85,6 +85,20 @@ class TestCases(unittest.TestCase):
         self.assertEqual(event.value.hour, 19)
         self.assertEqual(event.value.minute, 47)
         self.assertEqual(event.value.second, 8)
+
+    def test_GroupItemStateChangedEvent(self):
+        d = {
+            'topic': 'smarthome/items/TestGroupAVG/TestNumber1/statechanged',
+            'payload': '{"type":"Decimal","value":"16","oldType":"Decimal","oldValue":"15"}',
+            'type': 'GroupItemStateChangedEvent'
+        }
+        event = get_event(d)
+        self.assertIsInstance(event, GroupItemStateChangedEvent)
+        self.assertEqual(event.name, 'TestGroupAVG')
+        self.assertEqual(event.item, 'TestNumber1')
+        self.assertEqual(event.value, 16)
+        self.assertEqual(event.old_value, 15)
+
 
 
 if __name__ == '__main__':
