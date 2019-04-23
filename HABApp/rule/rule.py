@@ -114,16 +114,15 @@ class Rule:
 
     def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
         """
-        Keep watch on the state of an item.
-        if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
-        `ValueNoChangeEvent` will be sent to the event bus.
-        if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
-        `ValueNoUpdateEvent` will be sent to the event bus.
+        | Keep watch on the state of an item.
+        | if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
+          `ValueNoChangeEvent` will be sent to the event bus.
+        | if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
+          `ValueNoUpdateEvent` will be sent to the event bus.
 
         :param name: item name that shall be watched
-        :param seconds_constant:
+        :param seconds_constant: the amount of seconds the item has to be constant or has not received an update
         :param watch_only_changes:
-        :return:
         """
         assert isinstance(name, str)
         assert isinstance(seconds_constant, int)
