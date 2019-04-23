@@ -5,7 +5,7 @@ openHAB
 
 Interaction with a openHAB
 ------------------------------
-All interaction with the openHAB is done through the :py:attr:`self.oh` or :py:attr:`self.openhab` object in the rule.
+All interaction with the openHAB is done through the ``self.oh`` or ``self.openhab`` object in the rule.
 
 .. image:: /gifs/openhab.gif
 

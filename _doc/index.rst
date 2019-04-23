@@ -9,6 +9,7 @@ Welcome to the HABApp documentation!
    
    installation
    configuration
+   logging
    rule
    interface_openhab
    interface_mqtt

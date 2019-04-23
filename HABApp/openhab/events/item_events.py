@@ -91,3 +91,19 @@ class ItemStatePredictedEvent(BaseItemEvent):
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+
+
+class GroupItemStateChangedEvent(BaseItemEvent):
+    def __init__(self, _in_dict):
+        super().__init__(_in_dict)
+
+        # 'smarthome/items/TestGroupAVG/TestNumber1/statechanged'
+        parts = self._topic.split('/')
+        self.name = parts[2]
+        self.item = parts[3]
+
+        self.value = map_event_types(self._payload['type'], self._payload['value'])
+        self.old_value = map_event_types(self._payload['oldType'], self._payload['oldValue'])
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'

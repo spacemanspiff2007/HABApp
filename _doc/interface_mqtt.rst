@@ -5,7 +5,7 @@ MQTT
 
 Interaction with a MQTT broker
 ------------------------------
-Interaction with the MQTT broker is done through the :py:attr:`self.mqtt` object in the rule.
+Interaction with the MQTT broker is done through the ``self.mqtt`` object in the rule.
 
 ..  image:: /gifs/mqtt.gif
 

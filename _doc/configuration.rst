@@ -20,6 +20,7 @@ Configuration contents
         logging: log    # If the filename for the logfile in logging.yml is not absolute it will be placed in this directory
         rules: rules    # All *.py files in this folder (and subfolders) will be loaded
         lib: lib        # Custom modules, libraries and files can be placed there
+        param: param    # Optional, this is the folder where the parameter files will be created and loaded from
     
     openhab:
         ping:
@@ -33,7 +34,6 @@ Configuration contents
             user: ''
             password: ''
         general:
-            timezone: '+1000'
             listen_only: False  # If True  HABApp will not change any value on the openhab instance.
                                 # Useful for testing rules from another machine.
    
