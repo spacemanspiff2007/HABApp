@@ -10,7 +10,7 @@ class ExampleMqttTestRule(HABApp.Rule):
         super().__init__()
 
         self.run_every(
-            datetime.timedelta(seconds=10),
+            time=datetime.timedelta(seconds=10),
             interval=datetime.timedelta(seconds=20),
             callback=self.publish_rand_value
         )
