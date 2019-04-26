@@ -9,16 +9,10 @@ from HABApp.util import PrintException
 from HABApp.runtime.shutdown_helper import ShutdownHelper
 from ..config import Mqtt as MqttConfig
 
+from .events import MqttValueUpdateEvent, MqttValueChangeEvent
+
 log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.Events.mqtt')
-
-
-class MqttValueUpdateEvent(HABApp.core.ValueUpdateEvent):
-    pass
-
-
-class MqttValueChangeEvent(HABApp.core.ValueChangeEvent):
-    pass
 
 
 class MqttConnection:
