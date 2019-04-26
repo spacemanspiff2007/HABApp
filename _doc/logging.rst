@@ -13,7 +13,7 @@ The logging library is the standard python library.
 
 Example configuration
 ------------------------------
-Configuration of logging is done through `Logging.yml`. During the first start a configuration will be created.
+Configuration of logging is done through ``logging.yml``. During the first start a configuration will be created.
 It is recommended to extend the default configuration.
 
 The complete description of the file format can be found `here <https://docs.python.org/3/library/logging.config.html?highlight=dictconfig#configuration-dictionary-schema>`_,

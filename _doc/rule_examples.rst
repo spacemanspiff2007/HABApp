@@ -1,5 +1,5 @@
 
-Rule examples
+Additional rule examples
 ==================================
 
 Using the scheduler
