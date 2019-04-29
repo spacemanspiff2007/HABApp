@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 import random
@@ -16,6 +17,7 @@ from .rule_parameter import RuleParameter
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
 from .watched_item import WatchedItem
+from .interfaces import async_subprocess_exec
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -34,13 +36,12 @@ class Rule:
                 break
 
         # variable vor unittests
-        test = __runtime__ == 'UNITTEST'
+        test = __vars.get('__UNITTEST__', False)
 
         # this is a list which contains all rules of this file
         __vars['__HABAPP__RULES'].append(self)
 
-        if not test:
-            assert isinstance(__runtime__, HABApp.Runtime)
+        assert isinstance(__runtime__, HABApp.Runtime)
         self.__runtime: HABApp.Runtime = __runtime__
 
         if not test:
@@ -55,7 +56,7 @@ class Rule:
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
         # interfaces
-        self.async_http: HABApp.async_http.AsyncHttpConnection = self.__runtime.async_http if not test else None
+        self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = self.__runtime.async_http if not test else None
         self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
         self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
@@ -187,6 +188,22 @@ class Rule:
         self.__event_listener.append(listener)
         HABApp.core.Events.add_listener(listener)
         return listener
+
+    def execute_subprocess(self, callback, program, *args, capture_output=True):
+        """Run another program
+
+         :param callback: |param_scheduled_cb| after process has finished. First parameter will
+                          be an instance of :class:`~HABApp.rule.FinishedProcessInfo`
+         :param program: program or path to program to run
+         :param args: |param_scheduled_cb_args|
+         """
+        assert isinstance(program, str), type(program)
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+
+        asyncio.run_coroutine_threadsafe(
+            async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
+            self.__runtime.loop  # this has to be passed because we will not call it from the main thread
+        )
 
     def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
