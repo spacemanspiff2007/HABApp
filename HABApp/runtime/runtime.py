@@ -21,7 +21,7 @@ class Runtime:
 
         self.config = HABApp.config.Config(self, config_folder=config_folder)
 
-        self.async_http = HABApp.async_http.AsyncHttpConnection()
+        self.async_http = HABApp.rule.interfaces.AsyncHttpConnection()
 
         # OpenHAB
         self.openhab_connection = HABApp.openhab.OpenhabConnection(self)

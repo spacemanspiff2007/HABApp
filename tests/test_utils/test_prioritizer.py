@@ -29,7 +29,7 @@ class TestCases(unittest.TestCase):
     def test_diff_prio(self):
         p = self.test_same_prio()
         self.assertEqual(self.value, 2)
-        
+
         a = p.add_value(0, '1234')
         a.set_enabled(True)
         self.assertEqual(self.value, '1234')
