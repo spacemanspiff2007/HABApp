@@ -45,8 +45,7 @@ class Rule:
         self.__runtime: HABApp.Runtime = __runtime__
 
         if not test:
-            1
-            #assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
+            assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
         self.__event_listener: typing.List[HABApp.core.EventListener] = []
@@ -203,7 +202,7 @@ class Rule:
 
         asyncio.run_coroutine_threadsafe(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
-            self.__runtime.loop # this has to be passed because we will not call it from the main thread
+            self.__runtime.loop  # this has to be passed because we will not call it from the main thread
         )
 
     def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:

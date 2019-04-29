@@ -15,6 +15,7 @@ class TestRuleFile:
     def suggest_rule_name(self, asdf):
         return ''
 
+
 __HABAPP__RUNTIME__ = HABApp.Runtime()
 __UNITTEST__ = True
 
@@ -54,7 +55,10 @@ class TestCases(unittest.TestCase):
             self.set_ret, sys.executable, '-c', 'import datetime; print(datetime.datetime.now())', capture_output=True
         )
 
-        asyncio.get_child_watcher()
+        # Test this call from __main__ to create thread save process watchers
+        if sys.platform != "win32":
+            asyncio.get_child_watcher()
+
         asyncio.get_event_loop().run_until_complete(asyncio.gather(asyncio.sleep(0.5)))
         self.assertEqual(self.ret.returncode, 0)
         self.assertTrue(self.ret.stdout.startswith('20'))
