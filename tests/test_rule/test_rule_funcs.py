@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, time
 
-from HABApp.rule import Rule
+from HABApp import Rule, Runtime
 
 
 class TestRuleFile:
@@ -9,7 +9,8 @@ class TestRuleFile:
         return ''
 
 
-__HABAPP__RUNTIME__ = 'UNITTEST'
+__HABAPP__RUNTIME__ = Runtime()
+__UNITTEST__ = True
 __HABAPP__RULE_FILE__ = TestRuleFile()
 __HABAPP__RULES = []
 

@@ -2,18 +2,22 @@ import asyncio
 import sys
 import unittest
 
+import HABApp
 from HABApp.rule import Rule
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 
+
+
 class TestRuleFile:
     def suggest_rule_name(self, asdf):
         return ''
 
+__HABAPP__RUNTIME__ = HABApp.Runtime()
+__UNITTEST__ = True
 
-__HABAPP__RUNTIME__ = 'UNITTEST'
 __HABAPP__RULE_FILE__ = TestRuleFile()
 __HABAPP__RULES = []
 

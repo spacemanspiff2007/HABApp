@@ -36,17 +36,17 @@ class Rule:
                 break
 
         # variable vor unittests
-        test = __runtime__ == 'UNITTEST'
+        test = __vars.get('__UNITTEST__', False)
 
         # this is a list which contains all rules of this file
         __vars['__HABAPP__RULES'].append(self)
 
-        if not test:
-            assert isinstance(__runtime__, HABApp.Runtime)
+        assert isinstance(__runtime__, HABApp.Runtime)
         self.__runtime: HABApp.Runtime = __runtime__
 
         if not test:
-            assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
+            1
+            #assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
         self.__event_listener: typing.List[HABApp.core.EventListener] = []
