@@ -14,6 +14,7 @@ Welcome to the HABApp documentation!
    interface_openhab
    interface_mqtt
    asyncio
+   util
    rule_examples
 
 

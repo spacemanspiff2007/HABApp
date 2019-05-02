@@ -3,67 +3,75 @@ from threading import Lock
 
 
 class ValueChanger:
-    def __init__(self, parent, value=None):
+    def __init__(self, parent, initial_value=None):
 
-        self.__parent = parent
+        self.__parent: PrioritizedValue = parent
 
-        self._value = value
-        self._enabled = True if value is not None else False
+        self._value = initial_value
+        self._enabled = True if initial_value is not None else False
 
     def set_value(self, value):
+        """Set new value and recalculate overall value
+
+        :param value: new value
+        """
         self._enabled = True if value is not None else False
         self._value = value
 
         self.__parent._value_changed(self)
 
-    def set_enabled(self, value):
+    def set_enabled(self, value: bool):
+        """Enable or disable and recalculate overall value
+
+        :param value: True/False
+        """
         assert value is True or value is False
         self._enabled = value
 
         self.__parent._value_changed(self)
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__} enabled: {self._enabled}, value: {self._value}>'
+
 
 class PrioritizedValue:
+    """Thread safe value prioritizer"""
+    
     def __init__(self, on_change):
         self.on_value_change = on_change
 
         self.__value = None
 
-        self.__childs: typing.Dict[int, typing.List[ValueChanger]] = {}
-        self.__child_list: typing.Dict[ValueChanger, list] = {}
+        self.__childs: typing.Dict[int, ValueChanger] = {}
         self.__lock = Lock()
 
-    def add_value(self, priority: int, value=None) -> ValueChanger:
+    def get_value_changer(self, priority: int, initial_value=None) -> ValueChanger:
+        """ Create a new instance which can be used to set values
 
-        c = ValueChanger(self, value)
+        :param priority: priority of the value
+        :param initial_value: initial value
+        """
+        if priority in self.__childs:
+            return self.__childs[priority]
 
-        child_list = self.__childs.setdefault(priority, [])
-        child_list.append(c)
-
-        self.__child_list[c] = child_list
-        return c
+        self.__childs[priority] = ret = ValueChanger(self, initial_value)
+        return ret
 
     def _value_changed(self, child):
 
-        # move most recent to the end of the queue if we have multiple entries with the same priority
-        with self.__lock:
-            child_list = self.__child_list[child]
-            if len(child_list) > 1:
-                child_list.remove(child)
-                child_list.append(child)
-
+        # recalculate value
         new_value = None
-        for prio, child_list in sorted(self.__childs.items()):
-            for child in child_list:
+        with self.__lock:
+            for prio, child in sorted(self.__childs.items()):
                 assert isinstance(child, ValueChanger)
 
                 if not child._enabled:
                     continue
                 new_value = child._value
 
-        if new_value == self.__value:
-            return None
-
-        with self.__lock:
+            value_changed = new_value != self.__value
             self.__value = new_value
-        self.on_value_change(new_value)
+
+        # Notify that the value has changed
+        if value_changed:
+            self.on_value_change(new_value)
