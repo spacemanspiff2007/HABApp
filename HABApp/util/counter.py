@@ -4,7 +4,7 @@ import threading
 class Counter:
     """Implements a thread safe counter"""
 
-    def __init__(self, initial_value: int=0, on_change=None):
+    def __init__(self, initial_value: int = 0, on_change = None):
         """
 
         :param initial_value: Initial value of the counter

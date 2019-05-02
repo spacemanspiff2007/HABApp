@@ -36,7 +36,7 @@ class ValueChanger:
 
 class PrioritizedValue:
     """Thread safe value prioritizer"""
-    
+
     def __init__(self, on_change):
         self.on_value_change = on_change
 

@@ -24,6 +24,7 @@ from docutils import nodes
 
 from io import StringIO
 
+
 class ExecuteCode(Directive):
     """ Sphinx class for execute_code directive
     """
@@ -103,21 +104,21 @@ class ExecuteCode(Directive):
         output = []
 
         # Show the example code
-        if not 'hide_code' in self.options:
+        if 'hide_code' not in self.options:
             input_code = nodes.literal_block(code, code)
 
             input_code['language'] = language
             input_code['linenos'] = 'linenos' in self.options
-            if not 'hide_headers' in self.options:
+            if 'hide_headers' not in self.options:
                 suffix = ''
-                if not 'hide_filename' in self.options:
+                if 'hide_filename' not in self.options:
                     suffix = '' if filename is None else str(filename)
                 output.append(nodes.caption(
                     text='Code %s' % suffix))
             output.append(input_code)
 
         # Show the code results
-        if not 'hide_headers' in self.options:
+        if 'hide_headers' not in self.options:
             output.append(nodes.caption(text='Results'))
         # add precode
         if 'precode' in self.options:
@@ -129,6 +130,7 @@ class ExecuteCode(Directive):
         code_results['language'] = output_language
         output.append(code_results)
         return output
+
 
 def setup(app):
     """ Register sphinx_execute_code directive with Sphinx """

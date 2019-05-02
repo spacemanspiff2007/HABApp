@@ -9,7 +9,7 @@ class Statistics:
 
         :param max_age:     Maximum age of values in seconds
         :param max_samples: Maximum amount of samples which will be kept
-        
+
         :ivar sum: sum of all values
         :ivar min: minimum of all values
         :ivar max: maximum of all values
