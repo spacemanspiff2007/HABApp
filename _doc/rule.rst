@@ -161,7 +161,33 @@ Example::
             pass
 
 
+Running external tools
+------------------------------
+External tools can be run with the :meth:`~HABApp.Rule.execute_subprocess` function.
+Once the process has finished the callback will be called with an :class:`~HABApp.rule.FinishedProcessInfo` instance as first argument.
+Example::
 
+    import HABApp
+
+    class MyExecutionRule(HABApp.Rule):
+
+        def __init__(self):
+            super().__init__()
+
+            self.execute_subprocess( self.func_when_finished, 'path_to_program', 'arg1', capture_output=True)
+
+        def func_when_finished(self, process_info):
+            assert isinstance(process_info, HABApp.rule.FinishedProcessInfo)
+            print(process_info)
+
+    MyExecutionRule()
+
+
+.. autoclass:: HABApp.rule.FinishedProcessInfo
+
+   :var int returncode: Return code of the process (0: IO, -1: Exception while starting process)
+   :var str stdout: Standard output of the process or None
+   :var str stderr: Error output of the process or None
 
 All available functions
 ------------------------------
@@ -172,5 +198,3 @@ All available functions
    :var mqtt: :ref:`MQTT interaction <ref_mqtt>`
    :var openhab: :ref:`Openhab interaction <ref_openhab>`
    :var oh: short alias for :py:class:`openhab` openhab
-  
-

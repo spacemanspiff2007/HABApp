@@ -17,26 +17,28 @@ log = logging.getLogger('HABApp.openhab.Connection')
 
 class OpenhabConnection(HttpConnectionEventHandler):
 
-    def __init__(self, parent):
-        assert isinstance(parent, HABApp.Runtime)
-        self.runtime: HABApp.Runtime = parent
+    def __init__(self, config, shutdown):
+        assert isinstance(config, HABApp.config.Config), type(config)
+        assert isinstance(shutdown, HABApp.runtime.ShutdownHelper), type(shutdown)
 
-        self.connection = HttpConnection(self, self.runtime.config)
-        self.interface = OpenhabInterface(self.connection, openhab_config=self.runtime.config.openhab)
+        self.config = config
+
+        self.connection = HttpConnection(self, self.config)
+        self.interface = OpenhabInterface(self.connection, openhab_config=self.config.openhab)
 
         self.__ping_sent = 0
         self.__ping_received = 0
 
         # Add the ping listener, this works because connect is the last step
-        if self.runtime.config.openhab.ping.enabled:
+        if self.config.openhab.ping.enabled:
             listener = HABApp.core.EventListener(
-                self.runtime.config.openhab.ping.item,
+                self.config.openhab.ping.item,
                 HABApp.core.WrappedFunction(self.ping_received),
                 HABApp.openhab.events.ItemStateEvent
             )
             HABApp.core.Events.add_listener(listener)
 
-        self.runtime.shutdown.register_func(self.shutdown)
+        shutdown.register_func(self.shutdown)
 
         # todo: currently this does not work
         # # reload config
@@ -78,13 +80,13 @@ class OpenhabConnection(HttpConnectionEventHandler):
     @PrintException
     async def async_ping(self):
 
-        if not self.runtime.config.openhab.ping.enabled:
+        if not self.config.openhab.ping.enabled:
             return None
 
         log.debug('Started ping')
-        while self.runtime.config.openhab.ping.enabled:
+        while self.config.openhab.ping.enabled:
             self.interface.post_update(
-                self.runtime.config.openhab.ping.item,
+                self.config.openhab.ping.item,
                 f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0'
             )
 
