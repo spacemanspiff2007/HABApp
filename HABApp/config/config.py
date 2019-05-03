@@ -144,7 +144,7 @@ class Config(FileEventTarget):
             __entry  = Path(v)
             if not __entry.is_absolute():
                 __entry = self.folder_conf / __entry
-                self.directories.__dict__[k] = __entry.resolve()
+            self.directories.__dict__[k] = __entry.resolve()
 
         if not self.directories.logging.is_dir():
             print( f'Creating log-dir: {self.directories.logging}')

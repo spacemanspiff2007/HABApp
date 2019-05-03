@@ -6,6 +6,9 @@ from typing import Any, Optional, Mapping
 class AsyncHttpConnection:
 
     def __init__(self):
+        self.__client: aiohttp.ClientSession = None
+
+    async def create_client(self):
         self.__client = aiohttp.ClientSession(json_serialize=ujson.dumps)
 
     def get(self, url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any):

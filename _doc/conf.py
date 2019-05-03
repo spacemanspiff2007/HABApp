@@ -16,6 +16,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('./_plugins'))
 
 # -- Project information -----------------------------------------------------
 
@@ -46,7 +47,8 @@ except Exception as e:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx_autodoc_typehints'
+    'sphinx_autodoc_typehints',
+    'sphinx_execute_code',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -27,7 +27,7 @@ class TimeFrame(object):
         Creates TimeFrame object.
 
         :param timespan: Description of time span. Omitting second time means until end of day (23:59:59).
-        E.g. "mon,8:30:00-9:31", "weekends,22:30:00", 'weekdays,8:30:00-9:30:00", "mon,tue,8:30:00-9:31:30"
+        E.g. ``mon,8:30:00-9:31``, ``weekends,22:30:00``, ``weekdays,8:30:00-9:30:00``, ``mon,tue,8:30:00-9:31:30``
         :param log_function: function for logging which takes 1 parameter
         """
         assert isinstance(timespan, str)
@@ -124,7 +124,7 @@ class TimeFrame(object):
         if self.__log_func is not None:
             self.__log_func(_in)
 
-    def is_now(self):
+    def is_now(self) -> bool:
         """
         Compares the defined time span to now
 
