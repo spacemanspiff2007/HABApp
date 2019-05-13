@@ -1,1 +1,1 @@
-from .context import HABApp
+from .context import add_stdout, HABApp

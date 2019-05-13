@@ -81,6 +81,8 @@ class MqttConnection:
             keepalive=60
         )
 
+        log.info('Connecting to {self.__config.connection.host}:{self.__config.connection.port}')
+
         if not self.loop_started:
             self.client.loop_start()
         self.loop_started = True
@@ -116,7 +118,7 @@ class MqttConnection:
 
     @PrintException
     def on_disconnect(self, client, userdata, rc):
-        log.log(logging.INFO if not rc else logging.ERROR, "Unexpected disconnection")
+        log.log(logging.INFO if not rc else logging.ERROR, f'Disconnect: {mqtt.error_string(rc)}')
         self.connected = False
 
     @PrintException

@@ -44,7 +44,18 @@ class WrappedFunction:
         try:
             await self._func(*args, **kwargs)
         except Exception as e:
-            self.log.error("{}\n{}".format(e, traceback.format_exc()))
+            self.__format_traceback(e)
+
+    def __format_traceback(self, e: Exception):
+        self.log.error(f'Error in {self.name}: {e}')
+        lines = traceback.format_exc().splitlines()
+        for i, l in enumerate(lines):
+            # Skip line 1 and 2 since they contain the wrapper:
+            # 0:  Traceback (most recent call last):
+            # 1:  File "Z:\Python\HABApp\HABApp\core\wrappedfunction.py", line 67, in __run
+            # 2:  self._func(*args, **kwargs)
+            if i == 0 or i > 2:
+                self.log.error(l)
 
     def __run(self, *args, **kwargs):
 
@@ -59,7 +70,7 @@ class WrappedFunction:
         try:
             self._func(*args, **kwargs)
         except Exception as e:
-            self.log.error("{}\n{}".format(e, traceback.format_exc()))
+            self.__format_traceback(e)
 
         # log warning if execution takes too long
         __dur = time.time() - __start

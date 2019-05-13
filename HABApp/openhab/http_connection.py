@@ -246,9 +246,14 @@ class HttpConnection:
             self.__get_openhab_url('rest/items'),
             json={'recursive': 'false', 'fields': 'state,type,name,editable'}
         )
-
-        resp = await self._check_http_response(fut)
-        return ujson.loads(await resp.text(encoding='utf-8'))
+        try:
+            resp = await self._check_http_response(fut)
+            return ujson.loads(await resp.text(encoding='utf-8'))
+        except Exception as e:
+            # sometimes uuid already works but items not - so we ignore these errors here, too
+            if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
+                for l in traceback.format_exc().splitlines():
+                    log.error(l)
 
     async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]) -> bool:
 

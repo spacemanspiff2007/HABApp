@@ -71,6 +71,21 @@ class TestCases(unittest.TestCase):
         self.assertEqual(self.last_args, ('arg1', 'arg2'))
         self.assertEqual(self.last_kwargs, {'kw1': 'kw1'})
 
+    def test_exception1(self):
+        def tmp():
+            1 / 0
+
+        f = WrappedFunction(tmp)
+        f.run()
+
+
 
 if __name__ == '__main__':
+    import logging
+    import sys
+    _log = logging.getLogger()
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(logging.Formatter("[{asctime:s}] [{name:25s}] {levelname:8s} | {message:s}", style='{'))
+    _log.addHandler(ch)
     unittest.main()
