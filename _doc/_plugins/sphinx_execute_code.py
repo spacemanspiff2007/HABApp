@@ -22,7 +22,21 @@ import os
 from docutils.parsers.rst import Directive, directives
 from docutils import nodes
 
-from io import StringIO
+import functools
+import traceback
+import subprocess
+
+
+def PrintException( func):
+
+    @functools.wraps(func)
+    def f(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            print("{}\n{}".format( e, traceback.format_exc()))
+            raise
+    return f
 
 
 class ExecuteCode(Directive):
@@ -43,42 +57,18 @@ class ExecuteCode(Directive):
     }
 
     @classmethod
+    @PrintException
     def execute_code(cls, code):
-        """ Executes supplied code as pure python and returns a list of stdout, stderr
-        Args:
-            code (string): Python code to execute
-        Results:
-            (list): stdout, stderr of executed python code
-        Raises:
-            ExecutionError when supplied python is incorrect
-        Examples:
-            >>> execute_code('print "foobar"')
-            'foobar'
-        """
 
-        output = StringIO()
-        err = StringIO()
+        run = subprocess.run([sys.executable, '-c', code], capture_output=True)
+        if run.returncode != 0:
+            print(run.stdout.decode())
+            print(run.stderr.decode())
+            raise ValueError()
+        return run.stdout.decode() + run.stderr.decode()
 
-        sys.stdout = output
-        sys.stderr = err
 
-        try:
-            # pylint: disable=exec-used
-            exec(code)
-        # If the code is invalid, just skip the block - any actual code errors
-        # will be raised properly
-        except TypeError:
-            pass
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
-
-        results = list()
-        results.append(output.getvalue())
-        results.append(err.getvalue())
-        results = ''.join(results)
-
-        return results
-
+    @PrintException
     def run(self):
         """ Executes python code for an RST document, taking input from content or from a filename
         :return:

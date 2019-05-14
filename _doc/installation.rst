@@ -1,7 +1,7 @@
 
 
 ==================================
-Installation
+Installation & Usage
 ==================================
 
 ----------------------------------
@@ -45,6 +45,8 @@ Virtual environment
 #. Run HABApp::
 
     habapp --config PATH_TO_CONFIGURATION_FOLDER
+
+
 
 
 ----------------------------------
@@ -91,6 +93,7 @@ Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>
 
 To have the proper timestamps in the logs set the ``TZ`` environment variable of the container accordingly (e.g. ``TZ=Europe/Berlin``).
 
+
 Updating docker on Synology
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To update your HABApp docker within Synology NAS, you just have to do the following:
@@ -99,3 +102,16 @@ On the Synology NAS just select "Download" with tag "latest" to download the new
 It will overwrite the old one on the NAS.
 Then stop the container. After selecting "Action" -> "Clear" on the HABapp container, the container is there, but without any content.
 After starting the container again, everything should immediately work again.
+
+----------------------------------
+HABApp Parameters
+----------------------------------
+
+.. execute_code::
+    :hide_headers:
+    :hide_code:
+    :precode: import HABApp.__main__
+
+    HABApp.__main__.get_command_line_args(['-h'])
+
+

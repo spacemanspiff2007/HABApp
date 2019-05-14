@@ -4,6 +4,7 @@ import logging
 import os
 import signal
 import sys
+import time
 import traceback
 import typing
 from pathlib import Path
@@ -44,21 +45,36 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
     sys.exit(1)
 
 
-def get_command_line_args():
+def get_command_line_args(args=None):
     parser = argparse.ArgumentParser(description='Start HABApp')
     parser.add_argument(
         '-c',
         '--config',
-        help='Path to configuration folder (where the config.yml is located)"',
+        help='Path to configuration folder (where the config.yml is located)',
         default=None
     )
-    parser.add_argument('--NoMQTTConnectionErrors', required=False, action='store_true')
-    return parser.parse_args()
+    parser.add_argument(
+        '-s',
+        '--sleep',
+        help='Sleep time in seconds before starting HABApp',
+        type=int,
+        default=None
+    )
+    parser.add_argument(
+        '--NoMQTTConnectionErrors', required=False, action='store_true',
+        help='Suppress MQTT connection errors and only log them (for testing without a connected MQTT Broker)'
+    )
+    return parser.parse_args(args)
 
 
 def main() -> typing.Union[int, str]:
 
     args = get_command_line_args()
+    if args.sleep:
+        args.sleep = max(0, args.sleep)
+        print(f'Waiting {args.sleep:d} seconds before starting HABApp ...', end='')
+        time.sleep(args.sleep)
+        print(' done!')
     if args.config is not None:
         args.config = Path(args.config).resolve()
     if args.NoMQTTConnectionErrors is True:
