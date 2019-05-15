@@ -83,7 +83,12 @@ class HttpConnection:
         self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
 
     def _is_disconnect_exception(self, e) -> bool:
-        if not isinstance(e, (aiohttp.ClientPayloadError, aiohttp.ClientConnectorError)):
+        if not isinstance(e, (
+                # aiohttp Exceptions
+                aiohttp.ClientPayloadError, aiohttp.ClientConnectorError,
+
+                # aiohttp_sse_client Exceptions
+                ConnectionRefusedError, ConnectionError, ConnectionAbortedError)):
             return False
 
         self.__set_offline()
