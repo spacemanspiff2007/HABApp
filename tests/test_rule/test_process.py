@@ -2,31 +2,11 @@ import asyncio
 import sys
 import unittest
 
-import HABApp
 from HABApp.rule import Rule
+from ..rule_runner import SimpleRuleRunner
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-
-
-
-
-class TestRuleFile:
-    def suggest_rule_name(self, asdf):
-        return ''
-
-
-__HABAPP__RUNTIME__ = HABApp.Runtime()
-__UNITTEST__ = True
-
-__HABAPP__RULE_FILE__ = TestRuleFile()
-__HABAPP__RULES = []
-
-
-def clear():
-    global __HABAPP__RUNTIME__, __HABAPP__RULE_FILE__
-    __HABAPP__RULE_FILE__ = TestRuleFile()
-    __HABAPP__RULES.clear()
 
 
 
@@ -35,17 +15,17 @@ class TestCases(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.runner = SimpleRuleRunner()
         self.rule: Rule = None
-        self.ret = None
 
     def setUp(self):
+
+        self.runner.set_up()
         self.rule = Rule()
-        self.ret = None
 
     def tearDown(self):
-        self.rule._cleanup()
+        self.runner.tear_down()
         self.rule = None
-        clear()
 
     def set_ret(self, p1):
         self.ret = p1

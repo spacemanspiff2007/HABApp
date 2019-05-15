@@ -26,6 +26,9 @@ import functools
 import traceback
 import subprocess
 
+from sphinx.util import logging
+log = logging.getLogger(__name__)
+
 
 def PrintException( func):
 
@@ -80,7 +83,7 @@ class ExecuteCode(Directive):
 
         if not filename:
             code = '\n'.join(self.content)
-        if filename:
+        else:
             try:
                 with open(filename, 'r') as code_file:
                     code = code_file.read()
@@ -95,7 +98,19 @@ class ExecuteCode(Directive):
 
         # Show the example code
         if 'hide_code' not in self.options:
-            input_code = nodes.literal_block(code, code)
+            shown_code = ''
+            hide = False
+            for line in self.content:
+                if line.replace(' ', '').lower() == '#hide':
+                    hide = not hide
+                    continue
+                if hide:
+                    continue
+                shown_code += line + '\n'
+            shown_code = shown_code.strip('\n').strip()
+
+
+            input_code = nodes.literal_block(shown_code, shown_code)
 
             input_code['language'] = language
             input_code['linenos'] = 'linenos' in self.options
@@ -113,7 +128,12 @@ class ExecuteCode(Directive):
         # add precode
         if 'precode' in self.options:
             code = self.options['precode'] + '\n' + code
+
         code_results = self.execute_code( code)
+        for out in code_results.split('\n'):
+            if 'Error in ' in out:
+                log.error(f'Possible Error in codeblock: {out}')
+
         code_results = nodes.literal_block(code_results, code_results)
 
         code_results['linenos'] = 'linenos' in self.options
