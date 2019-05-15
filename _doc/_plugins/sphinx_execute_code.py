@@ -19,6 +19,8 @@ Usage:
 """
 import sys
 import os
+from pathlib import Path
+
 from docutils.parsers.rst import Directive, directives
 from docutils import nodes
 
@@ -62,8 +64,9 @@ class ExecuteCode(Directive):
     @classmethod
     @PrintException
     def execute_code(cls, code):
+        project_folder = Path(__file__).parent.parent.parent
 
-        run = subprocess.run([sys.executable, '-c', code], capture_output=True)
+        run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=project_folder)
         if run.returncode != 0:
             print(run.stdout.decode())
             print(run.stderr.decode())
