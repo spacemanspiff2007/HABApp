@@ -22,7 +22,24 @@ import os
 from docutils.parsers.rst import Directive, directives
 from docutils import nodes
 
-from io import StringIO
+import functools
+import traceback
+import subprocess
+
+from sphinx.util import logging
+log = logging.getLogger(__name__)
+
+
+def PrintException( func):
+
+    @functools.wraps(func)
+    def f(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            print("{}\n{}".format( e, traceback.format_exc()))
+            raise
+    return f
 
 
 class ExecuteCode(Directive):
@@ -43,42 +60,18 @@ class ExecuteCode(Directive):
     }
 
     @classmethod
+    @PrintException
     def execute_code(cls, code):
-        """ Executes supplied code as pure python and returns a list of stdout, stderr
-        Args:
-            code (string): Python code to execute
-        Results:
-            (list): stdout, stderr of executed python code
-        Raises:
-            ExecutionError when supplied python is incorrect
-        Examples:
-            >>> execute_code('print "foobar"')
-            'foobar'
-        """
 
-        output = StringIO()
-        err = StringIO()
+        run = subprocess.run([sys.executable, '-c', code], capture_output=True)
+        if run.returncode != 0:
+            print(run.stdout.decode())
+            print(run.stderr.decode())
+            raise ValueError()
+        return run.stdout.decode() + run.stderr.decode()
 
-        sys.stdout = output
-        sys.stderr = err
 
-        try:
-            # pylint: disable=exec-used
-            exec(code)
-        # If the code is invalid, just skip the block - any actual code errors
-        # will be raised properly
-        except TypeError:
-            pass
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
-
-        results = list()
-        results.append(output.getvalue())
-        results.append(err.getvalue())
-        results = ''.join(results)
-
-        return results
-
+    @PrintException
     def run(self):
         """ Executes python code for an RST document, taking input from content or from a filename
         :return:
@@ -90,7 +83,7 @@ class ExecuteCode(Directive):
 
         if not filename:
             code = '\n'.join(self.content)
-        if filename:
+        else:
             try:
                 with open(filename, 'r') as code_file:
                     code = code_file.read()
@@ -105,7 +98,19 @@ class ExecuteCode(Directive):
 
         # Show the example code
         if 'hide_code' not in self.options:
-            input_code = nodes.literal_block(code, code)
+            shown_code = ''
+            hide = False
+            for line in self.content:
+                if line.replace(' ', '').lower() == '#hide':
+                    hide = not hide
+                    continue
+                if hide:
+                    continue
+                shown_code += line + '\n'
+            shown_code = shown_code.strip('\n').strip()
+
+
+            input_code = nodes.literal_block(shown_code, shown_code)
 
             input_code['language'] = language
             input_code['linenos'] = 'linenos' in self.options
@@ -123,7 +128,12 @@ class ExecuteCode(Directive):
         # add precode
         if 'precode' in self.options:
             code = self.options['precode'] + '\n' + code
+
         code_results = self.execute_code( code)
+        for out in code_results.split('\n'):
+            if 'Error in ' in out:
+                log.error(f'Possible Error in codeblock: {out}')
+
         code_results = nodes.literal_block(code_results, code_results)
 
         code_results['linenos'] = 'linenos' in self.options

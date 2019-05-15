@@ -1,24 +1,9 @@
 import unittest
 from datetime import datetime, timedelta, time
 
-from HABApp import Rule, Runtime
+from HABApp import Rule
 
-
-class TestRuleFile:
-    def suggest_rule_name(self, asdf):
-        return ''
-
-
-__HABAPP__RUNTIME__ = Runtime()
-__UNITTEST__ = True
-__HABAPP__RULE_FILE__ = TestRuleFile()
-__HABAPP__RULES = []
-
-
-def clear():
-    global __HABAPP__RUNTIME__, __HABAPP__RULE_FILE__
-    __HABAPP__RULE_FILE__ = TestRuleFile()
-    __HABAPP__RULES.clear()
+from ..rule_runner import SimpleRuleRunner
 
 
 class TestCases(unittest.TestCase):
@@ -26,15 +11,17 @@ class TestCases(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.runner = SimpleRuleRunner()
         self.rule: Rule = None
 
     def setUp(self):
+
+        self.runner.set_up()
         self.rule = Rule()
 
     def tearDown(self):
-        self.rule._cleanup()
+        self.runner.tear_down()
         self.rule = None
-        clear()
 
     def test_run_reoccurring(self):
         r = self.rule

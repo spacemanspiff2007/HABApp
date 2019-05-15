@@ -39,7 +39,7 @@ class ValueNoChangeEvent:
         self.seconds: int = seconds
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, seconds: {self.seconds}>'
 
 
 class ValueNoUpdateEvent:
@@ -49,7 +49,7 @@ class ValueNoUpdateEvent:
         self.seconds: int = seconds
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, seconds: {self.seconds}>'
 
 
 class EventListener:

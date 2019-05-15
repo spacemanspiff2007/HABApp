@@ -1,12 +1,16 @@
 
 
 ==================================
-Installation
+Installation & Usage
 ==================================
 
 ----------------------------------
 Virtual environment
 ----------------------------------
+
+Installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. hint::
    HABApp requires at least Python 3.6
 .. hint::
@@ -47,9 +51,11 @@ Virtual environment
     habapp --config PATH_TO_CONFIGURATION_FOLDER
 
 
-----------------------------------
-Autostart on Linux
-----------------------------------
+
+
+Autostart after reboot
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 To automatically start HABApp from the virtual environment after a reboot call::
 
     nano /etc/systemd/system/habapp.service
@@ -85,11 +91,16 @@ It is now possible to start and check the status of HABApp with::
 ----------------------------------
 Docker
 ----------------------------------
+
+Installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is also available::
 
     docker pull spacemanspiff2007/habapp
 
 To have the proper timestamps in the logs set the ``TZ`` environment variable of the container accordingly (e.g. ``TZ=Europe/Berlin``).
+
 
 Updating docker on Synology
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -99,3 +110,16 @@ On the Synology NAS just select "Download" with tag "latest" to download the new
 It will overwrite the old one on the NAS.
 Then stop the container. After selecting "Action" -> "Clear" on the HABapp container, the container is there, but without any content.
 After starting the container again, everything should immediately work again.
+
+----------------------------------
+HABApp Parameters
+----------------------------------
+
+.. execute_code::
+    :hide_headers:
+    :hide_code:
+    :precode: import HABApp.__main__
+
+    HABApp.__main__.get_command_line_args(['-h'])
+
+

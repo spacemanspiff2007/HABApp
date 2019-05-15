@@ -31,7 +31,9 @@ class RuleFile:
             return obj.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
 
         # create unique name
-        name = f'{str(type(obj))[19:-2]:s}'
+        # <class '__main__.MyRule'>
+        parts = str(type(obj)).split('.')
+        name = parts[-1][:-2]
         found = self.class_ctr[name]
         self.class_ctr[name] += 1
 
