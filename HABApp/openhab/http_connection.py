@@ -196,7 +196,12 @@ class HttpConnection:
                     session=self.__session
             ) as event_source:
                 async for event in event_source:
-                    event = ujson.loads(event.data)
+                    try:
+                        event = ujson.loads(event.data)
+                    except ValueError:
+                        continue
+                    except TypeError:
+                        continue
 
                     # Log sse event
                     if log_events.isEnabledFor(logging.DEBUG):
