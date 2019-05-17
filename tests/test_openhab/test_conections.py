@@ -1,8 +1,8 @@
-import aiohttp
 import unittest
 
 # from .context import HABApp
 from HABApp.openhab.http_connection import HttpConnection, HttpConnectionEventHandler
+
 
 class TestEventHandler(HttpConnectionEventHandler):
     pass
