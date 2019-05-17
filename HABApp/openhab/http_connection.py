@@ -41,7 +41,7 @@ class HttpConnection:
         assert isinstance(event_handler, HttpConnectionEventHandler)
         self.event_handler: HttpConnectionEventHandler = event_handler
 
-        assert isinstance(config, HABApp.config.Config)
+        assert isinstance(config, HABApp.config.Config) or config is None
         self.config: HABApp.config.Config = config
 
         self.is_online = False
@@ -57,8 +57,11 @@ class HttpConnection:
         self.async_try_uuid: asyncio.Future = None
 
         # automatically update config
-        self.__update_config_general()
-        self.config.openhab.general.subscribe_for_changes(self.__update_config_general)
+        if config is not None:
+            self.__update_config_general()
+            self.config.openhab.general.subscribe_for_changes(self.__update_config_general)
+        else:
+            log.error('self.config in http_connection.py is None!')
 
     def __update_config_general(self):
         self.is_read_only = self.config.openhab.general.listen_only
