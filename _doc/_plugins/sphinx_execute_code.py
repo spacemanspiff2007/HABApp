@@ -61,19 +61,6 @@ class ExecuteCode(Directive):
         'precode': directives.unchanged
     }
 
-    @classmethod
-    @PrintException
-    def execute_code(cls, code):
-        project_folder = Path(__file__).parent.parent.parent
-
-        run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=project_folder)
-        if run.returncode != 0:
-            print(run.stdout.decode())
-            print(run.stderr.decode())
-            raise ValueError()
-        return run.stdout.decode() + run.stderr.decode()
-
-
     @PrintException
     def run(self):
         """ Executes python code for an RST document, taking input from content or from a filename
@@ -132,7 +119,7 @@ class ExecuteCode(Directive):
         if 'precode' in self.options:
             code = self.options['precode'] + '\n' + code
 
-        code_results = self.execute_code( code)
+        code_results = execute_code( code)
         for out in code_results.split('\n'):
             if 'Error in ' in out:
                 log.error(f'Possible Error in codeblock: {out}')
@@ -145,7 +132,56 @@ class ExecuteCode(Directive):
         return output
 
 
+WORKING_DIR = None
+
+@PrintException
+def execute_code(code):
+
+    run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=WORKING_DIR)
+    if run.returncode != 0:
+        print(run.stdout.decode())
+        print(run.stderr.decode())
+        raise ValueError()
+    return run.stdout.decode() + run.stderr.decode()
+
+
+def builder_ready(app):
+    global WORKING_DIR
+
+    folder = app.config.execute_code_working_dir
+    if folder is None:
+        WORKING_DIR = folder
+        return None
+
+    # Make sure the folder is valid
+    if isinstance(folder, str):
+        folder = Path(folder)
+    else:
+        assert isinstance(folder, Path)
+    if not folder.is_dir():
+        log.error( f'Configuration execute_code_working_dir does not point to a directory: {folder}')
+    WORKING_DIR = folder
+
+    # Search for a python package and print a warning if we find none
+    # since this is the only reason to specify a working dir
+    for f in folder.iterdir():
+        if not f.is_dir():
+            continue
+
+        # log warning if we don't find a python package
+        for file in f.iterdir():
+            if file.name == '__init__.py':
+                return None
+
+    log.warning(f'No Python package found in {folder}')
+    return None
+
+
 def setup(app):
     """ Register sphinx_execute_code directive with Sphinx """
+
+    app.add_config_value('execute_code_working_dir', None, 'env')
+
+    app.connect('builder-inited', builder_ready)
     app.add_directive('execute_code', ExecuteCode)
-    return {'version': '0.1'}
+    return {'version': '0.2'}

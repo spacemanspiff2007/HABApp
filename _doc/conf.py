@@ -14,6 +14,7 @@
 #
 import os
 import sys
+import pathlib
 
 # required for autodoc
 sys.path.insert(0, os.path.abspath('..'))
@@ -207,3 +208,5 @@ epub_exclude_files = ['search.html']
 todo_include_todos = False
 
 autodoc_member_order = 'bysource'
+
+execute_code_working_dir = pathlib.Path(__file__).parent.parent
