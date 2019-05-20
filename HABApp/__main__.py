@@ -19,7 +19,7 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
         Path(os.environ.get('VIRTUAL_ENV', '')) / 'HABApp',    # Virtual env dir
         Path.home() / 'HABApp',                                # User home
     ]
-    check_path = [ k for k in check_path if k if str(k) != 'HABApp']
+    check_path = [k for k in check_path if k if str(k) != 'HABApp']
 
     # override automatic check if we have specified something
     if arg_config_path is not None:
@@ -94,7 +94,9 @@ def main() -> typing.Union[int, str]:
     try:
         # otherwise creating a subprocess does not work on windows
         if sys.platform == "win32":
-            asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+            # This is the default from 3.8 so we don't have to set it ourselfs
+            if sys.version_info < (3, 8):
+                asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
         else:
             # Must be called once in the main thread so creating a subprocess works properly
             # https://docs.python.org/3/library/asyncio-subprocess.html#subprocess-and-threads
