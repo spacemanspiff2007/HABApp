@@ -123,6 +123,8 @@ def main() -> typing.Union[int, str]:
             loop.run_until_complete(app.get_async())
         except asyncio.CancelledError:
             pass
+    except HABApp.config.InvalidConfigException:
+        pass
     except Exception as e:
         for line in traceback.format_exc().splitlines():
             log.error(line)
