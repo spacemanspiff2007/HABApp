@@ -13,8 +13,10 @@ Counter
 Example
 ^^^^^^^^^^^^^^^^^^
 .. execute_code::
-    :hide_headers:
-    :precode: from HABApp.util import Counter
+
+    # hide
+    from HABApp.util import Counter
+    # hide
 
     def print_value(val):
         print( f'Counter is {val}')
@@ -37,8 +39,10 @@ Statistics
 Example
 ^^^^^^^^^^^^^^^^^^
 .. execute_code::
-    :hide_headers:
-    :precode: from HABApp.util import Statistics
+
+    # hide
+    from HABApp.util import Statistics
+    # hide
 
     s = Statistics(max_samples=4)
     for i in range(1,4):
@@ -59,8 +63,10 @@ PrioritizedValue
 Example
 ^^^^^^^^^^^^^^^^^^
 .. execute_code::
-    :hide_headers:
-    :precode: from HABApp.util import PrioritizedValue
+
+    # hide
+    from HABApp.util import PrioritizedValue
+    # hide
 
     def print_value(val):
         print( f'   Output is {val}')
