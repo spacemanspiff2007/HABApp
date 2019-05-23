@@ -41,7 +41,7 @@ class HttpConnection:
         assert isinstance(event_handler, HttpConnectionEventHandler)
         self.event_handler: HttpConnectionEventHandler = event_handler
 
-        assert isinstance(config, HABApp.config.Config)
+        assert isinstance(config, HABApp.config.Config) or config is None
         self.config: HABApp.config.Config = config
 
         self.is_online = False
@@ -57,8 +57,11 @@ class HttpConnection:
         self.async_try_uuid: asyncio.Future = None
 
         # automatically update config
-        self.__update_config_general()
-        self.config.openhab.general.subscribe_for_changes(self.__update_config_general)
+        if config is not None:
+            self.__update_config_general()
+            self.config.openhab.general.subscribe_for_changes(self.__update_config_general)
+        else:
+            log.error('self.config in http_connection.py is None!')
 
     def __update_config_general(self):
         self.is_read_only = self.config.openhab.general.listen_only
@@ -68,11 +71,13 @@ class HttpConnection:
         url = url.format(*args, **kwargs)
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
 
-    def __set_offline(self):
+    def __set_offline(self, log_msg=''):
 
         if not self.is_online:
             return None
         self.is_online = False
+
+        log.warning( f'Disconnected! {log_msg}')
 
         self.__wait = 5
         self.event_handler.on_disconnected()
@@ -91,7 +96,7 @@ class HttpConnection:
                 ConnectionRefusedError, ConnectionError, ConnectionAbortedError)):
             return False
 
-        self.__set_offline()
+        self.__set_offline(str(e))
         return True
 
     async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ ClientResponse]:
@@ -107,7 +112,7 @@ class HttpConnection:
 
         # Server Errors if openhab is not ready yet
         if resp.status >= 500:
-            self.__set_offline()
+            self.__set_offline(f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}')
             raise OpenhabNotReadyYet()
 
         # Something went wrong - log error message
@@ -193,7 +198,12 @@ class HttpConnection:
                     session=self.__session
             ) as event_source:
                 async for event in event_source:
-                    event = ujson.loads(event.data)
+                    try:
+                        event = ujson.loads(event.data)
+                    except ValueError:
+                        continue
+                    except TypeError:
+                        continue
 
                     # Log sse event
                     if log_events.isEnabledFor(logging.DEBUG):

@@ -14,7 +14,6 @@ Mirror openHAB events to a MQTT Broker
 Trigger an event when an item is constant
 ------------------------------------------
 .. execute_code::
-    :hide_headers:
 
     # hide
     import time

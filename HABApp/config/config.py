@@ -27,6 +27,14 @@ _yaml_param.sort_base_mapping_type_on_output = False
 log = logging.getLogger('HABApp.Config')
 
 
+class AbsolutePathExpected(Exception):
+    pass
+
+
+class InvalidConfigException(Exception):
+    pass
+
+
 class Directories(ConfigEntry):
     def __init__(self):
         super().__init__()
@@ -68,8 +76,13 @@ class Config(FileEventTarget):
 
         # Load Config initially
         self.first_start = True
-        self.add_file(self.file_conf_habapp)
-        self.add_file(self.file_conf_logging)
+        try:
+            # try load logging config first. If we use abs path we can log errors when loading config.yml
+            self.add_file(self.file_conf_logging)
+            self.add_file(self.file_conf_habapp)
+        except AbsolutePathExpected:
+            self.add_file(self.file_conf_habapp)
+            self.add_file(self.file_conf_logging)
         self.first_start = False
 
     def add_file(self, path: Path):
@@ -131,9 +144,9 @@ class Config(FileEventTarget):
             self.mqtt.update_schema(_s)
             cfg = Schema(_s)(cfg)
         except MultipleInvalid as e:
-            log.error( f'Error loading config:')
-            log.error( e)
-            return
+            log.error(f'Error while loading {self.file_conf_habapp.name}:')
+            log.error(e)
+            raise InvalidConfigException()
 
         self.directories.load_data(cfg)
         self.openhab.load_data(cfg)
@@ -150,8 +163,6 @@ class Config(FileEventTarget):
             print( f'Creating log-dir: {self.directories.logging}')
             self.directories.logging.mkdir()
 
-        log.debug('Loaded HABApp config')
-
         # Set path for libraries
         if self.directories.lib.is_dir():
             lib_path = str(self.directories.lib)
@@ -163,6 +174,8 @@ class Config(FileEventTarget):
         if not self.directories.rules.is_dir():
             log.warning( f'Folder for rules files does not exist: {self.directories.rules}')
 
+        log.debug('Loaded HABApp config')
+        return None
 
     def load_log(self):
         # File has to exist - check because we also get FileDelete events
@@ -187,6 +200,11 @@ class Config(FileEventTarget):
             # make Filenames absolute path in the log folder if not specified
             p = Path(handler_cfg['filename'])
             if not p.is_absolute():
+                # Our log folder ist not yet converted to path -> it is not loaded yet
+                if isinstance(self.directories.logging, str):
+                    raise AbsolutePathExpected()
+
+                # Use defined parent folder
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 

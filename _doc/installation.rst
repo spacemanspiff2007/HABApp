@@ -116,10 +116,15 @@ HABApp Parameters
 ----------------------------------
 
 .. execute_code::
-    :hide_headers:
-    :hide_code:
-    :precode: import HABApp.__main__
+    :header_code: Execute habapp with "-h" to view possible command line arguments
 
+    # skip
+    habapp -h
+    # skip
+
+    # hide
+    import HABApp.__main__
     HABApp.__main__.get_command_line_args(['-h'])
+    # hide
 
 
