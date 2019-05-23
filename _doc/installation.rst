@@ -116,6 +116,11 @@ HABApp Parameters
 ----------------------------------
 
 .. execute_code::
+    :header_code: Execute habapp with "-h" to view possible command line arguments
+
+    # skip
+    habapp -h
+    # skip
 
     # hide
     import HABApp.__main__
