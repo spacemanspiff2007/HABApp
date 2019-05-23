@@ -71,11 +71,13 @@ class HttpConnection:
         url = url.format(*args, **kwargs)
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
 
-    def __set_offline(self):
+    def __set_offline(self, log_msg=''):
 
         if not self.is_online:
             return None
         self.is_online = False
+
+        log.warning( f'Disconnected! {log_msg}')
 
         self.__wait = 5
         self.event_handler.on_disconnected()
@@ -94,7 +96,7 @@ class HttpConnection:
                 ConnectionRefusedError, ConnectionError, ConnectionAbortedError)):
             return False
 
-        self.__set_offline()
+        self.__set_offline(str(e))
         return True
 
     async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ ClientResponse]:
@@ -110,7 +112,7 @@ class HttpConnection:
 
         # Server Errors if openhab is not ready yet
         if resp.status >= 500:
-            self.__set_offline()
+            self.__set_offline(f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}')
             raise OpenhabNotReadyYet()
 
         # Something went wrong - log error message
