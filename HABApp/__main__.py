@@ -14,12 +14,18 @@ import HABApp
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
 
+    working_dir = Path(os.getcwd())
     check_path = [
-        Path(os.getcwd()) / 'HABApp',                          # current working dir
-        Path(os.environ.get('VIRTUAL_ENV', '')) / 'HABApp',    # Virtual env dir
-        Path.home() / 'HABApp',                                # User home
+        working_dir / 'HABApp',                     # current working dir
+        working_dir.with_name('HABApp'),            # current working dir
+        working_dir.parent.with_name('HABApp'),     # current working dir
+        Path.home() / 'HABApp',                     # User home
     ]
-    check_path = [k for k in check_path if k if str(k) != 'HABApp']
+
+    # if we run in a venv check the venv, too
+    v_env = os.environ.get('VIRTUAL_ENV', '')
+    if v_env:
+        check_path.append(Path(v_env) / 'HABApp')  # Virtual env dir
 
     # override automatic check if we have specified something
     if arg_config_path is not None:
