@@ -71,6 +71,17 @@ class Rule:
         assert isinstance(name, str), type(name)
         return HABApp.core.Items.item_exists(name)
 
+
+    def get_item(self, name: str) -> HABApp.core.Item:
+        """
+        Return the item with the specified name.
+
+        :param name: name to post event to
+        :return: item
+        """
+        return HABApp.core.Items.get_item(name)
+
+
     def get_item_state(self, name: str, default=None) -> typing.Any:
         """
         Return the state of the item.
@@ -157,12 +168,9 @@ class Rule:
         )
         return watched_item, event_listener
 
-    def get_item(self, name: str) -> HABApp.core.Item:
-        return HABApp.core.Items.get_item(name)
-
     def post_event(self, name, event):
         """
-        Post an Event to the Event Bus
+        Post an event to the event bus
 
         :param name: name to post event to
         :param event: Event class to be used (must be class instance)
@@ -234,7 +242,7 @@ class Rule:
         lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
         lookup.update( {datetime.date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
 
-        # abreviations in German and English
+        # abbreviations in German and English
         lookup.update({"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7})
         lookup.update({"Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5, "Sat": 6, "Sun": 7})
         lookup = {k.lower(): v for k, v in lookup.items()}
