@@ -48,7 +48,7 @@ class Rule:
             assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
-        self.__event_listener: typing.List[HABApp.core.EventListener] = []
+        self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
         self.__future_events: typing.List[ScheduledCallback] = []
         self.__watched_items: typing.List[WatchedItem] = []
 
@@ -149,7 +149,7 @@ class Rule:
         return item
 
     def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
-                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
+                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventBusListener]:
         """
         Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
 
@@ -181,7 +181,7 @@ class Rule:
 
     def listen_event(self, name: typing.Optional[str], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
-                     ) -> HABApp.core.EventListener:
+                     ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
 
@@ -192,7 +192,7 @@ class Rule:
             or mqtt.
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        listener = HABApp.core.EventListener(name, cb, even_type)
+        listener = HABApp.core.EventBusListener(name, cb, even_type)
         self.__event_listener.append(listener)
         HABApp.core.Events.add_listener(listener)
         return listener

@@ -31,7 +31,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         # Add the ping listener, this works because connect is the last step
         if self.config.openhab.ping.enabled:
-            listener = HABApp.core.EventListener(
+            listener = HABApp.core.EventBusListener(
                 self.config.openhab.ping.item,
                 HABApp.core.WrappedFunction(self.ping_received),
                 HABApp.openhab.events.ItemStateEvent
