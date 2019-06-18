@@ -162,6 +162,19 @@ Example::
             pass
 
 
+Created file:
+
+.. code-block:: yaml
+
+   min_value: 10
+   Rule A:
+       subkey1:
+           subkey2:
+               - a
+               - b
+               - c
+
+
 Running external tools
 ------------------------------
 External tools can be run with the :meth:`~HABApp.Rule.execute_subprocess` function.
