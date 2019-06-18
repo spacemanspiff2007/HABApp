@@ -39,4 +39,3 @@ class ValueNoUpdateEvent:
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, seconds: {self.seconds}>'
-

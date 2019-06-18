@@ -3,33 +3,38 @@ import typing
 from .item import Item
 
 
-class Items:
-    def __init__(self):
-        self.items = {}  # type: typing.Dict[str,Item]
+_ALL_ITEMS: typing.Dict[str, Item] = {}
 
-    def item_exists(self, name) -> bool:
-        return name in self.items
 
-    def get_item(self, name) -> Item:
-        return self.items[name]
+def item_exists(name) -> bool:
+    return name in _ALL_ITEMS
 
-    def get_items(self) -> typing.List[Item]:
-        return list(self.items.values())
 
-    def get_item_names(self) -> typing.List[str]:
-        return list(self.items.keys())
+def get_item(name) -> Item:
+    return _ALL_ITEMS[name]
 
-    def set_state(self, name, new_state):
-        try:
-            self.items[name].set_state(new_state)
-        except KeyError:
-            item = Item(name)
-            item.set_state(new_state)
-            self.items[name] = item
 
-    def set_item(self, item):
-        assert isinstance(item, Item), type(item)
-        self.items[item.name] = item
+def get_items() -> typing.List[Item]:
+    return list(_ALL_ITEMS.values())
 
-    def pop_item(self, name) -> Item:
-        return self.items.pop(name)
+
+def get_item_names() -> typing.List[str]:
+    return list(_ALL_ITEMS.keys())
+
+
+def set_item_state(name, new_state):
+    try:
+        _ALL_ITEMS[name].set_state(new_state)
+    except KeyError:
+        item = Item(name)
+        item.set_state(new_state)
+        _ALL_ITEMS[name] = item
+
+
+def set_item(item):
+    assert isinstance(item, Item), type(item)
+    _ALL_ITEMS[item.name] = item
+
+
+def pop_item(name) -> Item:
+    return _ALL_ITEMS.pop(name)

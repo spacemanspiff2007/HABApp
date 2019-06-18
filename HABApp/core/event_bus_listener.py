@@ -1,6 +1,7 @@
 from . import WrappedFunction
 from .events import AllEvents
 
+
 class EventBusListener:
     def __init__(self, name, callback, event_type=AllEvents):
         assert isinstance(name, str) or name is None, type(name)

@@ -1,6 +1,6 @@
 import datetime
 
-from HABApp.core import Events, Items, ValueNoChangeEvent, ValueNoUpdateEvent
+from HABApp.core import Events, items, ValueNoChangeEvent, ValueNoUpdateEvent
 
 
 class WatchedItem:
@@ -22,7 +22,7 @@ class WatchedItem:
             return None
 
         try:
-            item = Items.get_item(self.name)
+            item = items.get_item(self.name)
         except KeyError:
             return None
 

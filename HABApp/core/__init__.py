@@ -1,10 +1,8 @@
 from .wrappedfunction import WrappedFunction
 
-from .event_bus import EventBus as __EventBus
 from .event_bus_listener import EventBusListener
 from .events import ValueUpdateEvent, ValueChangeEvent, ValueNoChangeEvent, ValueNoUpdateEvent, AllEvents
-from .items import Items as __Items
 from .items import Item
 
-Items = __Items()
-Events = __EventBus()
+from HABApp.core import items as Items
+from HABApp.core import event_bus as Events

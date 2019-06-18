@@ -10,7 +10,7 @@ default_logger = logging.getLogger('HABApp.Worker')
 class WrappedFunction:
     _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
 
-    def __init__(self, func, logger=None, warn_too_long = True, name = None):
+    def __init__(self, func, logger=None, warn_too_long=True, name=None):
         assert callable(func)
         self._func = func
 
