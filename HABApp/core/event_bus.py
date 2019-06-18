@@ -31,21 +31,6 @@ def post_event(name, event):
     return None
 
 
-def remove_listener(listener : EventBusListener):
-    assert isinstance(listener, EventBusListener)
-    add_to_all = listener.name is None
-
-    item_listeners = _EVENT_LISTENER.get(listener.name, []) if not add_to_all else _EVENT_LISTENER_ALL_EVENTS
-    if listener not in item_listeners:
-        return None
-    item_listeners.remove(listener)
-
-    if add_to_all:
-        _habapp_log.debug(f'Removed event listener for all names (type {listener.event_filter})')
-    else:
-        _habapp_log.debug(f'Removed event listener for "{listener.name}" (type {listener.event_filter})')
-
-
 def add_listener(listener: EventBusListener):
     assert isinstance(listener, EventBusListener)
     add_to_all = listener.name is None
@@ -62,3 +47,23 @@ def add_listener(listener: EventBusListener):
         _EVENT_LISTENER[listener.name] = item_listeners
         _habapp_log.debug(f'Added Event listener for "{listener.name}" (type {listener.event_filter})')
     return None
+
+
+def remove_listener(listener : EventBusListener):
+    assert isinstance(listener, EventBusListener)
+    add_to_all = listener.name is None
+
+    item_listeners = _EVENT_LISTENER.get(listener.name, []) if not add_to_all else _EVENT_LISTENER_ALL_EVENTS
+    if listener not in item_listeners:
+        return None
+    item_listeners.remove(listener)
+
+    if add_to_all:
+        _habapp_log.debug(f'Removed event listener for all names (type {listener.event_filter})')
+    else:
+        _habapp_log.debug(f'Removed event listener for "{listener.name}" (type {listener.event_filter})')
+
+
+def remove_all_listeners():
+    _EVENT_LISTENER.clear()
+    _EVENT_LISTENER_ALL_EVENTS.clear()
