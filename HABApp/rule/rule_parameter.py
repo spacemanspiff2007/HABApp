@@ -22,9 +22,6 @@ class RuleParameter:
     def __eq__(self, other):
         return self.get_value() == other
 
-    def __ne__(self, other):
-        return self.get_value() != other
-
     def __lt__(self, other):
         if not isinstance(other, (int, float)):
             return NotImplemented
