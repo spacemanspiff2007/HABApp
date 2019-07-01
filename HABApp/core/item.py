@@ -24,3 +24,24 @@ class Item:
         for k in ['name', 'state', 'last_change', 'last_update']:
             ret += f'{"," if ret else ""} {k}: {getattr(self, k)}'
         return f'<{self.__class__.__name__}{ret:s}>'
+
+    def __lt__(self, other):
+        return self.state < other
+
+    def __le__(self, other):
+        return self.state <= other
+
+    def __eq__(self, other):
+        return self.state == other
+
+    def __ne__(self, other):
+        return self.state != other
+
+    def __ge__(self, other):
+        return self.state >= other
+
+    def __gt__(self, other):
+        return self.state > other
+
+    def __bool__(self):
+        return self.state

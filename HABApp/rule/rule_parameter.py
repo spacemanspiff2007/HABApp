@@ -50,5 +50,4 @@ class RuleParameter:
         return self.get_value() > other
 
     def __repr__(self):
-        return f'<RuleParameter file: {self.filename}, keys: {self.keys}, ' \
-               f'value: {self.get_value()}'
+        return f'<RuleParameter file: {self.filename}, keys: {self.keys}, value: {self.get_value()}'
