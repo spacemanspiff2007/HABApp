@@ -1,12 +1,13 @@
 import datetime
+import typing
 
 
 class Item:
-    def __init__(self, name: str):
+    def __init__(self, name: str, state=None):
         assert isinstance(name, str), type(name)
 
-        self.name = name
-        self.state = None
+        self.name: str = name
+        self.state: typing.Any = state
 
         _now = datetime.datetime.now()
         self.last_change: datetime.datetime = _now
@@ -30,7 +31,7 @@ class Item:
     def __repr__(self):
         ret = ''
         for k in ['name', 'state', 'last_change', 'last_update']:
-            ret += f'{"," if ret else ""} {k}: {getattr(self, k)}'
+            ret += f'{", " if ret else ""}{k}: {getattr(self, k)}'
         return f'<{self.__class__.__name__} {ret:s}>'
 
     # only support == and != operators by default

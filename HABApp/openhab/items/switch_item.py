@@ -38,3 +38,6 @@ class SwitchItem(Item):
             return False
 
         return NotImplemented
+
+    def __bool__(self):
+        return self.is_on()

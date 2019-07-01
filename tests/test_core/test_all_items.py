@@ -23,10 +23,10 @@ class TestCasesItem(unittest.TestCase):
         self.assertIs(created_item, Items.get_item(NAME))
 
         self.assertEqual(Items.get_item_names(), [NAME])
-        self.assertEqual(Items.get_items(), [created_item])
+        self.assertEqual(Items.get_all_items(), [created_item])
 
         self.assertIs(created_item, Items.pop_item(NAME))
-        self.assertEqual(Items.get_items(), [])
+        self.assertEqual(Items.get_all_items(), [])
 
 
 if __name__ == '__main__':

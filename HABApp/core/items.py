@@ -14,7 +14,7 @@ def get_item(name) -> Item:
     return _ALL_ITEMS[name]
 
 
-def get_items() -> typing.List[Item]:
+def get_all_items() -> typing.List[Item]:
     return list(_ALL_ITEMS.values())
 
 

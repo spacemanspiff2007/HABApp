@@ -438,7 +438,7 @@ class Rule:
     def _check_rule(self):
 
         # Check if items do exists
-        if not HABApp.core.items.get_items():
+        if not HABApp.core.items.get_all_items():
             return None
 
         for listener in self.__event_listener:
