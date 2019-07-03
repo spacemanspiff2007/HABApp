@@ -1,8 +1,5 @@
 import datetime
 
-import HABApp
-from HABApp.classes import Color
-
 
 def map_event_types(openhab_type: str, openhab_value: str):
     assert isinstance(openhab_type, str), type(openhab_type)

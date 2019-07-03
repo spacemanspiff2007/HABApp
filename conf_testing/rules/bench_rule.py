@@ -5,6 +5,7 @@ import time
 import HABApp
 from HABApp.core.events import ValueChangeEvent
 
+
 class OpenhabBenchRule(HABApp.Rule):
 
     def __init__(self):
@@ -13,7 +14,7 @@ class OpenhabBenchRule(HABApp.Rule):
         self.item_list = [ f"CreatedItem{k}" for k in range(200)]
 
         self.__b_start = 0
-        self.__b_val = random.randint(0,9999)
+        self.__b_val = random.randint(0, 9999)
 
         self.run_in( 5 * 60, self.prepare_bench)
 
