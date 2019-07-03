@@ -7,7 +7,6 @@ import warnings
 import typing
 
 import HABApp
-import HABApp.classes
 import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
@@ -58,7 +57,7 @@ class Rule:
         # interfaces
         self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = self.__runtime.async_http if not test else None
         self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
-        self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface if not test else None
+        self.oh: HABApp.openhab.OpenhabInterface = HABApp.openhab.get_openhab_interface() if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
 
     def item_exists(self, name: str) -> bool:

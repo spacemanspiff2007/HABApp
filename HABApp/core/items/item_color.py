@@ -15,7 +15,15 @@ class ColorItem(Item):
         self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)
         self.value: float = min(max(0.0, v), PERCENT_FACTOR)
 
-    def set_state(self, h=0.0, s=0.0, v=0.0):
+    def set_state(self, hue=0.0, saturation=0.0, value=0.0):
+
+        # map tuples to variables
+        # when processing events instead of three values we get the tuple
+        if isinstance(hue, tuple):
+            v = hue[2]
+            s = hue[1]
+            h = hue[0]
+
         self.hue = min(max(0.0, h), HUE_FACTOR)
         self.saturation = min(max(0.0, s), PERCENT_FACTOR)
         self.value = min(max(0.0, v), PERCENT_FACTOR)

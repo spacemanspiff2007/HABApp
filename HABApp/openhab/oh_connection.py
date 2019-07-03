@@ -9,7 +9,7 @@ import HABApp.openhab.events
 from HABApp.openhab.events import get_event
 from HABApp.util import PrintException
 from .http_connection import HttpConnection, HttpConnectionEventHandler
-from .oh_interface import OpenhabInterface
+from .oh_interface import get_openhab_interface
 
 log = logging.getLogger('HABApp.openhab.Connection')
 
@@ -24,7 +24,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
         self.config = config
 
         self.connection = HttpConnection(self, self.config)
-        self.interface = OpenhabInterface(self.connection, openhab_config=self.config.openhab)
+        self.interface = get_openhab_interface(self.connection)
 
         self.__ping_sent = 0
         self.__ping_received = 0

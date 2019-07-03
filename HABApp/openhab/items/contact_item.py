@@ -5,12 +5,6 @@ class ContactItem(Item):
     OPEN = 'OPEN'
     CLOSED = 'CLOSED'
 
-    @classmethod
-    def from_str(self, name, value):
-        item = ContactItem(name=name)
-        item.set_state(value)
-        return item
-
     def set_state(self, new_state):
         if new_state is not None and new_state != ContactItem.OPEN and new_state != ContactItem.CLOSED:
             raise ValueError(f'Invalid value for ContactItem: {new_state}')
