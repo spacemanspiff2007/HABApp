@@ -36,7 +36,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 HABApp.core.WrappedFunction(self.ping_received),
                 HABApp.openhab.events.ItemStateEvent
             )
-            HABApp.core.Events.add_listener(listener)
+            HABApp.core.EventBus.add_listener(listener)
 
         shutdown.register_func(self.shutdown)
 
@@ -104,12 +104,12 @@ class OpenhabConnection(HttpConnectionEventHandler):
             # Events which change the ItemRegistry
             if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
                 item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
-                HABApp.core.items.set_item(item)
+                HABApp.core.Items.set_item(item)
             elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
-                HABApp.core.items.pop_item(event.name)
+                HABApp.core.Items.pop_item(event.name)
 
             # Send Event to Event Bus
-            HABApp.core.Events.post_event(event.name, event)
+            HABApp.core.EventBus.post_event(event.name, event)
 
         except Exception as e:
             log.error(e)
@@ -128,13 +128,13 @@ class OpenhabConnection(HttpConnectionEventHandler):
             found_items = len(data)
             for _dict in data:
                 __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
-                HABApp.core.items.set_item(__item)
+                HABApp.core.Items.set_item(__item)
 
             # remove items which are no longer available
             ist = set(HABApp.core.Items.get_item_names())
             soll = {k['name'] for k in data}
             for k in ist - soll:
-                HABApp.core.items.pop_item(k)
+                HABApp.core.Items.pop_item(k)
 
             log.info(f'Updated {found_items:d} items')
             return found_items

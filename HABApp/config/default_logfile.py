@@ -42,7 +42,7 @@ loggers:
       - HABApp_default
     propagate: False
 
-  HABApp.Events:
+  HABApp.EventBus:
     level: INFO
     handlers:
       - BufferEventFile

@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta
 
-from HABApp.core.items import Item
+from HABApp.core.Items import Item
 
 
 class TestCasesItem(unittest.TestCase):

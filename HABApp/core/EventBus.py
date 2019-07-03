@@ -3,11 +3,10 @@ import logging
 import typing
 
 from HABApp.util import PrintException
-from .event_bus_listener import EventBusListener
-from .events import ValueUpdateEvent
-from .items import set_item_state as _set_item_state
+from . import EventBusListener, ValueUpdateEvent
+from .Items import set_item_state as _set_item_state
 
-_event_log = logging.getLogger('HABApp.Events')
+_event_log = logging.getLogger('HABApp.EventBus')
 _habapp_log = logging.getLogger('HABApp')
 
 
@@ -49,7 +48,7 @@ def add_listener(listener: EventBusListener):
     return None
 
 
-def remove_listener(listener : EventBusListener):
+def remove_listener(listener: EventBusListener):
     assert isinstance(listener, EventBusListener)
     add_to_all = listener.name is None
 

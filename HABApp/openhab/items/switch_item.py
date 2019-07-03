@@ -1,4 +1,4 @@
-from HABApp.core.items import Item
+from HABApp.core.Items import Item
 
 
 class SwitchItem(Item):
@@ -16,10 +16,12 @@ class SwitchItem(Item):
             raise ValueError(f'Invalid value for SwitchItem {self.name}: {new_state}')
         super().set_state(new_state)
 
-    def is_on(self):
+    def is_on(self) -> bool:
+        """Test value against on-value"""
         return True if self.state == SwitchItem.ON else False
 
-    def is_off(self):
+    def is_off(self) -> bool:
+        """Test value against off-value"""
         return True if self.state == SwitchItem.OFF else False
 
     def __str__(self):

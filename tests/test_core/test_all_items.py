@@ -1,6 +1,7 @@
 import unittest
 
-from HABApp.core import Items, Item
+from HABApp.core.items import Item
+from HABApp.core import Items
 
 
 class TestCasesItem(unittest.TestCase):

@@ -69,17 +69,17 @@ class Rule:
         :return: True or False
         """
         assert isinstance(name, str), type(name)
-        return HABApp.core.items.item_exists(name)
+        return HABApp.core.Items.item_exists(name)
 
 
-    def get_item(self, name: str) -> HABApp.core.Item:
+    def get_item(self, name: str) -> HABApp.core.items.Item:
         """
         Return the item with the specified name.
 
         :param name: name to post event to
         :return: item
         """
-        return HABApp.core.items.get_item(name)
+        return HABApp.core.Items.get_item(name)
 
 
     def get_item_state(self, name: str, default=None) -> typing.Any:
@@ -91,10 +91,10 @@ class Rule:
         :return: state of the specified item
         """
         if default is None:
-            return HABApp.core.items.get_item(name).state
+            return HABApp.core.Items.get_item(name).state
 
         try:
-            state = HABApp.core.items.get_item(name).state
+            state = HABApp.core.Items.get_item(name).state
         except KeyError:
             return default
 
@@ -115,7 +115,7 @@ class Rule:
         assert isinstance(name, str)
 
         try:
-            old_state = HABApp.core.items.get_item(name).state
+            old_state = HABApp.core.Items.get_item(name).state
         except KeyError:
             old_state = None
 
@@ -177,7 +177,7 @@ class Rule:
         :return:
         """
         assert isinstance(name, str), type(name)
-        return HABApp.core.Events.post_event(name, event)
+        return HABApp.core.EventBus.post_event(name, event)
 
     def listen_event(self, name: typing.Optional[str], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
@@ -194,7 +194,7 @@ class Rule:
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         listener = HABApp.core.EventBusListener(name, cb, even_type)
         self.__event_listener.append(listener)
-        HABApp.core.Events.add_listener(listener)
+        HABApp.core.EventBus.add_listener(listener)
         return listener
 
     def execute_subprocess(self, callback, program, *args, capture_output=True):
@@ -438,7 +438,7 @@ class Rule:
     def _check_rule(self):
 
         # Check if items do exists
-        if not HABApp.core.items.get_all_items():
+        if not HABApp.core.Items.get_all_items():
             return None
 
         for listener in self.__event_listener:
@@ -447,12 +447,12 @@ class Rule:
                 continue
 
             # check if specific item exists
-            if not HABApp.core.items.item_exists(listener.name):
+            if not HABApp.core.Items.item_exists(listener.name):
                 log.warning(f'Item "{listener.name}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
         for item in self.__watched_items:
-            if not HABApp.core.items.item_exists(item.name):
+            if not HABApp.core.Items.item_exists(item.name):
                 log.warning(f'Item "{item.name}" does not exist (yet)! '
                             f'self.item_watch in "{self.rule_name}" may not work as intended.')
 
@@ -495,7 +495,7 @@ class Rule:
 
         # Actually remove the listeners/events
         for listener in event_listeners:
-            HABApp.core.Events.remove_listener(listener)
+            HABApp.core.EventBus.remove_listener(listener)
 
         for event in future_events:
             event.cancel()

@@ -13,7 +13,7 @@ import HABApp.core
 import HABApp.openhab.events
 
 log = logging.getLogger('HABApp.openhab.connection')
-log_events = logging.getLogger('HABApp.Events.openhab')
+log_events = logging.getLogger('HABApp.EventBus.openhab')
 
 
 class OpenhabDisconnectedError(Exception):
@@ -65,6 +65,9 @@ class HttpConnection:
 
     def __update_config_general(self):
         self.is_read_only = self.config.openhab.general.listen_only
+
+        if self.is_read_only:
+            log.info('Connected read only!')
 
     def __get_openhab_url(self, url: str, *args, **kwargs) -> str:
         assert not url.startswith('/')

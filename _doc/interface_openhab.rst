@@ -48,7 +48,19 @@ Function parameters
       Removes an item from the openhab item registry
    
       :param item_name: name of the item
+
+
+Openhab item types
+------------------------------
+
+
+.. autoclass:: HABApp.openhab.items.ContactItem
+   :members:
    
+.. autoclass:: HABApp.openhab.items.SwitchItem
+   :members:
+
+
 
 Example openHAB rule
 ---------------------

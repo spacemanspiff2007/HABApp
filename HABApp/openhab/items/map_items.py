@@ -1,7 +1,7 @@
 import datetime
 
 from HABApp.classes import Color
-from HABApp.core.items import Item
+from HABApp.core.Items import Item
 
 from . import SwitchItem, ContactItem
 

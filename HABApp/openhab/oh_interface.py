@@ -30,7 +30,7 @@ class OpenhabInterface:
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
             return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self._timezone
-        elif isinstance(_in, HABApp.core.Item):
+        elif isinstance(_in, HABApp.core.items.Item):
             return str(_in.state)
         elif isinstance(_in, HABApp.classes.Color):
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
@@ -63,8 +63,8 @@ class OpenhabInterface:
             return None
 
         assert isinstance(item_type, str), type(item_type)
-        item_type = item_type.title()
-        assert item_type in ['String', 'Number', 'Switch', 'Contact', 'Color', 'Contact'], item_type
+        assert item_type in ['String', 'Number', 'Switch', 'Contact',
+                             'Color', 'Contact', 'DateTime', "Location"], item_type
         assert isinstance(item_name, str), type(item_name)
         assert isinstance(label, str), type(label)
         assert isinstance(category, str), type(category)
