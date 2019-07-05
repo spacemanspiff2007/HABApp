@@ -40,12 +40,17 @@ class OpenhabInterface:
         """
         Post an update to the item
 
-        :param item_name: item name
+        :param item_name: item name or item
         :param state: new item state
         :return:
         """
+        assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
+
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
+
+        if isinstance(item_name, HABApp.core.items.Item):
+            item_name = item_name.name
 
         asyncio.run_coroutine_threadsafe(
             self.__connection.async_post_update(item_name, self.__convert_to_oh_type(state)),
@@ -57,12 +62,17 @@ class OpenhabInterface:
         """
         Send the specified command to the item
 
-        :param item_name: item name
+        :param item_name: item name or item
         :param command: command
         :return:
         """
+        assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
+
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
+
+        if isinstance(item_name, HABApp.core.items.Item):
+            item_name = item_name.name
 
         asyncio.run_coroutine_threadsafe(
             self.__connection.async_send_command(item_name, self.__convert_to_oh_type(command)),

@@ -75,7 +75,7 @@ class Rule:
         """
         Return the item with the specified name.
 
-        :param name: name to post event to
+        :param name: item name
         :return: item
         """
         return HABApp.core.Items.get_item(name)

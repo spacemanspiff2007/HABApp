@@ -30,9 +30,12 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
    * - Function
      - Description
    
+   * - :meth:`~HABApp.Rule.get_item`
+     - Return an item
+     
    * - :meth:`~HABApp.Rule.get_item_state`
      - Get the state of an item
-     
+
    * - :meth:`~HABApp.Rule.set_item_state`
      - | Set the state of an item  to a new value (which can be anything).
        | This can also be used with custom class instances to load them from other rules.
@@ -49,6 +52,18 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
 
    * - :meth:`~HABApp.Rule.item_watch_and_listen`
      - Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
+
+It is possible to check the item value by comparing it::
+
+    my_item = self.get_item('MyItem')
+
+    # this works
+    if my_item == 5:
+        # do sth
+
+    # and is the same as
+    if my_item.state == 5:
+        # do sth
 
 Events
 ------------------------------

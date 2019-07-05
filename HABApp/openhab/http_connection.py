@@ -224,8 +224,11 @@ class HttpConnection:
             log.log(lvl, f'SSE request Error: {e}')
             for l in traceback.format_exc().splitlines():
                 log.log(lvl, l)
+
+            # reconnect even if we have an unexpected error
             if not disconnect:
-                raise
+                self.__set_offline( f'Uncaught error in process_sse_events: {e}')
+
 
     async def async_post_update(self, item, state):
 
@@ -277,7 +280,6 @@ class HttpConnection:
 
         if self.config.openhab.general.listen_only:
             return False
-
 
         payload = {'type': item_type, 'name': item_name}
         if label:
