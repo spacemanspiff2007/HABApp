@@ -24,11 +24,11 @@ class ColorItem(Item):
             s = hue[1]
             h = hue[0]
 
-        self.hue = min(max(0.0, h), HUE_FACTOR)
-        self.saturation = min(max(0.0, s), PERCENT_FACTOR)
-        self.value = min(max(0.0, v), PERCENT_FACTOR)
+        self.hue = min(max(0.0, hue), HUE_FACTOR)
+        self.saturation = min(max(0.0, saturation), PERCENT_FACTOR)
+        self.value = min(max(0.0, value), PERCENT_FACTOR)
 
-        super().set_state(new_state=(h, s, v))
+        super().set_state(new_state=(hue, saturation, value))
 
     def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
         r, g, b = colorsys.hsv_to_rgb(

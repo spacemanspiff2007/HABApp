@@ -23,7 +23,7 @@ Trigger an event when an item is constant
     # hide
 
     import HABApp
-    from HABApp.core import ValueNoChangeEvent
+    from HABApp.core.events import ValueNoChangeEvent
 
     class MyRule(HABApp.Rule):
         def __init__(self):
@@ -40,7 +40,7 @@ Trigger an event when an item is constant
 
     MyRule()
     # hide
-    HABApp.core.Events.post_event('test_watch', ValueNoChangeEvent('test_watch', 'my_value', 5))
-    HABApp.core.Events.post_event('test_watch', ValueNoChangeEvent('test_watch', 'my_value', 10))
+    HABApp.core.EventBus.post_event('test_watch', ValueNoChangeEvent('test_watch', 'my_value', 5))
+    HABApp.core.EventBus.post_event('test_watch', ValueNoChangeEvent('test_watch', 'my_value', 10))
     runner.tear_down()
     # hide
