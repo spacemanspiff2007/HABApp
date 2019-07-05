@@ -1,9 +1,7 @@
 import datetime
 
-from HABApp.classes import Color
-from HABApp.core.items import Item
-
-from . import SwitchItem, ContactItem
+from HABApp.core.items import Item, NumericItem, ColorItem
+from . import SwitchItem, ContactItem, RollershutterItem, DimmerItem
 
 
 def map_items(name, openhab_type : str, openhab_value : str):
@@ -16,29 +14,37 @@ def map_items(name, openhab_type : str, openhab_value : str):
 
     # Specific classes
     if openhab_type == "Switch":
-        return SwitchItem.from_str(name, value)
-    if openhab_type == "Contact":
-        return ContactItem.from_str(name, value)
+        return SwitchItem(name, value)
 
-    item = Item(name)
-    if value is None:
-        item.set_state(value)
-        return item
+    if openhab_type == "Contact":
+        return ContactItem(name, value)
+
+    if openhab_type == "Rollershutter":
+        if value is None:
+            return RollershutterItem(name, value)
+        return RollershutterItem(name, float(value))
+
+    if openhab_type == "Dimmer":
+        return DimmerItem(name, value)
 
     if openhab_type == "Number":
+        if value is None:
+            return NumericItem(name, value)
+
+        # Number items can be int or float
         try:
-            value = int(openhab_value)
+            return NumericItem(name, int(value))
         except ValueError:
-            value = float(openhab_value)
+            return NumericItem(name, float(value))
 
-    elif openhab_type == "Decimal":
-        value = float(openhab_value)
+    if openhab_type == "DateTime":
+        if value is None:
+            return Item(name, value)
+        return Item(name, datetime.datetime.strptime(value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z'))
 
-    elif openhab_type == "Color":
-        value = Color(*[float(k) for k in openhab_value.split(',')])
+    if openhab_type == "Color":
+        if value is None:
+            return ColorItem(name)
+        return ColorItem(name, *(float(k) for k in value.split(',')))
 
-    elif openhab_type == "DateTime":
-        value = datetime.datetime.strptime(openhab_value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z')
-
-    item.set_state(value)
-    return item
+    return Item(name, value)

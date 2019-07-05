@@ -12,7 +12,7 @@ from ..config import Mqtt as MqttConfig
 from .events import MqttValueUpdateEvent, MqttValueChangeEvent
 
 log = logging.getLogger('HABApp.mqtt.connection')
-log_msg = logging.getLogger('HABApp.Events.mqtt')
+log_msg = logging.getLogger('HABApp.EventBus.mqtt')
 
 
 class MqttConnection:

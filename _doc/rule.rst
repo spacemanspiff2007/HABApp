@@ -30,9 +30,12 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
    * - Function
      - Description
    
+   * - :meth:`~HABApp.Rule.get_item`
+     - Return an item
+     
    * - :meth:`~HABApp.Rule.get_item_state`
      - Get the state of an item
-     
+
    * - :meth:`~HABApp.Rule.set_item_state`
      - | Set the state of an item  to a new value (which can be anything).
        | This can also be used with custom class instances to load them from other rules.
@@ -49,6 +52,18 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
 
    * - :meth:`~HABApp.Rule.item_watch_and_listen`
      - Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
+
+It is possible to check the item value by comparing it::
+
+    my_item = self.get_item('MyItem')
+
+    # this works
+    if my_item == 5:
+        # do sth
+
+    # and is the same as
+    if my_item.state == 5:
+        # do sth
 
 Events
 ------------------------------
@@ -128,7 +143,8 @@ Parameters
 ------------------------------
 Parameters are values which can easily be changed without having to reload the rules.
 Values will be picked up during runtime as soon as they get edited in the corresponding file.
-This makes them perfect for boundaries.
+If the file doesn't exist yet it will automatically be generated in the configured `param` folder.
+Parameters are perfect for boundaries (e.g. if value is below param switch something on).
 
 .. list-table::
    :widths: auto
@@ -146,11 +162,11 @@ Example::
         super().__init__()
 
         # construct parameter once, default_value can be anything
-        self.min_value = self.get_rule_parameter( 'p_file_testrule', 'min_value', default_value=10)
+        self.min_value = self.get_rule_parameter( 'param_file_testrule', 'min_value', default_value=10)
 
         # deeper structuring is possible through specifying multiple keys
         self.min_value_nested = self.get_rule_parameter(
-            'p_file_testrule',
+            'param_file_testrule',
             'Rule A', 'subkey1', 'subkey2',
             default_value=['a', 'b', 'c'] # defaults can also be dicts or lists
         )
@@ -159,6 +175,19 @@ Example::
         # the parameter can be used like a normal variable, comparison works as expected
         if self.min_value < event.value:
             pass
+
+
+Created file:
+
+.. code-block:: yaml
+
+   min_value: 10
+   Rule A:
+       subkey1:
+           subkey2:
+               - a
+               - b
+               - c
 
 
 Running external tools

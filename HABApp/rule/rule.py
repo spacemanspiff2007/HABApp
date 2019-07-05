@@ -7,7 +7,6 @@ import warnings
 import typing
 
 import HABApp
-import HABApp.classes
 import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
@@ -48,7 +47,7 @@ class Rule:
             assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
-        self.__event_listener: typing.List[HABApp.core.EventListener] = []
+        self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
         self.__future_events: typing.List[ScheduledCallback] = []
         self.__watched_items: typing.List[WatchedItem] = []
 
@@ -58,7 +57,7 @@ class Rule:
         # interfaces
         self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = self.__runtime.async_http if not test else None
         self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
-        self.oh: HABApp.openhab.OpenhabInterface = self.__runtime.openhab_connection.interface if not test else None
+        self.oh: HABApp.openhab.OpenhabInterface = HABApp.openhab.get_openhab_interface() if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
 
     def item_exists(self, name: str) -> bool:
@@ -70,6 +69,17 @@ class Rule:
         """
         assert isinstance(name, str), type(name)
         return HABApp.core.Items.item_exists(name)
+
+
+    def get_item(self, name: str) -> HABApp.core.items.Item:
+        """
+        Return the item with the specified name.
+
+        :param name: item name
+        :return: item
+        """
+        return HABApp.core.Items.get_item(name)
+
 
     def get_item_state(self, name: str, default=None) -> typing.Any:
         """
@@ -138,7 +148,7 @@ class Rule:
         return item
 
     def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
-                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventListener]:
+                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventBusListener]:
         """
         Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
 
@@ -157,23 +167,20 @@ class Rule:
         )
         return watched_item, event_listener
 
-    def get_item(self, name: str) -> HABApp.core.Item:
-        return HABApp.core.Items.get_item(name)
-
     def post_event(self, name, event):
         """
-        Post an Event to the Event Bus
+        Post an event to the event bus
 
         :param name: name to post event to
         :param event: Event class to be used (must be class instance)
         :return:
         """
         assert isinstance(name, str), type(name)
-        return HABApp.core.Events.post_event(name, event)
+        return HABApp.core.EventBus.post_event(name, event)
 
     def listen_event(self, name: typing.Optional[str], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
-                     ) -> HABApp.core.EventListener:
+                     ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
 
@@ -184,9 +191,9 @@ class Rule:
             or mqtt.
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        listener = HABApp.core.EventListener(name, cb, even_type)
+        listener = HABApp.core.EventBusListener(name, cb, even_type)
         self.__event_listener.append(listener)
-        HABApp.core.Events.add_listener(listener)
+        HABApp.core.EventBus.add_listener(listener)
         return listener
 
     def execute_subprocess(self, callback, program, *args, capture_output=True):
@@ -234,7 +241,7 @@ class Rule:
         lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
         lookup.update( {datetime.date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
 
-        # abreviations in German and English
+        # abbreviations in German and English
         lookup.update({"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7})
         lookup.update({"Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5, "Sat": 6, "Sun": 7})
         lookup = {k.lower(): v for k, v in lookup.items()}
@@ -430,7 +437,7 @@ class Rule:
     def _check_rule(self):
 
         # Check if items do exists
-        if not HABApp.core.Items.items:
+        if not HABApp.core.Items.get_all_items():
             return None
 
         for listener in self.__event_listener:
@@ -487,7 +494,7 @@ class Rule:
 
         # Actually remove the listeners/events
         for listener in event_listeners:
-            HABApp.core.Events.remove_listener(listener)
+            HABApp.core.EventBus.remove_listener(listener)
 
         for event in future_events:
             event.cancel()

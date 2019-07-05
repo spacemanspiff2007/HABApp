@@ -9,7 +9,7 @@ import HABApp.openhab.events
 from HABApp.openhab.events import get_event
 from HABApp.util import PrintException
 from .http_connection import HttpConnection, HttpConnectionEventHandler
-from .oh_interface import OpenhabInterface
+from .oh_interface import get_openhab_interface
 
 log = logging.getLogger('HABApp.openhab.Connection')
 
@@ -24,19 +24,19 @@ class OpenhabConnection(HttpConnectionEventHandler):
         self.config = config
 
         self.connection = HttpConnection(self, self.config)
-        self.interface = OpenhabInterface(self.connection, openhab_config=self.config.openhab)
+        self.interface = get_openhab_interface(self.connection)
 
         self.__ping_sent = 0
         self.__ping_received = 0
 
         # Add the ping listener, this works because connect is the last step
         if self.config.openhab.ping.enabled:
-            listener = HABApp.core.EventListener(
+            listener = HABApp.core.EventBusListener(
                 self.config.openhab.ping.item,
                 HABApp.core.WrappedFunction(self.ping_received),
                 HABApp.openhab.events.ItemStateEvent
             )
-            HABApp.core.Events.add_listener(listener)
+            HABApp.core.EventBus.add_listener(listener)
 
         shutdown.register_func(self.shutdown)
 
@@ -109,7 +109,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 HABApp.core.Items.pop_item(event.name)
 
             # Send Event to Event Bus
-            HABApp.core.Events.post_event(event.name, event)
+            HABApp.core.EventBus.post_event(event.name, event)
 
         except Exception as e:
             log.error(e)
@@ -131,7 +131,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 HABApp.core.Items.set_item(__item)
 
             # remove items which are no longer available
-            ist = set(HABApp.core.Items.items.keys())
+            ist = set(HABApp.core.Items.get_item_names())
             soll = {k['name'] for k in data}
             for k in ist - soll:
                 HABApp.core.Items.pop_item(k)

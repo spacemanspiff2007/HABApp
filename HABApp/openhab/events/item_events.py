@@ -4,7 +4,7 @@ from .map_events import map_event_types
 from .base_event import BaseItemEvent
 
 
-class ItemStateEvent(BaseItemEvent, HABApp.core.ValueUpdateEvent):
+class ItemStateEvent(BaseItemEvent, HABApp.core.events.ValueUpdateEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -16,7 +16,7 @@ class ItemStateEvent(BaseItemEvent, HABApp.core.ValueUpdateEvent):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class ItemStateChangedEvent(BaseItemEvent, HABApp.core.ValueChangeEvent):
+class ItemStateChangedEvent(BaseItemEvent, HABApp.core.events.ValueChangeEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 

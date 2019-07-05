@@ -1,7 +1,5 @@
 import datetime
 
-from HABApp.classes import Color
-
 
 def map_event_types(openhab_type: str, openhab_value: str):
     assert isinstance(openhab_type, str), type(openhab_type)
@@ -27,6 +25,6 @@ def map_event_types(openhab_type: str, openhab_value: str):
         return datetime.datetime.strptime(openhab_value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z')
 
     if openhab_type == "HSB":
-        return Color(*[float(k) for k in openhab_value.split(',')])
+        return tuple(float(k) for k in openhab_value.split(','))
 
     return openhab_value

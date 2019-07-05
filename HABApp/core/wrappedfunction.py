@@ -10,7 +10,7 @@ default_logger = logging.getLogger('HABApp.Worker')
 class WrappedFunction:
     _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
 
-    def __init__(self, func, logger=None, warn_too_long = True, name = None):
+    def __init__(self, func, logger=None, warn_too_long=True, name=None):
         assert callable(func)
         self._func = func
 
@@ -40,12 +40,6 @@ class WrappedFunction:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
 
-    async def __async_run(self, *args, **kwargs):
-        try:
-            await self._func(*args, **kwargs)
-        except Exception as e:
-            self.__format_traceback(e)
-
     def __format_traceback(self, e: Exception):
         self.log.error(f'Error in {self.name}: {e}')
         lines = traceback.format_exc().splitlines()
@@ -56,6 +50,12 @@ class WrappedFunction:
             # 2:  self._func(*args, **kwargs)
             if i == 0 or i > 2:
                 self.log.error(l)
+
+    async def __async_run(self, *args, **kwargs):
+        try:
+            await self._func(*args, **kwargs)
+        except Exception as e:
+            self.__format_traceback(e)
 
     def __run(self, *args, **kwargs):
 

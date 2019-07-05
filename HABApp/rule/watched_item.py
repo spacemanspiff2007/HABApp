@@ -1,6 +1,6 @@
 import datetime
 
-from HABApp.core import Events, Items, ValueNoChangeEvent, ValueNoUpdateEvent
+from HABApp.core import EventBus, Items, ValueNoChangeEvent, ValueNoUpdateEvent
 
 
 class WatchedItem:
@@ -35,7 +35,7 @@ class WatchedItem:
         if self.executed:
             return None
 
-        Events.post_event(
+        EventBus.post_event(
             self.name,
             (ValueNoChangeEvent if self.__watch_only_changes else ValueNoUpdateEvent)(
                 self.name, item.state, int(duration.total_seconds())

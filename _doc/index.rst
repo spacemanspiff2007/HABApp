@@ -18,11 +18,8 @@ Welcome to the HABApp documentation!
    rule_examples
 
 
-.. Commented out
-  Indices and tables
-  ==================
+Indices and tables
+==================
   
   * :ref:`genindex`
   * :ref:`modindex`
-  * :ref:`search`
-  

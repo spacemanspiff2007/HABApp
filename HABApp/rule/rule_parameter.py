@@ -22,9 +22,6 @@ class RuleParameter:
     def __eq__(self, other):
         return self.get_value() == other
 
-    def __ne__(self, other):
-        return self.get_value() != other
-
     def __lt__(self, other):
         if not isinstance(other, (int, float)):
             return NotImplemented
@@ -50,5 +47,4 @@ class RuleParameter:
         return self.get_value() > other
 
     def __repr__(self):
-        return f'<RuleParameter file: {self.filename}, keys: {self.keys}, ' \
-               f'value: {self.get_value()}'
+        return f'<RuleParameter file: {self.filename}, keys: {self.keys}, value: {self.get_value()}'

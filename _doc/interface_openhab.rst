@@ -48,7 +48,38 @@ Function parameters
       Removes an item from the openhab item registry
    
       :param item_name: name of the item
+
+
+Openhab item types
+------------------------------
+
+Openhab items are mapped to special classes and provide convenience functions
+
+Examples::
+
+    my_contact = self.get_item('MyContact')
+    if my_contact.is_open():
+        pass
+
+    my_switch = self.get_item('MySwitch')
+    if my_switch.is_on():
+        my_switch.off()
+
+
+
+.. autoclass:: HABApp.openhab.items.ContactItem
+   :members:
    
+.. autoclass:: HABApp.openhab.items.SwitchItem
+   :members:
+
+.. autoclass:: HABApp.openhab.items.DimmerItem
+   :members:
+
+.. autoclass:: HABApp.openhab.items.RollershutterItem
+   :members:
+
+
 
 Example openHAB rule
 ---------------------

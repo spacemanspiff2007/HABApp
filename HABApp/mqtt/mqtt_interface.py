@@ -22,7 +22,7 @@ class MqttInterface:
         if MqttInterface._RAISE_CONNECTION_ERRORS:
             raise ConnectionError('Mqtt client not connected')
         else:
-            log.error('Mqtt client not connected')
+            log.warning('Mqtt client not connected')
             return False
 
 
