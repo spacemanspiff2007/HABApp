@@ -13,11 +13,11 @@ class RollershutterItem(NumericItem):
         super().set_state(new_state)
 
     def up(self):
-        """Switch on"""
+        """Move shutter up"""
         get_openhab_interface().send_command(self.name, 'UP')
 
     def down(self):
-        """Switch off"""
+        """Move shutter down"""
         get_openhab_interface().send_command(self.name, 'DOWN')
 
     def percent(self, value: float):
