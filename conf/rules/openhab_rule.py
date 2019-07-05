@@ -1,6 +1,7 @@
 import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
 from HABApp.openhab.events import ItemStateEvent, ItemCommandEvent, ItemStateChangedEvent
+from HABApp.openhab.items import SwitchItem
 
 class MyOpenhabRule(HABApp.Rule):
 
@@ -35,6 +36,12 @@ class MyOpenhabRule(HABApp.Rule):
 
         # interaction is available through self.openhab or self.oh
         self.oh.post_update('TestItemUpdate', 123)
+
+        # example for interaction with openhab item type
+        switch_item = self.get_item('TestSwitch')
+        assert isinstance(switch_item, SwitchItem)
+        if switch_item.is_on():
+            switch_item.off()
 
 
 MyOpenhabRule()
