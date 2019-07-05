@@ -20,9 +20,9 @@ class ColorItem(Item):
         # map tuples to variables
         # when processing events instead of three values we get the tuple
         if isinstance(hue, tuple):
-            v = hue[2]
-            s = hue[1]
-            h = hue[0]
+            value = hue[2]
+            saturation = hue[1]
+            hue = hue[0]
 
         self.hue = min(max(0.0, hue), HUE_FACTOR)
         self.saturation = min(max(0.0, saturation), PERCENT_FACTOR)

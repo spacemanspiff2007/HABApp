@@ -22,6 +22,20 @@ class TestCasesItem(unittest.TestCase):
 
         self.assertEqual(i.state, (30, 50, 70))
 
+    def test_set_func_touple(self):
+        i = ColorItem('test')
+        self.assertEqual(i.hue, 0)
+        self.assertEqual(i.saturation, 0)
+        self.assertEqual(i.value, 0)
+
+        i.set_state((22, 33.3, 77), None)
+
+        self.assertEqual(i.hue, 22)
+        self.assertEqual(i.saturation, 33.3)
+        self.assertEqual(i.value, 77)
+
+        self.assertEqual(i.state, (22, 33.3, 77))
+
     def test_rgb_to_hsv(self):
         i = ColorItem('test')
         i.set_rgb(193, 25, 99)
