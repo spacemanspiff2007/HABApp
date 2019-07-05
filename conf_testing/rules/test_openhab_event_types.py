@@ -28,6 +28,7 @@ class TestOpenhabEventTypes(HABApp.Rule):
             'Dimmer': [0, 100, 55.5],
             'Location': ["1,2,3", "-1.1,2.2,3.3"],
             'Number': [-111, 222, -13.13, 55.55],
+            'Player': ["PLAY", "PAUSE", "REWIND", "FASTFORWARD"],
             'Rollershutter': [0, 100, 30.5],
             'String': ['A', 'B', 'C'],
             'Switch': ['ON', 'OFF'],

@@ -87,7 +87,7 @@ class OpenhabInterface:
 
         assert isinstance(item_type, str), type(item_type)
         assert item_type in ['String', 'Number', 'Switch', 'Contact', 'Dimmer', 'Rollershutter',
-                             'Color', 'Contact', 'DateTime', "Location"], item_type
+                             'Color', 'Contact', 'DateTime', "Location", "Player"], item_type
         assert isinstance(item_name, str), type(item_name)
         assert isinstance(label, str), type(label)
         assert isinstance(category, str), type(category)

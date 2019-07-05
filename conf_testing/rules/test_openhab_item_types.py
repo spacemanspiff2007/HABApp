@@ -7,6 +7,7 @@ from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem
 
 log = logging.getLogger('HABApp.OpenhabTestItems')
 
+
 @dataclasses.dataclass
 class TestParam():
     func_name: str
