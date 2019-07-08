@@ -146,12 +146,11 @@ class MqttConnection:
 
         try:
             _item = HABApp.core.Items.get_item(topic)
-            _old_state = _item.state
         except KeyError:
-            _old_state = None
             _item = HABApp.core.Items.create_item(topic, HABApp.mqtt.items.MqttItem)
 
-        # Update item before doing callbacks
+        # remeber state and update item before doing callbacks
+        _old_state = _item.state
         _item.set_state(payload)
 
         # Post events

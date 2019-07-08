@@ -121,12 +121,11 @@ class Rule:
 
         try:
             item = HABApp.core.Items.get_item(name)
-            old_state = item.state
         except KeyError:
-            old_state = None
             item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
 
-        # update item before events
+        # remember state and update item before events
+        old_state = item.state
         item.set_state(value)
 
         self.post_event(name, HABApp.core.ValueUpdateEvent(name=name, value=value))
