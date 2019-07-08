@@ -1,8 +1,8 @@
-from HABApp.core.items import NumericItem
+from HABApp.core.items import Item
 from .. import get_openhab_interface
 
 
-class DimmerItem(NumericItem):
+class DimmerItem(Item):
 
     def set_state(self, new_state):
         if new_state == 'ON':

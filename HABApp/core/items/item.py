@@ -41,3 +41,24 @@ class Item:
 
     def __bool__(self):
         return self.state
+
+    # rich comparisons only for numeric types (int and float)
+    def __lt__(self, other):
+        if not isinstance(self.state, (int, float)):
+            return NotImplemented
+        return self.state < other
+
+    def __le__(self, other):
+        if not isinstance(self.state, (int, float)):
+            return NotImplemented
+        return self.state <= other
+
+    def __ge__(self, other):
+        if not isinstance(self.state, (int, float)):
+            return NotImplemented
+        return self.state >= other
+
+    def __gt__(self, other):
+        if not isinstance(self.state, (int, float)):
+            return NotImplemented
+        return self.state > other

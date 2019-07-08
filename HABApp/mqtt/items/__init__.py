@@ -1,1 +1,1 @@
-from .mqtt_item import MqttItem, MqttNumericItem
+from .mqtt_item import MqttItem
