@@ -120,10 +120,14 @@ class Rule:
         assert isinstance(name, str)
 
         try:
-            old_state = HABApp.core.Items.get_item(name).state
+            item = HABApp.core.Items.get_item(name)
+            old_state = item.state
         except KeyError:
             old_state = None
-            HABApp.core.Items.create_item(name, HABApp.core.items.Item)
+            item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
+
+        # update item before events
+        item.set_state(value)
 
         self.post_event(name, HABApp.core.ValueUpdateEvent(name=name, value=value))
         if old_state != value:

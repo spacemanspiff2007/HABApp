@@ -19,13 +19,6 @@ def post_event(name, event):
 
     _event_log.info(event)
 
-    # Update Item Registry BEFORE doing the callbacks
-    if isinstance(event, ValueUpdateEvent):
-        try:
-            __get_item(event.name).set_state(event.value)
-        except KeyError:
-            pass
-
     # Notify all listeners
     for listener in itertools.chain(_EVENT_LISTENER.get(name, []), _EVENT_LISTENER_ALL_EVENTS):
         listener.notify_listeners(event)

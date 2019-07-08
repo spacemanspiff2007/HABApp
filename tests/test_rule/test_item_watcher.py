@@ -71,7 +71,9 @@ class TestCases(unittest.TestCase):
     def test_watcher_updates(self):
         self.event_triggered = False
 
-        watcher, listener = self.rule.item_watch_and_listen('test_watch', 2, self.run_no_update_event, watch_only_changes=False)
+        watcher, listener = self.rule.item_watch_and_listen(
+            'test_watch', 2, self.run_no_update_event, watch_only_changes=False
+        )
         HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item, 'asdf')
 
         now = datetime.now()
