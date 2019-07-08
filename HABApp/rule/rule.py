@@ -70,16 +70,22 @@ class Rule:
         assert isinstance(name, str), type(name)
         return HABApp.core.Items.item_exists(name)
 
-
-    def get_item(self, name: str) -> HABApp.core.items.Item:
+    def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
         """
         Return the item with the specified name.
 
-        :param name: item name
+        :param name: name of the item
+        :param item_factory: if specified and the item does not exist an item
+                             with the item_factory-class will be created
         :return: item
         """
-        return HABApp.core.Items.get_item(name)
+        if item_factory is None:
+            return HABApp.core.Items.get_item(name)
 
+        try:
+            return HABApp.core.Items.get_item(name)
+        except KeyError:
+            return HABApp.core.Items.create_item(name, item_factory)
 
     def get_item_state(self, name: str, default=None) -> typing.Any:
         """
