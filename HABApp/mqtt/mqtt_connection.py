@@ -149,10 +149,7 @@ class MqttConnection:
             _old_state = _item.state
         except KeyError:
             _old_state = None
-            _item = HABApp.core.Items.create_item(
-                topic,
-                HABApp.mqtt.items.MqttNumericItem if isinstance(payload, (int, float)) else HABApp.mqtt.items.MqttItem
-            )
+            _item = HABApp.core.Items.create_item(topic, HABApp.mqtt.items.MqttItem)
 
         # Update item before doing callbacks
         _item.set_state(payload)

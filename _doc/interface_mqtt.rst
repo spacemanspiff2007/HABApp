@@ -63,10 +63,6 @@ Example::
 .. autoclass:: HABApp.mqtt.items.MqttItem
    :members:
 
-.. autoclass:: HABApp.mqtt.items.MqttNumericItem
-   :members:
-
-
 
 
 Example MQTT rule
