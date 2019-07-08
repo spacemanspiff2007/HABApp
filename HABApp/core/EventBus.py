@@ -3,8 +3,7 @@ import logging
 import typing
 
 from HABApp.util import PrintException
-from . import EventBusListener, ValueUpdateEvent
-from .Items import get_item as __get_item
+from . import EventBusListener
 
 _event_log = logging.getLogger('HABApp.EventBus')
 _habapp_log = logging.getLogger('HABApp')
