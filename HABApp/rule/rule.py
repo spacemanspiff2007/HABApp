@@ -129,7 +129,8 @@ class Rule:
             self.post_event(name, HABApp.core.ValueChangeEvent(name=name, value=value, old_value=old_state))
         return None
 
-    def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
+    def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],
+                   seconds_constant: int, watch_only_changes=True) -> WatchedItem:
         """
         | Keep watch on the state of an item.
         | if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
@@ -137,16 +138,16 @@ class Rule:
         | if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
           `ValueNoUpdateEvent` will be sent to the event bus.
 
-        :param name: item name that shall be watched
+        :param name: item name or item that shall be watched
         :param seconds_constant: the amount of seconds the item has to be constant or has not received an update
         :param watch_only_changes:
         """
-        assert isinstance(name, str)
+        assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
 
         item = WatchedItem(
-            name=name,
+            name=name if not isinstance(name, HABApp.core.items.Item) else name.name,
             constant_time=seconds_constant,
             watch_only_changes=watch_only_changes
         )
@@ -184,20 +185,22 @@ class Rule:
         assert isinstance(name, str), type(name)
         return HABApp.core.EventBus.post_event(name, event)
 
-    def listen_event(self, name: typing.Optional[str], callback,
+    def listen_event(self, name: typing.Union[HABApp.core.items.Item, str, None], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
 
-        :param name: name to listen to or None for all events
+        :param name: item or name to listen to. Use None to listen to all events
         :param callback: callback that accepts one parameter which will contain the event
         :param even_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
             :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openhab
             or mqtt.
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        listener = HABApp.core.EventBusListener(name, cb, even_type)
+        listener = HABApp.core.EventBusListener(
+            name.name if isinstance(name, HABApp.core.items.Item) else name, cb, even_type
+        )
         self.__event_listener.append(listener)
         HABApp.core.EventBus.add_listener(listener)
         return listener
