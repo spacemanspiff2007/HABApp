@@ -123,6 +123,7 @@ class Rule:
             old_state = HABApp.core.Items.get_item(name).state
         except KeyError:
             old_state = None
+            HABApp.core.Items.create_item(name, HABApp.core.items.Item)
 
         self.post_event(name, HABApp.core.ValueUpdateEvent(name=name, value=value))
         if old_state != value:
@@ -147,7 +148,7 @@ class Rule:
         assert isinstance(watch_only_changes, bool)
 
         item = WatchedItem(
-            name=name if not isinstance(name, HABApp.core.items.Item) else name.name,
+            name=name.name if isinstance(name, HABApp.core.items.Item) else name,
             constant_time=seconds_constant,
             watch_only_changes=watch_only_changes
         )
