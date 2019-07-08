@@ -25,8 +25,6 @@ class MqttInterface:
             log.warning('Mqtt client not connected')
             return False
 
-
-
     def publish(self, topic: str, payload: typing.Any, qos: int = None, retain: bool = None) -> int:
         """
         Publish a value under a certain topic.
@@ -97,3 +95,16 @@ class MqttInterface:
         if result != mqtt.MQTT_ERR_SUCCESS:
             log.error(f'Could not unsubscribe from "{topic}": {mqtt.error_string(result)}')
         return result
+
+
+
+MQTT_INTERFACE: MqttInterface = None
+
+
+def get_mqtt_interface(connection=None, config=None) -> MqttInterface:
+    global MQTT_INTERFACE
+    if connection is None:
+        return MQTT_INTERFACE
+
+    MQTT_INTERFACE = MqttInterface(connection, config)
+    return MQTT_INTERFACE

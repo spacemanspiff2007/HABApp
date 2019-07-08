@@ -22,7 +22,7 @@ class DimmerItem(NumericItem):
         get_openhab_interface().send_command(self.name, 'OFF')
 
     def percent(self, value: float):
-        """Set dimmer to value (in percent)"""
+        """Command dimmer to value (in percent)"""
         assert 0 <= value <= 100
         get_openhab_interface().send_command(self.name, str(value))
 

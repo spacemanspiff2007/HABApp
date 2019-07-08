@@ -4,7 +4,7 @@ import typing
 
 from HABApp.util import PrintException
 from . import EventBusListener, ValueUpdateEvent
-from .Items import set_item_state as _set_item_state
+from .Items import get_item as __get_item
 
 _event_log = logging.getLogger('HABApp.EventBus')
 _habapp_log = logging.getLogger('HABApp')
@@ -21,7 +21,10 @@ def post_event(name, event):
 
     # Update Item Registry BEFORE doing the callbacks
     if isinstance(event, ValueUpdateEvent):
-        _set_item_state(event.name, event.value)
+        try:
+            __get_item(event.name).set_state(event.value)
+        except KeyError:
+            pass
 
     # Notify all listeners
     for listener in itertools.chain(_EVENT_LISTENER.get(name, []), _EVENT_LISTENER_ALL_EVENTS):

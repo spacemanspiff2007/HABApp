@@ -1,4 +1,4 @@
-from HABApp.core.Items import Item
+from HABApp.core.items import Item
 
 
 class ContactItem(Item):

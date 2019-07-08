@@ -21,7 +21,7 @@ class RollershutterItem(NumericItem):
         get_openhab_interface().send_command(self.name, 'DOWN')
 
     def percent(self, value: float):
-        """Set shutter to value (in percent)"""
+        """Command shutter to value (in percent)"""
         assert 0 <= value <= 100
         get_openhab_interface().send_command(self.name, str(value))
 

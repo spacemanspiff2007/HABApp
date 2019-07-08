@@ -1,4 +1,4 @@
-from HABApp.core.Items import Item
+from HABApp.core.items import Item
 from .. import get_openhab_interface
 
 
@@ -20,11 +20,11 @@ class SwitchItem(Item):
         return True if self.state == SwitchItem.OFF else False
 
     def on(self):
-        """Switch on"""
+        """Command item on"""
         get_openhab_interface().send_command(self.name, SwitchItem.ON)
 
     def off(self):
-        """Switch off"""
+        """Command item off"""
         get_openhab_interface().send_command(self.name, SwitchItem.OFF)
 
     def __str__(self):
