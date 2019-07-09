@@ -11,7 +11,7 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core import AllEvents
+from HABApp.core.events import AllEvents
 from .rule_parameter import RuleParameter
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
@@ -130,9 +130,9 @@ class Rule:
         old_state = item.state
         item.set_state(value)
 
-        self.post_event(name, HABApp.core.ValueUpdateEvent(name=name, value=value))
+        self.post_event(name, HABApp.core.events.ValueUpdateEvent(name=name, value=value))
         if old_state != value:
-            self.post_event(name, HABApp.core.ValueChangeEvent(name=name, value=value, old_value=old_state))
+            self.post_event(name, HABApp.core.events.ValueChangeEvent(name=name, value=value, old_value=old_state))
         return None
 
     def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],
@@ -176,7 +176,7 @@ class Rule:
         event_listener = self.listen_event(
             name,
             callback,
-            HABApp.core.ValueNoChangeEvent if watch_only_changes else HABApp.core.ValueNoUpdateEvent
+            HABApp.core.events.ValueNoChangeEvent if watch_only_changes else HABApp.core.events.ValueNoUpdateEvent
         )
         return watched_item, event_listener
 

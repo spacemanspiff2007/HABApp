@@ -1,6 +1,7 @@
 import datetime
 
-from HABApp.core import EventBus, Items, ValueNoChangeEvent, ValueNoUpdateEvent
+from HABApp.core import EventBus, Items
+from HABApp.core.events import ValueNoChangeEvent, ValueNoUpdateEvent
 
 
 class WatchedItem:

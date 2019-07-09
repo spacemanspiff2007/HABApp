@@ -108,7 +108,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
             elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
                 HABApp.core.Items.pop_item(event.name)
 
-            # Update Item in registry BEFORE doing the callbacks
+            # Update Item in registry BEFORE posting to the event bus
             if isinstance(event, HABApp.core.events.ValueUpdateEvent):
                 try:
                     HABApp.core.Items.get_item(event.name).set_state(event.value)
