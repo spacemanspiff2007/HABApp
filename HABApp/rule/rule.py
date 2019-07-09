@@ -72,7 +72,7 @@ class Rule:
 
     def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
         """
-        Return the item with the specified name.
+        Return the item with the specified name or create the item if it doesn't exist.
 
         :param name: name of the item
         :param item_factory: if specified and the item does not exist an item
@@ -114,15 +114,17 @@ class Rule:
 
         If the item doesn't exist it will be created
 
-        :param name: item name
+        :param name: item name or item instance
         :param value: value for new item state
         """
-        assert isinstance(name, str)
-
-        try:
-            item = HABApp.core.Items.get_item(name)
-        except KeyError:
-            item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
+        if isinstance(name, str):
+            try:
+                item = HABApp.core.Items.get_item(name)
+            except KeyError:
+                item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
+        else:
+            assert isinstance(name, HABApp.core.items.Item)
+            item = name
 
         # remember state and update item before events
         old_state = item.state

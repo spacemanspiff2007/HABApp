@@ -134,8 +134,20 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
             found_items = len(data)
             for _dict in data:
-                __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
-                HABApp.core.Items.set_item(__item)
+                item_name = _dict['name']
+                new_item = HABApp.openhab.map_items(item_name, _dict['type'], _dict['state'])
+
+                try:
+                    # if the item already exists and it has the correct type just update its state
+                    # Since we load the items before we load the rules this should actually never happen
+                    existing_item = HABApp.core.Items.get_item(item_name)
+                    if isinstance(existing_item, new_item.__class__):
+                        existing_item.set_state(_dict['state'])
+                except KeyError:
+                    pass
+
+                # create new item or change item type
+                HABApp.core.Items.set_item(new_item)
 
             # remove items which are no longer available
             ist = set(HABApp.core.Items.get_item_names())

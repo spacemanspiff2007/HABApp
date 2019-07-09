@@ -13,17 +13,28 @@ class Item:
         self.last_change: datetime.datetime = _now
         self.last_update: datetime.datetime = _now
 
-    def set_state(self, new_state):
-        # update timestamps
+    def set_state(self, new_state) -> bool:
+        """Set a new state without creating events
+
+        :param new_state: new state
+        :return: True if state has changed
+        """
+        state_changed = self.state != new_state
+
         _now = datetime.datetime.now()
-        if self.state != new_state:
+        if state_changed:
             self.last_change = _now
         self.last_update = _now
 
         self.state = new_state
-        return None
+        return state_changed
 
-    def get_state(self, default_value):
+    def get_state(self, default_value=None) -> typing.Any:
+        """Return the state of the item.
+
+        :param default_value: Return this value if the item state is None
+        :return: State of the item
+        """
         if self.state is None:
             return default_value
         return self.state
