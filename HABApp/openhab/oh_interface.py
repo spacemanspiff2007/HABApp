@@ -126,6 +126,19 @@ class OpenhabInterface:
         )
         return fut.result()
 
+    def item_exists(self, item_name: str):
+        """
+        Check if an item exists in the OpenHAB item registry
+
+        :param item_name: name
+        """
+        assert isinstance(item_name, str), type(item_name)
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_item_exists(item_name),
+            self.__loop
+        )
+        return fut.result()
+
 
 OH_INTERFACE = None
 

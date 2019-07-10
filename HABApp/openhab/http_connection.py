@@ -102,7 +102,8 @@ class HttpConnection:
         self.__set_offline(str(e))
         return True
 
-    async def _check_http_response(self, future, additional_info = "") -> typing.Optional[ ClientResponse]:
+    async def _check_http_response(self, future, additional_info="",
+                                   accept_404=False) -> typing.Optional[ ClientResponse]:
         try:
             resp = await future
         except Exception as e:
@@ -119,7 +120,15 @@ class HttpConnection:
             raise OpenhabNotReadyYet()
 
         # Something went wrong - log error message
+        log_msg = False
         if resp.status >= 300:
+            log_msg = True
+
+            # possibility to accept 404
+            if resp.status == 404 and accept_404:
+                log_msg = False
+
+        if log_msg:
             # Log Error Message
             additional_info = f' ({additional_info})' if additional_info else ""
             log.warning(f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}{additional_info}')
@@ -254,6 +263,11 @@ class HttpConnection:
         fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}', item_name))
         ret = await self._check_http_response(fut)
         return ret.status < 300
+
+    async def async_item_exists(self, item_name) -> bool:
+        fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))
+        ret = await self._check_http_response(fut, accept_404=True)
+        return ret.status == 200
 
     async def async_get_uuid(self) -> str:
         fut = self.__session.get(self.__get_openhab_url('rest/uuid'))
