@@ -33,12 +33,17 @@ class TestOpenhabItemTypes(HABApp.Rule):
         self.run_soon(self.run_tests)
 
     def run_tests(self):
+
+        assert self.openhab.item_exists('this_item_does_not_exist!') is False
+
         for item_cls, test_params in self.tests.items():
 
             item_type = str(item_cls).split('.')[-1][:-6]
             item_name = f'{item_type}_item_test'
 
+            assert self.openhab.item_exists(item_name) is False
             self.openhab.create_item(item_type, item_name)
+            assert self.openhab.item_exists(item_name) is True
 
             start = time.time()
             timeout = False
