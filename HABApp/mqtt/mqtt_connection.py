@@ -146,7 +146,7 @@ class MqttConnection:
 
         try:
             _item = HABApp.core.Items.get_item(topic)
-        except KeyError:
+        except HABApp.core.Items.ItemNotFoundException:
             _item = HABApp.core.Items.create_item(topic, HABApp.mqtt.items.MqttItem)
 
         # remeber state and update item before doing callbacks

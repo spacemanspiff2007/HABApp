@@ -16,10 +16,11 @@ Trigger an event when an item is constant
 .. execute_code::
 
     # hide
-    import time
+    import time, HABApp
     from tests import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
+    HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item)
     # hide
 
     import HABApp

@@ -112,7 +112,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
             if isinstance(event, HABApp.core.events.ValueUpdateEvent):
                 try:
                     HABApp.core.Items.get_item(event.name).set_state(event.value)
-                except KeyError:
+                except HABApp.core.Items.ItemNotFoundException:
                     pass
 
             # Send Event to Event Bus
@@ -143,7 +143,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                     existing_item = HABApp.core.Items.get_item(item_name)
                     if isinstance(existing_item, new_item.__class__):
                         existing_item.set_state(_dict['state'])
-                except KeyError:
+                except HABApp.core.Items.ItemNotFoundException:
                     pass
 
                 # create new item or change item type

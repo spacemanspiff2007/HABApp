@@ -84,7 +84,7 @@ class Rule:
 
         try:
             return HABApp.core.Items.get_item(name)
-        except KeyError:
+        except HABApp.core.Items.ItemNotFoundException:
             return HABApp.core.Items.create_item(name, item_factory)
 
     def get_item_state(self, name: str, default=None) -> typing.Any:
@@ -100,7 +100,7 @@ class Rule:
 
         try:
             state = HABApp.core.Items.get_item(name).state
-        except KeyError:
+        except HABApp.core.Items.ItemNotFoundException:
             return default
 
         if state is None:
@@ -120,19 +120,13 @@ class Rule:
         if isinstance(name, str):
             try:
                 item = HABApp.core.Items.get_item(name)
-            except KeyError:
+            except HABApp.core.Items.ItemNotFoundException:
                 item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
         else:
             assert isinstance(name, HABApp.core.items.Item)
             item = name
 
-        # remember state and update item before events
-        old_state = item.state
-        item.set_state(value)
-
-        self.post_event(name, HABApp.core.events.ValueUpdateEvent(name=name, value=value))
-        if old_state != value:
-            self.post_event(name, HABApp.core.events.ValueChangeEvent(name=name, value=value, old_value=old_state))
+        item.update_state(value)
         return None
 
     def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],

@@ -24,7 +24,7 @@ class WatchedItem:
 
         try:
             item = Items.get_item(self.name)
-        except KeyError:
+        except Items.ItemNotFoundException:
             return None
 
         timestamp = item.last_change if self.__watch_only_changes else item.last_update

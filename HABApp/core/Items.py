@@ -6,12 +6,19 @@ from HABApp.core.items.item import Item as __Item
 _ALL_ITEMS: typing.Dict[str, __Item] = {}
 
 
+class ItemNotFoundException(Exception):
+    pass
+
+
 def item_exists(name: str) -> bool:
     return name in _ALL_ITEMS
 
 
 def get_item(name: str) -> __Item:
-    return _ALL_ITEMS[name]
+    try:
+        return _ALL_ITEMS[name]
+    except KeyError:
+        raise ItemNotFoundException(f'Item {name} does not exist!')
 
 
 def get_all_items() -> typing.List[__Item]:

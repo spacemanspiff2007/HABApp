@@ -6,10 +6,10 @@ class SwitchItem(Item):
     ON = 'ON'
     OFF = 'OFF'
 
-    def set_state(self, new_state):
+    def set_state(self, new_state) -> bool:
         if new_state is not None and new_state != SwitchItem.ON and new_state != SwitchItem.OFF:
             raise ValueError(f'Invalid value for SwitchItem {self.name}: {new_state}')
-        super().set_state(new_state)
+        return super().set_state(new_state)
 
     def is_on(self) -> bool:
         """Test value against on-value"""
