@@ -50,7 +50,7 @@ class Item:
         self.state = new_state
         return state_changed
 
-    def update_state(self, new_state):
+    def post_state(self, new_state):
         """Set a new state and create appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param new_state: new state

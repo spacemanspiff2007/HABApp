@@ -144,10 +144,8 @@ class MqttConnection:
                 except ValueError:
                     pass
 
-        try:
-            _item = HABApp.core.Items.get_item(topic)
-        except HABApp.core.Items.ItemNotFoundException:
-            _item = HABApp.core.Items.create_item(topic, HABApp.mqtt.items.MqttItem)
+        # get the mqtt item
+        _item = HABApp.mqtt.items.MqttItem.get_create_item(topic)
 
         # remeber state and update item before doing callbacks
         _old_state = _item.state

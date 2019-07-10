@@ -126,7 +126,7 @@ class Rule:
             assert isinstance(name, HABApp.core.items.Item)
             item = name
 
-        item.update_state(value)
+        item.post_state(value)
         return None
 
     def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],
