@@ -4,6 +4,26 @@ import HABApp
 
 
 class Item:
+
+    @classmethod
+    def get_create_item(cls, name: str, default_state=None):
+        """Creates a new item and returns it or returns the already existing one with the given name
+
+        :param name: item name
+        :param default_state: state the item will have if it gets created
+        :return: item
+        """
+        assert isinstance(name, str), type(name)
+
+        try:
+            item = HABApp.core.Items.get_item(name)
+        except HABApp.core.Items.ItemNotFoundException:
+            item = cls(name, default_state)
+            HABApp.core.Items.set_item(item)
+
+        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        return item
+
     def __init__(self, name: str, state=None):
         assert isinstance(name, str), type(name)
 
