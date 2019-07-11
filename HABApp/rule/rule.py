@@ -396,8 +396,8 @@ class Rule:
         assert isinstance(file_name, str), type(file_name)
         return RuleParameter(self.__runtime.rule_params, file_name, *keys, default_value=default_value)
 
-    def get_rule(self, rule_name: str):  # todo: einkommentieren mit python3.7 -> Rule:
-        assert isinstance(rule_name, str), type(rule_name)
+    def get_rule(self, rule_name: str) -> 'typing.Union[Rule, typing.List[Rule]]':
+        assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     # -----------------------------------------------------------------------------------------------------------------

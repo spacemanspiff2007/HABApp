@@ -42,7 +42,6 @@ class OpenhabInterface:
 
         :param item_name: item name or item
         :param state: new item state
-        :return:
         """
         assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
 
@@ -64,7 +63,6 @@ class OpenhabInterface:
 
         :param item_name: item name or item
         :param command: command
-        :return:
         """
         assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
 
@@ -90,7 +88,6 @@ class OpenhabInterface:
         :param category: item category
         :param tags: item tags
         :param groups: in which groups is the item
-        :return:
         """
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None

@@ -51,18 +51,18 @@ class Item:
         return state_changed
 
     def post_state(self, new_state):
-        """Set a new state and create appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+        """Set a new state and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param new_state: new state
         """
-        old_value = self.state
+        old_state = self.state
         self.set_state(new_state)
 
         # create events
         HABApp.core.EventBus.post_event(self.name, HABApp.core.events.ValueUpdateEvent(self.name, new_state))
-        if self.state != old_value:
+        if old_state != new_state:
             HABApp.core.EventBus.post_event(
-                self.name, HABApp.core.events.ValueChangeEvent(self.name, value=new_state, old_value=old_value)
+                self.name, HABApp.core.events.ValueChangeEvent(self.name, value=new_state, old_value=old_state)
             )
         return None
 
