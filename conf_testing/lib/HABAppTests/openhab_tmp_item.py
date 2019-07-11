@@ -1,10 +1,9 @@
-import logging
 import random
 import string
 
 import HABApp
 
-log = logging.getLogger('HABApp.Tests')
+
 
 class OpenhabTmpItem:
     def __init__(self, item_name, item_type):
@@ -24,4 +23,3 @@ class OpenhabTmpItem:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         HABApp.openhab.oh_interface.get_openhab_interface().remove_item(self.item_name)
-

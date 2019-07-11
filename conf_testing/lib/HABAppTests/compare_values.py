@@ -1,6 +1,3 @@
-import datetime
-
-
 def get_equal_text(value1, value2):
 
     return f'{value1} ({str(type(value1))[8:-2]}) ' \

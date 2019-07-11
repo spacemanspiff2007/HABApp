@@ -1,9 +1,8 @@
-import datetime
 import logging
 import time
 
 import HABApp
-
+from .compare_values import get_equal_text
 log = logging.getLogger('HABApp.Tests')
 
 
@@ -30,8 +29,7 @@ class ItemWaiter:
 
             if time.time() > start + self.timeout:
                 self.states_ok = False
-                log.error(f'Timeout waiting for state "{state}" for {self.item.name} ({self.item.__class__})! '
-                          f'Current state: {self.item.state}')
+                log.error(f'Timeout waiting for {self.item.name} {get_equal_text(state, self.item.state)}')
                 return False
 
         raise ValueError()

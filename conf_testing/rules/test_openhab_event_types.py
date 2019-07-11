@@ -1,13 +1,8 @@
-import datetime
-import logging
-import time
-
-import HABApp
 from HABApp.core.events import ValueUpdateEvent
 
-log = logging.getLogger('HABApp.OpenhabTestEvents')
 
 from HABAppTests import TestBaseRule, EventWaiter, OpenhabTmpItem, get_openhab_test_events, get_openhab_test_types
+
 
 class TestOpenhabEventTypes(TestBaseRule):
     """This rule is testing the OpenHAB data types by posting values and checking the events"""

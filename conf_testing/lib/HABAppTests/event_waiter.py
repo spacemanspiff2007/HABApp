@@ -1,12 +1,11 @@
-import datetime
 import logging
 import time
 
 import HABApp
+from .compare_values import get_equal_text
 
 log = logging.getLogger('HABApp.Tests')
 
-from .compare_values import get_equal_text
 
 class EventWaiter:
     def __init__(self, name, event_type, timeout=1):

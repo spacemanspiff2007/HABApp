@@ -1,4 +1,6 @@
-import datetime, copy, itertools
+import copy
+import datetime
+import itertools
 
 # we only support milliseconds on openhab
 now = datetime.datetime.now().astimezone()

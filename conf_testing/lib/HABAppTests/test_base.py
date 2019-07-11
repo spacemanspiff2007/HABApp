@@ -1,7 +1,8 @@
-import logging, threading
+import logging
+import threading
+import traceback
 
 import HABApp
-import traceback
 
 log = logging.getLogger('HABApp.Tests')
 
@@ -18,12 +19,18 @@ class TestBaseRule(HABApp.Rule):
 
         self.prev_rule: str = None
         self.next_rule: str = None
+        self.tests_done = False
 
         with LOCK:
-            for rule in self.get_rule(None):
+            # if we have only one rule it's not a list
+            rules = self.get_rule(None)
+            if isinstance(rules, HABApp.Rule):
+                rules = [rules]
+
+            for rule in rules:
                 if not isinstance(rule, TestBaseRule):
                     continue
-                if rule is self:
+                if rule is self or rule.tests_done:
                     continue
 
                 if rule.next_rule is None:
@@ -70,5 +77,6 @@ class TestBaseRule(HABApp.Rule):
                     log.error(f'Test "{name}" failed: {msg} ({type(msg)})')
 
         # run next rule
+        self.tests_done = False
         if self.next_rule is not None:
             self.run_soon(self.get_rule(self.next_rule).run_tests)
