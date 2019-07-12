@@ -25,7 +25,6 @@ class MqttConnection:
         self.client: mqtt.Client = None
 
         self.subscriptions = []
-        self.value_cache = {}
 
         # config changes
         self.__config = mqtt_config
@@ -35,7 +34,7 @@ class MqttConnection:
         # shutdown
         shutdown_helper.register_func(self.disconnect)
 
-        self.interface: HABApp.mqtt.MqttInterface = HABApp.mqtt.MqttInterface(self, self.__config)
+        self.interface: HABApp.mqtt.MqttInterface = HABApp.mqtt.mqtt_interface.get_mqtt_interface(self, self.__config)
 
     def connect(self):
         if not self.__config.connection.host:
@@ -56,10 +55,11 @@ class MqttConnection:
         if self.__config.connection.tls:
             self.client.tls_set()
 
-        if self.__config.connection.tls_insecure:
-            log.warning('Verification of server hostname in server certificate disabled!')
-            log.warning('Use this only for testing, not for a real system!')
-            self.client.tls_insecure_set(True)
+            # we can only set tls_insecure if we have a tls connection
+            if self.__config.connection.tls_insecure:
+                log.warning('Verification of server hostname in server certificate disabled!')
+                log.warning('Use this only for testing, not for a real system!')
+                self.client.tls_insecure_set(True)
 
         # set user if required
         user = self.__config.connection.user
@@ -81,7 +81,7 @@ class MqttConnection:
             keepalive=60
         )
 
-        log.info('Connecting to {self.__config.connection.host}:{self.__config.connection.port}')
+        log.info(f'Connecting to {self.__config.connection.host}:{self.__config.connection.port}')
 
         if not self.loop_started:
             self.client.loop_start()
@@ -112,7 +112,6 @@ class MqttConnection:
             return None
         self.connected = True
 
-        self.value_cache.clear()
         self.subscriptions.clear()
         self.subscription_changed()
 
@@ -145,14 +144,17 @@ class MqttConnection:
                 except ValueError:
                     pass
 
-        # we do not use the item registry here since we only check the state from the mqtt broker
-        # otherwise we would fire an MqttValueChangeEvent if the user would have done an Items.set_state(topic, 'asdf')
-        __was = self.value_cache.get(topic, None)
-        self.value_cache[topic] = payload
+        # get the mqtt item
+        _item = HABApp.mqtt.items.MqttItem.get_create_item(topic)
 
-        HABApp.core.Events.post_event(topic, MqttValueUpdateEvent(topic, payload))
-        if __was is not None and __was != payload:
-            HABApp.core.Events.post_event(topic, MqttValueChangeEvent(topic, payload, __was))
+        # remeber state and update item before doing callbacks
+        _old_state = _item.state
+        _item.set_state(payload)
+
+        # Post events
+        HABApp.core.EventBus.post_event(topic, MqttValueUpdateEvent(topic, payload))
+        if _old_state != payload:
+            HABApp.core.EventBus.post_event(topic, MqttValueChangeEvent(topic, payload, _old_state))
 
     def disconnect(self):
         if self.connected:

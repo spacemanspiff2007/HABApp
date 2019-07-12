@@ -28,10 +28,10 @@ class OpenhabInterface:
             return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self._timezone
         elif isinstance(_in, HABApp.core.items.Item):
             return str(_in.state)
-        elif isinstance(_in, (set, list, tuple)):
-            return ','.join(str(k) for k in _in)
         elif isinstance(_in, HABApp.core.items.ColorItem):
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
+        elif isinstance(_in, (set, list, tuple)):
+            return ','.join(str(k) for k in _in)
 
         return str(_in)
 
@@ -42,7 +42,6 @@ class OpenhabInterface:
 
         :param item_name: item name or item
         :param state: new item state
-        :return:
         """
         assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
 
@@ -64,7 +63,6 @@ class OpenhabInterface:
 
         :param item_name: item name or item
         :param command: command
-        :return:
         """
         assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
 
@@ -90,7 +88,6 @@ class OpenhabInterface:
         :param category: item category
         :param tags: item tags
         :param groups: in which groups is the item
-        :return:
         """
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
@@ -122,6 +119,19 @@ class OpenhabInterface:
 
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_remove_item(item_name),
+            self.__loop
+        )
+        return fut.result()
+
+    def item_exists(self, item_name: str):
+        """
+        Check if an item exists in the OpenHAB item registry
+
+        :param item_name: name
+        """
+        assert isinstance(item_name, str), type(item_name)
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_item_exists(item_name),
             self.__loop
         )
         return fut.result()

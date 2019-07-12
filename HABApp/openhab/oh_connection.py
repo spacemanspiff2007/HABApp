@@ -104,9 +104,22 @@ class OpenhabConnection(HttpConnectionEventHandler):
             # Events which change the ItemRegistry
             if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
                 item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
-                HABApp.core.Items.set_item(item)
+                try:
+                    existing_item = HABApp.core.Items.get_item(item.name)
+                    if not isinstance(existing_item, item.__class__):
+                        log.warning( f'Item changed type from {existing_item.__class__} to {item.__class__}')
+                except HABApp.core.Items.ItemNotFoundException:
+                    HABApp.core.Items.set_item(item)
+
             elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
                 HABApp.core.Items.pop_item(event.name)
+
+            # Update Item in registry BEFORE posting to the event bus
+            if isinstance(event, HABApp.core.events.ValueUpdateEvent):
+                try:
+                    HABApp.core.Items.get_item(event.name).set_state(event.value)
+                except HABApp.core.Items.ItemNotFoundException:
+                    pass
 
             # Send Event to Event Bus
             HABApp.core.EventBus.post_event(event.name, event)
@@ -127,8 +140,20 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
             found_items = len(data)
             for _dict in data:
-                __item = HABApp.openhab.map_items(_dict['name'], _dict['type'], _dict['state'])
-                HABApp.core.Items.set_item(__item)
+                item_name = _dict['name']
+                new_item = HABApp.openhab.map_items(item_name, _dict['type'], _dict['state'])
+
+                try:
+                    # if the item already exists and it has the correct type just update its state
+                    # Since we load the items before we load the rules this should actually never happen
+                    existing_item = HABApp.core.Items.get_item(item_name)
+                    if isinstance(existing_item, new_item.__class__):
+                        existing_item.set_state(_dict['state'])
+                except HABApp.core.Items.ItemNotFoundException:
+                    pass
+
+                # create new item or change item type
+                HABApp.core.Items.set_item(new_item)
 
             # remove items which are no longer available
             ist = set(HABApp.core.Items.get_item_names())

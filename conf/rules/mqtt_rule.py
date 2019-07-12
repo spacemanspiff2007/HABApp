@@ -3,7 +3,7 @@ import random
 
 import HABApp
 from HABApp.core.events import ValueUpdateEvent
-
+from HABApp.mqtt.items import MqttItem
 
 class ExampleMqttTestRule(HABApp.Rule):
     def __init__(self):
@@ -15,11 +15,16 @@ class ExampleMqttTestRule(HABApp.Rule):
             callback=self.publish_rand_value
         )
 
+        # these two methods have the same effect.
+        # If item_factory is omitted self.get_item will raise an error if the item does not exist instead of creating it
+        self.my_mqtt_item: MqttItem = self.get_item('test/test', item_factory=MqttItem)
+        self.my_mqtt_item = MqttItem.get_create_item('test/test')
+
         self.listen_event('test/test', self.topic_updated, ValueUpdateEvent)
 
     def publish_rand_value(self):
         print('test mqtt_publish')
-        self.mqtt.publish('test/test', str(random.randint(0, 1000)))
+        self.my_mqtt_item.publish(str(random.randint(0, 1000)))
 
     def topic_updated(self, event):
         assert isinstance(event, ValueUpdateEvent), type(event)

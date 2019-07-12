@@ -1,20 +1,27 @@
 import typing
 
-from HABApp.core.items.item import Item
+from HABApp.core.items.item import Item as __Item
 
 
-_ALL_ITEMS: typing.Dict[str, Item] = {}
+_ALL_ITEMS: typing.Dict[str, __Item] = {}
+
+
+class ItemNotFoundException(Exception):
+    pass
 
 
 def item_exists(name: str) -> bool:
     return name in _ALL_ITEMS
 
 
-def get_item(name: str) -> Item:
-    return _ALL_ITEMS[name]
+def get_item(name: str) -> __Item:
+    try:
+        return _ALL_ITEMS[name]
+    except KeyError:
+        raise ItemNotFoundException(f'Item {name} does not exist!')
 
 
-def get_all_items() -> typing.List[Item]:
+def get_all_items() -> typing.List[__Item]:
     return list(_ALL_ITEMS.values())
 
 
@@ -22,24 +29,16 @@ def get_item_names() -> typing.List[str]:
     return list(_ALL_ITEMS.keys())
 
 
-def create_item( name: str, item_class):
-    assert issubclass(item_class, Item), item_class
-    _ALL_ITEMS[name] = item_class(name)
+def create_item(name: str, item_factory, item_state=None) -> __Item:
+    assert issubclass(item_factory, __Item), item_factory
+    _ALL_ITEMS[name] = new_item = item_factory(name, state=item_state)
+    return new_item
 
 
-def set_item_state(name, new_state):
-    try:
-        _ALL_ITEMS[name].set_state(new_state)
-    except KeyError:
-        item = Item(name)
-        item.set_state(new_state)
-        _ALL_ITEMS[name] = item
-
-
-def set_item(item: Item):
-    assert isinstance(item, Item), type(item)
+def set_item(item: __Item):
+    assert isinstance(item, __Item), type(item)
     _ALL_ITEMS[item.name] = item
 
 
-def pop_item(name: str) -> Item:
+def pop_item(name: str) -> __Item:
     return _ALL_ITEMS.pop(name)

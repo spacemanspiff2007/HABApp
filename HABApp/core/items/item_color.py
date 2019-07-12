@@ -28,7 +28,7 @@ class ColorItem(Item):
         self.saturation = min(max(0.0, saturation), PERCENT_FACTOR)
         self.value = min(max(0.0, value), PERCENT_FACTOR)
 
-        super().set_state(new_state=(hue, saturation, value))
+        return super().set_state(new_state=(hue, saturation, value))
 
     def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
         r, g, b = colorsys.hsv_to_rgb(

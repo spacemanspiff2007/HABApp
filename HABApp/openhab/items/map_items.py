@@ -1,6 +1,6 @@
 import datetime
 
-from HABApp.core.items import Item, NumericItem, ColorItem
+from HABApp.core.items import Item, ColorItem
 from . import SwitchItem, ContactItem, RollershutterItem, DimmerItem
 
 
@@ -29,13 +29,13 @@ def map_items(name, openhab_type : str, openhab_value : str):
 
     if openhab_type == "Number":
         if value is None:
-            return NumericItem(name, value)
+            return Item(name, value)
 
         # Number items can be int or float
         try:
-            return NumericItem(name, int(value))
+            return Item(name, int(value))
         except ValueError:
-            return NumericItem(name, float(value))
+            return Item(name, float(value))
 
     if openhab_type == "DateTime":
         if value is None:

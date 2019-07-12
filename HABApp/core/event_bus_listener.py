@@ -1,3 +1,4 @@
+import HABApp
 from . import WrappedFunction
 from .events import AllEvents
 
@@ -24,3 +25,7 @@ class EventBusListener:
                 if isinstance(event, cls):
                     self.func.run(event)
                     return None
+
+    def cancel(self):
+        """Stop listening on the event bus"""
+        HABApp.core.EventBus.remove_listener(self)

@@ -1,4 +1,6 @@
 import typing
+import ujson
+
 import paho.mqtt.client as mqtt
 
 from .mqtt_connection import MqttConnection, log
@@ -25,8 +27,6 @@ class MqttInterface:
             log.warning('Mqtt client not connected')
             return False
 
-
-
     def publish(self, topic: str, payload: typing.Any, qos: int = None, retain: bool = None) -> int:
         """
         Publish a value under a certain topic.
@@ -50,6 +50,10 @@ class MqttInterface:
             qos = self.__config.publish.qos
         if retain is None:
             retain = self.__config.publish.retain
+
+        # convert these to string
+        if isinstance(payload, (dict, list)):
+            payload = ujson.dumps(payload)
 
         info = self.__connection.client.publish(topic, payload, qos, retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
@@ -97,3 +101,16 @@ class MqttInterface:
         if result != mqtt.MQTT_ERR_SUCCESS:
             log.error(f'Could not unsubscribe from "{topic}": {mqtt.error_string(result)}')
         return result
+
+
+
+MQTT_INTERFACE: MqttInterface = None
+
+
+def get_mqtt_interface(connection=None, config=None) -> MqttInterface:
+    global MQTT_INTERFACE
+    if connection is None:
+        return MQTT_INTERFACE
+
+    MQTT_INTERFACE = MqttInterface(connection, config)
+    return MQTT_INTERFACE

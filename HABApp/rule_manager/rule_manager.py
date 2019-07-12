@@ -82,8 +82,12 @@ class RuleManager(FileEventTarget):
     def get_rule(self, rule_name):
         found = []
         for file in self.files.values():
-            if rule_name in file.rules:
-                found.append(file.rules[rule_name])
+            if rule_name is None:
+                for rule in file.rules.values():
+                    found.append(rule)
+            else:
+                if rule_name in file.rules:
+                    found.append(file.rules[rule_name])
         if not found:
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]

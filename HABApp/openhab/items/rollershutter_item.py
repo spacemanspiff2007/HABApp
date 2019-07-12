@@ -1,16 +1,16 @@
-from HABApp.core.items import NumericItem
+from HABApp.core.items import Item
 from .. import get_openhab_interface
 
 
-class RollershutterItem(NumericItem):
+class RollershutterItem(Item):
 
-    def set_state(self, new_state):
+    def set_state(self, new_state) -> bool:
         if new_state == 'UP':
             new_state = 0.0
         if new_state == 'DOWN':
             new_state = 100.0
         assert isinstance(new_state, (int, float)) or new_state is None, new_state
-        super().set_state(new_state)
+        return super().set_state(new_state)
 
     def up(self):
         """Move shutter up"""
@@ -21,7 +21,7 @@ class RollershutterItem(NumericItem):
         get_openhab_interface().send_command(self.name, 'DOWN')
 
     def percent(self, value: float):
-        """Set shutter to value (in percent)"""
+        """Command shutter to value (in percent)"""
         assert 0 <= value <= 100
         get_openhab_interface().send_command(self.name, str(value))
 

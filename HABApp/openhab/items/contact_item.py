@@ -1,14 +1,14 @@
-from HABApp.core.Items import Item
+from HABApp.core.items import Item
 
 
 class ContactItem(Item):
     OPEN = 'OPEN'
     CLOSED = 'CLOSED'
 
-    def set_state(self, new_state):
+    def set_state(self, new_state) -> bool:
         if new_state is not None and new_state != ContactItem.OPEN and new_state != ContactItem.CLOSED:
             raise ValueError(f'Invalid value for ContactItem: {new_state}')
-        super().set_state(new_state)
+        return super().set_state(new_state)
 
     def is_open(self) -> bool:
         """Test value against open-value"""

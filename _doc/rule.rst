@@ -31,7 +31,7 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
      - Description
    
    * - :meth:`~HABApp.Rule.get_item`
-     - Return an item
+     - Return an item (or create it if it doesn't exist yet)
      
    * - :meth:`~HABApp.Rule.get_item_state`
      - Get the state of an item

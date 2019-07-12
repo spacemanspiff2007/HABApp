@@ -11,7 +11,7 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core import AllEvents
+from HABApp.core.events import AllEvents
 from .rule_parameter import RuleParameter
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
@@ -70,16 +70,22 @@ class Rule:
         assert isinstance(name, str), type(name)
         return HABApp.core.Items.item_exists(name)
 
-
-    def get_item(self, name: str) -> HABApp.core.items.Item:
+    def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
         """
-        Return the item with the specified name.
+        Return the item with the specified name or create the item if it doesn't exist.
 
-        :param name: item name
+        :param name: name of the item
+        :param item_factory: if specified and the item does not exist an item
+                             with the item_factory-class will be created
         :return: item
         """
-        return HABApp.core.Items.get_item(name)
+        if item_factory is None:
+            return HABApp.core.Items.get_item(name)
 
+        try:
+            return HABApp.core.Items.get_item(name)
+        except HABApp.core.Items.ItemNotFoundException:
+            return HABApp.core.Items.create_item(name, item_factory)
 
     def get_item_state(self, name: str, default=None) -> typing.Any:
         """
@@ -94,7 +100,7 @@ class Rule:
 
         try:
             state = HABApp.core.Items.get_item(name).state
-        except KeyError:
+        except HABApp.core.Items.ItemNotFoundException:
             return default
 
         if state is None:
@@ -108,22 +114,23 @@ class Rule:
 
         If the item doesn't exist it will be created
 
-        :param name: item name
+        :param name: item name or item instance
         :param value: value for new item state
         """
-        assert isinstance(name, str)
+        if isinstance(name, str):
+            try:
+                item = HABApp.core.Items.get_item(name)
+            except HABApp.core.Items.ItemNotFoundException:
+                item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
+        else:
+            assert isinstance(name, HABApp.core.items.Item)
+            item = name
 
-        try:
-            old_state = HABApp.core.Items.get_item(name).state
-        except KeyError:
-            old_state = None
-
-        self.post_event(name, HABApp.core.ValueUpdateEvent(name=name, value=value))
-        if old_state != value:
-            self.post_event(name, HABApp.core.ValueChangeEvent(name=name, value=value, old_value=old_state))
+        item.post_state(value)
         return None
 
-    def item_watch(self, name: str, seconds_constant: int, watch_only_changes=True) -> WatchedItem:
+    def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],
+                   seconds_constant: int, watch_only_changes=True) -> WatchedItem:
         """
         | Keep watch on the state of an item.
         | if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
@@ -131,16 +138,16 @@ class Rule:
         | if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
           `ValueNoUpdateEvent` will be sent to the event bus.
 
-        :param name: item name that shall be watched
+        :param name: item name or item that shall be watched
         :param seconds_constant: the amount of seconds the item has to be constant or has not received an update
         :param watch_only_changes:
         """
-        assert isinstance(name, str)
+        assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
 
         item = WatchedItem(
-            name=name,
+            name=name.name if isinstance(name, HABApp.core.items.Item) else name,
             constant_time=seconds_constant,
             watch_only_changes=watch_only_changes
         )
@@ -163,7 +170,7 @@ class Rule:
         event_listener = self.listen_event(
             name,
             callback,
-            HABApp.core.ValueNoChangeEvent if watch_only_changes else HABApp.core.ValueNoUpdateEvent
+            HABApp.core.events.ValueNoChangeEvent if watch_only_changes else HABApp.core.events.ValueNoUpdateEvent
         )
         return watched_item, event_listener
 
@@ -178,20 +185,22 @@ class Rule:
         assert isinstance(name, str), type(name)
         return HABApp.core.EventBus.post_event(name, event)
 
-    def listen_event(self, name: typing.Optional[str], callback,
+    def listen_event(self, name: typing.Union[HABApp.core.items.Item, str, None], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
 
-        :param name: name to listen to or None for all events
+        :param name: item or name to listen to. Use None to listen to all events
         :param callback: callback that accepts one parameter which will contain the event
         :param even_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
             :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openhab
             or mqtt.
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        listener = HABApp.core.EventBusListener(name, cb, even_type)
+        listener = HABApp.core.EventBusListener(
+            name.name if isinstance(name, HABApp.core.items.Item) else name, cb, even_type
+        )
         self.__event_listener.append(listener)
         HABApp.core.EventBus.add_listener(listener)
         return listener
@@ -387,8 +396,8 @@ class Rule:
         assert isinstance(file_name, str), type(file_name)
         return RuleParameter(self.__runtime.rule_params, file_name, *keys, default_value=default_value)
 
-    def get_rule(self, rule_name: str):  # todo: einkommentieren mit python3.7 -> Rule:
-        assert isinstance(rule_name, str), type(rule_name)
+    def get_rule(self, rule_name: str) -> 'typing.Union[Rule, typing.List[Rule]]':
+        assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     # -----------------------------------------------------------------------------------------------------------------
