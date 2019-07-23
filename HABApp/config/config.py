@@ -218,7 +218,12 @@ class Config(FileEventTarget):
                     pass
 
         # load prepared logging
-        logging.config.dictConfig(cfg)
-        log.debug('Loaded logging config')
+        try:
+            logging.config.dictConfig(cfg)
+        except Exception as e:
+            print(f'Error loading logging config: {e}')
+            return None
 
+        log.debug('Loaded logging config')
         logging.getLogger('HABApp').info(f'HABApp Version {__VERSION__}')
+        return None
