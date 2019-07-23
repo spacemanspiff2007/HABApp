@@ -52,6 +52,24 @@ Installation
 
 
 
+Error message while installing ujson
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Under windows the installation of ujson may throw the following error but the download link is not working.
+Several working alternatives can be found `here <https://www.scivision.dev/python-windows-visual-c-14-required/>`_.
+
+.. code-block:: none
+
+  Running setup.py install for ujson ... error
+    ERROR: Complete output from command 'C:\Users\User\Desktop\HABapp\habapp\Scripts\python.exe' -u -c 'import setuptools, tokenize;__file__='"'"'C:\\Users\\User\\AppData\\Local\\Temp\\pip-install-4y0tobjp\\ujson\\setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' install --record 'C:\Users\User\AppData\Local\Temp\pip-record-6t2yo712\install-record.txt' --single-version-externally-managed --compile --install-headers 'C:\Users\User\Desktop\HABapp\habapp\include\site\python3.7\ujson':
+    ERROR: Warning: 'classifiers' should be a list, got type 'filter'
+    running install
+    running build
+    running build_ext
+    building 'ujson' extension
+    error: Microsoft Visual C++ 14.0 is required. Get it with "Microsoft Visual C++ Build Tools": https://visualstudio.microsoft.com/downloads/
+    ----------------------------------------
+
 
 Autostart after reboot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
