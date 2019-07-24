@@ -3,7 +3,7 @@ from HABApp.openhab.events import ItemStateEvent
 
 
 class ExampleOpenhabToMQTTRule(HABApp.Rule):
-    """This Rule mirrors all updates from openhab to MQTT"""
+    """This Rule mirrors all updates from OpenHAB to MQTT"""
 
     def __init__(self):
         super().__init__()
@@ -14,7 +14,7 @@ class ExampleOpenhabToMQTTRule(HABApp.Rule):
         assert isinstance(event, ItemStateEvent)
 
         print( f'/openhab/{event.name} <- {event.value}')
-        self.mqtt.publish( f'/openhab/{event.name}', event.value)
+        self.mqtt.publish( f'/openhab/{event.name}', str(event.value))
 
 
 ExampleOpenhabToMQTTRule()
