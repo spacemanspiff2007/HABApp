@@ -11,6 +11,7 @@ class TestOpenhabInterface(TestBaseRule):
 
         self.add_test('Interface item exists', self.test_item_exists)
         self.add_test('Interface item create/remove', self.test_item_create_delete)
+        self.add_test('Interface group create/remove', self.test_item_create_delete_group)
 
         # test the states
         for oh_type in get_openhab_test_types():
@@ -29,6 +30,25 @@ class TestOpenhabInterface(TestBaseRule):
 
         self.openhab.remove_item(test_item)
         assert not self.openhab.item_exists(test_item)
+
+    def test_item_create_delete_group(self):
+        test_item = ''.join(random.choice(string.ascii_letters) for _ in range(20))
+        test_group = ''.join(random.choice(string.ascii_letters) for _ in range(20))
+        assert not self.openhab.item_exists(test_item)
+        assert not self.openhab.item_exists(test_item)
+
+        self.openhab.create_item('Group', test_group)
+        assert self.openhab.item_exists(test_group)
+        self.openhab.create_item('String', test_item, groups=[test_group])
+        assert self.openhab.item_exists(test_item)
+
+        item = self.openhab.get_item(test_item)
+        self.openhab.get_item(test_group)
+        assert test_group in item.groups
+
+        self.openhab.remove_item(test_group)
+        self.openhab.remove_item(test_item)
+
 
     def test_post_update(self, oh_type, values):
         if isinstance(values, str):

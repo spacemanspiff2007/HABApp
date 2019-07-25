@@ -9,6 +9,16 @@ log = logging.getLogger('HABApp.Tests')
 LOCK = threading.Lock()
 
 
+class TestResult:
+    def __init__(self):
+        self.run = 0
+        self.io = 0
+        self.nio = 0
+
+    def __repr__(self):
+        return f'Processed {self.run:d} Tests: IO: {self.io} NIO: {self.nio}'
+
+
 class TestBaseRule(HABApp.Rule):
     """This rule is testing the OpenHAB data types by posting values and checking the events"""
 
@@ -44,15 +54,20 @@ class TestBaseRule(HABApp.Rule):
         if self.prev_rule is not None:
             return None
 
-        self.run_tests()
+        self.run_tests(TestResult())
 
 
     def add_test(self, name, func, *args, **kwargs):
         assert name not in self.__tests_funcs
         self.__tests_funcs[name] = (func, args, kwargs)
 
-    def run_tests(self):
+    def run_tests(self, result: TestResult):
+        test_count = len(self.__tests_funcs)
+        width = test_count // 10 + 1
+        test_current = 0
         for name, test_data in self.__tests_funcs.items():
+            test_current += 1
+            result.run += 1
 
             try:
                 func = test_data[0]
@@ -66,17 +81,22 @@ class TestBaseRule(HABApp.Rule):
                 log.error(f'Test "{name}" failed: {e}')
                 for line in traceback.format_exc().splitlines():
                     log.error(line)
+                result.nio += 1
                 continue
 
             if msg == '':
-                log.info( f'Test "{name}" successful!')
+                result.io += 1
+                log.info( f'Test {test_current:{width}}/{test_count} "{name}" successful!')
             else:
+                result.nio += 1
                 if isinstance(msg, bool):
-                    log.error(f'Test "{name}" failed')
+                    log.error(f'Test {test_current:{width}}/{test_count} "{name}" failed')
                 else:
-                    log.error(f'Test "{name}" failed: {msg} ({type(msg)})')
+                    log.error(f'Test {test_current:{width}}/{test_count} "{name}" failed: {msg} ({type(msg)})')
 
         # run next rule
         self.tests_done = False
         if self.next_rule is not None:
-            self.run_soon(self.get_rule(self.next_rule).run_tests)
+            self.run_soon(self.get_rule(self.next_rule).run_tests, result)
+        else:
+            log.info( str(result)) if not result.nio else log.error(str(result))

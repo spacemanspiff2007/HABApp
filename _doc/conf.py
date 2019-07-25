@@ -13,8 +13,9 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
 import pathlib
+import re
+import sys
 
 # required for autodoc
 sys.path.insert(0, os.path.abspath('..'))
@@ -210,3 +211,26 @@ todo_include_todos = False
 autodoc_member_order = 'bysource'
 
 execute_code_working_dir = pathlib.Path(__file__).parent.parent
+
+# Skip documentation for overloaded .set_state functions
+RE_SKIP = re.compile(r'\w+Item.set_state', re.IGNORECASE)
+
+
+def skip_member(app, what, name, obj, skip, options):
+
+    # Debug print
+    # print(app, what, name, obj, skip, options)
+
+    # don't change if we skip anyway
+    if skip:
+        return skip
+
+    if RE_SKIP.search(str(obj)):
+        print( f'Skipping autodoc for {str(obj).split(" ")[1]}')
+        return True
+
+    return skip
+
+
+def setup(app):
+    app.connect('autodoc-skip-member', skip_member)

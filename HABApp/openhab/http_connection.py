@@ -290,12 +290,21 @@ class HttpConnection:
                 for l in traceback.format_exc().splitlines():
                     log.error(l)
 
-    async def async_create_item(self, item_type, item_name, label="", category="", tags=[], groups=[]) -> bool:
+    async def async_get_item(self, item_name: str) -> dict:
+        fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))
+        ret = await self._check_http_response(fut, accept_404=True)
+        if ret.status >= 300:
+            return {}
+        else:
+            return await ret.json(encoding='utf-8')
+
+    async def async_create_item(self, item_type, name, label="", category="", tags=[], groups=[],
+                                group_type=None, group_function=None, group_function_params=[]) -> bool:
 
         if self.config.openhab.general.listen_only:
             return False
 
-        payload = {'type': item_type, 'name': item_name}
+        payload = {'type': item_type, 'name': name}
         if label:
             payload['label'] = label
         if category:
@@ -303,8 +312,17 @@ class HttpConnection:
         if tags:
             payload['tags'] = tags
         if groups:
-            payload['groupnames'] = groups
+            payload['groupNames'] = groups  # CamelCase!
 
-        fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', item_name), json=payload)
+        # we create a group
+        if group_type:
+            payload['groupType'] = group_type   # CamelCase!
+        if group_function:
+            payload['function'] = {}
+            payload['function']['name'] = group_function
+            if group_function_params:
+                payload['function']['params'] = group_function
+
+        fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', name), json=payload)
         ret = await self._check_http_response(fut, payload)
         return ret.status < 300
