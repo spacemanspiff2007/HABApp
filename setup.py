@@ -46,6 +46,7 @@ setuptools.setup(
         'ujson',
         'voluptuous',
         'watchdog',
+        'dataclasses;python_version<"3.7"',
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
