@@ -1,14 +1,25 @@
+import asyncio
 import concurrent.futures
 import logging
 import time
-import asyncio
 import traceback
+import typing
 
 default_logger = logging.getLogger('HABApp.Worker')
 
 
 class WrappedFunction:
     _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
+    _ERROR_CALLBACK: 'WrappedFunction'= None
+
+    @classmethod
+    def CLEAR_ERROR_CALLBACK(cls):
+        WrappedFunction._ERROR_CALLBACK = None
+
+    @classmethod
+    def REGISTER_ERROR_CALLBACK(cls, func):
+        assert callable(func)
+        WrappedFunction._ERROR_CALLBACK = WrappedFunction(func, name='ERROR_CALLBACK')
 
     def __init__(self, func, logger=None, warn_too_long=True, name=None):
         assert callable(func)
@@ -42,17 +53,21 @@ class WrappedFunction:
 
     def __format_traceback(self, e: Exception):
         self.log.error(f'Error in {self.name}: {e}')
-        lines = traceback.format_exc().splitlines()
 
         # Skip line 1 and 2 since they contain the wrapper:
         # 0:  Traceback (most recent call last):
         # 1:  File "Z:\Python\HABApp\HABApp\core\wrappedfunction.py", line 67, in __run
         # 2:  self._func(*args, **kwargs)
-
+        lines = traceback.format_exc().splitlines()
         del lines[1:3]  # Remove element 1 & 2
-
-        for i, l in enumerate(lines):
+        for l in lines:
             self.log.error(l)
+
+        # if we have an error callback call it
+        if WrappedFunction._ERROR_CALLBACK is not None:
+            if self._func is not WrappedFunction._ERROR_CALLBACK._func:
+                WrappedFunction._ERROR_CALLBACK.run('\n'.join(lines))
+
 
     async def __async_run(self, *args, **kwargs):
         try:

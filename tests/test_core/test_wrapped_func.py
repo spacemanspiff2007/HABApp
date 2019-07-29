@@ -1,6 +1,7 @@
 import asyncio
 import typing
 import unittest
+from unittest.mock import MagicMock
 
 from HABApp.core import WrappedFunction
 
@@ -76,6 +77,20 @@ class TestCases(unittest.TestCase):
             1 / 0
 
         f = WrappedFunction(tmp)
+        WrappedFunction.REGISTER_ERROR_CALLBACK( MagicMock())
+        self.assertFalse(f._ERROR_CALLBACK._func.called)
+        f.run()
+        self.assertTrue(f._ERROR_CALLBACK._func.called)
+
+    def test_exception_in_wrapper(self):
+        def tmp():
+            1 / 0
+
+        def bla(_in):
+            raise ValueError('Error in callback!')
+
+        f = WrappedFunction(tmp)
+        WrappedFunction.REGISTER_ERROR_CALLBACK( bla)
         f.run()
 
 
