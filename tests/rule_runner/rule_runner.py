@@ -35,7 +35,7 @@ class SimpleRuleRunner:
         self.vars.pop('__HABAPP__RULE_FILE__')
         loaded_rules = self.vars.pop('__HABAPP__RULES')
         for rule in loaded_rules:
-            rule._cleanup()
+            rule._unload()
         loaded_rules.clear()
 
 

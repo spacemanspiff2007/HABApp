@@ -43,13 +43,16 @@ class WrappedFunction:
     def __format_traceback(self, e: Exception):
         self.log.error(f'Error in {self.name}: {e}')
         lines = traceback.format_exc().splitlines()
+
+        # Skip line 1 and 2 since they contain the wrapper:
+        # 0:  Traceback (most recent call last):
+        # 1:  File "Z:\Python\HABApp\HABApp\core\wrappedfunction.py", line 67, in __run
+        # 2:  self._func(*args, **kwargs)
+
+        del lines[1:3]  # Remove element 1 & 2
+
         for i, l in enumerate(lines):
-            # Skip line 1 and 2 since they contain the wrapper:
-            # 0:  Traceback (most recent call last):
-            # 1:  File "Z:\Python\HABApp\HABApp\core\wrappedfunction.py", line 67, in __run
-            # 2:  self._func(*args, **kwargs)
-            if i == 0 or i > 2:
-                self.log.error(l)
+            self.log.error(l)
 
     async def __async_run(self, *args, **kwargs):
         try:

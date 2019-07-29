@@ -3,8 +3,9 @@ import datetime
 import logging
 import random
 import sys
-import warnings
+import traceback
 import typing
+import warnings
 
 import HABApp
 import HABApp.core
@@ -12,11 +13,11 @@ import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.events import AllEvents
+from .interfaces import async_subprocess_exec
 from .rule_parameter import RuleParameter
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
 from .watched_item import WatchedItem
-from .interfaces import async_subprocess_exec
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -50,6 +51,10 @@ class Rule:
         self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
         self.__future_events: typing.List[ScheduledCallback] = []
         self.__watched_items: typing.List[WatchedItem] = []
+        self.__unload_functions: typing.List[typing.Callable[[], None]] = []
+        # schedule cleanup
+        self.register_on_unload(self.__cleanup_rule)
+
 
         # suggest a rule name if it is not
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
@@ -59,6 +64,24 @@ class Rule:
         self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
         self.oh: HABApp.openhab.OpenhabInterface = HABApp.openhab.get_openhab_interface() if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
+
+    def __cleanup_rule(self):
+        # Important: set the dicts to None so we don't schedule a future event during _cleanup.
+        # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
+        event_listeners = self.__event_listener
+        future_events = self.__future_events
+
+        self.__event_listener = None
+        self.__future_events = None
+        self.__watched_items = None
+
+        # Actually remove the listeners/events
+        for listener in event_listeners:
+            HABApp.core.EventBus.remove_listener(listener)
+
+        for event in future_events:
+            event.cancel()
+        return None
 
     def item_exists(self, name: str) -> bool:
         """
@@ -400,6 +423,16 @@ class Rule:
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
+    def register_on_unload(self, func):
+        """Register a function with no parameters which will be called when the rule is unloaded.
+        Use this for custom cleanup functions.
+
+        :param func: function which will be called
+        """
+        assert callable(func)
+        assert func not in self.__unload_functions, 'Function was already registered!'
+        self.__unload_functions.append(func)
+
     # -----------------------------------------------------------------------------------------------------------------
     # deprecated stuff
     # -----------------------------------------------------------------------------------------------------------------
@@ -490,20 +523,24 @@ class Rule:
         return None
 
     @HABApp.util.PrintException
-    def _cleanup(self):
+    def _unload(self):
 
-        # Important: set the dicts to None so we don't schedule a future event during _cleanup
-        # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
-        event_listeners = self.__event_listener
-        future_events = self.__future_events
+        # unload all functions
+        for func in self.__unload_functions:
+            try:
+                func()
+            except Exception as e:
 
-        self.__event_listener = None
-        self.__future_events = None
-        self.__watched_items = None
+                # try getting function name
+                try:
+                    name = f' in "{func.__name__}"'
+                except AttributeError:
+                    name = ''
 
-        # Actually remove the listeners/events
-        for listener in event_listeners:
-            HABApp.core.EventBus.remove_listener(listener)
+                log.error( f'Error{name} while unloading "{self.rule_name}": {e}')
 
-        for event in future_events:
-            event.cancel()
+                # log traceback
+                lines = traceback.format_exc().splitlines()
+                del lines[1:3] # see implementation in wrappedfunction.py why we do this
+                for line in lines:
+                    log.error(line)
