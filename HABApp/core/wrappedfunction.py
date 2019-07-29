@@ -3,14 +3,13 @@ import concurrent.futures
 import logging
 import time
 import traceback
-import typing
 
 default_logger = logging.getLogger('HABApp.Worker')
 
 
 class WrappedFunction:
     _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
-    _ERROR_CALLBACK: 'WrappedFunction'= None
+    _ERROR_CALLBACK: 'WrappedFunction' = None
 
     @classmethod
     def CLEAR_ERROR_CALLBACK(cls):
@@ -66,6 +65,7 @@ class WrappedFunction:
         # if we have an error callback call it
         if WrappedFunction._ERROR_CALLBACK is not None:
             if self._func is not WrappedFunction._ERROR_CALLBACK._func:
+                lines.insert(0, f'Error in {self.name}: {e}')
                 WrappedFunction._ERROR_CALLBACK.run('\n'.join(lines))
 
 

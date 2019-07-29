@@ -51,6 +51,7 @@ class ExecuteCode(Directive):
 
     option_spec = {
         'linenos': directives.flag,
+        'ignore_stderr': directives.flag,
         'output_language': directives.unchanged,  # Runs specified pygments lexer on output data
         'hide_code': directives.flag,
         'hide_output': directives.flag,
@@ -103,10 +104,12 @@ class ExecuteCode(Directive):
         if 'header_output' in self.options:
             output.append(nodes.caption(text=self.options['header_output']))
 
-        code_results = execute_code( executed_code).strip()
-        for out in code_results.split('\n'):
-            if 'Error in ' in out:
-                log.error(f'Possible Error in codeblock: {out}')
+        code_results = execute_code( executed_code, ignore_stderr='ignore_stderr' in self.options)
+
+        if 'ignore_stderr' not in self.options:
+            for out in code_results.split('\n'):
+                if 'Error in ' in out:
+                    log.error(f'Possible Error in codeblock: {out}')
 
         code_results = nodes.literal_block(code_results, code_results)
 
@@ -120,14 +123,18 @@ WORKING_DIR = None
 
 
 @PrintException
-def execute_code(code) -> str:
+def execute_code(code, ignore_stderr) -> str:
 
     run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=WORKING_DIR)
     if run.returncode != 0:
-        print(run.stdout.decode())
-        print(run.stderr.decode())
+        print(f'stdout: {run.stdout.decode()}')
+        print(f'stderr: {run.stderr.decode()}')
         raise ValueError()
-    return run.stdout.decode() + run.stderr.decode()
+
+    if ignore_stderr:
+        return run.stdout.decode().strip()
+
+    return (run.stdout.decode() + run.stderr.decode()).strip()
 
 
 def builder_ready(app):

@@ -541,6 +541,6 @@ class Rule:
 
                 # log traceback
                 lines = traceback.format_exc().splitlines()
-                del lines[1:3] # see implementation in wrappedfunction.py why we do this
+                del lines[1:3]  # see implementation in wrappedfunction.py why we do this
                 for line in lines:
                     log.error(line)
