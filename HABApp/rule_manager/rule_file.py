@@ -55,7 +55,7 @@ class RuleFile:
 
         # unload all registered callbacks
         for rule in self.rules.values():  # type: HABApp.Rule
-            rule._cleanup()
+            rule._unload()
 
         log.debug(f'File {self.path} successfully unloaded!')
         return None

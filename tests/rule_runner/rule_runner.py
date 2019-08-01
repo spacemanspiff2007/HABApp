@@ -1,5 +1,6 @@
 import sys
 from HABApp.runtime import Runtime
+from HABApp.core import WrappedFunction
 
 
 def _get_topmost_globals() -> dict:
@@ -22,12 +23,23 @@ class TestRuleFile:
 class SimpleRuleRunner:
     def __init__(self):
         self.vars: dict = _get_topmost_globals()
+        self.loaded_rules = []
+
+    def submit(self, callback, *args, **kwargs):
+        # submit never raises and exception, so we don't do it here, too
+        try:
+            callback(*args, **kwargs)
+        except Exception as e:  # noqa: F841
+            pass
 
     def set_up(self):
         self.vars['__UNITTEST__'] = True
         self.vars['__HABAPP__RUNTIME__'] = Runtime()
         self.vars['__HABAPP__RULE_FILE__'] = TestRuleFile()
-        self.vars['__HABAPP__RULES'] = []
+        self.vars['__HABAPP__RULES'] = self.loaded_rules = []
+
+        self.worker = WrappedFunction._WORKERS
+        WrappedFunction._WORKERS = self
 
     def tear_down(self):
         self.vars.pop('__UNITTEST__')
@@ -35,9 +47,15 @@ class SimpleRuleRunner:
         self.vars.pop('__HABAPP__RULE_FILE__')
         loaded_rules = self.vars.pop('__HABAPP__RULES')
         for rule in loaded_rules:
-            rule._cleanup()
+            rule._unload()
         loaded_rules.clear()
 
+        WrappedFunction._WORKERS = self.worker
+
+
+    def process_events(self, date_time):
+        for rule in self.loaded_rules:
+            rule._process_events(date_time)
 
     def __enter__(self):
         self.set_up()

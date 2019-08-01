@@ -14,26 +14,26 @@ import HABApp
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
 
-    check_path = []
+    if arg_config_path is None:
+        # Nothing is specified, we try to find the config automatically
+        check_path = []
+        try:
+            working_dir = Path(os.getcwd())
+            check_path.append( working_dir / 'HABApp')
+            check_path.append( working_dir.with_name('HABApp'))
+            check_path.append( working_dir.parent.with_name('HABApp'))
+        except ValueError:
+            # the ValueError gets raised if the working_dir or its parent is empty (e.g. c:\ or /)
+            pass
 
-    working_dir = Path(os.getcwd())
-    if working_dir.is_dir():
-        check_path.append( working_dir / 'HABApp')
-        check_path.append( working_dir.with_name('HABApp'))
+        check_path.append(Path.home() / 'HABApp')   # User home
 
-        parent = working_dir.parent
-        if parent.is_dir():
-            check_path.append( parent.with_name('HABApp'))
-
-    check_path.append(Path.home() / 'HABApp')   # User home
-
-    # if we run in a venv check the venv, too
-    v_env = os.environ.get('VIRTUAL_ENV', '')
-    if v_env:
-        check_path.append(Path(v_env) / 'HABApp')  # Virtual env dir
-
-    # override automatic check if we have specified something
-    if arg_config_path is not None:
+        # if we run in a venv check the venv, too
+        v_env = os.environ.get('VIRTUAL_ENV', '')
+        if v_env:
+            check_path.append(Path(v_env) / 'HABApp')  # Virtual env dir
+    else:
+        # Override automatic config detection if something is specified through command line
         check_path = [arg_config_path]
 
     for config_folder in check_path:
