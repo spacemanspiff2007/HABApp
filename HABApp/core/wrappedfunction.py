@@ -10,6 +10,7 @@ default_logger = logging.getLogger('HABApp.Worker')
 class WrappedFunction:
     _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
     _ERROR_CALLBACK: 'WrappedFunction' = None
+    _EVENT_LOOP = None
 
     @classmethod
     def CLEAR_ERROR_CALLBACK(cls):
@@ -28,6 +29,9 @@ class WrappedFunction:
         self.name = self._func.__name__ if not name else name
 
         self.is_async = asyncio.iscoroutinefunction(self._func)
+        if self.is_async:
+            if WrappedFunction._EVENT_LOOP is None:
+                WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
 
         self.__time_submitted = 0.0
 
@@ -41,11 +45,9 @@ class WrappedFunction:
 
     def run(self, *args, **kwargs):
         if self.is_async:
-            try:
-                # this is only available from python 3.7
-                asyncio.create_task(self.__async_run(*args, **kwargs))
-            except AttributeError:
-                asyncio.ensure_future(self.__async_run(*args, **kwargs))
+            # schedule run async, we need to pass the event loop because we can create an async-WrappedFunction
+            # from a thread!
+            asyncio.ensure_future(self.__async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
@@ -66,7 +68,7 @@ class WrappedFunction:
 
         # if we have an error callback call it
         if WrappedFunction._ERROR_CALLBACK is not None:
-            if self._func is not WrappedFunction._ERROR_CALLBACK._func:
+            if self is not WrappedFunction._ERROR_CALLBACK:
                 WrappedFunction._ERROR_CALLBACK.run('\n'.join(lines))
 
 
