@@ -42,7 +42,7 @@ class RuleManager(FileEventTarget):
             folder=self.runtime.config.directories.rules,
             file_ending='.py',
             event_target=self,
-            worker_factory=lambda x : HABApp.core.WrappedFunction(x, logger=log).run,
+            worker_factory=lambda x: HABApp.core.WrappedFunction(x, logger=log).run,
             watch_subfolders=True
         )
 

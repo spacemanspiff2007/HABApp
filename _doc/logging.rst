@@ -19,6 +19,10 @@ It is recommended to extend the default configuration.
 The complete description of the file format can be found `here <https://docs.python.org/3/library/logging.config.html?highlight=dictconfig#configuration-dictionary-schema>`_,
 but the format should be pretty straight forward.
 
+.. hint::
+   | Is is recommended to use absolute paths as filenames
+   | e.g.: ``/HABApp/logs/my_logfile.log`` or ``c:\HABApp\logs\my_logfile.log`` on Windows
+
 .. code-block:: yaml
     
     # required, can not be omitted but does nothing
@@ -37,16 +41,16 @@ but the format should be pretty straight forward.
         maxBytes: 10_000_000
         backupCount: '3'
     
-        formatter: HABApp_format  # use the specified formater (see above)
+        formatter: HABApp_format  # use the specified formatter (see above)
         level: DEBUG
       
       MyRuleHandler:
         class: logging.handlers.RotatingFileHandler
-        filename: 'MyRule.log'    # relative or absolute filenames can be used
+        filename: 'c:\HABApp\Logs\MyRule.log'    # absolute filename is recommended
         maxBytes: 10_000_000
         backupCount: '3'
     
-        formatter: HABApp_format  # use the specified formater (see above)
+        formatter: HABApp_format  # use the specified formatter (see above)
         level: DEBUG
     
     
