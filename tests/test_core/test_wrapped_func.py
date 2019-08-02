@@ -2,6 +2,7 @@ import asyncio
 import typing
 import unittest
 from unittest.mock import MagicMock
+from asynctest import CoroutineMock
 
 from HABApp.core import WrappedFunction
 
@@ -77,10 +78,18 @@ class TestCases(unittest.TestCase):
             1 / 0
 
         f = WrappedFunction(tmp)
-        WrappedFunction.REGISTER_ERROR_CALLBACK( MagicMock())
-        self.assertFalse(f._ERROR_CALLBACK._func.called)
+        err_func = MagicMock()
+        WrappedFunction.REGISTER_ERROR_CALLBACK(err_func)
+        self.assertFalse(err_func.called)
         f.run()
-        self.assertTrue(f._ERROR_CALLBACK._func.called)
+        self.assertTrue(err_func.called)
+        err_func.assert_called_once_with(
+            'Error in tmp: division by zero\n'
+            'Traceback (most recent call last):\n'
+            '  File "Z:\\Python\\HABApp\\tests\\test_core\\test_wrapped_func.py", line 78, in tmp\n'
+            '    1 / 0\n'
+            'ZeroDivisionError: division by zero'
+        )
 
     def test_exception_in_wrapper(self):
         def tmp():

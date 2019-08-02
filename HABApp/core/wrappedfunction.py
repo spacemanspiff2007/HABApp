@@ -51,7 +51,6 @@ class WrappedFunction:
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
 
     def __format_traceback(self, e: Exception):
-        self.log.error(f'Error in {self.name}: {e}')
 
         # Skip line 1 and 2 since they contain the wrapper:
         # 0:  Traceback (most recent call last):
@@ -59,13 +58,15 @@ class WrappedFunction:
         # 2:  self._func(*args, **kwargs)
         lines = traceback.format_exc().splitlines()
         del lines[1:3]  # Remove element 1 & 2
+
+        # Add exception
+        lines.insert(0, f'Error in {self.name}: {e}')
         for l in lines:
             self.log.error(l)
 
         # if we have an error callback call it
         if WrappedFunction._ERROR_CALLBACK is not None:
             if self._func is not WrappedFunction._ERROR_CALLBACK._func:
-                lines.insert(0, f'Error in {self.name}: {e}')
                 WrappedFunction._ERROR_CALLBACK.run('\n'.join(lines))
 
 
