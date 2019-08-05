@@ -22,8 +22,8 @@ class OpenhabItemDefinition:
     editable: bool
     label = ''
     category = ''
-    tags: dataclasses.field(default_factory=list)
-    groups: dataclasses.field(default_factory=list)
+    tags: typing.List[str] = dataclasses.field(default_factory=list)
+    groups: typing.List[str] = dataclasses.field(default_factory=list)
     members: 'typing.List[OpenhabItemDefinition]' = dataclasses.field(default_factory=list)
 
     @classmethod
@@ -50,7 +50,10 @@ class OpenhabItemDefinition:
 
         for i, item in enumerate(data.get('members', [])):
             data['members'][i] = cls.from_dict(item)
-        return cls(**data)
+
+        # Important, sometimes OpenHAB returns more than in the schema spec, so we remove those items otherwise we
+        # get e.g.: TypeError: __init__() got an unexpected keyword argument 'stateDescription'
+        return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
 
 
 class OpenhabInterface:
@@ -173,6 +176,12 @@ class OpenhabInterface:
 
     @PrintException
     def get_item(self, item_name: str) -> OpenhabItemDefinition:
+        """ Return the complete OpenHAB item definition
+
+        :param item_name: name of the item or item
+        """
+        if isinstance(item_name, HABApp.core.items.Item):
+            item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)
 
         fut = asyncio.run_coroutine_threadsafe(

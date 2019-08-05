@@ -12,6 +12,7 @@ class TestOpenhabInterface(TestBaseRule):
         self.add_test('Interface item exists', self.test_item_exists)
         self.add_test('Interface item create/remove', self.test_item_create_delete)
         self.add_test('Interface group create/remove', self.test_item_create_delete_group)
+        self.add_test('Interface get item definition', self.test_item_definition)
 
         # test the states
         for oh_type in get_openhab_test_types():
@@ -65,6 +66,12 @@ class TestOpenhabInterface(TestBaseRule):
                     waiter.wait_for_state(value)
 
         return waiter.states_ok
+
+    def test_item_definition(self):
+        self.openhab.get_item('TestGroupAVG')
+        self.openhab.get_item('TestNumber')
+        self.openhab.get_item('TestNumber9')
+        self.openhab.get_item('TestString')
 
 
 TestOpenhabInterface()

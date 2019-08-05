@@ -88,6 +88,12 @@ class RuleManager(FileEventTarget):
             else:
                 if rule_name in file.rules:
                     found.append(file.rules[rule_name])
+
+        # if we want all return them
+        if rule_name is None:
+            return found
+
+        # if we want a special one throw error
         if not found:
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]

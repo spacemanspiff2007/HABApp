@@ -3,6 +3,7 @@ import concurrent.futures
 import logging
 import time
 import traceback
+from HABApp.util import PrintException
 
 default_logger = logging.getLogger('HABApp.Worker')
 
@@ -29,9 +30,6 @@ class WrappedFunction:
         self.name = self._func.__name__ if not name else name
 
         self.is_async = asyncio.iscoroutinefunction(self._func)
-        if self.is_async:
-            if WrappedFunction._EVENT_LOOP is None:
-                WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
 
         self.__time_submitted = 0.0
 
@@ -43,11 +41,12 @@ class WrappedFunction:
 
         self.__warn_too_long = warn_too_long
 
+    @PrintException
     def run(self, *args, **kwargs):
         if self.is_async:
-            # schedule run async, we need to pass the event loop because we can create an async-WrappedFunction
-            # from a thread!
-            asyncio.ensure_future(self.__async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
+            # schedule run async, we need to pass the event loop because we can create an async WrappedFunction
+            # from a worker thread (if we have a mixture between async and non-async)!
+            asyncio.run_coroutine_threadsafe(self.__async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
