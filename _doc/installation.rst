@@ -51,6 +51,17 @@ Installation
     habapp --config PATH_TO_CONFIGURATION_FOLDER
 
 
+Upgrading
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#. Stop HABApp
+
+#. Run the following command::
+
+    python3 -m pip install --upgrade habapp
+
+#. Start HABApp
+
+#. Observe the logs for errors in case there were changes
 
 Error message while installing ujson
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -101,9 +112,11 @@ Now execute the following commands to enable autostart::
     sudo systemctl --system daemon-reload
     sudo systemctl enable habapp.service
 
-It is now possible to start and check the status of HABApp with::
+It is now possible to start, stop, restart and check the status of HABApp with::
 
     sudo systemctl start habapp.service
+    sudo systemctl stop habapp.service
+    sudo systemctl restart habapp.service
     sudo systemctl status habapp.service
 
 ----------------------------------

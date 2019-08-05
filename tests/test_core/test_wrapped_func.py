@@ -3,11 +3,20 @@ import typing
 import unittest
 from unittest.mock import MagicMock
 
+import pytest
+import re
+from asynctest import CoroutineMock
+
 from HABApp.core import WrappedFunction
 
 
-def run_async(coro):
-    asyncio.get_event_loop().run_until_complete(coro)
+class FileNameRemover(str):
+    REGEX = re.compile(r'^\s+File ".+?$', re.MULTILINE)
+
+    def __eq__(self, other):
+        a = FileNameRemover.REGEX.sub('', self)
+        b = FileNameRemover.REGEX.sub('', other)
+        return a == b
 
 
 class TestCases(unittest.TestCase):
@@ -56,31 +65,24 @@ class TestCases(unittest.TestCase):
         self.assertEqual(self.last_args, ('sarg1', 'sarg2'))
         self.assertEqual(self.last_kwargs, {'skw1': 'skw1'})
 
-    def test_async_run(self):
-        async def tmp():
-            f = WrappedFunction(self.async_func_call)
-            f.run()
-        run_async(tmp())
-        self.assertTrue(self.func_called)
-
-    def test_async_args(self):
-        async def tmp():
-            f = WrappedFunction(self.async_func_call)
-            f.run('arg1', 'arg2', kw1='kw1')
-        run_async(tmp())
-        self.assertTrue(self.func_called)
-        self.assertEqual(self.last_args, ('arg1', 'arg2'))
-        self.assertEqual(self.last_kwargs, {'kw1': 'kw1'})
-
     def test_exception1(self):
         def tmp():
             1 / 0
 
+        WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
         f = WrappedFunction(tmp)
-        WrappedFunction.REGISTER_ERROR_CALLBACK( MagicMock())
-        self.assertFalse(f._ERROR_CALLBACK._func.called)
+        err_func = MagicMock()
+        WrappedFunction.REGISTER_ERROR_CALLBACK(err_func)
+        self.assertFalse(err_func.called)
         f.run()
-        self.assertTrue(f._ERROR_CALLBACK._func.called)
+        self.assertTrue(err_func.called)
+        err_func.assert_called_once_with(FileNameRemover(
+            'Error in tmp: division by zero\n'
+            'Traceback (most recent call last):\n'
+            '\n'
+            '    1 / 0\n'
+            'ZeroDivisionError: division by zero'
+        ))
 
     def test_exception_in_wrapper(self):
         def tmp():
@@ -94,6 +96,45 @@ class TestCases(unittest.TestCase):
         f.run()
 
 
+@pytest.mark.asyncio
+async def test_async_run():
+    coro = CoroutineMock()
+    WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
+    f = WrappedFunction(coro, name='coro_mock')
+    f.run()
+    await asyncio.sleep(0.05)
+    coro.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_async_args():
+    coro = CoroutineMock()
+    WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
+    f = WrappedFunction(coro, name='coro_mock')
+    f.run('arg1', 'arg2', kw1='kw1')
+
+    await asyncio.sleep(0.05)
+    coro.assert_awaited_once_with('arg1', 'arg2', kw1='kw1')
+
+
+@pytest.mark.asyncio
+async def test_async_error_wrapper():
+    async def tmp():
+        1 / 0
+
+    f = WrappedFunction(tmp)
+    WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
+    err_func = CoroutineMock()
+    WrappedFunction.REGISTER_ERROR_CALLBACK(err_func)
+    f.run()
+    await asyncio.sleep(0.05)
+    err_func.assert_awaited_once_with(FileNameRemover(
+        'Error in tmp: division by zero\n'
+        'Traceback (most recent call last):\n'
+        '\n'
+        '    1 / 0\n'
+        'ZeroDivisionError: division by zero'
+    ))
 
 if __name__ == '__main__':
     import logging

@@ -3,6 +3,7 @@ import concurrent.futures
 import logging
 import time
 import traceback
+from HABApp.util import PrintException
 
 default_logger = logging.getLogger('HABApp.Worker')
 
@@ -10,6 +11,7 @@ default_logger = logging.getLogger('HABApp.Worker')
 class WrappedFunction:
     _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
     _ERROR_CALLBACK: 'WrappedFunction' = None
+    _EVENT_LOOP = None
 
     @classmethod
     def CLEAR_ERROR_CALLBACK(cls):
@@ -39,19 +41,17 @@ class WrappedFunction:
 
         self.__warn_too_long = warn_too_long
 
+    @PrintException
     def run(self, *args, **kwargs):
         if self.is_async:
-            try:
-                # this is only available from python 3.7
-                asyncio.create_task(self.__async_run(*args, **kwargs))
-            except AttributeError:
-                asyncio.ensure_future(self.__async_run(*args, **kwargs))
+            # schedule run async, we need to pass the event loop because we can create an async WrappedFunction
+            # from a worker thread (if we have a mixture between async and non-async)!
+            asyncio.run_coroutine_threadsafe(self.__async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
 
     def __format_traceback(self, e: Exception):
-        self.log.error(f'Error in {self.name}: {e}')
 
         # Skip line 1 and 2 since they contain the wrapper:
         # 0:  Traceback (most recent call last):
@@ -59,13 +59,15 @@ class WrappedFunction:
         # 2:  self._func(*args, **kwargs)
         lines = traceback.format_exc().splitlines()
         del lines[1:3]  # Remove element 1 & 2
+
+        # Add exception
+        lines.insert(0, f'Error in {self.name}: {e}')
         for l in lines:
             self.log.error(l)
 
         # if we have an error callback call it
         if WrappedFunction._ERROR_CALLBACK is not None:
-            if self._func is not WrappedFunction._ERROR_CALLBACK._func:
-                lines.insert(0, f'Error in {self.name}: {e}')
+            if self is not WrappedFunction._ERROR_CALLBACK:
                 WrappedFunction._ERROR_CALLBACK.run('\n'.join(lines))
 
 

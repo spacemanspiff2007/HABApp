@@ -105,7 +105,7 @@ def main() -> typing.Union[int, str]:
     try:
         # otherwise creating a subprocess does not work on windows
         if sys.platform == "win32":
-            # This is the default from 3.8 so we don't have to set it ourselfs
+            # This is the default from 3.8 so we don't have to set it ourselves
             if sys.version_info < (3, 8):
                 asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
         else:

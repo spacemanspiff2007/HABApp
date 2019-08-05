@@ -33,7 +33,8 @@ class Runtime:
         self.rule_manager: HABApp.rule_manager.RuleManager = None
         self.rule_params: HABApp.rule_manager.RuleParameters = None
 
-        # Shutdown workers
+        # Async Workers & shutdown callback
+        HABApp.core.WrappedFunction._EVENT_LOOP = self.loop
         self.shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown)
 
     def load_config(self, config_folder):
