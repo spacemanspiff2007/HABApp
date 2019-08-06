@@ -7,7 +7,7 @@ class Item:
 
     @classmethod
     def get_create_item(cls, name: str, default_state=None):
-        """Creates a new item and returns it or returns the already existing one with the given name
+        """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 
         :param name: item name
         :param default_state: state the item will have if it gets created
@@ -88,7 +88,7 @@ class Item:
         return self.state == other
 
     def __bool__(self):
-        return self.state
+        return bool(self.state)
 
     # rich comparisons only for numeric types (int and float)
     def __lt__(self, other):

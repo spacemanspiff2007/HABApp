@@ -16,8 +16,9 @@ Rule
 Interacting with items
 ------------------------------
 Items are like variables. They have a name and a state (which can be anything).
-Items from openhab use the item name from openhab.
-Items from MQTT use the topic as item name.
+Items from openhab use the item name from openhab. Items from MQTT use the topic as item name.
+Some item types provide convenience functions, so it is advised to always set the correct item type.
+Use the class factory `get_create_item` to get the item by name.
 
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
