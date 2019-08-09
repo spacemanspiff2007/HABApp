@@ -1,30 +1,31 @@
 sudo: false
+language: python
 
-jobs:
+matrix:
   include:
-    - &python_shared
-      language: python
-      script: tox
-      install: pip install tox
-
-    - <<: *python_shared
-      python: 3.6
+    - python: 3.6
       env: TOXENV=flake
 
-    - <<: *python_shared
-      python: 3.6
+    - python: 3.6
       env: TOXENV=py36
 
-    - <<: *python_shared
-      python: 3.7
+    - python: 3.7
       dist: xenial
       env: TOXENV=py37
 
-    - <<: *python_shared
-      python: 3.7
+    - python: 3.7
       dist: xenial
       env: TOXENV=docs
 
+install:
+  - pip install tox
+
+script:
+  - tox
+
+
+jobs:
+  include:
     - stage: docker
       language: minimal
       install:
