@@ -1,6 +1,9 @@
 sudo: false
 language: python
 
+services:
+  - docker
+
 matrix:
   include:
     - python: 3.6
@@ -17,15 +20,17 @@ matrix:
       dist: xenial
       env: TOXENV=docs
 
-install:
-  # test docker build
-  - docker build -t habapp .
-  - docker run -d --name habapp habapp
+    - docker:
+        install:
+          # test docker build
+          - docker build -t habapp .
+          - docker run -d --name habapp habapp
+        script:
+          # Test docker is still running
+          - docker ps | grep -q habapp
 
-  # to run our python tests
+install:
   - pip install tox
 
 script:
-  # Test docker is still running
-  - docker ps | grep -q habapp
   - tox
