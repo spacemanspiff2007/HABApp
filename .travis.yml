@@ -4,22 +4,26 @@ sudo: false
 jobs:
   include:
     - python: 3.6
+      language: python
       env: TOXENV=flake
       script: tox
       install: pip install tox
 
     - python: 3.6
+      language: python
       env: TOXENV=py36
       script: tox
       install: pip install tox
 
     - python: 3.7
+      language: python
       dist: xenial
       env: TOXENV=py37
       script: tox
       install: pip install tox
 
     - python: 3.7
+      language: python
       dist: xenial
       env: TOXENV=docs
       script: tox
