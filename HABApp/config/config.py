@@ -118,8 +118,6 @@ class Config(FileEventTarget):
         if isinstance(self.directories.logging, str):
             (self.file_conf_habapp.parent / self.directories.logging).resolve().mkdir()
 
-        self.directories.rules.mkdir()
-
         time.sleep(0.1)
         return None
 
