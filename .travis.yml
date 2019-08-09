@@ -27,10 +27,11 @@ jobs:
         - docker build -t habapp .
         - docker run -d --name habapp habapp
       script:
+        # Allow the container to start properly
         - sleep 5
-        # output stdout to travis
+        # output stdout to travis in case we can not start the container
         - docker logs habapp
-        # Test docker is still running
+        # test if container is still running
         - docker ps | grep -q habapp
-        # Log from HABApp
-        - docker exec habapp tail -n +1 /config/HABApp.log
+        # Show logs from HABApp
+        - docker exec habapp tail -n +1 /config/logs/HABApp.log
