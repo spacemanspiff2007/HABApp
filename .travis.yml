@@ -18,7 +18,14 @@ matrix:
       env: TOXENV=docs
 
 install:
+  # test docker build
+  - docker build -t habapp .
+  - docker run -d --name habapp habapp
+
+  # to run our python tests
   - pip install tox
 
 script:
+  # Test docker is still running
+  - docker ps | grep -q habapp
   - tox
