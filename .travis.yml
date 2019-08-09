@@ -34,4 +34,4 @@ jobs:
         # test if container is still running
         - docker ps | grep -q habapp
         # Show logs from HABApp
-        - docker exec habapp tail -n +1 /config/logs/HABApp.log
+        - docker exec habapp tail -n +1 /config/log/HABApp.log
