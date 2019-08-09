@@ -1,36 +1,37 @@
 sudo: false
-language: python
+# language: python
 
-services:
-  - docker
-
-matrix:
+jobs:
   include:
     - python: 3.6
       env: TOXENV=flake
+      script: tox
+      install: pip install tox
 
     - python: 3.6
       env: TOXENV=py36
+      script: tox
+      install: pip install tox
 
     - python: 3.7
       dist: xenial
       env: TOXENV=py37
+      script: tox
+      install: pip install tox
 
     - python: 3.7
       dist: xenial
       env: TOXENV=docs
+      script: tox
+      install: pip install tox
 
-    - docker:
-        install:
-          # test docker build
-          - docker build -t habapp .
-          - docker run -d --name habapp habapp
-        script:
-          # Test docker is still running
-          - docker ps | grep -q habapp
-
-install:
-  - pip install tox
-
-script:
-  - tox
+    - stage: docker
+      install:
+        # test docker build
+        - docker build -t habapp .
+        - docker run -d --name habapp habapp
+      script:
+        # output stdout to travis
+        - docker logs habapp
+        # Test docker is still running
+        - docker ps | grep -q habapp
