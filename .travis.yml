@@ -27,6 +27,8 @@ jobs:
         - docker build -t habapp .
         - docker run -d --name habapp habapp
       script:
+        # Make dir so we try to load param files
+        - mkdir /config/param
         # Allow the container to start properly
         - sleep 5
         # output stdout to travis in case we can not start the container
