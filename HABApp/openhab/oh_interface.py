@@ -174,7 +174,6 @@ class OpenhabInterface:
         )
         return fut.result()
 
-    @PrintException
     def get_item(self, item_name: str) -> OpenhabItemDefinition:
         """ Return the complete OpenHAB item definition
 

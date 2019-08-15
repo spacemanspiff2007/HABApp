@@ -1,6 +1,7 @@
 import random
 import string
 
+import HABApp
 from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem, get_openhab_test_types, get_openhab_test_states
 
 
@@ -20,6 +21,7 @@ class TestOpenhabInterface(TestBaseRule):
 
         # test json post
         self.add_test(f'post_update (by_json)', self.test_umlaute)
+        self.add_test(f'test_item_not_found', self.test_openhab_item_not_found)
 
     def test_item_exists(self):
         assert not self.openhab.item_exists('item_which_does_not_exist')
@@ -78,6 +80,15 @@ class TestOpenhabInterface(TestBaseRule):
         ret = self.openhab.get_item(NAME)
         assert ret.label == LABEL
 
+    def test_openhab_item_not_found(self):
+        test_item = ''.join(random.choice(string.ascii_letters) for _ in range(20))
+        try:
+            self.openhab.get_item(test_item)
+        except Exception as e:
+            if isinstance(e, HABApp.openhab.exceptions.OpenhabItemNotFoundError):
+                return True
+
+        return 'Exception not raised!'
 
     def test_item_definition(self):
         self.openhab.get_item('TestGroupAVG')

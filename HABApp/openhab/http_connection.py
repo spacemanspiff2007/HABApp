@@ -12,6 +12,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 
+
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
 
@@ -293,6 +294,8 @@ class HttpConnection:
     async def async_get_item(self, item_name: str) -> dict:
         fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))
         ret = await self._check_http_response(fut, accept_404=True)
+        if ret.status == 404:
+            raise HABApp.openhab.exceptions.OpenhabItemNotFoundError(f'Item {item_name} not found!')
         if ret.status >= 300:
             return {}
         else:
