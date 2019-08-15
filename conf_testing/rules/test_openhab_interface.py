@@ -22,6 +22,7 @@ class TestOpenhabInterface(TestBaseRule):
         # test json post
         self.add_test(f'post_update (by_json)', self.test_umlaute)
         self.add_test(f'test_item_not_found', self.test_openhab_item_not_found)
+        self.add_test(f'Interface Metadata', self.test_metadata)
 
     def test_item_exists(self):
         assert not self.openhab.item_exists('item_which_does_not_exist')
@@ -95,6 +96,11 @@ class TestOpenhabInterface(TestBaseRule):
         self.openhab.get_item('TestNumber')
         self.openhab.get_item('TestNumber9')
         self.openhab.get_item('TestString')
+
+    def test_metadata(self):
+        with OpenhabTmpItem(None, 'String') as item:
+            self.openhab.set_metadata(item, 'MyNameSpace', 'MyValue', {'key': 'value'})
+            self.openhab.remove_metadata(item, 'MyNameSpace')
 
 
 TestOpenhabInterface()

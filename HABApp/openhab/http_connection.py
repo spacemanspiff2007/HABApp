@@ -329,3 +329,29 @@ class HttpConnection:
         fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', name), json=payload)
         ret = await self._check_http_response(fut, payload)
         return ret.status < 300
+
+    async def async_set_metadata(self, item_name: str, namespace: str, value: str, config: dict):
+
+        if self.config.openhab.general.listen_only:
+            return False
+
+        payload = {
+            'value': value,
+            'config': config
+        }
+
+        fut = self.__session.put(
+            self.__get_openhab_url('rest/items/{:s}/metadata/{:s}', item_name, namespace),
+            json=payload
+        )
+        ret = await self._check_http_response(fut)
+        return ret.status < 300
+
+    async def async_remove_metadata(self, item_name: str, namespace: str):
+
+        if self.config.openhab.general.listen_only:
+            return False
+
+        fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}/metadata/{:s}', item_name, namespace))
+        ret = await self._check_http_response(fut)
+        return ret.status < 300
