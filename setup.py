@@ -40,7 +40,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['tests*']),
     install_requires=[
         'ruamel.yaml>=0.16.1',
-        'aiohttp>3.5.4',
+        'aiohttp>=3.5.4',
         'voluptuous>=0.11.7',
         'aiohttp-sse-client',
         'paho-mqtt',
