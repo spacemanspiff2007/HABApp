@@ -41,8 +41,8 @@ class Rule:
         # this is a list which contains all rules of this file
         __vars['__HABAPP__RULES'].append(self)
 
-        assert isinstance(__runtime__, HABApp.Runtime)
-        self.__runtime: HABApp.Runtime = __runtime__
+        assert isinstance(__runtime__, HABApp.runtime.Runtime)
+        self.__runtime: HABApp.runtime.Runtime = __runtime__
 
         if not test:
             assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)

@@ -19,7 +19,7 @@ log = logging.getLogger('HABApp.Rules')
 class RuleManager(FileEventTarget):
 
     def __init__(self, parent):
-        assert isinstance(parent, HABApp.Runtime)
+        assert isinstance(parent, HABApp.runtime.Runtime)
         self.runtime = parent
 
         self.files: typing.Dict[str, RuleFile] = {}

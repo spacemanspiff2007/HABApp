@@ -18,6 +18,9 @@ class TestOpenhabInterface(TestBaseRule):
         for oh_type in get_openhab_test_types():
             self.add_test( f'post_update {oh_type}', self.test_post_update, oh_type, get_openhab_test_states(oh_type))
 
+        # test json post
+        self.add_test(f'post_update (by_json)', self.test_umlaute)
+
     def test_item_exists(self):
         assert not self.openhab.item_exists('item_which_does_not_exist')
         assert self.openhab.item_exists('TestString')
@@ -66,6 +69,15 @@ class TestOpenhabInterface(TestBaseRule):
                     waiter.wait_for_state(value)
 
         return waiter.states_ok
+
+    def test_umlaute(self):
+        LABEL = 'äöß'
+        NAME = 'TestUmlaute'
+
+        self.openhab.create_item('String', NAME, label=LABEL)
+        ret = self.openhab.get_item(NAME)
+        assert ret.label == LABEL
+
 
     def test_item_definition(self):
         self.openhab.get_item('TestGroupAVG')
