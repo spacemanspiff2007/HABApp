@@ -174,7 +174,6 @@ class OpenhabInterface:
         )
         return fut.result()
 
-    @PrintException
     def get_item(self, item_name: str) -> OpenhabItemDefinition:
         """ Return the complete OpenHAB item definition
 
@@ -216,6 +215,48 @@ class OpenhabInterface:
         assert isinstance(item_name, str), type(item_name)
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_item_exists(item_name),
+            self.__loop
+        )
+        return fut.result()
+
+    def set_metadata(self, item_name: str, namespace: str, value: str, config: dict):
+        """
+        Add/set metadata to an item
+
+        :param item_name: name of the item or item
+        :param namespace: namespace
+        :param value: value
+        :param config: configuration
+        :return:
+        """
+        if isinstance(item_name, HABApp.core.items.Item):
+            item_name = item_name.name
+        assert isinstance(item_name, str), type(item_name)
+        assert isinstance(namespace, str), type(namespace)
+        assert isinstance(value, str), type(value)
+        assert isinstance(config, dict), type(config)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_set_metadata(item_name=item_name, namespace=namespace, value=value, config=config),
+            self.__loop
+        )
+        return fut.result()
+
+    def remove_metadata(self, item_name: str, namespace: str):
+        """
+        Remove metadata from an item
+
+        :param item_name: name of the item or item
+        :param namespace: namespace
+        :return:
+        """
+        if isinstance(item_name, HABApp.core.items.Item):
+            item_name = item_name.name
+        assert isinstance(item_name, str), type(item_name)
+        assert isinstance(namespace, str), type(namespace)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_remove_metadata(item_name=item_name, namespace=namespace),
             self.__loop
         )
         return fut.result()

@@ -1,0 +1,3 @@
+
+class OpenhabItemNotFoundError(Exception):
+    pass

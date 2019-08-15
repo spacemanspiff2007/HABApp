@@ -19,13 +19,14 @@ log = logging.getLogger('HABApp.Rules')
 class RuleManager(FileEventTarget):
 
     def __init__(self, parent):
-        assert isinstance(parent, HABApp.Runtime)
+        assert isinstance(parent, HABApp.runtime.Runtime)
         self.runtime = parent
 
         self.files: typing.Dict[str, RuleFile] = {}
 
         # serialize loading
-        self.__lock = threading.Lock()
+        self.__file_load_lock = threading.Lock()
+        self.__rulefiles_lock = threading.Lock()
 
         # if we load immediately we don't have the items from openhab in itemcache
         def delayed_load():
@@ -61,10 +62,11 @@ class RuleManager(FileEventTarget):
                 continue
             self.__process_last_sec = now.second
 
-            for file in self.files.values():
-                assert isinstance(file, RuleFile), type(file)
-                for rule in file.iterrules():
-                    rule._process_events(now)
+            with self.__rulefiles_lock:
+                for file in self.files.values():
+                    assert isinstance(file, RuleFile), type(file)
+                    for rule in file.iterrules():
+                        rule._process_events(now)
 
             # sleep longer, try to sleep until the next full second
             end = datetime.datetime.now()
@@ -106,11 +108,13 @@ class RuleManager(FileEventTarget):
     @PrintException
     def remove_file(self, path: Path):
         try:
-            with self.__lock:
+            with self.__file_load_lock:
                 path_str = str(path)
                 log.debug(f'Removing file: {path}')
                 if path_str in self.files:
-                    self.files.pop(path_str).unload()
+                    with self.__rulefiles_lock:
+                        rule = self.files.pop(path_str)
+                    rule.unload()
         except Exception:
             log.error(f"Could not remove {path}!")
             for l in traceback.format_exc().splitlines():
@@ -122,11 +126,12 @@ class RuleManager(FileEventTarget):
 
         try:
             # serialize loading
-            with self.__lock:
+            with self.__file_load_lock:
                 path_str = str(path)
 
                 log.debug(f'Loading file: {path}')
-                self.files[path_str] = file = RuleFile(self, path)
+                with self.__rulefiles_lock:
+                    self.files[path_str] = file = RuleFile(self, path)
                 file.load()
         except Exception:
             log.error(f"Could not (fully) load {path}!")

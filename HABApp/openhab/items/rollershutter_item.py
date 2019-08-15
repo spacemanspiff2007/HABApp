@@ -20,10 +20,14 @@ class RollershutterItem(Item):
         """Move shutter down"""
         get_openhab_interface().send_command(self.name, 'DOWN')
 
-    def percent(self, value: float):
-        """Command shutter to value (in percent)"""
-        assert 0 <= value <= 100
-        get_openhab_interface().send_command(self.name, str(value))
+    def percent(self, percent: float):
+        """Command shutter to value (in percent)
+
+        :param percent: target position in percent
+        :return:
+        """
+        assert 0 <= percent <= 100
+        get_openhab_interface().send_command(self.name, str(percent))
 
     def __str__(self):
         return self.state

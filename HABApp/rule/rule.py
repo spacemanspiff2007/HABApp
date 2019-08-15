@@ -5,7 +5,7 @@ import random
 import sys
 import traceback
 import typing
-import warnings
+# import warnings
 
 import HABApp
 import HABApp.core
@@ -41,8 +41,8 @@ class Rule:
         # this is a list which contains all rules of this file
         __vars['__HABAPP__RULES'].append(self)
 
-        assert isinstance(__runtime__, HABApp.Runtime)
-        self.__runtime: HABApp.Runtime = __runtime__
+        assert isinstance(__runtime__, HABApp.runtime.Runtime)
+        self.__runtime: HABApp.runtime.Runtime = __runtime__
 
         if not test:
             assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
@@ -201,12 +201,12 @@ class Rule:
         """
         Post an event to the event bus
 
-        :param name: name to post event to
+        :param name: name or item to post event to
         :param event: Event class to be used (must be class instance)
         :return:
         """
-        assert isinstance(name, str), type(name)
-        return HABApp.core.EventBus.post_event(name, event)
+        assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
+        return HABApp.core.EventBus.post_event(name.name if isinstance(name, HABApp.core.items.Item) else name, event)
 
     def listen_event(self, name: typing.Union[HABApp.core.items.Item, str, None], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
@@ -231,11 +231,14 @@ class Rule:
     def execute_subprocess(self, callback, program, *args, capture_output=True):
         """Run another program
 
-         :param callback: |param_scheduled_cb| after process has finished. First parameter will
-                          be an instance of :class:`~HABApp.rule.FinishedProcessInfo`
-         :param program: program or path to program to run
-         :param args: |param_scheduled_cb_args|
-         """
+        :param callback: |param_scheduled_cb| after process has finished. First parameter will
+                         be an instance of :class:`~HABApp.rule.FinishedProcessInfo`
+        :param program: program or path to program to run
+        :param args: |param_scheduled_cb_args|
+        :param capture_output: Capture program output, set to `False` to only capture return code
+        :return:
+        """
+
         assert isinstance(program, str), type(program)
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
 
@@ -432,42 +435,6 @@ class Rule:
         assert callable(func)
         assert func not in self.__unload_functions, 'Function was already registered!'
         self.__unload_functions.append(func)
-
-    # -----------------------------------------------------------------------------------------------------------------
-    # deprecated stuff
-    # -----------------------------------------------------------------------------------------------------------------
-    def post_update(self, name, value):
-        warnings.warn("The 'self.post_update' method is deprecated, "
-                      "use 'self.openhab.post_update' instead", DeprecationWarning, 2)
-        log.warning('self.post_update is deprecated! Use self.openhab.post_update or self.oh.post_update instead!')
-        self.openhab.post_update(name, value)
-
-    def send_command(self, name, value):
-        warnings.warn("The 'self.send_command' method is deprecated, "
-                      "use 'self.openhab.send_command' instead", DeprecationWarning, 2)
-        log.warning('self.send_command is deprecated! Use self.openhab.send_command or self.oh.send_command instead!')
-        self.openhab.send_command(name, value)
-
-    def create_openhab_item(self, item_type, item_name, label="", category="", tags=[], groups=[]):
-        warnings.warn("The 'self.create_openhab_item' method is deprecated, "
-                      "use 'self.openhab.create_item' instead", DeprecationWarning, 2)
-        log.warning('self.create_openhab_item is deprecated!'
-                    'Use self.openhab.create_item or self.oh.create_item instead!')
-        return self.openhab.create_item(item_type, item_name, label, category, tags, groups)
-
-
-    def remove_openhab_item(self, item_name: str):
-        warnings.warn("The 'self.remove_openhab_item' method is deprecated, "
-                      "use 'self.openhab.remove_item' instead", DeprecationWarning, 2)
-        log.warning('self.remove_openhab_item is deprecated!'
-                    'Use self.openhab.remove_item or self.oh.remove_item instead!')
-        return self.openhab.remove_item(item_name)
-
-    def mqtt_publish(self, topic: str, payload, qos=None, retain=None):
-        warnings.warn("The 'self.mqtt_publish' method is deprecated, "
-                      "use 'self.mqtt.publish' instead", DeprecationWarning, 2)
-        log.warning('self.mqtt_publish is deprecated! Use self.mqtt.publish instead!')
-        return self.mqtt.publish(topic, payload, qos, retain)
 
     # -----------------------------------------------------------------------------------------------------------------
     # internal functions

@@ -12,6 +12,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 
+
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
 
@@ -293,6 +294,8 @@ class HttpConnection:
     async def async_get_item(self, item_name: str) -> dict:
         fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))
         ret = await self._check_http_response(fut, accept_404=True)
+        if ret.status == 404:
+            raise HABApp.openhab.exceptions.OpenhabItemNotFoundError(f'Item {item_name} not found!')
         if ret.status >= 300:
             return {}
         else:
@@ -325,4 +328,30 @@ class HttpConnection:
 
         fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', name), json=payload)
         ret = await self._check_http_response(fut, payload)
+        return ret.status < 300
+
+    async def async_set_metadata(self, item_name: str, namespace: str, value: str, config: dict):
+
+        if self.config.openhab.general.listen_only:
+            return False
+
+        payload = {
+            'value': value,
+            'config': config
+        }
+
+        fut = self.__session.put(
+            self.__get_openhab_url('rest/items/{:s}/metadata/{:s}', item_name, namespace),
+            json=payload
+        )
+        ret = await self._check_http_response(fut)
+        return ret.status < 300
+
+    async def async_remove_metadata(self, item_name: str, namespace: str):
+
+        if self.config.openhab.general.listen_only:
+            return False
+
+        fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}/metadata/{:s}', item_name, namespace))
+        ret = await self._check_http_response(fut)
         return ret.status < 300

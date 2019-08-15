@@ -113,7 +113,10 @@ class Config(FileEventTarget):
         # Create default folder for rules, too
         # Logging directories will get created elsewhere
         # Param files are optional
-        self.directories.rules.mkdir()
+        if isinstance(self.directories.rules, str):
+            (self.file_conf_habapp.parent / self.directories.rules).resolve().mkdir()
+        if isinstance(self.directories.logging, str):
+            (self.file_conf_habapp.parent / self.directories.logging).resolve().mkdir()
 
         time.sleep(0.1)
         return None
