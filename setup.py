@@ -39,13 +39,15 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=['tests*']),
     install_requires=[
-        'aiohttp',
+        'ruamel.yaml>=0.16.1',
+        'aiohttp>3.5.4',
+        'voluptuous>=0.11.7',
         'aiohttp-sse-client',
-        'ruamel.yaml',
         'paho-mqtt',
         'ujson',
-        'voluptuous',
         'watchdog',
+
+        # Backports
         'dataclasses;python_version<"3.7"',
     ],
     classifiers=[
