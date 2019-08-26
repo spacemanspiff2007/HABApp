@@ -219,6 +219,29 @@ Example::
    :var str stdout: Standard output of the process or None
    :var str stderr: Error output of the process or None
 
+How to properly use rules from other rule files
+-------------------------------------------------
+This example shows how to properly get a rule during runtime and execute one of its function.
+With the proper import this method provides syntax checks and auto complete.
+
+**Important:** always look up rule every time, never assign to a class member!
+The rule might get reloaded and then the class member will still point to the old unloaded instance.
+
+Example::
+
+    if typing.TYPE_CHECKING:
+        from .class_b import ClassB
+
+    class ClassA(Rule):
+        ...
+
+        def function_a(self):
+            # Important: always look up rule every time, never assign to a class member!
+            r = self.get_rule('NameOfRuleB')  # type: ClassB
+            r.function_b()
+
+
+
 All available functions
 ------------------------------
 .. autoclass:: Rule
