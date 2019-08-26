@@ -40,7 +40,12 @@ def map_items(name, openhab_type : str, openhab_value : str):
     if openhab_type == "DateTime":
         if value is None:
             return Item(name, value)
-        return Item(name, datetime.datetime.strptime(value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z'))
+        dt = datetime.datetime.strptime(value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z')
+        # all datetimes from openhab have a timezone set so we can't easily compare them
+        # TypeError: can't compare offset-naive and offset-aware datetimes
+        dt = dt.astimezone(tz=None)   # Changes datetime object so it uses system timezone
+        dt = dt.replace(tzinfo=None)  # Removes timezone awareness
+        return Item(name, dt)
 
     if openhab_type == "Color":
         if value is None:

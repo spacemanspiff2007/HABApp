@@ -207,7 +207,7 @@ class HttpConnection:
             call = self.event_handler.on_sse_event
 
             async with sse_client.EventSource(
-                    self.__get_openhab_url("rest/events?topics=smarthome/items/"),
+                    self.__get_openhab_url("rest/events?topics=smarthome/items/,smarthome/channels/"),
                     session=self.__session
             ) as event_source:
                 async for event in event_source:

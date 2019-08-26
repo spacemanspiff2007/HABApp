@@ -99,8 +99,8 @@ class RuleParameters(FileEventTarget):
         filename = self.config.directories.param / (file + '.yml')
         with self.__lock:
             log.info(f'Updated {filename}')
-            with filename.open('w', encoding='utf-8') as file:
-                _yml_setup.dump(self.params[file], file)
+            with filename.open('w', encoding='utf-8') as outfile:
+                _yml_setup.dump(self.params[file], outfile)
 
     def add_param(self, file, *keys, default_value):
         save = False
