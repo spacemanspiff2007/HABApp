@@ -1,3 +1,5 @@
+import HABApp.openhab.exceptions
+
 from .oh_interface import OpenhabInterface, get_openhab_interface
 from .oh_connection import OpenhabConnection
 from .http_connection import HttpConnection

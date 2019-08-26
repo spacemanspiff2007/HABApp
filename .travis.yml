@@ -1,24 +1,37 @@
 sudo: false
-language: python
 
-matrix:
+jobs:
   include:
-    - python: 3.6
-      env: TOXENV=flake
-
-    - python: 3.6
-      env: TOXENV=py36
-
-    - python: 3.7
-      dist: xenial
+    - &python_37
+      language: python
+      python: 3.7
+      script: tox
+      install: pip install tox
       env: TOXENV=py37
 
-    - python: 3.7
-      dist: xenial
+    - <<: *python_37
+      python: 3.6
+      env: TOXENV=py36
+
+    - <<: *python_37
+      env: TOXENV=flake
+
+    - <<: *python_37
+      python: 3.7
       env: TOXENV=docs
 
-install:
-  - pip install tox
-
-script:
-  - tox
+    - stage: docker
+      language: minimal
+      install:
+        # test docker build
+        - docker build -t habapp .
+        - docker run -d --name habapp habapp
+      script:
+        # Allow the container to start properly
+        - sleep 5
+        # output stdout to travis in case we can not start the container
+        - docker logs habapp
+        # test if container is still running
+        - docker ps | grep -q habapp
+        # Show logs from HABApp
+        - docker exec habapp tail -n +1 /config/log/HABApp.log
