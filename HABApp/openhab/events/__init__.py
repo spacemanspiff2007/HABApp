@@ -2,11 +2,18 @@ from .map_events import map_event_types
 from .base_event import BaseItemEvent
 from .item_events import ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,\
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent
+from .channel_events import ChannelTriggeredEvent
 
-EVENT_LIST = [ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,
-              ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent]
+EVENT_LIST = [
+    # item events
+    ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,
+    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent,
 
-__event_lookup = { k.__name__ : k for k in EVENT_LIST}
+    # channel events
+    ChannelTriggeredEvent
+]
+
+__event_lookup = {k.__name__: k for k in EVENT_LIST}
 
 def get_event(_in_dict : dict) -> BaseItemEvent:
     event_type = _in_dict['type']

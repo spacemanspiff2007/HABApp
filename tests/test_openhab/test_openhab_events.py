@@ -3,7 +3,9 @@ import unittest
 
 # from .context import HABApp
 from HABApp.openhab.events import ItemStateEvent, ItemAddedEvent, ItemCommandEvent,\
-    ItemStateChangedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, GroupItemStateChangedEvent, get_event
+    ItemStateChangedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, GroupItemStateChangedEvent, \
+    ChannelTriggeredEvent, \
+    get_event
 
 
 class TestCases(unittest.TestCase):
@@ -99,6 +101,18 @@ class TestCases(unittest.TestCase):
         self.assertEqual(event.value, 16)
         self.assertEqual(event.old_value, 15)
 
+    def test_ChannelTriggeredEvent(self):
+        d = {
+            "topic": "smarthome/channels/mihome:sensor_switch:00000000000000:button/triggered",
+            "payload": "{\"event\":\"SHORT_PRESSED\",\"channel\":\"mihome:sensor_switch:11111111111111:button\"}",
+            "type": "ChannelTriggeredEvent"
+        }
+
+        event = get_event(d)
+        self.assertIsInstance(event, ChannelTriggeredEvent)
+        self.assertEqual(event.name, 'mihome:sensor_switch:00000000000000:button')
+        self.assertEqual(event.channel, 'mihome:sensor_switch:11111111111111:button')
+        self.assertEqual(event.event, 'SHORT_PRESSED')
 
 
 if __name__ == '__main__':
