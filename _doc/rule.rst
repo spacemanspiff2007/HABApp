@@ -140,6 +140,11 @@ Do not use `time.sleep` but rather :meth:`~HABApp.Rule.run_in`.
    * - :meth:`~HABApp.Rule.run_on_day_of_week`
      - Run a function at a specific time on specific days of the week
 
+All functions return an instance of ScheduledCallback
+
+.. autoclass:: HABApp.rule.scheduler.ScheduledCallback
+   :members:
+
 Parameters
 ------------------------------
 Parameters are values which can easily be changed without having to reload the rules.

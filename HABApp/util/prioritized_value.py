@@ -12,7 +12,7 @@ class ValueWithPriority:
         self.__value = None
         self.__enabled = False
 
-        self.last_update: datetime.datetime = None
+        self.last_update: datetime.datetime = datetime.datetime.now()
 
         if initial_value is not None:
             self.set_value(initial_value)

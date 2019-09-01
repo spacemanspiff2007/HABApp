@@ -48,6 +48,11 @@ class ScheduledCallback:
         return self.next_call
 
     def check_due(self, now : datetime):
+        """Check whether the callback is due for execution
+
+        :param now:
+        :return:
+        """
 
         self.is_due = True if self.next_call <= now else False
         if self.is_finished:
@@ -55,7 +60,11 @@ class ScheduledCallback:
 
         return self.is_due
 
-    def execute(self):
+    def execute(self) -> bool:
+        """Try to execute callback. If the callback is not due yet or execution has already finished nothing will happen
+
+        :return: True if callback has been executed else False
+        """
         if not self.is_due or self.is_finished:
             return False
 
@@ -66,4 +75,6 @@ class ScheduledCallback:
         return True
 
     def cancel(self):
+        """ Cancel execution
+        """
         self.is_finished = True
