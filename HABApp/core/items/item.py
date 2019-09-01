@@ -35,7 +35,7 @@ class Item:
         self.last_update: datetime.datetime = _now
 
     def set_state(self, new_state) -> bool:
-        """Set a new state without creating events
+        """Set a new state without creating events on the event bus
 
         :param new_state: new state
         :return: True if state has changed
