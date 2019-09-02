@@ -94,6 +94,6 @@ Documentation
 .. autoclass:: MultiValue
    :members:
 
-.. autoclass:: HABApp.util.prioritized_value.ValueWithPriority
+.. autoclass:: HABApp.util.multi_value.ValueWithPriority
    :members:
 
