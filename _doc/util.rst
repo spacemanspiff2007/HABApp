@@ -57,7 +57,7 @@ Documentation
 
    .. automethod:: __init__
 
-ValuePrioritizer
+MultiValue
 ------------------------------
 Prioritizer which automatically switches between values with different priorities.
 Very useful when different states or modes overlap, e.g. automatic and manual mode. etc.
@@ -67,13 +67,13 @@ Example
 .. execute_code::
 
     # hide
-    from HABApp.util import ValuePrioritizer
+    from HABApp.util import MultiValue
     # hide
 
     def print_value(val):
         print( f'   Output is {val}')
 
-    p = ValuePrioritizer(on_value_change=print_value)
+    p = MultiValue(on_value_change=print_value)
     prio5 = p.get_create_value(priority=5, initial_value=5)
     prio4 = p.get_create_value(priority=4, initial_value=7)
 
@@ -91,7 +91,7 @@ Example
 
 Documentation
 ^^^^^^^^^^^^^^^^^^
-.. autoclass:: ValuePrioritizer
+.. autoclass:: MultiValue
    :members:
 
 .. autoclass:: HABApp.util.prioritized_value.ValueWithPriority

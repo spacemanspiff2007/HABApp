@@ -6,23 +6,28 @@ from threading import Lock
 class ValueWithPriority:
     def __init__(self, parent, initial_value=None):
 
-        assert isinstance(parent, ValuePrioritizer), type(parent)
-        self.__parent: ValuePrioritizer = parent
+        assert isinstance(parent, MultiValue), type(parent)
+        self.__parent: MultiValue = parent
 
         self.__value = None
         self.__enabled = False
 
+        #: Timestamp of the last update/enable of this value
         self.last_update: datetime.datetime = datetime.datetime.now()
 
+        # do not call callback for initial value
         if initial_value is not None:
-            self.set_value(initial_value)
+            self.__enabled = True
+            self.__value = initial_value
 
     @property
     def value(self):
+        """Returns the current value"""
         return self.__value
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
+        """Returns if the value is enabled"""
         return self.__enabled
 
     def set_value(self, value):
@@ -38,11 +43,11 @@ class ValueWithPriority:
         self.__parent.recalculate_value(self)
 
     def set_enabled(self, value: bool):
-        """Enable or disable and recalculate overall value
+        """Enable or disable this value and recalculate overall value
 
         :param value: True/False
         """
-        assert value is True or value is False
+        assert value is True or value is False, value
         self.__enabled = value
 
         self.last_update = datetime.datetime.now()
@@ -56,7 +61,7 @@ class ValueWithPriority:
         return f'<{self.__class__.__name__} enabled: {self.__enabled}, value: {self.__value}>'
 
 
-class ValuePrioritizer:
+class MultiValue:
     """Thread safe value prioritizer"""
 
     def __init__(self, on_value_change):
@@ -73,6 +78,7 @@ class ValuePrioritizer:
 
     @property
     def value(self):
+        """Returns the current value"""
         return self.__value
 
     def get_create_value(self, priority: int, initial_value=None) -> ValueWithPriority:
@@ -90,9 +96,15 @@ class ValuePrioritizer:
         return ret
 
     def recalculate_value(self, child):
+        """Recalculate the output value and call the registered callback
+
+        :param child: child that changed
+        :return: output value
+        """
 
         # recalculate value
         new_value = None
+
         with self.__lock:
             for priority, child in sorted(self.__children.items()):
                 assert isinstance(child, ValueWithPriority)
