@@ -6,7 +6,10 @@ from HABApp.rule import Rule
 from ..rule_runner import SimpleRuleRunner
 
 if sys.platform == "win32":
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    try:
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    except AttributeError:
+        pass
 
 
 

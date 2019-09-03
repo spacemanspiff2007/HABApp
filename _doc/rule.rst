@@ -13,16 +13,23 @@ Rule
 .. _datetime.time: <https://docs.python.org/3/library/datetime.html#time-objects>
 .. _datetime.timedelta: <https://docs.python.org/3/library/datetime.html#timedelta-objects>
 
+
 Interacting with items
 ------------------------------
 Items are like variables. They have a name and a state (which can be anything).
-Items from openhab use the item name from openhab. Items from MQTT use the topic as item name.
+Items from openhab use the item name from openhab and get created when HABApp successfully connects to
+openhab or when the openhab configuration changes.
+Items from MQTT use the topic as item name and get created as soon as a message gets processed.
+
 Some item types provide convenience functions, so it is advised to always set the correct item type.
-Use the class factory `get_create_item` to get the item by name.
+
+The preferred way to interact with items is through the class factory `get_create_item` since this provides type hints::
+
+    from HABApp.core.items import Item
+    my_item = Item.get_create_item('MyItem')
 
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
-
 
 .. list-table::
    :widths: auto
@@ -65,6 +72,10 @@ It is possible to check the item value by comparing it::
     # and is the same as
     if my_item.state == 5:
         # do sth
+
+.. autoclass:: HABApp.core.items.Item
+   :members:
+
 
 Events
 ------------------------------
@@ -139,6 +150,11 @@ Do not use `time.sleep` but rather :meth:`~HABApp.Rule.run_in`.
 
    * - :meth:`~HABApp.Rule.run_on_day_of_week`
      - Run a function at a specific time on specific days of the week
+
+All functions return an instance of ScheduledCallback
+
+.. autoclass:: HABApp.rule.scheduler.ScheduledCallback
+   :members:
 
 Parameters
 ------------------------------

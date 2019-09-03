@@ -1,4 +1,5 @@
 import typing
+import warnings
 
 from ..rule_manager import RuleParameters
 
@@ -16,35 +17,40 @@ class RuleParameter:
         # as a convenience try to create the file and the file structure
         self.__parameters.add_param(self.filename, *self.keys, default_value=default_value)
 
-    def get_value(self):
+    @property
+    def value(self):
         return self.__parameters.get_param(self.filename, *self.keys)
 
+    def get_value(self):
+        warnings.warn("The 'get_value' method is deprecated, use 'value' instead", DeprecationWarning, 2)
+        return self.value
+
     def __eq__(self, other):
-        return self.get_value() == other
+        return self.value == other
 
     def __lt__(self, other):
         if not isinstance(other, (int, float)):
             return NotImplemented
 
-        return self.get_value() < other
+        return self.value < other
 
     def __le__(self, other):
         if not isinstance(other, (int, float)):
             return NotImplemented
 
-        return self.get_value() <= other
+        return self.value <= other
 
     def __ge__(self, other):
         if not isinstance(other, (int, float)):
             return NotImplemented
 
-        return self.get_value() >= other
+        return self.value >= other
 
     def __gt__(self, other):
         if not isinstance(other, (int, float)):
             return NotImplemented
 
-        return self.get_value() > other
+        return self.value > other
 
     def __repr__(self):
-        return f'<RuleParameter file: {self.filename}, keys: {self.keys}, value: {self.get_value()}'
+        return f'<RuleParameter file: {self.filename}, keys: {self.keys}, value: {self.value}'
