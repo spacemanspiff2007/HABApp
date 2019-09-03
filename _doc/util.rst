@@ -66,9 +66,7 @@ Example
 ^^^^^^^^^^^^^^^^^^
 .. execute_code::
 
-    # hide
     from HABApp.util import MultiValue
-    # hide
 
     def print_value(val):
         print( f'   Output is {val}')
