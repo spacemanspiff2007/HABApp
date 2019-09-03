@@ -96,7 +96,7 @@ class MultiValue:
         return ret
 
     def recalculate_value(self, child):
-        """Recalculate the output value and call the registered callback
+        """Recalculate the output value and call the registered callback (if output has changed)
 
         :param child: child that changed
         :return: output value
