@@ -382,19 +382,20 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_in(self, seconds: int, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_in(self, seconds: typing.Union[int, datetime.timedelta], callback, *args, **kwargs) -> ScheduledCallback:
         """
         Run the callback in x seconds
 
-        :param int seconds: Wait time in seconds before calling the function
+        :param int seconds: Wait time in seconds or a timedelta obj before calling the function
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
-        assert isinstance(seconds, int), f'{seconds} ({type(seconds)})'
+        assert isinstance(seconds, (int, datetime.timedelta)), f'{seconds} ({type(seconds)})'
+        fut = datetime.timedelta(seconds=seconds) if not isinstance(seconds, datetime.timedelta) else seconds
 
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = ScheduledCallback(datetime.timedelta(seconds=seconds), cb, *args, **kwargs)
+        future_event = ScheduledCallback(fut, cb, *args, **kwargs)
         self.__future_events.append(future_event)
         return future_event
 

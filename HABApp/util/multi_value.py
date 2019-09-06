@@ -64,7 +64,7 @@ class ValueWithPriority:
 class MultiValue:
     """Thread safe value prioritizer"""
 
-    def __init__(self, on_value_change):
+    def __init__(self, on_value_change=None):
         """
 
         :param on_value_change: Callback with one arg which will be called on every change
@@ -89,11 +89,12 @@ class MultiValue:
         """
         assert isinstance(priority, int), type(priority)
 
-        if priority in self.__children:
-            return self.__children[priority]
-
-        self.__children[priority] = ret = ValueWithPriority(self, initial_value)
-        return ret
+        with self.__lock:
+            if priority in self.__children:
+                return self.__children[priority]
+    
+            self.__children[priority] = ret = ValueWithPriority(self, initial_value)
+            return ret
 
     def recalculate_value(self, child):
         """Recalculate the output value and call the registered callback (if output has changed)
@@ -117,7 +118,7 @@ class MultiValue:
             self.__value = new_value
 
         # Notify that the value has changed
-        if value_changed:
+        if value_changed and self.on_value_change is not None:
             self.on_value_change(new_value)
 
         return new_value
