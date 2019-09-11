@@ -81,6 +81,16 @@ Several working alternatives can be found `here <https://www.scivision.dev/pytho
     error: Microsoft Visual C++ 14.0 is required. Get it with "Microsoft Visual C++ Build Tools": https://visualstudio.microsoft.com/downloads/
     ----------------------------------------
 
+Error message while installing ruamel.yaml
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: none
+
+  _ruamel_yaml.c:4:10: fatal error: Python.h: No such file or directory
+
+Run the follwing command to fix it::
+
+  sudo apt install python3-dev
 
 Autostart after reboot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

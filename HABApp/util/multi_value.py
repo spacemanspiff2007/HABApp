@@ -92,7 +92,7 @@ class MultiValue:
         with self.__lock:
             if priority in self.__children:
                 return self.__children[priority]
-    
+
             self.__children[priority] = ret = ValueWithPriority(self, initial_value)
             return ret
 

@@ -52,6 +52,7 @@ class Rule:
         self.__future_events: typing.List[ScheduledCallback] = []
         self.__watched_items: typing.List[WatchedItem] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
+
         # schedule cleanup
         self.register_on_unload(self.__cleanup_rule)
 
