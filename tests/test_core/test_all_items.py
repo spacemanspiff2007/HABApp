@@ -7,11 +7,11 @@ from HABApp.core import Items
 class TestCasesItem(unittest.TestCase):
 
     def tearDown(self) -> None:
-        for name in Items.get_item_names():
+        for name in Items.get_all_item_names():
             Items.pop_item(name)
 
     def setUp(self) -> None:
-        for name in Items.get_item_names():
+        for name in Items.get_all_item_names():
             Items.pop_item(name)
 
     def test_item(self):
@@ -23,7 +23,7 @@ class TestCasesItem(unittest.TestCase):
         self.assertTrue(Items.item_exists(NAME))
         self.assertIs(created_item, Items.get_item(NAME))
 
-        self.assertEqual(Items.get_item_names(), [NAME])
+        self.assertEqual(Items.get_all_item_names(), [NAME])
         self.assertEqual(Items.get_all_items(), [created_item])
 
         self.assertIs(created_item, Items.pop_item(NAME))
