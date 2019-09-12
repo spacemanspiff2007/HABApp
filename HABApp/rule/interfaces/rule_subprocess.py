@@ -4,7 +4,6 @@ import asyncio
 class FinishedProcessInfo:
     """Information about the finished process."""
 
-
     def __init__(self, returncode: int, stdout: str, stderr: str):
         self.returncode: int = returncode
         self.stdout: str = stdout
@@ -17,6 +16,7 @@ class FinishedProcessInfo:
 async def async_subprocess_exec(callback, program: str, *args, capture_output=True):
     assert isinstance(program, str), type(program)
 
+    proc = None
     stdout = None
     stderr = None
     ret_code = None

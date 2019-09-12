@@ -5,6 +5,7 @@ import HABApp.core
 
 import HABApp.mqtt
 import HABApp.openhab
+import HABApp.parameters
 import HABApp.rule
 import HABApp.runtime
 

@@ -9,7 +9,7 @@ class EventBusListener:
         assert isinstance(callback, WrappedFunction)
 
         self.name: str = name
-        self.func = callback
+        self.func: WrappedFunction = callback
 
         self.event_filter = event_type
 

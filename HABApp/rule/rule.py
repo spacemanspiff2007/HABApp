@@ -5,7 +5,7 @@ import random
 import sys
 import traceback
 import typing
-# import warnings
+import warnings
 
 import HABApp
 import HABApp.core
@@ -14,7 +14,6 @@ import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
-from .rule_parameter import RuleParameter
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
     WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
 from .watched_item import WatchedItem
@@ -413,17 +412,6 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def get_rule_parameter(self, file_name: str, *keys, default_value='ToDo') -> RuleParameter:
-        """
-
-        :param file_name: Name of the file (without extension), will get created if it doesn't exist
-        :param keys: section name which value shall be loaded
-        :param default_value: if the corresponding entry in the file does not exist
-                              it will be created with default_value
-        """
-        assert isinstance(file_name, str), type(file_name)
-        return RuleParameter(self.__runtime.rule_params, file_name, *keys, default_value=default_value)
-
     def get_rule(self, rule_name: str) -> 'typing.Union[Rule, typing.List[Rule]]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
@@ -437,6 +425,24 @@ class Rule:
         assert callable(func)
         assert func not in self.__unload_functions, 'Function was already registered!'
         self.__unload_functions.append(func)
+
+    # -----------------------------------------------------------------------------------------------------------------
+    # deprecated functions
+    # -----------------------------------------------------------------------------------------------------------------
+    def get_rule_parameter(self, file_name: str, *keys, default_value='ToDo'):
+        """
+
+        :param file_name: Name of the file (without extension), will get created if it doesn't exist
+        :param keys: section name which value shall be loaded
+        :param default_value: if the corresponding entry in the file does not exist
+                              it will be created with default_value
+        """
+        warnings.warn("'get_rule_parameter' is deprecated, use 'HABApp.parameters.get_parameter()' instead",
+                      DeprecationWarning, 2)
+
+        assert isinstance(file_name, str), type(file_name)
+        import HABApp.parameters
+        return HABApp.parameters.get_parameter(file_name, *keys, default_value=default_value)
 
     # -----------------------------------------------------------------------------------------------------------------
     # internal functions
