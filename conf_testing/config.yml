@@ -1,0 +1,34 @@
+directories:
+  logging: ../conf/log
+  rules: rules
+  lib: lib
+  param: param
+mqtt:
+  connection:
+    client_id: HABApp
+    host: 'localhost'
+    password: ''
+    port: 1883
+    tls: false
+    tls_insecure: false
+    user: ''
+  publish:
+    qos: 0
+    retain: false
+  subscribe:
+    qos: 0
+    topics:
+    - '#'
+    - 0
+openhab:
+  connection:
+    host: localhost
+    password: ''
+    port: 8080
+    user: ''
+  general:
+    listen_only: false
+  ping:
+    enabled: true
+    interval: 10
+    item: 'Ping'
