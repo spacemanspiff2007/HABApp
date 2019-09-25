@@ -118,7 +118,7 @@ Example
             item.get_mode('Automatic').set_value(3)
 
         def item_update(self, event):
-            print(f'State: {event.state}')
+            print(f'State: {event.value}')
 
     MyMultiModeItemTestRule()
     # hide
