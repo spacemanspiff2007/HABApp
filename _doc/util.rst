@@ -103,7 +103,7 @@ Example
             item.get_mode('Automatic').set_value(5)
             item.get_mode('manual').set_value(10)
 
-            item.get_mode('manual').auto_disable_on '>='
+            item.get_mode('manual').auto_disable_on = '>='
 
             item.get_mode('Automatic').set_value(11)    # manual now gets disabled because the lower priority value is >= itself
             item.get_mode('Automatic').set_value(4)
