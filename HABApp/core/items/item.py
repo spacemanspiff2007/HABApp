@@ -8,7 +8,7 @@ class Item:
     @classmethod
     def get_item(cls, name: str):
         """Returns an already existing item. If it does not exist or has a different item type an exception will occur.
-        
+
         :param name: Name of the item
         :return: the item
         """
