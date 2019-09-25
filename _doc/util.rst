@@ -82,7 +82,7 @@ Example
             super().__init__()
 
             item = self.get_item(f'MultiModeTestItem', MultiModeItem)
-            self.listen_event(item, self.item_update, ValueNoChangeEvent)
+            self.listen_event(item, self.item_update, ValueUpdateEvent)
 
             item.create_mode('Automatic', 0, initial_value=5)
             item.create_mode('Manual', 10, initial_value=0)
