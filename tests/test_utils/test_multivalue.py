@@ -1,12 +1,12 @@
-from HABApp.util import MultiValueItem
+from HABApp.util import MultiModeItem
 
 def test_diff_prio():
-    p = MultiValueItem('TestItem')
-    p.add_multivalue('modea', 1, '1234')
-    p.add_multivalue('modeb', 2, '4567')
+    p = MultiModeItem('TestItem')
+    p.create_mode('modea', 1, '1234')
+    p.create_mode('modeb', 2, '4567')
 
-    p1 = p.get_multivalue('modea')
-    p2 = p.get_multivalue('modeb')
+    p1 = p.get_mode('modea')
+    p2 = p.get_mode('modeb')
     
     p1.set_value(5)
     assert p.state == '4567'
