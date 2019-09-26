@@ -48,4 +48,7 @@ Created file:
 
 
 .. automodule:: HABApp.Parameters
+   :members: get_parameter, get_parameter_value
+
+.. autoclass:: HABApp.Parameters.rule_parameter.RuleParameter
    :members:
