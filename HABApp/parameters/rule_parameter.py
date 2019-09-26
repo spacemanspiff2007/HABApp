@@ -6,8 +6,15 @@ from .parameters import get_value as _get_value
 
 class RuleParameter:
     def __init__(self, filename: str, *keys, default_value: typing.Any = 'ToDo'):
+        """Class to dynamically access parameters which are loaded from a file
+        
+        :param filename: filename (without extension)
+        :param keys: structure in the file
+        :param default_value: default value for the parameter.
+                              Is used to create the file and the value if it does not exist
+        """
 
-        assert isinstance(filename, str)
+        assert isinstance(filename, str), type(filename)
         self.filename: str = filename
         self.keys = keys
 
@@ -54,7 +61,7 @@ class RuleParameter:
 
 
 def get_parameter(filename: str, *keys, default_value: typing.Any = 'ToDo') -> RuleParameter:
-    """Returns a new :class:~`HABApp.parameters.rule_parameter.RuleParameter`
+    """Returns a new :class:`~HABApp.parameters.RuleParameter`
     
     :param filename: filename (without extension)
     :param keys: structure in the file

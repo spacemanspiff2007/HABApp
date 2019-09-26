@@ -19,10 +19,10 @@ Example::
         super().__init__()
 
         # construct parameter once, default_value can be anything
-        self.min_value = HABApp.Parameters.get_parameter( 'param_file_testrule', 'min_value', default_value=10)
+        self.min_value = HABApp.parameters.get_parameter( 'param_file_testrule', 'min_value', default_value=10)
 
         # deeper structuring is possible through specifying multiple keys
-        self.min_value_nested = HABApp.Parameters.get_parameter(
+        self.min_value_nested = HABApp.parameters.get_parameter(
             'param_file_testrule',
             'Rule A', 'subkey1', 'subkey2',
             default_value=['a', 'b', 'c'] # defaults can also be dicts or lists
