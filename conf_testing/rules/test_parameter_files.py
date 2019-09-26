@@ -22,11 +22,7 @@ class TestParamFile(TestBaseRule):
         self.add_test('ParamFile', self.test_param_file)
 
     def test_param_file(self):
-        p = HABApp.parameters.get_parameter('param_file', 'key')
-        assert p < 11
-        assert p.value == 10
-    
-        p = HABApp.parameters.RuleParameter('param_file', 'key')
+        p = HABApp.parameters.Parameter('param_file', 'key')
         assert p < 11
         assert p.value == 10
         return True

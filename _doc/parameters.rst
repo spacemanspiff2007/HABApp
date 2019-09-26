@@ -19,10 +19,10 @@ Example::
         super().__init__()
 
         # construct parameter once, default_value can be anything
-        self.min_value = HABApp.parameters.get_parameter( 'param_file_testrule', 'min_value', default_value=10)
+        self.min_value = HABApp.parameters.Parameter( 'param_file_testrule', 'min_value', default_value=10)
 
         # deeper structuring is possible through specifying multiple keys
-        self.min_value_nested = HABApp.parameters.get_parameter(
+        self.min_value_nested = HABApp.parameters.Parameter(
             'param_file_testrule',
             'Rule A', 'subkey1', 'subkey2',
             default_value=['a', 'b', 'c'] # defaults can also be dicts or lists
@@ -32,6 +32,9 @@ Example::
         # the parameter can be used like a normal variable, comparison works as expected
         if self.min_value < event.value:
             pass
+
+        # The current value can be accessed through the value-property
+        current_value = self.min_value.value
 
 
 Created file:
@@ -46,9 +49,5 @@ Created file:
                - b
                - c
 
-
-.. automodule:: HABApp.parameters
-   :members: get_parameter, get_parameter_value
-
-.. autoclass:: HABApp.parameters.RuleParameter
+.. autoclass:: HABApp.parameters.Parameter
    :members:

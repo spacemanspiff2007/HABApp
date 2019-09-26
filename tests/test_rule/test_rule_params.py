@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.parameters.rule_parameter import RuleParameter
+from HABApp.parameters.parameter import Parameter
 import HABApp.parameters.parameters as Parameters
 
 
@@ -16,7 +16,7 @@ def test_lookup(params):
 
     data = {'key1': {'key2': 'value2'}}
     Parameters.set_parameter_file('file1', data)
-    p = RuleParameter('file1', 'key1', 'key2')
+    p = Parameter('file1', 'key1', 'key2')
     assert p == 'value2'
 
     data['key1']['key2'] = 3
@@ -25,7 +25,7 @@ def test_lookup(params):
 
 def test_int_operators(params):
     Parameters.set_parameter_file('file', {'key': 5})
-    p = RuleParameter('file', 'key')
+    p = Parameter('file', 'key')
     assert p == 5
     assert p != 6
 
@@ -43,7 +43,7 @@ def test_int_operators(params):
 
 def test_float_operators(params):
     Parameters.set_parameter_file('file', {'key': 5.5})
-    p = RuleParameter('file', 'key')
+    p = Parameter('file', 'key')
 
     assert p < 6
     assert not p <= 5
@@ -53,20 +53,20 @@ def test_float_operators(params):
 
 def test_simple_key_creation(params):
 
-    RuleParameter('file', 'key')
+    Parameter('file', 'key')
     assert Parameters.get_parameter_file('file') == {'key': 'ToDo'}
 
-    RuleParameter('file', 'key2')
+    Parameter('file', 'key2')
     assert Parameters.get_parameter_file('file') == {'key': 'ToDo', 'key2': 'ToDo'}
 
 
 def test_structured_key_creation(params):
-    RuleParameter('file', 'key1', 'key1')
-    RuleParameter('file', 'key1', 'key2')
+    Parameter('file', 'key1', 'key1')
+    Parameter('file', 'key1', 'key2')
     assert Parameters.get_parameter_file('file') == {'key1': {'key1': 'ToDo', 'key2': 'ToDo'}}
 
 
 def test_structured_default_value(params):
-    RuleParameter('file', 'key1', 'key1', default_value=123)
-    RuleParameter('file', 'key1', 'key2', default_value=[1, 2, 3])
+    Parameter('file', 'key1', 'key1', default_value=123)
+    Parameter('file', 'key1', 'key2', default_value=[1, 2, 3])
     assert Parameters.get_parameter_file('file') == {'key1': {'key1': 123, 'key2': [1, 2, 3]}}

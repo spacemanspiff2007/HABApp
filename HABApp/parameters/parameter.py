@@ -4,10 +4,10 @@ from .parameters import add_parameter as _add_parameter
 from .parameters import get_value as _get_value
 
 
-class RuleParameter:
+class Parameter:
     def __init__(self, filename: str, *keys, default_value: typing.Any = 'ToDo'):
         """Class to dynamically access parameters which are loaded from a file
-        
+
         :param filename: filename (without extension)
         :param keys: structure in the file
         :param default_value: default value for the parameter.
@@ -23,7 +23,9 @@ class RuleParameter:
 
     @property
     def value(self):
-        """Return the current value"""
+        """Return the current value. This will do the lookup so make sure to not cache this value, otherwise
+        the parameter might not work as expected.
+        """
         return _get_value(self.filename, *self.keys)
 
     def __eq__(self, other):
@@ -54,29 +56,7 @@ class RuleParameter:
         return self.value > other
 
     def __repr__(self):
-        return f'<RuleParameter file: {self.filename}, keys: {self.keys}, value: {self.value}'
+        return f'<Parameter file: {self.filename}, keys: {self.keys}, value: {self.value}'
 
     def __str__(self):
         return str(self.value)
-
-
-def get_parameter(filename: str, *keys, default_value: typing.Any = 'ToDo') -> RuleParameter:
-    """Returns a new :class:`~HABApp.parameters.RuleParameter`
-    
-    :param filename: filename (without extension)
-    :param keys: structure in the file
-    :param default_value: default value for the parameter. Is used to create the file and the value if it does not exist
-    :return: RuleParameter instance
-    """
-    return RuleParameter(filename, *keys, default_value=default_value)
-
-
-def get_parameter_value(filename: str, *keys, default_value: typing.Any = 'ToDo') -> typing.Any:
-    """Returns a value, convenience function for ``get_parameter(...).value``
-    
-    :param filename: filename (without extension)
-    :param keys: structure in the file
-    :param default_value: default value for the parameter. Is used to create the file and the value if it does not exist
-    :return:
-    """
-    return RuleParameter(filename, *keys, default_value=default_value).value

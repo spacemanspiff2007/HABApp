@@ -55,7 +55,7 @@ def get_value(file: str, *keys):
 
 
 # Import here to prevent cyclic imports
-from .parameter_files import ParameterFileWatcher    # noqa: E402
+from .parameter_file_watcher import ParameterFileWatcher    # noqa: E402
 _PARAMETER_FILES: ParameterFileWatcher = None
 
 
