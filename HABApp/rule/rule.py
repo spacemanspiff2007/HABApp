@@ -437,12 +437,12 @@ class Rule:
         :param default_value: if the corresponding entry in the file does not exist
                               it will be created with default_value
         """
-        warnings.warn("'get_rule_parameter' is deprecated, use 'HABApp.Parameters.get_parameter()' instead",
+        warnings.warn("'get_rule_parameter' is deprecated, use 'HABApp.parameters.get_parameter()' instead",
                       DeprecationWarning, 2)
 
         assert isinstance(file_name, str), type(file_name)
-        import HABApp.Parameters
-        return HABApp.Parameters.get_parameter(file_name, *keys, default_value=default_value)
+        import HABApp.parameters
+        return HABApp.parameters.get_parameter(file_name, *keys, default_value=default_value)
 
     # -----------------------------------------------------------------------------------------------------------------
     # internal functions

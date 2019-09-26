@@ -16,7 +16,7 @@ class RuleParameter:
 
     @property
     def value(self):
-        """"Return the current value"""
+        """Return the current value"""
         return _get_value(self.filename, *self.keys)
 
     def __eq__(self, other):
@@ -54,22 +54,22 @@ class RuleParameter:
 
 
 def get_parameter(filename: str, *keys, default_value: typing.Any = 'ToDo') -> RuleParameter:
-    """Returns a new :class:`RuleParameter`
+    """Returns a new :class:~`HABApp.parameters.rule_parameter.RuleParameter`
     
-    :param filename: filename where the parameter is stored
+    :param filename: filename (without extension)
     :param keys: structure in the file
-    :param default_value: default value for parameter. Is used to create the file and the value if it does not exist
+    :param default_value: default value for the parameter. Is used to create the file and the value if it does not exist
     :return: RuleParameter instance
     """
     return RuleParameter(filename, *keys, default_value=default_value)
 
 
 def get_parameter_value(filename: str, *keys, default_value: typing.Any = 'ToDo') -> typing.Any:
-    """Returns a value
+    """Returns a value, convenience function for ``get_parameter(...).value``
     
-    :param filename: filename where the parameter is stored
+    :param filename: filename (without extension)
     :param keys: structure in the file
-    :param default_value: default value for parameter. Is used to create the file and the value if it does not exist
+    :param default_value: default value for the parameter. Is used to create the file and the value if it does not exist
     :return:
     """
     return RuleParameter(filename, *keys, default_value=default_value).value
