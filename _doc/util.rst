@@ -81,9 +81,10 @@ Example
         def __init__(self):
             super().__init__()
 
-            item = self.get_item(f'MultiModeTestItem', MultiModeItem)
+            item = MultiModeItem.get_create_item('MultiModeTestItem')
             self.listen_event(item, self.item_update, ValueUpdateEvent)
 
+            # create two different modes which we will use
             item.create_mode('Automatic', 0, initial_value=5)
             item.create_mode('Manual', 10, initial_value=0)
 
@@ -99,21 +100,22 @@ Example
 
             print('\nautomatically disable mode')
             # it is possible to automatically disable a mode
-            # this will disable the manual mode if the automatic mode sets a value greater equal manual mode
+            # this will disable the manual mode if the automatic mode
+            # sets a value greater equal manual mode
             item.get_mode('Automatic').set_value(5)
             item.get_mode('manual').set_value(10)
 
-            item.get_mode('manual').auto_disable_on = '>='
+            item.get_mode('manual').auto_disable_on = '>='  # set disable to low_priority >= value
 
-            item.get_mode('Automatic').set_value(11)    # manual now gets disabled because the lower priority value is >= itself
-            item.get_mode('Automatic').set_value(4)
+            item.get_mode('Automatic').set_value(11)    # <-- manual now gets disabled because
+            item.get_mode('Automatic').set_value(4)     #     the lower priority value is >= itself
 
             print('\nuse of functions')
             # It is possible to use functions to calculate the new value for a mode.
-            # E.g. shutter control and the manual mode moves the shades. If it's dark the automatic mode closes the shutter again.
-            # This could be achievied by automatically disable the manual mode or if the state should be remembered then
-            # the max function should be used
-            item.create_mode('Manual', 10, initial_value=5, calc_value_func=max)    # this will overwrite the earlier declaration
+            # E.g. shutter control and the manual mode moves the shades. If it's dark the automatic
+            # mode closes the shutter again. This could be achievied by automatically disable the
+            # manual mode or if the state should be remembered then the max function should be used
+            item.create_mode('Manual', 10, initial_value=5, calc_value_func=max)    # overwrite the earlier declaration
             item.get_mode('Automatic').set_value(7)
             item.get_mode('Automatic').set_value(3)
 
