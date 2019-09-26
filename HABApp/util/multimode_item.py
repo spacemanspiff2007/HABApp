@@ -8,6 +8,15 @@ from HABApp.core.items import Item
 
 
 class MultiModeValue:
+    """MultiModeValue
+
+    :ivar last_update: Timestamp of the last update/enable of this value
+    :ivar auto_disable_after: Automatically disable this mode after a given timedelta
+    :ivar auto_disable_on: Automatically disable this mode if the state with lower priority
+                           is >, >=, <, <=, == or != than the own value
+    :ivar calc_value_func: Function to calculate the new value (e.g. min or max). Any function that accepts two
+                           Arguments can be used. First arg is value with lower priority, second argument is own value.
+    """
     DISABLE_OPERATORS = {
         '>': operator.gt, '<': operator.lt, '>=': operator.ge, '<=': operator.le,
         '==': operator.eq, '!=': operator.ne, None: None
@@ -24,7 +33,6 @@ class MultiModeValue:
         self.__value = None
         self.__enabled = False
 
-        #: Timestamp of the last update/enable of this value
         self.last_update: datetime.datetime = datetime.datetime.now()
 
         # do not call callback for initial value
@@ -35,14 +43,10 @@ class MultiModeValue:
         assert isinstance(auto_disable_after, datetime.timedelta) or auto_disable_after is None, \
             type(auto_disable_after)
         assert auto_disable_on in MultiModeValue.DISABLE_OPERATORS, auto_disable_on
-        #: Automatically disable this mode after a given timedelta
         self.auto_disable_after: typing.Optional[datetime.timedelta] = auto_disable_after
-        #: Automatically disable this mode if the low priority state is >, >=, <, <=, == or != than the own value
         self.auto_disable_on: str = auto_disable_on
-        
-        #: Function to calculate the new value (e.g. min or max). Any function that accepts two parameters can be used.
-        #  First argument is value with lower priority, second argument is own value.
-        self.calc_value_func: typing.Callable[[typing.Any, typing.Any], typing.Any] = calc_value_func
+
+        self.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = calc_value_func
 
     @property
     def value(self):
@@ -126,7 +130,10 @@ class MultiModeValue:
 
 
 class MultiModeItem(Item):
-    """Thread safe value prioritizer"""
+    """Thread safe value prioritizer :class:`Item`
+
+    :ivar logger: Assign a logger to get log messages about the different modes
+    """
 
     @classmethod
     def get_create_item(cls, name: str, logger: logging.getLoggerClass() = None):
@@ -142,7 +149,7 @@ class MultiModeItem(Item):
 
         self.__lock = Lock()
 
-        self.logger: logging._loggerClass = None
+        self.logger: typing.Optional[logging._loggerClass] = None
 
     def log(self, level, text, *args, **kwargs):
         if self.logger is not None:

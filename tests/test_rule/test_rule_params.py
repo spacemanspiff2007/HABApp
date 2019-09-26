@@ -1,7 +1,7 @@
 import pytest
 
-from HABApp.parameters.rule_parameter import RuleParameter
-import HABApp.parameters.parameters as Parameters
+from HABApp.Parameters.rule_parameter import RuleParameter
+import HABApp.Parameters.parameters as Parameters
 
 
 @pytest.fixture(scope="function")

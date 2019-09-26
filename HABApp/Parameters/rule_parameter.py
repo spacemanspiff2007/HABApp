@@ -47,7 +47,7 @@ class RuleParameter:
 
     def __repr__(self):
         return f'<RuleParameter file: {self.filename}, keys: {self.keys}, value: {self.value}'
-    
+
     def __str__(self):
         return str(self.value)
 

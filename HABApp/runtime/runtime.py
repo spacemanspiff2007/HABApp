@@ -4,7 +4,7 @@ import HABApp.config
 import HABApp.core
 import HABApp.rule_manager
 import HABApp.util
-import HABApp.parameters.parameters
+import HABApp.Parameters.parameters
 
 from .folder_watcher import FolderWatcher
 from .shutdown_helper import ShutdownHelper
@@ -53,7 +53,7 @@ class Runtime:
         self.mqtt_connection.connect()
 
         # Parameter Files
-        HABApp.parameters.parameters.setup(self.config, self.folder_watcher)
+        HABApp.Parameters.parameters.setup(self.config, self.folder_watcher)
 
         # Rule engine
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
