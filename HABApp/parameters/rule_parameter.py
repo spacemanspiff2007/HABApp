@@ -47,11 +47,14 @@ class RuleParameter:
 
     def __repr__(self):
         return f'<RuleParameter file: {self.filename}, keys: {self.keys}, value: {self.value}'
+    
+    def __str__(self):
+        return str(self.value)
 
 
 def get_parameter(filename: str, *keys, default_value: typing.Any = 'ToDo') -> RuleParameter:
     return RuleParameter(filename, *keys, default_value=default_value)
 
 
-def get_value(filename: str, *keys, default_value: typing.Any = 'ToDo') -> RuleParameter:
+def get_parameter_value(filename: str, *keys, default_value: typing.Any = 'ToDo') -> typing.Any:
     return RuleParameter(filename, *keys, default_value=default_value).value

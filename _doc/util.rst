@@ -57,9 +57,9 @@ Documentation
 
    .. automethod:: __init__
 
-MultiMode
+MultiModeItem
 ------------------------------
-Prioritizer which automatically switches between values with different priorities.
+Prioritizer item which automatically switches between values with different priorities.
 Very useful when different states or modes overlap, e.g. automatic and manual mode. etc.
 
 Example
@@ -89,7 +89,7 @@ Example
 
             print('disable/enable higher priority')
             item.get_mode('manual').set_enabled(False)
-            item.get_mode('manual').set_value(10)
+            item.get_mode('manual').set_value(11)
 
             print('\nset value lower priority')
             item.get_mode('automatic').set_value(55)
@@ -132,6 +132,6 @@ Documentation
 .. autoclass:: MultiModeItem
    :members:
 
-.. autoclass:: HABApp.util.multi_value.MultiModeValue
+.. autoclass:: HABApp.util.multimode_item.MultiModeValue
    :members:
 
