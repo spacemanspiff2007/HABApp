@@ -11,6 +11,7 @@ Welcome to the HABApp documentation!
    configuration
    logging
    rule
+   parameters
    interface_openhab
    interface_mqtt
    asyncio

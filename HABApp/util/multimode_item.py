@@ -13,8 +13,8 @@ class MultiModeValue:
     :ivar last_update: Timestamp of the last update/enable of this value
     :ivar auto_disable_after: Automatically disable this mode after a given timedelta
     :ivar auto_disable_on: Automatically disable this mode if the state with lower priority
-                           is >, >=, <, <=, == or != than the own value
-    :ivar calc_value_func: Function to calculate the new value (e.g. min or max). Any function that accepts two
+                           is ``>``, ``>=``, ``<``, ``<=``, ``==`` or ``!=`` than the own value
+    :ivar calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts two
                            Arguments can be used. First arg is value with lower priority, second argument is own value.
     """
     DISABLE_OPERATORS = {
@@ -130,7 +130,7 @@ class MultiModeValue:
 
 
 class MultiModeItem(Item):
-    """Thread safe value prioritizer :class:`Item`
+    """Thread safe value prioritizer :class:`HABApp.core.items.Item`
 
     :ivar logger: Assign a logger to get log messages about the different modes
     """

@@ -53,8 +53,10 @@ class RuleParameter:
 
 
 def get_parameter(filename: str, *keys, default_value: typing.Any = 'ToDo') -> RuleParameter:
+    """Returns a new :class:`RuleParameter`"""
     return RuleParameter(filename, *keys, default_value=default_value)
 
 
 def get_parameter_value(filename: str, *keys, default_value: typing.Any = 'ToDo') -> typing.Any:
+    """Returns a parameter value"""
     return RuleParameter(filename, *keys, default_value=default_value).value
