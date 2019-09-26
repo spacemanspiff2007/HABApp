@@ -6,4 +6,4 @@ from .counter import Counter
 from .period_counter import PeriodCounter
 from .threshold import Threshold
 from .statistics import Statistics
-from .multi_value import MultiModeItem
+from .multimode_item import MultiModeItem

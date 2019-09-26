@@ -35,9 +35,13 @@ class MultiModeValue:
         assert isinstance(auto_disable_after, datetime.timedelta) or auto_disable_after is None, \
             type(auto_disable_after)
         assert auto_disable_on in MultiModeValue.DISABLE_OPERATORS, auto_disable_on
+        #: Automatically disable this mode after a given timedelta
         self.auto_disable_after: typing.Optional[datetime.timedelta] = auto_disable_after
+        #: Automatically disable this mode if the low priority state is >, >=, <, <=, == or != than the own value
         self.auto_disable_on: str = auto_disable_on
-
+        
+        #: Function to calculate the new value (e.g. min or max). Any function that accepts two parameters can be used.
+        #  First argument is value with lower priority, second argument is own value.
         self.calc_value_func: typing.Callable[[typing.Any, typing.Any], typing.Any] = calc_value_func
 
     @property
