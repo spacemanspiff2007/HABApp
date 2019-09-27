@@ -53,6 +53,7 @@ class ExecuteCode(Directive):
         'linenos': directives.flag,
         'ignore_stderr': directives.flag,
         'output_language': directives.unchanged,  # Runs specified pygments lexer on output data
+
         'hide_code': directives.flag,
         'hide_output': directives.flag,
         'header_code': directives.unchanged,
@@ -115,7 +116,9 @@ class ExecuteCode(Directive):
 
         code_results['linenos'] = 'linenos' in self.options
         code_results['language'] = output_language
-        output.append(code_results)
+        
+        if not 'hide_output' in self.options:
+            output.append(code_results)
         return output
 
 

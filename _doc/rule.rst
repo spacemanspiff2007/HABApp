@@ -208,7 +208,7 @@ Example::
 
 All available functions
 ------------------------------
-.. autoclass:: Rule
+.. autoclass:: HABApp.Rule
    :members:
 
    :var async_http: :ref:`Async http connections <ref_async_io>`
