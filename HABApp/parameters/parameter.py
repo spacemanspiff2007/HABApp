@@ -6,12 +6,12 @@ from .parameters import get_value as _get_value
 
 class Parameter:
     def __init__(self, filename: str, *keys, default_value: typing.Any = 'ToDo'):
-        """Class to dynamically access parameters which are loaded from a file
+        """Class to dynamically access parameters which are loaded from file.
 
         :param filename: filename (without extension)
         :param keys: structure in the file
         :param default_value: default value for the parameter.
-                              Is used to create the file and the value if it does not exist
+                              Is used to create the file and the structure if it does not exist yet.
         """
 
         assert isinstance(filename, str), type(filename)

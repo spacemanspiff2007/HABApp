@@ -71,3 +71,5 @@ Created file:
 
 .. autoclass:: HABApp.parameters.Parameter
    :members:
+
+   .. automethod:: __init__

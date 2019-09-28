@@ -10,10 +10,12 @@ from HABApp.core.items import Item
 class MultiModeValue:
     """MultiModeValue
 
-    :ivar last_update: Timestamp of the last update/enable of this value
-    :ivar auto_disable_after: Automatically disable this mode after a given timedelta
-    :ivar auto_disable_on: Automatically disable this mode if the state with lower priority
-                           is ``>``, ``>=``, ``<``, ``<=``, ``==`` or ``!=`` than the own value
+    :ivar datetime.datetime last_update: Timestamp of the last update/enable of this value
+    :ivar typing.Optional[datetime.timedelta] auto_disable_after: Automatically disable this mode after
+                                              a given timedelta on the next recalculation
+    :ivar typing.Optional[str] auto_disable_on: Automatically disable this mode if the state with lower priority
+                               is ``>``, ``>=``, ``<``, ``<=``, ``==`` or ``!=`` than the own value
+    :vartype calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]]
     :ivar calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts two
                            Arguments can be used. First arg is value with lower priority, second argument is own value.
     """
@@ -122,15 +124,12 @@ class MultiModeValue:
             return self.__value
         return self.calc_value_func(value_with_lower_priority, self.__value)
 
-    def __str__(self):
-        return str(self.__value)
-
     def __repr__(self):
-        return f'<{self.__class__.__name__} enabled: {self.__enabled}, value: {self.__value}>'
+        return f'<{self.__class__.__name__} {self.__name} enabled: {self.__enabled}, value: {self.__value}>'
 
 
 class MultiModeItem(Item):
-    """Thread safe value prioritizer :class:`HABApp.core.items.Item`
+    """Thread safe value prioritizer :class:`~HABApp.core.items.Item`
 
     :ivar logger: Assign a logger to get log messages about the different modes
     """
@@ -155,8 +154,24 @@ class MultiModeItem(Item):
         if self.logger is not None:
             self.logger.log(level, f'{self.name}: ' + text, *args, **kwargs)
 
-    def create_mode(self, name: str, priority: int,
-                    initial_value=None, auto_disable_on=None, auto_disable_after=None, calc_value_func=None):
+    def create_mode(
+            self, name: str, priority: int, initial_value: typing.Optional[typing.Any] = None,
+            auto_disable_on: typing.Optional[str] = None,
+            auto_disable_after: typing.Optional[datetime.timedelta] = None,
+            calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = None
+    ) -> MultiModeValue:
+        """Create a new mode with priority
+
+        :param name: Name of the new mode
+        :param priority: Priority of the mode
+        :param initial_value: Initial value, will also enable the mode
+        :param auto_disable_on: Automatically disable the mode if the lower priority state is ``>`` or ``<`` the value.
+                                See :attr:`~HABApp.util.multimode_item.MultiModeValue`
+        :param auto_disable_after: Automatically disable the mode after a timedelta if a recalculate is done
+                                   See :attr:`~HABApp.util.multimode_item.MultiModeValue`
+        :param calc_value_func: See :attr:`~HABApp.util.multimode_item.MultiModeValue`
+        :return: The newly created MultiModeValue
+        """
         # Silently overwrite the values
         # assert not name.lower() in self.__values_by_name, name.lower()
         # assert not priority in self.__values_by_prio, priority
@@ -172,7 +187,12 @@ class MultiModeItem(Item):
             self.__values_by_name[name.lower()] = ret
         return ret
 
-    def get_mode(self, name: str):
+    def get_mode(self, name: str) -> MultiModeValue:
+        """Returns a created mode
+
+        :param name: name of the mode (case insensitive)
+        :return: The requested MultiModeValue
+        """
         return self.__values_by_name[name.lower()]
 
     def get_value_until(self, mode_to_stop):
@@ -187,7 +207,7 @@ class MultiModeItem(Item):
                 new_value = child.calculate_value(new_value)
         raise ValueError()
 
-    def calculate_value(self):
+    def calculate_value(self) -> typing.Any:
         """Recalculate the output value and post the state to the event bus (if it is not None)
 
         :return: new value

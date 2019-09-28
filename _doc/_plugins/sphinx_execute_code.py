@@ -116,8 +116,8 @@ class ExecuteCode(Directive):
 
         code_results['linenos'] = 'linenos' in self.options
         code_results['language'] = output_language
-        
-        if not 'hide_output' in self.options:
+
+        if 'hide_output' not in self.options:
             output.append(code_results)
         return output
 
