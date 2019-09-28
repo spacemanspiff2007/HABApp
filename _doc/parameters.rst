@@ -69,6 +69,8 @@ Created file:
                - b
                - c
 
+Changes in the file will be automatically picked up through :class:`~HABApp.parameters.Parameter`.
+
 .. autoclass:: HABApp.parameters.Parameter
    :members:
 

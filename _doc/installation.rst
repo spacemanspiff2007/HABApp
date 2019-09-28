@@ -63,6 +63,7 @@ Upgrading
 
 #. Observe the logs for errors in case there were changes
 
+
 Error message while installing ujson
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -153,7 +154,15 @@ Then stop the container. After selecting "Action" -> "Clear" on the HABapp conta
 After starting the container again, everything should immediately work again.
 
 ----------------------------------
-HABApp Parameters
+Upgrading to a newer version
+----------------------------------
+
+It is recommended to upgrade the installation on another machine. Configure your production instance in the configuration
+and set the ``listen_only`` switch(es) in the configuration to ``True``. Observe the logs for any errors.
+This way if there were any breaking changes rules can easily be fixed before problems occur on the running installation.
+
+----------------------------------
+HABApp arguments
 ----------------------------------
 
 .. execute_code::
