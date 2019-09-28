@@ -156,7 +156,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 HABApp.core.Items.set_item(new_item)
 
             # remove items which are no longer available
-            ist = set(HABApp.core.Items.get_item_names())
+            ist = set(HABApp.core.Items.get_all_item_names())
             soll = {k['name'] for k in data}
             for k in ist - soll:
                 HABApp.core.Items.pop_item(k)

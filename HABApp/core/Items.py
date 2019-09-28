@@ -25,7 +25,7 @@ def get_all_items() -> typing.List[__Item]:
     return list(_ALL_ITEMS.values())
 
 
-def get_item_names() -> typing.List[str]:
+def get_all_item_names() -> typing.List[str]:
     return list(_ALL_ITEMS.keys())
 
 

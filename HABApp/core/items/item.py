@@ -6,6 +6,17 @@ import HABApp
 class Item:
 
     @classmethod
+    def get_item(cls, name: str):
+        """Returns an already existing item. If it does not exist or has a different item type an exception will occur.
+
+        :param name: Name of the item
+        :return: the item
+        """
+        item = HABApp.core.Items.get_item(name)
+        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        return item
+
+    @classmethod
     def get_create_item(cls, name: str, default_state=None):
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 

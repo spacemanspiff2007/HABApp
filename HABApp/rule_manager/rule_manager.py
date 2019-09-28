@@ -28,12 +28,12 @@ class RuleManager(FileEventTarget):
         self.__file_load_lock = threading.Lock()
         self.__rulefiles_lock = threading.Lock()
 
-        # if we load immediately we don't have the items from openhab in itemcache
+        # if we load immediately we don't have the items from openhab in itemcache yet
         def delayed_load():
-            time.sleep(5)
+            time.sleep(5.2)
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
-                    time.sleep(0.5)
+                    time.sleep(1)
                     HABApp.core.WrappedFunction(self.add_file, logger=log).run(f)
 
         HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).run()

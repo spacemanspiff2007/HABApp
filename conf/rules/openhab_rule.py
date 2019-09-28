@@ -30,18 +30,17 @@ class MyOpenhabRule(HABApp.Rule):
         # interaction is available through self.openhab or self.oh
         self.openhab.send_command('TestItemCommand', 'ON')
 
+        # example for interaction with openhab item type
+        switch_item = SwitchItem.get_create_item('TestSwitch')
+        if switch_item.is_on():
+            switch_item.off()
+
     def item_command(self, event):
         assert isinstance(event, ItemCommandEvent)
         print( f'{event}')
 
         # interaction is available through self.openhab or self.oh
-        self.oh.post_update('TestItemUpdate', 123)
-
-        # example for interaction with openhab item type
-        switch_item = self.get_item('TestSwitch')
-        assert isinstance(switch_item, SwitchItem)
-        if switch_item.is_on():
-            switch_item.off()
+        self.oh.post_update('ReceivedCommand', str(event))
 
 
 MyOpenhabRule()
