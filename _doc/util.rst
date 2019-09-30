@@ -7,27 +7,22 @@ util - helpers and utilities
 The util package contains useful classes which make rule creation easier.
 
 
-Counter
+CounterItem
 ------------------------------
 
 Example
 ^^^^^^^^^^^^^^^^^^
 .. execute_code::
 
-    # hide
-    from HABApp.util import Counter
-    # hide
-
-    def print_value(val):
-        print( f'Counter is {val}')
-
-    c = Counter( initial_value=5, on_change=print_value)
-    c.increase()
-    c.decrease()
+    from HABApp.util import CounterItem
+    c = CounterItem.get_create_item('MyCounter', initial_value=5)
+    print(c.increase())
+    print(c.decrease())
+    print(c.reset())
 
 Documentation
 ^^^^^^^^^^^^^^^^^^
-.. autoclass:: Counter
+.. autoclass:: CounterItem
    :members:
 
    .. automethod:: __init__

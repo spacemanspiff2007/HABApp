@@ -14,14 +14,14 @@ from .http_connection import HttpConnection
 log = logging.getLogger('HABApp.openhab.Connection')
 
 
-@dataclasses.dataclass()
+@dataclasses.dataclass
 class OpenhabItemDefinition:
     type: str
     name: str
     state: typing.Any
-    editable: bool
-    label = ''
-    category = ''
+    label: str = ''
+    category: str = ''
+    editable: bool = True
     tags: typing.List[str] = dataclasses.field(default_factory=list)
     groups: typing.List[str] = dataclasses.field(default_factory=list)
     members: 'typing.List[OpenhabItemDefinition]' = dataclasses.field(default_factory=list)
@@ -72,10 +72,10 @@ class OpenhabInterface:
         if isinstance(_in, datetime.datetime):
             return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self._timezone
         elif isinstance(_in, HABApp.core.items.Item):
-            return str(_in.state)
+            return str(_in.value)
         elif isinstance(_in, HABApp.core.items.ColorItem):
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
-        elif isinstance(_in, (set, list, tuple)):
+        elif isinstance(_in, (set, list, tuple, frozenset)):
             return ','.join(str(k) for k in _in)
 
         return str(_in)
@@ -212,6 +212,9 @@ class OpenhabInterface:
 
         :param item_name: name
         """
+        if not self.__connection.is_online:
+            return None
+
         assert isinstance(item_name, str), type(item_name)
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_item_exists(item_name),
@@ -229,6 +232,9 @@ class OpenhabInterface:
         :param config: configuration
         :return:
         """
+        if not self.__connection.is_online or self.__connection.is_read_only:
+            return None
+
         if isinstance(item_name, HABApp.core.items.Item):
             item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)
@@ -250,6 +256,9 @@ class OpenhabInterface:
         :param namespace: namespace
         :return:
         """
+        if not self.__connection.is_online or self.__connection.is_read_only:
+            return None
+
         if isinstance(item_name, HABApp.core.items.Item):
             item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)

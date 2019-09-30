@@ -7,7 +7,7 @@ now = datetime.datetime.now().astimezone()
 now = now.replace(microsecond=now.microsecond // 1000 * 1000)
 
 ITEM_STATE = {
-    'Color': [(1, 2, 3)],
+    'Color': [(1, 2, 3), (2.0, 3.0, 4.0)],
     'Contact': ['OPEN', 'CLOSED'],
     'DateTime': [
         now,
@@ -24,7 +24,9 @@ ITEM_STATE = {
 }
 
 ITEM_EVENTS = {
+    'Switch': ['ON', 'OFF'],
     'Dimmer': ['ON', 'OFF'],
+    'Color': ['ON', 'OFF'],
     'Rollershutter': ['UP', 'DOWN'],
 }
 

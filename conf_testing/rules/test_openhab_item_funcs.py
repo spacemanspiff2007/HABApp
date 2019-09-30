@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import typing
 
-from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem
+from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem
 from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem
 
 log = logging.getLogger('HABApp.Test')
@@ -28,6 +28,11 @@ class TestOpenhabItemFuncs(TestBaseRule):
                       [TestParam('percent', 55.5, 55.5), TestParam('up', 0), TestParam('down', 100)])
         self.add_test('DimmerItem', self.test_item, DimmerItem,
                       [TestParam('percent', 55.5, 55.5), TestParam('on', 100), TestParam('off', 0)])
+        self.add_test('ColorItem', self.test_item, ColorItem, [
+            TestParam('on', (None, None, 100)),
+            TestParam('off', (None, None, 0)),
+            TestParam('percent', (None, None, 55.5), 55.5)
+        ])
 
     def test_item(self, item_type, test_params):
 
@@ -47,7 +52,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
                     log.info(f'{item_type}.{test_param.func_name}() is ok!')
 
                 # reset state so we don't get false positives
-                item.set_state(None)
+                item.set_value(None)
 
             test_ok = waiter.states_ok
 

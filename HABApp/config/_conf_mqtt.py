@@ -1,6 +1,7 @@
-from voluptuous import All, Invalid, Length
+import typing
 
-from .configentry import ConfigEntry, ConfigEntryContainer
+from EasyCo import ConfigContainer, ConfigEntry
+from voluptuous import Invalid
 
 
 def MqttTopicValidator(msg=None):
@@ -32,54 +33,37 @@ def MqttTopicValidator(msg=None):
     return f
 
 
-class MqttConnection(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self._entry_name = 'connection'
-        self.client_id = 'HABApp'
-        self.host = ''
-        self.port = 8883
-        self.user = ''
-        self.password = ''
-        self.tls = True
-        self.tls_insecure = False
-
-        self._entry_validators['client_id'] = All(str, Length(min=1))
-
-        self._entry_kwargs['password'] = {'default': ''}
-        self._entry_kwargs['tls_insecure'] = {'default': False}
+class Connection(ConfigContainer):
+    client_id: str = 'HABApp'
+    host: str = ''
+    port: int = 8883
+    user: str = ''
+    password: str = ''
+    tls: bool = True
+    tls_insecure: bool = False
 
 
-class Subscribe(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.qos = 0
-        self.topics = ['#', 0]
 
-        self._entry_validators['topics'] = MqttTopicValidator()
-        self._entry_kwargs['topics'] = {'default': [('#', 0)]}
-        self._entry_kwargs['default_qos'] = {'default': 0}
+class Subscribe(ConfigContainer):
+    qos: int = ConfigEntry(default=0, description='Default QoS for subscribing')
+    topics: typing.List[typing.Union[str, int]] = ConfigEntry(
+        default_factory=lambda: list(('#', 0)), validator=MqttTopicValidator
+    )
 
 
-class Publish(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.qos = 0
-        self.retain = False
+class Publish(ConfigContainer):
+    qos: int = ConfigEntry(default=0, description='Default QoS when publishing values')
+    retain: bool = ConfigEntry(default=False, description='Default retain flag when publishing values')
 
 
-class mqtt(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.client_id = ''
-        self.tls = True
-        self.tls_insecure = False
-
-        self._entry_kwargs['tls_insecure'] = {'default': False}
+class General(ConfigContainer):
+    listen_only: bool = ConfigEntry(
+        False, description='If True HABApp will not publish any value to the broker'
+    )
 
 
-class Mqtt(ConfigEntryContainer):
-    def __init__(self):
-        self.connection = MqttConnection()
-        self.subscribe = Subscribe()
-        self.publish = Publish()
+class Mqtt(ConfigContainer):
+    connection = Connection()
+    subscribe = Subscribe()
+    publish = Publish()
+    general = General()

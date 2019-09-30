@@ -2,11 +2,11 @@ directories:
   logging: ../conf/log
   rules: rules
   lib: lib
-  param: param
+  param: parameters
 mqtt:
   connection:
     client_id: HABApp
-    host: 'localhost'
+    host: localhost
     password: ''
     port: 1883
     tls: false
@@ -20,6 +20,8 @@ mqtt:
     topics:
     - '#'
     - 0
+  general:
+    listen_only: false
 openhab:
   connection:
     host: localhost
@@ -31,4 +33,4 @@ openhab:
   ping:
     enabled: true
     interval: 10
-    item: 'Ping'
+    item: Ping

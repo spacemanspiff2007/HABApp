@@ -39,7 +39,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=['tests*']),
     install_requires=[
-        'ruamel.yaml>=0.16.1',
+        'easyco>=0.2',
         'aiohttp>=3.5.4',
         'voluptuous>=0.11.7',
         'aiohttp-sse-client',

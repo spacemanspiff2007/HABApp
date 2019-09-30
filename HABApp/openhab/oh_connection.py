@@ -117,7 +117,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
             # Update Item in registry BEFORE posting to the event bus
             if isinstance(event, HABApp.core.events.ValueUpdateEvent):
                 try:
-                    HABApp.core.Items.get_item(event.name).set_state(event.value)
+                    HABApp.core.Items.get_item(event.name).set_value(event.value)
                 except HABApp.core.Items.ItemNotFoundException:
                     pass
 
@@ -148,7 +148,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                     # Since we load the items before we load the rules this should actually never happen
                     existing_item = HABApp.core.Items.get_item(item_name)
                     if isinstance(existing_item, new_item.__class__):
-                        existing_item.set_state(_dict['state'])
+                        existing_item.set_value(_dict['state'])
                 except HABApp.core.Items.ItemNotFoundException:
                     pass
 

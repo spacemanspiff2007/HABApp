@@ -45,6 +45,8 @@ class MqttInterface:
 
         if not self.__is_connected():
             return mqtt.MQTT_ERR_NO_CONN
+        if self.__config.general.listen_only:
+            return 100
 
         if qos is None:
             qos = self.__config.publish.qos

@@ -29,9 +29,9 @@ def get_all_item_names() -> typing.List[str]:
     return list(_ALL_ITEMS.keys())
 
 
-def create_item(name: str, item_factory, item_state=None) -> __Item:
+def create_item(name: str, item_factory, initial_value=None) -> __Item:
     assert issubclass(item_factory, __Item), item_factory
-    _ALL_ITEMS[name] = new_item = item_factory(name, state=item_state)
+    _ALL_ITEMS[name] = new_item = item_factory(name, initial_value=initial_value)
     return new_item
 
 

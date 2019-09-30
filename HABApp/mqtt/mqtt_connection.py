@@ -149,7 +149,7 @@ class MqttConnection:
 
         # remeber state and update item before doing callbacks
         _old_state = _item.state
-        _item.set_state(payload)
+        _item.set_value(payload)
 
         # Post events
         HABApp.core.EventBus.post_event(topic, MqttValueUpdateEvent(topic, payload))

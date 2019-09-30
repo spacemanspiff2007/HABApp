@@ -1,8 +1,8 @@
 import random
 import string
+import time
 
 import HABApp
-
 
 
 class OpenhabTmpItem:
@@ -18,6 +18,13 @@ class OpenhabTmpItem:
 
         if not interface.item_exists(self.item_name):
             interface.create_item(self.item_type, self.item_name)
+
+        # wait max 1 sec for the item to be created
+        stop = time.time() + 1
+        while not HABApp.core.Items.item_exists(self.item_name):
+            time.sleep(0.01)
+            if time.time() > stop:
+                break
 
         return HABApp.core.Items.get_item(self.item_name)
 

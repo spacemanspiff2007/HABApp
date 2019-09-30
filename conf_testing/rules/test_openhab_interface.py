@@ -79,7 +79,7 @@ class TestOpenhabInterface(TestBaseRule):
 
         self.openhab.create_item('String', NAME, label=LABEL)
         ret = self.openhab.get_item(NAME)
-        assert ret.label == LABEL
+        assert ret.label == LABEL, f'"{LABEL}" != "{ret.label}"'
 
     def test_openhab_item_not_found(self):
         test_item = ''.join(random.choice(string.ascii_letters) for _ in range(20))

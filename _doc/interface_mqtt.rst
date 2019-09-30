@@ -3,15 +3,17 @@
 MQTT
 ==================================
 
-Interaction with a MQTT broker
-------------------------------
-Interaction with the MQTT broker is done through the ``self.mqtt`` object in the rule.
+Interaction with the MQTT broker
+---------------------------------
+Interaction with the MQTT broker is done through the ``self.mqtt`` object in the rule or through
+the :class:`~HABApp.mqtt.items.MqttItem`. When receiving a topic for the first time a new :class:`~HABApp.mqtt.items.MqttItem`
+will automatically be created.
 
 ..  image:: /gifs/mqtt.gif
 
 
 
-Function parameters
+Rule Interface
 ------------------------------
 .. py:class:: mqtt
       
@@ -42,27 +44,38 @@ Function parameters
       :return: 0 if successful
 
 
-MQTT item types
+MqttItem
 ------------------------------
 
-Mqtt items have a publish method which make interaction with the mqtt broker easier.
+Mqtt items have an additional publish method which make interaction with the mqtt broker easier.
 
-Example::
+.. execute_code::
+    :hide_output:
 
-    # items can be created manually or will be automatically created when the first mqtt message is received
-    my_mqtt_item = self.create_item('test/topic', HABApp.mqtt.items.MqttItem)
-    assert isinstance(my_mqtt_item, HABApp.mqtt.items.MqttItem)
+    # hide
+    import HABApp
+    from unittest.mock import MagicMock
+    HABApp.mqtt.mqtt_interface.MQTT_INTERFACE = MagicMock()
+    # hide
 
-    # easy publish
+    from HABApp.mqtt.items import MqttItem
+
+    # items can be created manually or will be automatically
+    # created when the first mqtt message is received
+    my_mqtt_item = MqttItem.get_create_item('test/topic')
+
+    # easy to publish values
     my_mqtt_item.publish('new_value')
 
     # comparing the item to get the state works, too
     if my_mqtt_item == 'test':
-        # do something
+        pass # do something
+
 
 .. autoclass:: HABApp.mqtt.items.MqttItem
    :members:
-
+   :inherited-members:
+   :member-order: groupwise
 
 
 Example MQTT rule

@@ -24,12 +24,12 @@ class ItemWaiter:
 
         while True:
             time.sleep(0.01)
-            if (self.item if self.item_compare else self.item.state) == state:
+            if (self.item if self.item_compare else self.item.value) == state:
                 return True
 
             if time.time() > start + self.timeout:
                 self.states_ok = False
-                log.error(f'Timeout waiting for {self.item.name} {get_equal_text(state, self.item.state)}')
+                log.error(f'Timeout waiting for {self.item.name} {get_equal_text(state, self.item.value)}')
                 return False
 
         raise ValueError()

@@ -119,10 +119,10 @@ class Rule:
         :return: state of the specified item
         """
         if default is None:
-            return HABApp.core.Items.get_item(name).state
+            return HABApp.core.Items.get_item(name).value
 
         try:
-            state = HABApp.core.Items.get_item(name).state
+            state = HABApp.core.Items.get_item(name).value
         except HABApp.core.Items.ItemNotFoundException:
             return default
 
@@ -149,7 +149,7 @@ class Rule:
             assert isinstance(name, HABApp.core.items.Item)
             item = name
 
-        item.post_state(value)
+        item.post_value(value)
         return None
 
     def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],

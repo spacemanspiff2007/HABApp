@@ -21,10 +21,18 @@ Items from MQTT use the topic as item name and get created as soon as a message 
 
 Some item types provide convenience functions, so it is advised to always set the correct item type.
 
-The preferred way to interact with items is through the class factory `get_create_item` since this provides type hints::
+The preferred way to get and create items is through the class factories :class:`~HABApp.core.items.Item.get_item`
+and :class:`~HABApp.core.items.Item.get_create_item` since this ensures the proper item class and provides type hints when
+using an IDE:
+
+.. execute_code::
+    :hide_output:
 
     from HABApp.core.items import Item
-    my_item = Item.get_create_item('MyItem')
+    my_item = Item.get_create_item('MyItem', initial_value=5)
+    my_item = Item.get_item('MyItem')
+    print(my_item)
+
 
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
@@ -59,17 +67,27 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
    * - :meth:`~HABApp.Rule.item_watch_and_listen`
      - Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
 
-It is possible to check the item value by comparing it::
+It is possible to check the item value by comparing it
 
-    my_item = self.get_item('MyItem')
+.. execute_code::
+    :hide_output:
+
+    # hide
+    from HABApp.core.items import Item
+    Item.get_create_item('MyItem', initial_value=5)
+    # hide
+
+    from HABApp.core.items import Item
+    my_item = Item.get_item('MyItem')
 
     # this works
     if my_item == 5:
-        # do sth
+        pass    # do something
 
-    # and is the same as
-    if my_item.state == 5:
-        # do sth
+    # and is the same as this
+    if my_item.value == 5:
+        pass    # do something
+
 
 .. autoclass:: HABApp.core.items.Item
    :members:
