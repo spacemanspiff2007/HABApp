@@ -1,8 +1,9 @@
 from HABApp.core.items import Item
+from threading import Lock
 
 
 class CounterItem(Item):
-    """Implements a simple counter"""
+    """Implements a simple thread safe counter"""
 
     # todo: Max Value and events when counter is 0 or has max value
 
@@ -14,13 +15,23 @@ class CounterItem(Item):
         self.value: int = initial_value  # this gets overwritten but we provide a type hint anyway
 
         super().__init__(name=name, initial_value=initial_value)
-        assert isinstance(initial_value, (int, float)), type(initial_value)
+        assert isinstance(initial_value, int), type(initial_value)
 
+        self.__lock: Lock = Lock()
         self.__initial_value = initial_value
+
+    def set_value(self, new_value) -> bool:
+        assert isinstance(new_value, int), type(new_value)
+        return super().set_value(new_value)
+
+    def post_value(self, new_value):
+        assert isinstance(new_value, int), type(new_value)
+        super().post_value(new_value)
 
     def reset(self):
         """Reset value to initial value"""
-        self.post_value(self.__initial_value)
+        with self.__lock:
+            self.post_value(self.__initial_value)
         return self.__initial_value
 
     def increase(self, step=1) -> int:
@@ -29,7 +40,8 @@ class CounterItem(Item):
         :param step: increase by this value, default = 1
         :return: value of the counter
         """
-        self.post_value(self.value + step)
+        with self.__lock:
+            self.post_value(self.value + step)
         return self.value
 
     def decrease(self, step=1) -> int:
@@ -38,5 +50,6 @@ class CounterItem(Item):
         :param step: decrease by this value, default = 1
         :return: value of the counter
         """
-        self.post_value(self.value - step)
+        with self.__lock:
+            self.post_value(self.value - step)
         return self.value

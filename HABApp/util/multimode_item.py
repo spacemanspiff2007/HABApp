@@ -156,8 +156,8 @@ class MultiModeItem(Item):
         item.logger = logger
         return item
 
-    def __init__(self, name: str, state=None):
-        super().__init__(name=name, initial_value=state)
+    def __init__(self, name: str, initial_value=None):
+        super().__init__(name=name, initial_value=initial_value)
 
         self.__values_by_prio: typing.Dict[int, MultiModeValue] = {}
         self.__values_by_name: typing.Dict[str, MultiModeValue] = {}
