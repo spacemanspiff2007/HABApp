@@ -2,13 +2,14 @@ import unittest
 from datetime import datetime, timedelta
 
 from HABApp.core.items import Item
-
 from . import ItemTests
+
 
 class TestItem(ItemTests):
     CLS = Item
     TEST_VALUES = [0, 'str', (1, 2, 3)]
     TEST_CREATE_ITEM = {'initial_value': 0}
+
 
 class TestCasesItem(unittest.TestCase):
 

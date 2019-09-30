@@ -2,9 +2,11 @@ from HABApp.util import MultiModeItem
 
 from ..test_core import ItemTests
 
+
 class TestMultiModeItem(ItemTests):
     CLS = MultiModeItem
     TEST_VALUES = [0, 'str', (1, 2, 3)]
+
 
 def test_diff_prio():
     p = MultiModeItem('TestItem')
@@ -38,4 +40,3 @@ def test_calculate_lower_priority_value():
 
     m1.set_value('asdf')
     assert m2.calculate_lower_priority_value() == 'asdf'
-

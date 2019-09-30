@@ -16,11 +16,11 @@ class ItemTests:
 
     def test_factories(self):
         cls = self.CLS
-        
+
         ITEM_NAME = 'testitem'
         if Items.item_exists(ITEM_NAME):
             Items.pop_item(ITEM_NAME)
-        
+
         c = cls.get_create_item(name=ITEM_NAME, **self.TEST_CREATE_ITEM)
         assert isinstance(c, cls)
 
@@ -30,10 +30,10 @@ class ItemTests:
     def test_var_names(self):
         item = self.CLS('test')
         assert item.value is None
-        
+
         item.set_value(self.TEST_VALUES[0])
         assert item.value == self.TEST_VALUES[0]
-        
+
         item.post_value(self.TEST_VALUES[0])
         item.get_value(default_value='asdf')
 
@@ -54,6 +54,6 @@ class ItemTests:
             i.last_change = datetime.now() - timedelta(seconds=5)
             i.last_update = datetime.now() - timedelta(seconds=5)
             i.set_value(value)
-    
+
             assert i.last_update > datetime.now() - timedelta(milliseconds=100)
             assert i.last_change > datetime.now() - timedelta(milliseconds=100)
