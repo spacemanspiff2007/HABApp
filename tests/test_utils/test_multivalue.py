@@ -10,14 +10,14 @@ def test_diff_prio():
     p2 = p.get_mode('modeb')
 
     p1.set_value(5)
-    assert p.state == '4567'
+    assert p.value == '4567'
 
     p2.set_enabled(False)
-    assert p.state == 5
+    assert p.value == 5
 
     p2.set_enabled(True)
-    assert p.state == '4567'
+    assert p.value == '4567'
 
     p2.set_enabled(False)
     p2.set_value(8888)
-    assert p.state == 8888
+    assert p.value == 8888

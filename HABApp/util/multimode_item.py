@@ -29,6 +29,7 @@ class MultiModeValue:
 
         assert isinstance(parent, MultiModeItem), type(parent)
         assert isinstance(name, str), type(name)
+        self.__lower_priority_mode: typing.Optional[MultiModeValue] = None
         self.__parent: MultiModeItem = parent
         self.__name = name
 
@@ -49,6 +50,10 @@ class MultiModeValue:
         self.auto_disable_on: str = auto_disable_on
 
         self.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = calc_value_func
+
+    def _set_lower_priority_mode(self, value):
+        assert isinstance(value, MultiModeValue) or value is None, type(value)
+        self.__lower_priority_mode = value
 
     @property
     def value(self):
@@ -96,7 +101,17 @@ class MultiModeValue:
                               f'{self.__value}({type(self.__value)})')
             return False
 
-    def calculate_value(self, value_with_lower_priority):
+    def calculate_lower_priority_value(self) -> typing.Any:
+
+        # go down to the first item an trigger recalculation, this way we keep the output of MultiModeValue synchronized
+        if self.__lower_priority_mode is None:
+            self.__parent.calculate_value()
+            return None
+
+        low_prio_value = self.__lower_priority_mode.calculate_lower_priority_value()
+        return self.calculate_value(low_prio_value)
+
+    def calculate_value(self, value_with_lower_priority: typing.Any) -> typing.Any:
 
         # so we don't spam the log if we are already disabled
         if not self.__enabled:
@@ -141,7 +156,7 @@ class MultiModeItem(Item):
         return item
 
     def __init__(self, name: str, state=None):
-        super().__init__(name=name, state=state)
+        super().__init__(name=name, initial_value=state)
 
         self.__values_by_prio: typing.Dict[int, MultiModeValue] = {}
         self.__values_by_name: typing.Dict[str, MultiModeValue] = {}
@@ -185,6 +200,13 @@ class MultiModeItem(Item):
             )
             self.__values_by_prio[priority] = ret
             self.__values_by_name[name.lower()] = ret
+
+            # make the lower priority known to the mode
+            low = None
+            for priority, child in sorted(self.__values_by_prio.items()):  # type: int, MultiModeValue
+                child._set_lower_priority_mode(low)
+                low = child
+
         return ret
 
     def get_mode(self, name: str) -> MultiModeValue:
@@ -194,18 +216,6 @@ class MultiModeItem(Item):
         :return: The requested MultiModeValue
         """
         return self.__values_by_name[name.lower()]
-
-    def get_value_until(self, mode_to_stop):
-        assert isinstance(mode_to_stop, MultiModeValue), type(mode_to_stop)
-        new_value = None
-        with self.__lock:
-            for priority, child in sorted(self.__values_by_prio.items()):
-                if child is mode_to_stop:
-                    return new_value
-
-                assert isinstance(child, MultiModeValue)
-                new_value = child.calculate_value(new_value)
-        raise ValueError()
 
     def calculate_value(self) -> typing.Any:
         """Recalculate the output value and post the state to the event bus (if it is not None)
@@ -220,7 +230,6 @@ class MultiModeItem(Item):
                 assert isinstance(child, MultiModeValue)
                 new_value = child.calculate_value(new_value)
 
-        # Notify that the value has changed
         if new_value is not None:
-            self.post_state(new_value)
+            self.post_value(new_value)
         return new_value

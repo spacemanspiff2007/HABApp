@@ -9,26 +9,24 @@ PERCENT_FACTOR = 100
 
 class ColorItem(Item):
     def __init__(self, name: str, h=0.0, s=0.0, v=0.0):
-        super().__init__(name=name, state=(h, s, v))
+        super().__init__(name=name, initial_value=(h, s, v))
 
         self.hue: float = min(max(0.0, h), HUE_FACTOR)
         self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)
         self.value: float = min(max(0.0, v), PERCENT_FACTOR)
 
-    def set_state(self, hue=0.0, saturation=0.0, value=0.0):
+    def set_value(self, hue=0.0, saturation=0.0, value=0.0):
 
         # map tuples to variables
         # when processing events instead of three values we get the tuple
         if isinstance(hue, tuple):
-            value = hue[2]
-            saturation = hue[1]
-            hue = hue[0]
+            hue, saturation, value = hue
 
         self.hue = min(max(0.0, hue), HUE_FACTOR)
         self.saturation = min(max(0.0, saturation), PERCENT_FACTOR)
         self.value = min(max(0.0, value), PERCENT_FACTOR)
 
-        return super().set_state(new_state=(hue, saturation, value))
+        return super().set_value(new_state=(hue, saturation, value))
 
     def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
         r, g, b = colorsys.hsv_to_rgb(

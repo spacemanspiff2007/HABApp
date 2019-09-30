@@ -1,18 +1,17 @@
 import threading
 
+from HABApp.core.items import Item
 
-class Counter:
+
+class CounterItem(Item):
     """Implements a thread safe counter"""
 
-    def __init__(self, initial_value: int = 0, on_change = None):
+    def __init__(self, name: str, initial_value: int = 0):
         """
-
         :param initial_value: Initial value of the counter
-        :param on_change:  Function which will be called when the counter changes.
-                           First argument will be the new counter value.
-                           Function will also be called when the Counter gets created.
         """
-        assert isinstance(initial_value, int)
+        super().__init__(name=name, initial_value=initial_value)
+        assert isinstance(initial_value, (int, float)), type(initial_value)
 
         self.__lock = threading.Lock()
 
@@ -20,7 +19,7 @@ class Counter:
         self.__value = self.__initial_value
 
         # func which gets called when the counter changes
-        self.on_change = on_change
+        self.on_change = None
         if self.on_change:
             self.on_change(self.__value)
 

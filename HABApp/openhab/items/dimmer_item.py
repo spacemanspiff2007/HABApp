@@ -4,14 +4,14 @@ from .. import get_openhab_interface
 
 class DimmerItem(Item):
 
-    def set_state(self, new_state) -> bool:
+    def set_value(self, new_state) -> bool:
         if new_state == 'ON':
             new_state = 100
         if new_state == 'OFF':
             new_state = 0
 
         assert isinstance(new_state, (int, float)) or new_state is None, new_state
-        return super().set_state(new_state)
+        return super().set_value(new_state)
 
     def on(self):
         """Switch on"""
@@ -27,4 +27,4 @@ class DimmerItem(Item):
         get_openhab_interface().send_command(self.name, str(value))
 
     def __str__(self):
-        return self.state
+        return self.value

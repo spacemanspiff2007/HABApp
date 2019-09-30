@@ -4,13 +4,13 @@ from .. import get_openhab_interface
 
 class RollershutterItem(Item):
 
-    def set_state(self, new_state) -> bool:
+    def set_value(self, new_state) -> bool:
         if new_state == 'UP':
             new_state = 0.0
         if new_state == 'DOWN':
             new_state = 100.0
         assert isinstance(new_state, (int, float)) or new_state is None, new_state
-        return super().set_state(new_state)
+        return super().set_value(new_state)
 
     def up(self):
         """Move shutter up"""
@@ -30,4 +30,4 @@ class RollershutterItem(Item):
         get_openhab_interface().send_command(self.name, str(percent))
 
     def __str__(self):
-        return self.state
+        return self.value

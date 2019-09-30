@@ -47,7 +47,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
                     log.info(f'{item_type}.{test_param.func_name}() is ok!')
 
                 # reset state so we don't get false positives
-                item.set_state(None)
+                item.set_value(None)
 
             test_ok = waiter.states_ok
 
