@@ -76,7 +76,7 @@ class Statistics:
     def add_value(self, value):
         """Add a new value and recalculate statistical values
 
-        :param value:
+        :param value: new value
         """
         assert isinstance(value, (int, float)), type(value)
 

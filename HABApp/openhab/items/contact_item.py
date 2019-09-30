@@ -5,10 +5,10 @@ class ContactItem(Item):
     OPEN = 'OPEN'
     CLOSED = 'CLOSED'
 
-    def set_value(self, new_state) -> bool:
-        if new_state is not None and new_state != ContactItem.OPEN and new_state != ContactItem.CLOSED:
-            raise ValueError(f'Invalid value for ContactItem: {new_state}')
-        return super().set_value(new_state)
+    def set_value(self, new_value) -> bool:
+        if new_value is not None and new_value != ContactItem.OPEN and new_value != ContactItem.CLOSED:
+            raise ValueError(f'Invalid value for ContactItem: {new_value}')
+        return super().set_value(new_value)
 
     def is_open(self) -> bool:
         """Test value against open-value"""

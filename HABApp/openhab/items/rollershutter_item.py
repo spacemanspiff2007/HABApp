@@ -4,13 +4,13 @@ from .. import get_openhab_interface
 
 class RollershutterItem(Item):
 
-    def set_value(self, new_state) -> bool:
-        if new_state == 'UP':
-            new_state = 0.0
-        if new_state == 'DOWN':
-            new_state = 100.0
-        assert isinstance(new_state, (int, float)) or new_state is None, new_state
-        return super().set_value(new_state)
+    def set_value(self, new_value) -> bool:
+        if new_value == 'UP':
+            new_value = 0.0
+        if new_value == 'DOWN':
+            new_value = 100.0
+        assert isinstance(new_value, (int, float)) or new_value is None, new_value
+        return super().set_value(new_value)
 
     def up(self):
         """Move shutter up"""

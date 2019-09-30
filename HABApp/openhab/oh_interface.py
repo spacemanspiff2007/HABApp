@@ -75,7 +75,7 @@ class OpenhabInterface:
             return str(_in.value)
         elif isinstance(_in, HABApp.core.items.ColorItem):
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
-        elif isinstance(_in, (set, list, tuple)):
+        elif isinstance(_in, (set, list, tuple, frozenset)):
             return ','.join(str(k) for k in _in)
 
         return str(_in)

@@ -46,35 +46,35 @@ class Item:
         self.last_change: datetime.datetime = _now
         self.last_update: datetime.datetime = _now
 
-    def set_value(self, new_state) -> bool:
+    def set_value(self, new_value) -> bool:
         """Set a new state without creating events on the event bus
 
-        :param new_state: new state
+        :param new_value: new state
         :return: True if state has changed
         """
-        state_changed = self.value != new_state
+        state_changed = self.value != new_value
 
         _now = datetime.datetime.now()
         if state_changed:
             self.last_change = _now
         self.last_update = _now
 
-        self.value = new_state
+        self.value = new_value
         return state_changed
 
-    def post_value(self, new_state):
+    def post_value(self, new_value):
         """Set a new state and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
-        :param new_state: new state
+        :param new_value: new state
         """
         old_state = self.value
-        self.set_value(new_state)
+        self.set_value(new_value)
 
         # create events
-        HABApp.core.EventBus.post_event(self.name, HABApp.core.events.ValueUpdateEvent(self.name, new_state))
-        if old_state != new_state:
+        HABApp.core.EventBus.post_event(self.name, HABApp.core.events.ValueUpdateEvent(self.name, new_value))
+        if old_state != new_value:
             HABApp.core.EventBus.post_event(
-                self.name, HABApp.core.events.ValueChangeEvent(self.name, value=new_state, old_value=old_state)
+                self.name, HABApp.core.events.ValueChangeEvent(self.name, value=new_value, old_value=old_state)
             )
         return None
 

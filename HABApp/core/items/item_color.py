@@ -8,31 +8,31 @@ PERCENT_FACTOR = 100
 
 
 class ColorItem(Item):
-    def __init__(self, name: str, h=0.0, s=0.0, v=0.0):
-        super().__init__(name=name, initial_value=(h, s, v))
+    def __init__(self, name: str, h=0.0, s=0.0, b=0.0):
+        super().__init__(name=name, initial_value=(h, s, b))
 
         self.hue: float = min(max(0.0, h), HUE_FACTOR)
         self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)
-        self.value: float = min(max(0.0, v), PERCENT_FACTOR)
+        self.brightness: float = min(max(0.0, b), PERCENT_FACTOR)
 
-    def set_value(self, hue=0.0, saturation=0.0, value=0.0):
+    def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
 
         # map tuples to variables
         # when processing events instead of three values we get the tuple
         if isinstance(hue, tuple):
-            hue, saturation, value = hue
+            hue, saturation, brightness = hue
 
         self.hue = min(max(0.0, hue), HUE_FACTOR)
         self.saturation = min(max(0.0, saturation), PERCENT_FACTOR)
-        self.value = min(max(0.0, value), PERCENT_FACTOR)
+        self.brightness = min(max(0.0, brightness), PERCENT_FACTOR)
 
-        return super().set_value(new_state=(hue, saturation, value))
+        return super().set_value(new_value=(hue, saturation, brightness))
 
     def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
         r, g, b = colorsys.hsv_to_rgb(
             self.hue / HUE_FACTOR,
             self.saturation / PERCENT_FACTOR,
-            self.value / PERCENT_FACTOR
+            self.brightness / PERCENT_FACTOR
         )
         return int(r * max_rgb_value), int(g * max_rgb_value), int(b * max_rgb_value)
 
@@ -40,8 +40,8 @@ class ColorItem(Item):
         h, s, v = colorsys.rgb_to_hsv(r / max_rgb_value, g / max_rgb_value, b / max_rgb_value)
         self.hue = h * HUE_FACTOR
         self.saturation = s * PERCENT_FACTOR
-        self.value = v * PERCENT_FACTOR
+        self.brightness = v * PERCENT_FACTOR
         return self
 
     def __repr__(self):
-        return f'<Color Hue: {self.hue}°, Saturation: {self.saturation}%, Value: {self.value}%>'
+        return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.value}%>'

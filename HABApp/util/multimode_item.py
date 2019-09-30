@@ -108,8 +108,9 @@ class MultiModeValue:
             self.__parent.calculate_value()
             return None
 
-        low_prio_value = self.__lower_priority_mode.calculate_lower_priority_value()
-        return self.calculate_value(low_prio_value)
+        lower_mode = self.__lower_priority_mode
+        low_prio_value = lower_mode.calculate_lower_priority_value()
+        return lower_mode.calculate_value(low_prio_value)
 
     def calculate_value(self, value_with_lower_priority: typing.Any) -> typing.Any:
 
