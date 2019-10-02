@@ -1,31 +1,26 @@
 from HABApp.core.items import Item
-from .. import get_openhab_interface
+from .commands import OnOffCommand
+from ..definitions import OnOffValue
 
 
-class SwitchItem(Item):
-    ON = 'ON'
-    OFF = 'OFF'
+class SwitchItem(Item, OnOffCommand):
 
     def set_value(self, new_value) -> bool:
-        if new_value is not None and new_value != SwitchItem.ON and new_value != SwitchItem.OFF:
+
+        if isinstance(new_value, OnOffValue):
+            new_value = new_value.value
+
+        if new_value is not None and new_value != OnOffValue.ON and new_value != OnOffValue.OFF:
             raise ValueError(f'Invalid value for SwitchItem {self.name}: {new_value}')
         return super().set_value(new_value)
 
     def is_on(self) -> bool:
         """Test value against on-value"""
-        return True if self.value == SwitchItem.ON else False
+        return True if self.value == OnOffValue.ON else False
 
     def is_off(self) -> bool:
         """Test value against off-value"""
-        return True if self.value == SwitchItem.OFF else False
-
-    def on(self):
-        """Command item on"""
-        get_openhab_interface().send_command(self.name, SwitchItem.ON)
-
-    def off(self):
-        """Command item off"""
-        get_openhab_interface().send_command(self.name, SwitchItem.OFF)
+        return True if self.value == OnOffValue.OFF else False
 
     def __str__(self):
         return self.value

@@ -2,7 +2,7 @@ directories:
   logging: ../conf/log
   rules: rules
   lib: lib
-  param: param
+  param: parameters
 mqtt:
   connection:
     client_id: HABApp

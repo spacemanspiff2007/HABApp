@@ -7,10 +7,11 @@ log = logging.getLogger('HABApp.TestParameterFiles')
 
 # User Parameter files to create rules dynamically
 try:
-    assert HABApp.parameters.get_parameter_value('param_file', 'key') != 10, \
+    assert HABApp.Parameter('param_file', 'key') == 10, \
         f'Loading of Parameters does not work properly'
 except Exception as e:
     log.error(e)
+    log.error(HABApp.Parameter('param_file', 'key'))
 
 
 class TestParamFile(TestBaseRule):
@@ -22,7 +23,7 @@ class TestParamFile(TestBaseRule):
         self.add_test('ParamFile', self.test_param_file)
 
     def test_param_file(self):
-        p = HABApp.parameters.Parameter('param_file', 'key')
+        p = HABApp.Parameter('param_file', 'key')
         assert p < 11
         assert p.value == 10
         return True

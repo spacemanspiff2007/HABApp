@@ -18,6 +18,7 @@ Example
     c = CounterItem.get_create_item('MyCounter', initial_value=5)
     print(c.increase())
     print(c.decrease())
+    print(c.reset())
 
 Documentation
 ^^^^^^^^^^^^^^^^^^

@@ -9,7 +9,7 @@ formatters:
 handlers:
   HABApp_default:
     class: logging.handlers.RotatingFileHandler
-    filename: 'z:/Python/HABApp/conf/log/HABApp.log'
+    filename: 'HABApp.log'
     maxBytes: 10_000_000
     backupCount: '3'
 
@@ -18,7 +18,7 @@ handlers:
 
   EventFile:
     class: logging.handlers.RotatingFileHandler
-    filename: 'z:/Python/HABApp/conf/log/events.log'
+    filename: 'events.log'
     maxBytes: 10_485_760
     backupCount: 3
 
@@ -27,7 +27,7 @@ handlers:
 
   BufferEventFile:
     class: logging.handlers.MemoryHandler
-    capacity: 10
+    capacity: 0
     formatter: HABApp_format
     target: EventFile
     level: DEBUG

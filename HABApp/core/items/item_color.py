@@ -22,9 +22,10 @@ class ColorItem(Item):
         if isinstance(hue, tuple):
             hue, saturation, brightness = hue
 
-        self.hue = min(max(0.0, hue), HUE_FACTOR)
-        self.saturation = min(max(0.0, saturation), PERCENT_FACTOR)
-        self.brightness = min(max(0.0, brightness), PERCENT_FACTOR)
+        # with None we use the already set value
+        self.hue = min(max(0.0, hue), HUE_FACTOR) if hue is not None else self.hue
+        self.saturation = min(max(0.0, saturation), PERCENT_FACTOR) if saturation is not None else self.saturation
+        self.brightness = min(max(0.0, brightness), PERCENT_FACTOR) if brightness is not None else self.brightness
 
         return super().set_value(new_value=(hue, saturation, brightness))
 
@@ -43,5 +44,11 @@ class ColorItem(Item):
         self.brightness = v * PERCENT_FACTOR
         return self
 
+    def is_on(self):
+        return self.brightness > 0
+
+    def is_off(self):
+        return self.brightness <= 0
+
     def __repr__(self):
-        return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.value}%>'
+        return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.brightness}%>'

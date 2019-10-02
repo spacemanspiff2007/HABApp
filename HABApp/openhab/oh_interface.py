@@ -14,14 +14,14 @@ from .http_connection import HttpConnection
 log = logging.getLogger('HABApp.openhab.Connection')
 
 
-@dataclasses.dataclass()
+@dataclasses.dataclass
 class OpenhabItemDefinition:
     type: str
     name: str
     state: typing.Any
-    editable: bool
-    label = ''
-    category = ''
+    label: str = ''
+    category: str = ''
+    editable: bool = True
     tags: typing.List[str] = dataclasses.field(default_factory=list)
     groups: typing.List[str] = dataclasses.field(default_factory=list)
     members: 'typing.List[OpenhabItemDefinition]' = dataclasses.field(default_factory=list)

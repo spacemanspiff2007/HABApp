@@ -1,7 +1,7 @@
 import datetime
 
-from HABApp.core.items import Item, ColorItem
-from . import SwitchItem, ContactItem, RollershutterItem, DimmerItem
+from HABApp.core.items import Item
+from . import SwitchItem, ContactItem, RollershutterItem, DimmerItem, ColorItem
 
 
 def map_items(name, openhab_type : str, openhab_value : str):

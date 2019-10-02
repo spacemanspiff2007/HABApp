@@ -37,6 +37,7 @@ class Item:
         return item
 
     def __init__(self, name: str, initial_value=None):
+        super().__init__()
         assert isinstance(name, str), type(name)
 
         self.name: str = name

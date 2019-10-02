@@ -68,7 +68,7 @@ class TestCases(unittest.TestCase):
                            'type': 'ItemStatePredictedEvent'})
         self.assertIsInstance(event, ItemStatePredictedEvent)
         self.assertEqual(event.name, 'Buero_Lampe_Vorne_W')
-        self.assertEqual(event.value, 10.0)
+        self.assertEqual(event.value.value, 10.0)
 
     def test_ItemStateChangedEvent2(self):
         d = {

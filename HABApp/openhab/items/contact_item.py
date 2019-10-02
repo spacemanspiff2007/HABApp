@@ -12,11 +12,11 @@ class ContactItem(Item):
 
     def is_open(self) -> bool:
         """Test value against open-value"""
-        return True if self.value == ContactItem.OPEN else False
+        return self.value == ContactItem.OPEN
 
     def is_closed(self) -> bool:
         """Test value against closed-value"""
-        return True if self.value == ContactItem.CLOSED else False
+        return self.value == ContactItem.CLOSED
 
     def __str__(self):
         return self.value

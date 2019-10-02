@@ -1,5 +1,7 @@
 import datetime
 
+from ..definitions import PercentValue, UpDownValue, OnOffValue, HSBValue
+
 
 def map_event_types(openhab_type: str, openhab_value: str):
     assert isinstance(openhab_type, str), type(openhab_type)
@@ -10,9 +12,6 @@ def map_event_types(openhab_type: str, openhab_value: str):
 
     if openhab_type == "Number":
         return int(openhab_value)
-
-    if openhab_type == 'Percent':
-        return float(openhab_value)
 
     if openhab_type == "Decimal":
         try:
@@ -25,6 +24,15 @@ def map_event_types(openhab_type: str, openhab_value: str):
         return datetime.datetime.strptime(openhab_value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z')
 
     if openhab_type == "HSB":
-        return tuple(float(k) for k in openhab_value.split(','))
+        return HSBValue(openhab_value)
+
+    if openhab_type == 'OnOff':
+        return OnOffValue(openhab_value)
+
+    if openhab_type == 'UpDown':
+        return UpDownValue(openhab_value)
+
+    if openhab_type == 'Percent':
+        return PercentValue(openhab_value)
 
     return openhab_value

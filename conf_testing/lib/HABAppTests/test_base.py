@@ -63,6 +63,8 @@ class TestBaseRule(HABApp.Rule):
 
     def run_tests(self, result: TestResult):
         test_count = len(self.__tests_funcs)
+        log.info(f'Running {test_count} tests for {self.rule_name}')
+
         width = test_count // 10 + 1
         test_current = 0
         for name, test_data in self.__tests_funcs.items():
