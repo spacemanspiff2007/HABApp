@@ -16,6 +16,13 @@ class ColorItem(Item):
         self.brightness: float = min(max(0.0, b), PERCENT_FACTOR)
 
     def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
+        """Set the color value
+        
+        :param hue: hue (in °)
+        :param saturation: saturation (in %)
+        :param brightness: brightness (in %)
+        :return:
+        """
 
         # map tuples to variables
         # when processing events instead of three values we get the tuple
@@ -29,7 +36,21 @@ class ColorItem(Item):
 
         return super().set_value(new_value=(hue, saturation, brightness))
 
+    def post_value(self, hue=0.0, saturation=0.0, brightness=0.0):
+        """Set a new value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+
+        :param hue: hue (in °)
+        :param saturation: saturation (in %)
+        :param brightness: brightness (in %)
+        """
+        super().post_value((hue, saturation, brightness))
+
     def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
+        """Return a rgb equivalent of the color
+        
+        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
+        :return: rgb tuple
+        """
         r, g, b = colorsys.hsv_to_rgb(
             self.hue / HUE_FACTOR,
             self.saturation / PERCENT_FACTOR,
@@ -37,17 +58,27 @@ class ColorItem(Item):
         )
         return int(r * max_rgb_value), int(g * max_rgb_value), int(b * max_rgb_value)
 
-    def set_rgb(self, r, g, b, max_rgb_value=255):
+    def set_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
+        """Set a rgb value
+        
+        :param r: red value
+        :param g: green value
+        :param b: blue value
+        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
+        :return: self
+        """
         h, s, v = colorsys.rgb_to_hsv(r / max_rgb_value, g / max_rgb_value, b / max_rgb_value)
         self.hue = h * HUE_FACTOR
         self.saturation = s * PERCENT_FACTOR
         self.brightness = v * PERCENT_FACTOR
         return self
 
-    def is_on(self):
+    def is_on(self) -> bool:
+        """Return true if item is on"""
         return self.brightness > 0
 
-    def is_off(self):
+    def is_off(self) -> bool:
+        """Return true if item is off"""
         return self.brightness <= 0
 
     def __repr__(self):

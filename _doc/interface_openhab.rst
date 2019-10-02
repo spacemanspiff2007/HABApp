@@ -37,15 +37,19 @@ Examples::
 
 .. autoclass:: HABApp.openhab.items.ContactItem
    :members:
-   
+
 .. autoclass:: HABApp.openhab.items.SwitchItem
-   :members:
+   :members: is_on, is_off, on, off
 
 .. autoclass:: HABApp.openhab.items.DimmerItem
-   :members:
+   :members: is_on, is_off, on, off, percent
 
 .. autoclass:: HABApp.openhab.items.RollershutterItem
-   :members:
+   :members: up, down, percent
+
+.. autoclass:: HABApp.openhab.items.ColorItem
+   :members: is_on, is_off, on, off, percent, post_value, get_rgb, set_rgb, set_value
+
 
 
 

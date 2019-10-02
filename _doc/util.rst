@@ -7,7 +7,7 @@ util - helpers and utilities
 The util package contains useful classes which make rule creation easier.
 
 
-Counter
+CounterItem
 ------------------------------
 
 Example
