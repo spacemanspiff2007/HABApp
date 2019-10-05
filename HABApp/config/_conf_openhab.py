@@ -1,34 +1,28 @@
-from .configentry import ConfigEntry, ConfigEntryContainer
+from EasyCo import ConfigContainer, ConfigEntry
 
 
-class Ping(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.enabled = False
-        self.item = ''
-        self.interval = 10
+class Ping(ConfigContainer):
+    enabled: bool = ConfigEntry(True, description='If enabled the configured item will show how long it takes to send '
+                                                  'an update from HABApp and get the updated value back from openhab'
+                                                  'in milliseconds')
+    item: str = ConfigEntry('HABApp_Ping', description='Name of the item')
+    interval: int = ConfigEntry(10, description='Seconds between two pings')
 
 
-class General(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.listen_only = False
+class General(ConfigContainer):
+    listen_only: bool = ConfigEntry(
+        False, description='If True HABApp will not change anything on the openhab instance.'
+    )
 
 
-class Connection(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.host = 'localhost'
-        self.port = 8080
-        self.user = ''
-        self.password = ''
-
-        self._entry_kwargs['user'] = {'default': ''}
-        self._entry_kwargs['password'] = {'default': ''}
+class Connection(ConfigContainer):
+    host: str = 'localhost'
+    port: int = 8080
+    user: str = ''
+    password: str = ''
 
 
-class Openhab(ConfigEntryContainer):
-    def __init__(self):
-        self.ping = Ping()
-        self.connection = Connection()
-        self.general = General()
+class Openhab(ConfigContainer):
+    ping = Ping()
+    connection = Connection()
+    general = General()

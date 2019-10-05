@@ -28,15 +28,18 @@ Configuration contents
                                  # and get the updated value back in milliseconds
             item: 'HABApp_Ping'  # Name of the item
             interval: 10         # Seconds between two pings
+
         connection:
             host: localhost
             port: 8080
             user: ''
             password: ''
+
         general:
             listen_only: False  # If True  HABApp will not change any value on the openhab instance.
                                 # Useful for testing rules from another machine.
-   
+
+
     mqtt:
         connection:
             client_id: HABApp
@@ -56,3 +59,7 @@ Configuration contents
         publish:
             qos: 0          # Default QoS when publishing values
             retain: false   # Default retain flag when publishing values
+
+        general:
+            listen_only: False  # If True  HABApp will not publish any value to the broker.
+                                # Useful for testing rules from another machine.

@@ -1,20 +1,18 @@
 import codecs
 import logging
 import logging.config
+import sys
 import time
 from pathlib import Path
-import sys
 
 import ruamel.yaml
-from voluptuous import MultipleInvalid, Schema
+from EasyCo import ConfigFile, PathContainer
 
 from HABApp.__version__ import __VERSION__
+from HABApp.runtime import FileEventTarget
 from ._conf_mqtt import Mqtt
 from ._conf_openhab import Openhab
-from .configentry import ConfigEntry
 from .default_logfile import get_default_logfile
-
-from HABApp.runtime import FileEventTarget
 
 _yaml_param = ruamel.yaml.YAML(typ='safe')
 _yaml_param.default_flow_style = False
@@ -35,13 +33,26 @@ class InvalidConfigException(Exception):
     pass
 
 
-class Directories(ConfigEntry):
-    def __init__(self):
-        super().__init__()
-        self.logging: Path = 'log'
-        self.rules: Path   = 'rules'
-        self.lib: Path     = 'lib'
-        self.param: Path   = 'param'
+class Directories(PathContainer):
+    logging: Path = 'log'
+    rules: Path = 'rules'
+    lib: Path = 'lib'
+    param: Path = 'param'
+
+    def on_all_values_set(self):
+        try:
+            if not self.rules.is_dir():
+                self.rules.mkdir()
+            if not self.logging.is_dir():
+                self.logging.mkdir()
+        except Exception as e:
+            log.error(e)
+
+
+class HABAppConfigFile(ConfigFile):
+    directories = Directories()
+    mqtt = Mqtt()
+    openhab = Openhab()
 
 
 class Config(FileEventTarget):
@@ -59,12 +70,12 @@ class Config(FileEventTarget):
         self.file_conf_logging = self.folder_conf / 'logging.yml'
 
         # these are the accessible config entries
-        self.directories = Directories()
-        self.mqtt = Mqtt()
-        self.openhab = Openhab()
+        self.config = HABAppConfigFile()
+        self.directories = self.config.directories
+        self.mqtt = self.config.mqtt
+        self.openhab = self.config.openhab
 
         # if the config does not exist it will be created
-        self.__check_create_config()
         self.__check_create_logging()
 
         # folder watcher
@@ -97,31 +108,6 @@ class Config(FileEventTarget):
     def remove_file(self, path: Path):
         pass
 
-    def __check_create_config(self):
-        if self.file_conf_habapp.is_file():
-            return None
-
-        cfg = {}
-        self.directories.insert_data(cfg)
-        self.openhab.insert_data(cfg)
-        self.mqtt.insert_data(cfg)
-
-        print( f'Creating {self.file_conf_habapp.name} in {self.file_conf_habapp.parent}')
-        with self.file_conf_habapp.open('w', encoding='utf-8') as file:
-            _yaml_param.dump(cfg, file)
-
-        # Create default folder for rules, too
-        # Logging directories will get created elsewhere
-        # Param files are optional
-        if isinstance(self.directories.rules, str):
-            (self.file_conf_habapp.parent / self.directories.rules).resolve().mkdir()
-        if isinstance(self.directories.logging, str):
-            (self.file_conf_habapp.parent / self.directories.logging).resolve().mkdir()
-
-        time.sleep(0.1)
-        return None
-
-
     def __check_create_logging(self):
         if self.file_conf_logging.is_file():
             return None
@@ -134,37 +120,12 @@ class Config(FileEventTarget):
         return None
 
     def load_cfg(self):
-        # File has to exist - check because we also get FileDelete events
-        if not self.file_conf_habapp.is_file():
-            return
+        # We always try to create the dummy config
+        # # File has to exist - check because we also get FileDelete events
+        # if not self.file_conf_habapp.is_file():
+        #     return
 
-        with self.file_conf_habapp.open('r', encoding='utf-8') as file:
-            cfg = _yaml_param.load(file)
-        try:
-            _s = {}
-            self.directories.update_schema(_s)
-            self.openhab.update_schema(_s)
-            self.mqtt.update_schema(_s)
-            cfg = Schema(_s)(cfg)
-        except MultipleInvalid as e:
-            log.error(f'Error while loading {self.file_conf_habapp.name}:')
-            log.error(e)
-            raise InvalidConfigException()
-
-        self.directories.load_data(cfg)
-        self.openhab.load_data(cfg)
-        self.mqtt.load_data(cfg)
-
-        # make Path absolute for all directory entries
-        for k, v in self.directories.iter_entry():
-            __entry  = Path(v)
-            if not __entry.is_absolute():
-                __entry = self.folder_conf / __entry
-            self.directories.__dict__[k] = __entry.resolve()
-
-        if not self.directories.logging.is_dir():
-            print( f'Creating log-dir: {self.directories.logging}')
-            self.directories.logging.mkdir()
+        self.config.load(self.file_conf_habapp)
 
         # Set path for libraries
         if self.directories.lib.is_dir():

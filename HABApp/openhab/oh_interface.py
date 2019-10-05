@@ -212,6 +212,9 @@ class OpenhabInterface:
 
         :param item_name: name
         """
+        if not self.__connection.is_online:
+            return None
+
         assert isinstance(item_name, str), type(item_name)
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_item_exists(item_name),
@@ -229,6 +232,9 @@ class OpenhabInterface:
         :param config: configuration
         :return:
         """
+        if not self.__connection.is_online or self.__connection.is_read_only:
+            return None
+
         if isinstance(item_name, HABApp.core.items.Item):
             item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)
@@ -250,6 +256,9 @@ class OpenhabInterface:
         :param namespace: namespace
         :return:
         """
+        if not self.__connection.is_online or self.__connection.is_read_only:
+            return None
+
         if isinstance(item_name, HABApp.core.items.Item):
             item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)
