@@ -43,3 +43,18 @@ class HSBValue(ComplexEventValue):
 
     def __str__(self):
         return f'{self.value[0]}°,{self.value[1]}%,{self.value[2]}%'
+
+
+class QuantityValue(ComplexEventValue):
+    def __init__(self, value: str):
+        val, unit = value.split(' ')
+        try:
+            val = int(val)
+        except ValueError:
+            val = float(val)
+
+        super().__init__(val)
+        self.unit = unit
+
+    def __str__(self):
+        return f'{self.value} {self.unit}'

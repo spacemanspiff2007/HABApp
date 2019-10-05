@@ -220,6 +220,7 @@ IGNORE_SKIP = (
     'ColorItem',
 )
 
+
 def skip_member(app, what, name, obj, skip, options):
 
     # Debug print
@@ -228,7 +229,7 @@ def skip_member(app, what, name, obj, skip, options):
     # don't change if we skip anyway
     if skip:
         return skip
-    
+
     for regex in RE_SKIP:
         m = regex.search(str(obj))
         if m:

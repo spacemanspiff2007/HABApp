@@ -17,11 +17,10 @@ class ColorItem(Item):
 
     def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
         """Set the color value
-        
+
         :param hue: hue (in °)
         :param saturation: saturation (in %)
         :param brightness: brightness (in %)
-        :return:
         """
 
         # map tuples to variables
@@ -47,7 +46,7 @@ class ColorItem(Item):
 
     def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
         """Return a rgb equivalent of the color
-        
+
         :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
         :return: rgb tuple
         """
@@ -60,7 +59,7 @@ class ColorItem(Item):
 
     def set_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
         """Set a rgb value
-        
+
         :param r: red value
         :param g: green value
         :param b: blue value

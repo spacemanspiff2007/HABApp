@@ -5,6 +5,13 @@ import warnings
 
 
 class Item:
+    """Simple item
+
+    :ivar str ~.name: Name of the item
+    :ivar ~.value: Value of the item, can be anything
+    :ivar ~.datetime.datetime last_change: Timestamp of the last time when the item has changed the value
+    :ivar ~.datetime.datetime last_update: Timestamp of the last time when the item has updated the value
+    """
 
     @classmethod
     def get_item(cls, name: str):
@@ -64,7 +71,8 @@ class Item:
         return state_changed
 
     def post_value(self, new_value):
-        """Set a new value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+        """Set a new value and post appropriate events on the HABApp event bus
+        (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param new_value: new value of the item
         """
@@ -72,18 +80,18 @@ class Item:
         self.set_value(new_value)
 
         # create events
-        HABApp.core.EventBus.post_event(self.name, HABApp.core.events.ValueUpdateEvent(self.name, new_value))
-        if old_value != new_value:
+        HABApp.core.EventBus.post_event(self.name, HABApp.core.events.ValueUpdateEvent(self.name, self.value))
+        if old_value != self.value:
             HABApp.core.EventBus.post_event(
-                self.name, HABApp.core.events.ValueChangeEvent(self.name, value=new_value, old_value=old_value)
+                self.name, HABApp.core.events.ValueChangeEvent(self.name, value=self.value, old_value=old_value)
             )
         return None
 
     def get_value(self, default_value=None) -> typing.Any:
-        """Return the state of the item.
+        """Return the value of the item.
 
-        :param default_value: Return this value if the item state is None
-        :return: State of the item
+        :param default_value: Return this value if the item value is None
+        :return: value of the item
         """
         if self.value is None:
             return default_value

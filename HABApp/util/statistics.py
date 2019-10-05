@@ -4,19 +4,20 @@ import time
 
 
 class Statistics:
-    def __init__(self, max_age=None, max_samples=None):
-        """Calculate mathematical statistics of numerical values.
+    """Calculate mathematical statistics of numerical values.
 
+    :ivar sum: sum of all values
+    :ivar min: minimum of all values
+    :ivar max: maximum of all values
+    :ivar mean: mean of all values
+    :ivar median: median of all values
+    :ivar last_value: last added value
+    :ivar last_change: timestamp the last time a value was added
+    """
+    def __init__(self, max_age=None, max_samples=None):
+        """
         :param max_age:     Maximum age of values in seconds
         :param max_samples: Maximum amount of samples which will be kept
-
-        :ivar sum: sum of all values
-        :ivar min: minimum of all values
-        :ivar max: maximum of all values
-        :ivar mean: mean of all values
-        :ivar median: median of all values
-        :ivar last_value: last added value
-        :ivar last_change: timestamp the last time a value was added
         """
 
         if max_age is None and max_samples is None:

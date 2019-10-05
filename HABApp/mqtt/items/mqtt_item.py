@@ -4,12 +4,12 @@ from HABApp.core.items import Item
 
 class MqttItem(Item):
 
-    def publish(self, payload, qos=None, retain=None):
+    def publish(self, payload, qos: int = None, retain: bool = None):
         """
         Publish the payload under the topic from the item.
 
         :param payload: MQTT Payload
-        :param qos: QoS, can be 0, 1 or 2. If not specified value from configuration file will be used.
+        :param qos: QoS, can be ``0``, ``1`` or ``2``. If not specified value from configuration file will be used.
         :param retain: retain message. If not specified value from configuration file will be used.
         :return: 0 if successful
         """

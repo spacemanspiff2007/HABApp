@@ -15,9 +15,6 @@ class ExampleMqttTestRule(HABApp.Rule):
             callback=self.publish_rand_value
         )
 
-        # these two methods have the same effect.
-        # If item_factory is omitted self.get_item will raise an error if the item does not exist instead of creating it
-        self.my_mqtt_item: MqttItem = self.get_item('test/test', item_factory=MqttItem)
         self.my_mqtt_item = MqttItem.get_create_item('test/test')
 
         self.listen_event('test/test', self.topic_updated, ValueUpdateEvent)

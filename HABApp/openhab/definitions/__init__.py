@@ -4,4 +4,4 @@ ITEM_TYPES = [
 
 GROUP_FUNCTIONS = ['AND', 'OR', 'NAND', 'NOR', 'AVG', 'MAX', 'MIN', 'SUM']
 
-from .values import OnOffValue, PercentValue, UpDownValue, HSBValue
+from .values import OnOffValue, PercentValue, UpDownValue, HSBValue, QuantityValue
