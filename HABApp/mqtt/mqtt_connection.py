@@ -94,15 +94,17 @@ class MqttConnection:
 
         if self.subscriptions:
             unsubscribe = [k[0] for k in self.subscriptions]
+            log.debug(f'Unsubscribing from:')
             for t in unsubscribe:
-                log.debug(f'Unsubscribing from "{t}"')
+                log.debug(f' - "{t}"')
             self.client.unsubscribe(unsubscribe)
 
         topics = self.__config.subscribe.topics
         default_qos = self.__config.subscribe.qos
         self.subscriptions = [(topic, qos if qos is not None else default_qos) for topic, qos in topics]
+        log.debug(f'Subscribing to:')
         for topic, qos in self.subscriptions:
-            log.debug(f'Subscribing to "{topic}" (QoS {qos:d})')
+            log.debug(f' - "{topic}" (QoS {qos:d})')
         self.client.subscribe(self.subscriptions)
 
     @PrintException
@@ -117,7 +119,7 @@ class MqttConnection:
 
     @PrintException
     def on_disconnect(self, client, userdata, rc):
-        log.log(logging.INFO if not rc else logging.ERROR, f'Disconnect: {mqtt.error_string(rc)}')
+        log.log(logging.INFO if not rc else logging.ERROR, f'Disconnect: {mqtt.error_string(rc)} ({rc})')
         self.connected = False
 
     @PrintException

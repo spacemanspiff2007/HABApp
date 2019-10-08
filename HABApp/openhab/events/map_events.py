@@ -3,7 +3,7 @@ import datetime
 from ..definitions import PercentValue, UpDownValue, OnOffValue, HSBValue
 
 
-def map_event_types(openhab_type: str, openhab_value: str):
+def map_openhab_types(openhab_type: str, openhab_value: str):
     assert isinstance(openhab_type, str), type(openhab_type)
     assert isinstance(openhab_value, str), type(openhab_value)
 
@@ -21,7 +21,12 @@ def map_event_types(openhab_type: str, openhab_value: str):
 
     if openhab_type == "DateTime":
         # 2018-11-19T09:47:38.284+0100
-        return datetime.datetime.strptime(openhab_value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z')
+        dt = datetime.datetime.strptime(openhab_value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z')
+        # all datetimes from openhab have a timezone set so we can't easily compare them
+        # --> TypeError: can't compare offset-naive and offset-aware datetimes
+        dt = dt.astimezone(tz=None)   # Changes datetime object so it uses system timezone
+        dt = dt.replace(tzinfo=None)  # Removes timezone awareness
+        return dt
 
     if openhab_type == "HSB":
         return HSBValue(openhab_value)

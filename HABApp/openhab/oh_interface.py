@@ -77,6 +77,8 @@ class OpenhabInterface:
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
         elif isinstance(_in, (set, list, tuple, frozenset)):
             return ','.join(str(k) for k in _in)
+        elif _in is None:
+            return 'NULL'
 
         return str(_in)
 

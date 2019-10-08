@@ -10,8 +10,8 @@ class Parameter:
 
         :param filename: filename (without extension)
         :param keys: structure in the file
-        :param default_value: default value for the parameter.
-                              Is used to create the file and the structure if it does not exist yet.
+        :param default_value: default value for the parameter. Is used to create the file and the structure if
+                              it does not exist yet. Use ``None`` to skip creation of the file structure.
         """
 
         assert isinstance(filename, str), type(filename)
@@ -19,10 +19,11 @@ class Parameter:
         self.keys = keys
 
         # as a convenience try to create the file and the file structure
-        _add_parameter(self.filename, *self.keys, default_value=default_value)
+        if default_value is not None:
+            _add_parameter(self.filename, *self.keys, default_value=default_value)
 
     @property
-    def value(self):
+    def value(self) -> typing.Any:
         """Return the current value. This will do the lookup so make sure to not cache this value, otherwise
         the parameter might not work as expected.
         """
@@ -57,6 +58,3 @@ class Parameter:
 
     def __repr__(self):
         return f'<Parameter file: {self.filename}, keys: {self.keys}, value: {self.value}'
-
-    def __str__(self):
-        return str(self.value)
