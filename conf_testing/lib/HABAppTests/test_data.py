@@ -2,8 +2,8 @@ import copy
 import datetime
 import itertools
 
-# we only support milliseconds on openhab
-now = datetime.datetime.now().astimezone()
+# we only support milliseconds on openHAB side
+now = datetime.datetime.now()
 now = now.replace(microsecond=now.microsecond // 1000 * 1000)
 
 ITEM_STATE = {

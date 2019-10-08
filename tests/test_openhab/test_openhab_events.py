@@ -2,10 +2,8 @@ import datetime
 import unittest
 
 # from .context import HABApp
-from HABApp.openhab.events import ItemStateEvent, ItemAddedEvent, ItemCommandEvent,\
-    ItemStateChangedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, GroupItemStateChangedEvent, \
-    ChannelTriggeredEvent, \
-    get_event
+from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
+    ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, get_event
 
 
 class TestCases(unittest.TestCase):
@@ -71,22 +69,19 @@ class TestCases(unittest.TestCase):
         self.assertEqual(event.value.value, 10.0)
 
     def test_ItemStateChangedEvent2(self):
-        d = {
+        UTC_OFFSET = datetime.datetime.now().astimezone(None).strftime('%z')
+
+        _in = {
             'topic': 'smarthome/items/TestDateTimeTOGGLE/statechanged',
-            'payload': '{"type":"DateTime","value":"2018-11-21T19:47:08.277+0100",'
-                       '"oldType":"DateTime","oldValue":"2018-11-19T09:46:38.273+0100"}',
+            'payload': f'{{"type":"DateTime","value":"2018-06-21T19:47:08.000{UTC_OFFSET}",'
+                       f'"oldType":"DateTime","oldValue":"2017-10-20T17:46:07.000{UTC_OFFSET}"}}',
             'type': 'ItemStateChangedEvent'}
-        event = get_event(d)
+
+        event = get_event(_in)
+
         self.assertIsInstance(event, ItemStateChangedEvent)
         self.assertEqual(event.name, 'TestDateTimeTOGGLE')
-        # use this so we don't validate the timezone
-        self.assertIsInstance(event.value, datetime.datetime)
-        self.assertEqual(event.value.year, 2018)
-        self.assertEqual(event.value.month, 11)
-        self.assertEqual(event.value.day, 21)
-        self.assertEqual(event.value.hour, 19)
-        self.assertEqual(event.value.minute, 47)
-        self.assertEqual(event.value.second, 8)
+        self.assertEqual(datetime.datetime(2018, 6, 21, 19, 47, 8), event.value)
 
     def test_GroupItemStateChangedEvent(self):
         d = {
