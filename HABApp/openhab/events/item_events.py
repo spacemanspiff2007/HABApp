@@ -1,6 +1,6 @@
 import HABApp.core
 
-from .map_events import map_openhab_types
+from ..definitions import map_openhab_types
 from .base_event import BaseItemEvent
 
 
