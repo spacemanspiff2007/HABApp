@@ -1,3 +1,4 @@
+from .map_events import map_openhab_types
 from .base_event import BaseItemEvent
 from .item_events import ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,\
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent

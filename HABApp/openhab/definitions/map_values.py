@@ -1,9 +1,9 @@
 import datetime
 
-from . import PercentValue, UpDownValue, OnOffValue, HSBValue
+from ..definitions import PercentValue, UpDownValue, OnOffValue, HSBValue
 
 
-def map_openhab_values(openhab_type: str, openhab_value: str):
+def map_openhab_types(openhab_type: str, openhab_value: str):
     assert isinstance(openhab_type, str), type(openhab_type)
     assert isinstance(openhab_value, str), type(openhab_value)
 
@@ -20,9 +20,9 @@ def map_openhab_values(openhab_type: str, openhab_value: str):
             return float(openhab_value)
 
     if openhab_type == "DateTime":
-        # 2018-11-19T09:47:38.284+0100 ->  2018-11-19T09:47:38.284000+0100
-        dt = datetime.datetime.strptime(f'{openhab_value[:-5]}000{openhab_value[-5:]}', '%Y-%m-%dT%H:%M:%S.%f%z')
-        # all datetimes from openHAB have a timezone set so we can't easily compare them
+        # 2018-11-19T09:47:38.284+0100
+        dt = datetime.datetime.strptime(openhab_value.replace('+', '000+'), '%Y-%m-%dT%H:%M:%S.%f%z')
+        # all datetimes from openhab have a timezone set so we can't easily compare them
         # --> TypeError: can't compare offset-naive and offset-aware datetimes
         dt = dt.astimezone(tz=None)   # Changes datetime object so it uses system timezone
         dt = dt.replace(tzinfo=None)  # Removes timezone awareness

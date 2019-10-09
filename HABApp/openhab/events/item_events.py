@@ -1,6 +1,6 @@
 import HABApp.core
 
-from ..definitions import map_openhab_values
+from .map_events import map_openhab_types
 from .base_event import BaseItemEvent
 
 
@@ -10,7 +10,7 @@ class ItemStateEvent(BaseItemEvent, HABApp.core.events.ValueUpdateEvent):
 
         # smarthome/items/NAME/state
         self.name = self._topic[16:-6]
-        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
+        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
@@ -22,8 +22,8 @@ class ItemStateChangedEvent(BaseItemEvent, HABApp.core.events.ValueChangeEvent):
 
         # smarthome/items/Ping/statechanged
         self.name = self._topic[16:-13]
-        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
-        self.old_value = map_openhab_values(self._payload['oldType'], self._payload['oldValue'])
+        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
+        self.old_value = map_openhab_types(self._payload['oldType'], self._payload['oldValue'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
@@ -35,7 +35,7 @@ class ItemCommandEvent(BaseItemEvent):
 
         # smarthome/items/NAME/command
         self.name = self._topic[16:-8]
-        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
+        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
@@ -87,7 +87,7 @@ class ItemStatePredictedEvent(BaseItemEvent):
 
         # 'smarthome/items/NAME/statepredicted'
         self.name = self._topic[16:-15]
-        self.value = map_openhab_values(self._payload['predictedType'], self._payload['predictedValue'])
+        self.value = map_openhab_types(self._payload['predictedType'], self._payload['predictedValue'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
@@ -102,8 +102,8 @@ class GroupItemStateChangedEvent(BaseItemEvent):
         self.name = parts[2]
         self.item = parts[3]
 
-        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
-        self.old_value = map_openhab_values(self._payload['oldType'], self._payload['oldValue'])
+        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
+        self.old_value = map_openhab_types(self._payload['oldType'], self._payload['oldValue'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
