@@ -62,21 +62,20 @@ class OpenhabInterface:
         self.__loop = asyncio.get_event_loop()
         self.__connection: HttpConnection = connection
 
-        # build str like this: '+1000' with the current timezone
-        timezone_delta = datetime.datetime.now().astimezone().utcoffset()
-        hours = int(timezone_delta.total_seconds()) // 3600
-        minutes = (int(timezone_delta.total_seconds()) - hours * 3600) // 60
-        self._timezone = f'{hours:+03d}{minutes:02d}'
-
     def __convert_to_oh_type(self, _in):
         if isinstance(_in, datetime.datetime):
-            return _in.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + self._timezone
+            # Add timezone (if not yet defined) to string, then remote anything below ms.
+            # 2018-11-19T09:47:38.284000+0100 -> 2018-11-19T09:47:38.284+0100
+            out = _in.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+            return f'{out[:-8]}{out[-5:]}'
         elif isinstance(_in, HABApp.core.items.Item):
             return str(_in.value)
         elif isinstance(_in, HABApp.core.items.ColorItem):
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
         elif isinstance(_in, (set, list, tuple, frozenset)):
             return ','.join(str(k) for k in _in)
+        elif _in is None:
+            return 'NULL'
 
         return str(_in)
 

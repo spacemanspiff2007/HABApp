@@ -4,33 +4,30 @@ from EasyCo import ConfigContainer, ConfigEntry
 from voluptuous import Invalid
 
 
-def MqttTopicValidator(msg=None):
-    def f(v):
-        if isinstance(v, str):
-            return [(v, 0)]
+def MqttTopicValidator(v, msg=''):
+    if isinstance(v, str):
+        return [(v, 0)]
 
-        ret = []
-        for i, val in enumerate(v):
-            qos = 0
-            if i < len(v) - 1:
-                qos = v[i + 1]
+    ret = []
+    for i, val in enumerate(v):
+        qos = 0
+        if i < len(v) - 1:
+            qos = v[i + 1]
 
-            if not isinstance(val, str) and not isinstance(val, int):
-                raise Invalid(msg or (f"Topics must consist of int and string!"))
+        if not isinstance(val, str) and not isinstance(val, int):
+            raise Invalid(msg or (f"Topics must consist of int and string!"))
 
-            if not isinstance(val, str):
-                continue
+        if not isinstance(val, str):
+            continue
 
-            if isinstance(qos, int):
-                if qos not in [0, 1, 2]:
-                    raise Invalid(msg or (f"QoS must be 0, 1 or 2"))
-            else:
-                qos = None
+        if isinstance(qos, int):
+            if qos not in [0, 1, 2]:
+                raise Invalid(msg or (f"QoS must be 0, 1 or 2"))
+        else:
+            qos = None
 
-            ret.append((val, qos))
-        return ret
-
-    return f
+        ret.append((val, qos))
+    return ret
 
 
 class Connection(ConfigContainer):

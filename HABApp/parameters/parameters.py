@@ -42,7 +42,7 @@ def add_parameter(file: str, *keys, default_value):
     return None
 
 
-def get_value(file: str, *keys):
+def get_value(file: str, *keys) -> typing.Any:
     try:
         param = _PARAMETERS[file]
     except KeyError:
