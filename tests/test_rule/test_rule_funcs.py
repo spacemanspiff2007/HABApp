@@ -26,7 +26,7 @@ class TestCases(unittest.TestCase):
 
     def test_run_reoccurring(self):
         r = self.rule
-        test = [time(11, 30, 0), timedelta(seconds=30), None]
+        test = [time(11, 30, 0), timedelta(seconds=30), None, datetime.now()]
         for t in test:
             r.run_on_weekends(t, lambda x : x)
             r.run_on_workdays(t, lambda x : x)
@@ -34,15 +34,6 @@ class TestCases(unittest.TestCase):
 
             r.run_every(t, 60, lambda x : x)
             r.run_every(t, timedelta(seconds=30), lambda x : x)
-
-        with self.assertRaises(AssertionError):
-            r.run_on_weekends(datetime.now(), lambda x : x)
-        with self.assertRaises(AssertionError):
-            r.run_on_workdays(datetime.now(), lambda x : x)
-        with self.assertRaises(AssertionError):
-            r.run_on_every_day(datetime.now(), lambda x : x)
-        with self.assertRaises(AssertionError):
-            r.run_every(datetime.now(), 30, lambda x : x)
 
     def test_run_convenience_funcs(self):
         r = self.rule

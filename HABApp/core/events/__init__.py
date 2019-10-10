@@ -1,1 +1,1 @@
-from .events import ValueUpdateEvent, ValueChangeEvent, ValueNoChangeEvent, ValueNoUpdateEvent, AllEvents
+from .events import ComplexEventValue, ValueUpdateEvent, ValueChangeEvent, ValueNoChangeEvent, ValueNoUpdateEvent, AllEvents

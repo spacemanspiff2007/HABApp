@@ -1,4 +1,4 @@
-from HABApp.core.EventBus import ComplexEventValue
+from HABApp.core.events import ComplexEventValue
 
 
 class OnOffValue(ComplexEventValue):

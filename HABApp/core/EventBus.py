@@ -4,7 +4,7 @@ import typing
 
 from HABApp.util import PrintException
 from . import EventBusListener
-from .events import ValueChangeEvent, ValueUpdateEvent
+from .events import ComplexEventValue
 
 _event_log = logging.getLogger('HABApp.EventBus')
 _habapp_log = logging.getLogger('HABApp')
@@ -21,22 +21,19 @@ def __get_listener_description(listener: EventBusListener) -> str:
         return f'"{listener.name}" (type {listener.event_filter})'
 
 
-class ComplexEventValue:
-    def __init__(self, value):
-        self.value: typing.Any = value
-
-
 @PrintException
 def post_event(name, event):
 
     _event_log.info(event)
 
-    # Sometimes we have nested data structues which we need to set the value.
+    # Sometimes we have nested data structures which we need to set the value.
     # Once the value in the item registry is set the data structures provide no benefit thus
     # we unpack the corresponding value
-    if isinstance(event, (ValueUpdateEvent, ValueChangeEvent)):
+    try:
         if isinstance(event.value, ComplexEventValue):
             event.value = event.value.value
+    except AttributeError:
+        pass
 
     # Notify all listeners
     for listener in itertools.chain(_EVENT_LISTENER.get(name, []), _EVENT_LISTENER_ALL_EVENTS):

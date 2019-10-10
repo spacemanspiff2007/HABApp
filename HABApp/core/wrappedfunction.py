@@ -70,7 +70,6 @@ class WrappedFunction:
             if self is not WrappedFunction._ERROR_CALLBACK:
                 WrappedFunction._ERROR_CALLBACK.run('\n'.join(lines))
 
-
     async def __async_run(self, *args, **kwargs):
         try:
             await self._func(*args, **kwargs)
