@@ -34,7 +34,7 @@ class RuleManager(FileEventTarget):
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     time.sleep(1)
-                    HABApp.core.WrappedFunction(self.add_file, logger=log).run(f)
+                    HABApp.core.WrappedFunction(self.load_rule_file, logger=log).run(f)
 
         HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).run()
 
@@ -48,6 +48,10 @@ class RuleManager(FileEventTarget):
         )
 
         self.__process_last_sec = 60
+
+        # to debounce loading
+        self.__last_file_events_lock = threading.Lock()
+        self.__last_file_events: typing.Dict[Path: datetime.datetime] = {}
 
     @PrintException
     async def process_scheduled_events(self):
@@ -100,13 +104,48 @@ class RuleManager(FileEventTarget):
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]
 
-    @PrintException
+    def add_file(self, path: Path):
+        self.setup_file_event('ADD', path)
+
+    def remove_file(self, path: Path):
+        self.setup_file_event('REMOVE', path)
+
     def reload_file(self, path: Path):
         self.remove_file(path)
+        time.sleep(0.05)
         self.add_file(path)
 
+    def setup_file_event(self, event, path):
+        assert event in ('ADD', 'REMOVE'), event
+
+        # remember when we receivied the event
+        with self.__last_file_events_lock:
+            self.__last_file_events[f'{event}_{path}'] = datetime.datetime.now()
+
+        HABApp.core.WrappedFunction(self.process_file_event, logger=log).run(event, path)
+
+    def process_file_event(self, event: str, path: Path):
+        assert event in ('ADD', 'REMOVE'), event
+
+        # wait for further events
+        WAIT_TIME = 0.2
+        time.sleep(WAIT_TIME)
+
+        now = datetime.datetime.now()
+        with self.__last_file_events_lock:
+            last_event = self.__last_file_events[f'{event}_{path}']
+
+        if now - last_event < datetime.timedelta(seconds=WAIT_TIME):
+            return None
+
+        # no finally run load/unload
+        HABApp.core.WrappedFunction(
+            self.load_rule_file if event == 'ADD' else self.remove_rule_file, logger=log
+        ).run(path)
+
+
     @PrintException
-    def remove_file(self, path: Path):
+    def remove_rule_file(self, path: Path):
         try:
             with self.__file_load_lock:
                 path_str = str(path)
@@ -122,7 +161,7 @@ class RuleManager(FileEventTarget):
             return None
 
     @PrintException
-    def add_file(self, path : Path):
+    def load_rule_file(self, path: Path):
 
         try:
             # serialize loading
