@@ -31,7 +31,7 @@ def post_event(name, event):
 
     _event_log.info(event)
 
-    # Sometimes we have nested data structues which we need to set the value.
+    # Sometimes we have nested data structures which we need to set the value.
     # Once the value in the item registry is set the data structures provide no benefit thus
     # we unpack the corresponding value
     if isinstance(event, (ValueUpdateEvent, ValueChangeEvent)):

@@ -1,17 +1,14 @@
 import typing
 import datetime
 
-from .scheduled_cb import ScheduledCallback
-
-TYPING_TIME = typing.Union[datetime.time, datetime.timedelta, None]
+from .scheduled_cb import ScheduledCallback, TYPING_DATE_TIME
 
 
 class ReoccurringScheduledCallback(ScheduledCallback):
 
     CALL_ONCE = False
 
-    def __init__(self, time: TYPING_TIME, interval: typing.Union[int, datetime.timedelta], callback, *args, **kwargs):
-        assert isinstance(time, (datetime.time, datetime.timedelta)) or time is None, f'{time} ({type(time)})'
+    def __init__(self, time: TYPING_DATE_TIME, interval: typing.Union[int, datetime.timedelta], callback, *args, **kwargs):
         super().__init__(time, callback, *args, **kwargs)
 
         if isinstance(interval, int):
@@ -29,8 +26,7 @@ class DayOfWeekScheduledCallback(ScheduledCallback):
 
     CALL_ONCE = False
 
-    def __init__(self, time: TYPING_TIME, weekdays: typing.List[int], callback, *args, **kwargs):
-        assert isinstance(time, (datetime.time, datetime.timedelta)) or time is None, f'{time} ({type(time)})'
+    def __init__(self, time: TYPING_DATE_TIME, weekdays: typing.List[int], callback, *args, **kwargs):
         super().__init__(time, callback, *args, **kwargs)
 
         assert weekdays, 'please specify weekdays'
@@ -52,10 +48,10 @@ class DayOfWeekScheduledCallback(ScheduledCallback):
 
 
 class WorkdayScheduledCallback(DayOfWeekScheduledCallback):
-    def __init__(self, time: TYPING_TIME, callback, *args, **kwargs):
+    def __init__(self, time: TYPING_DATE_TIME, callback, *args, **kwargs):
         super().__init__(time, [1, 2, 3, 4, 5], callback, *args, **kwargs)
 
 
 class WeekendScheduledCallback(DayOfWeekScheduledCallback):
-    def __init__(self, time: TYPING_TIME, callback, *args, **kwargs):
+    def __init__(self, time: TYPING_DATE_TIME, callback, *args, **kwargs):
         super().__init__(time, [6, 7], callback, *args, **kwargs)

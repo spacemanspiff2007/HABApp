@@ -15,7 +15,7 @@ import HABApp.util
 from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
 from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
-    WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME, TYPING_TIME
+    WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME
 from .watched_item import WatchedItem
 
 log = logging.getLogger('HABApp.Rule')
@@ -247,7 +247,7 @@ class Rule:
             self.__runtime.loop  # this has to be passed because we will not call it from the main thread
         )
 
-    def run_every(self, time: TYPING_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
+    def run_every(self, time: TYPING_DATE_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
         Run a function periodically
 
@@ -262,7 +262,7 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_day_of_week(self, time: TYPING_TIME, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_day_of_week(self, time: TYPING_DATE_TIME, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
         :param time: |param_scheduled_time|
@@ -293,7 +293,7 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_every_day(self, time: TYPING_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_every_day(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
         :param time: |param_scheduled_time|
@@ -306,7 +306,7 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_workdays(self, time: TYPING_TIME, callback, *args, **kwargs) -> WorkdayScheduledCallback:
+    def run_on_workdays(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> WorkdayScheduledCallback:
         """
 
         :param time: |param_scheduled_time|
@@ -319,7 +319,7 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_weekends(self, time: TYPING_TIME, callback, *args, **kwargs) -> WeekendScheduledCallback:
+    def run_on_weekends(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> WeekendScheduledCallback:
         """
 
         :param time: |param_scheduled_time|
