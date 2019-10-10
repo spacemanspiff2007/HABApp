@@ -104,7 +104,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
             # Events which change the ItemRegistry
             if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
                 item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
-
+                
                 # check already existing item so we can print a warning if something changes
                 try:
                     existing_item = HABApp.core.Items.get_item(item.name)
@@ -112,7 +112,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                         log.warning( f'Item changed type from {existing_item.__class__} to {item.__class__}')
                 except HABApp.core.Items.ItemNotFoundException:
                     pass
-
+                
                 # always overwrite with new definition
                 HABApp.core.Items.set_item(item)
 

@@ -262,8 +262,7 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_day_of_week(self, time: TYPING_DATE_TIME, weekdays, callback, *args, **kwargs) \
-            -> DayOfWeekScheduledCallback:
+    def run_on_day_of_week(self, time: TYPING_DATE_TIME, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
         :param time: |param_scheduled_time|

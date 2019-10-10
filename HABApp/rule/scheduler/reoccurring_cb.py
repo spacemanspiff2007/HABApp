@@ -8,8 +8,7 @@ class ReoccurringScheduledCallback(ScheduledCallback):
 
     CALL_ONCE = False
 
-    def __init__(
-            self, time: TYPING_DATE_TIME, interval: typing.Union[int, datetime.timedelta], callback, *args, **kwargs):
+    def __init__(self, time: TYPING_DATE_TIME, interval: typing.Union[int, datetime.timedelta], callback, *args, **kwargs):
         super().__init__(time, callback, *args, **kwargs)
 
         if isinstance(interval, int):
