@@ -1,5 +1,13 @@
+import typing
+
+
 class AllEvents:
     pass
+
+
+class ComplexEventValue:
+    def __init__(self, value):
+        self.value: typing.Any = value
 
 
 class ValueUpdateEvent:

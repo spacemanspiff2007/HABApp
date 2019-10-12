@@ -48,6 +48,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         self.__async_sse: asyncio.Future = None
         self.__async_items: asyncio.Future = None
+        self.__async_ping: asyncio.Future = None
 
     def on_connected(self):
         # Start SSE Processing
@@ -56,15 +57,18 @@ class OpenhabConnection(HttpConnectionEventHandler):
         # Read all Items
         self.__async_items = asyncio.ensure_future(self.update_all_items())
 
+        # start ping
+        self.__async_ping = asyncio.ensure_future(self.async_ping)
+
 
     def on_disconnected(self):
-        if self.__async_sse:
-            if not self.__async_sse.done():
-                self.__async_sse.cancel()
 
-        if self.__async_items:
-            if not self.__async_items.done():
-                self.__async_items.cancel()
+        for future in (self.__async_sse, self.__async_items, self.__async_ping):
+            if future is None:
+                continue
+            # if it is still running cancel
+            if not future.done():
+                future.cancel()
 
     async def start(self):
         await self.connection.try_connect()
@@ -91,7 +95,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
             )
 
             self.__ping_sent = time.time()
-            await asyncio.sleep(10)
+            await asyncio.sleep(self.config.openhab.ping.interval)
 
 
 
@@ -104,12 +108,17 @@ class OpenhabConnection(HttpConnectionEventHandler):
             # Events which change the ItemRegistry
             if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
                 item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
+
+                # check already existing item so we can print a warning if something changes
                 try:
                     existing_item = HABApp.core.Items.get_item(item.name)
                     if not isinstance(existing_item, item.__class__):
                         log.warning( f'Item changed type from {existing_item.__class__} to {item.__class__}')
                 except HABApp.core.Items.ItemNotFoundException:
-                    HABApp.core.Items.set_item(item)
+                    pass
+
+                # always overwrite with new definition
+                HABApp.core.Items.set_item(item)
 
             elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
                 HABApp.core.Items.pop_item(event.name)
