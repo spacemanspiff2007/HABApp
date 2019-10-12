@@ -56,13 +56,13 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         # Read all Items
         self.__async_items = asyncio.ensure_future(self.update_all_items())
-        
+
         # start ping
         self.__async_ping = asyncio.ensure_future(self.async_ping)
 
 
     def on_disconnected(self):
-        
+
         for future in (self.__async_sse, self.__async_items, self.__async_ping):
             if future is None:
                 continue
