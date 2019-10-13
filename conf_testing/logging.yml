@@ -11,7 +11,7 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     filename: 'HABApp.log'
     maxBytes: 10_000_000
-    backupCount: '3'
+    backupCount: 3
 
     formatter: HABApp_format
     level: DEBUG

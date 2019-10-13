@@ -1,8 +1,9 @@
-import codecs
 import logging
 import logging.config
 import sys
 import time
+import traceback
+from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 
 import ruamel.yaml
@@ -172,22 +173,30 @@ class Config(FileEventTarget):
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 
-            # Delete old Log-Files on startup
-            if self.first_start and p.is_file():
-                try:
-                    # default is utf-8 logging so we write BOM
-                    with open(p, mode='wb') as f:
-                        f.write(codecs.BOM_UTF8)
-                finally:
-                    pass
-
         # load prepared logging
         try:
             logging.config.dictConfig(cfg)
         except Exception as e:
             print(f'Error loading logging config: {e}')
             return None
-
         log.debug('Loaded logging config')
+
+        # Try rotating the logs on first start
+        if self.first_start:
+            self.first_start = False
+            for handler in logging._handlerList:
+                try:
+                    handler = handler()  # weakref -> call it to get object
+                    if isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
+                        handler.doRollover()
+                except Exception:
+                    lines = traceback.format_exc().splitlines()
+                    start = 0
+                    for i, l in enumerate(lines):
+                        if l.startswith('Traceback'):
+                            start = i
+                    for l in lines[start:]:
+                        log.error(l)
+
         logging.getLogger('HABApp').info(f'HABApp Version {__VERSION__}')
         return None
