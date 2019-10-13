@@ -5,13 +5,13 @@ from watchdog.events import FileSystemEventHandler, FileMovedEvent, FileCreatedE
 
 
 class FileEventTarget:
-    def add_file(self, path: Path):
+    def on_file_added(self, path: Path):
         raise NotImplementedError()
 
-    def reload_file(self, path: Path):
+    def on_file_changed(self, path: Path):
         raise NotImplementedError()
 
-    def remove_file(self, path: Path):
+    def on_file_removed(self, path: Path):
         raise NotImplementedError()
 
 
@@ -39,7 +39,7 @@ class SimpleFileEventHandler(FileSystemEventHandler):
         if not event.src_path.endswith(self.__file_ending):
             return None
 
-        self._get_func(self.target.remove_file)(Path(event.src_path))
+        self._get_func(self.target.on_file_removed)(Path(event.src_path))
 
     def on_modified(self, event):
         if not isinstance(event, FileModifiedEvent):
@@ -48,7 +48,7 @@ class SimpleFileEventHandler(FileSystemEventHandler):
         if not event.src_path.endswith(self.__file_ending):
             return None
 
-        self._get_func(self.target.reload_file)(Path(event.src_path))
+        self._get_func(self.target.on_file_changed)(Path(event.src_path))
 
     def on_created(self, event):
         if not isinstance(event, FileCreatedEvent):
@@ -57,14 +57,14 @@ class SimpleFileEventHandler(FileSystemEventHandler):
         if not event.src_path.endswith(self.__file_ending):
             return None
 
-        self._get_func(self.target.add_file)(Path(event.src_path))
+        self._get_func(self.target.on_file_added)(Path(event.src_path))
 
     def on_moved(self, event):
         if not isinstance(event, FileMovedEvent):
             return None
 
         if event.src_path.endswith(self.__file_ending):
-            self._get_func(self.target.remove_file)(Path(event.src_path))
+            self._get_func(self.target.on_file_removed)(Path(event.src_path))
 
         if event.dest_path.endswith(self.__file_ending):
-            self._get_func(self.target.add_file)(Path(event.dest_path))
+            self._get_func(self.target.on_file_added)(Path(event.dest_path))

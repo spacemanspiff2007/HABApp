@@ -82,7 +82,7 @@ class WrappedFunction:
 
         # notify if we don't process quickly
         if __start - self.__time_submitted > 0.05:
-            self.log.warning(f'Starting of {self.name} took too long: {__start - self.__time_submitted:.1f}s. '
+            self.log.warning(f'Starting of {self.name} took too long: {__start - self.__time_submitted:.2f}s. '
                              f'Maybe there are not enough threads?')
 
         # Execute the function
@@ -94,4 +94,4 @@ class WrappedFunction:
         # log warning if execution takes too long
         __dur = time.time() - __start
         if self.__warn_too_long and __dur > 0.8:
-            self.log.warning(f'Execution of {self.name} took too long: {__dur:.1f}s')
+            self.log.warning(f'Execution of {self.name} took too long: {__dur:.2f}s')

@@ -90,23 +90,23 @@ class Config(FileEventTarget):
         self.first_start = True
         try:
             # try load logging config first. If we use abs path we can log errors when loading config.yml
-            self.add_file(self.file_conf_logging)
-            self.add_file(self.file_conf_habapp)
+            self.on_file_added(self.file_conf_logging)
+            self.on_file_added(self.file_conf_habapp)
         except AbsolutePathExpected:
-            self.add_file(self.file_conf_habapp)
-            self.add_file(self.file_conf_logging)
+            self.on_file_added(self.file_conf_habapp)
+            self.on_file_added(self.file_conf_logging)
         self.first_start = False
 
-    def add_file(self, path: Path):
-        self.reload_file(path)
+    def on_file_added(self, path: Path):
+        self.on_file_changed(path)
 
-    def reload_file(self, path: Path):
+    def on_file_changed(self, path: Path):
         if path.name == 'config.yml':
             self.load_cfg()
         if path.name == 'logging.yml':
             self.load_log()
 
-    def remove_file(self, path: Path):
+    def on_file_removed(self, path: Path):
         pass
 
     def __check_create_logging(self):
@@ -183,7 +183,6 @@ class Config(FileEventTarget):
 
         # Try rotating the logs on first start
         if self.first_start:
-            self.first_start = False
             for handler in logging._handlerList:
                 try:
                     handler = handler()  # weakref -> call it to get object
@@ -191,6 +190,7 @@ class Config(FileEventTarget):
                         handler.doRollover()
                 except Exception:
                     lines = traceback.format_exc().splitlines()
+                    # cut away AbsolutePathExpected Exception from log output
                     start = 0
                     for i, l in enumerate(lines):
                         if l.startswith('Traceback'):

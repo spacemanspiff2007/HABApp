@@ -52,15 +52,15 @@ class ParameterFileWatcher(FileEventTarget):
         def load_all_files():
             for f in self.config.directories.param.glob('**/*.yml'):
                 try:
-                    self.add_file(f)
+                    self.on_file_added(f)
                 except Exception as e:
                     log.error(e)
         HABApp.core.WrappedFunction(load_all_files, logger=log, name='Load all parameter files').run()
 
-    def reload_file(self, path: Path):
-        self.add_file(path)
+    def on_file_changed(self, path: Path):
+        self.on_file_added(path)
 
-    def remove_file(self, path: Path):
+    def on_file_removed(self, path: Path):
         try:
             with self.__lock:
                 remove_parameter_file(path.stem)
@@ -72,7 +72,7 @@ class ParameterFileWatcher(FileEventTarget):
 
         log.debug(f'Removed params from {path.name}!')
 
-    def add_file(self, path: Path):
+    def on_file_added(self, path: Path):
         try:
             with self.__lock:
                 with path.open( mode='r', encoding='utf-8') as file:

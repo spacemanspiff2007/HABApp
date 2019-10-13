@@ -34,7 +34,7 @@ class RuleManager(FileEventTarget):
             for f in self.runtime.config.directories.rules.glob('**/*.py'):
                 if f.name.endswith('.py'):
                     time.sleep(1)
-                    HABApp.core.WrappedFunction(self.add_file, logger=log).run(f)
+                    HABApp.core.WrappedFunction(self.on_file_added, logger=log).run(f)
 
         HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).run()
 
@@ -101,12 +101,12 @@ class RuleManager(FileEventTarget):
         return found if len(found) > 1 else found[0]
 
     @PrintException
-    def reload_file(self, path: Path):
-        self.remove_file(path)
-        self.add_file(path)
+    def on_file_changed(self, path: Path):
+        self.on_file_removed(path)
+        self.on_file_added(path)
 
     @PrintException
-    def remove_file(self, path: Path):
+    def on_file_removed(self, path: Path):
         try:
             with self.__file_load_lock:
                 path_str = str(path)
@@ -122,7 +122,7 @@ class RuleManager(FileEventTarget):
             return None
 
     @PrintException
-    def add_file(self, path : Path):
+    def on_file_added(self, path : Path):
 
         try:
             # serialize loading

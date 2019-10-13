@@ -21,7 +21,6 @@ class OnOffCommand:
         get_openhab_interface().send_command(self, OnOffValue.OFF)
 
 
-
 class PercentCommand:
     def percent(self, value: float):
         """Command to value (in percent)"""
