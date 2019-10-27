@@ -23,9 +23,10 @@ Some item types provide convenience functions, so it is advised to always set th
 
 The preferred way to get and create items is through the class factories :class:`~HABApp.core.items.Item.get_item`
 and :class:`~HABApp.core.items.Item.get_create_item` since this ensures the proper item class and provides type hints when
-using an IDE:
+using an IDE!
 
 .. execute_code::
+    :header_code: Example:
     :hide_output:
 
     from HABApp.core.items import Item
@@ -37,16 +38,14 @@ using an IDE:
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
 
+
 .. list-table::
    :widths: auto
    :header-rows: 1
    
    * - Function
      - Description
-   
-   * - :meth:`~HABApp.Rule.get_item`
-     - Return an item (or create it if it doesn't exist yet)
-     
+
    * - :meth:`~HABApp.Rule.get_item_state`
      - Get the state of an item
 

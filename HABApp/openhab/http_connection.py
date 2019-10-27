@@ -109,7 +109,7 @@ class HttpConnection:
             resp = await future
         except Exception as e:
             is_disconnect = self._is_disconnect_exception(e)
-            log.log(logging.WARNING if is_disconnect else logging.ERROR, f'{e}')
+            log.log(logging.WARNING if is_disconnect else logging.ERROR, f'"{e}" ({type(e)})')
             if is_disconnect:
                 raise OpenhabDisconnectedError()
             else:
