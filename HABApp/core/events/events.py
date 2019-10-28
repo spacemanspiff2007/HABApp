@@ -47,3 +47,19 @@ class ValueNoUpdateEvent:
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, seconds: {self.seconds}>'
+
+
+class RequestFileLoadEvent:
+    def __init__(self, name: str = None):
+        self.filename: str = name
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} filename: {self.filename}>'
+
+
+class RequestFileUnloadEvent:
+    def __init__(self, name: str = None):
+        self.filename: str = name
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} filename: {self.filename}>'

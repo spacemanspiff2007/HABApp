@@ -15,6 +15,8 @@ from HABApp.runtime import FileEventTarget
 
 log = logging.getLogger('HABApp.Rules')
 
+RULES_TOPIC = 'HABApp.Rules'
+
 
 class RuleManager(FileEventTarget):
 
@@ -28,26 +30,61 @@ class RuleManager(FileEventTarget):
         self.__file_load_lock = threading.Lock()
         self.__rulefiles_lock = threading.Lock()
 
-        # if we load immediately we don't have the items from openhab in itemcache yet
-        def delayed_load():
-            time.sleep(5.2)
-            for f in self.runtime.config.directories.rules.glob('**/*.py'):
-                if f.name.endswith('.py'):
-                    time.sleep(1)
-                    HABApp.core.WrappedFunction(self.on_file_added, logger=log).run(f)
+        # Processing
+        self.__process_last_sec = 60
 
-        HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).run()
+
+        # Listener to add rules
+        HABApp.core.EventBus.add_listener(
+            HABApp.core.EventBusListener(
+                RULES_TOPIC,
+                HABApp.core.WrappedFunction(self.request_file_load),
+                HABApp.core.events.events.RequestFileLoadEvent
+            )
+        )
+
+        # listener to remove rules
+        HABApp.core.EventBus.add_listener(
+            HABApp.core.EventBusListener(
+                RULES_TOPIC,
+                HABApp.core.WrappedFunction(self.request_file_unload),
+                HABApp.core.events.events.RequestFileUnloadEvent
+            )
+        )
 
         # folder watcher
         self.runtime.folder_watcher.watch_folder(
-            folder=self.runtime.config.directories.rules,
-            file_ending='.py',
-            event_target=self,
-            worker_factory=lambda x: HABApp.core.WrappedFunction(x, logger=log).run,
-            watch_subfolders=True
+            folder=self.runtime.config.directories.rules, file_ending='.py', event_target=self, watch_subfolders=True
         )
 
-        self.__process_last_sec = 60
+        # Initial loading of rules
+        HABApp.core.WrappedFunction(self.load_rules_on_startup, logger=log, warn_too_long=False).run()
+
+    def load_rules_on_startup(self):
+
+        if self.runtime.config.openhab.connection.host and self.runtime.config.openhab.general.wait_for_openhab:
+            items_found = False
+            while not items_found:
+                time.sleep(3)
+                for item in HABApp.core.Items.get_all_items():
+                    if isinstance(item, (HABApp.openhab.items.NumberItem, HABApp.openhab.items.ContactItem,
+                                         HABApp.openhab.items.SwitchItem, HABApp.openhab.items.RollershutterItem,
+                                         HABApp.openhab.items.DimmerItem, HABApp.openhab.items.ColorItem)):
+                        items_found = True
+                        break
+            time.sleep(0.2)
+        else:
+            time.sleep(5.2)
+
+        # trigger event for every file
+        for f in self.runtime.config.directories.rules.glob('**/*.py'):
+            if f.name.endswith('.py'):
+                time.sleep(1)
+                filename = str(f.relative_to(self.runtime.config.directories.rules))
+                HABApp.core.EventBus.post_event(
+                    RULES_TOPIC, HABApp.core.events.events.RequestFileLoadEvent(filename)
+                )
+        return None
 
     @PrintException
     async def process_scheduled_events(self):
@@ -102,14 +139,40 @@ class RuleManager(FileEventTarget):
 
     @PrintException
     def on_file_changed(self, path: Path):
-        self.on_file_removed(path)
-        self.on_file_added(path)
+        HABApp.core.EventBus.post_event(
+            RULES_TOPIC, HABApp.core.events.events.RequestFileUnloadEvent(path.name)
+        )
+        time.sleep(0.1)
+        HABApp.core.EventBus.post_event(
+            RULES_TOPIC, HABApp.core.events.events.RequestFileLoadEvent(path.name)
+        )
 
     @PrintException
     def on_file_removed(self, path: Path):
+        HABApp.core.EventBus.post_event(
+            RULES_TOPIC, HABApp.core.events.events.RequestFileUnloadEvent(path.name)
+        )
+
+    @PrintException
+    def on_file_added(self, path : Path):
+        time.sleep(0.1)
+        HABApp.core.EventBus.post_event(
+            RULES_TOPIC, HABApp.core.events.events.RequestFileLoadEvent(path.name)
+        )
+
+    @PrintException
+    def request_file_unload(self, event: HABApp.core.events.events.RequestFileUnloadEvent):
+
+        path = self.runtime.config.directories.rules / event.filename
+        path_str = str(path)
+
+        # Only unload already loaded files
+        if path_str not in self.files:
+            log.warning(f'Rule file {path} is not yet loaded and therefore can not be unloaded')
+            return None
+
         try:
             with self.__file_load_lock:
-                path_str = str(path)
                 log.debug(f'Removing file: {path}')
                 if path_str in self.files:
                     with self.__rulefiles_lock:
@@ -122,7 +185,14 @@ class RuleManager(FileEventTarget):
             return None
 
     @PrintException
-    def on_file_added(self, path : Path):
+    def request_file_load(self, event: HABApp.core.events.events.RequestFileLoadEvent):
+
+        path = self.runtime.config.directories.rules / event.filename
+
+        # Only load existing files
+        if not path.is_file():
+            log.warning(f'Rule file {path} does not exist and can not be loaded!')
+            return None
 
         try:
             # serialize loading

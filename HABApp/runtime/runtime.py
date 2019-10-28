@@ -32,7 +32,6 @@ class Runtime:
 
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
-        self.rule_params: HABApp.rule_manager.RuleParameters = None
 
         # Async Workers & shutdown callback
         HABApp.core.WrappedFunction._EVENT_LOOP = self.loop

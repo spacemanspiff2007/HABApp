@@ -22,9 +22,10 @@ def __get_listener_description(listener: EventBusListener) -> str:
 
 
 @PrintException
-def post_event(name, event):
+def post_event(name: typing.Optional[str], event):
+    assert isinstance(name, str), type(name)
 
-    _event_log.info(event)
+    _event_log.info(f'{name:>20s}: {event}')
 
     # Sometimes we have nested data structures which we need to set the value.
     # Once the value in the item registry is set the data structures provide no benefit thus
