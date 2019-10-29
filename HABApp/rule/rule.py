@@ -93,23 +93,6 @@ class Rule:
         assert isinstance(name, str), type(name)
         return HABApp.core.Items.item_exists(name)
 
-    def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
-        """
-        Return the item with the specified name or create the item if it doesn't exist.
-
-        :param name: name of the item
-        :param item_factory: if specified and the item does not exist an item
-                             with the item_factory-class will be created
-        :return: item
-        """
-        if item_factory is None:
-            return HABApp.core.Items.get_item(name)
-
-        try:
-            return HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
-            return HABApp.core.Items.create_item(name, item_factory)
-
     def get_item_state(self, name: str, default=None) -> typing.Any:
         """
         Return the state of the item.
@@ -430,6 +413,19 @@ class Rule:
     # -----------------------------------------------------------------------------------------------------------------
     # deprecated functions
     # -----------------------------------------------------------------------------------------------------------------
+    def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
+
+        warnings.warn("'get_item' is deprecated, use 'Item.get_item' or 'Item.get_create_item' instead",
+              DeprecationWarning, 2)
+
+        if item_factory is None:
+            return HABApp.core.Items.get_item(name)
+
+        try:
+            return HABApp.core.Items.get_item(name)
+        except HABApp.core.Items.ItemNotFoundException:
+            return HABApp.core.Items.create_item(name, item_factory)
+
     def get_rule_parameter(self, file_name: str, *keys, default_value='ToDo'):
         """
 

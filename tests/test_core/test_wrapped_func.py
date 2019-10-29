@@ -1,10 +1,11 @@
 import asyncio
+import re
 import typing
 import unittest
 from unittest.mock import MagicMock
 
-import pytest, HABApp
-import re
+import HABApp
+import pytest
 from asynctest import CoroutineMock
 
 from HABApp.core import WrappedFunction
@@ -38,7 +39,9 @@ class TestCases(unittest.TestCase):
         self.worker = WrappedFunction._WORKERS
 
         self.err_func: MagicMock = MagicMock()
-        self.err_listener = HABApp.core.EventBusListener('HABApp.Errors', WrappedFunction(self.err_func, name='ErrMock'))
+        self.err_listener = HABApp.core.EventBusListener(
+            'HABApp.Errors', WrappedFunction(self.err_func, name='ErrMock')
+        )
         HABApp.core.EventBus.add_listener(self.err_listener)
 
         class CExecutor:
