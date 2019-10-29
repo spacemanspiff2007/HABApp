@@ -3,7 +3,7 @@ import typing
 import unittest
 from unittest.mock import MagicMock
 
-import pytest
+import pytest, HABApp
 import re
 from asynctest import CoroutineMock
 
@@ -28,12 +28,18 @@ class TestCases(unittest.TestCase):
         self.last_args: typing.Optional[typing.List] = None
         self.last_kwargs: typing.Optional[typing.Dict] = None
 
+        self.err_func: MagicMock = None
+
     def setUp(self):
         self.func_called = False
         self.last_args = None
         self.last_kwargs = None
 
         self.worker = WrappedFunction._WORKERS
+
+        self.err_func: MagicMock = MagicMock()
+        self.err_listener = HABApp.core.EventBusListener('HABApp.Errors', WrappedFunction(self.err_func, name='ErrMock'))
+        HABApp.core.EventBus.add_listener(self.err_listener)
 
         class CExecutor:
             def submit(self, callback, *args, **kwargs):
@@ -42,6 +48,7 @@ class TestCases(unittest.TestCase):
 
     def tearDown(self):
         WrappedFunction._WORKERS = self.worker
+        HABApp.core.EventBus.remove_listener(self.err_listener)
 
     def func_call(self, *args, **kwargs):
         self.func_called = True
@@ -71,29 +78,16 @@ class TestCases(unittest.TestCase):
 
         WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
         f = WrappedFunction(tmp)
-        err_func = MagicMock()
-        WrappedFunction.REGISTER_ERROR_CALLBACK(err_func)
-        self.assertFalse(err_func.called)
+        self.assertFalse(self.err_func.called)
+
         f.run()
-        self.assertTrue(err_func.called)
-        err_func.assert_called_once_with(FileNameRemover(
-            'Error in tmp: division by zero\n'
-            'Traceback (most recent call last):\n'
-            '\n'
-            '    1 / 0\n'
-            'ZeroDivisionError: division by zero'
-        ))
 
-    def test_exception_in_wrapper(self):
-        def tmp():
-            1 / 0
-
-        def bla(_in):
-            raise ValueError('Error in callback!')
-
-        f = WrappedFunction(tmp)
-        WrappedFunction.REGISTER_ERROR_CALLBACK( bla)
-        f.run()
+        self.assertTrue(self.err_func.called)
+        err = self.err_func.call_args[0][0]
+        assert isinstance(err, HABApp.core.events.habapp_events.HABAppError)
+        assert err.func_name == 'tmp'
+        assert isinstance(err.exception, ZeroDivisionError)
+        assert err.traceback.startswith('Traceback (most recent call last):')
 
 
 @pytest.mark.asyncio
@@ -125,16 +119,18 @@ async def test_async_error_wrapper():
     f = WrappedFunction(tmp)
     WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
     err_func = CoroutineMock()
-    WrappedFunction.REGISTER_ERROR_CALLBACK(err_func)
+    err_listener = HABApp.core.EventBusListener('HABApp.Errors', WrappedFunction(err_func, name='ErrMock'))
+    HABApp.core.EventBus.add_listener(err_listener)
+
     f.run()
     await asyncio.sleep(0.05)
-    err_func.assert_awaited_once_with(FileNameRemover(
-        'Error in tmp: division by zero\n'
-        'Traceback (most recent call last):\n'
-        '\n'
-        '    1 / 0\n'
-        'ZeroDivisionError: division by zero'
-    ))
+
+    assert err_func.called
+    err = err_func.call_args[0][0]
+    assert isinstance(err, HABApp.core.events.habapp_events.HABAppError)
+    assert err.func_name == 'tmp'
+    assert isinstance(err.exception, ZeroDivisionError)
+    assert err.traceback.startswith('Traceback (most recent call last):')
 
 if __name__ == '__main__':
     import logging

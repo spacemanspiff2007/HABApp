@@ -38,7 +38,7 @@ class RuleManager:
             HABApp.core.EventBusListener(
                 RULES_TOPIC,
                 HABApp.core.WrappedFunction(self.request_file_load),
-                HABApp.core.events.file_events.RequestFileLoadEvent
+                HABApp.core.events.habapp_events.RequestFileLoadEvent
             )
         )
 
@@ -47,7 +47,7 @@ class RuleManager:
             HABApp.core.EventBusListener(
                 RULES_TOPIC,
                 HABApp.core.WrappedFunction(self.request_file_unload),
-                HABApp.core.events.file_events.RequestFileUnloadEvent
+                HABApp.core.events.habapp_events.RequestFileUnloadEvent
             )
         )
 
@@ -136,7 +136,7 @@ class RuleManager:
 
 
     @PrintException
-    def request_file_unload(self, event: HABApp.core.events.file_events.RequestFileUnloadEvent):
+    def request_file_unload(self, event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
 
         path = self.runtime.config.directories.rules / event.filename
         path_str = str(path)
@@ -160,7 +160,7 @@ class RuleManager:
             return None
 
     @PrintException
-    def request_file_load(self, event: HABApp.core.events.file_events.RequestFileLoadEvent):
+    def request_file_load(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
         path = self.runtime.config.directories.rules / event.filename
         path_str = str(path)

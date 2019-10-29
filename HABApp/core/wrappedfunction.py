@@ -4,22 +4,14 @@ import logging
 import time
 import traceback
 
+import HABApp
+
 default_logger = logging.getLogger('HABApp.Worker')
 
 
 class WrappedFunction:
     _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
-    _ERROR_CALLBACK: 'WrappedFunction' = None
     _EVENT_LOOP = None
-
-    @classmethod
-    def CLEAR_ERROR_CALLBACK(cls):
-        WrappedFunction._ERROR_CALLBACK = None
-
-    @classmethod
-    def REGISTER_ERROR_CALLBACK(cls, func):
-        assert callable(func)
-        WrappedFunction._ERROR_CALLBACK = WrappedFunction(func, name='ERROR_CALLBACK')
 
     def __init__(self, func, logger=None, warn_too_long=True, name=None):
         assert callable(func)
@@ -41,6 +33,7 @@ class WrappedFunction:
         self.__warn_too_long = warn_too_long
 
     def run(self, *args, **kwargs):
+
         if self.is_async:
             # schedule run async, we need to pass the event loop because we can create an async WrappedFunction
             # from a worker thread (if we have a mixture between async and non-async)!
@@ -49,7 +42,7 @@ class WrappedFunction:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
 
-    def __format_traceback(self, e: Exception):
+    def __format_traceback(self, e: Exception, *args, **kwargs):
 
         # Skip line 1 and 2 since they contain the wrapper:
         # 0:  Traceback (most recent call last):
@@ -58,21 +51,25 @@ class WrappedFunction:
         lines = traceback.format_exc().splitlines()
         del lines[1:3]  # Remove element 1 & 2
 
-        # Add exception
-        lines.insert(0, f'Error in {self.name}: {e}')
+        # Log Exception
+        self.log.error(f'Error in {self.name}: {e}')
         for l in lines:
             self.log.error(l)
 
-        # if we have an error callback call it
-        if WrappedFunction._ERROR_CALLBACK is not None:
-            if self is not WrappedFunction._ERROR_CALLBACK:
-                WrappedFunction._ERROR_CALLBACK.run('\n'.join(lines))
+        # create HABApp event, but only if we are not currently processing one
+        if not args or not isinstance(args[0], HABApp.core.events.habapp_events.HABAppError):
+            HABApp.core.EventBus.post_event(
+                'HABApp.Errors', HABApp.core.events.habapp_events.HABAppError(
+                    func_name=self.name, exception=e, traceback='\n'.join(lines)
+                )
+            )
 
     async def __async_run(self, *args, **kwargs):
         try:
             await self._func(*args, **kwargs)
         except Exception as e:
-            self.__format_traceback(e)
+            self.__format_traceback(e, *args, **kwargs)
+        return None
 
     def __run(self, *args, **kwargs):
 
@@ -87,7 +84,7 @@ class WrappedFunction:
         try:
             self._func(*args, **kwargs)
         except Exception as e:
-            self.__format_traceback(e)
+            self.__format_traceback(e, *args, **kwargs)
 
         # log warning if execution takes too long
         __dur = time.time() - __start

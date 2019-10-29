@@ -35,7 +35,7 @@ def set_file_validator(file: str, validator: typing.Any, allow_extra_keys=True):
     # todo: move this to file handling so we get the extension
     if old_validator != new_validator:
         HABApp.core.EventBus.post_event(
-            HABAPP_PARAM_TOPIC, HABApp.core.events.file_events.RequestFileLoadEvent(file + '.yml')
+            HABAPP_PARAM_TOPIC, HABApp.core.events.habapp_events.RequestFileLoadEvent(file + '.yml')
         )
 
 

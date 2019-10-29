@@ -31,7 +31,7 @@ class FileEventToHABAppEvent(FileSystemEventHandler):
         if not event.src_path.endswith(self.file_ending):
             return None
 
-        self.send_habapp_event(event.src_path, HABApp.core.events.file_events.RequestFileUnloadEvent)
+        self.send_habapp_event(event.src_path, HABApp.core.events.habapp_events.RequestFileUnloadEvent)
 
     def on_created(self, event):
         if not isinstance(event, FileCreatedEvent):
@@ -40,17 +40,17 @@ class FileEventToHABAppEvent(FileSystemEventHandler):
         if not event.src_path.endswith(self.file_ending):
             return None
 
-        self.send_habapp_event(event.src_path, HABApp.core.events.file_events.RequestFileLoadEvent)
+        self.send_habapp_event(event.src_path, HABApp.core.events.habapp_events.RequestFileLoadEvent)
 
     def on_moved(self, event):
         if not isinstance(event, FileMovedEvent):
             return None
 
         if event.src_path.endswith(self.file_ending):
-            self.send_habapp_event(event.src_path, HABApp.core.events.file_events.RequestFileUnloadEvent)
+            self.send_habapp_event(event.src_path, HABApp.core.events.habapp_events.RequestFileUnloadEvent)
 
         if event.dest_path.endswith(self.file_ending):
-            self.send_habapp_event(event.dest_path, HABApp.core.events.file_events.RequestFileLoadEvent)
+            self.send_habapp_event(event.dest_path, HABApp.core.events.habapp_events.RequestFileLoadEvent)
 
     def on_modified(self, event):
         if not isinstance(event, FileModifiedEvent):
@@ -59,7 +59,7 @@ class FileEventToHABAppEvent(FileSystemEventHandler):
         if not event.src_path.endswith(self.file_ending):
             return None
 
-        self.send_habapp_event(event.src_path, HABApp.core.events.file_events.RequestFileLoadEvent)
+        self.send_habapp_event(event.src_path, HABApp.core.events.habapp_events.RequestFileLoadEvent)
 
     def trigger_load_for_all_files(self, delay: int = None):
 
@@ -72,7 +72,7 @@ class FileEventToHABAppEvent(FileSystemEventHandler):
                 time.sleep(delay)
 
             HABApp.core.EventBus.post_event(
-                self.habapp_topic, HABApp.core.events.file_events.RequestFileLoadEvent.from_path(
+                self.habapp_topic, HABApp.core.events.habapp_events.RequestFileLoadEvent.from_path(
                     folder=self.folder, file=f
                 )
             )

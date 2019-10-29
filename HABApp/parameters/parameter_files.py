@@ -36,7 +36,7 @@ def setup_param_files(config, folder_watcher):
         HABApp.core.EventBusListener(
             HABAPP_PARAM_TOPIC,
             HABApp.core.WrappedFunction(load_file),
-            HABApp.core.events.file_events.RequestFileUnloadEvent
+            HABApp.core.events.habapp_events.RequestFileUnloadEvent
         )
     )
     # listener to add parameters
@@ -44,7 +44,7 @@ def setup_param_files(config, folder_watcher):
         HABApp.core.EventBusListener(
             HABAPP_PARAM_TOPIC,
             HABApp.core.WrappedFunction(load_file),
-            HABApp.core.events.file_events.RequestFileLoadEvent
+            HABApp.core.events.habapp_events.RequestFileLoadEvent
         )
     )
 
@@ -55,7 +55,7 @@ def setup_param_files(config, folder_watcher):
     HABApp.core.WrappedFunction(handler.trigger_load_for_all_files, logger=log, name='Load all parameter files').run()
 
 
-def load_file(event: HABApp.core.events.file_events.RequestFileLoadEvent):
+def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
     path = CONFIG.directories.param / event.filename
 
     with LOCK:  # serialize to get proper error messages
@@ -74,7 +74,7 @@ def load_file(event: HABApp.core.events.file_events.RequestFileLoadEvent):
         log.debug(f'Loaded params from {path.name}!')
 
 
-def unload_file(event: HABApp.core.events.file_events.RequestFileUnloadEvent):
+def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
     path = CONFIG.directories.param / event.filename
 
     with LOCK:  # serialize to get proper error messages

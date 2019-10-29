@@ -47,10 +47,11 @@ Trigger an event when an item is constant
     # hide
 
 
-Register a callback for errors
+Process Errors in Rules
 ------------------------------------------
 This example shows how to create a rule with a function which will be called when **any** rule throws an error.
-The rule function then can push the error message to an openhab item or e.g. use Pushover to send the error message to the mobile device.
+The rule function then can push the error message to an openhab item or e.g. use Pushover to send the error message
+to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more information).
 
 .. execute_code::
     :ignore_stderr:
@@ -63,20 +64,17 @@ The rule function then can push the error message to an openhab item or e.g. use
     # hide
 
     import HABApp
-    from HABApp.core import WrappedFunction
+    from HABApp.core.events.habapp_events import HABAppError
 
     class NotifyOnError(HABApp.Rule):
         def __init__(self):
             super().__init__()
             
-            # so it get's unloaded propperly in case we make changes to this rule
-            self.register_on_unload(WrappedFunction.CLEAR_ERROR_CALLBACK)
+            # Listen to all errors
+            self.listen_event('HABApp.Errors', self.on_error, HABAppError)
 
-            # register function 
-            WrappedFunction.REGISTER_ERROR_CALLBACK(self.on_error)
-            
-        def on_error(self, error_message: str):
-            print(f'Message:\n{error_message}\n')
+        def on_error(self, error_event: HABAppError):
+            print(error_event.to_str())
 
     NotifyOnError()
 
