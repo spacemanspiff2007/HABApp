@@ -1,24 +1,23 @@
 import asyncio
 import datetime
 import logging
-import math
 import threading
 import time
 import traceback
 import typing
-from pathlib import Path
+
+import math
 
 import HABApp
 from HABApp.util import PrintException
 from .rule_file import RuleFile
-from HABApp.runtime import FileEventTarget
 
 log = logging.getLogger('HABApp.Rules')
 
 RULES_TOPIC = 'HABApp.Rules'
 
 
-class RuleManager(FileEventTarget):
+class RuleManager:
 
     def __init__(self, parent):
         assert isinstance(parent, HABApp.runtime.Runtime)
@@ -39,7 +38,7 @@ class RuleManager(FileEventTarget):
             HABApp.core.EventBusListener(
                 RULES_TOPIC,
                 HABApp.core.WrappedFunction(self.request_file_load),
-                HABApp.core.events.events.RequestFileLoadEvent
+                HABApp.core.events.file_events.RequestFileLoadEvent
             )
         )
 
@@ -48,13 +47,14 @@ class RuleManager(FileEventTarget):
             HABApp.core.EventBusListener(
                 RULES_TOPIC,
                 HABApp.core.WrappedFunction(self.request_file_unload),
-                HABApp.core.events.events.RequestFileUnloadEvent
+                HABApp.core.events.file_events.RequestFileUnloadEvent
             )
         )
 
         # folder watcher
-        self.runtime.folder_watcher.watch_folder(
-            folder=self.runtime.config.directories.rules, file_ending='.py', event_target=self, watch_subfolders=True
+        self.runtime.folder_watcher.watch_folder_habapp_events(
+            folder=self.runtime.config.directories.rules, file_ending='.py',
+            habapp_topic=RULES_TOPIC, watch_subfolders=True
         )
 
         # Initial loading of rules
@@ -77,13 +77,8 @@ class RuleManager(FileEventTarget):
             time.sleep(5.2)
 
         # trigger event for every file
-        for f in self.runtime.config.directories.rules.glob('**/*.py'):
-            if f.name.endswith('.py'):
-                time.sleep(1)
-                filename = str(f.relative_to(self.runtime.config.directories.rules))
-                HABApp.core.EventBus.post_event(
-                    RULES_TOPIC, HABApp.core.events.events.RequestFileLoadEvent(filename)
-                )
+        w = self.runtime.folder_watcher.get_handler(self.runtime.config.directories.rules)
+        w.trigger_load_for_all_files(delay=1)
         return None
 
     @PrintException
@@ -97,6 +92,8 @@ class RuleManager(FileEventTarget):
             if now.second == self.__process_last_sec:
                 await asyncio.sleep(0.1)
                 continue
+
+            # remember sec
             self.__process_last_sec = now.second
 
             with self.__rulefiles_lock:
@@ -110,7 +107,7 @@ class RuleManager(FileEventTarget):
             if end.second == self.__process_last_sec:
                 frac, whole = math.modf(time.time())
                 sleep_time = 1 - frac + 0.005   # prevent rounding error and add a little bit of security
-                await asyncio.sleep( sleep_time)
+                await asyncio.sleep(sleep_time)
 
 
     @PrintException
@@ -137,31 +134,9 @@ class RuleManager(FileEventTarget):
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]
 
-    @PrintException
-    def on_file_changed(self, path: Path):
-        HABApp.core.EventBus.post_event(
-            RULES_TOPIC, HABApp.core.events.events.RequestFileUnloadEvent(path.name)
-        )
-        time.sleep(0.1)
-        HABApp.core.EventBus.post_event(
-            RULES_TOPIC, HABApp.core.events.events.RequestFileLoadEvent(path.name)
-        )
 
     @PrintException
-    def on_file_removed(self, path: Path):
-        HABApp.core.EventBus.post_event(
-            RULES_TOPIC, HABApp.core.events.events.RequestFileUnloadEvent(path.name)
-        )
-
-    @PrintException
-    def on_file_added(self, path : Path):
-        time.sleep(0.1)
-        HABApp.core.EventBus.post_event(
-            RULES_TOPIC, HABApp.core.events.events.RequestFileLoadEvent(path.name)
-        )
-
-    @PrintException
-    def request_file_unload(self, event: HABApp.core.events.events.RequestFileUnloadEvent):
+    def request_file_unload(self, event: HABApp.core.events.file_events.RequestFileUnloadEvent):
 
         path = self.runtime.config.directories.rules / event.filename
         path_str = str(path)
@@ -185,19 +160,23 @@ class RuleManager(FileEventTarget):
             return None
 
     @PrintException
-    def request_file_load(self, event: HABApp.core.events.events.RequestFileLoadEvent):
+    def request_file_load(self, event: HABApp.core.events.file_events.RequestFileLoadEvent):
 
         path = self.runtime.config.directories.rules / event.filename
+        path_str = str(path)
 
         # Only load existing files
         if not path.is_file():
             log.warning(f'Rule file {path} does not exist and can not be loaded!')
             return None
 
+        # Unload if we have already loaded
+        if path_str in self.files:
+            self.request_file_unload(event)
+
         try:
             # serialize loading
             with self.__file_load_lock:
-                path_str = str(path)
 
                 log.debug(f'Loading file: {path}')
                 with self.__rulefiles_lock:

@@ -22,7 +22,7 @@ def __get_listener_description(listener: EventBusListener) -> str:
 
 
 @PrintException
-def post_event(name: typing.Optional[str], event):
+def post_event(name: str, event):
     assert isinstance(name, str), type(name)
 
     _event_log.info(f'{name:>20s}: {event}')
