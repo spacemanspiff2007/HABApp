@@ -72,5 +72,7 @@ class FileEventToHABAppEvent(FileSystemEventHandler):
                 time.sleep(delay)
 
             HABApp.core.EventBus.post_event(
-                self.habapp_topic, HABApp.core.events.file_events.RequestFileLoadEvent.from_path(folder=self.folder, file=f)
+                self.habapp_topic, HABApp.core.events.file_events.RequestFileLoadEvent.from_path(
+                    folder=self.folder, file=f
+                )
             )

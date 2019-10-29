@@ -460,12 +460,12 @@ class Rule:
 
         for listener in self.__event_listener:
             # Listener listens to all changes
-            if listener.name is None:
+            if listener.topic is None:
                 continue
 
             # check if specific item exists
-            if not HABApp.core.Items.item_exists(listener.name):
-                log.warning(f'Item "{listener.name}" does not exist (yet)! '
+            if not HABApp.core.Items.item_exists(listener.topic):
+                log.warning(f'Item "{listener.topic}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
         for item in self.__watched_items:

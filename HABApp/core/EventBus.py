@@ -15,17 +15,17 @@ _EVENT_LISTENER_ALL_EVENTS: typing.List[EventBusListener] = []
 
 
 def __get_listener_description(listener: EventBusListener) -> str:
-    if listener.name is None:
+    if listener.topic is None:
         return f'all names (type {listener.event_filter})'
     else:
-        return f'"{listener.name}" (type {listener.event_filter})'
+        return f'"{listener.topic}" (type {listener.event_filter})'
 
 
 @PrintException
-def post_event(name: str, event):
-    assert isinstance(name, str), type(name)
+def post_event(topic: str, event):
+    assert isinstance(topic, str), type(topic)
 
-    _event_log.info(f'{name:>20s}: {event}')
+    _event_log.info(f'{topic:>20s}: {event}')
 
     # Sometimes we have nested data structures which we need to set the value.
     # Once the value in the item registry is set the data structures provide no benefit thus
@@ -37,7 +37,7 @@ def post_event(name: str, event):
         pass
 
     # Notify all listeners
-    for listener in itertools.chain(_EVENT_LISTENER.get(name, []), _EVENT_LISTENER_ALL_EVENTS):
+    for listener in itertools.chain(_EVENT_LISTENER.get(topic, []), _EVENT_LISTENER_ALL_EVENTS):
         listener.notify_listeners(event)
 
     return None
@@ -45,9 +45,9 @@ def post_event(name: str, event):
 
 def add_listener(listener: EventBusListener):
     assert isinstance(listener, EventBusListener)
-    add_to_all = listener.name is None
+    add_to_all = listener.topic is None
 
-    item_listeners = _EVENT_LISTENER.setdefault(listener.name, []) if not add_to_all else _EVENT_LISTENER_ALL_EVENTS
+    item_listeners = _EVENT_LISTENER.setdefault(listener.topic, []) if not add_to_all else _EVENT_LISTENER_ALL_EVENTS
 
     # don't add the same listener twice
     if listener in item_listeners:
@@ -62,9 +62,9 @@ def add_listener(listener: EventBusListener):
 
 def remove_listener(listener: EventBusListener):
     assert isinstance(listener, EventBusListener)
-    add_to_all = listener.name is None
+    add_to_all = listener.topic is None
 
-    item_listeners = _EVENT_LISTENER.get(listener.name, []) if not add_to_all else _EVENT_LISTENER_ALL_EVENTS
+    item_listeners = _EVENT_LISTENER.get(listener.topic, []) if not add_to_all else _EVENT_LISTENER_ALL_EVENTS
 
     # print warning if we try to remove it twice
     if listener not in item_listeners:
