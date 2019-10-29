@@ -416,7 +416,7 @@ class Rule:
     def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
 
         warnings.warn("'get_item' is deprecated, use 'Item.get_item' or 'Item.get_create_item' instead",
-              DeprecationWarning, 2)
+                      DeprecationWarning, 2)
 
         if item_factory is None:
             return HABApp.core.Items.get_item(name)
@@ -427,19 +427,12 @@ class Rule:
             return HABApp.core.Items.create_item(name, item_factory)
 
     def get_rule_parameter(self, file_name: str, *keys, default_value='ToDo'):
-        """
-
-        :param file_name: Name of the file (without extension), will get created if it doesn't exist
-        :param keys: section name which value shall be loaded
-        :param default_value: if the corresponding entry in the file does not exist
-                              it will be created with default_value
-        """
-        warnings.warn("'get_rule_parameter' is deprecated, use 'HABApp.parameters.get_parameter()' instead",
+        warnings.warn("'get_rule_parameter' is deprecated, use 'HABApp.parameters.Parameter()' instead",
                       DeprecationWarning, 2)
 
         assert isinstance(file_name, str), type(file_name)
         import HABApp.parameters
-        return HABApp.parameters.get_parameter(file_name, *keys, default_value=default_value)
+        return HABApp.parameters.Parameter(file_name, *keys, default_value=default_value)
 
     # -----------------------------------------------------------------------------------------------------------------
     # internal functions
