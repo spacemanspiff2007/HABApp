@@ -81,7 +81,7 @@ class TestCases(unittest.TestCase):
 
         self.assertIsInstance(event, ItemStateChangedEvent)
         self.assertEqual(event.name, 'TestDateTimeTOGGLE')
-        self.assertEqual(datetime.datetime(2018, 6, 21, 21, 47, 8), event.value)
+        self.assertEqual(datetime.datetime(2018, 6, 21, 19, 47, 8), event.value)
 
     def test_GroupItemStateChangedEvent(self):
         d = {
