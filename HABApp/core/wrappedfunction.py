@@ -3,7 +3,6 @@ import concurrent.futures
 import logging
 import time
 import traceback
-from HABApp.util import PrintException
 
 default_logger = logging.getLogger('HABApp.Worker')
 
@@ -41,7 +40,6 @@ class WrappedFunction:
 
         self.__warn_too_long = warn_too_long
 
-    @PrintException
     def run(self, *args, **kwargs):
         if self.is_async:
             # schedule run async, we need to pass the event loop because we can create an async WrappedFunction

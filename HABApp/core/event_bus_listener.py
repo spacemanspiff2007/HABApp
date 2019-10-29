@@ -1,6 +1,6 @@
 import HABApp
+from HABApp.core.events import AllEvents
 from . import WrappedFunction
-from .events import AllEvents
 
 
 class EventBusListener:
