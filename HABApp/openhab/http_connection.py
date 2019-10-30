@@ -190,7 +190,7 @@ class HttpConnection:
         except Exception as e:
             if isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
                 self.async_try_uuid = asyncio.ensure_future(self._try_uuid())
-                log.info(f'... offline!')
+                log.info('... offline!')
             else:
                 for l in traceback.format_exc().splitlines():
                     log.error(l)
