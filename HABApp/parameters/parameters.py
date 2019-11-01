@@ -12,6 +12,11 @@ def remove_parameter_file(file):
 
 
 def set_parameter_file(file: str, value):
+    # validate the parameters, this will raise an exception
+    validator = _VALIDATORS.get(file)
+    if validator is not None:
+        value = validator(value)
+
     _PARAMETERS[file] = value
 
 
