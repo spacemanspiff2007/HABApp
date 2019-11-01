@@ -64,10 +64,10 @@ class RuleFile:
 
         created_rules = []
         try:
-            runpy.run_path(self.path, init_globals={
+            runpy.run_path(self.path, run_name=str(self.path), init_globals={
                 '__HABAPP__RUNTIME__': self.rule_manager.runtime,
                 '__HABAPP__RULE_FILE__': self,
-                '__HABAPP__RULES' : created_rules
+                '__HABAPP__RULES': created_rules,
             })
         except Exception as e:
             log.error(f"Could not load {self.path}: {e}!")

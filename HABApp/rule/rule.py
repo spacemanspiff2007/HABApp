@@ -21,6 +21,15 @@ from .watched_item import WatchedItem
 log = logging.getLogger('HABApp.Rule')
 
 
+def send_warnings_to_log(message, category, filename, lineno, file=None, line=None):
+    log.warning('%s:%s: %s:%s' % (filename, lineno, category.__name__, message))
+    return
+
+
+warnings.simplefilter('default')
+warnings.showwarning = send_warnings_to_log
+
+
 class Rule:
     def __init__(self):
 
@@ -83,74 +92,6 @@ class Rule:
             event.cancel()
         return None
 
-    def item_exists(self, name: str) -> bool:
-        """
-        Checks whether an item exists
-
-        :param name: item name
-        :return: True or False
-        """
-        assert isinstance(name, str), type(name)
-        return HABApp.core.Items.item_exists(name)
-
-    def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
-        """
-        Return the item with the specified name or create the item if it doesn't exist.
-
-        :param name: name of the item
-        :param item_factory: if specified and the item does not exist an item
-                             with the item_factory-class will be created
-        :return: item
-        """
-        if item_factory is None:
-            return HABApp.core.Items.get_item(name)
-
-        try:
-            return HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
-            return HABApp.core.Items.create_item(name, item_factory)
-
-    def get_item_state(self, name: str, default=None) -> typing.Any:
-        """
-        Return the state of the item.
-
-        :param name: item name
-        :param default: If the item does not exist or is None this value will be returned (has to be != None)
-        :return: state of the specified item
-        """
-        if default is None:
-            return HABApp.core.Items.get_item(name).value
-
-        try:
-            state = HABApp.core.Items.get_item(name).value
-        except HABApp.core.Items.ItemNotFoundException:
-            return default
-
-        if state is None:
-            return default
-        return state
-
-    def set_item_state(self, name: str, value: typing.Any):
-        """
-        Set a new state for an item. State can be anything so it is possible to set custom class instances
-        and load them in another rule. Using this will also generate the appropriate event.
-
-        If the item doesn't exist it will be created
-
-        :param name: item name or item instance
-        :param value: value for new item state
-        """
-        if isinstance(name, str):
-            try:
-                item = HABApp.core.Items.get_item(name)
-            except HABApp.core.Items.ItemNotFoundException:
-                item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
-        else:
-            assert isinstance(name, HABApp.core.items.Item)
-            item = name
-
-        item.post_value(value)
-        return None
 
     def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],
                    seconds_constant: int, watch_only_changes=True) -> WatchedItem:
@@ -430,20 +371,63 @@ class Rule:
     # -----------------------------------------------------------------------------------------------------------------
     # deprecated functions
     # -----------------------------------------------------------------------------------------------------------------
-    def get_rule_parameter(self, file_name: str, *keys, default_value='ToDo'):
-        """
+    def item_exists(self, name: str) -> bool:
+        warnings.warn("'item_exists' is deprecated!", DeprecationWarning, 2)
+        assert isinstance(name, str), type(name)
+        return HABApp.core.Items.item_exists(name)
 
-        :param file_name: Name of the file (without extension), will get created if it doesn't exist
-        :param keys: section name which value shall be loaded
-        :param default_value: if the corresponding entry in the file does not exist
-                              it will be created with default_value
-        """
-        warnings.warn("'get_rule_parameter' is deprecated, use 'HABApp.parameters.get_parameter()' instead",
+    def get_item_state(self, name: str, default=None) -> typing.Any:
+        warnings.warn("'get_item_state' is deprecated, use 'get_value' or 'value'"
+                      " method of the item instance instead", DeprecationWarning, 2)
+
+        if default is None:
+            return HABApp.core.Items.get_item(name).value
+
+        try:
+            state = HABApp.core.Items.get_item(name).value
+        except HABApp.core.Items.ItemNotFoundException:
+            return default
+
+        if state is None:
+            return default
+        return state
+
+    def set_item_state(self, name: str, value: typing.Any):
+        warnings.warn("'set_item_state' is deprecated, use 'post_value' or 'set_value' method "
+                      "of the item instance instead", DeprecationWarning, 2)
+
+        if isinstance(name, str):
+            try:
+                item = HABApp.core.Items.get_item(name)
+            except HABApp.core.Items.ItemNotFoundException:
+                item = HABApp.core.Items.create_item(name, HABApp.core.items.Item)
+        else:
+            assert isinstance(name, HABApp.core.items.Item)
+            item = name
+
+        item.post_value(value)
+        return None
+
+    def get_item(self, name: str, item_factory=None) -> HABApp.core.items.Item:
+
+        warnings.warn("'get_item' is deprecated, use 'Item.get_item' or 'Item.get_create_item' instead",
+                      DeprecationWarning, 2)
+
+        if item_factory is None:
+            return HABApp.core.Items.get_item(name)
+
+        try:
+            return HABApp.core.Items.get_item(name)
+        except HABApp.core.Items.ItemNotFoundException:
+            return HABApp.core.Items.create_item(name, item_factory)
+
+    def get_rule_parameter(self, file_name: str, *keys, default_value='ToDo'):
+        warnings.warn("'get_rule_parameter' is deprecated, use 'HABApp.parameters.Parameter()' instead",
                       DeprecationWarning, 2)
 
         assert isinstance(file_name, str), type(file_name)
         import HABApp.parameters
-        return HABApp.parameters.get_parameter(file_name, *keys, default_value=default_value)
+        return HABApp.parameters.Parameter(file_name, *keys, default_value=default_value)
 
     # -----------------------------------------------------------------------------------------------------------------
     # internal functions
@@ -460,12 +444,12 @@ class Rule:
 
         for listener in self.__event_listener:
             # Listener listens to all changes
-            if listener.name is None:
+            if listener.topic is None:
                 continue
 
             # check if specific item exists
-            if not HABApp.core.Items.item_exists(listener.name):
-                log.warning(f'Item "{listener.name}" does not exist (yet)! '
+            if not HABApp.core.Items.item_exists(listener.topic):
+                log.warning(f'Item "{listener.topic}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
         for item in self.__watched_items:

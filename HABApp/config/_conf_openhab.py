@@ -11,7 +11,11 @@ class Ping(ConfigContainer):
 
 class General(ConfigContainer):
     listen_only: bool = ConfigEntry(
-        False, description='If True HABApp will not change anything on the openhab instance.'
+        False, description='If True HABApp will not change anything on the openHAB instance.'
+    )
+    wait_for_openhab: bool = ConfigEntry(
+        False,
+        description='If True HABApp will wait for items from the openHAB instance before loading any rules on startup'
     )
 
 

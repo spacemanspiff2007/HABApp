@@ -1,15 +1,27 @@
 import pytest
+from pathlib import Path
 
 from HABApp.parameters.parameter import Parameter
 import HABApp.parameters.parameters as Parameters
+import HABApp.parameters.parameter_files as Files
 
 
 @pytest.fixture(scope="function")
 def params():
-    Parameters.ParameterFileWatcher.UNITTEST = True
-    Parameters.setup(None, None)
+    class DummyCfg:
+        class directories:
+            param: Path = Path(__file__).parent
+
+    Files.CONFIG = DummyCfg
+    # Parameters.ParameterFileWatcher.UNITTEST = True
+    # Parameters.setup(None, None)
     yield None
     Parameters._PARAMETERS.clear()
+
+    # delete possible created files
+    for f in DummyCfg.directories.param.iterdir():
+        if f.name.endswith('.yml'):
+            f.unlink()
 
 
 def test_lookup(params):

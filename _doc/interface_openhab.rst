@@ -16,6 +16,7 @@ Function parameters
 .. autoclass:: HABApp.openhab.oh_interface.OpenhabInterface
    :members:
 
+.. autoclass:: HABApp.openhab.oh_interface.OpenhabItemDefinition
 
 
 Openhab item types

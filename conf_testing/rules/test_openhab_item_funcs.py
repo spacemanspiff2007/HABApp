@@ -2,6 +2,7 @@ import dataclasses
 import logging
 import typing
 
+from HABApp.core.items import Item
 from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem
 from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem
 
@@ -39,7 +40,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
         item_type = str(item_type).split('.')[-1][:-6]
         item_name = f'{item_type}_item_test'
 
-        with OpenhabTmpItem(item_name, item_type) as item, ItemWaiter(self.get_item(item_name)) as waiter:
+        with OpenhabTmpItem(item_name, item_type) as item, ItemWaiter(Item.get_item(item_name)) as waiter:
             for test_param in test_params:
                 assert isinstance(test_param, TestParam)
 

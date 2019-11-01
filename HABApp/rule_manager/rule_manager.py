@@ -1,22 +1,23 @@
 import asyncio
 import datetime
 import logging
-import math
 import threading
 import time
 import traceback
 import typing
-from pathlib import Path
+
+import math
 
 import HABApp
 from HABApp.util import PrintException
 from .rule_file import RuleFile
-from HABApp.runtime import FileEventTarget
 
 log = logging.getLogger('HABApp.Rules')
 
+RULES_TOPIC = 'HABApp.Rules'
 
-class RuleManager(FileEventTarget):
+
+class RuleManager:
 
     def __init__(self, parent):
         assert isinstance(parent, HABApp.runtime.Runtime)
@@ -28,26 +29,57 @@ class RuleManager(FileEventTarget):
         self.__file_load_lock = threading.Lock()
         self.__rulefiles_lock = threading.Lock()
 
-        # if we load immediately we don't have the items from openhab in itemcache yet
-        def delayed_load():
-            time.sleep(5.2)
-            for f in self.runtime.config.directories.rules.glob('**/*.py'):
-                if f.name.endswith('.py'):
-                    time.sleep(1)
-                    HABApp.core.WrappedFunction(self.add_file, logger=log).run(f)
+        # Processing
+        self.__process_last_sec = 60
 
-        HABApp.core.WrappedFunction(delayed_load, logger=log, warn_too_long=False).run()
 
-        # folder watcher
-        self.runtime.folder_watcher.watch_folder(
-            folder=self.runtime.config.directories.rules,
-            file_ending='.py',
-            event_target=self,
-            worker_factory=lambda x: HABApp.core.WrappedFunction(x, logger=log).run,
-            watch_subfolders=True
+        # Listener to add rules
+        HABApp.core.EventBus.add_listener(
+            HABApp.core.EventBusListener(
+                RULES_TOPIC,
+                HABApp.core.WrappedFunction(self.request_file_load),
+                HABApp.core.events.habapp_events.RequestFileLoadEvent
+            )
         )
 
-        self.__process_last_sec = 60
+        # listener to remove rules
+        HABApp.core.EventBus.add_listener(
+            HABApp.core.EventBusListener(
+                RULES_TOPIC,
+                HABApp.core.WrappedFunction(self.request_file_unload),
+                HABApp.core.events.habapp_events.RequestFileUnloadEvent
+            )
+        )
+
+        # folder watcher
+        self.runtime.folder_watcher.watch_folder_habapp_events(
+            folder=self.runtime.config.directories.rules, file_ending='.py',
+            habapp_topic=RULES_TOPIC, watch_subfolders=True
+        )
+
+        # Initial loading of rules
+        HABApp.core.WrappedFunction(self.load_rules_on_startup, logger=log, warn_too_long=False).run()
+
+    def load_rules_on_startup(self):
+
+        if self.runtime.config.openhab.connection.host and self.runtime.config.openhab.general.wait_for_openhab:
+            items_found = False
+            while not items_found:
+                time.sleep(3)
+                for item in HABApp.core.Items.get_all_items():
+                    if isinstance(item, (HABApp.openhab.items.NumberItem, HABApp.openhab.items.ContactItem,
+                                         HABApp.openhab.items.SwitchItem, HABApp.openhab.items.RollershutterItem,
+                                         HABApp.openhab.items.DimmerItem, HABApp.openhab.items.ColorItem)):
+                        items_found = True
+                        break
+            time.sleep(0.2)
+        else:
+            time.sleep(5.2)
+
+        # trigger event for every file
+        w = self.runtime.folder_watcher.get_handler(self.runtime.config.directories.rules)
+        w.trigger_load_for_all_files(delay=1)
+        return None
 
     @PrintException
     async def process_scheduled_events(self):
@@ -60,6 +92,8 @@ class RuleManager(FileEventTarget):
             if now.second == self.__process_last_sec:
                 await asyncio.sleep(0.1)
                 continue
+
+            # remember sec
             self.__process_last_sec = now.second
 
             with self.__rulefiles_lock:
@@ -73,7 +107,7 @@ class RuleManager(FileEventTarget):
             if end.second == self.__process_last_sec:
                 frac, whole = math.modf(time.time())
                 sleep_time = 1 - frac + 0.005   # prevent rounding error and add a little bit of security
-                await asyncio.sleep( sleep_time)
+                await asyncio.sleep(sleep_time)
 
 
     @PrintException
@@ -100,16 +134,20 @@ class RuleManager(FileEventTarget):
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]
 
-    @PrintException
-    def reload_file(self, path: Path):
-        self.remove_file(path)
-        self.add_file(path)
 
     @PrintException
-    def remove_file(self, path: Path):
+    def request_file_unload(self, event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
+
+        path = self.runtime.config.directories.rules / event.filename
+        path_str = str(path)
+
+        # Only unload already loaded files
+        if path_str not in self.files:
+            log.warning(f'Rule file {path} is not yet loaded and therefore can not be unloaded')
+            return None
+
         try:
             with self.__file_load_lock:
-                path_str = str(path)
                 log.debug(f'Removing file: {path}')
                 if path_str in self.files:
                     with self.__rulefiles_lock:
@@ -122,12 +160,23 @@ class RuleManager(FileEventTarget):
             return None
 
     @PrintException
-    def add_file(self, path : Path):
+    def request_file_load(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
+
+        path = self.runtime.config.directories.rules / event.filename
+        path_str = str(path)
+
+        # Only load existing files
+        if not path.is_file():
+            log.warning(f'Rule file {path} does not exist and can not be loaded!')
+            return None
+
+        # Unload if we have already loaded
+        if path_str in self.files:
+            self.request_file_unload(event)
 
         try:
             # serialize loading
             with self.__file_load_lock:
-                path_str = str(path)
 
                 log.debug(f'Loading file: {path}')
                 with self.__rulefiles_lock:

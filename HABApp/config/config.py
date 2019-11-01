@@ -1,8 +1,9 @@
-import codecs
 import logging
 import logging.config
 import sys
 import time
+import traceback
+from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 
 import ruamel.yaml
@@ -89,23 +90,23 @@ class Config(FileEventTarget):
         self.first_start = True
         try:
             # try load logging config first. If we use abs path we can log errors when loading config.yml
-            self.add_file(self.file_conf_logging)
-            self.add_file(self.file_conf_habapp)
+            self.on_file_added(self.file_conf_logging)
+            self.on_file_added(self.file_conf_habapp)
         except AbsolutePathExpected:
-            self.add_file(self.file_conf_habapp)
-            self.add_file(self.file_conf_logging)
+            self.on_file_added(self.file_conf_habapp)
+            self.on_file_added(self.file_conf_logging)
         self.first_start = False
 
-    def add_file(self, path: Path):
-        self.reload_file(path)
+    def on_file_added(self, path: Path):
+        self.on_file_changed(path)
 
-    def reload_file(self, path: Path):
+    def on_file_changed(self, path: Path):
         if path.name == 'config.yml':
             self.load_cfg()
         if path.name == 'logging.yml':
             self.load_log()
 
-    def remove_file(self, path: Path):
+    def on_file_removed(self, path: Path):
         pass
 
     def __check_create_logging(self):
@@ -172,22 +173,30 @@ class Config(FileEventTarget):
                 p = (self.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 
-            # Delete old Log-Files on startup
-            if self.first_start and p.is_file():
-                try:
-                    # default is utf-8 logging so we write BOM
-                    with open(p, mode='wb') as f:
-                        f.write(codecs.BOM_UTF8)
-                finally:
-                    pass
-
         # load prepared logging
         try:
             logging.config.dictConfig(cfg)
         except Exception as e:
             print(f'Error loading logging config: {e}')
             return None
-
         log.debug('Loaded logging config')
+
+        # Try rotating the logs on first start
+        if self.first_start:
+            for handler in logging._handlerList:
+                try:
+                    handler = handler()  # weakref -> call it to get object
+                    if isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
+                        handler.doRollover()
+                except Exception:
+                    lines = traceback.format_exc().splitlines()
+                    # cut away AbsolutePathExpected Exception from log output
+                    start = 0
+                    for i, l in enumerate(lines):
+                        if l.startswith('Traceback'):
+                            start = i
+                    for l in lines[start:]:
+                        log.error(l)
+
         logging.getLogger('HABApp').info(f'HABApp Version {__VERSION__}')
         return None

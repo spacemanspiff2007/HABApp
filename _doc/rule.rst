@@ -23,19 +23,21 @@ Some item types provide convenience functions, so it is advised to always set th
 
 The preferred way to get and create items is through the class factories :class:`~HABApp.core.items.Item.get_item`
 and :class:`~HABApp.core.items.Item.get_create_item` since this ensures the proper item class and provides type hints when
-using an IDE:
+using an IDE!
 
 .. execute_code::
+    :header_code: Example:
     :hide_output:
 
     from HABApp.core.items import Item
-    my_item = Item.get_create_item('MyItem', initial_value=5)
-    my_item = Item.get_item('MyItem')
+    my_item = Item.get_create_item('MyItem', initial_value=5)   # This will create the item if it does not exist
+    my_item = Item.get_item('MyItem')                           # This will raise an exception if the item is not found
     print(my_item)
 
 
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
+
 
 .. list-table::
    :widths: auto
@@ -43,26 +45,12 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
    
    * - Function
      - Description
-   
-   * - :meth:`~HABApp.Rule.get_item`
-     - Return an item (or create it if it doesn't exist yet)
-     
-   * - :meth:`~HABApp.Rule.get_item_state`
-     - Get the state of an item
 
-   * - :meth:`~HABApp.Rule.set_item_state`
-     - | Set the state of an item  to a new value (which can be anything).
-       | This can also be used with custom class instances to load them from other rules.
-         If the item doesn't exist yet it will be created.
-       
-   * - :meth:`~HABApp.Rule.item_exists`
-     - Check if an item already exists.
-     
    * - :meth:`~HABApp.Rule.item_watch`
      - | Keep watch on the state of an item.
        | If the item does not receive an update or change for a certain amount of time
          there will be a :class:`~HABApp.core.ValueNoUpdateEvent` or a :class:`~HABApp.core.ValueNoChangeEvent`
-         on the event bus.
+         on the event bus. It is possible to add multiple watches to an item.
 
    * - :meth:`~HABApp.Rule.item_watch_and_listen`
      - Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`

@@ -16,6 +16,17 @@ log = logging.getLogger('HABApp.openhab.Connection')
 
 @dataclasses.dataclass
 class OpenhabItemDefinition:
+    """
+    :ivar str type: item type
+    :ivar str name: item name
+    :ivar typing.Any state: item state
+    :ivar str state: item label
+    :ivar str category: item category
+    :ivar bool editable: item can changed through Rest API
+    :ivar typing.List[str] tags: item tags
+    :ivar typing.List[str] groups: groups the item is in
+    :ivar typing.List[OpenhabItemDefinition] members: If the item is a group this contains the members
+    """
     type: str
     name: str
     state: typing.Any
@@ -134,7 +145,7 @@ class OpenhabInterface:
         :param tags: item tags
         :param groups: in which groups is the item
         :param group_type: what kind of group is it
-        :param group_function: Group state aggregation function
+        :param group_function: group state aggregation function
         :param group_function_params: params for group state aggregation
         :return: True if item was created/updated
         """

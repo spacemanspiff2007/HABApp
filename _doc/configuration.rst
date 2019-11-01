@@ -38,6 +38,8 @@ Configuration contents
         general:
             listen_only: False  # If True  HABApp will not change any value on the openhab instance.
                                 # Useful for testing rules from another machine.
+            wait_for_openhab: False  # If True HABApp will wait for items from the openHAB instance
+                                     # before loading any rules on startup
 
 
     mqtt:
@@ -61,5 +63,5 @@ Configuration contents
             retain: false   # Default retain flag when publishing values
 
         general:
-            listen_only: False  # If True  HABApp will not publish any value to the broker.
-                                # Useful for testing rules from another machine.
+            listen_only: False # If True  HABApp will not publish any value to the broker.
+                               # Useful for testing rules from another machine.

@@ -58,7 +58,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
         self.__async_items = asyncio.ensure_future(self.update_all_items())
 
         # start ping
-        self.__async_ping = asyncio.ensure_future(self.async_ping)
+        self.__async_ping = asyncio.ensure_future(self.async_ping())
 
 
     def on_disconnected(self):

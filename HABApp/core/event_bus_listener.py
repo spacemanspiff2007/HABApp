@@ -1,14 +1,14 @@
 import HABApp
+from HABApp.core.events import AllEvents
 from . import WrappedFunction
-from .events import AllEvents
 
 
 class EventBusListener:
-    def __init__(self, name, callback, event_type=AllEvents):
-        assert isinstance(name, str) or name is None, type(name)
+    def __init__(self, topic, callback, event_type=AllEvents):
+        assert isinstance(topic, str) or topic is None, type(topic)
         assert isinstance(callback, WrappedFunction)
 
-        self.name: str = name
+        self.topic: str = topic
         self.func: WrappedFunction = callback
 
         self.event_filter = event_type

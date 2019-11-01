@@ -30,6 +30,7 @@ openhab:
     user: ''
   general:
     listen_only: false
+    wait_for_openhab: true
   ping:
     enabled: true
     interval: 10

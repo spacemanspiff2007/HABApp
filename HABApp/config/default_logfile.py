@@ -12,8 +12,8 @@ handlers:
   HABApp_default:
     class: logging.handlers.RotatingFileHandler
     filename: 'HABApp.log'
-    maxBytes: 10_485_760
-    backupCount: '3'
+    maxBytes: 1_048_576
+    backupCount: 3
 
     formatter: HABApp_format
     level: DEBUG
@@ -21,7 +21,7 @@ handlers:
   EventFile:
     class: logging.handlers.RotatingFileHandler
     filename: 'events.log'
-    maxBytes: 10_485_760
+    maxBytes: 1_048_576
     backupCount: 3
 
     formatter: HABApp_format
