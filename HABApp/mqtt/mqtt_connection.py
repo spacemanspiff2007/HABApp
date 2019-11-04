@@ -150,7 +150,7 @@ class MqttConnection:
         _item = HABApp.mqtt.items.MqttItem.get_create_item(topic)
 
         # remeber state and update item before doing callbacks
-        _old_state = _item.state
+        _old_state = _item.value
         _item.set_value(payload)
 
         # Post events

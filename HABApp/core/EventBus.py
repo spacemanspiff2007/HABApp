@@ -13,6 +13,8 @@ _habapp_log = logging.getLogger('HABApp')
 _EVENT_LISTENER: typing.Dict[str, typing.List[EventBusListener]] = {}
 _EVENT_LISTENER_ALL_EVENTS: typing.List[EventBusListener] = []
 
+# todo: make central HABApp topic (name) definition here
+
 
 def __get_listener_description(listener: EventBusListener) -> str:
     if listener.topic is None:
