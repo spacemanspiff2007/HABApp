@@ -14,7 +14,6 @@ from .oh_interface import get_openhab_interface
 log = logging.getLogger('HABApp.openhab.Connection')
 
 
-
 class OpenhabConnection(HttpConnectionEventHandler):
 
     def __init__(self, config, shutdown):

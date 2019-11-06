@@ -142,6 +142,9 @@ def main() -> typing.Union[int, str]:
             print(e)
         return str(e)
     finally:
+        # Sleep to allow underlying connections of aiohttp to close
+        # https://aiohttp.readthedocs.io/en/stable/client_advanced.html#graceful-shutdown
+        loop.run_until_complete(asyncio.sleep(1))
         loop.close()
     return 0
 

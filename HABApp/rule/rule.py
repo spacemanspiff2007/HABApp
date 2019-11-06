@@ -21,11 +21,13 @@ from .watched_item import WatchedItem
 log = logging.getLogger('HABApp.Rule')
 
 
+# Func to log deprecation warnings
 def send_warnings_to_log(message, category, filename, lineno, file=None, line=None):
     log.warning('%s:%s: %s:%s' % (filename, lineno, category.__name__, message))
     return
 
 
+# Setup deprecation warnings
 warnings.simplefilter('default')
 warnings.showwarning = send_warnings_to_log
 
