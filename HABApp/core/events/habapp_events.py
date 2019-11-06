@@ -14,6 +14,9 @@ class RequestFileLoadEvent:
     def __init__(self, name: str = None):
         self.filename: str = name
 
+    def get_path(self, parent_folder: Path) -> Path:
+        return parent_folder / self.filename
+
     def __repr__(self):
         return f'<{self.__class__.__name__} filename: {self.filename}>'
 
@@ -30,6 +33,10 @@ class RequestFileUnloadEvent:
 
     def __init__(self, name: str = None):
         self.filename: str = name
+
+    def get_path(self, parent_folder: Path) -> Path:
+        return parent_folder / self.filename
+
 
     def __repr__(self):
         return f'<{self.__class__.__name__} filename: {self.filename}>'

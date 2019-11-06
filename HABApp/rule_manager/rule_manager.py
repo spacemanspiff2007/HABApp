@@ -137,8 +137,7 @@ class RuleManager:
 
     @PrintException
     def request_file_unload(self, event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
-
-        path = self.runtime.config.directories.rules / event.filename
+        path = event.get_path(self.runtime.config.directories.rules)
         path_str = str(path)
 
         # Only unload already loaded files
@@ -162,7 +161,7 @@ class RuleManager:
     @PrintException
     def request_file_load(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
-        path = self.runtime.config.directories.rules / event.filename
+        path = event.get_path(self.runtime.config.directories.rules)
         path_str = str(path)
 
         # Only load existing files

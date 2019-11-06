@@ -56,7 +56,7 @@ def setup_param_files(config, folder_watcher):
 
 
 def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
-    path = CONFIG.directories.param / event.filename
+    path = event.get_path(CONFIG.directories.param)
 
     with LOCK:  # serialize to get proper error messages
         try:
@@ -75,7 +75,7 @@ def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
 
 def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
-    path = CONFIG.directories.param / event.filename
+    path = event.get_path(CONFIG.directories.param)
 
     with LOCK:  # serialize to get proper error messages
         try:
