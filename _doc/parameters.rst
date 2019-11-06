@@ -75,3 +75,40 @@ Changes in the file will be automatically picked up through :class:`~HABApp.para
    :members:
 
    .. automethod:: __init__
+
+Validation
+------------------------------
+Since parameters used to provide flexible configuration for automation classes they can get quite complex and
+error prone. Thus it is possible to provide a validator for a file which will check the files for constraints,
+missing keys etc. when the file is loaded.
+
+.. autofunction:: HABApp.parameters.set_file_validator
+
+Example
+
+.. execute_code::
+    :hide_output:
+
+    # hide
+    from HABApp.parameters.parameters import _PARAMETERS
+    _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
+    # hide
+
+    import HABApp
+    import voluptuous
+
+    # Validator can even and should be specified before loading rules
+
+    # allows a dict e.g. { 'key1': {'key2': '5}}
+    HABApp.parameters.set_file_validator('file1', {str: {str: int}})
+
+    # More complex example with an optional key:
+    validator = {
+        'Test': int,
+        'Key': {
+            'mandatory': str,
+            voluptuous.Optional('optional'): int
+        }
+    }
+    HABApp.parameters.set_file_validator('file1', validator)
+

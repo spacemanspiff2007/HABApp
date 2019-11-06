@@ -24,23 +24,31 @@ def get_parameter_file(file: str):
     return _PARAMETERS[file]
 
 
-def set_file_validator(file: str, validator: typing.Any, allow_extra_keys=True):
+def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=True):
+    """Add a validator for the parameter file. If the file is already loaded this will reload the file.
+
+    :param filename: filename which shall be validated (without extension)
+    :param validator: Description of file content - see the library
+                      `voluptuous <https://github.com/alecthomas/voluptuous#show-me-an-example/>`_ for examples.
+                      Use `None` to remove validator.
+    :param allow_extra_keys: Allow additional keys in the file structure
+    """
 
     # Remove validator
     if validator is None:
-        _VALIDATORS.pop(file, None)
+        _VALIDATORS.pop(filename, None)
         return
 
     # Set validator
-    old_validator = _VALIDATORS.get(file)
-    _VALIDATORS[file] = new_validator = voluptuous.Schema(
+    old_validator = _VALIDATORS.get(filename)
+    _VALIDATORS[filename] = new_validator = voluptuous.Schema(
         validator, required=True, extra=(voluptuous.ALLOW_EXTRA if allow_extra_keys else voluptuous.PREVENT_EXTRA)
     )
 
     # todo: move this to file handling so we get the extension
     if old_validator != new_validator:
         HABApp.core.EventBus.post_event(
-            HABAPP_PARAM_TOPIC, HABApp.core.events.habapp_events.RequestFileLoadEvent(file + '.yml')
+            HABAPP_PARAM_TOPIC, HABApp.core.events.habapp_events.RequestFileLoadEvent(filename + '.yml')
         )
 
 
