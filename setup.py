@@ -1,13 +1,20 @@
+import typing
 from pathlib import Path
+
 import setuptools
 
-# Load version number
-version = {}
-with open("HABApp/__version__.py") as fp:
-    exec(fp.read(), version)
-assert version
-assert version['__VERSION__']
-__VERSION__ = version['__VERSION__']
+
+# Load version number without importing HABApp
+def load_version() -> str:
+    version: typing.Dict[str, str] = {}
+    with open("HABApp/__version__.py") as fp:
+        exec(fp.read(), version)
+    assert version['__VERSION__'], version
+    return version['__VERSION__']
+
+
+__VERSION__ = load_version()
+
 print(f'Version: {__VERSION__}')
 print('')
 

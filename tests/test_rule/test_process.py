@@ -46,6 +46,21 @@ class TestCases(unittest.TestCase):
         self.assertEqual(self.ret.returncode, 0)
         self.assertTrue(self.ret.stdout.startswith('20'))
 
+    def test_run_func_no_cap(self):
+        self.rule.execute_subprocess(
+            self.set_ret, sys.executable, '-c', 'import datetime; print(datetime.datetime.now())', capture_output=False
+        )
+
+        # Test this call from __main__ to create thread save process watchers
+        if sys.platform != "win32":
+            asyncio.get_child_watcher()
+
+        asyncio.get_event_loop().run_until_complete(asyncio.gather(asyncio.sleep(0.5)))
+        self.assertEqual(self.ret.returncode, 0)
+        self.assertEqual(self.ret.stdout, None)
+        self.assertEqual(self.ret.stderr, None)
+
+
     def test_exception(self):
         self.rule.execute_subprocess(self.set_ret, 'asdfasdf', capture_output=False)
 

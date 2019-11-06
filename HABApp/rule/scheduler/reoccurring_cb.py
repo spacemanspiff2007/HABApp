@@ -17,7 +17,7 @@ class ReoccurringScheduledCallback(ScheduledCallback):
         assert isinstance(interval, datetime.timedelta), type(interval)
         self.time_interval = interval
 
-    def check_due(self, now: datetime):
+    def check_due(self, now: datetime.datetime):
         super().check_due(now)
         if self.is_due:
             self.next_call += self.time_interval
@@ -40,7 +40,7 @@ class DayOfWeekScheduledCallback(ScheduledCallback):
         while not self.next_call.isoweekday() in self.weekdays:
             self.next_call += datetime.timedelta(days=1)
 
-    def check_due(self, now: datetime):
+    def check_due(self, now: datetime.datetime):
         super().check_due(now)
         if self.is_due:
             self.next_call += datetime.timedelta(days=1)

@@ -6,7 +6,7 @@ from HABApp.core.items import Item
 from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem
 from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem
 
-log = logging.getLogger('HABApp.Test')
+log = logging.getLogger('HABApp.Tests')
 
 
 @dataclasses.dataclass

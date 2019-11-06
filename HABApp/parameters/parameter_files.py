@@ -1,6 +1,7 @@
 import logging
 import threading
 import traceback
+import typing
 
 import ruamel.yaml
 
@@ -11,14 +12,14 @@ log = logging.getLogger('HABApp.RuleParameters')
 
 _yml_setup = ruamel.yaml.YAML()
 _yml_setup.default_flow_style = False
-_yml_setup.default_style = False
-_yml_setup.width = 1000000
+_yml_setup.default_style = False    # type: ignore
+_yml_setup.width = 1000000          # type: ignore
 _yml_setup.allow_unicode = True
-_yml_setup.sort_base_mapping_type_on_output = False
+_yml_setup.sort_base_mapping_type_on_output = False     # type: ignore
 
 LOCK = threading.Lock()
 HABAPP_PARAM_TOPIC = 'HABApp.Parameters'
-CONFIG = None
+CONFIG = None   # type: typing.Optional[HABApp.config.Config]
 
 
 def setup_param_files(config, folder_watcher):
@@ -56,7 +57,7 @@ def setup_param_files(config, folder_watcher):
 
 
 def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
-    path = CONFIG.directories.param / event.filename
+    path = event.get_path(CONFIG.directories.param)
 
     with LOCK:  # serialize to get proper error messages
         try:
@@ -75,7 +76,7 @@ def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
 
 def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
-    path = CONFIG.directories.param / event.filename
+    path = event.get_path(CONFIG.directories.param)
 
     with LOCK:  # serialize to get proper error messages
         try:
