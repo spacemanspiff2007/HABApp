@@ -20,9 +20,9 @@ class RuleFile:
 
         self.path = path
 
-        self.rules = {}
+        self.rules = {}  # type: typing.Dict[str, HABApp.Rule]
 
-        self.class_ctr = collections.defaultdict(lambda : 1)
+        self.class_ctr: typing.Dict[str, int] = collections.defaultdict(lambda : 1)
 
     def suggest_rule_name(self, obj) -> str:
 

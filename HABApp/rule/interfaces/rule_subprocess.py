@@ -1,16 +1,17 @@
 import asyncio
+import typing
 
 
 class FinishedProcessInfo:
     """Information about the finished process."""
 
-    def __init__(self, returncode: int, stdout: str, stderr: str):
+    def __init__(self, returncode: int, stdout: typing.Optional[str], stderr: typing.Optional[str]):
         self.returncode: int = returncode
-        self.stdout: str = stdout
-        self.stderr: str = stderr
+        self.stdout: typing.Optional[str] = stdout
+        self.stderr: typing.Optional[str] = stderr
 
     def __repr__(self):
-        return f'<ProcessInfo: returncode:{self.returncode} stdout:{self.stdout} stderr:{self.stderr}>'
+        return f'<ProcessInfo: returncode: {self.returncode}, stdout: {self.stdout}, stderr: {self.stderr}>'
 
 
 async def async_subprocess_exec(callback, program: str, *args, capture_output=True):
@@ -29,10 +30,11 @@ async def async_subprocess_exec(callback, program: str, *args, capture_output=Tr
             stderr=asyncio.subprocess.PIPE if capture_output else None
         )
 
-        stdout, stderr = await proc.communicate()
-        stdout = stdout.decode()
-        stderr = stderr.decode()
+        b_stdout, b_stderr = await proc.communicate()
         ret_code = proc.returncode
+        if capture_output:
+            stdout = b_stdout.decode()
+            stderr = b_stderr.decode()
     except asyncio.CancelledError:
         if proc is not None:
             proc.terminate()

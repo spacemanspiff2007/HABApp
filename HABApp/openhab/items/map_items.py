@@ -1,4 +1,5 @@
 import datetime
+import typing
 
 from HABApp.core.items import Item
 from . import SwitchItem, ContactItem, RollershutterItem, DimmerItem, ColorItem, NumberItem
@@ -8,7 +9,7 @@ def map_items(name, openhab_type : str, openhab_value : str):
     assert isinstance(openhab_type, str), type(openhab_type)
     assert isinstance(openhab_value, str), type(openhab_value)
 
-    value = openhab_value
+    value: typing.Optional[str] = openhab_value
     if openhab_value == 'NULL' or openhab_value == 'UNDEF':
         value = None
 

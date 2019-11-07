@@ -91,7 +91,6 @@ def main() -> typing.Union[int, str]:
     if args.NoMQTTConnectionErrors is True:
         HABApp.mqtt.MqttInterface._RAISE_CONNECTION_ERRORS = False
 
-    loop = None
     log = logging.getLogger('HABApp')
 
     # if installed we use uvloop because it seems to be much faster (untested)
@@ -113,7 +112,7 @@ def main() -> typing.Union[int, str]:
             # https://docs.python.org/3/library/asyncio-subprocess.html#subprocess-and-threads
             asyncio.get_child_watcher()
 
-        loop = asyncio.get_event_loop()
+        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
 
         loop.set_debug(True)
         loop.slow_callback_duration = 0.02

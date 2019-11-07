@@ -1,6 +1,7 @@
 import logging
 import threading
 import traceback
+import typing
 
 import ruamel.yaml
 
@@ -11,14 +12,14 @@ log = logging.getLogger('HABApp.RuleParameters')
 
 _yml_setup = ruamel.yaml.YAML()
 _yml_setup.default_flow_style = False
-_yml_setup.default_style = False
-_yml_setup.width = 1000000
+_yml_setup.default_style = False    # type: ignore
+_yml_setup.width = 1000000          # type: ignore
 _yml_setup.allow_unicode = True
-_yml_setup.sort_base_mapping_type_on_output = False
+_yml_setup.sort_base_mapping_type_on_output = False     # type: ignore
 
 LOCK = threading.Lock()
 HABAPP_PARAM_TOPIC = 'HABApp.Parameters'
-CONFIG = None
+CONFIG = None   # type: typing.Optional[HABApp.config.Config]
 
 
 def setup_param_files(config, folder_watcher):

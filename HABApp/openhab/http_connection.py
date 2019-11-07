@@ -103,8 +103,8 @@ class HttpConnection:
         self.__set_offline(str(e))
         return True
 
-    async def _check_http_response(self, future, additional_info="",
-                                   accept_404=False) -> typing.Optional[ ClientResponse]:
+    async def _check_http_response(self, future: aiohttp.client._RequestContextManager, additional_info="",
+                                   accept_404=False) -> ClientResponse:
         try:
             resp = await future
         except Exception as e:
@@ -112,8 +112,7 @@ class HttpConnection:
             log.log(logging.WARNING if is_disconnect else logging.ERROR, f'"{e}" ({type(e)})')
             if is_disconnect:
                 raise OpenhabDisconnectedError()
-            else:
-                return None
+            raise
 
         # Server Errors if openhab is not ready yet
         if resp.status >= 500:
@@ -290,6 +289,7 @@ class HttpConnection:
             if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
                 for l in traceback.format_exc().splitlines():
                     log.error(l)
+            return None
 
     async def async_get_item(self, item_name: str) -> dict:
         fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))

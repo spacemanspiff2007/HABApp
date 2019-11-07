@@ -105,8 +105,7 @@ class MqttInterface:
         return result
 
 
-
-MQTT_INTERFACE: MqttInterface = None
+MQTT_INTERFACE: MqttInterface
 
 
 def get_mqtt_interface(connection=None, config=None) -> MqttInterface:

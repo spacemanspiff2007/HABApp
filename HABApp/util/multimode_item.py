@@ -21,7 +21,7 @@ class MultiModeValue:
     """
     DISABLE_OPERATORS = {
         '>': operator.gt, '<': operator.lt, '>=': operator.ge, '<=': operator.le,
-        '==': operator.eq, '!=': operator.ne, None: None
+        '==': operator.eq, '!=': operator.ne,
     }
 
     def __init__(self, parent, name: str, initial_value=None, auto_disable_on=None, auto_disable_after=None,
@@ -45,9 +45,9 @@ class MultiModeValue:
 
         assert isinstance(auto_disable_after, datetime.timedelta) or auto_disable_after is None, \
             type(auto_disable_after)
-        assert auto_disable_on in MultiModeValue.DISABLE_OPERATORS, auto_disable_on
+        assert auto_disable_on is None or auto_disable_on in MultiModeValue.DISABLE_OPERATORS, auto_disable_on
         self.auto_disable_after: typing.Optional[datetime.timedelta] = auto_disable_after
-        self.auto_disable_on: str = auto_disable_on
+        self.auto_disable_on: typing.Optional[str] = auto_disable_on
 
         self.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = calc_value_func
 
@@ -151,7 +151,7 @@ class MultiModeItem(Item):
     """
 
     @classmethod
-    def get_create_item(cls, name: str, logger: logging.getLoggerClass() = None):
+    def get_create_item(cls, name: str, logger: logging.Logger = None):
         item = super().get_create_item(name, None)
         item.logger = logger
         return item
@@ -164,7 +164,7 @@ class MultiModeItem(Item):
 
         self.__lock = Lock()
 
-        self.logger: typing.Optional[logging._loggerClass] = None
+        self.logger: typing.Optional[logging.Logger] = None
 
     def log(self, level, text, *args, **kwargs):
         if self.logger is not None:
@@ -204,7 +204,7 @@ class MultiModeItem(Item):
 
             # make the lower priority known to the mode
             low = None
-            for priority, child in sorted(self.__values_by_prio.items()):  # type: int, MultiModeValue
+            for _, child in sorted(self.__values_by_prio.items()):  # type: int, MultiModeValue
                 child._set_lower_priority_mode(low)
                 low = child
 

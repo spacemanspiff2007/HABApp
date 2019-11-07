@@ -58,7 +58,8 @@ def add_parameter(file: str, *keys, default_value):
 
     if file not in _PARAMETERS:
         save = True
-        _PARAMETERS[file] = param = {}
+        param: typing.Dict[str, typing.Any] = {}
+        _PARAMETERS[file] = param
     else:
         param = _PARAMETERS[file]
 

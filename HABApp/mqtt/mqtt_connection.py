@@ -1,4 +1,5 @@
 import logging
+import typing
 import ujson
 
 import paho.mqtt.client as mqtt
@@ -24,7 +25,7 @@ class MqttConnection:
 
         self.client: mqtt.Client = None
 
-        self.subscriptions = []
+        self.subscriptions: typing.List[typing.Tuple[str, int]] = []
 
         # config changes
         self.__config = mqtt_config

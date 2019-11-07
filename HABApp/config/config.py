@@ -17,10 +17,10 @@ from .default_logfile import get_default_logfile
 
 _yaml_param = ruamel.yaml.YAML(typ='safe')
 _yaml_param.default_flow_style = False
-_yaml_param.default_style = False
-_yaml_param.width = 1000000
+_yaml_param.default_style = False   # type: ignore
+_yaml_param.width = 1000000         # type: ignore
 _yaml_param.allow_unicode = True
-_yaml_param.sort_base_mapping_type_on_output = False
+_yaml_param.sort_base_mapping_type_on_output = False    # type: ignore
 
 
 log = logging.getLogger('HABApp.Config')

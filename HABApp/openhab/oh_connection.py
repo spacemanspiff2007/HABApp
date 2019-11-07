@@ -98,11 +98,11 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
 
 
-    def on_sse_event(self, event: dict):
+    def on_sse_event(self, event_dict: dict):
 
         try:
             # Lookup corresponding OpenHAB event
-            event = get_event(event)
+            event = get_event(event_dict)
 
             # Events which change the ItemRegistry
             if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
@@ -139,7 +139,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
 
     @PrintException
-    async def update_all_items(self) -> int:
+    async def update_all_items(self):
 
         try:
             data = await self.connection.async_get_items()
@@ -175,4 +175,4 @@ class OpenhabConnection(HttpConnectionEventHandler):
             log.error(e)
             for l in traceback.format_exc().splitlines():
                 log.error(l)
-            return 0
+            return None

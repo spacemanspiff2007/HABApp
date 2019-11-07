@@ -1,3 +1,4 @@
+import typing
 from HABApp.core.events import ComplexEventValue
 
 
@@ -16,9 +17,9 @@ class OnOffValue(ComplexEventValue):
 
 class PercentValue(ComplexEventValue):
     def __init__(self, value: str):
-        value = float(value)
-        assert 0 <= value <= 100, f'{value} ({type(value)})'
-        super().__init__(value)
+        percent = float(value)
+        assert 0 <= percent <= 100, f'{percent} ({type(percent)})'
+        super().__init__(percent)
 
     def __str__(self):
         return f'{self.value}%'
@@ -47,14 +48,16 @@ class HSBValue(ComplexEventValue):
 
 class QuantityValue(ComplexEventValue):
     def __init__(self, value: str):
-        val, unit = value.split(' ')
+        str_val, unit = value.split(' ')
+
         try:
-            val = int(val)
+            val: typing.Union[int, float] = int(str_val)
         except ValueError:
-            val = float(val)
+            val = float(str_val)
 
         super().__init__(val)
         self.unit = unit
+
 
     def __str__(self):
         return f'{self.value} {self.unit}'
