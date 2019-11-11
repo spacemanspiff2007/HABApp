@@ -26,8 +26,8 @@ class RuleManager:
         self.files: typing.Dict[str, RuleFile] = {}
 
         # serialize loading
-        self.__file_load_lock = threading.Lock()
-        self.__rulefiles_lock = threading.Lock()
+        self.__load_lock = threading.Lock()
+        self.__files_lock = threading.Lock()
 
         # Processing
         self.__process_last_sec = 60
@@ -96,7 +96,7 @@ class RuleManager:
             # remember sec
             self.__process_last_sec = now.second
 
-            with self.__rulefiles_lock:
+            with self.__files_lock:
                 for file in self.files.values():
                     assert isinstance(file, RuleFile), type(file)
                     for rule in file.iterrules():
@@ -136,27 +136,33 @@ class RuleManager:
 
 
     @PrintException
-    def request_file_unload(self, event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
+    def request_file_unload(self, event: HABApp.core.events.habapp_events.RequestFileUnloadEvent, request_lock=True):
         path = event.get_path(self.runtime.config.directories.rules)
         path_str = str(path)
 
-        # Only unload already loaded files
-        if path_str not in self.files:
-            log.warning(f'Rule file {path} is not yet loaded and therefore can not be unloaded')
-            return None
-
         try:
-            with self.__file_load_lock:
-                log.debug(f'Removing file: {path}')
-                if path_str in self.files:
-                    with self.__rulefiles_lock:
-                        rule = self.files.pop(path_str)
-                    rule.unload()
+            if request_lock:
+                self.__load_lock.acquire()
+
+            # Only unload already loaded files
+            with self.__files_lock:
+                already_loaded = path_str in self.files
+            if not already_loaded:
+                log.warning(f'Rule file {path} is not yet loaded and therefore can not be unloaded')
+                return None
+
+            log.debug(f'Removing file: {path}')
+            with self.__files_lock:
+                rule = self.files.pop(path_str)
+            rule.unload()
         except Exception:
             log.error(f"Could not remove {path}!")
             for l in traceback.format_exc().splitlines():
                 log.error(l)
             return None
+        finally:
+            if request_lock:
+                self.__load_lock.release()
 
     @PrintException
     def request_file_load(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
@@ -169,23 +175,27 @@ class RuleManager:
             log.warning(f'Rule file {path} does not exist and can not be loaded!')
             return None
 
-        # Unload if we have already loaded
-        if path_str in self.files:
-            self.request_file_unload(event)
-
         try:
             # serialize loading
-            with self.__file_load_lock:
+            self.__load_lock.acquire()
 
-                log.debug(f'Loading file: {path}')
-                with self.__rulefiles_lock:
-                    self.files[path_str] = file = RuleFile(self, path)
-                file.load()
+            # Unload if we have already loaded
+            with self.__files_lock:
+                already_loaded = path_str in self.files
+            if already_loaded:
+                self.request_file_unload(event, request_lock=False)
+
+            log.debug(f'Loading file: {path}')
+            with self.__files_lock:
+                self.files[path_str] = file = RuleFile(self, path)
+            file.load()
         except Exception:
             log.error(f"Could not (fully) load {path}!")
             for l in traceback.format_exc().splitlines():
                 log.error(l)
             return None
+        finally:
+            self.__load_lock.release()
 
         log.debug(f'File {path_str} successfully loaded!')
 
