@@ -18,11 +18,11 @@ class RuleFile:
         assert isinstance(rule_manager, RuleManager)
         self.rule_manager = rule_manager
 
-        self.path = path
+        self.path: Path = path
 
         self.rules = {}  # type: typing.Dict[str, HABApp.Rule]
 
-        self.class_ctr: typing.Dict[str, int] = collections.defaultdict(lambda : 1)
+        self.class_ctr: typing.Dict[str, int] = collections.defaultdict(lambda: 1)
 
     def suggest_rule_name(self, obj) -> str:
 

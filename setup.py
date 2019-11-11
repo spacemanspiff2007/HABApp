@@ -12,6 +12,7 @@ def load_version() -> str:
     assert version['__VERSION__'], version
     return version['__VERSION__']
 
+
 __VERSION__ = load_version()
 
 print(f'Version: {__VERSION__}')
