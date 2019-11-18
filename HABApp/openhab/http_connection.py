@@ -274,7 +274,7 @@ class HttpConnection:
         resp = await self._check_http_response(fut)
         if resp.status >= 300:
             raise OpenhabNotReadyYet()
-        return (await resp.text(encoding='utf-8')) if resp else resp
+        return await resp.text(encoding='utf-8')
 
     async def async_get_items(self) -> typing.Optional[list]:
         fut = self.__session.get(
