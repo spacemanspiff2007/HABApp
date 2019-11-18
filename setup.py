@@ -46,7 +46,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=['tests*']),
     install_requires=[
-        'easyco>=0.2',
+        'easyco>=0.2.1',
         'aiohttp>=3.5.4',
         'voluptuous>=0.11.7',
         'aiohttp-sse-client',

@@ -35,10 +35,10 @@ class InvalidConfigException(Exception):
 
 
 class Directories(PathContainer):
-    logging: Path = 'log'
-    rules: Path = 'rules'
-    lib: Path = 'lib'
-    param: Path = 'param'
+    logging: Path = Path('log')
+    rules: Path = Path('rules')
+    lib: Path = Path('lib')
+    param: Path = Path('param')
 
     def on_all_values_set(self):
         try:
@@ -165,8 +165,8 @@ class Config(FileEventTarget):
             # make Filenames absolute path in the log folder if not specified
             p = Path(handler_cfg['filename'])
             if not p.is_absolute():
-                # Our log folder ist not yet converted to path -> it is not loaded yet
-                if isinstance(self.directories.logging, str):
+                # Our log folder ist not yet converted to path -> it is not loaded
+                if not self.directories.logging.is_absolute():
                     raise AbsolutePathExpected()
 
                 # Use defined parent folder
