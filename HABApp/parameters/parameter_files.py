@@ -19,7 +19,7 @@ _yml_setup.sort_base_mapping_type_on_output = False     # type: ignore
 
 LOCK = threading.Lock()
 HABAPP_PARAM_TOPIC = 'HABApp.Parameters'
-CONFIG = None   # type: typing.Optional[HABApp.config.Config]
+CONFIG: HABApp.config.Config
 
 
 def setup_param_files(config, folder_watcher):

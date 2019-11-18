@@ -35,10 +35,10 @@ class InvalidConfigException(Exception):
 
 
 class Directories(PathContainer):
-    logging: Path = 'log'
-    rules: Path = 'rules'
-    lib: Path = 'lib'
-    param: Path = 'param'
+    logging: Path = Path('log')
+    rules: Path = Path('rules')
+    lib: Path = Path('lib')
+    param: Path = Path('param')
 
     def on_all_values_set(self):
         try:
