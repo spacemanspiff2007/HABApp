@@ -155,9 +155,12 @@ Do not use `time.sleep` but rather :meth:`~HABApp.Rule.run_in`.
    * - :meth:`~HABApp.Rule.run_on_day_of_week`
      - Run a function at a specific time on specific days of the week
 
-All functions return an instance of ScheduledCallback
+   * - :meth:`~HABApp.Rule.run_on_sun`
+     - Run a function in relation to the sun (e.g. Sunrise, Sunset)
 
-.. autoclass:: HABApp.rule.scheduler.ScheduledCallback
+All functions return an instance of ScheduledCallbackBase
+
+.. autoclass:: HABApp.rule.scheduler.base.ScheduledCallbackBase
    :members:
 
 

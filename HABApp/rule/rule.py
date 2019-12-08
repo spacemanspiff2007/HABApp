@@ -14,8 +14,8 @@ import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
-from .scheduler import ReoccurringScheduledCallback, ScheduledCallback, WorkdayScheduledCallback, \
-    WeekendScheduledCallback, DayOfWeekScheduledCallback, TYPING_DATE_TIME
+from .scheduler import ReoccurringScheduledCallback, OneTimeCallback, DayOfWeekScheduledCallback, \
+    TYPING_DATE_TIME, SunScheduledCallback
 from .watched_item import WatchedItem
 
 log = logging.getLogger('HABApp.Rule')
@@ -59,7 +59,7 @@ class Rule:
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
         self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
-        self.__future_events: typing.List[ScheduledCallback] = []
+        self.__future_events: typing.List[OneTimeCallback] = []
         self.__watched_items: typing.List[WatchedItem] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
 
@@ -120,7 +120,7 @@ class Rule:
         self.__watched_items.append(item)
         return item
 
-    def item_watch_and_listen(self, name: str, seconds_constant: int, callback,
+    def item_watch_and_listen(self, name: typing.Union[HABApp.core.items.Item, str], seconds_constant: int, callback,
                               watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventBusListener]:
         """
         Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
@@ -201,7 +201,26 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = ReoccurringScheduledCallback(time, interval, cb, *args, **kwargs)
+        future_event = ReoccurringScheduledCallback(cb, *args, **kwargs)
+        future_event.interval(interval)
+        future_event.set_next_run_time(time)
+        self.__future_events.append(future_event)
+        return future_event
+
+    def run_on_sun(self, sun_event: str, callback, *args, run_if_missed=False, **kwargs) -> SunScheduledCallback:
+        """Run a function on sunrise/sunset etc
+
+        :param sun_event: 'sunrise', 'sunset', 'dusk', 'dawn'
+        :param run_if_missed: run the event if we missed it for today
+        :param callback: |param_scheduled_cb|
+        :param args: |param_scheduled_cb_args|
+        :param kwargs: |param_scheduled_cb_kwargs|
+        """
+        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        future_event = SunScheduledCallback(cb, *args, **kwargs)
+        future_event.sun_trigger(sun_event)
+        future_event._calculate_next_call()
+        future_event.update_run_time()
         self.__future_events.append(future_event)
         return future_event
 
@@ -218,7 +237,7 @@ class Rule:
 
         # names of weekdays in local language
         lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
-        lookup.update( {datetime.date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
+        lookup.update({datetime.date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
 
         # abbreviations in German and English
         lookup.update({"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7})
@@ -233,7 +252,9 @@ class Rule:
             weekdays[i] = lookup[val.lower()]
 
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = DayOfWeekScheduledCallback(time, weekdays, cb, *args, **kwargs)
+        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
+        future_event.weekdays(weekdays)
+        future_event.set_next_run_time(time)
         self.__future_events.append(future_event)
         return future_event
 
@@ -246,11 +267,13 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = DayOfWeekScheduledCallback(time, [1, 2, 3, 4, 5, 6, 7], cb, *args, **kwargs)
+        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
+        future_event.weekdays([1, 2, 3, 4, 5, 6, 7])
+        future_event.set_next_run_time(time)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_workdays(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> WorkdayScheduledCallback:
+    def run_on_workdays(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
         :param time: |param_scheduled_time|
@@ -259,11 +282,13 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = WorkdayScheduledCallback(time, cb, *args, **kwargs)
+        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
+        future_event.weekdays('workday')
+        future_event.set_next_run_time(time)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_weekends(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> WeekendScheduledCallback:
+    def run_on_weekends(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
         :param time: |param_scheduled_time|
@@ -272,7 +297,9 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = WeekendScheduledCallback(time, cb, *args, **kwargs)
+        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
+        future_event.weekdays('weekend')
+        future_event.set_next_run_time(time)
         self.__future_events.append(future_event)
         return future_event
 
@@ -312,7 +339,7 @@ class Rule:
         interval = datetime.timedelta(seconds=60)
         return self.run_every(start, interval, callback, *args, **kwargs)
 
-    def run_at(self, date_time: TYPING_DATE_TIME, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_at(self, date_time: TYPING_DATE_TIME, callback, *args, **kwargs) -> OneTimeCallback:
         """
         Run a function at a specified date_time
 
@@ -322,11 +349,12 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = ScheduledCallback(date_time, cb, *args, **kwargs)
+        future_event = OneTimeCallback(cb, *args, **kwargs)
+        future_event.set_next_run_time(date_time)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_in(self, seconds: typing.Union[int, datetime.timedelta], callback, *args, **kwargs) -> ScheduledCallback:
+    def run_in(self, seconds: typing.Union[int, datetime.timedelta], callback, *args, **kwargs) -> OneTimeCallback:
         """
         Run the callback in x seconds
 
@@ -339,11 +367,12 @@ class Rule:
         fut = datetime.timedelta(seconds=seconds) if not isinstance(seconds, datetime.timedelta) else seconds
 
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = ScheduledCallback(fut, cb, *args, **kwargs)
+        future_event = OneTimeCallback(cb, *args, **kwargs)
+        future_event.set_next_run_time(fut)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_soon(self, callback, *args, **kwargs) -> ScheduledCallback:
+    def run_soon(self, callback, *args, **kwargs) -> OneTimeCallback:
         """
         Run the callback as soon as possible (typically in the next second).
 
@@ -352,7 +381,8 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
-        future_event = ScheduledCallback( None, cb, *args, **kwargs)
+        future_event = OneTimeCallback(cb, *args, **kwargs)
+        future_event.set_next_run_time(None)
         self.__future_events.append(future_event)
         return future_event
 
@@ -473,7 +503,7 @@ class Rule:
 
         # sheduled events
         clean_events = False
-        for future_event in self.__future_events:  # type: ScheduledCallback
+        for future_event in self.__future_events:  # type: OneTimeCallback
             future_event.check_due(now)
             future_event.execute()
             if future_event.is_finished:

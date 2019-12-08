@@ -8,8 +8,12 @@ import time
 import traceback
 import typing
 from pathlib import Path
+import astral
 
 import HABApp
+
+# Remove City list because we don't need it
+astral._LOCATION_INFO = ''
 
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:

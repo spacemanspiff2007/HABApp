@@ -1,6 +1,8 @@
 import typing
 from datetime import datetime, timedelta
 
+import pytz
+
 from HABApp.core import Items
 from HABApp.core.items import Item
 
@@ -41,19 +43,19 @@ class ItemTests:
         for value in self.TEST_VALUES:
             i = self.CLS('test')
             i.set_value(value)
-            i.last_change = datetime.now() - timedelta(seconds=5)
-            i.last_update = datetime.now() - timedelta(seconds=5)
+            i._last_change = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
+            i._last_update = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
             i.set_value(value)
 
-            assert i.last_update > datetime.now() - timedelta(milliseconds=100)
-            assert i.last_change < datetime.now() - timedelta(milliseconds=100)
+            assert i._last_update > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_change < datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
 
     def test_time_value_change(self):
         i = self.CLS('test')
         for value in self.TEST_VALUES:
-            i.last_change = datetime.now() - timedelta(seconds=5)
-            i.last_update = datetime.now() - timedelta(seconds=5)
+            i._last_change = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
+            i._last_update = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
             i.set_value(value)
 
-            assert i.last_update > datetime.now() - timedelta(milliseconds=100)
-            assert i.last_change > datetime.now() - timedelta(milliseconds=100)
+            assert i._last_update > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_change > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)

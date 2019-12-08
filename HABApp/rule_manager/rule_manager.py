@@ -1,12 +1,13 @@
 import asyncio
 import datetime
 import logging
+import math
 import threading
 import time
 import traceback
 import typing
 
-import math
+from pytz import utc
 
 import HABApp
 from HABApp.util import PrintException
@@ -86,7 +87,7 @@ class RuleManager:
 
         while not self.runtime.shutdown.requested:
 
-            now = datetime.datetime.now()
+            now = datetime.datetime.now(tz=utc)
 
             # process only once per second
             if now.second == self.__process_last_sec:
@@ -99,11 +100,11 @@ class RuleManager:
             with self.__files_lock:
                 for file in self.files.values():
                     assert isinstance(file, RuleFile), type(file)
-                    for rule in file.iterrules():
+                    for rule in file.rules.values():
                         rule._process_events(now)
 
             # sleep longer, try to sleep until the next full second
-            end = datetime.datetime.now()
+            end = datetime.datetime.now(tz=utc)
             if end.second == self.__process_last_sec:
                 frac, whole = math.modf(time.time())
                 sleep_time = 1 - frac + 0.005   # prevent rounding error and add a little bit of security

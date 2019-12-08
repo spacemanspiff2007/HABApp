@@ -1,6 +1,10 @@
+import datetime
 import sys
-from HABApp.runtime import Runtime
+
+import pytz
+
 from HABApp.core import WrappedFunction
+from HABApp.runtime import Runtime
 
 
 def _get_topmost_globals() -> dict:
@@ -53,9 +57,10 @@ class SimpleRuleRunner:
         WrappedFunction._WORKERS = self.worker
 
 
-    def process_events(self, date_time):
+    def process_events(self):
+        now = datetime.datetime.now(tz=pytz.utc)
         for rule in self.loaded_rules:
-            rule._process_events(date_time)
+            rule._process_events(now)
 
     def __enter__(self):
         self.set_up()

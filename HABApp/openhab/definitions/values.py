@@ -47,17 +47,23 @@ class HSBValue(ComplexEventValue):
 
 
 class QuantityValue(ComplexEventValue):
+
+    @staticmethod
+    def split_unit(value: str) -> typing.Tuple[str, str]:
+        p = value.rfind(' ')
+        assert p >= 0, f'No unit separator found for QuantityValue in "{value}"'
+        val = value[0:p]
+        unit = value[p + 1:]
+        return val, unit
+
     def __init__(self, value: str):
-        str_val, unit = value.split(' ')
-
+        value, unit = QuantityValue.split_unit(value)
         try:
-            val: typing.Union[int, float] = int(str_val)
+            val: typing.Union[int, float] = int(value)
         except ValueError:
-            val = float(str_val)
-
+            val = float(value)
         super().__init__(val)
         self.unit = unit
-
 
     def __str__(self):
         return f'{self.value} {self.unit}'

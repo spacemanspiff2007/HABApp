@@ -53,6 +53,9 @@ setuptools.setup(
         'paho-mqtt',
         'ujson',
         'watchdog',
+        'astral',
+        'pytz',
+        'tzlocal',
 
         # Backports
         'dataclasses;python_version<"3.7"',

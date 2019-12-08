@@ -11,6 +11,7 @@ from EasyCo import ConfigFile, PathContainer
 
 from HABApp.__version__ import __VERSION__
 from HABApp.runtime import FileEventTarget
+from ._conf_location import Location
 from ._conf_mqtt import Mqtt
 from ._conf_openhab import Openhab
 from .default_logfile import get_default_logfile
@@ -51,6 +52,7 @@ class Directories(PathContainer):
 
 
 class HABAppConfigFile(ConfigFile):
+    location = Location()
     directories = Directories()
     mqtt = Mqtt()
     openhab = Openhab()
@@ -200,3 +202,13 @@ class Config(FileEventTarget):
 
         logging.getLogger('HABApp').info(f'HABApp Version {__VERSION__}')
         return None
+
+
+CONFIG: HABAppConfigFile = None
+
+
+def setup_config(runtime, config_folder : Path) -> Config:
+    global CONFIG
+    cfg = Config(runtime, config_folder)
+    CONFIG = cfg.config
+    return cfg

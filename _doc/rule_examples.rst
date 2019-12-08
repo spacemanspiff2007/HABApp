@@ -11,8 +11,12 @@ Mirror openHAB events to a MQTT Broker
 ---------------------------------------
 .. literalinclude:: ../conf/rules/openhab_to_mqtt_rule.py
 
+.. _item_const_example:
+
 Trigger an event when an item is constant
 ------------------------------------------
+Get an even when the item is constant for 5 and for 10 seconds.
+
 .. execute_code::
 
     # hide
@@ -24,17 +28,20 @@ Trigger an event when an item is constant
     # hide
 
     import HABApp
+    from HABApp.core.items import Item
     from HABApp.core.events import ValueNoChangeEvent
 
     class MyRule(HABApp.Rule):
         def __init__(self):
             super().__init__()
+            my_item = Item.get_item('test_watch')
 
-            self.item_watch('test_watch', 5)
-            self.item_watch('test_watch', 10)
-            self.listen_event('test_watch', self.item_constant, ValueNoChangeEvent)
+            # don't use item_watch_and_listen, it's just a convenience function for only one timeout.
+            self.item_watch(my_item, 5)     # Create event when item doesn't change for  5 secs
+            self.item_watch(my_item, 10)    # Create event when item doesn't change for 10 secs
+            self.listen_event(my_item, self.item_constant, ValueNoChangeEvent)
 
-            self.set_item_state('test_watch', 'my_value')
+            my_item.set_value('my_value')
 
         def item_constant(self, event):
             print(f'{event}')
@@ -89,6 +96,6 @@ to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more informa
             1 / 0
     FaultyRule()
     # hide
-    runner.process_events(datetime.datetime.now())
+    runner.process_events()
     runner.tear_down()
     # hide

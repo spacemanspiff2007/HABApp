@@ -42,7 +42,7 @@ class Runtime:
         # Start Folder watcher!
         self.folder_watcher.start(self.shutdown)
 
-        self.config = HABApp.config.Config(self, config_folder=config_folder)
+        self.config = HABApp.config.setup_config(self, config_folder=config_folder)
 
         # OpenHAB
         self.openhab_connection = HABApp.openhab.OpenhabConnection(self.config, self.shutdown)

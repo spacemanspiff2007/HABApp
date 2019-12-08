@@ -1,7 +1,10 @@
 import datetime
 import typing
-import HABApp
 import warnings
+import tzlocal
+from pytz import utc
+
+import HABApp
 
 
 class Item:
@@ -50,9 +53,17 @@ class Item:
         self.name: str = name
         self.value: typing.Any = initial_value
 
-        _now = datetime.datetime.now()
-        self.last_change: datetime.datetime = _now
-        self.last_update: datetime.datetime = _now
+        _now = datetime.datetime.now(tz=utc)
+        self._last_change: datetime.datetime = _now
+        self._last_update: datetime.datetime = _now
+
+    @property
+    def last_change(self):
+        return self._last_change.astimezone(tzlocal.get_localzone()).replace(tzinfo=None)
+
+    @property
+    def last_update(self):
+        return self._last_update.astimezone(tzlocal.get_localzone()).replace(tzinfo=None)
 
     def set_value(self, new_value) -> bool:
         """Set a new value without creating events on the event bus
@@ -62,10 +73,10 @@ class Item:
         """
         state_changed = self.value != new_value
 
-        _now = datetime.datetime.now()
+        _now = datetime.datetime.now(tz=utc)
         if state_changed:
-            self.last_change = _now
-        self.last_update = _now
+            self._last_change = _now
+        self._last_update = _now
 
         self.value = new_value
         return state_changed

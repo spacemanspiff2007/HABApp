@@ -127,7 +127,7 @@ class MultiModeValue:
 
         # Automatically disable if <> etc.
         if self.auto_disable_on is not None:
-            if self.__operator_on_value(self.auto_disable_on, value_with_lower_priority):
+            if self.__operator_on_value(operator_str=self.auto_disable_on, low_prio_value=value_with_lower_priority):
                 self.__enabled = False
                 self.last_update = datetime.datetime.now()
                 self.__parent.log(logging.INFO, f'{self.__name} disabled '

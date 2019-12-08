@@ -9,6 +9,7 @@ Welcome to the HABApp documentation!
    
    installation
    configuration
+   getting_started
    logging
    rule
    parameters

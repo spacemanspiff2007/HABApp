@@ -9,15 +9,15 @@ class MyOpenhabRule(HABApp.Rule):
         super().__init__()
 
         # Trigger on item updates
-        self.listen_event( 'TestContact', self.item_state_update, ItemStateEvent)
-        self.listen_event( 'TestDateTime', self.item_state_update, ValueUpdateEvent)
+        self.listen_event('TestContact', self.item_state_update, ItemStateEvent)
+        self.listen_event('TestDateTime', self.item_state_update, ValueUpdateEvent)
 
         # Trigger on item changes
-        self.listen_event( 'TestDateTime', self.item_state_change, ItemStateChangedEvent)
-        self.listen_event( 'TestSwitch', self.item_state_change, ValueChangeEvent)
+        self.listen_event('TestDateTime', self.item_state_change, ItemStateChangedEvent)
+        self.listen_event('TestSwitch', self.item_state_change, ValueChangeEvent)
 
         # Trigger on item commands
-        self.listen_event( 'TestSwitch', self.item_command, ItemCommandEvent)
+        self.listen_event('TestSwitch', self.item_command, ItemCommandEvent)
 
     def item_state_update(self, event):
         assert isinstance(event, ValueUpdateEvent)
