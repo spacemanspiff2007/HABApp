@@ -51,7 +51,6 @@ class EventWaiter:
 
         raise ValueError()
 
-
     def __enter__(self) -> 'EventWaiter':
         HABApp.core.EventBus.add_listener(self.event_listener)
         return self

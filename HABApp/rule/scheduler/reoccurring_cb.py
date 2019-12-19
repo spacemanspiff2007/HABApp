@@ -1,58 +1,46 @@
 import typing
-import datetime
+from datetime import timedelta
 
-from .scheduled_cb import ScheduledCallback, TYPING_DATE_TIME
+from .base import ScheduledCallbackBase, local_tz
 
 
-class ReoccurringScheduledCallback(ScheduledCallback):
+class ReoccurringScheduledCallback(ScheduledCallbackBase):
 
-    CALL_ONCE = False
+    def __init__(self, callback, *args, **kwargs):
+        super().__init__(callback, *args, **kwargs)
+        self._interval: timedelta = None
 
-    def __init__(self, time: TYPING_DATE_TIME, interval: typing.Union[int, datetime.timedelta],
-                 callback, *args, **kwargs):
-        super().__init__(time, callback, *args, **kwargs)
+    def _calculate_next_call(self):
+        self._next_base += self._interval
+        self.update_run_time()
 
+    def interval(self, interval: typing.Union[int, timedelta]):
         if isinstance(interval, int):
-            interval = datetime.timedelta(seconds=interval)
-        assert isinstance(interval, datetime.timedelta), type(interval)
-        self.time_interval = interval
-
-    def check_due(self, now: datetime.datetime):
-        super().check_due(now)
-        if self.is_due:
-            self.next_call += self.time_interval
+            interval = timedelta(seconds=interval)
+        assert isinstance(interval, timedelta), type(interval)
+        assert interval.total_seconds() > 0
+        self._interval = interval
 
 
-class DayOfWeekScheduledCallback(ScheduledCallback):
+class DayOfWeekScheduledCallback(ScheduledCallbackBase):
 
-    CALL_ONCE = False
+    def __init__(self, callback, *args, **kwargs):
+        super().__init__(callback, *args, **kwargs)
+        self._weekdays: typing.Set[int] = None
 
-    def __init__(self, time: TYPING_DATE_TIME, weekdays: typing.List[int], callback, *args, **kwargs):
-        super().__init__(time, callback, *args, **kwargs)
-
-        assert weekdays, 'please specify weekdays'
-        assert isinstance(weekdays, list)
+    def weekdays(self, weekdays):
+        if weekdays == 'weekend':
+            weekdays = [6, 7]
+        elif weekdays == 'workday':
+            weekdays = [1, 2, 3, 4, 5]
         for k in weekdays:
             assert 1 <= k <= 7, k
-        self.weekdays = weekdays
+        self._weekdays = weekdays
 
-        # shedule for next day if the date_time is in the past or date does not match weekdays
-        while not self.next_call.isoweekday() in self.weekdays:
-            self.next_call += datetime.timedelta(days=1)
-
-    def check_due(self, now: datetime.datetime):
-        super().check_due(now)
-        if self.is_due:
-            self.next_call += datetime.timedelta(days=1)
-            while not self.next_call.isoweekday() in self.weekdays:
-                self.next_call += datetime.timedelta(days=1)
-
-
-class WorkdayScheduledCallback(DayOfWeekScheduledCallback):
-    def __init__(self, time: TYPING_DATE_TIME, callback, *args, **kwargs):
-        super().__init__(time, [1, 2, 3, 4, 5], callback, *args, **kwargs)
-
-
-class WeekendScheduledCallback(DayOfWeekScheduledCallback):
-    def __init__(self, time: TYPING_DATE_TIME, callback, *args, **kwargs):
-        super().__init__(time, [6, 7], callback, *args, **kwargs)
+    def _calculate_next_call(self):
+        self._next_base += timedelta(days=1)
+        loc = self._next_base.astimezone(local_tz)
+        while not loc.isoweekday() in self._weekdays:
+            self._next_base += timedelta(days=1)
+            loc = self._next_base.astimezone(local_tz)
+        self.update_run_time()

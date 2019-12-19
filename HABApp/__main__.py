@@ -8,8 +8,12 @@ import time
 import traceback
 import typing
 from pathlib import Path
+import astral
 
 import HABApp
+
+# Remove City list because we don't need it
+astral._LOCATION_INFO = ''
 
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
@@ -71,10 +75,6 @@ def get_command_line_args(args=None):
         type=int,
         default=None
     )
-    parser.add_argument(
-        '--NoMQTTConnectionErrors', required=False, action='store_true',
-        help='Suppress MQTT connection errors and only log them (for testing without a connected MQTT Broker)'
-    )
     return parser.parse_args(args)
 
 
@@ -88,8 +88,6 @@ def main() -> typing.Union[int, str]:
         print(' done!')
     if args.config is not None:
         args.config = Path(args.config).resolve()
-    if args.NoMQTTConnectionErrors is True:
-        HABApp.mqtt.MqttInterface._RAISE_CONNECTION_ERRORS = False
 
     log = logging.getLogger('HABApp')
 

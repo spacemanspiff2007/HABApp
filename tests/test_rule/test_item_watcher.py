@@ -1,10 +1,10 @@
-import unittest
+import pytz
 import time
+import unittest
 from datetime import datetime, timedelta
 
 import HABApp
 from HABApp import Rule
-
 from ..rule_runner import SimpleRuleRunner
 
 
@@ -45,7 +45,7 @@ class TestCases(unittest.TestCase):
         watcher, listener = self.rule.item_watch_and_listen('test_watch', 2, self.run_no_change_event)
         HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item, 'asdf')
 
-        now = datetime.now()
+        now = datetime.now(tz=pytz.utc)
         for delta in [timedelta(seconds=-2), timedelta(), timedelta(seconds=1)]:
             self.rule.set_item_state('test_watch', 'asdf')
             self.event_triggered = False
@@ -57,7 +57,7 @@ class TestCases(unittest.TestCase):
         time.sleep(0.01)
         self.assertTrue(self.event_triggered)
 
-        now = datetime.now()
+        now = datetime.now(tz=pytz.utc)
         for delta in [timedelta(seconds=2), timedelta(), timedelta(seconds=1)]:
             self.rule.set_item_state('test_watch', 'asdf')
             self.event_triggered = False
@@ -76,7 +76,7 @@ class TestCases(unittest.TestCase):
         )
         HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item, 'asdf')
 
-        now = datetime.now()
+        now = datetime.now(tz=pytz.utc)
         for delta in [timedelta(seconds=-2), timedelta(), timedelta(seconds=1)]:
             self.rule.set_item_state('test_watch', 'asdf')
             self.event_triggered = False
@@ -88,7 +88,7 @@ class TestCases(unittest.TestCase):
         time.sleep(0.01)
         self.assertFalse(self.event_triggered)
 
-        now = datetime.now()
+        now = datetime.now(tz=pytz.utc)
         for delta in [timedelta(seconds=1), timedelta(), timedelta(seconds=1)]:
             self.rule.set_item_state('test_watch', 'asdf')
             self.event_triggered = False

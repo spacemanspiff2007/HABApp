@@ -1,14 +1,13 @@
 import typing
-import ujson
 
 import paho.mqtt.client as mqtt
+import ujson
 
 from .mqtt_connection import MqttConnection, log
 from ..config import Mqtt as MqttConfig
 
 
 class MqttInterface:
-    _RAISE_CONNECTION_ERRORS = True
 
     def __init__(self, connection: MqttConnection, config: MqttConfig):
         assert isinstance(connection, MqttConnection)
@@ -21,11 +20,8 @@ class MqttInterface:
         if self.__connection.connected:
             return True
 
-        if MqttInterface._RAISE_CONNECTION_ERRORS:
-            raise ConnectionError('Mqtt client not connected')
-        else:
-            log.warning('Mqtt client not connected')
-            return False
+        raise ConnectionError('Mqtt client not connected')
+
 
     def publish(self, topic: str, payload: typing.Any, qos: int = None, retain: bool = None) -> int:
         """

@@ -1,64 +1,86 @@
-import unittest
-import typing
-from datetime import datetime, timedelta
+import HABApp
+import unittest.mock
+from datetime import datetime, date, time
+
+from pytz import utc
 
 from HABApp.rule import scheduler
-from HABApp.core import WrappedFunction
 
 
+class FuncWrapper:
+    mock = unittest.mock.MagicMock()
 
-class TestCases(unittest.TestCase):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.called = False
-        self.last_args: typing.Optional[typing.List] = None
-        self.last_kwargs: typing.Optional[typing.Dict] = None
-
-    def setUp(self):
-        self.called = False
-        self.last_args = None
-        self.last_kwargs = None
-
-        self.worker = WrappedFunction._WORKERS
-
-        class CExecutor:
-            def submit(self, callback, *args, **kwargs):
-                callback(*args, **kwargs)
-        WrappedFunction._WORKERS = CExecutor()
-
-    def tearDown(self):
-        WrappedFunction._WORKERS = self.worker
-
-    def call_func(self, *args, **kwargs):
-        self.called = True
-        self.last_args = args
-        self.last_kwargs = kwargs
-
-    def test_ScheduledCallback(self):
-        shed = scheduler.ScheduledCallback(
-            datetime.now() + timedelta(seconds=1),
-            WrappedFunction(self.call_func),
-            'T1',
-            F2='F2'
-        )
-        self.assertIs(shed.check_due(datetime.now()), False)
-        self.assertIs(shed.execute(), False)
-        self.assertIs(self.called, False)
-        self.assertEqual(shed.is_finished, False)
-
-        # recheck and run
-        self.assertIs(shed.check_due(datetime.now() + timedelta(seconds=1)), True)
-        self.assertIs(shed.execute(), True)
-
-        # func call
-        self.assertIs(self.called, True)
-        self.assertEqual(self.last_args, ('T1',))
-        self.assertEqual(self.last_kwargs, {'F2': 'F2'})
-
-        self.assertEqual(shed.is_finished, True)
+    def run(self, *args, **kwargs):
+        self.mock(*args, **kwargs)
 
 
-if __name__ == '__main__':
-    unittest.main()
+func = FuncWrapper()
+
+
+def test_one_time():
+    func.mock.reset_mock()
+    s = scheduler.OneTimeCallback(func)
+
+    s.set_next_run_time(None)
+    s.check_due(datetime.now(tz=utc))
+    func.mock.assert_not_called()
+    s.execute()
+    func.mock.assert_called()
+
+
+def test_workday():
+    func.mock.reset_mock()
+    s = scheduler.DayOfWeekScheduledCallback(func)
+
+    s.weekdays('workday')
+    s.set_next_run_time(datetime(2001, 1, 1, 12, 30))
+    s._calculate_next_call()
+
+    assert s._next_call.date() == date(2001, 1, 2)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 3)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 4)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 5)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 8)
+
+
+def test_weekend():
+    func.mock.reset_mock()
+    s = scheduler.DayOfWeekScheduledCallback(func)
+
+    s.weekdays('weekend')
+    s.set_next_run_time(datetime(2001, 1, 1, 12, 30))
+    s._calculate_next_call()
+
+    assert s._next_call.date() == date(2001, 1, 6)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 7)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 13)
+
+
+def test_sun():
+    from HABApp.config.config import HABAppConfigFile
+    HABApp.config.config.CONFIG = HABAppConfigFile()
+    HABApp.config.config.CONFIG.location.latitude = 52.52437
+    HABApp.config.config.CONFIG.location.longitude = 13.41053
+    HABApp.config.config.CONFIG.location.elevation = 43
+    HABApp.config.config.CONFIG.location.on_all_values_set()
+
+    func.mock.reset_mock()
+    s = scheduler.SunScheduledCallback(func)
+
+    s.sun_trigger('sunrise')
+    s._calculate_next_call()
+
+    s.earliest(time(hour=12))
+    s.update_run_time()
+    assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(12)
+
+    s.earliest(None)
+    s.latest(time(hour=4))
+    s.update_run_time()
+    assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(4)

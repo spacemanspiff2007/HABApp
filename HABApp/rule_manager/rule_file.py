@@ -39,10 +39,6 @@ class RuleFile:
 
         return f'{name:s}.{found:d}' if found > 1 else f'{name:s}'
 
-    def iterrules(self):
-        for rule in self.rules.values():
-            yield rule
-
     def check_all_rules(self):
         for rule in self.rules.values():  # type: HABApp.Rule
             rule._check_rule()

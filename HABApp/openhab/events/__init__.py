@@ -2,6 +2,7 @@ from .base_event import BaseItemEvent
 from .item_events import ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,\
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent
 from .channel_events import ChannelTriggeredEvent
+from .thing_events import ThingStatusInfoChangedEvent, ThingStatusInfoEvent
 
 EVENT_LIST = [
     # item events
@@ -9,7 +10,10 @@ EVENT_LIST = [
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent,
 
     # channel events
-    ChannelTriggeredEvent
+    ChannelTriggeredEvent,
+
+    # thing events
+    ThingStatusInfoEvent, ThingStatusInfoChangedEvent,
 ]
 
 __event_lookup = {k.__name__: k for k in EVENT_LIST}

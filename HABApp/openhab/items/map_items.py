@@ -3,15 +3,24 @@ import typing
 
 from HABApp.core.items import Item
 from . import SwitchItem, ContactItem, RollershutterItem, DimmerItem, ColorItem, NumberItem
+from ..definitions.values import QuantityValue
 
 
-def map_items(name, openhab_type : str, openhab_value : str):
+def map_items(name, openhab_type: str, openhab_value: str):
     assert isinstance(openhab_type, str), type(openhab_type)
     assert isinstance(openhab_value, str), type(openhab_value)
 
     value: typing.Optional[str] = openhab_value
     if openhab_value == 'NULL' or openhab_value == 'UNDEF':
         value = None
+
+    # Quantity types are like this: Number:Temperature and have a unit set: "12.3 °C".
+    # We have to remove the dimension from the type and remove the unit from the value
+    if ':' in openhab_type:
+        openhab_type = openhab_type[:openhab_type.find(':')]
+        # if the item is not initialized its None and has no dimension
+        if value is not None:
+            value, _ = QuantityValue.split_unit(value)
 
     # Specific classes
     if openhab_type == "Switch":

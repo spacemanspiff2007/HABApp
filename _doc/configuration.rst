@@ -21,7 +21,12 @@ Configuration contents
         rules: rules    # All *.py files in this folder (and subfolders) will be loaded
         lib: lib        # Custom modules, libraries and files can be placed there
         param: param    # Optional, this is the folder where the parameter files will be created and loaded from
-    
+
+    location:           # Specify the location where your HABApp instance is running
+      latitude: 0.0     # The value is used to calculate the Sunrise/Sunset etc accordingly
+      longitude: 0.0
+      elevation: 0.0
+
     openhab:
         ping:
             enabled: true        # If enabled the configured item will show how long it takes to send an update from HABApp

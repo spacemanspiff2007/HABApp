@@ -3,6 +3,10 @@ directories:
   rules: rules
   lib: lib
   param: parameters
+location:
+  latitude: 52.52437
+  longitude: 13.41053
+  elevation: 43
 mqtt:
   connection:
     client_id: HABApp

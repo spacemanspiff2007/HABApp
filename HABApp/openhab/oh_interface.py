@@ -156,8 +156,15 @@ class OpenhabInterface:
             assert isinstance(_in, str), type(_in)
 
         # limit values to special entries and validate parameters
-        assert item_type in definitions.ITEM_TYPES, \
-            f'{item_type} is not an OpenHAB type: {", ".join(definitions.ITEM_TYPES)}'
+        if ':' in item_type:
+            __type, __unit = item_type.split(':')
+            assert __unit in definitions.ITEM_DIMENSION, \
+                f'{__unit} is not a valid Openhab unit: {", ".join(definitions.ITEM_DIMENSION)}'
+            assert __type in definitions.ITEM_TYPES, \
+                f'{__type} is not a valid OpenHAB type: {", ".join(definitions.ITEM_TYPES)}'
+        else:
+            assert item_type in definitions.ITEM_TYPES, \
+                f'{item_type} is not an OpenHAB type: {", ".join(definitions.ITEM_TYPES)}'
         assert isinstance(name, str), type(name)
         assert isinstance(label, str), type(label)
         assert isinstance(category, str), type(category)
@@ -172,7 +179,7 @@ class OpenhabInterface:
 
             if group_function:
                 assert group_function in definitions.GROUP_FUNCTIONS, \
-                    f'{item_type} is not a group function: {", ".join(definitions.ITEM_TYPES)}'
+                    f'{item_type} is not a group function: {", ".join(definitions.GROUP_FUNCTIONS)}'
 
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_create_item(

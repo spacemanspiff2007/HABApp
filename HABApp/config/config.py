@@ -11,6 +11,7 @@ from EasyCo import ConfigFile, PathContainer
 
 from HABApp.__version__ import __VERSION__
 from HABApp.runtime import FileEventTarget
+from ._conf_location import Location
 from ._conf_mqtt import Mqtt
 from ._conf_openhab import Openhab
 from .default_logfile import get_default_logfile
@@ -35,10 +36,10 @@ class InvalidConfigException(Exception):
 
 
 class Directories(PathContainer):
-    logging: Path = 'log'
-    rules: Path = 'rules'
-    lib: Path = 'lib'
-    param: Path = 'param'
+    logging: Path = Path('log')
+    rules: Path = Path('rules')
+    lib: Path = Path('lib')
+    param: Path = Path('param')
 
     def on_all_values_set(self):
         try:
@@ -51,6 +52,7 @@ class Directories(PathContainer):
 
 
 class HABAppConfigFile(ConfigFile):
+    location = Location()
     directories = Directories()
     mqtt = Mqtt()
     openhab = Openhab()
@@ -165,8 +167,8 @@ class Config(FileEventTarget):
             # make Filenames absolute path in the log folder if not specified
             p = Path(handler_cfg['filename'])
             if not p.is_absolute():
-                # Our log folder ist not yet converted to path -> it is not loaded yet
-                if isinstance(self.directories.logging, str):
+                # Our log folder ist not yet converted to path -> it is not loaded
+                if not self.directories.logging.is_absolute():
                     raise AbsolutePathExpected()
 
                 # Use defined parent folder
@@ -200,3 +202,13 @@ class Config(FileEventTarget):
 
         logging.getLogger('HABApp').info(f'HABApp Version {__VERSION__}')
         return None
+
+
+CONFIG: HABAppConfigFile = None
+
+
+def setup_config(runtime, config_folder : Path) -> Config:
+    global CONFIG
+    cfg = Config(runtime, config_folder)
+    CONFIG = cfg.config
+    return cfg

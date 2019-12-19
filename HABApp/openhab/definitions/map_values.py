@@ -1,6 +1,6 @@
 import datetime
 
-from ..definitions import PercentValue, UpDownValue, OnOffValue, HSBValue
+from . import PercentValue, UpDownValue, OnOffValue, HSBValue, QuantityValue
 
 
 def map_openhab_types(openhab_type: str, openhab_value: str):
@@ -39,5 +39,8 @@ def map_openhab_types(openhab_type: str, openhab_value: str):
 
     if openhab_type == 'Percent':
         return PercentValue(openhab_value)
+
+    if openhab_type == "Quantity":
+        return QuantityValue(openhab_value)
 
     return openhab_value

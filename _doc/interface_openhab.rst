@@ -49,6 +49,8 @@ Example:
 
    * - Openhab type
      - HABApp class
+   * - ``NumberItem``
+     - :class:`~HABApp.openhab.items.NumberItem`
    * - ``Contact``
      - :class:`~HABApp.openhab.items.ContactItem`
    * - ``Switch``
@@ -59,6 +61,11 @@ Example:
      - :class:`~HABApp.openhab.items.RollershutterItem`
    * - ``Color``
      - :class:`~HABApp.openhab.items.ColorItem`
+
+.. autoclass:: HABApp.openhab.items.NumberItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
 
 .. autoclass:: HABApp.openhab.items.ContactItem
    :members:

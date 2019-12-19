@@ -27,7 +27,7 @@ class WatchedItem:
         except Items.ItemNotFoundException:
             return None
 
-        timestamp = item.last_change if self.__watch_only_changes else item.last_update
+        timestamp = item._last_change if self.__watch_only_changes else item._last_update
         duration = now - timestamp
         if duration < self.duration_const:
             self.executed = False

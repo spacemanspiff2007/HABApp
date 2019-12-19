@@ -110,5 +110,41 @@ class TestCases(unittest.TestCase):
         self.assertEqual(event.event, 'SHORT_PRESSED')
 
 
+    def test_thing_info_events(self):
+        data = {
+            'topic': 'smarthome/things/samsungtv:tv:mysamsungtv/status',
+            'payload': '{"status":"ONLINE","statusDetail":"NONE"}',
+            'type': 'ThingStatusInfoEvent'
+        }
+        event = get_event(data)
+        assert event.name == 'samsungtv:tv:mysamsungtv'
+        assert event.status == 'ONLINE'
+        assert event.detail is None
+
+        data = {
+            'topic': 'smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status',
+            'payload': '{"status":"ONLINE","statusDetail":"NONE"}',
+            'type': 'ThingStatusInfoEvent'
+        }
+        event = get_event(data)
+        assert event.name == 'chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        assert event.status == 'ONLINE'
+        assert event.detail is None
+
+    def test_thing_info_changed_events(self):
+        data = {
+            'topic': 'smarthome/things/samsungtv:tv:mysamsungtv/statuschanged',
+            'payload': '[{"status":"OFFLINE","statusDetail":"NONE"},{"status":"ONLINE","statusDetail":"NONE"}]',
+            'type': 'ThingStatusInfoChangedEvent'
+        }
+        event = get_event(data)
+        assert event.name == 'samsungtv:tv:mysamsungtv'
+        assert event.status == 'OFFLINE'
+        assert event.detail is None
+        assert event.old_status == 'ONLINE'
+        assert event.old_detail is None
+
+
+
 if __name__ == '__main__':
     unittest.main()
