@@ -45,7 +45,8 @@ def setup_param_files(folder_watcher):
     )
 
     handler = folder_watcher.watch_folder_habapp_events(
-        folder=HABApp.CONFIG.directories.param, file_ending='.yml', habapp_topic=HABAPP_PARAM_TOPIC, watch_subfolders=False
+        folder=HABApp.CONFIG.directories.param, file_ending='.yml',
+        habapp_topic=HABAPP_PARAM_TOPIC, watch_subfolders=False
     )
 
     HABApp.core.WrappedFunction(handler.trigger_load_for_all_files, logger=log, name='Load all parameter files').run()

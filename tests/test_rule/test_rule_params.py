@@ -4,7 +4,6 @@ from pathlib import Path
 import HABApp
 from HABApp.parameters.parameter import Parameter
 import HABApp.parameters.parameters as Parameters
-import HABApp.parameters.parameter_files as Files
 
 
 @pytest.fixture(scope="function")
