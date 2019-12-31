@@ -10,14 +10,15 @@ from HABApp.openhab.events import get_event
 from HABApp.util import log_exception
 from .http_connection import HttpConnection, HttpConnectionEventHandler
 from .oh_interface import get_openhab_interface
+from ..config import Openhab as OpenhabConfig
 
 log = logging.getLogger('HABApp.openhab.Connection')
 
 
 class OpenhabConnection(HttpConnectionEventHandler):
 
-    def __init__(self, config, shutdown):
-        assert isinstance(config, HABApp.config.Config), type(config)
+    def __init__(self, config: OpenhabConfig, shutdown):
+        assert isinstance(config, OpenhabConfig), type(config)
         assert isinstance(shutdown, HABApp.runtime.ShutdownHelper), type(shutdown)
 
         self.config = config
@@ -29,9 +30,9 @@ class OpenhabConnection(HttpConnectionEventHandler):
         self.__ping_received = 0
 
         # Add the ping listener, this works because connect is the last step
-        if self.config.openhab.ping.enabled:
+        if self.config.ping.enabled:
             listener = HABApp.core.EventBusListener(
-                self.config.openhab.ping.item,
+                self.config.ping.item,
                 HABApp.core.WrappedFunction(self.ping_received),
                 HABApp.openhab.events.ItemStateEvent
             )
@@ -83,18 +84,18 @@ class OpenhabConnection(HttpConnectionEventHandler):
     @log_exception
     async def async_ping(self):
 
-        if not self.config.openhab.ping.enabled:
+        if not self.config.ping.enabled:
             return None
 
         log.debug('Started ping')
-        while self.config.openhab.ping.enabled:
+        while self.config.ping.enabled:
             self.interface.post_update(
-                self.config.openhab.ping.item,
+                self.config.ping.item,
                 f'{(self.__ping_received - self.__ping_sent) * 1000:.1f}' if self.__ping_received else '0'
             )
 
             self.__ping_sent = time.time()
-            await asyncio.sleep(self.config.openhab.ping.interval)
+            await asyncio.sleep(self.config.ping.interval)
 
 
 

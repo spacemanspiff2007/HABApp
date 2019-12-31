@@ -1,6 +1,7 @@
 import HABApp.util
 
 import HABApp.config
+#
 import HABApp.core
 
 import HABApp.mqtt
@@ -12,3 +13,4 @@ from HABApp.rule import Rule
 from HABApp.parameters import Parameter
 
 #from HABApp.runtime import Runtime
+from HABApp.config import CONFIG

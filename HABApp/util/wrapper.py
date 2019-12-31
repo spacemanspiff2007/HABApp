@@ -30,5 +30,8 @@ def log_exception(func):
                     func_name=func.__name__, exception=e, traceback='\n'.join(lines)
                 )
             )
+            
+            # re raise exception, since this is something we didn't anticipate
+            raise
 
     return f

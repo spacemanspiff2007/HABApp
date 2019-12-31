@@ -204,7 +204,7 @@ class Config(FileEventTarget):
         return None
 
 
-CONFIG: HABAppConfigFile = None
+CONFIG: HABAppConfigFile = HABAppConfigFile()
 
 
 def setup_config(runtime, config_folder : Path) -> Config:

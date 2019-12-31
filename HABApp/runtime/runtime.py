@@ -45,14 +45,14 @@ class Runtime:
         self.config = HABApp.config.setup_config(self, config_folder=config_folder)
 
         # OpenHAB
-        self.openhab_connection = HABApp.openhab.OpenhabConnection(self.config, self.shutdown)
+        self.openhab_connection = HABApp.openhab.OpenhabConnection(HABApp.config.CONFIG.openhab, self.shutdown)
 
         # MQTT
-        self.mqtt_connection = HABApp.mqtt.MqttConnection(self.config.mqtt, self.shutdown)
+        self.mqtt_connection = HABApp.mqtt.MqttConnection(HABApp.config.CONFIG.mqtt, self.shutdown)
         self.mqtt_connection.connect()
 
         # Parameter Files
-        HABApp.parameters.parameter_files.setup_param_files(self.config, self.folder_watcher)
+        HABApp.parameters.parameter_files.setup_param_files(self.folder_watcher)
 
         # Rule engine
         self.rule_manager = HABApp.rule_manager.RuleManager(self)

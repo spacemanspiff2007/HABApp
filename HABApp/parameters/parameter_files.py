@@ -1,7 +1,6 @@
 import logging
 import threading
 import traceback
-import typing
 
 import ruamel.yaml
 
@@ -19,17 +18,13 @@ _yml_setup.sort_base_mapping_type_on_output = False     # type: ignore
 
 LOCK = threading.Lock()
 HABAPP_PARAM_TOPIC = 'HABApp.Parameters'
-CONFIG = None   # type: typing.Optional[HABApp.config.Config]
 
 
-def setup_param_files(config, folder_watcher):
-    global CONFIG
-    assert isinstance(config, HABApp.config.Config)
+def setup_param_files(folder_watcher):
     assert isinstance(folder_watcher, HABApp.runtime.folder_watcher.FolderWatcher)
-    CONFIG = config
 
-    if not CONFIG.directories.param.is_dir():
-        log.info(f'Parameter files disabled: Folder {CONFIG.directories.param} does not exist!')
+    if not HABApp.CONFIG.directories.param.is_dir():
+        log.info(f'Parameter files disabled: Folder {HABApp.CONFIG.directories.param} does not exist!')
         return
 
     # listener to remove parameters
@@ -50,14 +45,14 @@ def setup_param_files(config, folder_watcher):
     )
 
     handler = folder_watcher.watch_folder_habapp_events(
-        folder=CONFIG.directories.param, file_ending='.yml', habapp_topic=HABAPP_PARAM_TOPIC, watch_subfolders=False
+        folder=HABApp.CONFIG.directories.param, file_ending='.yml', habapp_topic=HABAPP_PARAM_TOPIC, watch_subfolders=False
     )
 
     HABApp.core.WrappedFunction(handler.trigger_load_for_all_files, logger=log, name='Load all parameter files').run()
 
 
 def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
-    path = event.get_path(CONFIG.directories.param)
+    path = event.get_path(HABApp.CONFIG.directories.param)
 
     with LOCK:  # serialize to get proper error messages
         try:
@@ -76,7 +71,7 @@ def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
 
 def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
-    path = event.get_path(CONFIG.directories.param)
+    path = event.get_path(HABApp.CONFIG.directories.param)
 
     with LOCK:  # serialize to get proper error messages
         try:
@@ -92,7 +87,7 @@ def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
 
 def save_file(file: str):
     assert isinstance(file, str), type(file)
-    filename = CONFIG.directories.param / (file + '.yml')
+    filename = HABApp.CONFIG.directories.param / (file + '.yml')
 
     with LOCK:  # serialize to get proper error messages
         log.info(f'Updated {filename}')
