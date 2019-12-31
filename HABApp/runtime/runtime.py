@@ -58,7 +58,7 @@ class Runtime:
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
 
 
-    @HABApp.util.PrintException
+    @HABApp.util.log_exception
     def get_async(self):
         return asyncio.gather(
             self.async_http.create_client(),

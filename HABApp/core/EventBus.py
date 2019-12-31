@@ -2,7 +2,7 @@ import itertools
 import logging
 import typing
 
-from HABApp.util import PrintException
+from HABApp.util import log_exception
 from . import EventBusListener
 from .events import ComplexEventValue
 
@@ -23,7 +23,7 @@ def __get_listener_description(listener: EventBusListener) -> str:
         return f'"{listener.topic}" (type {listener.event_filter})'
 
 
-@PrintException
+@log_exception
 def post_event(topic: str, event):
     assert isinstance(topic, str), type(topic)
 

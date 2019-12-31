@@ -7,7 +7,7 @@ import typing
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.util import PrintException
+from HABApp.util import log_exception
 from . import definitions
 from .http_connection import HttpConnection
 
@@ -90,7 +90,7 @@ class OpenhabInterface:
 
         return str(_in)
 
-    @PrintException
+    @log_exception
     def post_update(self, item_name: str, state):
         """
         Post an update to the item
@@ -111,7 +111,7 @@ class OpenhabInterface:
             self.__loop
         )
 
-    @PrintException
+    @log_exception
     def send_command(self, item_name: str, command):
         """
         Send the specified command to the item
@@ -132,7 +132,7 @@ class OpenhabInterface:
             self.__loop
         )
 
-    @PrintException
+    @log_exception
     def create_item(self, item_type: str, name: str, label="", category="",
                     tags: typing.List[str] = [], groups: typing.List[str] = [],
                     group_type: str = '', group_function: str = '', group_function_params: typing.List[str] = []):
@@ -207,7 +207,7 @@ class OpenhabInterface:
         data = fut.result()
         return OpenhabItemDefinition.from_dict(data)
 
-    @PrintException
+    @log_exception
     def remove_item(self, item_name: str):
         """
         Removes an item from the openHAB item registry

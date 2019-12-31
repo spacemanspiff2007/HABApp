@@ -10,7 +10,7 @@ import typing
 from pytz import utc
 
 import HABApp
-from HABApp.util import PrintException
+from HABApp.util import log_exception
 from .rule_file import RuleFile
 
 log = logging.getLogger('HABApp.Rules')
@@ -82,7 +82,7 @@ class RuleManager:
         w.trigger_load_for_all_files(delay=1)
         return None
 
-    @PrintException
+    @log_exception
     async def process_scheduled_events(self):
 
         while not self.runtime.shutdown.requested:
@@ -111,11 +111,11 @@ class RuleManager:
                 await asyncio.sleep(sleep_time)
 
 
-    @PrintException
+    @log_exception
     def get_async(self):
         return asyncio.gather(self.process_scheduled_events())
 
-    @PrintException
+    @log_exception
     def get_rule(self, rule_name):
         found = []
         for file in self.files.values():
@@ -136,7 +136,7 @@ class RuleManager:
         return found if len(found) > 1 else found[0]
 
 
-    @PrintException
+    @log_exception
     def request_file_unload(self, event: HABApp.core.events.habapp_events.RequestFileUnloadEvent, request_lock=True):
         path = event.get_path(self.runtime.config.directories.rules)
         path_str = str(path)
@@ -165,7 +165,7 @@ class RuleManager:
             if request_lock:
                 self.__load_lock.release()
 
-    @PrintException
+    @log_exception
     def request_file_load(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
         path = event.get_path(self.runtime.config.directories.rules)

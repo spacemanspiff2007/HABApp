@@ -7,7 +7,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.openhab.events import get_event
-from HABApp.util import PrintException
+from HABApp.util import log_exception
 from .http_connection import HttpConnection, HttpConnectionEventHandler
 from .oh_interface import get_openhab_interface
 
@@ -76,11 +76,11 @@ class OpenhabConnection(HttpConnectionEventHandler):
         self.on_disconnected()
         self.connection.cancel_connect()
 
-    @PrintException
+    @log_exception
     def ping_received(self, event):
         self.__ping_received = time.time()
 
-    @PrintException
+    @log_exception
     async def async_ping(self):
 
         if not self.config.openhab.ping.enabled:
@@ -138,7 +138,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 log.error(line)
 
 
-    @PrintException
+    @log_exception
     async def update_all_items(self):
 
         try:

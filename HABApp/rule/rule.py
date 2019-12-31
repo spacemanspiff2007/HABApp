@@ -467,7 +467,7 @@ class Rule:
     def __get_rule_name(self, callback):
         return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None
 
-    @HABApp.util.PrintException
+    @HABApp.util.log_exception
     def _check_rule(self):
 
         # Check if items do exists
@@ -489,7 +489,7 @@ class Rule:
                 log.warning(f'Item "{item.name}" does not exist (yet)! '
                             f'self.item_watch in "{self.rule_name}" may not work as intended.')
 
-    @HABApp.util.PrintException
+    @HABApp.util.log_exception
     def _process_events(self, now):
 
         # watch items
@@ -514,7 +514,7 @@ class Rule:
             self.__future_events = [k for k in self.__future_events if not k.is_finished]
         return None
 
-    @HABApp.util.PrintException
+    @HABApp.util.log_exception
     def _unload(self):
 
         # unload all functions

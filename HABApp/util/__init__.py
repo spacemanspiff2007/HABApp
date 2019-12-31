@@ -1,4 +1,4 @@
-from .wrapper import PrintException
+from .wrapper import log_exception
 
 from .timeframe import TimeFrame
 
