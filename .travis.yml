@@ -18,7 +18,7 @@ jobs:
 
     - <<: *python_37
       python: 3.8
-      env: TOXENV=py36
+      env: TOXENV=py38
 
     - <<: *python_37
       python: 3.7
