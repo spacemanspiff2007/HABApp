@@ -15,7 +15,7 @@ def MqttTopicValidator(v, msg=''):
             qos = v[i + 1]
 
         if not isinstance(val, str) and not isinstance(val, int):
-            raise Invalid(msg or (f"Topics must consist of int and string!"))
+            raise Invalid(msg or "Topics must consist of int and string!")
 
         if not isinstance(val, str):
             continue
@@ -38,7 +38,6 @@ class Connection(ConfigContainer):
     password: str = ''
     tls: bool = True
     tls_insecure: bool = False
-
 
 
 class Subscribe(ConfigContainer):

@@ -31,7 +31,7 @@ class InvalidConfigException(Exception):
     pass
 
 
-class ConfigLoader(FileEventTarget):
+class HABAppConfigLoader(FileEventTarget):
 
     def __init__(self, config_folder: Path):
 

@@ -44,7 +44,7 @@ class Runtime:
         # Start Folder watcher!
         self.folder_watcher.start(self.shutdown)
 
-        self.config_loader = HABApp.config.ConfigLoader(config_folder)
+        self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
 
         # OpenHAB
         self.openhab_connection = HABApp.openhab.OpenhabConnection(HABApp.config.CONFIG.openhab, self.shutdown)
@@ -54,7 +54,7 @@ class Runtime:
         self.mqtt_connection.connect()
 
         # Parameter Files
-        params_enabled = HABApp.parameters.parameter_files.setup_param_files(self.folder_watcher)
+        params_enabled = HABApp.parameters.parameter_files.setup_param_files()
 
         # Rule engine
         self.rule_manager = HABApp.rule_manager.RuleManager(self)

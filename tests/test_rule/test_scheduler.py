@@ -63,8 +63,8 @@ def test_weekend():
 
 
 def test_sun():
-    from HABApp.config.config import HABAppConfigFile
-    HABApp.config.config.CONFIG = HABAppConfigFile()
+    from HABApp.config.config import HABAppConfig
+    HABApp.config.config.CONFIG = HABAppConfig()
     HABApp.config.config.CONFIG.location.latitude = 52.52437
     HABApp.config.config.CONFIG.location.longitude = 13.41053
     HABApp.config.config.CONFIG.location.elevation = 43

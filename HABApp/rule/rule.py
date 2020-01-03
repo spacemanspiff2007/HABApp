@@ -151,7 +151,7 @@ class Rule:
         assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
         return HABApp.core.EventBus.post_event(name.name if isinstance(name, HABApp.core.items.Item) else name, event)
 
-    def listen_event(self, name: typing.Union[HABApp.core.items.Item, str, None], callback,
+    def listen_event(self, name: typing.Union[HABApp.core.items.Item, str], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
@@ -475,10 +475,6 @@ class Rule:
             return None
 
         for listener in self.__event_listener:
-            # Listener listens to all changes
-            if listener.topic is None:
-                continue
-
             # check if specific item exists
             if not HABApp.core.Items.item_exists(listener.topic):
                 log.warning(f'Item "{listener.topic}" does not exist (yet)! '
@@ -529,7 +525,7 @@ class Rule:
                 except AttributeError:
                     name = ''
 
-                log.error( f'Error{name} while unloading "{self.rule_name}": {e}')
+                log.error(f'Error{name} while unloading "{self.rule_name}": {e}')
 
                 # log traceback
                 lines = traceback.format_exc().splitlines()

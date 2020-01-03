@@ -36,11 +36,11 @@ class Directories(PathContainer):
             print(e)
 
 
-class HABAppConfigFile(ConfigFile):
+class HABAppConfig(ConfigFile):
     location = Location()
     directories = Directories()
     mqtt = Mqtt()
     openhab = Openhab()
 
 
-CONFIG: HABAppConfigFile = HABAppConfigFile()
+CONFIG: HABAppConfig = HABAppConfig()

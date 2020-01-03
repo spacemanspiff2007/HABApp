@@ -3,6 +3,7 @@ import typing
 
 import voluptuous
 
+
 _PARAMETERS: typing.Dict[str, dict] = {}
 _VALIDATORS: typing.Dict[str, voluptuous.Schema] = {}
 
@@ -51,7 +52,6 @@ def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=Tr
             HABApp.core.events.habapp_events.TOPIC_PARAM,
             HABApp.core.events.habapp_events.RequestFileLoadEvent(filename + '.yml')
         )
-
 
 
 def add_parameter(file: str, *keys, default_value):

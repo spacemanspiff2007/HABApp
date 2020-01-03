@@ -19,8 +19,7 @@ _yml_setup.sort_base_mapping_type_on_output = False     # type: ignore
 LOCK = threading.Lock()
 
 
-def setup_param_files(folder_watcher) -> bool:
-    assert isinstance(folder_watcher, HABApp.runtime.folder_watcher.FolderWatcher)
+def setup_param_files() -> bool:
 
     if not HABApp.CONFIG.directories.param.is_dir():
         log.info(f'Parameter files disabled: Folder {HABApp.CONFIG.directories.param} does not exist!')

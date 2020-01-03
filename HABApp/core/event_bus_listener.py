@@ -5,7 +5,7 @@ from . import WrappedFunction
 
 class EventBusListener:
     def __init__(self, topic, callback, event_type=AllEvents):
-        assert isinstance(topic, str) or topic is None, type(topic)
+        assert isinstance(topic, str), type(topic)
         assert isinstance(callback, WrappedFunction)
 
         self.topic: str = topic
