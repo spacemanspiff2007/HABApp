@@ -18,3 +18,9 @@ class ColorItem(ColorItemCore, OnOffCommand, PercentCommand):
 
     def __str__(self):
         return self.value
+
+    def is_on(self) -> bool:
+        return self.brightness > 0
+    
+    def is_off(self) -> bool:
+        return self.brightness <= 0
