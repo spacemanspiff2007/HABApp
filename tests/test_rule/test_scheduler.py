@@ -63,12 +63,10 @@ def test_weekend():
 
 
 def test_sun():
-    from HABApp.config.config import HABAppConfig
-    HABApp.config.config.CONFIG = HABAppConfig()
-    HABApp.config.config.CONFIG.location.latitude = 52.52437
-    HABApp.config.config.CONFIG.location.longitude = 13.41053
-    HABApp.config.config.CONFIG.location.elevation = 43
-    HABApp.config.config.CONFIG.location.on_all_values_set()
+    HABApp.CONFIG.location.latitude = 52.52437
+    HABApp.CONFIG.location.longitude = 13.41053
+    HABApp.CONFIG.location.elevation = 43
+    HABApp.CONFIG.location.on_all_values_set()
 
     func.mock.reset_mock()
     s = scheduler.SunScheduledCallback(func)

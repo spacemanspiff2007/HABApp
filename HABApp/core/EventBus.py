@@ -1,5 +1,5 @@
-import threading
 import logging
+import threading
 import typing
 
 from HABApp.util import log_exception
@@ -20,10 +20,7 @@ _EVENT_LISTENER: typing.Dict[str, typing.List[EventBusListener]] = {}
 
 
 def __get_listener_description(listener: EventBusListener) -> str:
-    if listener.topic is None:
-        return f'all names (type {listener.event_filter})'
-    else:
-        return f'"{listener.topic}" (type {listener.event_filter})'
+    return f'"{listener.topic}" (type {listener.event_filter})'
 
 
 @log_exception
@@ -60,7 +57,7 @@ def add_listener(listener: EventBusListener):
             return None
 
         # add listener
-        item_listeners.append( listener)
+        item_listeners.append(listener)
         _habapp_log.debug(f'Added event listener for {__get_listener_description(listener)}')
         return None
 
