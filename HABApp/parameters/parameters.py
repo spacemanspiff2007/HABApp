@@ -48,7 +48,8 @@ def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=Tr
     # todo: move this to file handling so we get the extension
     if old_validator != new_validator:
         HABApp.core.EventBus.post_event(
-            HABAPP_PARAM_TOPIC, HABApp.core.events.habapp_events.RequestFileLoadEvent(filename + '.yml')
+            HABApp.core.events.habapp_events.TOPIC_PARAM,
+            HABApp.core.events.habapp_events.RequestFileLoadEvent(filename + '.yml')
         )
 
 
@@ -94,4 +95,4 @@ def get_value(file: str, *keys) -> typing.Any:
 
 
 # Import here to prevent cyclic imports
-from .parameter_files import save_file, HABAPP_PARAM_TOPIC  # noqa: E402
+from .parameter_files import save_file  # noqa: E402

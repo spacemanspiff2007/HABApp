@@ -17,20 +17,19 @@ _yml_setup.allow_unicode = True
 _yml_setup.sort_base_mapping_type_on_output = False     # type: ignore
 
 LOCK = threading.Lock()
-HABAPP_PARAM_TOPIC = 'HABApp.Parameters'
 
 
-def setup_param_files(folder_watcher):
+def setup_param_files(folder_watcher) -> bool:
     assert isinstance(folder_watcher, HABApp.runtime.folder_watcher.FolderWatcher)
 
     if not HABApp.CONFIG.directories.param.is_dir():
         log.info(f'Parameter files disabled: Folder {HABApp.CONFIG.directories.param} does not exist!')
-        return
+        return False
 
     # listener to remove parameters
     HABApp.core.EventBus.add_listener(
         HABApp.core.EventBusListener(
-            HABAPP_PARAM_TOPIC,
+            HABApp.core.events.habapp_events.TOPIC_PARAM,
             HABApp.core.WrappedFunction(load_file),
             HABApp.core.events.habapp_events.RequestFileUnloadEvent
         )
@@ -38,18 +37,12 @@ def setup_param_files(folder_watcher):
     # listener to add parameters
     HABApp.core.EventBus.add_listener(
         HABApp.core.EventBusListener(
-            HABAPP_PARAM_TOPIC,
+            HABApp.core.events.habapp_events.TOPIC_PARAM,
             HABApp.core.WrappedFunction(load_file),
             HABApp.core.events.habapp_events.RequestFileLoadEvent
         )
     )
-
-    handler = folder_watcher.watch_folder_habapp_events(
-        folder=HABApp.CONFIG.directories.param, file_ending='.yml',
-        habapp_topic=HABAPP_PARAM_TOPIC, watch_subfolders=False
-    )
-
-    HABApp.core.WrappedFunction(handler.trigger_load_for_all_files, logger=log, name='Load all parameter files').run()
+    return True
 
 
 def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):

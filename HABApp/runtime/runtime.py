@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 
 import HABApp.config
 import HABApp.core
@@ -8,6 +9,7 @@ import HABApp.parameters.parameter_files
 
 from .folder_watcher import FolderWatcher
 from .shutdown_helper import ShutdownHelper
+from HABApp.config import CONFIG
 
 
 class Runtime:
@@ -37,12 +39,12 @@ class Runtime:
         HABApp.core.WrappedFunction._EVENT_LOOP = self.loop
         self.shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown)
 
-    def load_config(self, config_folder):
+    def startup(self, config_folder: Path):
 
         # Start Folder watcher!
         self.folder_watcher.start(self.shutdown)
 
-        self.config = HABApp.config.setup_config(self, config_folder=config_folder)
+        self.config_loader = HABApp.config.ConfigLoader(config_folder)
 
         # OpenHAB
         self.openhab_connection = HABApp.openhab.OpenhabConnection(HABApp.config.CONFIG.openhab, self.shutdown)
@@ -52,10 +54,32 @@ class Runtime:
         self.mqtt_connection.connect()
 
         # Parameter Files
-        HABApp.parameters.parameter_files.setup_param_files(self.folder_watcher)
+        params_enabled = HABApp.parameters.parameter_files.setup_param_files(self.folder_watcher)
 
         # Rule engine
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
+
+        # watch folders config
+        self.folder_watcher.watch_folder(
+            folder=config_folder,
+            file_ending='.yml',
+            event_target=self.config_loader
+        )
+
+        # folder watcher rules
+        self.folder_watcher.watch_folder_habapp_events(
+            folder=CONFIG.directories.rules, file_ending='.py',
+            habapp_topic=HABApp.core.events.habapp_events.TOPIC_RULES, watch_subfolders=True
+        )
+
+        # watch parameter files
+        if params_enabled:
+            param_watcher = self.folder_watcher.watch_folder_habapp_events(
+                folder=HABApp.CONFIG.directories.param, file_ending='.yml',
+                habapp_topic=HABApp.core.events.habapp_events.TOPIC_PARAM, watch_subfolders=False
+            )
+            # load all param files through the worker
+            HABApp.core.WrappedFunction(param_watcher.trigger_load_for_all_files, name='Load all parameter files').run()
 
 
     @HABApp.util.log_exception

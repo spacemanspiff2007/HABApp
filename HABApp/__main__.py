@@ -116,7 +116,7 @@ def main() -> typing.Union[int, str]:
         loop.slow_callback_duration = 0.02
 
         app = HABApp.runtime.Runtime()
-        app.load_config(config_folder=find_config_folder(args.config))
+        app.startup(config_folder=find_config_folder(args.config))
 
         def shutdown_handler(sig, frame):
             print('Shutting down ...')

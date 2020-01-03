@@ -12,10 +12,10 @@ from pytz import utc
 import HABApp
 from HABApp.util import log_exception
 from .rule_file import RuleFile
+from HABApp.core.events.habapp_events import TOPIC_RULES
 
 log = logging.getLogger('HABApp.Rules')
 
-RULES_TOPIC = 'HABApp.Rules'
 
 
 class RuleManager:
@@ -37,7 +37,7 @@ class RuleManager:
         # Listener to add rules
         HABApp.core.EventBus.add_listener(
             HABApp.core.EventBusListener(
-                RULES_TOPIC,
+                TOPIC_RULES,
                 HABApp.core.WrappedFunction(self.request_file_load),
                 HABApp.core.events.habapp_events.RequestFileLoadEvent
             )
@@ -46,16 +46,10 @@ class RuleManager:
         # listener to remove rules
         HABApp.core.EventBus.add_listener(
             HABApp.core.EventBusListener(
-                RULES_TOPIC,
+                TOPIC_RULES,
                 HABApp.core.WrappedFunction(self.request_file_unload),
                 HABApp.core.events.habapp_events.RequestFileUnloadEvent
             )
-        )
-
-        # folder watcher
-        self.runtime.folder_watcher.watch_folder_habapp_events(
-            folder=self.runtime.config.directories.rules, file_ending='.py',
-            habapp_topic=RULES_TOPIC, watch_subfolders=True
         )
 
         # Initial loading of rules
@@ -63,7 +57,7 @@ class RuleManager:
 
     def load_rules_on_startup(self):
 
-        if self.runtime.config.openhab.connection.host and self.runtime.config.openhab.general.wait_for_openhab:
+        if HABApp.CONFIG.openhab.connection.host and HABApp.CONFIG.openhab.general.wait_for_openhab:
             items_found = False
             while not items_found:
                 time.sleep(3)
@@ -78,7 +72,7 @@ class RuleManager:
             time.sleep(5.2)
 
         # trigger event for every file
-        w = self.runtime.folder_watcher.get_handler(self.runtime.config.directories.rules)
+        w = self.runtime.folder_watcher.get_handler(HABApp.CONFIG.directories.rules)
         w.trigger_load_for_all_files(delay=1)
         return None
 
@@ -138,7 +132,7 @@ class RuleManager:
 
     @log_exception
     def request_file_unload(self, event: HABApp.core.events.habapp_events.RequestFileUnloadEvent, request_lock=True):
-        path = event.get_path(self.runtime.config.directories.rules)
+        path = event.get_path(HABApp.CONFIG.directories.rules)
         path_str = str(path)
 
         try:
@@ -168,7 +162,7 @@ class RuleManager:
     @log_exception
     def request_file_load(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
-        path = event.get_path(self.runtime.config.directories.rules)
+        path = event.get_path(HABApp.CONFIG.directories.rules)
         path_str = str(path)
 
         # Only load existing files
