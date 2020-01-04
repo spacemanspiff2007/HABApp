@@ -36,3 +36,11 @@ class UpDownCommand:
     def down(self):
         """Command down"""
         get_openhab_interface().send_command(self, UpDownValue.DOWN)
+
+    def is_up(self) -> bool:
+        """Test value against on-value"""
+        raise NotImplementedError()
+
+    def is_down(self) -> bool:
+        """Test value against off-value"""
+        raise NotImplementedError()

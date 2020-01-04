@@ -15,5 +15,11 @@ class RollershutterItem(Item, UpDownCommand, PercentCommand):
         assert isinstance(new_value, (int, float)) or new_value is None, new_value
         return super().set_value(new_value)
 
+    def is_up(self) -> bool:
+        return self.value <= 0
+
+    def is_down(self) -> bool:
+        return self.value >= 100
+
     def __str__(self):
         return self.value

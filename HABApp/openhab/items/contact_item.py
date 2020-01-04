@@ -1,22 +1,25 @@
 from HABApp.core.items import Item
+from ..definitions import OpenClosedValue
 
 
 class ContactItem(Item):
-    OPEN = 'OPEN'
-    CLOSED = 'CLOSED'
 
     def set_value(self, new_value) -> bool:
-        if new_value is not None and new_value != ContactItem.OPEN and new_value != ContactItem.CLOSED:
+
+        if isinstance(new_value, OpenClosedValue):
+            new_value = new_value.value
+
+        if new_value is not None and new_value != OpenClosedValue.OPEN and new_value != OpenClosedValue.CLOSED:
             raise ValueError(f'Invalid value for ContactItem: {new_value}')
         return super().set_value(new_value)
 
     def is_open(self) -> bool:
         """Test value against open-value"""
-        return self.value == ContactItem.OPEN
+        return self.value == OpenClosedValue.OPEN
 
     def is_closed(self) -> bool:
         """Test value against closed-value"""
-        return self.value == ContactItem.CLOSED
+        return self.value == OpenClosedValue.CLOSED
 
     def __str__(self):
         return self.value

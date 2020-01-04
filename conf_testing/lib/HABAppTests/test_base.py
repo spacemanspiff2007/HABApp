@@ -58,7 +58,7 @@ class TestBaseRule(HABApp.Rule):
 
 
     def add_test(self, name, func, *args, **kwargs):
-        assert name not in self.__tests_funcs
+        assert name not in self.__tests_funcs, name
         self.__tests_funcs[name] = (func, args, kwargs)
 
     def run_tests(self, result: TestResult):
