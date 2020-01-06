@@ -45,6 +45,7 @@ def post_event(topic: str, event):
     return None
 
 
+@log_exception
 def add_listener(listener: EventBusListener):
     assert isinstance(listener, EventBusListener)
 
@@ -62,6 +63,7 @@ def add_listener(listener: EventBusListener):
         return None
 
 
+@log_exception
 def remove_listener(listener: EventBusListener):
     assert isinstance(listener, EventBusListener)
 
@@ -78,6 +80,7 @@ def remove_listener(listener: EventBusListener):
         _habapp_log.debug(f'Removed event listener for {__get_listener_description(listener)}')
 
 
+@log_exception
 def remove_all_listeners():
     with _LOCK:
         _EVENT_LISTENER.clear()
