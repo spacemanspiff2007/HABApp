@@ -31,8 +31,8 @@ Example:
     # hide
     import HABApp
     from HABApp.openhab.items import ContactItem, SwitchItem
-    ContactItem.get_create_item('MyContact', initial_value='OPEN')
-    SwitchItem.get_create_item('MySwitch', initial_value='OFF')
+    HABApp.core.Items.set_item(ContactItem('MyContact', initial_value='OPEN'))
+    HABApp.core.Items.set_item(SwitchItem('MySwitch', initial_value='OFF'))
     # hide
 
     my_contact = ContactItem.get_item('MyContact')
