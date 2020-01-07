@@ -4,7 +4,7 @@ import typing
 from pytz import utc
 
 import HABApp
-from HABApp.core.items.base_item import BaseItem
+from HABApp.core.items.base import BaseItem
 
 
 class OpenhabItem(BaseItem):
