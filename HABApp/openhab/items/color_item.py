@@ -1,5 +1,5 @@
 from HABApp.core.items import ColorItem as ColorItemCore
-from .commands import OnOffCommand, PercentCommand
+from HABApp.openhab.definitions.commands import OnOffCommand, PercentCommand
 from ..definitions import OnOffValue, PercentValue, HSBValue
 
 

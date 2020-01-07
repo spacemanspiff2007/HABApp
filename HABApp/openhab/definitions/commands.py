@@ -1,5 +1,5 @@
-from .. import get_openhab_interface
-from ..definitions import OnOffValue, UpDownValue
+from HABApp.openhab import get_openhab_interface
+from HABApp.openhab.definitions import OnOffValue, UpDownValue
 
 
 class OnOffCommand:

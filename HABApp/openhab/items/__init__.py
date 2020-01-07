@@ -4,3 +4,5 @@ from .rollershutter_item import RollershutterItem
 from .switch_item import SwitchItem
 from .color_item import ColorItem
 from .number_item import NumberItem
+from .group_item import GroupItem
+from .string_item import StringItem, LocationItem, PlayerItem

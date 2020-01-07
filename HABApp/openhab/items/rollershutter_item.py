@@ -1,5 +1,5 @@
 from HABApp.core.items import Item
-from .commands import UpDownCommand, PercentCommand
+from HABApp.openhab.definitions.commands import UpDownCommand, PercentCommand
 from ..definitions import UpDownValue, PercentValue
 
 
