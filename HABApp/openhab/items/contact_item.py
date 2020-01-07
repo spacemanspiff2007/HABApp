@@ -1,8 +1,8 @@
-from HABApp.core.items import Item
+from HABApp.openhab.items.base_item import OpenhabItem
 from ..definitions import OpenClosedValue
 
 
-class ContactItem(Item):
+class ContactItem(OpenhabItem):
 
     def set_value(self, new_value) -> bool:
 

@@ -1,12 +1,12 @@
-from HABApp.core.items import Item
+from HABApp.openhab.items.base_item import OpenhabItem
 from ..definitions import QuantityValue
 
 
-class StringItem(Item):
+class StringItem(OpenhabItem):
     """StringItem which accepts and converts the data types from OpenHAB"""
 
 
-class LocationItem(Item):
+class LocationItem(OpenhabItem):
     """LocationItem which accepts and converts the data types from OpenHAB"""
 
     def set_value(self, new_value) -> bool:
@@ -17,7 +17,7 @@ class LocationItem(Item):
         return super().set_value(new_value)
 
 
-class PlayerItem(Item):
+class PlayerItem(OpenhabItem):
     """PlayerItem which accepts and converts the data types from OpenHAB"""
 
     def set_value(self, new_value) -> bool:

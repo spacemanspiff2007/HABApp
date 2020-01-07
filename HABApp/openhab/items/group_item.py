@@ -1,5 +1,5 @@
-from HABApp.core.items import Item
+from HABApp.openhab.items.base_item import OpenhabItem
 
 
-class GroupItem(Item):
+class GroupItem(OpenhabItem):
     """GroupItem which accepts and converts the data types from OpenHAB"""

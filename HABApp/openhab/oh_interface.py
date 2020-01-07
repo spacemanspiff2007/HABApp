@@ -8,6 +8,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.util import log_exception
+from HABApp.core.items.base_value import BaseValueItem
 from . import definitions
 from .http_connection import HttpConnection
 
@@ -79,10 +80,10 @@ class OpenhabInterface:
             # 2018-11-19T09:47:38.284000+0100 -> 2018-11-19T09:47:38.284+0100
             out = _in.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
             return f'{out[:-8]}{out[-5:]}'
-        elif isinstance(_in, HABApp.core.items.Item):
-            return str(_in.value)
-        elif isinstance(_in, HABApp.core.items.ColorItem):
+        elif isinstance(_in, HABApp.openhab.items.ColorItem):
             return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
+        elif isinstance(_in, BaseValueItem):
+            return str(_in.value)
         elif isinstance(_in, (set, list, tuple, frozenset)):
             return ','.join(str(k) for k in _in)
         elif _in is None:
@@ -98,12 +99,12 @@ class OpenhabInterface:
         :param item_name: item name or item
         :param state: new item state
         """
-        assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
+        assert isinstance(item_name, (str, HABApp.openhab.items.base_item.BaseValueItem)), type(item_name)
 
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
 
-        if isinstance(item_name, HABApp.core.items.Item):
+        if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
             item_name = item_name.name
 
         asyncio.run_coroutine_threadsafe(
@@ -119,12 +120,12 @@ class OpenhabInterface:
         :param item_name: item name or item
         :param command: command
         """
-        assert isinstance(item_name, (str, HABApp.core.items.Item)), type(item_name)
+        assert isinstance(item_name, (str, HABApp.openhab.items.base_item.BaseValueItem)), type(item_name)
 
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
 
-        if isinstance(item_name, HABApp.core.items.Item):
+        if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
             item_name = item_name.name
 
         asyncio.run_coroutine_threadsafe(
@@ -196,7 +197,7 @@ class OpenhabInterface:
 
         :param item_name: name of the item or item
         """
-        if isinstance(item_name, HABApp.core.items.Item):
+        if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
             item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)
 
@@ -252,7 +253,7 @@ class OpenhabInterface:
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
 
-        if isinstance(item_name, HABApp.core.items.Item):
+        if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
             item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)
         assert isinstance(namespace, str), type(namespace)
@@ -276,7 +277,7 @@ class OpenhabInterface:
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None
 
-        if isinstance(item_name, HABApp.core.items.Item):
+        if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
             item_name = item_name.name
         assert isinstance(item_name, str), type(item_name)
         assert isinstance(namespace, str), type(namespace)

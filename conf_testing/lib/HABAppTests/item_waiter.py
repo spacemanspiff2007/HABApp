@@ -10,7 +10,7 @@ log = logging.getLogger('HABApp.Tests')
 class ItemWaiter:
     def __init__(self, item, timeout=1, item_compare: bool = True):
         self.item = item
-        assert isinstance(item, HABApp.core.items.Item), f'{item} is not an Item'
+        assert isinstance(item, HABApp.openhab.items.OpenhabItem), f'{item} is not an Item'
 
         self.timeout = timeout
         self.item_compare = item_compare

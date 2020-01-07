@@ -1,9 +1,9 @@
-from HABApp.core.items import Item
+from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.definitions.commands import UpDownCommand, PercentCommand
 from ..definitions import UpDownValue, PercentValue
 
 
-class RollershutterItem(Item, UpDownCommand, PercentCommand):
+class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
 
     def set_value(self, new_value) -> bool:
 

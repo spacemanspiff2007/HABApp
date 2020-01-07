@@ -26,7 +26,7 @@ class OpenhabTmpItem:
             if time.time() > stop:
                 break
 
-        return HABApp.core.Items.get_item(self.item_name)
+        return HABApp.openhab.items.OpenhabItem.get_item(self.item_name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         HABApp.openhab.oh_interface.get_openhab_interface().remove_item(self.item_name)
