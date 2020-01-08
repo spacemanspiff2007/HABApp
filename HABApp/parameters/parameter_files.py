@@ -28,7 +28,7 @@ def setup_param_files() -> bool:
     # listener to remove parameters
     HABApp.core.EventBus.add_listener(
         HABApp.core.EventBusListener(
-            HABApp.core.events.habapp_events.TOPIC_PARAM,
+            HABApp.core.const.topics.PARAM,
             HABApp.core.WrappedFunction(load_file),
             HABApp.core.events.habapp_events.RequestFileUnloadEvent
         )
@@ -36,7 +36,7 @@ def setup_param_files() -> bool:
     # listener to add parameters
     HABApp.core.EventBus.add_listener(
         HABApp.core.EventBusListener(
-            HABApp.core.events.habapp_events.TOPIC_PARAM,
+            HABApp.core.const.topics.PARAM,
             HABApp.core.WrappedFunction(load_file),
             HABApp.core.events.habapp_events.RequestFileLoadEvent
         )

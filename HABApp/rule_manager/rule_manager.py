@@ -12,7 +12,7 @@ from pytz import utc
 import HABApp
 from HABApp.util import log_exception
 from .rule_file import RuleFile
-from HABApp.core.events.habapp_events import TOPIC_RULES
+from HABApp.core.const.topics import RULES as TOPIC_RULES
 
 log = logging.getLogger('HABApp.Rules')
 

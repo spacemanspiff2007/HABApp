@@ -69,14 +69,14 @@ class Runtime:
         # folder watcher rules
         self.folder_watcher.watch_folder_habapp_events(
             folder=CONFIG.directories.rules, file_ending='.py',
-            habapp_topic=HABApp.core.events.habapp_events.TOPIC_RULES, watch_subfolders=True
+            habapp_topic=HABApp.core.const.topics.RULES, watch_subfolders=True
         )
 
         # watch parameter files
         if params_enabled:
             param_watcher = self.folder_watcher.watch_folder_habapp_events(
                 folder=HABApp.CONFIG.directories.param, file_ending='.yml',
-                habapp_topic=HABApp.core.events.habapp_events.TOPIC_PARAM, watch_subfolders=False
+                habapp_topic=HABApp.core.const.topics.PARAM, watch_subfolders=False
             )
             # load all param files through the worker
             HABApp.core.WrappedFunction(param_watcher.trigger_load_for_all_files, name='Load all parameter files').run()

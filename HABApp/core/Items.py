@@ -2,7 +2,6 @@ import typing
 
 from HABApp.core.items.base import BaseItem as __BaseItem
 
-
 _ALL_ITEMS: typing.Dict[str, __BaseItem] = {}
 
 

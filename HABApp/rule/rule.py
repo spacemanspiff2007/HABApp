@@ -95,7 +95,7 @@ class Rule:
         return None
 
 
-    def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],
+    def item_watch(self, name: typing.Union[str, HABApp.core.items.BaseValueItem],
                    seconds_constant: int, watch_only_changes=True) -> WatchedItem:
         """
         | Keep watch on the state of an item.
@@ -108,20 +108,21 @@ class Rule:
         :param seconds_constant: the amount of seconds the item has to be constant or has not received an update
         :param watch_only_changes:
         """
-        assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
+        assert isinstance(name, (str, HABApp.core.items.BaseValueItem)), type(name)
         assert isinstance(seconds_constant, int)
         assert isinstance(watch_only_changes, bool)
 
         item = WatchedItem(
-            name=name.name if isinstance(name, HABApp.core.items.Item) else name,
+            name=name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name,
             constant_time=seconds_constant,
             watch_only_changes=watch_only_changes
         )
         self.__watched_items.append(item)
         return item
 
-    def item_watch_and_listen(self, name: typing.Union[HABApp.core.items.Item, str], seconds_constant: int, callback,
-                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventBusListener]:
+    def item_watch_and_listen(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
+                              seconds_constant: int, callback, watch_only_changes=True
+                              ) -> typing.Tuple[WatchedItem, HABApp.core.EventBusListener]:
         """
         Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
 
@@ -148,10 +149,13 @@ class Rule:
         :param event: Event class to be used (must be class instance)
         :return:
         """
-        assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
-        return HABApp.core.EventBus.post_event(name.name if isinstance(name, HABApp.core.items.Item) else name, event)
+        assert isinstance(name, (str, HABApp.core.items.BaseValueItem)), type(name)
+        return HABApp.core.EventBus.post_event(
+            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name,
+            event
+        )
 
-    def listen_event(self, name: typing.Union[HABApp.core.items.Item, str], callback,
+    def listen_event(self, name: typing.Union[HABApp.core.items.BaseValueItem, str], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
@@ -165,7 +169,7 @@ class Rule:
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         listener = HABApp.core.EventBusListener(
-            name.name if isinstance(name, HABApp.core.items.Item) else name, cb, even_type
+            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name, cb, even_type
         )
         self.__event_listener.append(listener)
         HABApp.core.EventBus.add_listener(listener)
@@ -475,6 +479,11 @@ class Rule:
             return None
 
         for listener in self.__event_listener:
+
+            # Internal topics - don't warn there
+            if listener.topic in [HABApp.core.const.topics.WARNINGS, HABApp.core.const.topics.ERRORS]:
+                continue
+
             # check if specific item exists
             if not HABApp.core.Items.item_exists(listener.topic):
                 log.warning(f'Item "{listener.topic}" does not exist (yet)! '

@@ -1,8 +1,5 @@
 from pathlib import Path
 
-TOPIC_RULES = 'HABApp.Rules'
-TOPIC_PARAM = 'HABApp.Parameters'
-
 
 class RequestFileLoadEvent:
     """Request (re-) loading of the specified file
