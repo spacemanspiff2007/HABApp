@@ -6,6 +6,7 @@ import sys
 import traceback
 import typing
 import warnings
+import weakref
 
 import HABApp
 import HABApp.core
@@ -62,9 +63,11 @@ class Rule:
         self.__future_events: typing.List[OneTimeCallback] = []
         self.__watched_items: typing.List[WatchedItem] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
+        self.__cancel_objs: weakref.WeakSet = weakref.WeakSet()
 
-        # schedule cleanup
+        # schedule cleanup of this rule
         self.register_on_unload(self.__cleanup_rule)
+        self.register_on_unload(self.__cleanup_objs)
 
 
         # suggest a rule name if it is not
@@ -76,6 +79,13 @@ class Rule:
         self.oh: HABApp.openhab.OpenhabInterface = HABApp.openhab.get_openhab_interface() if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
 
+    @HABApp.util.log_exception
+    def __cleanup_objs(self):
+        while self.__cancel_objs:
+            obj = self.__cancel_objs.pop()
+            obj.cancel()
+
+    @HABApp.util.log_exception
     def __cleanup_rule(self):
         # Important: set the dicts to None so we don't schedule a future event during _cleanup.
         # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
@@ -191,7 +201,7 @@ class Rule:
 
         asyncio.run_coroutine_threadsafe(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
-            self.__runtime.loop  # this has to be passed because we will not call it from the main thread
+            HABApp.core.const.loop
         )
 
     def run_every(self, time: TYPING_DATE_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
@@ -404,6 +414,14 @@ class Rule:
         assert func not in self.__unload_functions, 'Function was already registered!'
         self.__unload_functions.append(func)
 
+    def register_cancel_obj(self, obj):
+        """Add a ``weakref`` to an obj which has a ``cancel`` function.
+        When the rule gets unloaded the cancel function will be called (if the obj was not already garbage collected)
+        
+        :param obj:
+        """
+        self.__cancel_objs.add(obj)
+
     # -----------------------------------------------------------------------------------------------------------------
     # deprecated functions
     # -----------------------------------------------------------------------------------------------------------------
@@ -541,3 +559,19 @@ class Rule:
                 del lines[1:3]  # see implementation in wrappedfunction.py why we do this
                 for line in lines:
                     log.error(line)
+
+
+def get_parent_rule() -> Rule:
+    depth = 1
+    while True:
+        try:
+            frm = sys._getframe(depth)
+        except ValueError:
+            raise RuntimeError(f'Could not find parent rule!')
+
+        __vars = frm.f_locals
+        depth += 1
+        if 'self' in __vars:
+            rule = __vars['self']
+            if isinstance(rule, Rule):
+                return rule

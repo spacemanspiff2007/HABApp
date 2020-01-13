@@ -31,8 +31,8 @@ class BaseValueItem(BaseItem):
 
         _now = datetime.datetime.now(tz=utc)
         if state_changed:
-            self._last_change = _now
-        self._last_update = _now
+            self._last_change.set(_now)
+        self._last_update.set(_now)
 
         self.value = new_value
         return state_changed

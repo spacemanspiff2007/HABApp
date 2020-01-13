@@ -17,6 +17,7 @@ class TestItemEvents(TestBaseRule):
         def cb(event: ValueNoUpdateEvent):
             assert event.name == watch_item.name, f'Wrong name: {event.name} != {watch_item.name}'
             assert event.seconds == secs, f'Wrong seconds: {event.seconds} != {secs}'
+
         self.item_watch_and_listen(watch_item.name, secs, cb, changes)
 
         for step, value in enumerate(values):

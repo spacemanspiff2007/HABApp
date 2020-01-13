@@ -1,5 +1,5 @@
 import HABApp
-from .base_valueitem import BaseValueItem
+from . import BaseValueItem
 
 
 class Item(BaseValueItem):

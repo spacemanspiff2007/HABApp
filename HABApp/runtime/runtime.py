@@ -15,9 +15,6 @@ from HABApp.config import CONFIG
 class Runtime:
 
     def __init__(self):
-
-        self.loop = asyncio.get_event_loop()
-
         self.shutdown = ShutdownHelper()
 
         self.folder_watcher: FolderWatcher = FolderWatcher()
@@ -36,7 +33,7 @@ class Runtime:
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
         # Async Workers & shutdown callback
-        HABApp.core.WrappedFunction._EVENT_LOOP = self.loop
+        HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
         self.shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown)
 
     def startup(self, config_folder: Path):
@@ -85,7 +82,7 @@ class Runtime:
     @HABApp.util.log_exception
     def get_async(self):
         return asyncio.gather(
-            self.async_http.create_client(),
+            self.async_http.create_client(HABApp.core.const.loop),
             self.openhab_connection.start(),
             self.rule_manager.get_async(),
         )

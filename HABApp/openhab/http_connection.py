@@ -90,7 +90,7 @@ class HttpConnection:
         # Try reconnect
         if not self.async_try_uuid.done():
             self.async_try_uuid.cancel()
-        self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
+        self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), HABApp.core.const.loop)
 
     def _is_disconnect_exception(self, e) -> bool:
         if not isinstance(e, (

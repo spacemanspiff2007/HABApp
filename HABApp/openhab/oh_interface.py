@@ -8,6 +8,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.util import log_exception
+from HABApp.core.const import loop
 from HABApp.core.items.base_valueitem import BaseValueItem
 from . import definitions
 from .http_connection import HttpConnection
@@ -70,8 +71,6 @@ class OpenhabItemDefinition:
 
 class OpenhabInterface:
     def __init__(self, connection):
-
-        self.__loop = asyncio.get_event_loop()
         self.__connection: HttpConnection = connection
 
     def __convert_to_oh_type(self, _in):
@@ -109,7 +108,7 @@ class OpenhabInterface:
 
         asyncio.run_coroutine_threadsafe(
             self.__connection.async_post_update(item_name, self.__convert_to_oh_type(state)),
-            self.__loop
+            loop
         )
 
     @log_exception
@@ -130,7 +129,7 @@ class OpenhabInterface:
 
         asyncio.run_coroutine_threadsafe(
             self.__connection.async_send_command(item_name, self.__convert_to_oh_type(command)),
-            self.__loop
+            loop
         )
 
     @log_exception
@@ -188,7 +187,7 @@ class OpenhabInterface:
                 label=label, category=category, tags=tags, groups=groups,
                 group_type=group_type, group_function=group_function, group_function_params=group_function_params
             ),
-            self.__loop
+            loop
         )
         return fut.result()
 
@@ -203,7 +202,7 @@ class OpenhabInterface:
 
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_get_item(item_name),
-            self.__loop
+            loop
         )
         data = fut.result()
         return OpenhabItemDefinition.from_dict(data)
@@ -220,7 +219,7 @@ class OpenhabInterface:
 
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_remove_item(item_name),
-            self.__loop
+            loop
         )
         return fut.result()
 
@@ -236,7 +235,7 @@ class OpenhabInterface:
         assert isinstance(item_name, str), type(item_name)
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_item_exists(item_name),
-            self.__loop
+            loop
         )
         return fut.result()
 
@@ -262,7 +261,7 @@ class OpenhabInterface:
 
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_set_metadata(item_name=item_name, namespace=namespace, value=value, config=config),
-            self.__loop
+            loop
         )
         return fut.result()
 
@@ -284,7 +283,7 @@ class OpenhabInterface:
 
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_remove_metadata(item_name=item_name, namespace=namespace),
-            self.__loop
+            loop
         )
         return fut.result()
 

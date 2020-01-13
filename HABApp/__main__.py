@@ -100,21 +100,6 @@ def main() -> typing.Union[int, str]:
         pass
 
     try:
-        # otherwise creating a subprocess does not work on windows
-        if sys.platform == "win32":
-            # This is the default from 3.8 so we don't have to set it ourselves
-            if sys.version_info < (3, 8):
-                asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-        else:
-            # Must be called once in the main thread so creating a subprocess works properly
-            # https://docs.python.org/3/library/asyncio-subprocess.html#subprocess-and-threads
-            asyncio.get_child_watcher()
-
-        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
-
-        loop.set_debug(True)
-        loop.slow_callback_duration = 0.02
-
         app = HABApp.runtime.Runtime()
         app.startup(config_folder=find_config_folder(args.config))
 
@@ -128,7 +113,7 @@ def main() -> typing.Union[int, str]:
 
         # start workers
         try:
-            loop.run_until_complete(app.get_async())
+            HABApp.core.const.loop.run_until_complete(app.get_async())
         except asyncio.CancelledError:
             pass
     except HABApp.config.InvalidConfigException:
@@ -141,8 +126,8 @@ def main() -> typing.Union[int, str]:
     finally:
         # Sleep to allow underlying connections of aiohttp to close
         # https://aiohttp.readthedocs.io/en/stable/client_advanced.html#graceful-shutdown
-        loop.run_until_complete(asyncio.sleep(1))
-        loop.close()
+        HABApp.core.const.loop.run_until_complete(asyncio.sleep(1))
+        HABApp.core.const.loop.close()
     return 0
 
 

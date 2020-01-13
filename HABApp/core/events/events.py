@@ -47,3 +47,21 @@ class ValueNoUpdateEvent:
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, seconds: {self.seconds}>'
+
+
+class ItemNoChangeEvent:
+    def __init__(self, name=None, seconds=None):
+        self.name: str = name
+        self.seconds: int = seconds
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'
+
+
+class ItemNoUpdateEvent:
+    def __init__(self, name=None, seconds=None):
+        self.name: str = name
+        self.seconds: int = seconds
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'
