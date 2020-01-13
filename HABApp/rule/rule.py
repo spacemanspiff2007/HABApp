@@ -394,7 +394,7 @@ class Rule:
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
-    def register_on_unload(self, func):
+    def register_on_unload(self, func: typing.Callable[[], typing.Any]):
         """Register a function with no parameters which will be called when the rule is unloaded.
         Use this for custom cleanup functions.
 
@@ -481,7 +481,7 @@ class Rule:
         for listener in self.__event_listener:
 
             # Internal topics - don't warn there
-            if listener.topic in [HABApp.core.const.topics.WARNINGS, HABApp.core.const.topics.ERRORS]:
+            if listener.topic in HABApp.core.const.topics.ALL:
                 continue
 
             # check if specific item exists

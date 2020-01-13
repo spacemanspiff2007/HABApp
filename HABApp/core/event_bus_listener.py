@@ -29,3 +29,7 @@ class EventBusListener:
     def cancel(self):
         """Stop listening on the event bus"""
         HABApp.core.EventBus.remove_listener(self)
+
+    def desc(self):
+        # return description
+        return f'"{self.topic}" (type {self.event_filter})'

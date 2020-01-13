@@ -1,6 +1,6 @@
 import typing
 
-from HABApp.core.items.base import BaseItem as __BaseItem
+from HABApp.core.items.base_item import BaseItem as __BaseItem
 
 _ALL_ITEMS: typing.Dict[str, __BaseItem] = {}
 

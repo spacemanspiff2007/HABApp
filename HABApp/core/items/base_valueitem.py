@@ -4,7 +4,7 @@ import typing
 from pytz import utc
 
 import HABApp
-from .base import BaseItem
+from .base_item import BaseItem
 
 
 class BaseValueItem(BaseItem):

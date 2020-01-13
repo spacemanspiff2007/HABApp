@@ -1,4 +1,4 @@
-from HABApp.core.items.base_value import BaseValueItem
+from HABApp.core.items.base_valueitem import BaseValueItem
 
 
 class OpenhabItem(BaseValueItem):

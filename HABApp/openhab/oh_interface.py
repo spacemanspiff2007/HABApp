@@ -8,7 +8,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.util import log_exception
-from HABApp.core.items.base_value import BaseValueItem
+from HABApp.core.items.base_valueitem import BaseValueItem
 from . import definitions
 from .http_connection import HttpConnection
 

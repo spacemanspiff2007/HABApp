@@ -1,7 +1,7 @@
 import colorsys
 import typing
 
-from .base_value import BaseValueItem
+from .base_valueitem import BaseValueItem
 
 HUE_FACTOR = 360
 PERCENT_FACTOR = 100
