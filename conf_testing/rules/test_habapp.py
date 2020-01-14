@@ -1,4 +1,4 @@
-from HABApp.core.events import ValueNoUpdateEvent, ValueNoChangeEvent
+from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
 from HABApp.core.items import Item
 from HABAppTests import TestBaseRule, EventWaiter
 
@@ -12,17 +12,18 @@ class TestItemEvents(TestBaseRule):
 
     def item_events(self, changes=False, secs=5, values=[]):
         watch_item = Item.get_create_item('watch_item', values[0])
-        event = ValueNoUpdateEvent if not changes else ValueNoChangeEvent
+        (watch_item.watch_change if changes else watch_item.watch_update)(secs)
+        event = ItemNoUpdateEvent if not changes else ItemNoChangeEvent
 
-        def cb(event: ValueNoUpdateEvent):
+        def cb(event: ItemNoUpdateEvent):
             assert event.name == watch_item.name, f'Wrong name: {event.name} != {watch_item.name}'
             assert event.seconds == secs, f'Wrong seconds: {event.seconds} != {secs}'
 
-        self.item_watch_and_listen(watch_item.name, secs, cb, changes)
+        self.listen_event(watch_item, cb, event)
 
         for step, value in enumerate(values):
             watch_item.set_value(value)
-            with EventWaiter(watch_item.name, event, secs + 2) as w:
+            with EventWaiter(watch_item.name, event, secs + 2, check_value=False) as w:
                 w.wait_for_event(value)
                 if not w.events_ok:
                     return w.events_ok

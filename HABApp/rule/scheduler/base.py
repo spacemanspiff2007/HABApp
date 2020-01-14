@@ -77,6 +77,7 @@ class ScheduledCallbackBase:
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
         self._earliest = time_obj
+        self.update_run_time()
         return self
 
     def latest(self, time_obj: typing.Optional[time]) -> 'ScheduledCallbackBase':
@@ -86,6 +87,7 @@ class ScheduledCallbackBase:
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
         self._latest = time_obj
+        self.update_run_time()
         return self
 
     def offset(self, timedelta_obj: typing.Optional[timedelta]) -> 'ScheduledCallbackBase':
@@ -95,6 +97,7 @@ class ScheduledCallbackBase:
         """
         assert isinstance(timedelta_obj, timedelta) or timedelta_obj is None, type(timedelta_obj)
         self._offset = timedelta_obj
+        self.update_run_time()
         return self
 
     def jitter(self, secs: typing.Optional[int]) -> 'ScheduledCallbackBase':
@@ -104,6 +107,7 @@ class ScheduledCallbackBase:
         """
         assert isinstance(secs, int) or secs is None, type(secs)
         self._jitter = secs
+        self.update_run_time()
         return self
 
     def boundary_func(self, func: typing.Optional[typing.Callable[[datetime], datetime]]):
@@ -112,6 +116,7 @@ class ScheduledCallbackBase:
         :param func: Function which returns a datetime obj, arg is a datetime with the next call time
         """
         self._boundary_func = func
+        self.update_run_time()
         return self
 
     def update_run_time(self) -> 'ScheduledCallbackBase':

@@ -9,6 +9,8 @@ from .item_times import BaseWatch, ChangedTime, UpdatedTime
 
 
 class BaseItem:
+    """BaseItem, all items must inherit from this class
+    """
 
     @classmethod
     def get_item(cls, name: str):
@@ -33,14 +35,23 @@ class BaseItem:
 
     @property
     def name(self) -> str:
+        """
+        :return: Name of the item (read only)
+        """
         return self._name
 
     @property
     def last_change(self) -> datetime.datetime:
+        """
+        :return: Timestamp of the last time when the item has been changed (read only)
+        """
         return self._last_change.dt.astimezone(tzlocal.get_localzone()).replace(tzinfo=None)
 
     @property
     def last_update(self) -> datetime.datetime:
+        """
+        :return: Timestamp of the last time when the item has been updated (read only)
+        """
         return self._last_update.dt.astimezone(tzlocal.get_localzone()).replace(tzinfo=None)
 
     def __repr__(self):
