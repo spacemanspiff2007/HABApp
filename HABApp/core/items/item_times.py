@@ -64,7 +64,7 @@ class ItemTimes:
     def __init__(self, name: str, dt: datetime.datetime):
         self.name: str = name
         self.dt: datetime.datetime = dt
-        self.tasks: typing.List[typing.Union[ItemNoUpdateWatch, ItemNoChangeWatch]] = []
+        self.tasks: typing.List[BaseWatch] = []
 
     def set(self, dt: datetime.datetime, events=True):
         self.dt = dt
@@ -88,7 +88,7 @@ class ItemTimes:
     async def schedule_events(self):
         clean = False
         for t in self.tasks:
-            if t.secs <= 0:
+            if t._secs <= 0:
                 clean = True
             else:
                 # Schedule the new task, todo: rename to asyncio.create_task once we go py3.7 only
@@ -96,7 +96,7 @@ class ItemTimes:
 
         # remove canceled tasks
         if clean:
-            self.tasks = [t for t in self.tasks if t.secs > 0]
+            self.tasks = [t for t in self.tasks if t._secs > 0]
         return None
 
 
