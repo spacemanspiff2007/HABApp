@@ -1,10 +1,11 @@
-import datetime, typing
+import datetime
+import typing
 
 import tzlocal
 from pytz import utc
 
 import HABApp
-from .item_times import ChangedTime, UpdatedTime
+from .item_times import BaseWatch, ChangedTime, UpdatedTime
 
 
 class BaseItem:
@@ -48,11 +49,12 @@ class BaseItem:
             ret += f'{", " if ret else ""}{k}: {getattr(self, k)}'
         return f'<{self.__class__.__name__} {ret:s}>'
 
-    def watch_change(self, secs: typing.Union[int, float]):
-        """Generate an even if the item does not change for a certain period of time.
-        Has to be called from a rule function.
-        
-        :param secs: secs after which the event will occur
+    def watch_change(self, secs: typing.Union[int, float]) -> BaseWatch:
+        """Generate an event if the item does not change for a certain period of time.
+        Has to be called from inside a rule function.
+
+        :param secs: secs after which the event will occur, max 1 decimal digit for floats
+        :return: The watch obj which can be used to cancel the watch
         """
         if isinstance(secs, float):
             secs = round(secs, 1)
@@ -60,12 +62,14 @@ class BaseItem:
             assert isinstance(secs, int)
         w = self._last_change.add_watch(secs)
         HABApp.rule.get_parent_rule().register_cancel_obj(w)
+        return w
 
-    def watch_update(self, secs: typing.Union[int, float]):
-        """Generate an even if the item does not receive and update for a certain period of time.
-        Has to be called from a rule function.
+    def watch_update(self, secs: typing.Union[int, float]) -> BaseWatch:
+        """Generate an event if the item does not receive and update for a certain period of time.
+        Has to be called from inside a rule function.
 
-        :param secs: secs after which the event will occur
+        :param secs: secs after which the event will occur, max 1 decimal digit for floats
+        :return: The watch obj which can be used to cancel the watch
         """
         if isinstance(secs, float):
             secs = round(secs, 1)
@@ -73,3 +77,4 @@ class BaseItem:
             assert isinstance(secs, int)
         w = self._last_update.add_watch(secs)
         HABApp.rule.get_parent_rule().register_cancel_obj(w)
+        return w

@@ -17,7 +17,7 @@ from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
 from .scheduler import ReoccurringScheduledCallback, OneTimeCallback, DayOfWeekScheduledCallback, \
     TYPING_DATE_TIME, SunScheduledCallback
-from .watched_item import WatchedItem
+
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -61,7 +61,6 @@ class Rule:
 
         self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
         self.__future_events: typing.List[OneTimeCallback] = []
-        self.__watched_items: typing.List[WatchedItem] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
         self.__cancel_objs: weakref.WeakSet = weakref.WeakSet()
 
@@ -94,7 +93,6 @@ class Rule:
 
         self.__event_listener = None
         self.__future_events = None
-        self.__watched_items = None
 
         # Actually remove the listeners/events
         for listener in event_listeners:
@@ -103,53 +101,6 @@ class Rule:
         for event in future_events:
             event.cancel()
         return None
-
-
-    def item_watch(self, name: typing.Union[str, HABApp.core.items.BaseValueItem],
-                   seconds_constant: int, watch_only_changes=True) -> WatchedItem:
-        """
-        | Keep watch on the state of an item.
-        | if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
-          `ValueNoChangeEvent` will be sent to the event bus.
-        | if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
-          `ValueNoUpdateEvent` will be sent to the event bus.
-
-        :param name: item name or item that shall be watched
-        :param seconds_constant: the amount of seconds the item has to be constant or has not received an update
-        :param watch_only_changes:
-        """
-        assert isinstance(name, (str, HABApp.core.items.BaseValueItem)), type(name)
-        assert isinstance(seconds_constant, int)
-        assert isinstance(watch_only_changes, bool)
-
-        item = WatchedItem(
-            name=name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name,
-            constant_time=seconds_constant,
-            watch_only_changes=watch_only_changes
-        )
-        self.__watched_items.append(item)
-        return item
-
-    def item_watch_and_listen(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
-                              seconds_constant: int, callback, watch_only_changes=True
-                              ) -> typing.Tuple[WatchedItem, HABApp.core.EventBusListener]:
-        """
-        Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
-
-        :param name: item name
-        :param seconds_constant:
-        :param callback: callback that accepts one parameter which will contain the event
-        :param watch_only_changes:
-        :return:
-        """
-
-        watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
-        event_listener = self.listen_event(
-            name,
-            callback,
-            HABApp.core.events.ValueNoChangeEvent if watch_only_changes else HABApp.core.events.ValueNoUpdateEvent
-        )
-        return watched_item, event_listener
 
     def post_event(self, name, event):
         """
@@ -417,7 +368,7 @@ class Rule:
     def register_cancel_obj(self, obj):
         """Add a ``weakref`` to an obj which has a ``cancel`` function.
         When the rule gets unloaded the cancel function will be called (if the obj was not already garbage collected)
-        
+
         :param obj:
         """
         self.__cancel_objs.add(obj)
@@ -425,6 +376,40 @@ class Rule:
     # -----------------------------------------------------------------------------------------------------------------
     # deprecated functions
     # -----------------------------------------------------------------------------------------------------------------
+    def item_watch(self, name: typing.Union[str, HABApp.core.items.BaseValueItem],
+                   seconds_constant: int, watch_only_changes=True):
+        warnings.warn("'item_watch' is deprecated, use the 'watch_change' or 'watch_update'"
+                      " method of the item instance instead", DeprecationWarning, 2)
+
+        assert isinstance(seconds_constant, int)
+        assert isinstance(watch_only_changes, bool)
+        if isinstance(name, str):
+            item = HABApp.core.items.BaseValueItem.get_item(name)
+        else:
+            assert isinstance(name, HABApp.core.items.BaseValueItem), type(name)
+            item = name
+
+        if watch_only_changes:
+            return item.watch_change(seconds_constant)
+        else:
+            return item.watch_update(seconds_constant)
+
+
+    def item_watch_and_listen(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
+                              seconds_constant: int, callback, watch_only_changes=True
+                              ):
+        warnings.warn("'item_watch_and_listen' is deprecated, use the 'watch_change' or 'watch_update'"
+                      " method of the item instance instead", DeprecationWarning, 2)
+
+        watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
+        event_listener = self.listen_event(
+            name,
+            callback,
+            HABApp.core.events.ItemNoChangeEvent if watch_only_changes else HABApp.core.events.ItemNoUpdateEvent
+        )
+        return watched_item, event_listener
+
+
     def item_exists(self, name: str) -> bool:
         warnings.warn("'item_exists' is deprecated!", DeprecationWarning, 2)
         assert isinstance(name, str), type(name)
@@ -507,22 +492,9 @@ class Rule:
                 log.warning(f'Item "{listener.topic}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
-        for item in self.__watched_items:
-            if not HABApp.core.Items.item_exists(item.name):
-                log.warning(f'Item "{item.name}" does not exist (yet)! '
-                            f'self.item_watch in "{self.rule_name}" may not work as intended.')
 
     @HABApp.util.log_exception
     def _process_events(self, now):
-
-        # watch items
-        clean_items = False
-        for item in self.__watched_items:
-            item.check(now)
-            if item.is_canceled:
-                clean_items = True
-        if clean_items:
-            self.__watched_items = [k for k in self.__watched_items if not k.is_canceled]
 
         # sheduled events
         clean_events = False
@@ -561,6 +533,7 @@ class Rule:
                     log.error(line)
 
 
+@HABApp.util.log_exception
 def get_parent_rule() -> Rule:
     depth = 1
     while True:

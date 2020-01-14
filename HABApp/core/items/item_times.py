@@ -10,7 +10,7 @@ from ..events import ItemNoChangeEvent, ItemNoUpdateEvent
 
 class BaseWatch:
     EVENT: typing.Union[typing.Type[ItemNoUpdateEvent], typing.Type[ItemNoChangeEvent]]
-    
+
     def __init__(self, name: str, secs: int):
         self.secs: typing.Union[int, float] = secs
         self.name: str = name

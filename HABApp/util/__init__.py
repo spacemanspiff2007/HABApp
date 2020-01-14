@@ -1,4 +1,4 @@
-from .wrapper import log_exception, ignore_exception
+from .wrapper import log_exception, ignore_exception, ExceptionToHABApp
 
 from .timeframe import TimeFrame
 

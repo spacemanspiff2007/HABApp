@@ -29,26 +29,6 @@ class ValueChangeEvent:
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
 
-class ValueNoChangeEvent:
-    def __init__(self, name=None, value=None, seconds=None):
-        self.name: str = name
-        self.value = value
-        self.seconds: int = seconds
-
-    def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, seconds: {self.seconds}>'
-
-
-class ValueNoUpdateEvent:
-    def __init__(self, name=None, value=None, seconds=None):
-        self.name: str = name
-        self.value = value
-        self.seconds: int = seconds
-
-    def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, seconds: {self.seconds}>'
-
-
 class ItemNoChangeEvent:
     def __init__(self, name=None, seconds=None):
         self.name: str = name
