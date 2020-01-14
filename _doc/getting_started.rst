@@ -180,7 +180,7 @@ Trigger an event when an item is constant
 
     import HABApp
     from HABApp.core.items import Item
-    from HABApp.core.events import ValueNoChangeEvent
+    from HABApp.core.events import ItemNoChangeEvent
 
     class MyFirstRule(HABApp.Rule):
         def __init__(self):
@@ -188,14 +188,17 @@ Trigger an event when an item is constant
             # Get the item or create it if it does not exist
             self.my_item = Item.get_create_item('Item_Name')
 
-            self.item_watch_and_listen(self.my_item, 10, self.item_constant)
+            # This will create an event if the item is 10 secs constant
+            self.my_item.watch_change(10)
 
-        def item_constant(self, event: ValueNoChangeEvent):
+            self.listen_event(self.my_item, self.item_constant, ItemNoChangeEvent)
+
+        def item_constant(self, event: ItemNoChangeEvent):
             print(f'{event}')
 
     MyFirstRule()
     # hide
-    HABApp.core.EventBus.post_event('Item_Name', ValueNoChangeEvent('Item_Name', 'my_value', 10))
+    HABApp.core.EventBus.post_event('Item_Name', ItemNoChangeEvent('Item_Name', 10))
     runner.tear_down()
     # hide
 
