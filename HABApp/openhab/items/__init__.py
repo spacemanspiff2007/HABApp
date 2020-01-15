@@ -8,3 +8,4 @@ from .number_item import NumberItem
 from .datetime_item import DatetimeItem
 from .group_item import GroupItem
 from .string_item import StringItem, LocationItem, PlayerItem
+from .thing_item import Thing

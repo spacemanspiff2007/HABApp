@@ -297,6 +297,11 @@ class HttpConnection:
                     log.error(l)
             return None
 
+    async def async_get_things(self) -> typing.List[dict]:
+        fut = self.__session.get(self.__get_openhab_url('rest/things'))
+        resp = await self._check_http_response(fut)
+        return ujson.loads(await resp.text(encoding='utf-8'))
+
     async def async_get_item(self, item_name: str) -> dict:
         fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))
         ret = await self._check_http_response(fut, accept_404=True)

@@ -126,6 +126,9 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 HABApp.core.Items.get_item(event.name).set_value(event.value)
             except HABApp.core.Items.ItemNotFoundException:
                 pass
+        elif isinstance(event, HABApp.openhab.events.ThingStatusInfoEvent):
+            item = HABApp.core.Items.get_item(event.name)   # type: HABApp.openhab.items.Thing
+            item.process_event(event)
 
         # Send Event to Event Bus
         HABApp.core.EventBus.post_event(event.name, event)
@@ -148,6 +151,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 existing_item = HABApp.core.Items.get_item(item_name)
                 if isinstance(existing_item, new_item.__class__):
                     existing_item.set_value(_dict['state'])
+                    new_item = existing_item
             except HABApp.core.Items.ItemNotFoundException:
                 pass
 
@@ -158,7 +162,35 @@ class OpenhabConnection(HttpConnectionEventHandler):
         ist = set(HABApp.core.Items.get_all_item_names())
         soll = {k['name'] for k in data}
         for k in ist - soll:
-            HABApp.core.Items.pop_item(k)
+            if isinstance(HABApp.core.Items.get_item(k), HABApp.openhab.items.OpenhabItem):
+                HABApp.core.Items.pop_item(k)
 
-        log.info(f'Updated {found_items:d} items')
-        return found_items
+        log.info(f'Updated {found_items:d} Items')
+
+
+        # try to update things, too
+        Thing = HABApp.openhab.items.Thing
+        data = await self.connection.async_get_things()
+        for t_dict in data:
+            name = t_dict['UID']
+            try:
+                thing = HABApp.core.Items.get_item(name)
+                if not isinstance(thing, Thing):
+                    log.warning(f'Item {name} has the wrong type ({type(thing)}), expected Thing')
+                    thing = Thing(name)
+            except HABApp.core.Items.ItemNotFoundException:
+                thing = Thing(name)
+
+            thing.status = t_dict['statusInfo']['status']
+            HABApp.core.Items.set_item(thing)
+
+        # remove things which were deleted
+        ist = set(HABApp.core.Items.get_all_item_names())
+        soll = {k['UID'] for k in data}
+        for k in ist - soll:
+            if isinstance(HABApp.core.Items.get_item(k), Thing):
+                HABApp.core.Items.pop_item(k)
+
+        log.info(f'Updated {len(data):d} Things')
+
+        return None
