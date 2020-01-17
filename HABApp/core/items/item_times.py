@@ -42,11 +42,11 @@ class BaseWatch:
         self._task = asyncio.ensure_future(self._send_event())
 
     async def __cancel_watch(self):
-        self._secs = 0
         self.__cancel_task()
 
     def cancel(self):
         """Cancel the item watch"""
+        self._secs = 0  # we have to to set secs asap so we indicate that it is canceled
         asyncio.run_coroutine_threadsafe(self.__cancel_watch(), loop)
 
 
@@ -76,6 +76,8 @@ class ItemTimes:
         return None
 
     def add_watch(self, secs: int) -> BaseWatch:
+        assert secs > 0, secs
+
         # don't add the watch two times
         for t in self.tasks:
             if t._secs == secs:

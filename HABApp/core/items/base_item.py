@@ -71,6 +71,7 @@ class BaseItem:
             secs = round(secs, 1)
         else:
             assert isinstance(secs, int)
+        assert secs > 0, secs
         w = self._last_change.add_watch(secs)
         HABApp.rule.get_parent_rule().register_cancel_obj(w)
         return w
@@ -86,6 +87,7 @@ class BaseItem:
             secs = round(secs, 1)
         else:
             assert isinstance(secs, int)
+        assert secs > 0, secs
         w = self._last_update.add_watch(secs)
         HABApp.rule.get_parent_rule().register_cancel_obj(w)
         return w

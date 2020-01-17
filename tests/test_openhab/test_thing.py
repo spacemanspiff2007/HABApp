@@ -33,4 +33,4 @@ def test_thing_status_events(test_thing: Thing):
     assert test_thing.status == 'asdf'
 
     test_thing.process_event(ThingStatusInfoEvent(get_dict('NONE')))
-    assert test_thing.status == None
+    assert test_thing.status is None

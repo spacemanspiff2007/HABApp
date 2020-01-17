@@ -61,7 +61,22 @@ class TestBaseRule(HABApp.Rule):
         assert name not in self.__tests_funcs, name
         self.__tests_funcs[name] = (func, args, kwargs)
 
+    def set_up(self):
+        pass
+
+    def tear_down(self):
+        pass
+
     def run_tests(self, result: TestResult):
+        try:
+            self.set_up()
+        except Exception as e:
+            log.error(f'"Set up of {self.__class__.__name__}" failed: {e}')
+            for line in traceback.format_exc().splitlines():
+                log.error(line)
+            result.nio += 1
+            return None
+
         test_count = len(self.__tests_funcs)
         log.info(f'Running {test_count} tests for {self.rule_name}')
 
@@ -95,6 +110,15 @@ class TestBaseRule(HABApp.Rule):
                     log.error(f'Test {test_current:{width}}/{test_count} "{name}" failed')
                 else:
                     log.error(f'Test {test_current:{width}}/{test_count} "{name}" failed: {msg} ({type(msg)})')
+
+        # TEAR DOWN
+        try:
+            self.tear_down()
+        except Exception as e:
+            log.error(f'"Set up of {self.__class__.__name__}" failed: {e}')
+            for line in traceback.format_exc().splitlines():
+                log.error(line)
+            result.nio += 1
 
         # run next rule
         self.tests_done = False
