@@ -132,14 +132,16 @@ class BaseValueItem(BaseItem):
             return None
         assert secs > 0, f'secs must be > 0 (is {secs})'
 
-        # Add event listener so the value gets set
+        # Func which calls the expire
         func = HABApp.core.wrappedfunction.WrappedFunction(self.__expire_event, name=f'Expire.{self.name}')
-        listener = HABApp.core.EventBusListener(self.name, func, HABApp.core.events.ItemNoUpdateEvent)
 
-        watcher = self.watch_update(secs)
+        # Add event listener so the value gets set
+        listener = HABApp.core.EventBusListener(self.name, func, HABApp.core.events.ItemNoUpdateEvent)
+        watcher = self._last_update.add_watch(secs)
 
         self._expire = ExpireData()
         self._expire.create(watcher=watcher, listener=listener, secs=secs, default_value=default_value)
+
         log.debug(f'Added expire ({secs}s) to {self._name}')
         return None
 
