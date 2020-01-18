@@ -43,36 +43,3 @@ class TestItemEvents(TestBaseRule):
 
 
 TestItemEvents()
-
-
-class TestItemExpire(TestBaseRule):
-
-    def __init__(self):
-        super().__init__()
-        self.add_test('Item expire', self.test_expire)
-
-        self.item = Item.get_create_item(get_random_name())
-
-    def test_expire(self):
-        EXPIRE_TIME = 0.4
-        for val in ('asdf', 'asdf', 3, 0):
-            self.item.expire(EXPIRE_TIME, val)
-            start = time.time()
-            self.item.set_value('NOT_EXPIRED')
-            with ItemWaiter(self.item) as w:
-                w.wait_for_state(val)
-                if not w.states_ok:
-                    return False
-                assert self.item.value == val, f'{self.item.value} != {val}'
-                assert time.time() - start
-
-        # check that the expire gets removed properly
-        self.item.expire(None)
-        self.item.set_value('NOT_EXPIRED')
-        time.sleep(EXPIRE_TIME + 0.1)
-        assert self.item == 'NOT_EXPIRED'
-
-        return True
-
-
-TestItemExpire()

@@ -15,6 +15,3 @@ class MqttItem(Item):
         """
 
         return HABApp.mqtt.mqtt_interface.MQTT_INTERFACE.publish(self.name, payload, qos=qos, retain=retain)
-
-    def _expire_item(self):
-        self.publish(self._expire.value)

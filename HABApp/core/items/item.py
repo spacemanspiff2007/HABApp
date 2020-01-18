@@ -23,6 +23,3 @@ class Item(BaseValueItem):
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
-
-    def _expire_item(self):
-        self.post_value(self._expire.value)

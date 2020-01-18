@@ -106,7 +106,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
         # so the items have the correct state when we process the event in a rule
         try:
             if isinstance(event, HABApp.core.events.ValueUpdateEvent):
-                __item = HABApp.core.Items.get_item(event.name)  # type: HABApp.openhab.items.base_item.BaseValueItem
+                __item = HABApp.core.Items.get_item(event.name)  # type: HABApp.core.items.base_item.BaseValueItem
                 __item.set_value(event.value)
                 HABApp.core.EventBus.post_event(event.name, event)
                 return None
