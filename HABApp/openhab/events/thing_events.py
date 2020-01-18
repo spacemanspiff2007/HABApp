@@ -1,9 +1,7 @@
-import HABApp.core
-
-from .base_event import BaseItemEvent
+from .base_event import OpenhabEvent
 
 
-class ThingStatusInfoEvent(BaseItemEvent):
+class ThingStatusInfoEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         # Hack for NONE types, todo: find proper solution
         _in_dict['payload'] = _in_dict['payload'].replace('"NONE"', 'null')
@@ -18,7 +16,7 @@ class ThingStatusInfoEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}, status: {self.status}, detail: {self.detail}>'
 
 
-class ThingStatusInfoChangedEvent(BaseItemEvent):
+class ThingStatusInfoChangedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         # Hack for NONE types, todo: find proper solution
         _in_dict['payload'] = _in_dict['payload'].replace('"NONE"', 'null')

@@ -1,7 +1,7 @@
 import ujson
 
 
-class BaseItemEvent:
+class OpenhabEvent:
     def __init__(self, _in_dict: dict):
         super().__init__()
         assert isinstance(_in_dict, dict), type(_in_dict)

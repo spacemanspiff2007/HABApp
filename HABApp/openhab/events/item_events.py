@@ -1,10 +1,10 @@
 import HABApp.core
 
 from ..map_values import map_openhab_values
-from .base_event import BaseItemEvent
+from .base_event import OpenhabEvent
 
 
-class ItemStateEvent(BaseItemEvent, HABApp.core.events.ValueUpdateEvent):
+class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -16,7 +16,7 @@ class ItemStateEvent(BaseItemEvent, HABApp.core.events.ValueUpdateEvent):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class ItemStateChangedEvent(BaseItemEvent, HABApp.core.events.ValueChangeEvent):
+class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -29,7 +29,7 @@ class ItemStateChangedEvent(BaseItemEvent, HABApp.core.events.ValueChangeEvent):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
 
-class ItemCommandEvent(BaseItemEvent):
+class ItemCommandEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -41,7 +41,7 @@ class ItemCommandEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class ItemAddedEvent(BaseItemEvent):
+class ItemAddedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -55,7 +55,7 @@ class ItemAddedEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
 
 
-class ItemUpdatedEvent(BaseItemEvent):
+class ItemUpdatedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -70,7 +70,7 @@ class ItemUpdatedEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
 
 
-class ItemRemovedEvent(BaseItemEvent):
+class ItemRemovedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -81,7 +81,7 @@ class ItemRemovedEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}>'
 
 
-class ItemStatePredictedEvent(BaseItemEvent):
+class ItemStatePredictedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -93,7 +93,7 @@ class ItemStatePredictedEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class GroupItemStateChangedEvent(BaseItemEvent):
+class GroupItemStateChangedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 

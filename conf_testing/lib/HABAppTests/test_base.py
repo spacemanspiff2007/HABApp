@@ -30,7 +30,7 @@ class TestBaseRule(HABApp.Rule):
         self.prev_rule: str = None
         self.next_rule: str = None
         self.tests_done = False
-        
+
         with LOCK:
             # if we have only one rule it's not a list
             rules = self.get_rule(None)

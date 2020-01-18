@@ -102,6 +102,22 @@ class OpenhabConnection(HttpConnectionEventHandler):
         # Lookup corresponding OpenHAB event
         event = get_event(event_dict)
 
+        # Update item in registry BEFORE posting to the event bus
+        # so the items have the correct state when we process the event in a rule
+        try:
+            if isinstance(event, HABApp.core.events.ValueUpdateEvent):
+                __item = HABApp.core.Items.get_item(event.name)  # type: HABApp.openhab.items.base_item.BaseValueItem
+                __item.set_value(event.value)
+                HABApp.core.EventBus.post_event(event.name, event)
+                return None
+            elif isinstance(event, HABApp.openhab.events.ThingStatusInfoEvent):
+                __thing = HABApp.core.Items.get_item(event.name)   # type: HABApp.openhab.items.Thing
+                __thing.process_event(event)
+                HABApp.core.EventBus.post_event(event.name, event)
+                return None
+        except HABApp.core.Items.ItemNotFoundException:
+            pass
+
         # Events which change the ItemRegistry
         if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
             item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
@@ -109,8 +125,11 @@ class OpenhabConnection(HttpConnectionEventHandler):
             # check already existing item so we can print a warning if something changes
             try:
                 existing_item = HABApp.core.Items.get_item(item.name)
-                if not isinstance(existing_item, item.__class__):
-                    log.warning( f'Item changed type from {existing_item.__class__} to {item.__class__}')
+                if isinstance(existing_item, item.__class__):
+                    # it's the same item class so we don't replace it!
+                    item = existing_item
+                else:
+                    log.warning(f'Item changed type from {existing_item.__class__} to {item.__class__}')
             except HABApp.core.Items.ItemNotFoundException:
                 pass
 
@@ -119,16 +138,6 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
             HABApp.core.Items.pop_item(event.name)
-
-        # Update Item in registry BEFORE posting to the event bus
-        if isinstance(event, HABApp.core.events.ValueUpdateEvent):
-            try:
-                HABApp.core.Items.get_item(event.name).set_value(event.value)
-            except HABApp.core.Items.ItemNotFoundException:
-                pass
-        elif isinstance(event, HABApp.openhab.events.ThingStatusInfoEvent):
-            item = HABApp.core.Items.get_item(event.name)   # type: HABApp.openhab.items.Thing
-            item.process_event(event)
 
         # Send Event to Event Bus
         HABApp.core.EventBus.post_event(event.name, event)
