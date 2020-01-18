@@ -25,7 +25,7 @@ class Thing(BaseItem):
 
         if isinstance(event, ThingStatusInfoEvent):
             old = self.status
-            self.status = event.value
+            self.status = event.status
             self.__update_timestamps(old == self.status)
 
         return None

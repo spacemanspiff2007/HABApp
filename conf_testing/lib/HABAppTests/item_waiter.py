@@ -17,7 +17,6 @@ class ItemWaiter:
 
         self.states_ok = True
 
-
     def wait_for_state(self, state=None):
 
         start = time.time()

@@ -22,6 +22,7 @@ class ExpireData:
     def cancel(self):
         self.watcher.cancel()
         self.listener.cancel()
+        self.value = None
 
     def create(self, watcher, listener, secs: int, default_value: typing.Any):
         assert isinstance(listener, HABApp.core.EventBusListener), type(watcher)
@@ -141,6 +142,9 @@ class BaseValueItem(BaseItem):
 
         self._expire = ExpireData()
         self._expire.create(watcher=watcher, listener=listener, secs=secs, default_value=default_value)
+
+        # We remove the expire if we unload the rule
+        HABApp.rule.get_parent_rule().register_on_unload(lambda: self.expire(None))
 
         log.debug(f'Added expire ({secs}s) to {self._name}')
         return None
