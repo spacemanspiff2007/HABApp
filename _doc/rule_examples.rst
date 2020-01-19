@@ -29,18 +29,20 @@ Get an even when the item is constant for 5 and for 10 seconds.
 
     import HABApp
     from HABApp.core.items import Item
-    from HABApp.core.events import ValueNoChangeEvent
+    from HABApp.core.events import ItemNoChangeEvent
 
     class MyRule(HABApp.Rule):
         def __init__(self):
             super().__init__()
             my_item = Item.get_item('test_watch')
 
-            # don't use item_watch_and_listen, it's just a convenience function for only one timeout.
-            self.item_watch(my_item, 5)     # Create event when item doesn't change for  5 secs
-            self.item_watch(my_item, 10)    # Create event when item doesn't change for 10 secs
-            self.listen_event(my_item, self.item_constant, ValueNoChangeEvent)
+            my_item.watch_change(5)     # Create event when item doesn't change for  5 secs
+            my_item.watch_change(10)    # Create event when item doesn't change for 10 secs
 
+            # Listen to these events
+            self.listen_event(my_item, self.item_constant, ItemNoChangeEvent)
+
+            # Set the item to a value
             my_item.set_value('my_value')
 
         def item_constant(self, event):
@@ -48,8 +50,8 @@ Get an even when the item is constant for 5 and for 10 seconds.
 
     MyRule()
     # hide
-    HABApp.core.EventBus.post_event('test_watch', ValueNoChangeEvent('test_watch', 'my_value', 5))
-    HABApp.core.EventBus.post_event('test_watch', ValueNoChangeEvent('test_watch', 'my_value', 10))
+    HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 5))
+    HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 10))
     runner.tear_down()
     # hide
 

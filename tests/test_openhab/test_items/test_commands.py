@@ -2,7 +2,7 @@ import pytest
 import typing
 
 from HABApp.openhab.items import ContactItem, DimmerItem, RollershutterItem, SwitchItem, ColorItem
-from HABApp.openhab.definitions import OnOffValue, UpDownValue
+from HABApp.openhab.definitions import OnOffValue, UpDownValue, OpenClosedValue
 
 
 @pytest.mark.parametrize("cls", (SwitchItem, DimmerItem, ColorItem))
@@ -30,11 +30,11 @@ def test_UpDown(cls: typing.Type[RollershutterItem]):
 @pytest.mark.parametrize("cls", (ContactItem, ))
 def test_OpenClosed(cls: typing.Type[ContactItem]):
     c = cls('item_name')
-    c.set_value(ContactItem.OPEN)
+    c.set_value(OpenClosedValue.OPEN)
     assert c.is_open()
     assert not c.is_closed()
 
     c = cls('item_name')
-    c.set_value(ContactItem.CLOSED)
+    c.set_value(OpenClosedValue.CLOSED)
     assert c.is_closed()
     assert not c.is_open()

@@ -1,3 +1,5 @@
+from . import const
+
 from .wrappedfunction import WrappedFunction
 
 from .event_bus_listener import EventBusListener

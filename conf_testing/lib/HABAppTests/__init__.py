@@ -1,4 +1,6 @@
-from .test_base import TestBaseRule
+from .utils import get_random_name
+
+from .test_base import TestBaseRule, TestResult
 from .event_waiter import EventWaiter
 from .item_waiter import ItemWaiter
 from .openhab_tmp_item import OpenhabTmpItem

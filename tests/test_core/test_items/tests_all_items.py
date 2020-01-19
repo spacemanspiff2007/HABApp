@@ -43,19 +43,19 @@ class ItemTests:
         for value in self.TEST_VALUES:
             i = self.CLS('test')
             i.set_value(value)
-            i._last_change = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
-            i._last_update = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
+            i._last_change.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
+            i._last_update.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
             i.set_value(value)
 
-            assert i._last_update > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
-            assert i._last_change < datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_update.dt > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_change.dt < datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
 
     def test_time_value_change(self):
         i = self.CLS('test')
         for value in self.TEST_VALUES:
-            i._last_change = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
-            i._last_update = datetime.now(tz=pytz.utc) - timedelta(seconds=5)
+            i._last_change.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
+            i._last_update.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
             i.set_value(value)
 
-            assert i._last_update > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
-            assert i._last_change > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_update.dt > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_change.dt > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)

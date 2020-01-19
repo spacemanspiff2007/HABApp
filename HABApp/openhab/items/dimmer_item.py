@@ -1,9 +1,9 @@
-from HABApp.core.items import Item
-from .commands import OnOffCommand, PercentCommand
+from HABApp.openhab.items.base_item import OpenhabItem
+from HABApp.openhab.definitions.commands import OnOffCommand, PercentCommand
 from ..definitions import OnOffValue, PercentValue
 
 
-class DimmerItem(Item, OnOffCommand, PercentCommand):
+class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
 
     def set_value(self, new_value) -> bool:
 

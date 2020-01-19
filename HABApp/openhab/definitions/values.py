@@ -25,6 +25,19 @@ class PercentValue(ComplexEventValue):
         return f'{self.value}%'
 
 
+class OpenClosedValue(ComplexEventValue):
+    OPEN = 'OPEN'
+    CLOSED = 'CLOSED'
+
+    def __init__(self, value):
+        super().__init__(value)
+        assert value == OpenClosedValue.OPEN or value == OpenClosedValue.CLOSED, f'{value} ({type(value)})'
+        self.open = value == OpenClosedValue.OPEN
+
+    def __str__(self):
+        return self.value
+
+
 class UpDownValue(ComplexEventValue):
     UP = 'UP'
     DOWN = 'DOWN'

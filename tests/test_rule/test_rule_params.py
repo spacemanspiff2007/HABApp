@@ -1,9 +1,9 @@
 import pytest
 from pathlib import Path
 
+import HABApp
 from HABApp.parameters.parameter import Parameter
 import HABApp.parameters.parameters as Parameters
-import HABApp.parameters.parameter_files as Files
 
 
 @pytest.fixture(scope="function")
@@ -12,7 +12,8 @@ def params():
         class directories:
             param: Path = Path(__file__).parent
 
-    Files.CONFIG = DummyCfg
+    original = HABApp.CONFIG
+    HABApp.CONFIG = DummyCfg
     # Parameters.ParameterFileWatcher.UNITTEST = True
     # Parameters.setup(None, None)
     yield None
@@ -22,6 +23,8 @@ def params():
     for f in DummyCfg.directories.param.iterdir():
         if f.name.endswith('.yml'):
             f.unlink()
+
+    HABApp.CONFIG = original
 
 
 def test_lookup(params):

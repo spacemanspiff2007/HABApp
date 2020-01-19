@@ -31,8 +31,8 @@ Example:
     # hide
     import HABApp
     from HABApp.openhab.items import ContactItem, SwitchItem
-    ContactItem.get_create_item('MyContact', initial_value='OPEN')
-    SwitchItem.get_create_item('MySwitch', initial_value='OFF')
+    HABApp.core.Items.set_item(ContactItem('MyContact', initial_value='OPEN'))
+    HABApp.core.Items.set_item(SwitchItem('MySwitch', initial_value='OFF'))
     # hide
 
     my_contact = ContactItem.get_item('MyContact')
@@ -61,6 +61,15 @@ Example:
      - :class:`~HABApp.openhab.items.RollershutterItem`
    * - ``Color``
      - :class:`~HABApp.openhab.items.ColorItem`
+   * - ``String``
+     - :class:`~HABApp.openhab.items.StringItem`
+   * - ``Location``
+     - :class:`~HABApp.openhab.items.LocationItem`
+   * - ``Player``
+     - :class:`~HABApp.openhab.items.PlayerItem`
+   * - ``Group``
+     - :class:`~HABApp.openhab.items.GroupItem`
+
 
 .. autoclass:: HABApp.openhab.items.NumberItem
    :members:
@@ -93,7 +102,25 @@ Example:
    :inherited-members:
    :member-order: groupwise
 
+.. autoclass:: HABApp.openhab.items.StringItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
 
+.. autoclass:: HABApp.openhab.items.LocationItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+.. autoclass:: HABApp.openhab.items.PlayerItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+.. autoclass:: HABApp.openhab.items.GroupItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
 
 
 Example openHAB rule

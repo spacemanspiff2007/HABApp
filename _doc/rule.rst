@@ -38,23 +38,6 @@ using an IDE!
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
 
-
-.. list-table::
-   :widths: auto
-   :header-rows: 1
-   
-   * - Function
-     - Description
-
-   * - :meth:`~HABApp.Rule.item_watch`
-     - | Keep watch on the state of an item.
-       | If the item does not receive an update or change for a certain amount of time
-         there will be a :class:`~HABApp.core.ValueNoUpdateEvent` or a :class:`~HABApp.core.ValueNoChangeEvent`
-         on the event bus. It is possible to add multiple watches to an item.
-
-   * - :meth:`~HABApp.Rule.item_watch_and_listen`
-     - Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
-
 It is possible to check the item value by comparing it
 
 .. execute_code::
@@ -79,6 +62,7 @@ It is possible to check the item value by comparing it
 
 .. autoclass:: HABApp.core.items.Item
    :members:
+   :inherited-members:
 
 
 Events

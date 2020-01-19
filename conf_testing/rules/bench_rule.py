@@ -41,7 +41,7 @@ class OpenhabBenchRule(HABApp.Rule):
         ts_start = time.time()
         while True:
             for k in self.item_list:
-                if HABApp.core.items.Item.get_item(k).value != self.__b_val:
+                if HABApp.openhab.items.OpenhabItem.get_item(k).value != self.__b_val:
                     break
             else:
                 break

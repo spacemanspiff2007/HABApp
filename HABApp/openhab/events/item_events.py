@@ -1,47 +1,47 @@
 import HABApp.core
 
-from ..definitions import map_openhab_types
-from .base_event import BaseItemEvent
+from ..map_values import map_openhab_values
+from .base_event import OpenhabEvent
 
 
-class ItemStateEvent(BaseItemEvent, HABApp.core.events.ValueUpdateEvent):
+class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
         # smarthome/items/NAME/state
         self.name = self._topic[16:-6]
-        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
+        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class ItemStateChangedEvent(BaseItemEvent, HABApp.core.events.ValueChangeEvent):
+class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
         # smarthome/items/Ping/statechanged
         self.name = self._topic[16:-13]
-        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
-        self.old_value = map_openhab_types(self._payload['oldType'], self._payload['oldValue'])
+        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
+        self.old_value = map_openhab_values(self._payload['oldType'], self._payload['oldValue'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
 
-class ItemCommandEvent(BaseItemEvent):
+class ItemCommandEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
         # smarthome/items/NAME/command
         self.name = self._topic[16:-8]
-        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
+        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class ItemAddedEvent(BaseItemEvent):
+class ItemAddedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -55,7 +55,7 @@ class ItemAddedEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
 
 
-class ItemUpdatedEvent(BaseItemEvent):
+class ItemUpdatedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -70,7 +70,7 @@ class ItemUpdatedEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
 
 
-class ItemRemovedEvent(BaseItemEvent):
+class ItemRemovedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -81,19 +81,19 @@ class ItemRemovedEvent(BaseItemEvent):
         return f'<{self.__class__.__name__} name: {self.name}>'
 
 
-class ItemStatePredictedEvent(BaseItemEvent):
+class ItemStatePredictedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
         # 'smarthome/items/NAME/statepredicted'
         self.name = self._topic[16:-15]
-        self.value = map_openhab_types(self._payload['predictedType'], self._payload['predictedValue'])
+        self.value = map_openhab_values(self._payload['predictedType'], self._payload['predictedValue'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class GroupItemStateChangedEvent(BaseItemEvent):
+class GroupItemStateChangedEvent(OpenhabEvent):
     def __init__(self, _in_dict):
         super().__init__(_in_dict)
 
@@ -102,8 +102,8 @@ class GroupItemStateChangedEvent(BaseItemEvent):
         self.name = parts[2]
         self.item = parts[3]
 
-        self.value = map_openhab_types(self._payload['type'], self._payload['value'])
-        self.old_value = map_openhab_types(self._payload['oldType'], self._payload['oldValue'])
+        self.value = map_openhab_values(self._payload['type'], self._payload['value'])
+        self.old_value = map_openhab_values(self._payload['oldType'], self._payload['oldValue'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'

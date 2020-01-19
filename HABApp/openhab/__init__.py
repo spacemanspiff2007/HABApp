@@ -5,4 +5,4 @@ from .oh_connection import OpenhabConnection
 from .http_connection import HttpConnection
 
 import HABApp.openhab.items
-from .items.map_items import map_items
+from HABApp.openhab.map_items import map_items

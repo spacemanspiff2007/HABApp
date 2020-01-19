@@ -11,6 +11,7 @@ from aiohttp_sse_client import client as sse_client
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
+from ..config import Openhab as OpenhabConfig
 
 
 log = logging.getLogger('HABApp.openhab.connection')
@@ -42,8 +43,8 @@ class HttpConnection:
         assert isinstance(event_handler, HttpConnectionEventHandler)
         self.event_handler: HttpConnectionEventHandler = event_handler
 
-        assert isinstance(config, HABApp.config.Config) or config is None
-        self.config: HABApp.config.Config = config
+        assert isinstance(config, OpenhabConfig) or config is None
+        self.config: OpenhabConfig = config
 
         self.is_online = False
         self.is_read_only = False
@@ -60,12 +61,12 @@ class HttpConnection:
         # automatically update config
         if config is not None:
             self.__update_config_general()
-            self.config.openhab.general.subscribe_for_changes(self.__update_config_general)
+            self.config.general.subscribe_for_changes(self.__update_config_general)
         else:
             log.error('self.config in http_connection.py is None!')
 
     def __update_config_general(self):
-        self.is_read_only = self.config.openhab.general.listen_only
+        self.is_read_only = self.config.general.listen_only
 
         if self.is_read_only:
             log.info('Connected read only!')
@@ -89,7 +90,7 @@ class HttpConnection:
         # Try reconnect
         if not self.async_try_uuid.done():
             self.async_try_uuid.cancel()
-        self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), asyncio.get_event_loop())
+        self.async_try_uuid = asyncio.run_coroutine_threadsafe(self._try_uuid(), HABApp.core.const.loop)
 
     def _is_disconnect_exception(self, e) -> bool:
         if not isinstance(e, (
@@ -153,18 +154,18 @@ class HttpConnection:
             await self.__session.close()
             self.__session = None
 
-        self.__host: str = self.config.openhab.connection.host
-        self.__port: str = self.config.openhab.connection.port
+        self.__host: str = self.config.connection.host
+        self.__port: str = self.config.connection.port
 
         # do not run without host
         if self.__host == '':
             return None
 
         auth = None
-        if self.config.openhab.connection.user or self.config.openhab.connection.password:
+        if self.config.connection.user or self.config.connection.password:
             auth = aiohttp.BasicAuth(
-                self.config.openhab.connection.user,
-                self.config.openhab.connection.password
+                self.config.connection.user,
+                self.config.connection.password
             )
 
         self.__session = aiohttp.ClientSession(
@@ -246,7 +247,7 @@ class HttpConnection:
 
     async def async_post_update(self, item, state):
 
-        if self.config.openhab.general.listen_only:
+        if self.config.general.listen_only:
             return False
 
         fut = self.__session.put(self.__get_openhab_url('rest/items/{item:s}/state', item=item), data=state)
@@ -254,7 +255,7 @@ class HttpConnection:
 
     async def async_send_command(self, item, state):
 
-        if self.config.openhab.general.listen_only:
+        if self.config.general.listen_only:
             return False
 
         fut = self.__session.post(self.__get_openhab_url('rest/items/{item:s}', item=item), data=state)
@@ -262,7 +263,7 @@ class HttpConnection:
 
     async def async_remove_item(self, item_name) -> bool:
 
-        if self.config.openhab.general.listen_only:
+        if self.config.general.listen_only:
             return False
 
         fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}', item_name))
@@ -296,6 +297,11 @@ class HttpConnection:
                     log.error(l)
             return None
 
+    async def async_get_things(self) -> typing.List[dict]:
+        fut = self.__session.get(self.__get_openhab_url('rest/things'))
+        resp = await self._check_http_response(fut)
+        return ujson.loads(await resp.text(encoding='utf-8'))
+
     async def async_get_item(self, item_name: str) -> dict:
         fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))
         ret = await self._check_http_response(fut, accept_404=True)
@@ -309,7 +315,7 @@ class HttpConnection:
     async def async_create_item(self, item_type, name, label="", category="", tags=[], groups=[],
                                 group_type=None, group_function=None, group_function_params=[]) -> bool:
 
-        if self.config.openhab.general.listen_only:
+        if self.config.general.listen_only:
             return False
 
         payload = {'type': item_type, 'name': name}
@@ -337,7 +343,7 @@ class HttpConnection:
 
     async def async_set_metadata(self, item_name: str, namespace: str, value: str, config: dict):
 
-        if self.config.openhab.general.listen_only:
+        if self.config.general.listen_only:
             return False
 
         payload = {
@@ -354,7 +360,7 @@ class HttpConnection:
 
     async def async_remove_metadata(self, item_name: str, namespace: str):
 
-        if self.config.openhab.general.listen_only:
+        if self.config.general.listen_only:
             return False
 
         fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}/metadata/{:s}', item_name, namespace))

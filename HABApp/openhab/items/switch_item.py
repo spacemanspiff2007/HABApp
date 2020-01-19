@@ -1,9 +1,9 @@
-from HABApp.core.items import Item
-from .commands import OnOffCommand
+from HABApp.openhab.items.base_item import OpenhabItem
+from HABApp.openhab.definitions.commands import OnOffCommand
 from ..definitions import OnOffValue
 
 
-class SwitchItem(Item, OnOffCommand):
+class SwitchItem(OpenhabItem, OnOffCommand):
 
     def set_value(self, new_value) -> bool:
 

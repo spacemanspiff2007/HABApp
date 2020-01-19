@@ -1,13 +1,13 @@
 import colorsys
 import typing
 
-from . import Item
+from .base_valueitem import BaseValueItem
 
 HUE_FACTOR = 360
 PERCENT_FACTOR = 100
 
 
-class ColorItem(Item):
+class ColorItem(BaseValueItem):
     def __init__(self, name: str, h=0.0, s=0.0, b=0.0):
         super().__init__(name=name, initial_value=(h, s, b))
 

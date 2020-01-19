@@ -1,9 +1,9 @@
 import datetime
 
-from . import PercentValue, UpDownValue, OnOffValue, HSBValue, QuantityValue
+from HABApp.openhab.definitions import PercentValue, UpDownValue, OnOffValue, HSBValue, QuantityValue, OpenClosedValue
 
 
-def map_openhab_types(openhab_type: str, openhab_value: str):
+def map_openhab_values(openhab_type: str, openhab_value: str):
     assert isinstance(openhab_type, str), type(openhab_type)
     assert isinstance(openhab_value, str), type(openhab_value)
 
@@ -33,6 +33,9 @@ def map_openhab_types(openhab_type: str, openhab_value: str):
 
     if openhab_type == 'OnOff':
         return OnOffValue(openhab_value)
+
+    if openhab_type == 'OpenClosed':
+        return OpenClosedValue(openhab_value)
 
     if openhab_type == 'UpDown':
         return UpDownValue(openhab_value)

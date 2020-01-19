@@ -1,8 +1,8 @@
-from HABApp.core.items import Item
+from HABApp.openhab.items.base_item import OpenhabItem
 from ..definitions import QuantityValue
 
 
-class NumberItem(Item):
+class NumberItem(OpenhabItem):
     """NumberItem which accepts and converts the data types from OpenHAB"""
 
     def set_value(self, new_value) -> bool:

@@ -8,7 +8,7 @@ log = logging.getLogger('HABApp.Tests')
 
 
 class EventWaiter:
-    def __init__(self, name, event_type, timeout=1):
+    def __init__(self, name, event_type, timeout=1, check_value=True):
         self.event_name = name
         assert isinstance(name, str)
         self.event_type = event_type
@@ -19,6 +19,7 @@ class EventWaiter:
         )
         self.timeout = timeout
         self.event = None
+        self.check_value = check_value
 
         self.events_ok = True
 
@@ -42,12 +43,16 @@ class EventWaiter:
             if self.event is None:
                 continue
 
-            values_same = self.compare_event_value(value)
-            if not values_same:
-                self.events_ok = False
+            if self.check_value:
+                values_same = self.compare_event_value(value)
+                if not values_same:
+                    self.events_ok = False
+
+                self.event = None
+                return values_same
 
             self.event = None
-            return values_same
+            return True
 
         raise ValueError()
 

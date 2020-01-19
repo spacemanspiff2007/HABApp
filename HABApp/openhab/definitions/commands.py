@@ -1,5 +1,5 @@
-from .. import get_openhab_interface
-from ..definitions import OnOffValue, UpDownValue
+from HABApp.openhab import get_openhab_interface
+from HABApp.openhab.definitions import OnOffValue, UpDownValue
 
 
 class OnOffCommand:
@@ -36,3 +36,11 @@ class UpDownCommand:
     def down(self):
         """Command down"""
         get_openhab_interface().send_command(self, UpDownValue.DOWN)
+
+    def is_up(self) -> bool:
+        """Test value against on-value"""
+        raise NotImplementedError()
+
+    def is_down(self) -> bool:
+        """Test value against off-value"""
+        raise NotImplementedError()

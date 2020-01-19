@@ -6,6 +6,7 @@ import sys
 import traceback
 import typing
 import warnings
+import weakref
 
 import HABApp
 import HABApp.core
@@ -16,7 +17,7 @@ from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
 from .scheduler import ReoccurringScheduledCallback, OneTimeCallback, DayOfWeekScheduledCallback, \
     TYPING_DATE_TIME, SunScheduledCallback
-from .watched_item import WatchedItem
+
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -60,11 +61,12 @@ class Rule:
 
         self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
         self.__future_events: typing.List[OneTimeCallback] = []
-        self.__watched_items: typing.List[WatchedItem] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
+        self.__cancel_objs: weakref.WeakSet = weakref.WeakSet()
 
-        # schedule cleanup
+        # schedule cleanup of this rule
         self.register_on_unload(self.__cleanup_rule)
+        self.register_on_unload(self.__cleanup_objs)
 
 
         # suggest a rule name if it is not
@@ -76,6 +78,13 @@ class Rule:
         self.oh: HABApp.openhab.OpenhabInterface = HABApp.openhab.get_openhab_interface() if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
 
+    @HABApp.util.log_exception
+    def __cleanup_objs(self):
+        while self.__cancel_objs:
+            obj = self.__cancel_objs.pop()
+            obj.cancel()
+
+    @HABApp.util.log_exception
     def __cleanup_rule(self):
         # Important: set the dicts to None so we don't schedule a future event during _cleanup.
         # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
@@ -84,7 +93,6 @@ class Rule:
 
         self.__event_listener = None
         self.__future_events = None
-        self.__watched_items = None
 
         # Actually remove the listeners/events
         for listener in event_listeners:
@@ -94,52 +102,6 @@ class Rule:
             event.cancel()
         return None
 
-
-    def item_watch(self, name: typing.Union[str, HABApp.core.items.Item],
-                   seconds_constant: int, watch_only_changes=True) -> WatchedItem:
-        """
-        | Keep watch on the state of an item.
-        | if `watch_only_changes` is True (default) and the state does not change for `seconds_constant` a
-          `ValueNoChangeEvent` will be sent to the event bus.
-        | if `watch_only_changes` is False and the state does not receive and update for `seconds_constant` a
-          `ValueNoUpdateEvent` will be sent to the event bus.
-
-        :param name: item name or item that shall be watched
-        :param seconds_constant: the amount of seconds the item has to be constant or has not received an update
-        :param watch_only_changes:
-        """
-        assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
-        assert isinstance(seconds_constant, int)
-        assert isinstance(watch_only_changes, bool)
-
-        item = WatchedItem(
-            name=name.name if isinstance(name, HABApp.core.items.Item) else name,
-            constant_time=seconds_constant,
-            watch_only_changes=watch_only_changes
-        )
-        self.__watched_items.append(item)
-        return item
-
-    def item_watch_and_listen(self, name: typing.Union[HABApp.core.items.Item, str], seconds_constant: int, callback,
-                              watch_only_changes=True) -> typing.Tuple[WatchedItem, HABApp.core.EventBusListener]:
-        """
-        Convenience function which combines :class:`~HABApp.Rule.item_watch` and :class:`~HABApp.Rule.listen_event`
-
-        :param name: item name
-        :param seconds_constant:
-        :param callback: callback that accepts one parameter which will contain the event
-        :param watch_only_changes:
-        :return:
-        """
-
-        watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
-        event_listener = self.listen_event(
-            name,
-            callback,
-            HABApp.core.events.ValueNoChangeEvent if watch_only_changes else HABApp.core.events.ValueNoUpdateEvent
-        )
-        return watched_item, event_listener
-
     def post_event(self, name, event):
         """
         Post an event to the event bus
@@ -148,10 +110,13 @@ class Rule:
         :param event: Event class to be used (must be class instance)
         :return:
         """
-        assert isinstance(name, (str, HABApp.core.items.Item)), type(name)
-        return HABApp.core.EventBus.post_event(name.name if isinstance(name, HABApp.core.items.Item) else name, event)
+        assert isinstance(name, (str, HABApp.core.items.BaseValueItem)), type(name)
+        return HABApp.core.EventBus.post_event(
+            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name,
+            event
+        )
 
-    def listen_event(self, name: typing.Union[HABApp.core.items.Item, str, None], callback,
+    def listen_event(self, name: typing.Union[HABApp.core.items.BaseValueItem, str], callback,
                      even_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
@@ -165,7 +130,7 @@ class Rule:
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         listener = HABApp.core.EventBusListener(
-            name.name if isinstance(name, HABApp.core.items.Item) else name, cb, even_type
+            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name, cb, even_type
         )
         self.__event_listener.append(listener)
         HABApp.core.EventBus.add_listener(listener)
@@ -187,7 +152,7 @@ class Rule:
 
         asyncio.run_coroutine_threadsafe(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
-            self.__runtime.loop  # this has to be passed because we will not call it from the main thread
+            HABApp.core.const.loop
         )
 
     def run_every(self, time: TYPING_DATE_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
@@ -390,7 +355,7 @@ class Rule:
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
-    def register_on_unload(self, func):
+    def register_on_unload(self, func: typing.Callable[[], typing.Any]):
         """Register a function with no parameters which will be called when the rule is unloaded.
         Use this for custom cleanup functions.
 
@@ -400,9 +365,51 @@ class Rule:
         assert func not in self.__unload_functions, 'Function was already registered!'
         self.__unload_functions.append(func)
 
+    def register_cancel_obj(self, obj):
+        """Add a ``weakref`` to an obj which has a ``cancel`` function.
+        When the rule gets unloaded the cancel function will be called (if the obj was not already garbage collected)
+
+        :param obj:
+        """
+        self.__cancel_objs.add(obj)
+
     # -----------------------------------------------------------------------------------------------------------------
     # deprecated functions
     # -----------------------------------------------------------------------------------------------------------------
+    def item_watch(self, name: typing.Union[str, HABApp.core.items.BaseValueItem],
+                   seconds_constant: int, watch_only_changes=True):
+        warnings.warn("'item_watch' is deprecated, use the 'watch_change' or 'watch_update'"
+                      " method of the item instance instead", DeprecationWarning, 2)
+
+        assert isinstance(seconds_constant, int)
+        assert isinstance(watch_only_changes, bool)
+        if isinstance(name, str):
+            item = HABApp.core.items.BaseValueItem.get_item(name)
+        else:
+            assert isinstance(name, HABApp.core.items.BaseValueItem), type(name)
+            item = name
+
+        if watch_only_changes:
+            return item.watch_change(seconds_constant)
+        else:
+            return item.watch_update(seconds_constant)
+
+
+    def item_watch_and_listen(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
+                              seconds_constant: int, callback, watch_only_changes=True
+                              ):
+        warnings.warn("'item_watch_and_listen' is deprecated, use the 'watch_change' or 'watch_update'"
+                      " method of the item instance instead", DeprecationWarning, 2)
+
+        watched_item = self.item_watch(name, seconds_constant, watch_only_changes)
+        event_listener = self.listen_event(
+            name,
+            callback,
+            HABApp.core.events.ItemNoChangeEvent if watch_only_changes else HABApp.core.events.ItemNoUpdateEvent
+        )
+        return watched_item, event_listener
+
+
     def item_exists(self, name: str) -> bool:
         warnings.warn("'item_exists' is deprecated!", DeprecationWarning, 2)
         assert isinstance(name, str), type(name)
@@ -467,7 +474,7 @@ class Rule:
     def __get_rule_name(self, callback):
         return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None
 
-    @HABApp.util.PrintException
+    @HABApp.util.log_exception
     def _check_rule(self):
 
         # Check if items do exists
@@ -475,8 +482,9 @@ class Rule:
             return None
 
         for listener in self.__event_listener:
-            # Listener listens to all changes
-            if listener.topic is None:
+
+            # Internal topics - don't warn there
+            if listener.topic in HABApp.core.const.topics.ALL:
                 continue
 
             # check if specific item exists
@@ -484,22 +492,9 @@ class Rule:
                 log.warning(f'Item "{listener.topic}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
-        for item in self.__watched_items:
-            if not HABApp.core.Items.item_exists(item.name):
-                log.warning(f'Item "{item.name}" does not exist (yet)! '
-                            f'self.item_watch in "{self.rule_name}" may not work as intended.')
 
-    @HABApp.util.PrintException
+    @HABApp.util.log_exception
     def _process_events(self, now):
-
-        # watch items
-        clean_items = False
-        for item in self.__watched_items:
-            item.check(now)
-            if item.is_canceled:
-                clean_items = True
-        if clean_items:
-            self.__watched_items = [k for k in self.__watched_items if not k.is_canceled]
 
         # sheduled events
         clean_events = False
@@ -514,7 +509,7 @@ class Rule:
             self.__future_events = [k for k in self.__future_events if not k.is_finished]
         return None
 
-    @HABApp.util.PrintException
+    @HABApp.util.log_exception
     def _unload(self):
 
         # unload all functions
@@ -529,10 +524,27 @@ class Rule:
                 except AttributeError:
                     name = ''
 
-                log.error( f'Error{name} while unloading "{self.rule_name}": {e}')
+                log.error(f'Error{name} while unloading "{self.rule_name}": {e}')
 
                 # log traceback
                 lines = traceback.format_exc().splitlines()
                 del lines[1:3]  # see implementation in wrappedfunction.py why we do this
                 for line in lines:
                     log.error(line)
+
+
+@HABApp.util.log_exception
+def get_parent_rule() -> Rule:
+    depth = 1
+    while True:
+        try:
+            frm = sys._getframe(depth)
+        except ValueError:
+            raise RuntimeError(f'Could not find parent rule!')
+
+        __vars = frm.f_locals
+        depth += 1
+        if 'self' in __vars:
+            rule = __vars['self']
+            if isinstance(rule, Rule):
+                return rule

@@ -29,6 +29,7 @@ class ScheduledCallbackBase:
         self._latest: typing.Optional[time] = None
         self._offset: typing.Optional[timedelta] = None
         self._jitter: typing.Optional[int] = None
+        self._boundary_func: typing.Optional[typing.Callable[[datetime], datetime]] = None
 
         # times when we run
         self._next_base: datetime = None
@@ -76,6 +77,7 @@ class ScheduledCallbackBase:
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
         self._earliest = time_obj
+        self.update_run_time()
         return self
 
     def latest(self, time_obj: typing.Optional[time]) -> 'ScheduledCallbackBase':
@@ -85,6 +87,7 @@ class ScheduledCallbackBase:
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
         self._latest = time_obj
+        self.update_run_time()
         return self
 
     def offset(self, timedelta_obj: typing.Optional[timedelta]) -> 'ScheduledCallbackBase':
@@ -94,6 +97,7 @@ class ScheduledCallbackBase:
         """
         assert isinstance(timedelta_obj, timedelta) or timedelta_obj is None, type(timedelta_obj)
         self._offset = timedelta_obj
+        self.update_run_time()
         return self
 
     def jitter(self, secs: typing.Optional[int]) -> 'ScheduledCallbackBase':
@@ -103,6 +107,16 @@ class ScheduledCallbackBase:
         """
         assert isinstance(secs, int) or secs is None, type(secs)
         self._jitter = secs
+        self.update_run_time()
+        return self
+
+    def boundary_func(self, func: typing.Optional[typing.Callable[[datetime], datetime]]):
+        """Add a function which will be called when the datetime changes. Use this to implement custom boundaries
+
+        :param func: Function which returns a datetime obj, arg is a datetime with the next call time
+        """
+        self._boundary_func = func
+        self.update_run_time()
         return self
 
     def update_run_time(self) -> 'ScheduledCallbackBase':
@@ -110,6 +124,10 @@ class ScheduledCallbackBase:
 
         # Starting point is always the next call
         self._next_call = self._next_base
+
+        # custom boundaries first
+        if self._boundary_func is not None:
+            self._next_call = self._boundary_func(self._next_call.astimezone(local_tz)).astimezone(utc)
 
         if self._offset is not None:
             self._next_call += self._offset  # offset doesn't have to be localized
@@ -133,7 +151,7 @@ class ScheduledCallbackBase:
 
     def get_next_call(self):
         """Return the next execution timestamp"""
-        return self._next_call.astimezone(local_tz)
+        return self._next_call.astimezone(local_tz).replace(tzinfo=None)
 
     def check_due(self, now: datetime):
         """Check whether the callback is due for execution

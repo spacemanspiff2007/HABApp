@@ -8,8 +8,8 @@ class AsyncHttpConnection:
     def __init__(self):
         self.__client: aiohttp.ClientSession = None
 
-    async def create_client(self):
-        self.__client = aiohttp.ClientSession(json_serialize=ujson.dumps)
+    async def create_client(self, loop):
+        self.__client = aiohttp.ClientSession(json_serialize=ujson.dumps, loop=loop)
 
     def get(self, url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
             -> aiohttp.client._RequestContextManager:

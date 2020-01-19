@@ -5,7 +5,7 @@ import ujson
 import paho.mqtt.client as mqtt
 
 import HABApp
-from HABApp.util import PrintException
+from HABApp.util import log_exception
 
 from HABApp.runtime.shutdown_helper import ShutdownHelper
 from ..config import Mqtt as MqttConfig
@@ -88,7 +88,7 @@ class MqttConnection:
             self.client.loop_start()
         self.loop_started = True
 
-    @PrintException
+    @log_exception
     def subscription_changed(self):
         if not self.connected:
             return None
@@ -108,7 +108,7 @@ class MqttConnection:
             log.debug(f' - "{topic}" (QoS {qos:d})')
         self.client.subscribe(self.subscriptions)
 
-    @PrintException
+    @log_exception
     def on_connect(self, client, userdata, flags, rc):
         log.log(logging.INFO if not rc else logging.ERROR, mqtt.connack_string(rc))
         if rc:
@@ -118,12 +118,12 @@ class MqttConnection:
         self.subscriptions.clear()
         self.subscription_changed()
 
-    @PrintException
+    @log_exception
     def on_disconnect(self, client, userdata, rc):
         log.log(logging.INFO if not rc else logging.ERROR, f'Disconnect: {mqtt.error_string(rc)} ({rc})')
         self.connected = False
 
-    @PrintException
+    @log_exception
     def process_msg(self, client, userdata, message: mqtt.MQTTMessage):
         topic = message.topic
         payload = message.payload.decode("utf-8")

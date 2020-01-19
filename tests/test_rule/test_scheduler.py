@@ -1,6 +1,6 @@
 import HABApp
 import unittest.mock
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 
 from pytz import utc
 
@@ -63,12 +63,10 @@ def test_weekend():
 
 
 def test_sun():
-    from HABApp.config.config import HABAppConfigFile
-    HABApp.config.config.CONFIG = HABAppConfigFile()
-    HABApp.config.config.CONFIG.location.latitude = 52.52437
-    HABApp.config.config.CONFIG.location.longitude = 13.41053
-    HABApp.config.config.CONFIG.location.elevation = 43
-    HABApp.config.config.CONFIG.location.on_all_values_set()
+    HABApp.CONFIG.location.latitude = 52.52437
+    HABApp.CONFIG.location.longitude = 13.41053
+    HABApp.CONFIG.location.elevation = 43
+    HABApp.CONFIG.location.on_all_values_set()
 
     func.mock.reset_mock()
     s = scheduler.SunScheduledCallback(func)
@@ -84,3 +82,24 @@ def test_sun():
     s.latest(time(hour=4))
     s.update_run_time()
     assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(4)
+
+
+def test_boundary():
+    func.mock.reset_mock()
+    s = scheduler.reoccurring_cb.ReoccurringScheduledCallback(func)
+
+    now = datetime.now()
+    s.set_next_run_time(now + timedelta(seconds=15))
+    assert s.get_next_call() == now + timedelta(seconds=15)
+
+    def b_func(d: datetime):
+        return d + timedelta(seconds=15)
+
+    s.boundary_func(b_func)
+    s.update_run_time()
+    assert s.get_next_call() == now + timedelta(seconds=30)
+
+    # offset etc comes after the custom function
+    s.offset(timedelta(seconds=-10))
+    s.update_run_time()
+    assert s.get_next_call() == now + timedelta(seconds=20)
