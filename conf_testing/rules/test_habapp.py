@@ -1,7 +1,7 @@
 import time
 from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
 from HABApp.core.items import Item
-from HABAppTests import TestBaseRule, EventWaiter, get_random_name, ItemWaiter
+from HABAppTests import TestBaseRule, EventWaiter, get_random_name
 
 
 class TestItemEvents(TestBaseRule):
