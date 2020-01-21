@@ -60,6 +60,9 @@ It is possible to check the item value by comparing it
         pass    # do something
 
 
+.. inheritance-diagram:: HABApp.core.items.Item
+   :parts: 1
+
 .. autoclass:: HABApp.core.items.Item
    :members:
    :inherited-members:

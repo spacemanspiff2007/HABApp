@@ -69,12 +69,21 @@ Example:
      - :class:`~HABApp.openhab.items.PlayerItem`
    * - ``Group``
      - :class:`~HABApp.openhab.items.GroupItem`
+   * - ``Thing``
+     - :class:`~HABApp.openhab.items.Thing`
 
+
+.. inheritance-diagram:: HABApp.openhab.items.NumberItem
+   :parts: 1
 
 .. autoclass:: HABApp.openhab.items.NumberItem
    :members:
    :inherited-members:
    :member-order: groupwise
+
+
+.. inheritance-diagram:: HABApp.openhab.items.ContactItem
+   :parts: 1
 
 .. autoclass:: HABApp.openhab.items.ContactItem
    :members:
@@ -82,42 +91,82 @@ Example:
    :member-order: groupwise
 
 
+.. inheritance-diagram:: HABApp.openhab.items.SwitchItem
+   :parts: 1
+
 .. autoclass:: HABApp.openhab.items.SwitchItem
    :members:
    :inherited-members:
    :member-order: groupwise
+
+
+.. inheritance-diagram:: HABApp.openhab.items.DimmerItem
+   :parts: 1
 
 .. autoclass:: HABApp.openhab.items.DimmerItem
    :members:
    :inherited-members:
    :member-order: groupwise
 
+
+.. inheritance-diagram:: HABApp.openhab.items.RollershutterItem
+   :parts: 1
+
 .. autoclass:: HABApp.openhab.items.RollershutterItem
    :members:
    :inherited-members:
    :member-order: groupwise
+
+
+.. inheritance-diagram:: HABApp.openhab.items.ColorItem
+   :parts: 1
 
 .. autoclass:: HABApp.openhab.items.ColorItem
    :members:
    :inherited-members:
    :member-order: groupwise
 
+
+.. inheritance-diagram:: HABApp.openhab.items.StringItem
+   :parts: 1
+
 .. autoclass:: HABApp.openhab.items.StringItem
    :members:
    :inherited-members:
    :member-order: groupwise
+
+
+.. inheritance-diagram:: HABApp.openhab.items.LocationItem
+   :parts: 1
 
 .. autoclass:: HABApp.openhab.items.LocationItem
    :members:
    :inherited-members:
    :member-order: groupwise
 
+
+.. inheritance-diagram:: HABApp.openhab.items.PlayerItem
+   :parts: 1
+
 .. autoclass:: HABApp.openhab.items.PlayerItem
    :members:
    :inherited-members:
    :member-order: groupwise
 
+
+.. inheritance-diagram:: HABApp.openhab.items.GroupItem
+   :parts: 1
+
 .. autoclass:: HABApp.openhab.items.GroupItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+.. inheritance-diagram:: HABApp.openhab.items.Thing
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.items.Thing
    :members:
    :inherited-members:
    :member-order: groupwise
