@@ -178,10 +178,11 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
 
         # try to update things, too
-        Thing = HABApp.openhab.items.Thing
         data = await self.connection.async_get_things()
         if data is None:
             return None
+
+        Thing = HABApp.openhab.items.Thing
         for t_dict in data:
             name = t_dict['UID']
             try:
