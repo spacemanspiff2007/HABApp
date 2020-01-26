@@ -144,6 +144,16 @@ class TestCases(unittest.TestCase):
         assert event.old_status == 'ONLINE'
         assert event.old_detail is None
 
+    def test_thing_ConfigStatusInfoEvent(self):
+        data = {
+            'topic': 'smarthome/things/zwave:device:controller:my_node/config/status',
+            'payload': '{"configStatusMessages":[{"parameterName":"switchall_mode","type":"PENDING"}]}',
+            'type': 'ConfigStatusInfoEvent'
+        }
+        event = get_event(data)
+        assert event.name == 'zwave:device:controller:my_node'
+        assert event.messages == [{"parameterName": "switchall_mode", "type": "PENDING"}]
+
 
 
 if __name__ == '__main__':
