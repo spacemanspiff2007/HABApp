@@ -3,7 +3,8 @@ import unittest
 
 # from .context import HABApp
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
-    ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, get_event
+    ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
+    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, get_event
 
 
 class TestCases(unittest.TestCase):
@@ -117,6 +118,7 @@ class TestCases(unittest.TestCase):
             'type': 'ThingStatusInfoEvent'
         }
         event = get_event(data)
+        assert isinstance(event, ThingStatusInfoEvent)
         assert event.name == 'samsungtv:tv:mysamsungtv'
         assert event.status == 'ONLINE'
         assert event.detail is None
@@ -127,6 +129,7 @@ class TestCases(unittest.TestCase):
             'type': 'ThingStatusInfoEvent'
         }
         event = get_event(data)
+        assert isinstance(event, ThingStatusInfoEvent)
         assert event.name == 'chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         assert event.status == 'ONLINE'
         assert event.detail is None
@@ -138,11 +141,23 @@ class TestCases(unittest.TestCase):
             'type': 'ThingStatusInfoChangedEvent'
         }
         event = get_event(data)
+        assert isinstance(event, ThingStatusInfoChangedEvent)
         assert event.name == 'samsungtv:tv:mysamsungtv'
         assert event.status == 'OFFLINE'
         assert event.detail is None
         assert event.old_status == 'ONLINE'
         assert event.old_detail is None
+
+    def test_thing_ConfigStatusInfoEvent(self):
+        data = {
+            'topic': 'smarthome/things/zwave:device:controller:my_node/config/status',
+            'payload': '{"configStatusMessages":[{"parameterName":"switchall_mode","type":"PENDING"}]}',
+            'type': 'ConfigStatusInfoEvent'
+        }
+        event = get_event(data)
+        assert isinstance(event, ThingConfigStatusInfoEvent)
+        assert event.name == 'zwave:device:controller:my_node'
+        assert event.messages == [{"parameterName": "switchall_mode", "type": "PENDING"}]
 
 
 

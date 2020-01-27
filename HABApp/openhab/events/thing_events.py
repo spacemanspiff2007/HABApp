@@ -1,3 +1,5 @@
+import typing
+
 from .base_event import OpenhabEvent
 
 
@@ -33,3 +35,17 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
         return f'<{self.__class__.__name__} name: {self.name}, ' \
                f'status: {self.status}, detail: {self.detail}, ' \
                f'old_status: {self.old_status}, old_detail: {self.old_detail}>'
+
+
+class ThingConfigStatusInfoEvent(OpenhabEvent):
+    def __init__(self, _in_dict):
+        # Hack for NONE types, todo: find proper solution
+        _in_dict['payload'] = _in_dict['payload'].replace('"NONE"', 'null')
+        super().__init__(_in_dict)
+
+        # 'smarthome/things/zwave:device:controller:my_node/config/status'
+        self.name: str = self._topic[17:-14]
+        self.messages: typing.List[typing.Dict[str, str]] = self._payload['configStatusMessages']
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, messages: {self.messages}>'

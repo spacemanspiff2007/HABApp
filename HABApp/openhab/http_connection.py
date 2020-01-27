@@ -297,10 +297,17 @@ class HttpConnection:
                     log.error(l)
             return None
 
-    async def async_get_things(self) -> typing.List[dict]:
+    async def async_get_things(self) -> typing.Optional[typing.List[dict]]:
         fut = self.__session.get(self.__get_openhab_url('rest/things'))
-        resp = await self._check_http_response(fut)
-        return ujson.loads(await resp.text(encoding='utf-8'))
+        try:
+            resp = await self._check_http_response(fut)
+            return ujson.loads(await resp.text(encoding='utf-8'))
+        except Exception as e:
+            # sometimes uuid and items already works but things not - so we ignore these errors here, too
+            if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
+                for l in traceback.format_exc().splitlines():
+                    log.error(l)
+            return None
 
     async def async_get_item(self, item_name: str) -> dict:
         fut = self.__session.get(self.__get_openhab_url('rest/items/{:s}', item_name))
