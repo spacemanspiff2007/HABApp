@@ -4,7 +4,9 @@ import unittest
 # from .context import HABApp
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
-    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, get_event
+    ThingStatusInfoChangedEvent, ThingStatusInfoEvent
+
+from HABApp.openhab.map_events import get_event
 
 
 class TestCases(unittest.TestCase):

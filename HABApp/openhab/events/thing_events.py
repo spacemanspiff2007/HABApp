@@ -4,32 +4,41 @@ from .base_event import OpenhabEvent
 
 
 class ThingStatusInfoEvent(OpenhabEvent):
-    def __init__(self, _in_dict):
-        # Hack for NONE types, todo: find proper solution
-        _in_dict['payload'] = _in_dict['payload'].replace('"NONE"', 'null')
-        super().__init__(_in_dict)
+    def __init__(self, name: str = '', status: str = '', detail: str = ''):
+        super().__init__()
 
+        self.name: str = name
+        self.status: str = status
+        self.detail: str = detail
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
         # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
-        self.name: str = self._topic[17:-7]
-        self.status: str = self._payload['status']
-        self.detail: str = self._payload['statusDetail']
+        return cls(name=topic[17:-7], status=payload['status'], detail=payload['statusDetail'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, status: {self.status}, detail: {self.detail}>'
 
 
 class ThingStatusInfoChangedEvent(OpenhabEvent):
-    def __init__(self, _in_dict):
-        # Hack for NONE types, todo: find proper solution
-        _in_dict['payload'] = _in_dict['payload'].replace('"NONE"', 'null')
-        super().__init__(_in_dict)
+    def __init__(self, name: str = '', status: str = '', detail: str = '', old_status: str = '', old_detail: str = ''):
+        super().__init__()
 
+        self.name: str = name
+        self.status: str = status
+        self.detail: str = detail
+        self.old_status: str = old_status
+        self.old_detail: str = old_detail
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
         # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/statuschanged
-        self.name: str = self._topic[17:-14]
-        self.status: str = self._payload[0]['status']
-        self.detail: str = self._payload[0]['statusDetail']
-        self.old_status: str = self._payload[1]['status']
-        self.old_detail: str = self._payload[1]['statusDetail']
+        name = topic[17:-14]
+        new, old = payload
+        return cls(
+            name=name, status=new['status'], detail=new['statusDetail'],
+            old_status=old['status'], old_detail=old['statusDetail']
+        )
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, ' \
@@ -38,14 +47,16 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
 
 
 class ThingConfigStatusInfoEvent(OpenhabEvent):
-    def __init__(self, _in_dict):
-        # Hack for NONE types, todo: find proper solution
-        _in_dict['payload'] = _in_dict['payload'].replace('"NONE"', 'null')
-        super().__init__(_in_dict)
+    def __init__(self, name: str = '', messages: typing.List[typing.Dict[str, str]] = [{}]):
+        super().__init__()
 
+        self.name: str = name
+        self.messages: typing.List[typing.Dict[str, str]] = messages
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
         # 'smarthome/things/zwave:device:controller:my_node/config/status'
-        self.name: str = self._topic[17:-14]
-        self.messages: typing.List[typing.Dict[str, str]] = self._payload['configStatusMessages']
+        return cls(name=topic[17:-14], messages=payload['configStatusMessages'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, messages: {self.messages}>'

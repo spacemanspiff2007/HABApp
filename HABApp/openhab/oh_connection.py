@@ -5,7 +5,7 @@ import time
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.openhab.events import get_event
+from HABApp.openhab.map_events import get_event
 from HABApp.util import log_exception, ignore_exception
 from .http_connection import HttpConnection, HttpConnectionEventHandler
 from .oh_interface import get_openhab_interface

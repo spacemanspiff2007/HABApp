@@ -2,13 +2,16 @@ from .base_event import OpenhabEvent
 
 
 class ChannelTriggeredEvent(OpenhabEvent):
-    def __init__(self, _in_dict):
-        super().__init__(_in_dict)
+    def __init__(self, name: str = '', event: str = '', channel: str = ''):
+        super().__init__()
 
-        # smarthome/items/NAME/state
-        self.name: str = self._topic[19:-10]
-        self.event: str = self._payload['event']
-        self.channel: str = self._payload['channel']
+        self.name: str = name
+        self.event: str = event
+        self.channel: str = channel
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        return cls(topic[19:-10], payload['event'], payload['channel'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, event: {self.event}>'
