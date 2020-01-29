@@ -4,6 +4,8 @@ import HABApp
 from HABApp.openhab.events import ThingStatusInfoEvent
 from HABApp.openhab.items import Thing
 
+from HABApp.openhab.map_events import get_event
+
 
 @pytest.fixture(scope="function")
 def test_thing():
@@ -26,11 +28,17 @@ def get_dict(status: str):
 def test_thing_status_events(test_thing: Thing):
 
     assert test_thing.status == ''
-    test_thing.process_event(ThingStatusInfoEvent(get_dict('ONLINE')))
+    e = get_event(get_dict('ONLINE'))
+    assert isinstance(e, ThingStatusInfoEvent)
+    test_thing.process_event(e)
     assert test_thing.status == 'ONLINE'
 
-    test_thing.process_event(ThingStatusInfoEvent(get_dict('asdf')))
+    e = get_event(get_dict('asdf'))
+    assert isinstance(e, ThingStatusInfoEvent)
+    test_thing.process_event(e)
     assert test_thing.status == 'asdf'
 
-    test_thing.process_event(ThingStatusInfoEvent(get_dict('NONE')))
+    e = get_event(get_dict('NONE'))
+    assert isinstance(e, ThingStatusInfoEvent)
+    test_thing.process_event(e)
     assert test_thing.status is None
