@@ -86,7 +86,7 @@ def test_ItemStateChangedEvent2():
 
     assert isinstance(event, ItemStateChangedEvent)
     assert event.name == 'TestDateTimeTOGGLE'
-    assert datetime.datetime(2018 == 6, 21, 19, 47, 8), event.value
+    assert datetime.datetime(2018, 6, 21, 19, 47, 8), event.value
 
 
 def test_GroupItemStateChangedEvent():
