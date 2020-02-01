@@ -67,6 +67,8 @@ Example:
      - :class:`~HABApp.openhab.items.LocationItem`
    * - ``Player``
      - :class:`~HABApp.openhab.items.PlayerItem`
+   * - ``Image``
+     - :class:`~HABApp.openhab.items.ImageItem`
    * - ``Group``
      - :class:`~HABApp.openhab.items.GroupItem`
    * - ``Thing``
@@ -167,6 +169,15 @@ Example:
    :parts: 1
 
 .. autoclass:: HABApp.openhab.items.Thing
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+.. inheritance-diagram:: HABApp.openhab.items.ImageItem
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.items.ImageItem
    :members:
    :inherited-members:
    :member-order: groupwise

@@ -1,6 +1,7 @@
 import datetime
 
-from HABApp.openhab.definitions import PercentValue, UpDownValue, OnOffValue, HSBValue, QuantityValue, OpenClosedValue
+from HABApp.openhab.definitions import HSBValue, OnOffValue, OpenClosedValue, PercentValue, QuantityValue, RawValue, \
+    UpDownValue
 
 
 def map_openhab_values(openhab_type: str, openhab_value: str):
@@ -43,7 +44,10 @@ def map_openhab_values(openhab_type: str, openhab_value: str):
     if openhab_type == 'Percent':
         return PercentValue(openhab_value)
 
-    if openhab_type == "Quantity":
+    if openhab_type == 'Quantity':
         return QuantityValue(openhab_value)
+
+    if openhab_type == 'Raw':
+        return RawValue(openhab_value)
 
     return openhab_value

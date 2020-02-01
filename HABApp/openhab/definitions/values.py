@@ -1,4 +1,6 @@
+import base64
 import typing
+
 from HABApp.core.events import ComplexEventValue
 
 
@@ -80,3 +82,24 @@ class QuantityValue(ComplexEventValue):
 
     def __str__(self):
         return f'{self.value} {self.unit}'
+
+
+class RawValue(ComplexEventValue):
+    def __init__(self, value: str):
+        # The data is in this format
+        # data:image/png;base64,iVBORw0KGgo....
+
+        # extract the contents from "data:"
+        sep_type = value.find(';')
+        self.type = value[5: sep_type]
+
+        # this is our encoded payload
+        sep_enc = value.find(',', sep_type)
+        encoding = value[sep_type + 1: sep_enc]
+        assert encoding == 'base64', f'"{encoding}"'
+
+        # set the bytes as value
+        super().__init__(base64.b64decode(value[sep_enc + 1:]))
+
+    def __str__(self):
+        return f'{self.type}'

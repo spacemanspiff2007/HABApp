@@ -2,12 +2,12 @@ import pytest
 import typing
 
 from HABApp.openhab.items import ContactItem, DimmerItem, RollershutterItem, SwitchItem, ColorItem, \
-    DatetimeItem, GroupItem, LocationItem, NumberItem, PlayerItem, StringItem
+    DatetimeItem, GroupItem, LocationItem, NumberItem, PlayerItem, StringItem, ImageItem
 from HABApp.openhab.definitions import OnOffValue, UpDownValue, OpenClosedValue
 from HABApp.openhab.definitions.commands import UpDownCommand, OnOffCommand
 
 ALL_ITEMS = [
-    ContactItem, DimmerItem, RollershutterItem, SwitchItem, ColorItem,
+    ContactItem, DimmerItem, RollershutterItem, SwitchItem, ColorItem, ImageItem,
     DatetimeItem, GroupItem, LocationItem, NumberItem, PlayerItem, StringItem
 ]
 
