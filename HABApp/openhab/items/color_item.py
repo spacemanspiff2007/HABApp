@@ -36,13 +36,17 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
             hue = None
         elif isinstance(hue, HSBValue):
             hue, saturation, brightness = hue.value
+        elif isinstance(hue, tuple):
+            # map tuples to variables e.g. when calling post_value
+            # when processing events instead of three values we get the tuple
+            hue, saturation, brightness = hue
 
         # with None we use the already set value
         self.hue = min(max(0.0, hue), HUE_FACTOR) if hue is not None else self.hue
         self.saturation = min(max(0.0, saturation), PERCENT_FACTOR) if saturation is not None else self.saturation
         self.brightness = min(max(0.0, brightness), PERCENT_FACTOR) if brightness is not None else self.brightness
 
-        return super().set_value(new_value=(hue, saturation, brightness))
+        return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
 
     def post_value(self, hue=0.0, saturation=0.0, brightness=0.0):
         """Set a new value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
@@ -79,7 +83,20 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
         self.hue = h * HUE_FACTOR
         self.saturation = s * PERCENT_FACTOR
         self.brightness = v * PERCENT_FACTOR
+        self.set_value(None, None, None)
         return self
+
+    def post_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
+        """Set a new rgb value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+
+        :param r: red value
+        :param g: green value
+        :param b: blue value
+        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
+        :return: self
+        """
+        self.set_rgb(r, g, b, max_rgb_value=max_rgb_value)
+        self.post_value(None, None, None)
 
     def is_on(self) -> bool:
         """Return true if item is on"""

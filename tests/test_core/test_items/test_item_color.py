@@ -1,54 +1,75 @@
-import unittest
+import pytest
 
 from HABApp.core.items import ColorItem
 
 
-class TestCasesItem(unittest.TestCase):
-
-    def test_repr(self):
-        str(ColorItem('test'))
-
-    def test_set_func(self):
-        i = ColorItem('test')
-        self.assertEqual(i.hue, 0)
-        self.assertEqual(i.saturation, 0)
-        self.assertEqual(i.brightness, 0)
-
-        i.set_value(30, 50, 70)
-
-        self.assertEqual(i.hue, 30)
-        self.assertEqual(i.saturation, 50)
-        self.assertEqual(i.brightness, 70)
-        self.assertEqual(i.value, (30, 50, 70))
+def test_repr():
+    str(ColorItem('test'))
 
 
-    def test_set_func_touple(self):
-        i = ColorItem('test')
-        self.assertEqual(i.hue, 0)
-        self.assertEqual(i.saturation, 0)
-        self.assertEqual(i.brightness, 0)
+def test_init():
+    assert ColorItem('').hue == 0
+    assert ColorItem('').saturation == 0
+    assert ColorItem('').brightness == 0
 
-        i.set_value((22, 33.3, 77), None)
-
-        self.assertEqual(i.hue, 22)
-        self.assertEqual(i.saturation, 33.3)
-        self.assertEqual(i.brightness, 77)
-        self.assertEqual(i.value, (22, 33.3, 77))
-
-
-    def test_rgb_to_hsv(self):
-        i = ColorItem('test')
-        i.set_rgb(193, 25, 99)
-
-        self.assertEqual(int(i.hue), 333)
-        self.assertEqual(int(i.saturation), 87)
-        self.assertEqual(int(i.brightness), 75)
-
-    def test_hsv_to_rgb(self):
-        i = ColorItem('test', 23, 44, 66)
-        self.assertEqual(i.get_rgb(), (168, 122, 94))
+    assert ColorItem('', hue=11).hue == 11
+    assert ColorItem('', hue=11).value == (11, 0, 0)
+    assert ColorItem('', saturation=33).saturation == 33
+    assert ColorItem('', saturation=33).value == (0, 33, 0)
+    assert ColorItem('', brightness=22).brightness == 22
+    assert ColorItem('', brightness=22).value == (0, 0, 22)
 
 
+@pytest.mark.parametrize("func_name", ['set_value', 'post_value'])
+@pytest.mark.parametrize(
+    "test_vals", [
+        ((45, 46, 47), (45, 46, 47)),
+        ((10, None, None), (10, 22.22, 33.33)),
+        ((None, 50, None), (11.11, 50, 33.33)),
+        ((None, None, 60), (11.11, 22.22, 60)),
+    ]
+)
+def test_set_func_vals(func_name, test_vals):
+    i = ColorItem('test', hue=11.11, saturation=22.22, brightness=33.33)
+    assert i.hue == 11.11
+    assert i.saturation == 22.22
+    assert i.brightness == 33.33
+    assert i.value == (11.11, 22.22, 33.33)
 
-if __name__ == '__main__':
-    unittest.main()
+    arg, soll = test_vals
+
+    getattr(i, func_name)(*arg)
+
+    assert i.hue == soll[0]
+    assert i.saturation == soll[1]
+    assert i.brightness == soll[2]
+    assert i.value == soll
+
+
+def test_set_func_tuple():
+    i = ColorItem('test')
+    assert i.hue == 0
+    assert i.saturation == 0
+    assert i.brightness == 0
+
+    i.set_value((22, 33.3, 77))
+
+    assert i.hue == 22
+    assert i.saturation == 33.3
+    assert i.brightness == 77
+    assert i.value == (22, 33.3, 77)
+
+
+def test_rgb_to_hsv():
+    i = ColorItem('test')
+    i.set_rgb(193, 25, 99)
+
+    assert int(i.hue) == 333
+    assert int(i.saturation) == 87
+    assert int(i.brightness) == 75
+    assert tuple(int(i) for i in i.value) == (333, 87, 75)
+
+
+def test_hsv_to_rgb():
+    i = ColorItem('test', 23, 44, 66)
+    assert i.get_rgb() == (168, 122, 94)

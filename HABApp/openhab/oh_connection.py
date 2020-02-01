@@ -5,7 +5,7 @@ import time
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.openhab.events import get_event
+from HABApp.openhab.map_events import get_event
 from HABApp.util import log_exception, ignore_exception
 from .http_connection import HttpConnection, HttpConnectionEventHandler
 from .oh_interface import get_openhab_interface
@@ -159,7 +159,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 # Since we load the items before we load the rules this should actually never happen
                 existing_item = HABApp.core.Items.get_item(item_name)
                 if isinstance(existing_item, new_item.__class__):
-                    existing_item.set_value(_dict['state'])
+                    existing_item.set_value(new_item.value)  # use the converted state from the new item here
                     new_item = existing_item
             except HABApp.core.Items.ItemNotFoundException:
                 pass
@@ -178,8 +178,11 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
 
         # try to update things, too
-        Thing = HABApp.openhab.items.Thing
         data = await self.connection.async_get_things()
+        if data is None:
+            return None
+
+        Thing = HABApp.openhab.items.Thing
         for t_dict in data:
             name = t_dict['UID']
             try:

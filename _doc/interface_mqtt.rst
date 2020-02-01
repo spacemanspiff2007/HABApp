@@ -72,6 +72,10 @@ Mqtt items have an additional publish method which make interaction with the mqt
         pass # do something
 
 
+.. inheritance-diagram:: HABApp.mqtt.items.MqttItem
+   :parts: 1
+
+
 .. autoclass:: HABApp.mqtt.items.MqttItem
    :members:
    :inherited-members:

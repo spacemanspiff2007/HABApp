@@ -8,12 +8,12 @@ PERCENT_FACTOR = 100
 
 
 class ColorItem(BaseValueItem):
-    def __init__(self, name: str, h=0.0, s=0.0, b=0.0):
-        super().__init__(name=name, initial_value=(h, s, b))
+    def __init__(self, name: str, hue=0.0, saturation=0.0, brightness=0.0):
+        super().__init__(name=name, initial_value=(hue, saturation, brightness))
 
-        self.hue: float = min(max(0.0, h), HUE_FACTOR)
-        self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)
-        self.brightness: float = min(max(0.0, b), PERCENT_FACTOR)
+        self.hue: float = min(max(0.0, hue), HUE_FACTOR)
+        self.saturation: float = min(max(0.0, saturation), PERCENT_FACTOR)
+        self.brightness: float = min(max(0.0, brightness), PERCENT_FACTOR)
 
     def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
         """Set the color value
@@ -33,7 +33,7 @@ class ColorItem(BaseValueItem):
         self.saturation = min(max(0.0, saturation), PERCENT_FACTOR) if saturation is not None else self.saturation
         self.brightness = min(max(0.0, brightness), PERCENT_FACTOR) if brightness is not None else self.brightness
 
-        return super().set_value(new_value=(hue, saturation, brightness))
+        return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
 
     def post_value(self, hue=0.0, saturation=0.0, brightness=0.0):
         """Set a new value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
@@ -70,7 +70,20 @@ class ColorItem(BaseValueItem):
         self.hue = h * HUE_FACTOR
         self.saturation = s * PERCENT_FACTOR
         self.brightness = v * PERCENT_FACTOR
+        self.set_value(None, None, None)
         return self
+
+    def post_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
+        """Set a new rgb value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+
+        :param r: red value
+        :param g: green value
+        :param b: blue value
+        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
+        :return: self
+        """
+        self.set_rgb(r, g, b, max_rgb_value=max_rgb_value)
+        self.post_value(None, None, None)
 
     def is_on(self) -> bool:
         """Return true if item is on"""

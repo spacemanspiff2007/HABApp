@@ -1,9 +1,9 @@
 import datetime
 import typing
 
-from HABApp.openhab.definitions.values import QuantityValue
+from HABApp.openhab.definitions.values import QuantityValue, RawValue
 from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerItem, GroupItem, LocationItem, \
-    NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem
+    NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem, ImageItem
 
 
 def map_items(name, openhab_type: str, openhab_value: str):
@@ -73,5 +73,12 @@ def map_items(name, openhab_type: str, openhab_value: str):
 
     if openhab_type == "Group":
         return GroupItem(name, value)
+
+    if openhab_type == "Image":
+        img = ImageItem(name)
+        if value is None:
+            return img
+        img.set_value(RawValue(value))
+        return img
 
     raise ValueError(f'Unknown Openhab type: {openhab_type}')

@@ -1,12 +1,19 @@
 import pytest
 import typing
 
-from HABApp.openhab.items import ContactItem, DimmerItem, RollershutterItem, SwitchItem, ColorItem
+from HABApp.openhab.items import ContactItem, DimmerItem, RollershutterItem, SwitchItem, ColorItem, \
+    DatetimeItem, GroupItem, LocationItem, NumberItem, PlayerItem, StringItem, ImageItem
 from HABApp.openhab.definitions import OnOffValue, UpDownValue, OpenClosedValue
+from HABApp.openhab.definitions.commands import UpDownCommand, OnOffCommand
+
+ALL_ITEMS = [
+    ContactItem, DimmerItem, RollershutterItem, SwitchItem, ColorItem, ImageItem,
+    DatetimeItem, GroupItem, LocationItem, NumberItem, PlayerItem, StringItem
+]
 
 
-@pytest.mark.parametrize("cls", (SwitchItem, DimmerItem, ColorItem))
-def test_onoff(cls: typing.Type[SwitchItem]):
+@pytest.mark.parametrize("cls", [cls for cls in ALL_ITEMS if issubclass(cls, OnOffCommand)])
+def test_OnOff(cls):
     c = cls('item_name')
     c.set_value(OnOffValue('ON'))
     assert c.is_on()
@@ -18,13 +25,17 @@ def test_onoff(cls: typing.Type[SwitchItem]):
     assert not c.is_on()
 
 
-@pytest.mark.parametrize("cls", (RollershutterItem, ))
-def test_UpDown(cls: typing.Type[RollershutterItem]):
+@pytest.mark.parametrize("cls", [cls for cls in ALL_ITEMS if issubclass(cls, UpDownCommand)])
+def test_UpDown(cls):
     c = cls('item_name')
     c.set_value(UpDownValue('UP'))
+    assert c.is_up()
+    assert not c.is_down()
 
     c = cls('item_name')
     c.set_value(UpDownValue('DOWN'))
+    assert not c.is_up()
+    assert c.is_down()
 
 
 @pytest.mark.parametrize("cls", (ContactItem, ))

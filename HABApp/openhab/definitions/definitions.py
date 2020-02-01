@@ -1,6 +1,6 @@
 ITEM_TYPES = {
     'String', 'Number', 'Switch', 'Contact', 'Dimmer', 'Rollershutter',
-    'Color', 'Contact', 'DateTime', 'Location', 'Player', 'Group',
+    'Color', 'DateTime', 'Location', 'Player', 'Group', 'Image',
 }
 
 ITEM_DIMENSION = {'Length', 'Temperature', 'Pressure', 'Speed', 'Intensity', 'Angle'}
