@@ -123,7 +123,7 @@ class ScheduledCallbackBase:
 
         :param func: Function which returns a datetime obj, arg is a datetime with the next call time
         """
-        changed = self._boundary_func == func
+        changed = self._boundary_func != func
         self._boundary_func = func
         if changed:
             self.update_run_time()
