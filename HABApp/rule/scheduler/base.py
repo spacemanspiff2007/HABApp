@@ -39,10 +39,6 @@ class ScheduledCallbackBase:
         self.is_due = False
         self.is_finished = False
         self.run_counter = 0
-        
-    @property
-    def next_call(self) -> datetime:
-        return self._next_call.astimezone(local_tz)
 
     def set_next_run_time(self, date_time: TYPING_DATE_TIME) -> 'ScheduledCallbackBase':
         # next time the callback will be executed
@@ -80,7 +76,7 @@ class ScheduledCallbackBase:
         :param time_obj: time obj, scheduler will not run earlier
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
-        changed = self._earliest == time_obj
+        changed = self._earliest != time_obj
         self._earliest = time_obj
         if changed:
             self.update_run_time()
@@ -92,7 +88,7 @@ class ScheduledCallbackBase:
         :param time_obj: time obj, scheduler will not run later
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
-        changed = self._latest == time_obj
+        changed = self._latest != time_obj
         self._latest = time_obj
         if changed:
             self.update_run_time()
@@ -104,7 +100,7 @@ class ScheduledCallbackBase:
         :param timedelta_obj: constant offset
         """
         assert isinstance(timedelta_obj, timedelta) or timedelta_obj is None, type(timedelta_obj)
-        changed = self._offset == timedelta_obj
+        changed = self._offset != timedelta_obj
         self._offset = timedelta_obj
         if changed:
             self.update_run_time()
@@ -116,7 +112,7 @@ class ScheduledCallbackBase:
         :param secs: jitter in secs
         """
         assert isinstance(secs, int) or secs is None, type(secs)
-        changed = self._jitter == secs
+        changed = self._jitter != secs
         self._jitter = secs
         if changed:
             self.update_run_time()
