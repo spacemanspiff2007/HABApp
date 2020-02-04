@@ -39,6 +39,10 @@ class ScheduledCallbackBase:
         self.is_due = False
         self.is_finished = False
         self.run_counter = 0
+        
+    @property
+    def next_call(self) -> datetime:
+        return self._next_call.astimezone(local_tz)
 
     def set_next_run_time(self, date_time: TYPING_DATE_TIME) -> 'ScheduledCallbackBase':
         # next time the callback will be executed
@@ -76,8 +80,10 @@ class ScheduledCallbackBase:
         :param time_obj: time obj, scheduler will not run earlier
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
+        changed = self._earliest == time_obj
         self._earliest = time_obj
-        self.update_run_time()
+        if changed:
+            self.update_run_time()
         return self
 
     def latest(self, time_obj: typing.Optional[time]) -> 'ScheduledCallbackBase':
@@ -86,8 +92,10 @@ class ScheduledCallbackBase:
         :param time_obj: time obj, scheduler will not run later
         """
         assert isinstance(time_obj, time) or time_obj is None, type(time_obj)
+        changed = self._latest == time_obj
         self._latest = time_obj
-        self.update_run_time()
+        if changed:
+            self.update_run_time()
         return self
 
     def offset(self, timedelta_obj: typing.Optional[timedelta]) -> 'ScheduledCallbackBase':
@@ -96,8 +104,10 @@ class ScheduledCallbackBase:
         :param timedelta_obj: constant offset
         """
         assert isinstance(timedelta_obj, timedelta) or timedelta_obj is None, type(timedelta_obj)
+        changed = self._offset == timedelta_obj
         self._offset = timedelta_obj
-        self.update_run_time()
+        if changed:
+            self.update_run_time()
         return self
 
     def jitter(self, secs: typing.Optional[int]) -> 'ScheduledCallbackBase':
@@ -106,8 +116,10 @@ class ScheduledCallbackBase:
         :param secs: jitter in secs
         """
         assert isinstance(secs, int) or secs is None, type(secs)
+        changed = self._jitter == secs
         self._jitter = secs
-        self.update_run_time()
+        if changed:
+            self.update_run_time()
         return self
 
     def boundary_func(self, func: typing.Optional[typing.Callable[[datetime], datetime]]):
@@ -115,8 +127,10 @@ class ScheduledCallbackBase:
 
         :param func: Function which returns a datetime obj, arg is a datetime with the next call time
         """
+        changed = self._boundary_func == func
         self._boundary_func = func
-        self.update_run_time()
+        if changed:
+            self.update_run_time()
         return self
 
     def update_run_time(self) -> 'ScheduledCallbackBase':
