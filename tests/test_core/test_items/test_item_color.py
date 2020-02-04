@@ -1,6 +1,10 @@
+from unittest.mock import MagicMock
+
 import pytest
 
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.items import ColorItem
+from tests.helpers import SyncWorker
 
 
 def test_repr():
@@ -18,7 +22,6 @@ def test_init():
     assert ColorItem('', saturation=33).value == (0, 33, 0)
     assert ColorItem('', brightness=22).brightness == 22
     assert ColorItem('', brightness=22).value == (0, 0, 22)
-
 
 @pytest.mark.parametrize("func_name", ['set_value', 'post_value'])
 @pytest.mark.parametrize(
@@ -45,6 +48,21 @@ def test_set_func_vals(func_name, test_vals):
     assert i.brightness == soll[2]
     assert i.value == soll
 
+@pytest.mark.parametrize("func_name", ['set_value', 'post_value'])
+@pytest.mark.parametrize(
+    "test_vals", [
+        ((45, 46, 47), (45, 46, 47)),
+        ((10, None, None), (10, 22.22, 33.33)),
+        ((None, 50, None), (11.11, 50, 33.33)),
+        ((None, None, 60), (11.11, 22.22, 60)),
+    ]
+)
+def test_set_func_vals(func_name, test_vals):
+    i = ColorItem('test', hue=11.11, saturation=22.22, brightness=33.33)
+    assert i.hue == 11.11
+    assert i.saturation == 22.22
+    assert i.brightness == 33.33
+    assert i.value == (11.11, 22.22, 33.33)
 
 def test_set_func_tuple():
     i = ColorItem('test')
@@ -73,3 +91,26 @@ def test_rgb_to_hsv():
 def test_hsv_to_rgb():
     i = ColorItem('test', 23, 44, 66)
     assert i.get_rgb() == (168, 122, 94)
+
+
+def test_post_update():
+    with SyncWorker() as w:
+        i = ColorItem('test', 23, 44, 66)
+
+        mock = MagicMock()
+        w.listen_events(i.name, mock)
+        mock.assert_not_called()
+
+        i.post_value(1, 2, 3)
+        mock.assert_called()
+
+        update = mock.call_args_list[0][0][0]
+        assert isinstance(update, ValueUpdateEvent)
+        assert update.name == 'test'
+        assert update.value == (1, 2, 3)
+
+        update = mock.call_args_list[1][0][0]
+        assert isinstance(update, ValueChangeEvent)
+        assert update.name == 'test'
+        assert update.value == (1, 2, 3)
+        assert update.old_value == (23, 44, 66)
