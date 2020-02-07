@@ -116,21 +116,22 @@ class Rule:
             event
         )
 
-    def listen_event(self, name: typing.Union[HABApp.core.items.BaseValueItem, str], callback,
-                     even_type: typing.Union[AllEvents, typing.Any] = AllEvents
+    def listen_event(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
+                     callback: typing.Callable[[typing.Any], typing.Any],
+                     event_type: typing.Union[AllEvents, typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
 
         :param name: item or name to listen to. Use None to listen to all events
         :param callback: callback that accepts one parameter which will contain the event
-        :param even_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
+        :param event_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
             :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openhab
             or mqtt.
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         listener = HABApp.core.EventBusListener(
-            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name, cb, even_type
+            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name, cb, event_type
         )
         self.__event_listener.append(listener)
         HABApp.core.EventBus.add_listener(listener)

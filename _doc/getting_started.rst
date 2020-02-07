@@ -150,6 +150,9 @@ It is possible to watch items for changes or updates.
             # Run this function whenever the item receives an ValueChangeEvent
             self.listen_event(self.my_item, self.item_changed, ValueChangeEvent)
 
+            # If you already have an item you can use the more convenient method of the item
+            self.my_item.listen_event(self.item_changed, ValueChangeEvent)
+
         # the function has 1 argument which is the event
         def item_changed(self, event: ValueChangeEvent):
             print(f'{event.name} changed from {event.old_value} to {event.value}')

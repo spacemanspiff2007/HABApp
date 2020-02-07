@@ -89,6 +89,7 @@ class ColorItem(BaseValueItem):
         """
         self.set_rgb(r, g, b, max_rgb_value=max_rgb_value)
         self.post_value(self.hue, self.saturation, self.brightness)
+        return self
 
     def is_on(self) -> bool:
         """Return true if item is on"""

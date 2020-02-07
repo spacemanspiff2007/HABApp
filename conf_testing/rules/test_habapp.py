@@ -1,5 +1,6 @@
 import time
-from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
+import HABApp
+from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent, ValueUpdateEvent
 from HABApp.core.items import Item
 from HABAppTests import TestBaseRule, EventWaiter, get_random_name
 
@@ -15,7 +16,7 @@ class TestItemEvents(TestBaseRule):
         assert event.name == self.watch_item.name, f'Wrong name: {event.name} != {self.watch_item.name}'
         assert event.seconds == self.secs, f'Wrong seconds: {event.seconds} != {self.secs}'
         dur = time.time() - self.ts_set - self.secs
-        assert abs(dur) < 0.3, f'Time wrong: {abs(dur):.2f}'
+        assert abs(dur) < 0.05, f'Time wrong: {abs(dur):.2f}'
 
     def item_events(self, changes=False, secs=5, values=[]):
         self.secs = secs
@@ -43,3 +44,34 @@ class TestItemEvents(TestBaseRule):
 
 
 TestItemEvents()
+
+
+class TestItemListener(TestBaseRule):
+
+    def __init__(self):
+        super().__init__()
+        self.add_test('Item.listen_event', self.trigger_event)
+
+    def check_event(self, event: ValueUpdateEvent):
+        assert event.name == self.watch_item.name, f'Wrong name: {event.name} != {self.watch_item.name}'
+        assert event.value == 123, f'Wrong value: {event.value} != 123'
+
+    def trigger_event(self):
+        self.watch_item = Item.get_create_item(get_random_name())
+        listener = self.watch_item.listen_event(self.check_event, ValueUpdateEvent)
+
+        self.run_in(
+            1, HABApp.core.EventBus.post_event, self.watch_item.name, ValueUpdateEvent(self.watch_item.name, 123)
+        )
+
+        with EventWaiter(self.watch_item.name, ValueUpdateEvent, 2, check_value=True) as w:
+            w.wait_for_event(123)
+            if not w.events_ok:
+                listener.cancel()
+                return w.events_ok
+
+        listener.cancel()
+        return True
+
+
+TestItemListener()
