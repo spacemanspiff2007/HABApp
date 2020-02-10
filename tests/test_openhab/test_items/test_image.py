@@ -2,7 +2,7 @@ from HABApp.openhab.items import ImageItem
 from HABApp.openhab.map_items import map_items
 
 
-def test_image():
+def test_image_load():
 
     i = map_items(
         'localCurrentConditionIcon',

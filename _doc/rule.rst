@@ -91,6 +91,11 @@ Example::
         self.listen_event('MyOpenhabItem', self.on_change, ValueChangeEvent)
         self.listen_event('My/MQTT/Topic', self.on_update, ValueUpdateEvent)
 
+        # If you already have an item you can use the more convenient method of the item
+        # to listen to the item events
+        my_item = Item.get_item('MyItem')
+        my_item.listen_event(self.item_changed, ValueUpdateEvent)
+
     def on_change(event):
         assert isinstance(event, ValueChangeEvent), type(event)
 

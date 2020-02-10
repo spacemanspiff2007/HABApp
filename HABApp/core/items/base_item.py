@@ -91,3 +91,17 @@ class BaseItem:
         w = self._last_update.add_watch(secs)
         HABApp.rule.get_parent_rule().register_cancel_obj(w)
         return w
+
+    def listen_event(self, callback: typing.Callable[[typing.Any], typing.Any],
+                     event_type: typing.Union['HABApp.core.events.AllEvents', typing.Any]
+                     ) -> 'HABApp.core.EventBusListener':
+        """
+        Register an event listener which listens to all event that the item receives
+
+        :param callback: callback that accepts one parameter which will contain the event
+        :param event_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
+            :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openHAB
+            or mqtt.
+        """
+        rule = HABApp.rule.get_parent_rule()
+        return rule.listen_event(self._name, callback=callback, event_type=event_type)

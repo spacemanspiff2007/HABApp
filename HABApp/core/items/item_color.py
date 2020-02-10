@@ -36,13 +36,18 @@ class ColorItem(BaseValueItem):
         return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
 
     def post_value(self, hue=0.0, saturation=0.0, brightness=0.0):
-        """Set a new value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+        """Set a new value and post appropriate events on the HABApp event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param hue: hue (in °)
         :param saturation: saturation (in %)
         :param brightness: brightness (in %)
         """
-        super().post_value((hue, saturation, brightness))
+        super().post_value(
+            # encapsulate in tuple !
+            (hue if hue is not None else self.hue,
+             saturation if saturation is not None else self.saturation,
+             brightness if brightness is not None else self.brightness)
+        )
 
     def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
         """Return a rgb equivalent of the color
@@ -70,11 +75,11 @@ class ColorItem(BaseValueItem):
         self.hue = h * HUE_FACTOR
         self.saturation = s * PERCENT_FACTOR
         self.brightness = v * PERCENT_FACTOR
-        self.set_value(None, None, None)
+        self.set_value(self.hue, self.saturation, self.brightness)
         return self
 
     def post_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
-        """Set a new rgb value and post appropriate events on the event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+        """Set a new rgb value and post appropriate events on the HABApp event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param r: red value
         :param g: green value
@@ -83,7 +88,8 @@ class ColorItem(BaseValueItem):
         :return: self
         """
         self.set_rgb(r, g, b, max_rgb_value=max_rgb_value)
-        self.post_value(None, None, None)
+        self.post_value(self.hue, self.saturation, self.brightness)
+        return self
 
     def is_on(self) -> bool:
         """Return true if item is on"""

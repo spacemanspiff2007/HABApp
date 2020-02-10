@@ -1,6 +1,10 @@
+from unittest.mock import MagicMock
+
 import pytest
 
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.items import ColorItem
+from tests.helpers import SyncWorker
 
 
 def test_repr():
@@ -73,3 +77,26 @@ def test_rgb_to_hsv():
 def test_hsv_to_rgb():
     i = ColorItem('test', 23, 44, 66)
     assert i.get_rgb() == (168, 122, 94)
+
+
+def test_post_update():
+    with SyncWorker() as w:
+        i = ColorItem('test', 23, 44, 66)
+
+        mock = MagicMock()
+        w.listen_events(i.name, mock)
+        mock.assert_not_called()
+
+        i.post_value(1, 2, 3)
+        mock.assert_called()
+
+        update = mock.call_args_list[0][0][0]
+        assert isinstance(update, ValueUpdateEvent)
+        assert update.name == 'test'
+        assert update.value == (1, 2, 3)
+
+        update = mock.call_args_list[1][0][0]
+        assert isinstance(update, ValueChangeEvent)
+        assert update.name == 'test'
+        assert update.value == (1, 2, 3)
+        assert update.old_value == (23, 44, 66)

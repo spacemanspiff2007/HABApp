@@ -60,7 +60,9 @@ class RuleFile:
 
         created_rules = []
         try:
-            runpy.run_path(self.path, run_name=str(self.path), init_globals={
+            # It seems like python 3.8 doesn't allow path like objects any more:
+            # https://github.com/spacemanspiff2007/HABApp/issues/111
+            runpy.run_path(str(self.path), run_name=str(self.path), init_globals={
                 '__HABAPP__RUNTIME__': self.rule_manager.runtime,
                 '__HABAPP__RULE_FILE__': self,
                 '__HABAPP__RULES': created_rules,
