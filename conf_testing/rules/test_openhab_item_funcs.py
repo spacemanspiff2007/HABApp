@@ -4,7 +4,7 @@ import typing
 
 from HABApp.openhab.items import OpenhabItem
 from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem, ImageItem
-from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem
+from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem, get_openhab_test_states, get_openhab_test_types
 
 log = logging.getLogger('HABApp.Tests')
 
@@ -87,4 +87,35 @@ class TestOpenhabItemFuncs(TestBaseRule):
         return test_ok
 
 
-a = TestOpenhabItemFuncs()
+TestOpenhabItemFuncs()
+
+
+class TestOpenhabItemConvenience(TestBaseRule):
+
+    def __init__(self):
+        super().__init__()
+
+        for name in ('oh_post_update', 'oh_send_command'):
+            for k in get_openhab_test_types():
+                if name == 'oh_send_command' and k == 'Contact':
+                    continue
+                self.add_test(f'{k}.{name}', self.test_func, k, name, get_openhab_test_states(k))
+
+    def test_func(self, item_type, func_name, test_vals):
+
+        with OpenhabTmpItem(None, item_type) as tmpitem, ItemWaiter(OpenhabItem.get_item(tmpitem.name)) as waiter:
+            for val in test_vals:
+                getattr(tmpitem, func_name)(val)
+                waiter.wait_for_state(val)
+
+            for val in test_vals:
+                tmpitem.set_value(val)
+                getattr(tmpitem, func_name)()
+                waiter.wait_for_state(val)
+
+            test_ok = waiter.states_ok
+
+        return test_ok
+
+
+TestOpenhabItemConvenience()
