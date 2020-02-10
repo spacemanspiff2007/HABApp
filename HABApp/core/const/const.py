@@ -1,3 +1,6 @@
-class NotSet:
+class _MissingType:
     def __repr__(self):
-        return '<NotSet>'
+        return '<Missing>'
+
+
+MISSING = _MissingType()
