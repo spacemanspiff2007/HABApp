@@ -1,4 +1,5 @@
 import typing
+import datetime
 
 from HABApp.core.const import MISSING
 from HABApp.core.items.base_valueitem import BaseValueItem
@@ -22,3 +23,17 @@ class OpenhabItem(BaseValueItem):
         :param value: (optional) value to be posted. If not specified the item value will be used.
         """
         get_openhab_interface().post_update(self.name, self.value if value is MISSING else value)
+
+    def get_persistence_data(self, persistence: typing.Optional[str] = None,
+                             start_time: typing.Optional[datetime.datetime] = None,
+                             end_time: typing.Optional[datetime.datetime] = None):
+        """Query historical data from the OpenHAB persistence service
+
+        :param persistence: name of the persistence service (e.g. ``rrd4j``, ``mapdb``). If not set default will be used
+        :param start_time: return only items which are newer than this
+        :param end_time: return only items which are older than this
+        """
+
+        return get_openhab_interface().get_persistence_data(
+            self.name, persistence, start_time, end_time
+        )

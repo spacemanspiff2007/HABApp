@@ -7,11 +7,13 @@ import typing
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.util import log_exception
 from HABApp.core.const import loop
 from HABApp.core.items.base_valueitem import BaseValueItem
+from HABApp.util import log_exception
 from . import definitions
 from .http_connection import HttpConnection
+
+OPTIONAL_DT = typing.Optional[datetime.datetime]
 
 log = logging.getLogger('HABApp.openhab.Connection')
 
@@ -67,6 +69,62 @@ class OpenhabItemDefinition:
         # Important, sometimes OpenHAB returns more than in the schema spec, so we remove those items otherwise we
         # get e.g.: TypeError: __init__() got an unexpected keyword argument 'stateDescription'
         return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
+
+
+class OpenhabPersistenceData:
+
+    def __init__(self):
+        self.data: typing.Dict[float, typing.Union[int, float, str]] = {}
+
+    @classmethod
+    def from_dict(cls, data) -> 'OpenhabPersistenceData':
+        c = cls()
+        for entry in data['data']:
+            # calc as timestamp
+            time = entry['time'] / 1000
+            state = entry['state']
+            if '.' in state:
+                try:
+                    state = float(state)
+                except ValueError:
+                    pass
+            else:
+                try:
+                    state = int(state)
+                except ValueError:
+                    pass
+
+            c.data[time] = state
+        return c
+
+    def get_data(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None):
+        if start_date is None and end_date is None:
+            return self.data
+
+        filter_start = start_date.timestamp() if start_date else None
+        filter_end = end_date.timestamp() if end_date else None
+
+        ret = {}
+        for ts, val in self.data.items():
+            if filter_start is not None and ts < filter_start:
+                continue
+            if filter_end is not None and ts > filter_end:
+                continue
+            ret[ts] = val
+        return ret
+
+    def min(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> typing.Optional[float]:
+        return min(self.get_data(start_date, end_date).values(), default=None)
+
+    def max(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> typing.Optional[float]:
+        return max(self.get_data(start_date, end_date).values(), default=None)
+
+    def average(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> typing.Optional[float]:
+        values = list(self.get_data(start_date, end_date).values())
+        ct = len(values)
+        if ct == 0:
+            return None
+        return sum(values) / ct
 
 
 class OpenhabInterface:
@@ -286,6 +344,35 @@ class OpenhabInterface:
             loop
         )
         return fut.result()
+
+    def get_persistence_data(self,
+                             item_name: str, persistence: typing.Optional[str],
+                             start_time: typing.Optional[datetime.datetime],
+                             end_time: typing.Optional[datetime.datetime]) -> OpenhabPersistenceData:
+        """Query historical data from the OpenHAB persistence service
+
+        :param item_name: name of the persistet item
+        :param persistence: name of the persistence service (e.g. ``rrd4j``, ``mapdb``). If not set default will be used
+        :param start_time: return only items which are newer than this
+        :param end_time: return only items which are older than this
+        """
+        if not self.__connection.is_online:
+            return None
+
+        assert isinstance(item_name, str) and item_name, item_name
+        assert isinstance(persistence, str) or persistence is None, persistence
+        assert isinstance(start_time, datetime.datetime) or start_time is None, start_time
+        assert isinstance(end_time, datetime.datetime) or end_time is None, end_time
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.get_persistence_data(
+                item_name=item_name, persistence=persistence, start_time=start_time, end_time=end_time
+            ),
+            loop
+        )
+
+        ret = fut.result()
+        return OpenhabPersistenceData.from_dict(ret)
 
 
 OH_INTERFACE = None
