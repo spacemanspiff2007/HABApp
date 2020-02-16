@@ -53,7 +53,7 @@ setuptools.setup(
         'paho-mqtt',
         'ujson',
         'watchdog',
-        'astral',
+        'astral>=2.1,<3',
         'pytz',
         'tzlocal',
 
