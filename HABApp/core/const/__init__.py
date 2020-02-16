@@ -1,3 +1,3 @@
-from .const import NotSet
+from .const import MISSING
 from . import topics
 from .loop import loop

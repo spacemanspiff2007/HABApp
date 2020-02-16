@@ -4,6 +4,7 @@ import traceback
 import typing
 
 import aiohttp
+import datetime
 import ujson
 from aiohttp.client import ClientResponse
 from aiohttp_sse_client import client as sse_client
@@ -12,7 +13,6 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from ..config import Openhab as OpenhabConfig
-
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
@@ -373,3 +373,29 @@ class HttpConnection:
         fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}/metadata/{:s}', item_name, namespace))
         ret = await self._check_http_response(fut)
         return ret.status < 300
+
+    async def get_persistence_data(self,
+                                   item_name: str, persistence: typing.Optional[str],
+                                   start_time: typing.Optional[datetime.datetime],
+                                   end_time: typing.Optional[datetime.datetime]) -> dict:
+
+        params = {}
+        if persistence:
+            params['serviceId'] = persistence
+        if start_time is not None:
+            params['starttime'] = start_time.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+        if end_time is not None:
+            params['endtime'] = end_time.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+        if not params:
+            params = None
+
+        fut = self.__session.get(
+            self.__get_openhab_url('rest/persistence/items/{:s}', item_name),
+            params=params
+        )
+        ret = await self._check_http_response(fut)
+
+        if ret.status >= 300:
+            return {}
+        else:
+            return await ret.json(encoding='utf-8')

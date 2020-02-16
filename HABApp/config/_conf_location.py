@@ -15,16 +15,20 @@ class Location(ConfigContainer):
 
     def __init__(self):
         super().__init__()
-        self.astral: _astral.Location = None
+
+        self._astral_location: _astral.LocationInfo
+        self.astral_observer: _astral.Observer
 
     def on_all_values_set(self):
         tz = tzlocal.get_localzone()
         tz_name = str(tz)
         log.debug(f'Local Timezone: {tz_name}')
 
-        self.astral = _astral.Location()
-        self.astral.name = 'HABApp'
-        self.astral.latitude = self.latitude
-        self.astral.longitude = self.longitude
-        self.astral.elevation = self.elevation
-        self.astral.timezone = tz_name
+        # unsure why we need the location in 2.1
+        self._astral_location = _astral.LocationInfo(name='HABApp', )
+        self._astral_location.latitude = self.latitude
+        self._astral_location.longitude = self.longitude
+        self._astral_location.timezone = tz_name
+
+        self.astral_observer = self._astral_location.observer
+        self.astral_observer.elevation = self.elevation
