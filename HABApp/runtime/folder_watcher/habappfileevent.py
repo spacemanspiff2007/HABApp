@@ -25,7 +25,7 @@ class FileEventToHABAppEvent(SimpleAsyncEventHandler):
             event = HABApp.core.events.habapp_events.RequestFileUnloadEvent
 
         HABApp.core.EventBus.post_event(
-            self.habapp_topic, event.from_path(self.folder, Path(path))
+            self.habapp_topic, event.from_path(self.folder, path)
         )
 
     def trigger_load_for_all_files(self, delay: int = None):
