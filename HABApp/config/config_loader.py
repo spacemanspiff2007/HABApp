@@ -83,9 +83,10 @@ class HABAppConfigLoader:
         return None
 
     def load_log(self):
+        # config gets created on startup - if it gets deleted we do nothing here
         if not self.file_conf_logging.is_file():
             return None
-        
+
         with self.file_conf_logging.open('r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
 
