@@ -55,10 +55,6 @@ class HABAppConfigLoader:
         self.first_start = False
 
     def on_file_event(self, path: Path):
-        # don't process remove events
-        if not path.is_file():
-            return None
-
         if path.name == 'config.yml':
             self.load_cfg()
         if path.name == 'logging.yml':
@@ -87,10 +83,9 @@ class HABAppConfigLoader:
         return None
 
     def load_log(self):
-        # File has to exist - check because we also get FileDelete events
         if not self.file_conf_logging.is_file():
             return None
-
+        
         with self.file_conf_logging.open('r', encoding='utf-8') as file:
             cfg = _yaml_param.load(file)
 
