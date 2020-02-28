@@ -60,7 +60,7 @@ class Runtime:
         self.folder_watcher.watch_folder(
             folder=config_folder,
             file_ending='.yml',
-            event_target=self.config_loader
+            target_func=self.config_loader.on_file_event
         )
 
         # folder watcher rules

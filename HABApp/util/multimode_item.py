@@ -17,7 +17,8 @@ class MultiModeValue:
                                is ``>``, ``>=``, ``<``, ``<=``, ``==`` or ``!=`` than the own value
     :vartype auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]]
     :ivar auto_disable_func: Function which can be used to disable this mode. Any function that accepts two
-                           Arguments can be used. First arg is value with lower priority, second argument is own value.
+                            Arguments can be used. First arg is value with lower priority, second argument is own value.
+                            Return ``True`` to disable this mode.
     :vartype calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]]
     :ivar calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts two
                            Arguments can be used. First arg is value with lower priority, second argument is own value.
@@ -199,6 +200,8 @@ class MultiModeItem(Item):
         :param auto_disable_on: Automatically disable the mode if the lower priority state is ``>`` or ``<`` the value.
                                 See :attr:`~HABApp.util.multimode_item.MultiModeValue`
         :param auto_disable_after: Automatically disable the mode after a timedelta if a recalculate is done
+                                   See :attr:`~HABApp.util.multimode_item.MultiModeValue`
+        :param auto_disable_func: Automatically disable the mode with a custom function
                                    See :attr:`~HABApp.util.multimode_item.MultiModeValue`
         :param calc_value_func: See :attr:`~HABApp.util.multimode_item.MultiModeValue`
         :return: The newly created MultiModeValue

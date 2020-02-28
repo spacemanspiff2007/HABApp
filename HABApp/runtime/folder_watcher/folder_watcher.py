@@ -4,14 +4,14 @@ import typing
 from watchdog.observers import Observer
 
 from .habappfileevent import FileEventToHABAppEvent
-from .simplefileevent import SimpleFileEventHandler
+from .simpleasyncfileevent import SimpleAsyncEventHandler
 
 
 class FolderWatcher:
     def __init__(self):
 
         self.__observer = Observer()
-        self.__handlers: typing.Dict[str, typing.Union[SimpleFileEventHandler, FileEventToHABAppEvent]] = {}
+        self.__handlers: typing.Dict[str, typing.Union[SimpleAsyncEventHandler, FileEventToHABAppEvent]] = {}
         self.__watches = {}
         self.__started = False
 
@@ -31,16 +31,16 @@ class FolderWatcher:
         shutdown_helper.register_func(self.__observer.join, last=True)
         return None
 
-    def watch_folder(self, folder: pathlib.Path, file_ending: str, event_target,
-                     watch_subfolders = False, worker_factory=None) -> SimpleFileEventHandler:
+    def watch_folder(self, folder: pathlib.Path, file_ending: str, target_func,
+                     watch_subfolders = False, worker_factory=None) -> SimpleAsyncEventHandler:
         assert isinstance(folder, pathlib.Path), type(folder)
         assert folder.is_dir(), folder
 
         folder_str = str(folder)
         assert folder_str not in self.__watches, folder_str
 
-        self.__handlers[folder_str] = handler = SimpleFileEventHandler(
-            event_target=event_target, file_ending=file_ending, worker_factory=worker_factory
+        self.__handlers[folder_str] = handler = SimpleAsyncEventHandler(
+            target_func=target_func, file_ending=file_ending, worker_factory=worker_factory
         )
         self.__watches[folder_str] = self.__observer.schedule(handler, path=folder_str, recursive=watch_subfolders)
         return handler
@@ -67,7 +67,7 @@ class FolderWatcher:
         self.__handlers.pop(folder)
         self.__observer.unschedule(self.__watches.pop(folder))
 
-    def get_handler(self, folder) -> typing.Union[SimpleFileEventHandler, FileEventToHABAppEvent]:
+    def get_handler(self, folder) -> typing.Union[SimpleAsyncEventHandler, FileEventToHABAppEvent]:
         if isinstance(folder, pathlib.Path):
             folder = str(folder)
         assert isinstance(folder, str), type(folder)

@@ -1,2 +1,2 @@
-from .simplefileevent import FileEventTarget
+from .simpleasyncfileevent import SimpleAsyncEventHandler
 from .folder_watcher import FolderWatcher
