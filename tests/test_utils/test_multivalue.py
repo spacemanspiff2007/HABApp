@@ -56,3 +56,22 @@ def test_auto_disable_on():
 
     m1.set_value(59)
     assert p.value == 59
+
+
+def test_auto_disable_func():
+    p = MultiModeItem('TestItem')
+    m1 = p.create_mode('modea', 1, 50)
+    m2 = p.create_mode('modeb', 2, 60, auto_disable_func=lambda low, s: low == 40)
+
+    m2.set_value(60)
+    assert p.value == 60
+    assert m2.enabled is True
+
+    m1.set_value(40)
+
+    assert p.value == 40
+    assert m2.enabled is False
+
+    m1.set_value(50)
+    assert p.value == 50
+    assert m2.enabled is False
