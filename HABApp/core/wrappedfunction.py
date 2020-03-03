@@ -2,10 +2,10 @@ import asyncio
 import concurrent.futures
 import io
 import logging
-import pstats
 import time
 import traceback
 from cProfile import Profile
+from pstats import SortKey, Stats
 
 import HABApp
 
@@ -92,6 +92,7 @@ class WrappedFunction:
         except Exception as e:
             self.__format_traceback(e, *args, **kwargs)
 
+        # disable profiler
         pr.disable()
 
         # log warning if execution takes too long
@@ -100,10 +101,9 @@ class WrappedFunction:
             self.log.warning(f'Execution of {self.name} took too long: {__dur:.2f}s')
 
             s = io.StringIO()
-            sortby = pstats.SortKey.CUMULATIVE
-            ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-            ps.print_stats(0.1)  # limit to 10% of the lines
-            output = s.getvalue()
-            for line in output.splitlines()[4:]:    # skip the amount of calls and "Ordered by:"
+            ps = Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
+            ps.print_stats(0.1)  # limit to output to 10% of the lines
+
+            for line in s.getvalue().splitlines()[4:]:    # skip the amount of calls and "Ordered by:"
                 if line:
                     self.log.warning(line)
