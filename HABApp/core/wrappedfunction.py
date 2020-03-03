@@ -1,8 +1,11 @@
 import asyncio
 import concurrent.futures
+import io
 import logging
+import pstats
 import time
 import traceback
+from cProfile import Profile
 
 import HABApp
 
@@ -27,7 +30,6 @@ class WrappedFunction:
         # Allow custom logger
         self.log = default_logger
         if logger:
-            assert isinstance(logger, logging.getLoggerClass())
             self.log = logger
 
         self.__warn_too_long = warn_too_long
@@ -80,13 +82,28 @@ class WrappedFunction:
             self.log.warning(f'Starting of {self.name} took too long: {__start - self.__time_submitted:.2f}s. '
                              f'Maybe there are not enough threads?')
 
+        # start profiler
+        pr = Profile()
+        pr.enable()
+
         # Execute the function
         try:
             self._func(*args, **kwargs)
         except Exception as e:
             self.__format_traceback(e, *args, **kwargs)
 
+        pr.disable()
+
         # log warning if execution takes too long
         __dur = time.time() - __start
         if self.__warn_too_long and __dur > 0.8:
             self.log.warning(f'Execution of {self.name} took too long: {__dur:.2f}s')
+
+            s = io.StringIO()
+            sortby = pstats.SortKey.CUMULATIVE
+            ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+            ps.print_stats(0.1)  # limit to 10% of the lines
+            output = s.getvalue()
+            for line in output.splitlines()[4:]:    # skip the amount of calls and "Ordered by:"
+                if line:
+                    self.log.warning(line)
