@@ -1,10 +1,10 @@
 import typing
 
 import paho.mqtt.client as mqtt
-import ujson
 
 from .mqtt_connection import MqttConnection, log
 from ..config import Mqtt as MqttConfig
+from ..core.const.json import dump_json
 
 
 class MqttInterface:
@@ -51,7 +51,7 @@ class MqttInterface:
 
         # convert these to string
         if isinstance(payload, (dict, list)):
-            payload = ujson.dumps(payload)
+            payload = dump_json(payload)
 
         info = self.__connection.client.publish(topic, payload, qos, retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:

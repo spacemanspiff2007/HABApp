@@ -1,6 +1,5 @@
 import logging
 import typing
-import ujson
 
 import paho.mqtt.client as mqtt
 
@@ -9,6 +8,7 @@ from HABApp.core.wrapper import log_exception
 
 from HABApp.runtime.shutdown_helper import ShutdownHelper
 from ..config import Mqtt as MqttConfig
+from ..core.const.json import load_json
 
 from .events import MqttValueUpdateEvent, MqttValueChangeEvent
 
@@ -138,7 +138,7 @@ class MqttConnection:
             # load json dict and list
             if payload.startswith('{') and payload.endswith('}') or payload.startswith('[') and payload.endswith(']'):
                 try:
-                    payload = ujson.loads(payload)
+                    payload = load_json(payload)
                 except ValueError:
                     pass
             else:

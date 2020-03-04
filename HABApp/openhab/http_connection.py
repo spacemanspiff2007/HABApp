@@ -5,7 +5,6 @@ import typing
 
 import aiohttp
 import datetime
-import ujson
 from aiohttp.client import ClientResponse
 from aiohttp_sse_client import client as sse_client
 
@@ -13,6 +12,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from ..config import Openhab as OpenhabConfig
+from ..core.const.json import load_json, dump_json
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
@@ -170,7 +170,7 @@ class HttpConnection:
 
         self.__session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=99999999999999999),
-            json_serialize=ujson.dumps,
+            json_serialize=dump_json,
             auth=auth
         )
 
@@ -217,7 +217,7 @@ class HttpConnection:
             ) as event_source:
                 async for event in event_source:
                     try:
-                        event = ujson.loads(event.data)
+                        event = load_json(event.data)
                     except ValueError:
                         continue
                     except TypeError:
@@ -289,7 +289,7 @@ class HttpConnection:
         )
         try:
             resp = await self._check_http_response(fut)
-            return ujson.loads(await resp.text(encoding='utf-8'))
+            return load_json(await resp.text(encoding='utf-8'))
         except Exception as e:
             # sometimes uuid already works but items not - so we ignore these errors here, too
             if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
@@ -301,7 +301,7 @@ class HttpConnection:
         fut = self.__session.get(self.__get_openhab_url('rest/things'))
         try:
             resp = await self._check_http_response(fut)
-            return ujson.loads(await resp.text(encoding='utf-8'))
+            return load_json(await resp.text(encoding='utf-8'))
         except Exception as e:
             # sometimes uuid and items already works but things not - so we ignore these errors here, too
             if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):

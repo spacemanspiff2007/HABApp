@@ -1,5 +1,5 @@
 import typing
-import ujson
+from ..core.const.json import load_json
 
 from .events import OpenhabEvent, \
     ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
@@ -31,7 +31,7 @@ def get_event(_in_dict : dict) -> OpenhabEvent:
     p_str: str = _in_dict['payload']
     if '"NONE"' in p_str:
         p_str = p_str.replace('"NONE"', 'null')
-    payload = ujson.loads(p_str)
+    payload = load_json(p_str)
 
     # Find event from implemented events
     try:
