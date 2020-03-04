@@ -6,7 +6,7 @@ from threading import Lock
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 
 import HABApp
-from HABApp.util import ignore_exception
+from HABApp.core.wrapper import ignore_exception
 
 LOCK = Lock()
 

@@ -3,7 +3,7 @@ import datetime
 import typing
 
 import HABApp
-from HABApp.util.wrapper import log_exception
+from HABApp.core.wrapper import log_exception
 from ..const import loop
 from ..events import ItemNoChangeEvent, ItemNoUpdateEvent
 

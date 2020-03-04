@@ -2,7 +2,7 @@ import logging
 import threading
 import typing
 
-from HABApp.util import log_exception
+from HABApp.core.wrapper import log_exception
 from . import EventBusListener
 from .events import ComplexEventValue
 

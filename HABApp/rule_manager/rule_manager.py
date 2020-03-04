@@ -10,7 +10,7 @@ import typing
 from pytz import utc
 
 import HABApp
-from HABApp.util import log_exception
+from HABApp.core.wrapper import log_exception
 from .rule_file import RuleFile
 from HABApp.core.const.topics import RULES as TOPIC_RULES
 

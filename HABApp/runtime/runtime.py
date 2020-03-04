@@ -79,7 +79,7 @@ class Runtime:
             HABApp.core.WrappedFunction(param_watcher.trigger_load_for_all_files, name='Load all parameter files').run()
 
 
-    @HABApp.util.log_exception
+    @HABApp.core.wrapper.log_exception
     def get_async(self):
         return asyncio.gather(
             self.async_http.create_client(HABApp.core.const.loop),

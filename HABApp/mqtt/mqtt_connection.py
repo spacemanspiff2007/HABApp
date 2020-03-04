@@ -5,7 +5,7 @@ import ujson
 import paho.mqtt.client as mqtt
 
 import HABApp
-from HABApp.util import log_exception
+from HABApp.core.wrapper import log_exception
 
 from HABApp.runtime.shutdown_helper import ShutdownHelper
 from ..config import Mqtt as MqttConfig

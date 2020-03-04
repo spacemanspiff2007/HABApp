@@ -1,4 +1,5 @@
 from . import const
+from . import wrapper
 
 from .wrappedfunction import WrappedFunction
 

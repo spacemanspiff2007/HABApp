@@ -35,6 +35,6 @@ def get_event(_in_dict : dict) -> OpenhabEvent:
 
     # Find event from implemented events
     try:
-        return __event_lookup[event_type]().from_dict(topic, payload)
+        return __event_lookup[event_type].from_dict(topic, payload)
     except KeyError:
         raise ValueError(f'Unknown Event: {event_type:s} for {_in_dict}')
