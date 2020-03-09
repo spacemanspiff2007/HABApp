@@ -23,7 +23,7 @@ class SimpleAsyncEventHandler(FileSystemEventHandler):
         self.__worker_factory = worker_factory
 
         # Pending events
-        self.__tasks: typing.Dict[str, asyncio.Task] = {}
+        self.__tasks: typing.Dict[str, asyncio.Future] = {}
 
     def __execute(self, dst: str):
         if self.__worker_factory is None:
@@ -54,7 +54,7 @@ class SimpleAsyncEventHandler(FileSystemEventHandler):
         # this has to be thread safe!
         with LOCK:
             try:
-                # cancel alrady running Task
+                # cancel already running Task
                 self.__tasks[dst].cancel()
             except KeyError:
                 pass
@@ -64,9 +64,14 @@ class SimpleAsyncEventHandler(FileSystemEventHandler):
     @ignore_exception
     async def event_waiter(self, dst: str):
         try:
+            # debounce time
             await asyncio.sleep(0.4)
+
+            # remove debounce task for target file
             with LOCK:
-                self.__tasks.pop(dst, None)
+                _ = self.__tasks.pop(dst, None)
+
+            # trigger file event
             self.__execute(dst)
         except asyncio.CancelledError:
             pass

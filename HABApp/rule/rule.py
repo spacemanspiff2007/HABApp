@@ -17,6 +17,7 @@ from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
 from .scheduler import ReoccurringScheduledCallback, OneTimeCallback, DayOfWeekScheduledCallback, \
     TYPING_DATE_TIME, SunScheduledCallback
+from .scheduler.base import ScheduledCallbackBase as _ScheduledCallbackBase
 
 
 log = logging.getLogger('HABApp.Rule')
@@ -60,7 +61,7 @@ class Rule:
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
         self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
-        self.__future_events: typing.List[OneTimeCallback] = []
+        self.__future_events: typing.List[_ScheduledCallbackBase] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
         self.__cancel_objs: weakref.WeakSet = weakref.WeakSet()
 

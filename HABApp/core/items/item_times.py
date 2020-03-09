@@ -11,7 +11,7 @@ from ..events import ItemNoChangeEvent, ItemNoUpdateEvent
 class BaseWatch:
     EVENT: typing.Union[typing.Type[ItemNoUpdateEvent], typing.Type[ItemNoChangeEvent]]
 
-    def __init__(self, name: str, secs: int):
+    def __init__(self, name: str, secs: typing.Union[int, float]):
         self._secs: typing.Union[int, float] = secs
         self._name: str = name
         self._task: typing.Optional[asyncio.Task] = None
@@ -75,7 +75,7 @@ class ItemTimes:
             asyncio.run_coroutine_threadsafe(self.schedule_events(), loop)
         return None
 
-    def add_watch(self, secs: int) -> BaseWatch:
+    def add_watch(self, secs: typing.Union[int, float]) -> BaseWatch:
         assert secs > 0, secs
 
         # don't add the watch two times
