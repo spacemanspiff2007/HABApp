@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 
 VOLUME [ "/config"]
 
@@ -6,9 +6,8 @@ VOLUME [ "/config"]
 RUN apk add --no-cache \
 # Support for Timezones
     tzdata \
-# ujson won't compile without these libs
-    musl-dev \
-    gcc
+# ujson because we don't want to compile ourselves
+    py3-ujson
 
 # Always use latest versions
 RUN mkdir -p /usr/src/app
