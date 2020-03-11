@@ -1,5 +1,6 @@
-from HABApp.util import MultiModeItem
+import pytest
 
+from HABApp.util import MultiModeItem
 from ..test_core import ItemTests
 
 
@@ -75,3 +76,13 @@ def test_auto_disable_func():
     m1.set_value(50)
     assert p.value == 50
     assert m2.enabled is False
+
+
+def test_unknown():
+    p = MultiModeItem('asdf')
+    with pytest.raises(KeyError):
+        p.get_mode('asdf')
+
+    p.create_mode('mode', 1, 50)
+    with pytest.raises(KeyError):
+        p.get_mode('asdf')

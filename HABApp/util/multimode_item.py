@@ -235,7 +235,10 @@ class MultiModeItem(Item):
         :param name: name of the mode (case insensitive)
         :return: The requested MultiModeValue
         """
-        return self.__values_by_name[name.lower()]
+        try:
+            return self.__values_by_name[name.lower()]
+        except KeyError:
+            raise KeyError(f'Unknown mode "{name}"! Available: {", ".join(self.__values_by_name.keys())}') from None
 
     def calculate_value(self) -> typing.Any:
         """Recalculate the output value and post the state to the event bus (if it is not None)

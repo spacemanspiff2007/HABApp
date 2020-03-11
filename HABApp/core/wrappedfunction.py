@@ -5,7 +5,12 @@ import logging
 import time
 import traceback
 from cProfile import Profile
-from pstats import SortKey, Stats
+from pstats import Stats
+try:
+    from pstats import SortKey
+    STAT_SORT_KEY = SortKey.CUMULATIVE
+except ImportError:
+    STAT_SORT_KEY = 'cumulative', 'cumtime'
 
 import HABApp
 
@@ -101,7 +106,7 @@ class WrappedFunction:
             self.log.warning(f'Execution of {self.name} took too long: {__dur:.2f}s')
 
             s = io.StringIO()
-            ps = Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
+            ps = Stats(pr, stream=s).sort_stats(STAT_SORT_KEY)
             ps.print_stats(0.1)  # limit to output to 10% of the lines
 
             for line in s.getvalue().splitlines()[4:]:    # skip the amount of calls and "Ordered by:"
