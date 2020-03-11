@@ -8,7 +8,6 @@ from pathlib import Path
 import ruamel.yaml
 
 from HABApp.__version__ import __VERSION__
-from HABApp.runtime import FileEventTarget
 from . import CONFIG
 from .default_logfile import get_default_logfile
 
@@ -31,7 +30,7 @@ class InvalidConfigException(Exception):
     pass
 
 
-class HABAppConfigLoader(FileEventTarget):
+class HABAppConfigLoader:
 
     def __init__(self, config_folder: Path):
 
@@ -48,24 +47,18 @@ class HABAppConfigLoader(FileEventTarget):
         self.first_start = True
         try:
             # try load logging config first. If we use abs path we can log errors when loading config.yml
-            self.on_file_added(self.file_conf_logging)
-            self.on_file_added(self.file_conf_habapp)
+            self.on_file_event(self.file_conf_logging)
+            self.on_file_event(self.file_conf_habapp)
         except AbsolutePathExpected:
-            self.on_file_added(self.file_conf_habapp)
-            self.on_file_added(self.file_conf_logging)
+            self.on_file_event(self.file_conf_habapp)
+            self.on_file_event(self.file_conf_logging)
         self.first_start = False
 
-    def on_file_added(self, path: Path):
-        self.on_file_changed(path)
-
-    def on_file_changed(self, path: Path):
+    def on_file_event(self, path: Path):
         if path.name == 'config.yml':
             self.load_cfg()
         if path.name == 'logging.yml':
             self.load_log()
-
-    def on_file_removed(self, path: Path):
-        pass
 
     def __check_create_logging(self):
         if self.file_conf_logging.is_file():
@@ -90,7 +83,7 @@ class HABAppConfigLoader(FileEventTarget):
         return None
 
     def load_log(self):
-        # File has to exist - check because we also get FileDelete events
+        # config gets created on startup - if it gets deleted we do nothing here
         if not self.file_conf_logging.is_file():
             return None
 

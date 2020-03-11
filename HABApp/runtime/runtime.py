@@ -60,7 +60,7 @@ class Runtime:
         self.folder_watcher.watch_folder(
             folder=config_folder,
             file_ending='.yml',
-            event_target=self.config_loader
+            target_func=self.config_loader.on_file_event
         )
 
         # folder watcher rules
@@ -73,13 +73,13 @@ class Runtime:
         if params_enabled:
             param_watcher = self.folder_watcher.watch_folder_habapp_events(
                 folder=HABApp.CONFIG.directories.param, file_ending='.yml',
-                habapp_topic=HABApp.core.const.topics.PARAM, watch_subfolders=False
+                habapp_topic=HABApp.core.const.topics.PARAM, watch_subfolders=True
             )
             # load all param files through the worker
             HABApp.core.WrappedFunction(param_watcher.trigger_load_for_all_files, name='Load all parameter files').run()
 
 
-    @HABApp.util.log_exception
+    @HABApp.core.wrapper.log_exception
     def get_async(self):
         return asyncio.gather(
             self.async_http.create_client(HABApp.core.const.loop),

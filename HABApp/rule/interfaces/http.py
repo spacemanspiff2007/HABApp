@@ -1,6 +1,8 @@
-import aiohttp
-import ujson
 from typing import Any, Optional, Mapping
+
+import aiohttp
+
+from HABApp.core.const.json import dump_json
 
 
 class AsyncHttpConnection:
@@ -9,7 +11,7 @@ class AsyncHttpConnection:
         self.__client: aiohttp.ClientSession = None
 
     async def create_client(self, loop):
-        self.__client = aiohttp.ClientSession(json_serialize=ujson.dumps, loop=loop)
+        self.__client = aiohttp.ClientSession(json_serialize=dump_json, loop=loop)
 
     def get(self, url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
             -> aiohttp.client._RequestContextManager:

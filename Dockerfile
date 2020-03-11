@@ -7,8 +7,7 @@ RUN apk add --no-cache \
 # Support for Timezones
     tzdata \
 # ujson won't compile without these libs
-    musl-dev \
-    gcc
+    g++
 
 # Always use latest versions
 RUN mkdir -p /usr/src/app

@@ -158,6 +158,9 @@ Advanced Example
             print('-' * 80)
             item.get_mode('manual').auto_disable_on = '>='  # disable when low priority value >= mode value
 
+            # A custom function can also disable the mode:
+            # item.get_mode('manual').auto_disable_func = lambda low, own: low >= own
+
             item.get_mode('Automatic').set_value(11)    # <-- manual now gets disabled because
             item.get_mode('Automatic').set_value(4)     #     the lower priority value is >= itself
 

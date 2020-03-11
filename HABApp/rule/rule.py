@@ -17,6 +17,7 @@ from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
 from .scheduler import ReoccurringScheduledCallback, OneTimeCallback, DayOfWeekScheduledCallback, \
     TYPING_DATE_TIME, SunScheduledCallback
+from .scheduler.base import ScheduledCallbackBase as _ScheduledCallbackBase
 
 
 log = logging.getLogger('HABApp.Rule')
@@ -60,7 +61,7 @@ class Rule:
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
         self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
-        self.__future_events: typing.List[OneTimeCallback] = []
+        self.__future_events: typing.List[_ScheduledCallbackBase] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
         self.__cancel_objs: weakref.WeakSet = weakref.WeakSet()
 
@@ -78,13 +79,15 @@ class Rule:
         self.oh: HABApp.openhab.OpenhabInterface = HABApp.openhab.get_openhab_interface() if not test else None
         self.openhab: HABApp.openhab.OpenhabInterface = self.oh
 
-    @HABApp.util.log_exception
+    @HABApp.core.wrapper.log_exception
     def __cleanup_objs(self):
         while self.__cancel_objs:
-            obj = self.__cancel_objs.pop()
-            obj.cancel()
+            # we log each error as warning
+            with HABApp.core.wrapper.ExceptionToHABApp(log, logging.WARNING):
+                obj = self.__cancel_objs.pop()
+                obj.cancel()
 
-    @HABApp.util.log_exception
+    @HABApp.core.wrapper.log_exception
     def __cleanup_rule(self):
         # Important: set the dicts to None so we don't schedule a future event during _cleanup.
         # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
@@ -475,7 +478,7 @@ class Rule:
     def __get_rule_name(self, callback):
         return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None
 
-    @HABApp.util.log_exception
+    @HABApp.core.wrapper.log_exception
     def _check_rule(self):
 
         # Check if items do exists
@@ -494,7 +497,7 @@ class Rule:
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
 
-    @HABApp.util.log_exception
+    @HABApp.core.wrapper.log_exception
     def _process_events(self, now):
 
         # sheduled events
@@ -510,7 +513,7 @@ class Rule:
             self.__future_events = [k for k in self.__future_events if not k.is_finished]
         return None
 
-    @HABApp.util.log_exception
+    @HABApp.core.wrapper.log_exception
     def _unload(self):
 
         # unload all functions
@@ -534,7 +537,7 @@ class Rule:
                     log.error(line)
 
 
-@HABApp.util.log_exception
+@HABApp.core.wrapper.log_exception
 def get_parent_rule() -> Rule:
     depth = 1
     while True:
