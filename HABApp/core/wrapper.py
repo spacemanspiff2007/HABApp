@@ -96,7 +96,11 @@ class ExceptionToHABApp:
         pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        tb = traceback.format_exc()
+        # no exception -> we exit gracefully
+        if exc_type is None and exc_val is None:
+            return True
+
+        tb = traceback.format_exception(exc_type, exc_val, exc_tb)
 
         # try to get the parent function name
         try:
@@ -107,14 +111,14 @@ class ExceptionToHABApp:
         # log error
         if self.log is not None:
             self.log.log(self.log_level, f'Error {exc_val} in {f_name}:')
-            for l in tb.splitlines():
+            for l in tb:
                 self.log.log(self.log_level, l)
 
         # send Error to internal event bus so we can reprocess it and notify the user
         HABApp.core.EventBus.post_event(
             HABApp.core.const.topics.WARNINGS if self.log_level == logging.WARNING else HABApp.core.const.topics.ERRORS,
             HABApp.core.events.habapp_events.HABAppError(
-                func_name=f_name, exception=exc_val, traceback=tb
+                func_name=f_name, exception=exc_val, traceback='\n'.join(tb)
             )
         )
         return self.ignore_exception
