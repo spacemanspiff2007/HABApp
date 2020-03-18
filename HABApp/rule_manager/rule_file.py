@@ -5,8 +5,7 @@ import traceback
 import typing
 from pathlib import Path
 
-if typing.TYPE_CHECKING:
-    import HABApp
+import HABApp
 
 log = logging.getLogger(f'HABApp.Rules')
 
@@ -56,10 +55,19 @@ class RuleFile:
         log.debug(f'File {self.path} successfully unloaded!')
         return None
 
+    def __process_tc(self, tb: list):
+        tb = tb[-5:]
+        tb.insert(0, f"Could not load {self.path}!")
+        return [l.replace('<module>', self.path.name) for l in tb]
+
     def load(self):
 
         created_rules = []
-        try:
+
+        ign = HABApp.core.wrapper.ExceptionToHABApp(logger=log)
+        ign.proc_tb = self.__process_tc
+
+        with ign:
             # It seems like python 3.8 doesn't allow path like objects any more:
             # https://github.com/spacemanspiff2007/HABApp/issues/111
             runpy.run_path(str(self.path), run_name=str(self.path), init_globals={
@@ -67,10 +75,14 @@ class RuleFile:
                 '__HABAPP__RULE_FILE__': self,
                 '__HABAPP__RULES': created_rules,
             })
-        except Exception as e:
-            log.error(f"Could not load {self.path}: {e}!")
-            for l in traceback.format_exc().splitlines()[-5:]:
-                log.error(l)
+
+        if ign.raised_exception:
+            # unload all rule instances which might have already been created otherwise they might
+            # still listen to events and do stuff
+            for rule in created_rules:
+                with ign:
+                    rule._unload()
+            return None
 
         len_found = len(created_rules)
         if not len_found:

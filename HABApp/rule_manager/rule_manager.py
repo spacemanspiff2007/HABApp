@@ -185,7 +185,7 @@ class RuleManager:
                 self.files[path_str] = file = RuleFile(self, path)
             file.load()
         except Exception:
-            log.error(f"Could not (fully) load {path}!")
+            log.error(f"Could not load {path}!")
             for l in traceback.format_exc().splitlines():
                 log.error(l)
             return None
