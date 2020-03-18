@@ -15,7 +15,6 @@ class AggregationItem(BaseValueItem):
         """Creates a new AggregationItem in HABApp and returns it or returns the already existing one with the given name
 
         :param name: item name
-        :param initial_value: state the item will have if it gets created
         :return: item
         """
         assert isinstance(name, str), type(name)
@@ -42,7 +41,8 @@ class AggregationItem(BaseValueItem):
     def aggregation_func(self, func: typing.Callable[[typing.Iterable], typing.Any]) -> 'AggregationItem':
         """Set the function which will be used to aggregate all values. E.g. ``min`` or ``max``
 
-        :param func: function which takes an iterator an returns a value, must be non blocking!
+        :param func: The function which takes an iterator an returns an aggregated value.
+                     Important: the function must be **non blocking**!
         """
         self.__aggregation_func = func
         return self
@@ -58,6 +58,7 @@ class AggregationItem(BaseValueItem):
 
     def aggregation_source(self, source: typing.Union[BaseValueItem, str]) -> 'AggregationItem':
         """Set the source item which changes will be aggregated
+
         :param item_or_name: name or Item obj
         """
         # If we already have one we cancel it

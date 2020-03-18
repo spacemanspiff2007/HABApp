@@ -1,7 +1,6 @@
 import collections
 import logging
 import runpy
-import traceback
 import typing
 from pathlib import Path
 
