@@ -43,11 +43,11 @@ an own notifier in case there are errors (e.g. Pushover).
 
 AggregationItem
 ------------------------------
-The aggregation item which takes another item as an input. It then allows to aggregate the state changes
-and generate an output based on it.
+The aggregation item is an item which takes the values of another item as an input.
+It then allows to process these values and generate an aggregated output based on it.
 The item makes implementing time logic like "Has it been dark for the last hour?" or
 "Was there frost during the last six hours?" really easy.
-And since it is just like a normal item triggering on changes is possible, too.
+And since it is just like a normal item triggering on changes etc. is possible, too.
 
 .. execute_code::
     :hide_output:
