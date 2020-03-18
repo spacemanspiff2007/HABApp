@@ -14,7 +14,7 @@ Rule
 
 Interacting with items
 ------------------------------
-Items are like variables. They have a name and a state (which can be anything).
+Items are like variables. They have a name and a value (which can be anything).
 Items from openhab use the item name from openhab and get created when HABApp successfully connects to
 openhab or when the openhab configuration changes.
 Items from MQTT use the topic as item name and get created as soon as a message gets processed.

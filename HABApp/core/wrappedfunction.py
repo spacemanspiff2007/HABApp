@@ -14,6 +14,7 @@ except ImportError:
 
 import HABApp
 
+
 default_logger = logging.getLogger('HABApp.Worker')
 
 
@@ -44,7 +45,7 @@ class WrappedFunction:
         if self.is_async:
             # schedule run async, we need to pass the event loop because we can create an async WrappedFunction
             # from a worker thread (if we have a mixture between async and non-async)!
-            asyncio.run_coroutine_threadsafe(self.__async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
+            asyncio.run_coroutine_threadsafe(self.async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
@@ -71,7 +72,7 @@ class WrappedFunction:
                 )
             )
 
-    async def __async_run(self, *args, **kwargs):
+    async def async_run(self, *args, **kwargs):
         try:
             await self._func(*args, **kwargs)
         except Exception as e:

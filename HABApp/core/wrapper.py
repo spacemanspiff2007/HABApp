@@ -92,11 +92,27 @@ class ExceptionToHABApp:
         self.log_level = log_level
         self.ignore_exception: bool = ignore_exception
 
+        self.raised_exception = False
+
+        self.proc_tb: typing.Optional[typing.Callable[[list], list]] = None
+
     def __enter__(self):
-        pass
+        self.raised_exception = False
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        tb = traceback.format_exc()
+        # no exception -> we exit gracefully
+        if exc_type is None and exc_val is None:
+            return True
+
+        self.raised_exception = True
+
+        tb = traceback.format_exception(exc_type, exc_val, exc_tb)
+        # there is an inconsistent use of newlines and array entries so we normalize it
+        tb = '\n'.join(map(lambda x: x.strip(' \n'), tb))
+        tb = tb.splitlines()
+        # possibility to reprocess tb
+        if self.proc_tb is not None:
+            tb = self.proc_tb(tb)
 
         # try to get the parent function name
         try:
@@ -106,15 +122,15 @@ class ExceptionToHABApp:
 
         # log error
         if self.log is not None:
-            self.log.log(self.log_level, f'Error {exc_val} in {f_name}:')
-            for l in tb.splitlines():
+            self.log.log(self.log_level, f'Error "{exc_val}" in {f_name}:')
+            for l in tb:
                 self.log.log(self.log_level, l)
 
         # send Error to internal event bus so we can reprocess it and notify the user
         HABApp.core.EventBus.post_event(
             HABApp.core.const.topics.WARNINGS if self.log_level == logging.WARNING else HABApp.core.const.topics.ERRORS,
             HABApp.core.events.habapp_events.HABAppError(
-                func_name=f_name, exception=exc_val, traceback=tb
+                func_name=f_name, exception=exc_val, traceback='\n'.join(tb)
             )
         )
         return self.ignore_exception

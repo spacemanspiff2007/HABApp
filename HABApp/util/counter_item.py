@@ -1,8 +1,9 @@
-from HABApp.core.items import Item
 from threading import Lock
 
+import HABApp
 
-class CounterItem(Item):
+
+class CounterItem(HABApp.core.items.Item):
     """Implements a simple thread safe counter"""
 
     # todo: Max Value and events when counter is 0 or has max value

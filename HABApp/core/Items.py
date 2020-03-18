@@ -40,4 +40,6 @@ def set_item(item: __BaseItem):
 
 
 def pop_item(name: str) -> __BaseItem:
-    return _ALL_ITEMS.pop(name)
+    item = _ALL_ITEMS.pop(name)
+    item._on_item_remove()
+    return item

@@ -5,7 +5,7 @@ import tzlocal
 from pytz import utc
 
 import HABApp
-from .item_times import BaseWatch, ChangedTime, UpdatedTime
+from .base_item_times import BaseWatch, ChangedTime, UpdatedTime
 
 
 class BaseItem:
@@ -105,3 +105,8 @@ class BaseItem:
         """
         rule = HABApp.rule.get_parent_rule()
         return rule.listen_event(self._name, callback=callback, event_type=event_type)
+
+    def _on_item_remove(self):
+        """This function gets called when the item is removed from the item registry
+        """
+        pass
