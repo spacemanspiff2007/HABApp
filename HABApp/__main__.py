@@ -37,6 +37,10 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
         if v_env:
             check_path.append(Path(v_env) / 'HABApp')  # Virtual env dir
     else:
+        # in case the user specifies the config.yml we automatically switch to the parent folder
+        if arg_config_path.name.lower() == 'config.yml' and arg_config_path.is_file():
+            arg_config_path = arg_config_path.parent
+
         # Override automatic config detection if something is specified through command line
         check_path = [arg_config_path]
 

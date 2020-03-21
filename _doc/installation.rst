@@ -50,6 +50,9 @@ Installation
 
     habapp --config PATH_TO_CONFIGURATION_FOLDER
 
+.. hint::
+   After the installation take a look how to configure HABApp.
+   A default configuration will be created on the first start.
 
 Upgrading
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
