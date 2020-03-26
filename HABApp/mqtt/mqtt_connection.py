@@ -129,7 +129,7 @@ class MqttConnection:
         try:
             payload = message.payload.decode("utf-8")
         except UnicodeDecodeError:
-            pass
+            payload = message.payload
 
         if log_msg.isEnabledFor(logging.DEBUG):
             log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload}', [])

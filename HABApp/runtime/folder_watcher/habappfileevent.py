@@ -28,7 +28,6 @@ class FileEventToHABAppEvent(SimpleAsyncEventHandler):
             self.habapp_topic, event.from_path(self.folder, path)
         )
 
-    @HABApp.core.wrapper.log_exception
     def trigger_load_for_all_files(self, delay: int = None):
 
         # trigger event for every file, we load in alphabetical order
