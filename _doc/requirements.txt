@@ -1,5 +1,5 @@
 sphinx-autodoc-typehints
-sphinx_rtd_theme
+sphinx_rtd_theme==0.4.3
 
 # Specify this so autodoc works with ReadTheDocs
 aiohttp
