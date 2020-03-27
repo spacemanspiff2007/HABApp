@@ -125,16 +125,14 @@ class MqttConnection:
 
     @log_exception
     def process_msg(self, client, userdata, message: mqtt.MQTTMessage):
-        topic = message.topic
+        topic: str = message.topic
+
         try:
             payload = message.payload.decode("utf-8")
-        except UnicodeDecodeError:
-            payload = message.payload
 
-        if log_msg.isEnabledFor(logging.DEBUG):
-            log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload}', [])
+            if log_msg.isEnabledFor(logging.DEBUG):
+                log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload}', [])
 
-        if isinstance(topic, str):
             # load json dict and list
             if payload.startswith('{') and payload.endswith('}') or payload.startswith('[') and payload.endswith(']'):
                 try:
@@ -150,6 +148,12 @@ class MqttConnection:
                         payload = float(payload)
                     except ValueError:
                         pass
+        except UnicodeDecodeError:
+            # Payload ist binary
+            payload = message.payload
+            if log_msg.isEnabledFor(logging.DEBUG):
+                log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload[:20]}...', [])
+
 
         # get the mqtt item
         _item = HABApp.mqtt.items.MqttItem.get_create_item(topic)

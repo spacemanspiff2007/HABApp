@@ -13,6 +13,11 @@ def load_version() -> str:
     return version['__VERSION__']
 
 
+def load_req():
+    with open('requirements.txt') as f:
+        return f.readlines()
+
+
 __VERSION__ = load_version()
 
 print(f'Version: {__VERSION__}')
@@ -45,21 +50,7 @@ setuptools.setup(
         'GitHub': 'https://github.com/spacemanspiff2007/HABApp',
     },
     packages=setuptools.find_packages(exclude=['tests*']),
-    install_requires=[
-        'easyco>=0.2.1',
-        'aiohttp>=3.5.4',
-        'voluptuous>=0.11.7',
-        'aiohttp-sse-client',
-        'paho-mqtt',
-        'ujson',
-        'watchdog',
-        'astral>=2.1,<3',
-        'pytz',
-        'tzlocal',
-
-        # Backports
-        'dataclasses;python_version<"3.7"',
-    ],
+    install_requires=load_req(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: AsyncIO",
