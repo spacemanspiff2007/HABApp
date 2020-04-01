@@ -43,10 +43,10 @@ def test_calculate_lower_priority_value():
     assert m2.calculate_lower_priority_value() == 'asdf'
 
 
-def test_auto_disable_on():
+def test_auto_disable_1():
     p = MultiModeItem('TestItem')
     m1 = p.create_mode('modea', 1, 50)
-    m2 = p.create_mode('modeb', 2, 60, auto_disable_on='>')
+    m2 = p.create_mode('modeb', 2, 60, auto_disable_func= lambda l, o: l > o)
 
     m1.set_value(50)
     assert p.value == 60

@@ -1,10 +1,10 @@
 import asyncio
+import datetime
 import logging
 import traceback
 import typing
 
 import aiohttp
-import datetime
 from aiohttp.client import ClientResponse
 from aiohttp_sse_client import client as sse_client
 
@@ -12,7 +12,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from ..config import Openhab as OpenhabConfig
-from ..core.const.json import load_json, dump_json
+from ..core.const.json import dump_json, load_json
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')

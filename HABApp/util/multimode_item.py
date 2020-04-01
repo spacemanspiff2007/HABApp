@@ -1,6 +1,5 @@
 import datetime
 import logging
-import operator
 import typing
 from threading import Lock
 
@@ -13,8 +12,6 @@ class MultiModeValue:
     :ivar datetime.datetime last_update: Timestamp of the last update/enable of this value
     :ivar typing.Optional[datetime.timedelta] auto_disable_after: Automatically disable this mode after
                                               a given timedelta on the next recalculation
-    :ivar typing.Optional[str] auto_disable_on: Automatically disable this mode if the state with lower priority
-                               is ``>``, ``>=``, ``<``, ``<=``, ``==`` or ``!=`` than the own value
     :vartype auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]]
     :ivar auto_disable_func: Function which can be used to disable this mode. Any function that accepts two
                             Arguments can be used. First arg is value with lower priority, second argument is own value.
@@ -23,13 +20,9 @@ class MultiModeValue:
     :ivar calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts two
                            Arguments can be used. First arg is value with lower priority, second argument is own value.
     """
-    DISABLE_OPERATORS = {
-        '>': operator.gt, '<': operator.lt, '>=': operator.ge, '<=': operator.le,
-        '==': operator.eq, '!=': operator.ne,
-    }
 
     def __init__(self, parent, name: str, initial_value=None,
-                 auto_disable_on=None, auto_disable_after=None, auto_disable_func=None,
+                 auto_disable_after=None, auto_disable_func=None,
                  calc_value_func=None):
 
         assert isinstance(parent, MultiModeItem), type(parent)
@@ -50,9 +43,7 @@ class MultiModeValue:
 
         assert isinstance(auto_disable_after, datetime.timedelta) or auto_disable_after is None, \
             type(auto_disable_after)
-        assert auto_disable_on is None or auto_disable_on in MultiModeValue.DISABLE_OPERATORS, auto_disable_on
         self.auto_disable_after: typing.Optional[datetime.timedelta] = auto_disable_after
-        self.auto_disable_on: typing.Optional[str] = auto_disable_on
         self.auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]] = auto_disable_func
 
         self.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = calc_value_func
@@ -99,14 +90,6 @@ class MultiModeValue:
 
         self.__parent.calculate_value()
 
-    def __operator_on_value(self, operator_str: str, low_prio_value):
-        try:
-            return MultiModeValue.DISABLE_OPERATORS[operator_str](low_prio_value, self.__value)
-        except TypeError as e:
-            self.__parent.log(logging.WARNING, f'{e}! {low_prio_value}({type(low_prio_value)}) {operator_str:s} '
-                              f'{self.__value}({type(self.__value)})')
-            return False
-
     def calculate_lower_priority_value(self) -> typing.Any:
 
         # go down to the first item an trigger recalculation, this way we keep the output of MultiModeValue synchronized
@@ -131,21 +114,12 @@ class MultiModeValue:
                 self.last_update = datetime.datetime.now()
                 self.__parent.log(logging.INFO, f'{self.__name} disabled (after {self.auto_disable_after})!')
 
-        # Automatically disable if <> etc.
-        if self.auto_disable_on is not None:
-            if self.__operator_on_value(operator_str=self.auto_disable_on, low_prio_value=value_with_lower_priority):
-                self.__enabled = False
-                self.last_update = datetime.datetime.now()
-                self.__parent.log(logging.INFO, f'{self.__name} disabled '
-                                  f'({value_with_lower_priority}{self.auto_disable_on}{self.__value})!')
-
         # provide user function which can disable a mode
         if self.auto_disable_func is not None:
             if self.auto_disable_func(value_with_lower_priority, self.__value) is True:
                 self.__enabled = False
                 self.last_update = datetime.datetime.now()
-                self.__parent.log(logging.INFO, f'{self.__name} disabled '
-                                  f'({value_with_lower_priority}{self.auto_disable_on}{self.__value})!')
+                self.__parent.log(logging.INFO, f'{self.__name} disabled')
 
         # check if we may have disabled this mode
         if not self.__enabled:
@@ -187,7 +161,6 @@ class MultiModeItem(Item):
 
     def create_mode(
             self, name: str, priority: int, initial_value: typing.Optional[typing.Any] = None,
-            auto_disable_on: typing.Optional[str] = None,
             auto_disable_after: typing.Optional[datetime.timedelta] = None,
             auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]] = None,
             calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = None
@@ -197,8 +170,6 @@ class MultiModeItem(Item):
         :param name: Name of the new mode
         :param priority: Priority of the mode
         :param initial_value: Initial value, will also enable the mode
-        :param auto_disable_on: Automatically disable the mode if the lower priority state is ``>`` or ``<`` the value.
-                                See :attr:`~HABApp.util.multimode_item.MultiModeValue`
         :param auto_disable_after: Automatically disable the mode after a timedelta if a recalculate is done
                                    See :attr:`~HABApp.util.multimode_item.MultiModeValue`
         :param auto_disable_func: Automatically disable the mode with a custom function
@@ -214,7 +185,7 @@ class MultiModeItem(Item):
             ret = MultiModeValue(
                 self, name,
                 initial_value=initial_value,
-                auto_disable_on=auto_disable_on, auto_disable_after=auto_disable_after,
+                auto_disable_after=auto_disable_after,
                 auto_disable_func=auto_disable_func,
                 calc_value_func=calc_value_func
             )
