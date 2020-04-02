@@ -26,6 +26,9 @@ class SunScheduledCallback(ScheduledCallbackBase):
         observer = HABApp.config.CONFIG.location.astral_observer
 
         dt = datetime.now().date()
-        self._next_base: datetime = func(observer=observer, date=dt)
-        if self._next_base < datetime.now(tz=utc):
-            self._next_base: datetime = func(observer=observer, date=dt + timedelta(days=1))
+        self._next_base: datetime = func(observer=observer, date=dt).replace(microsecond=0)
+        self._update_run_time()
+
+        if self._next_call < datetime.now(tz=utc):
+            self._next_base: datetime = func(observer=observer, date=dt + timedelta(days=1)).replace(microsecond=0)
+            self._update_run_time()

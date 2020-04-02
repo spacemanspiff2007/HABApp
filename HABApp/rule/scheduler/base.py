@@ -63,7 +63,7 @@ class ScheduledCallbackBase:
         self._next_base = date_time
 
         # Check boundaries
-        self.update_run_time()
+        self._update_run_time()
         return self
 
     def _calculate_next_call(self):
@@ -79,7 +79,7 @@ class ScheduledCallbackBase:
         changed = self._earliest != time_obj
         self._earliest = time_obj
         if changed:
-            self.update_run_time()
+            self._update_run_time()
         return self
 
     def latest(self, time_obj: typing.Optional[time]) -> 'ScheduledCallbackBase':
@@ -91,7 +91,7 @@ class ScheduledCallbackBase:
         changed = self._latest != time_obj
         self._latest = time_obj
         if changed:
-            self.update_run_time()
+            self._update_run_time()
         return self
 
     def offset(self, timedelta_obj: typing.Optional[timedelta]) -> 'ScheduledCallbackBase':
@@ -103,7 +103,7 @@ class ScheduledCallbackBase:
         changed = self._offset != timedelta_obj
         self._offset = timedelta_obj
         if changed:
-            self.update_run_time()
+            self._update_run_time()
         return self
 
     def jitter(self, secs: typing.Optional[int]) -> 'ScheduledCallbackBase':
@@ -115,7 +115,7 @@ class ScheduledCallbackBase:
         changed = self._jitter != secs
         self._jitter = secs
         if changed:
-            self.update_run_time()
+            self._update_run_time()
         return self
 
     def boundary_func(self, func: typing.Optional[typing.Callable[[datetime], datetime]]):
@@ -126,12 +126,10 @@ class ScheduledCallbackBase:
         changed = self._boundary_func != func
         self._boundary_func = func
         if changed:
-            self.update_run_time()
+            self._update_run_time()
         return self
 
-    def update_run_time(self) -> 'ScheduledCallbackBase':
-        """Update the next time the job will be run. Call this if some boundaries have changed"""
-
+    def _update_run_time(self) -> 'ScheduledCallbackBase':
         # Starting point is always the next call
         self._next_call = self._next_base
 
@@ -186,7 +184,6 @@ class ScheduledCallbackBase:
 
         self.run_counter += 1
         self._calculate_next_call()
-        self.update_run_time()
         self._callback.run(*self._args, **self._kwargs)
         return True
 
