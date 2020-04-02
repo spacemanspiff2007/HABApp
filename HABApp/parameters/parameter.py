@@ -29,6 +29,9 @@ class Parameter:
         """
         return _get_value(self.filename, *self.keys)
 
+    def __bool__(self):
+        return bool(self.value)
+
     def __eq__(self, other):
         return self.value == other
 

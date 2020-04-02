@@ -81,4 +81,4 @@ def map_items(name, openhab_type: str, openhab_value: str):
         img.set_value(RawValue(value))
         return img
 
-    raise ValueError(f'Unknown Openhab type: {openhab_type}')
+    raise ValueError(f'Unknown Openhab type: {openhab_type} for {name}')

@@ -75,12 +75,12 @@ def test_sun():
     s._calculate_next_call()
 
     s.earliest(time(hour=12))
-    s.update_run_time()
+    s._update_run_time()
     assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(12)
 
     s.earliest(None)
     s.latest(time(hour=4))
-    s.update_run_time()
+    s._update_run_time()
     assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(4)
 
 
@@ -96,10 +96,10 @@ def test_boundary():
         return d + timedelta(seconds=15)
 
     s.boundary_func(b_func)
-    s.update_run_time()
+    s._update_run_time()
     assert s.get_next_call() == now + timedelta(seconds=30)
 
     # offset etc comes after the custom function
     s.offset(timedelta(seconds=-10))
-    s.update_run_time()
+    s._update_run_time()
     assert s.get_next_call() == now + timedelta(seconds=20)

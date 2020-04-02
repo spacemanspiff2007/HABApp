@@ -13,12 +13,22 @@ def load_version() -> str:
     return version['__VERSION__']
 
 
+def load_req() -> typing.List[str]:
+    # When we run tox tests we don't have this file available so we skip them
+    req_file = Path(__file__).with_name('requirements.txt')
+    if not req_file.is_file():
+        return ['']
+
+    with req_file.open() as f:
+        return f.readlines()
+
+
 __VERSION__ = load_version()
 
 print(f'Version: {__VERSION__}')
 print('')
 
-# don't load file for tox-builds
+# When we run tox tests we don't have these files available so we skip them
 readme = Path(__file__).with_name('readme.md')
 long_description = ''
 if readme.is_file():
@@ -45,21 +55,7 @@ setuptools.setup(
         'GitHub': 'https://github.com/spacemanspiff2007/HABApp',
     },
     packages=setuptools.find_packages(exclude=['tests*']),
-    install_requires=[
-        'easyco>=0.2.1',
-        'aiohttp>=3.5.4',
-        'voluptuous>=0.11.7',
-        'aiohttp-sse-client',
-        'paho-mqtt',
-        'ujson',
-        'watchdog',
-        'astral>=2.1,<3',
-        'pytz',
-        'tzlocal',
-
-        # Backports
-        'dataclasses;python_version<"3.7"',
-    ],
+    install_requires=load_req(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: AsyncIO",

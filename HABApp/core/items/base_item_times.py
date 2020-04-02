@@ -3,7 +3,7 @@ import datetime
 import typing
 
 from HABApp.core.wrapper import log_exception
-from .base_item_watch import BaseWatch, ItemNoUpdateWatch, ItemNoChangeWatch
+from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
 from ..const import loop
 
 

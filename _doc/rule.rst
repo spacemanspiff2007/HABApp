@@ -187,22 +187,37 @@ Example::
 How to properly use rules from other rule files
 -------------------------------------------------
 This example shows how to properly get a rule during runtime and execute one of its function.
-With the proper import this method provides syntax checks and auto complete.
+With the proper import and type hint this method provides syntax checks and auto complete.
 
-**Important:** always look up rule every time, never assign to a class member!
-The rule might get reloaded and then the class member will still point to the old unloaded instance.
+Rule instances can be accessed by their name (typically the class name). In the ``HABApp.log`` you can see the name when the rule is loaded.
+If you want to assign a custom name, you can change the rule name easily by assigning it to ``self.rule_name`` in ``__init__``.
 
-Example::
+.. important:: Always look up rule every time, never assign to a class member!
+               The rule might get reloaded and then the class member will still point to the old unloaded instance.
 
-    if typing.TYPE_CHECKING:
-        from .class_b import ClassB
+
+*rule_a.py*::
 
     class ClassA(Rule):
         ...
 
+    ClassA()
+
+*rule_b.py*::
+
+    if typing.TYPE_CHECKING:            # This is only here to allow
+        from .class_a import ClassA     # type hints for the IDE
+
+    class ClassB(Rule):
+        ...
+
         def function_a(self):
-            # Important: always look up rule every time, never assign to a class member!
-            r = self.get_rule('NameOfRuleB')  # type: ClassB
+
+            r = self.get_rule('ClassA')  # type: ClassA
+            # The comment "# type: ClassA" will signal the IDE that the value returned from the
+            # function is an instance of ClassA and thus provide checks and auto complete.
+
+            # this calls the function on the instance
             r.function_b()
 
 

@@ -189,7 +189,6 @@ class Rule:
         future_event = SunScheduledCallback(cb, *args, **kwargs)
         future_event.sun_trigger(sun_event)
         future_event._calculate_next_call()
-        future_event.update_run_time()
         self.__future_events.append(future_event)
         return future_event
 

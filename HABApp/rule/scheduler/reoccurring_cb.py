@@ -12,7 +12,7 @@ class ReoccurringScheduledCallback(ScheduledCallbackBase):
 
     def _calculate_next_call(self):
         self._next_base += self._interval
-        self.update_run_time()
+        self._update_run_time()
 
     def interval(self, interval: typing.Union[int, timedelta]) -> 'ReoccurringScheduledCallback':
         if isinstance(interval, int):
@@ -45,4 +45,4 @@ class DayOfWeekScheduledCallback(ScheduledCallbackBase):
         while not loc.isoweekday() in self._weekdays:
             self._next_base += timedelta(days=1)
             loc = self._next_base.astimezone(local_tz)
-        self.update_run_time()
+        self._update_run_time()

@@ -32,4 +32,7 @@ class EventBusListener:
 
     def desc(self):
         # return description
-        return f'"{self.topic}" (type {self.event_filter})'
+        _type = str(self.event_filter)
+        if _type.startswith("<class '"):
+            _type = _type[8:-2]
+        return f'"{self.topic}" (type {_type})'
