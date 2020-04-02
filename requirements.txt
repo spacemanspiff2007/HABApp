@@ -1,7 +1,7 @@
 easyco>=0.2.1
 aiohttp>=3.5.4
 voluptuous>=0.11.7
-aiohttp-sse-client
+aiohttp-sse-client==0.1.7
 paho-mqtt
 ujson
 watchdog
