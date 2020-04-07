@@ -38,7 +38,9 @@ def map_items(name, openhab_type: str, openhab_value: str):
         return RollershutterItem(name, float(value))
 
     if openhab_type == "Dimmer":
-        return DimmerItem(name, value)
+        if value is None:
+            return DimmerItem(name, value)
+        return DimmerItem(name, float(value))
 
     if openhab_type == "Number":
         if value is None:
@@ -65,20 +67,20 @@ def map_items(name, openhab_type: str, openhab_value: str):
             return ColorItem(name)
         return ColorItem(name, *(float(k) for k in value.split(',')))
 
-    if openhab_type == "Location":
-        return LocationItem(name, value)
-
-    if openhab_type == "Player":
-        return PlayerItem(name, value)
-
-    if openhab_type == "Group":
-        return GroupItem(name, value)
-
     if openhab_type == "Image":
         img = ImageItem(name)
         if value is None:
             return img
         img.set_value(RawValue(value))
         return img
+
+    if openhab_type == "Group":
+        return GroupItem(name, value)
+
+    if openhab_type == "Location":
+        return LocationItem(name, value)
+
+    if openhab_type == "Player":
+        return PlayerItem(name, value)
 
     raise ValueError(f'Unknown Openhab type: {openhab_type} for {name}')

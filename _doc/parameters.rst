@@ -112,3 +112,40 @@ Example
     }
     HABApp.parameters.set_file_validator('file1', validator)
 
+
+Create rules from Parameters
+------------------------------
+Parameteres are not bound to rule instance and thus work everywhere in the rule file.
+It is possible to dynamically create rules from the contents of the parameter file.
+
+It's even possible to automatically reload rules if the parameter file has changed:
+Just listen to the ``FileLoadEvent`` of the parameter file and create a  ``FileLoadEvent`` for the rule file, too.
+
+
+Example
+
+.. execute_code::
+
+    # hide
+    from HABApp.parameters.parameters import _PARAMETERS
+    _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
+
+    from tests import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    # hide
+
+    import HABApp
+
+    class MyRule(HABApp.Rule):
+        def __init__(self, k, v):
+            super().__init__()
+            print(f'{k}: {v}')
+
+    cfg = HABApp.Parameter( 'param_file_testrule').value    # this will get the file content
+    for k, v in cfg.items():
+        MyRule(k, v)
+
+    # hide
+    runner.tear_down()
+    # hide
