@@ -78,6 +78,15 @@ class Runtime:
             # load all param files through the worker
             HABApp.core.WrappedFunction(param_watcher.trigger_load_for_all_files, name='Load all parameter files').run()
 
+        # watch folders for manual config
+        if CONFIG.directories.config.is_dir():
+            self.folder_watcher.watch_folder(
+                folder=CONFIG.directories.config,
+                file_ending='.yml',
+                target_func=lambda x: asyncio.run_coroutine_threadsafe(
+                    self.openhab_connection.update_thing_config(x), HABApp.core.const.loop
+                )
+            )
 
     @HABApp.core.wrapper.log_exception
     def get_async(self):

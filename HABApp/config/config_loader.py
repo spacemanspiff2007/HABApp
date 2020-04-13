@@ -106,7 +106,7 @@ class HABAppConfigLoader:
             p = Path(handler_cfg['filename'])
             if not p.is_absolute():
                 # Our log folder ist not yet converted to path -> it is not loaded
-                if not CONFIG.directories.logging.is_absolute():
+                if not isinstance(CONFIG.directories.logging, Path):
                     raise AbsolutePathExpected()
 
                 # Use defined parent folder
