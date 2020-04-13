@@ -13,6 +13,7 @@ import HABApp.core
 import HABApp.openhab.events
 from ..config import Openhab as OpenhabConfig
 from ..core.const.json import dump_json, load_json
+from .definitions.rest import OpenhabThingDefinition, ThingNotFoundError, ThingNotEditableError
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
@@ -399,3 +400,25 @@ class HttpConnection:
             return {}
         else:
             return await ret.json(encoding='utf-8')
+
+    async def async_get_thing(self, uid: str) -> OpenhabThingDefinition:
+        fut = self.__session.get(
+            self.__get_openhab_url('rest/things/{:s}', uid),
+        )
+        ret = await self._check_http_response(fut)
+        if ret.status >= 300:
+            raise ThingNotFoundError(f'Thing {uid} not found!')
+
+        return OpenhabThingDefinition(**await ret.json(encoding='utf-8'))
+
+    async def async_set_thing_cfg(self, uid: str, cfg: typing.Dict[str, typing.Any]):
+        fut = self.__session.put(
+            self.__get_openhab_url('rest/things/{:s}/config', uid), json=cfg
+        )
+        ret = await self._check_http_response(fut)
+        if ret.status == 404:
+            raise ThingNotFoundError(f'Thing "{uid}" not found!')
+        elif ret.status == 409:
+            raise ThingNotEditableError(f'Thing "{uid}" is not editable!')
+        elif ret.status >= 300:
+            raise ValueError('Something went wrong')

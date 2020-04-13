@@ -1,5 +1,4 @@
 import asyncio
-import dataclasses
 import datetime
 import logging
 import typing
@@ -10,6 +9,7 @@ import HABApp.openhab.events
 from HABApp.core.const import loop
 from HABApp.core.items.base_valueitem import BaseValueItem
 from HABApp.core.wrapper import log_exception
+from HABApp.openhab.definitions.rest import OpenhabItemDefinition
 from . import definitions
 from .http_connection import HttpConnection
 
@@ -17,58 +17,6 @@ OPTIONAL_DT = typing.Optional[datetime.datetime]
 
 log = logging.getLogger('HABApp.openhab.Connection')
 
-
-@dataclasses.dataclass
-class OpenhabItemDefinition:
-    """
-    :ivar str type: item type
-    :ivar str name: item name
-    :ivar typing.Any state: item state
-    :ivar str state: item label
-    :ivar str category: item category
-    :ivar bool editable: item can changed through Rest API
-    :ivar typing.List[str] tags: item tags
-    :ivar typing.List[str] groups: groups the item is in
-    :ivar typing.List[OpenhabItemDefinition] members: If the item is a group this contains the members
-    """
-    type: str
-    name: str
-    state: typing.Any
-    label: str = ''
-    category: str = ''
-    editable: bool = True
-    tags: typing.List[str] = dataclasses.field(default_factory=list)
-    groups: typing.List[str] = dataclasses.field(default_factory=list)
-    members: 'typing.List[OpenhabItemDefinition]' = dataclasses.field(default_factory=list)
-
-    @classmethod
-    def from_dict(cls, data) -> 'OpenhabItemDefinition':
-        assert isinstance(data, dict), type(dict)
-        data['groups'] = data.pop('groupNames', [])
-
-        # remove link
-        data.pop('link', None)
-
-        # map states, quick n dirty
-        state = data['state']
-        if state == 'NULL':
-            state = None
-        else:
-            try:
-                state = int(state)
-            except ValueError:
-                try:
-                    state = float(state)
-                except ValueError:
-                    pass
-        data['state'] = state
-
-        for i, item in enumerate(data.get('members', [])):
-            data['members'][i] = cls.from_dict(item)
-
-        # Important, sometimes OpenHAB returns more than in the schema spec, so we remove those items otherwise we
-        # get e.g.: TypeError: __init__() got an unexpected keyword argument 'stateDescription'
-        return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
 
 
 class OpenhabPersistenceData:

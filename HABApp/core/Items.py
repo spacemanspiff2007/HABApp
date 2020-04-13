@@ -17,7 +17,7 @@ def get_item(name: str) -> __BaseItem:
     try:
         return _ALL_ITEMS[name]
     except KeyError:
-        raise ItemNotFoundException(f'Item {name} does not exist!')
+        raise ItemNotFoundException(f'Item {name} does not exist!') from None
 
 
 def get_all_items() -> typing.List[__BaseItem]:
