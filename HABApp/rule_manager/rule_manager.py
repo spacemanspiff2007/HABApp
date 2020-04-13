@@ -62,9 +62,7 @@ class RuleManager:
             while not items_found:
                 time.sleep(3)
                 for item in HABApp.core.Items.get_all_items():
-                    if isinstance(item, (HABApp.openhab.items.NumberItem, HABApp.openhab.items.ContactItem,
-                                         HABApp.openhab.items.SwitchItem, HABApp.openhab.items.RollershutterItem,
-                                         HABApp.openhab.items.DimmerItem, HABApp.openhab.items.ColorItem)):
+                    if isinstance(item, HABApp.openhab.items.OpenhabItem):
                         items_found = True
                         break
             time.sleep(0.2)

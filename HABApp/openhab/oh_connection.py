@@ -1,12 +1,18 @@
 import asyncio
 import logging
+import re
 import time
+import typing
+from pathlib import Path
+
+from bidict import bidict
 
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
+from HABApp.core.wrapper import ignore_exception, log_exception
 from HABApp.openhab.map_events import get_event
-from HABApp.core.wrapper import log_exception, ignore_exception
+from .definitions.rest import ThingNotFoundError
 from .http_connection import HttpConnection, HttpConnectionEventHandler
 from .oh_interface import get_openhab_interface
 from ..config import Openhab as OpenhabConfig
@@ -58,6 +64,14 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
         # start ping
         self.__async_ping = asyncio.ensure_future(self.async_ping())
+
+        # todo: move this somewhere proper
+        async def wait_and_update():
+            await asyncio.sleep(2)
+            for f in HABApp.CONFIG.directories.config.iterdir():
+                if f.name.endswith('.yml'):
+                    await self.update_thing_config(f)
+        asyncio.ensure_future(wait_and_update())
 
     @log_exception
     def on_disconnected(self):
@@ -206,3 +220,122 @@ class OpenhabConnection(HttpConnectionEventHandler):
         log.info(f'Updated {len(data):d} Things')
 
         return None
+
+    @HABApp.core.wrapper.log_exception
+    async def update_thing_config(self, path: Path):
+        if path.name.lower() != 'thingconfig.yml':
+            return None
+
+        log = logging.getLogger('HABApp.openhab.Config')
+        if not path.is_file():
+            log.debug(f'File {path} does not exist -> skipping Thing configuration!')
+            return None
+
+        yml = HABApp.parameters.parameter_files._yml_setup
+        with path.open(mode='r', encoding='utf-8') as file:
+            manu_cfg = yml.load(file)
+
+        if not manu_cfg or not isinstance(manu_cfg, dict):
+            log.warning(f'File {path} is empty!')
+            return None
+
+        for uid, target_cfg in manu_cfg.items():
+            try:
+                thing = await self.connection.async_get_thing(uid)
+            except ThingNotFoundError:
+                log.error(f'Thing with uid "{uid}" does not exist!')
+                continue
+
+            if thing.configuration is None:
+                log.error(f'Thing can not be configured!')
+                continue
+
+            cfg = ThingConfigChanger.from_dict(thing.configuration)
+
+            log.info(f'Checking {uid}: {thing.label}')
+            keys_ok = True
+            for k in target_cfg:
+                if k in cfg:
+                    continue
+                keys_ok = False
+                log.error(f' - Config value "{k}" does not exist!')
+
+            if not keys_ok:
+                # show list with available entries
+                log.error(f'   Available:')
+                for k, v in sorted(filter(lambda x: isinstance(x[0], str), cfg.items())):
+                    if k.startswith('action_') or k in ('node_id', 'wakeup_node'):
+                        continue
+                    log.error(f'    - {k}: {v}')
+                for k, v in sorted(filter(lambda x: isinstance(x[0], int), cfg.items())):
+                    log.error(f'    - {k:3d}: {v}')
+
+                # don't process entries with invalid keys
+                continue
+
+            # Check the current value
+            for k, target_val in target_cfg.items():
+                current_val = cfg[k]
+                if current_val == target_val:
+                    log.info(f' - {k} is already {target_val}')
+                    continue
+
+                log.info(f' - Set {k} to {target_val}')
+                cfg[k] = target_val
+
+            if not cfg.new or self.connection.is_read_only:
+                continue
+
+            try:
+                await self.connection.async_set_thing_cfg(uid, cfg=cfg.new)
+            except Exception as e:
+                log.error(f'Could not set new config: {e}!')
+                continue
+            log.info('Config successfully updated!')
+
+
+class ThingConfigChanger:
+    zw_param = re.compile(r'config_(?P<p>\d+)_(?P<w>\d+)')
+    zw_group = re.compile(r'group_(\d+)')
+
+    @classmethod
+    def from_dict(cls, _in: dict) -> 'ThingConfigChanger':
+        c = cls()
+        c.org = _in
+        for k in _in:
+            # Z-Wave Params -> 0
+            m = ThingConfigChanger.zw_param.fullmatch(k)
+            if m:
+                c.alias[int(m.group(1))] = k
+                continue
+
+            # Z-Wave Groups to Group1
+            m = ThingConfigChanger.zw_group.fullmatch(k)
+            if m:
+                c.alias[f'Group{m.group(1)}'] = k
+                continue
+        return c
+
+    def __init__(self):
+        self.alias = bidict()
+        self.org: typing.Dict[str, typing.Any] = {}
+        self.new: typing.Dict[str, typing.Any] = {}
+
+    def __getitem__(self, key):
+        return self.org[self.alias.get(key, key)]
+
+    def __setitem__(self, key, item):
+        self.new[self.alias.get(key, key)] = item
+
+    def __contains__(self, key):
+        return self.alias.get(key, key) in self.org
+
+    def keys(self):
+        return (self.alias.inverse.get(k, k) for k in self.org.keys())
+
+    def values(self):
+        return self.org.values()
+
+    def items(self):
+        for k, v in zip(self.keys(), self.values()):
+            yield k, v
