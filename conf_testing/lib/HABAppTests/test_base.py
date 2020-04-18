@@ -31,11 +31,39 @@ class TestBaseRule(HABApp.Rule):
         self.next_rule: str = None
         self.tests_done = False
 
+        self.__rule_count = 0
+
+        # we have to chain the rules later, because we register the rules only once we loaded successfully.
+        self.run_in(2, self._wait_for_rules)
+        
+        self.register_on_unload(self.do_unload)
+
+    def do_unload(self):
         with LOCK:
-            # if we have only one rule it's not a list
+            next = self.get_rule(self.next_rule) if self.next_rule is not None else None
+            prev = self.get_rule(self.prev_rule) if self.next_rule is not None else None
+            if next is not None and prev is not None:
+                prev.next_rule = next.rule_name
+                next.prev_rule = prev.rule_name
+            elif next is None and prev is not None:
+                prev.next_rule = None
+            elif next is not None and prev is None:
+                next.prev_rule = None
+
+    def _wait_for_rules(self):
+        with LOCK:
             rules = self.get_rule(None)
-            if isinstance(rules, HABApp.Rule):
-                rules = [rules]
+            
+            # wait until the rule count is constant
+            found = len(rules)
+            if self.__rule_count != found:
+                self.__rule_count = found
+                self.run_in(1, self._wait_for_rules)
+                return None
+
+            if self.next_rule is not None:
+                self.run_in(2, self.start_test_execution)
+                return None
 
             for rule in rules:
                 if not isinstance(rule, TestBaseRule):
@@ -46,16 +74,16 @@ class TestBaseRule(HABApp.Rule):
                 if rule.next_rule is None:
                     rule.next_rule = self.rule_name
                     self.prev_rule = rule.rule_name
-                    break
+                    return None
 
-        self.run_in(2, self.start_test_execution)
+            self.run_in(1, self.start_test_execution)
 
     def start_test_execution(self):
-        if self.prev_rule is not None:
-            return None
-
+        with LOCK:
+            if self.prev_rule is not None:
+                return None
+        
         self.run_tests(TestResult())
-
 
     def add_test(self, name, func, *args, **kwargs):
         assert name not in self.__tests_funcs, name
@@ -121,7 +149,7 @@ class TestBaseRule(HABApp.Rule):
             result.nio += 1
 
         # run next rule
-        self.tests_done = False
+        self.tests_done = True
         if self.next_rule is not None:
             self.run_soon(self.get_rule(self.next_rule).run_tests, result)
         else:

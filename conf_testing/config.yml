@@ -3,6 +3,7 @@ directories:
   rules: rules
   lib: lib
   param: parameters
+  config: config  # Folder from which configuration files will be loaded
 location:
   latitude: 52.52437
   longitude: 13.41053
