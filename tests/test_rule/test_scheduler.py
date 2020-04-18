@@ -66,6 +66,7 @@ def test_sun():
     HABApp.CONFIG.location.latitude = 52.52437
     HABApp.CONFIG.location.longitude = 13.41053
     HABApp.CONFIG.location.elevation = 43
+    HABApp.CONFIG.location._astral_location.timezone = 'Europe/Berlin'
     HABApp.CONFIG.location.on_all_values_set()
 
     func.mock.reset_mock()
