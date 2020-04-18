@@ -67,7 +67,6 @@ def test_sun():
     HABApp.CONFIG.location.longitude = 13.41053
     HABApp.CONFIG.location.elevation = 43
     HABApp.CONFIG.location.on_all_values_set()
-    HABApp.CONFIG.location._astral_location.timezone = 'Europe/Berlin'
 
     func.mock.reset_mock()
     s = scheduler.SunScheduledCallback(func)
@@ -80,9 +79,9 @@ def test_sun():
     assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(12)
 
     s.earliest(None)
-    s.latest(time(hour=4))
+    s.latest(time(hour=2))
     s._update_run_time()
-    assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(4)
+    assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(2)
 
 
 def test_boundary():
