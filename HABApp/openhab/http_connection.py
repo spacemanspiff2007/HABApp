@@ -409,7 +409,7 @@ class HttpConnection:
         if ret.status >= 300:
             raise ThingNotFoundError(f'Thing {uid} not found!')
 
-        return OpenhabThingDefinition(**await ret.json(encoding='utf-8'))
+        return OpenhabThingDefinition.from_dict(await ret.json(encoding='utf-8'))
 
     async def async_set_thing_cfg(self, uid: str, cfg: typing.Dict[str, typing.Any]):
         fut = self.__session.put(

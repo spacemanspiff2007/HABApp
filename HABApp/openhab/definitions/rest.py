@@ -57,6 +57,7 @@ class OpenhabItemDefinition:
 
 @dataclasses.dataclass
 class OpenhabThingChannelDefinition:
+    linkedItems: typing.Optional[str] = None
     uid: typing.Optional[str] = None
     id: typing.Optional[str] = None
     channelTypeUID: typing.Optional[str] = None
