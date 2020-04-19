@@ -28,9 +28,10 @@ class TestCases(unittest.TestCase):
         r = self.rule
         test = [time(11, 30, 0), timedelta(seconds=30), None, datetime.now() + timedelta(seconds=5)]
         for t in test:
-            r.run_on_weekends(t, lambda x : x)
-            r.run_on_workdays(t, lambda x : x)
-            r.run_on_every_day(t, lambda x : x)
+            if isinstance(test, time):
+                r.run_on_weekends(t, lambda x : x)
+                r.run_on_workdays(t, lambda x : x)
+                r.run_on_every_day(t, lambda x : x)
 
             r.run_every(t, 60, lambda x : x)
             r.run_every(t, timedelta(seconds=30), lambda x : x)

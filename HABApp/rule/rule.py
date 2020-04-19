@@ -193,10 +193,10 @@ class Rule:
         return future_event
 
     def run_on_day_of_week(self,
-                           time: TYPING_DATE_TIME, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+                           time: datetime.time, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param weekdays:
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
@@ -226,10 +226,10 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_every_day(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_every_day(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
@@ -241,10 +241,10 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_workdays(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_workdays(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
@@ -256,10 +256,10 @@ class Rule:
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_weekends(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_weekends(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|

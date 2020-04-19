@@ -33,7 +33,8 @@ def test_workday():
     s = scheduler.DayOfWeekScheduledCallback(func)
 
     s.weekdays('workday')
-    s.set_next_run_time(datetime(2001, 1, 1, 12, 30))
+    s.set_next_run_time(time(12))
+    s._next_base = s._next_base.replace(year=2001, month=1, day=1)
     s._calculate_next_call()
 
     assert s._next_call.date() == date(2001, 1, 2)
@@ -45,6 +46,8 @@ def test_workday():
     assert s._next_call.date() == date(2001, 1, 5)
     s._calculate_next_call()
     assert s._next_call.date() == date(2001, 1, 8)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 9)
 
 
 def test_weekend():
@@ -52,7 +55,8 @@ def test_weekend():
     s = scheduler.DayOfWeekScheduledCallback(func)
 
     s.weekdays('weekend')
-    s.set_next_run_time(datetime(2001, 1, 1, 12, 30))
+    s.set_next_run_time(time(12))
+    s._next_base = s._next_base.replace(year=2001, month=1, day=1)
     s._calculate_next_call()
 
     assert s._next_call.date() == date(2001, 1, 6)
@@ -60,6 +64,8 @@ def test_weekend():
     assert s._next_call.date() == date(2001, 1, 7)
     s._calculate_next_call()
     assert s._next_call.date() == date(2001, 1, 13)
+    s._calculate_next_call()
+    assert s._next_call.date() == date(2001, 1, 14)
 
 
 def test_sun():
