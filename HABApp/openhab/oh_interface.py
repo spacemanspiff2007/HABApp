@@ -211,7 +211,7 @@ class OpenhabInterface:
             loop
         )
         data = fut.result()
-        return OpenhabItemDefinition.from_dict(data)
+        return OpenhabItemDefinition.parse_obj(data)
 
     @log_exception
     def remove_item(self, item_name: str):

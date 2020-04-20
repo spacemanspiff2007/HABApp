@@ -11,9 +11,9 @@ from aiohttp_sse_client import client as sse_client
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from ..config import Openhab as OpenhabConfig
-from ..core.const.json import dump_json, load_json
-from .definitions.rest import OpenhabThingDefinition, ThingNotFoundError, ThingNotEditableError
+from HABApp.config import Openhab as OpenhabConfig
+from HABApp.core.const.json import dump_json, load_json
+from .definitions.rest import OpenhabThingDefinition, ThingNotEditableError, ThingNotFoundError
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
@@ -409,7 +409,7 @@ class HttpConnection:
         if ret.status >= 300:
             raise ThingNotFoundError(f'Thing {uid} not found!')
 
-        return OpenhabThingDefinition.from_dict(await ret.json(encoding='utf-8'))
+        return OpenhabThingDefinition.parse_obj(await ret.json(encoding='utf-8'))
 
     async def async_set_thing_cfg(self, uid: str, cfg: typing.Dict[str, typing.Any]):
         fut = self.__session.put(
