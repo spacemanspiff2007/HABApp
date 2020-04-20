@@ -18,11 +18,11 @@ class OpenhabItemDefinition(BaseModel):
     label: str
     link: str
     state: Any
+    tags: List[str]
     category: Optional[str]
     editable: bool = True
-    tags: List[str]
     groups: List[str] = Field(alias='groupNames')
-    members: List['OpenhabItemDefinition']
+    members: List['OpenhabItemDefinition'] = []
     transformed_state: Optional[str] = Field(alias='transformedState')
 
 

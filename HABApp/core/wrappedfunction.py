@@ -7,7 +7,7 @@ import traceback
 from cProfile import Profile
 from pstats import Stats
 try:
-    from pstats import SortKey
+    from pstats import SortKey   # type: ignore[attr-defined]
     STAT_SORT_KEY = SortKey.CUMULATIVE
 except ImportError:
     STAT_SORT_KEY = 'cumulative', 'cumtime'

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-import astral.sun
+from astral import sun
 from pytz import utc
 
 import HABApp
@@ -22,7 +22,7 @@ class SunScheduledCallback(ScheduledCallbackBase):
         raise NotImplementedError()
 
     def _calculate_next_call(self):
-        func = getattr(astral.sun, self._method)
+        func = getattr(sun, self._method)
         observer = HABApp.config.CONFIG.location.astral_observer
 
         dt = datetime.now().date()

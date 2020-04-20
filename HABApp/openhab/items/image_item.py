@@ -1,6 +1,5 @@
 import typing
 from base64 import b64encode
-from binascii import hexlify
 
 from HABApp.openhab.items.base_item import OpenhabItem
 from ..definitions import RawValue
@@ -15,7 +14,7 @@ def _convert_bytes(data: bytes, img_type: typing.Optional[str]) -> str:
             img_type = 'jpeg'
         elif data.startswith(b'\x89\x50\x4E\x47'):
             img_type = 'png'
-    assert img_type in ('jpeg', 'png'), f'Image type: "{img_type}", File Signature: {hexlify(data[:10])}'
+    assert img_type in ('jpeg', 'png'), f'Image type: "{img_type}", File Signature: {data[:10].hex()}'
 
     return f'data:image/{img_type:s};base64,{b64encode(data).decode("ascii")}'
 

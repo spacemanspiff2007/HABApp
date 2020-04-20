@@ -37,6 +37,8 @@ class DayOfWeekScheduledCallback(ScheduledCallbackBase):
         self._time = _time
         super().set_next_run_time(_time)
 
+        return self
+
     def weekdays(self, weekdays) -> 'DayOfWeekScheduledCallback':
         if weekdays == 'weekend':
             weekdays = [6, 7]

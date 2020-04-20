@@ -8,12 +8,8 @@ import time
 import traceback
 import typing
 from pathlib import Path
-import astral
 
 import HABApp
-
-# Remove City list because we don't need it
-astral._LOCATION_INFO = ''
 
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
@@ -94,14 +90,6 @@ def main() -> typing.Union[int, str]:
         args.config = Path(args.config).resolve()
 
     log = logging.getLogger('HABApp')
-
-    # if installed we use uvloop because it seems to be much faster (untested)
-    try:
-        import uvloop
-        uvloop.install()
-        print('Using uvloop')
-    except ModuleNotFoundError:
-        pass
 
     try:
         app = HABApp.runtime.Runtime()

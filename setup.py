@@ -1,7 +1,7 @@
 import typing
 from pathlib import Path
 
-import setuptools
+import setuptools  # type: ignore
 
 
 # Load version number without importing HABApp

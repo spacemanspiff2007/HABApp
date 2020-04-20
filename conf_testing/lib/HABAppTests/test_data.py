@@ -32,11 +32,11 @@ ITEM_EVENTS = {
 
 
 def get_openhab_test_states(key) -> list:
-    return copy.copy(ITEM_STATE[key])
+    return list(copy.copy(ITEM_STATE[key]))
 
 
 def get_openhab_test_events(key) -> list:
-    return copy.copy(list(itertools.chain(ITEM_STATE[key], ITEM_EVENTS.get(key, []))))
+    return list(copy.copy(itertools.chain(ITEM_STATE[key], ITEM_EVENTS.get(key, []))))
 
 
 def get_openhab_test_types() -> list:
