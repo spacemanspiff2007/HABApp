@@ -32,35 +32,37 @@ class ScheduledCallbackBase:
         self._boundary_func: typing.Optional[typing.Callable[[datetime], datetime]] = None
 
         # times when we run
-        self._next_base: datetime = None
-        self._next_call: datetime = None
+        self._next_base: datetime
+        self._next_call: datetime
 
         # properties
         self.is_due = False
         self.is_finished = False
         self.run_counter = 0
 
-    def set_next_run_time(self, date_time: TYPING_DATE_TIME) -> 'ScheduledCallbackBase':
+    def set_next_run_time(self, next_time: TYPING_DATE_TIME) -> 'ScheduledCallbackBase':
         # next time the callback will be executed
         __now = datetime.now()
 
-        if date_time is None:
+        if next_time is None:
             # If we don't specify a datetime we start it now
-            date_time = __now
-        elif isinstance(date_time, timedelta):
+            base_time = __now
+        elif isinstance(next_time, timedelta):
             # if it is a timedelta add it to now to easily speciy points in the future
-            date_time = __now + date_time
-        elif isinstance(date_time, time):
+            base_time = __now + next_time
+        elif isinstance(next_time, time):
             # if it is a time object it specifies a time of day.
-            date_time = __now.replace(hour=date_time.hour, minute=date_time.minute, second=date_time.second)
-            if date_time < __now:
-                date_time += timedelta(days=1)
-        assert isinstance(date_time, datetime), type(date_time)
+            base_time = __now.replace(hour=next_time.hour, minute=next_time.minute, second=next_time.second)
+            if base_time < __now:
+                base_time += timedelta(days=1)
+        else:
+            base_time = next_time
+
+        assert isinstance(base_time, datetime), type(base_time)
 
         # convert to utc
-        date_time = local_tz.localize(date_time)
-        date_time = date_time.astimezone(utc)
-        self._next_base = date_time
+        base_time = local_tz.localize(base_time)
+        self._next_base = base_time.astimezone(utc)
 
         # Check boundaries
         self._update_run_time()

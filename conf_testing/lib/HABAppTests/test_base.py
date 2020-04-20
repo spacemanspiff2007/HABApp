@@ -65,6 +65,7 @@ class TestBaseRule(HABApp.Rule):
             rule.run_tests(result)
 
         log.info(str(result)) if not result.nio else log.error(str(result))
+        print(str(result))
         return None
 
     def add_test(self, name, func, *args, **kwargs):

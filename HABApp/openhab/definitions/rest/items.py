@@ -1,6 +1,22 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseConfig, BaseModel, Extra, Field
+
+BaseConfig.extra = Extra.forbid
+
+
+class StateOptionDefinition(BaseModel):
+    value: str
+    label: str
+
+
+class CommandOptionDefinition(BaseModel):
+    command: str
+    label: str
+
+
+class CommandDescriptionDefinition(BaseModel):
+    command_options: Optional[List[CommandOptionDefinition]] = Field(alias='commandOptions')
 
 
 class StateDescriptionDefinition(BaseModel):
@@ -9,21 +25,28 @@ class StateDescriptionDefinition(BaseModel):
     step: Optional[Union[int, float]]
     pattern: Optional[str]
     read_only: Optional[bool] = Field(alias='readOnly')
-    options: Dict[str, str] = {}
+    options: Optional[List[StateOptionDefinition]]
 
 
 class OpenhabItemDefinition(BaseModel):
     type: str
     name: str
-    label: str
+    label: Optional[str]
+    category: Optional[str]
+    tags: List[str]
     link: str
     state: Any
-    tags: List[str]
-    category: Optional[str]
-    editable: bool = True
     groups: List[str] = Field(alias='groupNames')
     members: List['OpenhabItemDefinition'] = []
     transformed_state: Optional[str] = Field(alias='transformedState')
+    state_description: Optional[StateDescriptionDefinition] = Field(alias='stateDescription')
+    command_description: Optional[CommandDescriptionDefinition] = Field(alias='commandDescription')
+    metadata: Dict[str, Any] = {}
+    editable: bool = True
+
+    # Group only fields
+    group_type: Optional[str] = Field(alias='groupType')
+    group_function: Optional[Dict[str, str]] = Field(alias='function')
 
 
 OpenhabItemDefinition.update_forward_refs()
