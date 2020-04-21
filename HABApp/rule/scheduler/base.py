@@ -40,10 +40,10 @@ class ScheduledCallbackBase:
         self.is_finished = False
         self.run_counter = 0
 
-    def set_next_run_time(self, next_time: TYPING_DATE_TIME) -> 'ScheduledCallbackBase':
-        # next time the callback will be executed
-        __now = datetime.now()
+    def _set_next_base(self, next_time: TYPING_DATE_TIME) -> 'ScheduledCallbackBase':
+        # initializer method for self._next_base
 
+        __now = datetime.now()
         if next_time is None:
             # If we don't specify a datetime we start it now
             base_time = __now
@@ -63,9 +63,6 @@ class ScheduledCallbackBase:
         # convert to utc
         base_time = local_tz.localize(base_time)
         self._next_base = base_time.astimezone(utc)
-
-        # Check boundaries
-        self._update_run_time()
         return self
 
     def _calculate_next_call(self):

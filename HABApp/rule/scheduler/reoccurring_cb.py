@@ -10,7 +10,7 @@ class ReoccurringScheduledCallback(ScheduledCallbackBase):
 
     def __init__(self, callback, *args, **kwargs):
         super().__init__(callback, *args, **kwargs)
-        self._interval: timedelta = None
+        self._interval: timedelta
 
     def _calculate_next_call(self):
         self._next_base += self._interval
@@ -21,7 +21,11 @@ class ReoccurringScheduledCallback(ScheduledCallbackBase):
             interval = timedelta(seconds=interval)
         assert isinstance(interval, timedelta), type(interval)
         assert interval.total_seconds() > 0
+
         self._interval = interval
+        super()._set_next_base(interval)
+
+        self._update_run_time()
         return self
 
 
@@ -29,14 +33,17 @@ class DayOfWeekScheduledCallback(ScheduledCallbackBase):
 
     def __init__(self, callback, *args, **kwargs):
         super().__init__(callback, *args, **kwargs)
-        self._time: time = None
-        self._weekdays: typing.Set[int] = None
+        self._time: time
+        self._weekdays: typing.Set[int]
 
-    def set_next_run_time(self, _time: time) -> 'DayOfWeekScheduledCallback':
-        assert isinstance(_time, time), type(_time)
-        self._time = _time
-        super().set_next_run_time(_time)
+    def time(self, _time: typing.Union[time, datetime]) -> 'DayOfWeekScheduledCallback':
+        super()._set_next_base(_time)
 
+        self._time = _time if isinstance(_time, time) else _time.time()
+
+        # it is possible that the current day is not in the weekdays -> find next correct day
+        # it's also why we don't have to call _update_run_time here
+        self._calculate_next_call(add_day=False)
         return self
 
     def weekdays(self, weekdays) -> 'DayOfWeekScheduledCallback':
@@ -49,11 +56,11 @@ class DayOfWeekScheduledCallback(ScheduledCallbackBase):
         self._weekdays = weekdays
         return self
 
-    def _calculate_next_call(self):
+    def _calculate_next_call(self, add_day=True):
 
         # we have to do it like this so the dst-change works,
         # otherwise we have the wrong hour after the change
-        next_date = self._next_base.date() + timedelta(days=1)
+        next_date = (self._next_base.date() + timedelta(days=1)) if add_day else self._next_base.date()
         loc = datetime.combine(next_date, self._time, tzinfo=local_tz)
 
         while not loc.isoweekday() in self._weekdays:

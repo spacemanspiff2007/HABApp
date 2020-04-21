@@ -18,14 +18,12 @@ class SunScheduledCallback(ScheduledCallbackBase):
         assert trig in ('sunrise', 'sunset', 'dusk', 'dawn'), trig
         self._method = trig
 
-    def set_next_run_time(self, date_time: TYPING_DATE_TIME) -> 'ScheduledCallbackBase':
-        raise NotImplementedError()
-
     def _calculate_next_call(self):
         func = getattr(sun, self._method)
         observer = HABApp.config.CONFIG.location.astral_observer
 
         dt = datetime.now().date()
+        # the datetime from astral has the proper timezone set so we don't have to do anything here
         self._next_base: datetime = func(observer=observer, date=dt).replace(microsecond=0)
         self._update_run_time()
 

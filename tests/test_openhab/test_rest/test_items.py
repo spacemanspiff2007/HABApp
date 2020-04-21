@@ -10,26 +10,13 @@ def test_item_1():
             "pattern": "MAP(de.map):%s",
             "readOnly": True,
             "options": [
-                {
-                    "value": "OPEN",
-                    "label": "Open"
-                },
-                {
-                    "value": "CLOSED",
-                    "label": "Closed"
-                }
-            ]
+                {"value": "OPEN", "label": "Open"},
+                {"value": "CLOSED", "label": "Closed"}]
         },
         "commandDescription": {
             "commandOptions": [
-                {
-                    "command": "OPEN",
-                    "label": "Open"
-                },
-                {
-                    "command": "CLOSED",
-                    "label": "Closed"
-                }
+                {"command": "OPEN", "label": "Open"},
+                {"command": "CLOSED", "label": "Closed"}
             ]
         },
         "editable": False,
@@ -37,10 +24,7 @@ def test_item_1():
         "name": "Item1Name",
         "label": "Item1Label",
         "tags": [],
-        "groupNames": [
-            "Group1",
-            "Group2"
-        ]
+        "groupNames": ["Group1", "Group2"]
     }
     item = OpenhabItemDefinition.parse_obj(_in)  # type: OpenhabItemDefinition
 
