@@ -4,6 +4,7 @@ import logging
 import traceback
 import typing
 
+import urllib
 import aiohttp
 from aiohttp.client import ClientResponse
 from aiohttp_sse_client import client as sse_client
@@ -319,6 +320,47 @@ class HttpConnection:
             return {}
         else:
             return await ret.json(encoding='utf-8')
+
+    async def async_remove_link(self, item_name, thing_UID, channel) -> bool:
+        if self.config.general.listen_only:
+            return False
+
+        # rest/links/ endpoint needs the channel to be url encoded (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        channelUID = urllib.parse.quote(thing_UID + ":" + channel)
+        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}',item=item_name,channel=channelUID)
+        
+        fut = self.__session.delete(url,json={})
+        
+        ret = await self._check_http_response(fut)
+        return ret.status == 200
+
+    async def async_link_exists(self, item_name, thing_UID, channel) -> bool:
+        # rest/links/ endpoint needs the channel to be url encoded (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        channelUID = urllib.parse.quote(thing_UID + ":" + channel)
+        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}',item=item_name,channel=channelUID)
+        
+        fut = self.__session.get(url,json={})
+
+        ret = await self._check_http_response(fut)
+        return ret.status == 200
+
+    async def async_add_link(self, item_name, thing_UID, channel) -> bool:
+        if self.config.general.listen_only:
+            return False
+
+        # check for item existence first, otherwhise OpenHAB creates a new item when we add a link with an unknown itemname
+        exists = await self.async_item_exists(item_name)        
+        if not exists:
+            return False
+        
+        # rest/links/ endpoint needs the channel to be url encoded (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        channelUID = urllib.parse.quote(thing_UID + ":" + channel)
+        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}',item=item_name,channel=channelUID)
+        
+        fut = self.__session.put(url,json={})
+
+        ret = await self._check_http_response(fut)
+        return ret.status == 200
 
     async def async_create_item(self, item_type, name, label="", category="", tags=[], groups=[],
                                 group_type=None, group_function=None, group_function_params=[]) -> bool:
