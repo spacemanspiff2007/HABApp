@@ -107,17 +107,17 @@ def test_boundary():
 
     now = datetime.now()
     s.interval(timedelta(seconds=15))
-    assert s.get_next_call() == now + timedelta(seconds=15)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=15))
 
     def b_func(d: datetime):
         return d + timedelta(seconds=15)
 
     s.boundary_func(b_func)
-    assert s.get_next_call() == now + timedelta(seconds=30)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=30))
 
     # offset etc comes after the custom function
     s.offset(timedelta(seconds=-10))
-    assert s.get_next_call() == now + timedelta(seconds=20)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=20))
 
 
 def test_boundary_func():
@@ -126,11 +126,11 @@ def test_boundary_func():
 
     now = datetime.now()
     s.interval(timedelta(seconds=15))
-    assert s.get_next_call() == now + timedelta(seconds=15)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=15))
 
     def b_func(d: datetime):
         s.offset(timedelta(seconds=15))
         return d
 
     s.boundary_func(b_func)
-    assert s.get_next_call() == now + timedelta(seconds=30)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=30))
