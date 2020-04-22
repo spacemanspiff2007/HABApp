@@ -3,7 +3,7 @@ from datetime import datetime, time, timedelta
 
 from pytz import utc
 
-from .base import ScheduledCallbackBase, local_tz
+from .base import ScheduledCallbackBase
 
 
 class ReoccurringScheduledCallback(ScheduledCallbackBase):
