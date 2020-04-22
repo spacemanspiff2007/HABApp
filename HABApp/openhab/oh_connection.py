@@ -249,7 +249,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 continue
 
             if thing.configuration is None:
-                log.error(f'Thing can not be configured!')
+                log.error('Thing can not be configured!')
                 continue
 
             cfg = ThingConfigChanger.from_dict(thing.configuration)
@@ -264,7 +264,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
             if not keys_ok:
                 # show list with available entries
-                log.error(f'   Available:')
+                log.error('   Available:')
                 for k, v in sorted(filter(lambda x: isinstance(x[0], str), cfg.items())):
                     if k.startswith('action_') or k in ('node_id', 'wakeup_node'):
                         continue

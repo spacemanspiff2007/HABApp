@@ -28,6 +28,11 @@ class StateDescriptionDefinition(BaseModel):
     options: Optional[List[StateOptionDefinition]]
 
 
+class GroupFunctionDefinition(BaseModel):
+    name: str
+    params: List[str]
+
+
 class OpenhabItemDefinition(BaseModel):
     type: str
     name: str
@@ -46,7 +51,7 @@ class OpenhabItemDefinition(BaseModel):
 
     # Group only fields
     group_type: Optional[str] = Field(alias='groupType')
-    group_function: Optional[Dict[str, str]] = Field(alias='function')
+    group_function: Optional[GroupFunctionDefinition] = Field(alias='function')
 
 
 OpenhabItemDefinition.update_forward_refs()

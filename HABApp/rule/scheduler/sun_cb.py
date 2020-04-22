@@ -4,7 +4,6 @@ from astral import sun
 from pytz import utc
 
 import HABApp
-from . import TYPING_DATE_TIME
 from .base import ScheduledCallbackBase
 
 

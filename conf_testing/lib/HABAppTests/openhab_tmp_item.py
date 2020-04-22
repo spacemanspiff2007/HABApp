@@ -23,7 +23,7 @@ class OpenhabTmpItem:
         while not HABApp.core.Items.item_exists(self.item_name):
             time.sleep(0.01)
             if time.time() > stop:
-                raise TimeoutError(f'Item was not found!')
+                raise TimeoutError(f'Item {self.item_name} was not found!')
 
         return HABApp.openhab.items.OpenhabItem.get_item(self.item_name)
 

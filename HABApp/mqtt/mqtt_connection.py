@@ -95,7 +95,7 @@ class MqttConnection:
 
         if self.subscriptions:
             unsubscribe = [k[0] for k in self.subscriptions]
-            log.debug(f'Unsubscribing from:')
+            log.debug('Unsubscribing from:')
             for t in unsubscribe:
                 log.debug(f' - "{t}"')
             self.client.unsubscribe(unsubscribe)
@@ -103,7 +103,7 @@ class MqttConnection:
         topics = self.__config.subscribe.topics
         default_qos = self.__config.subscribe.qos
         self.subscriptions = [(topic, qos if qos is not None else default_qos) for topic, qos in topics]
-        log.debug(f'Subscribing to:')
+        log.debug('Subscribing to:')
         for topic, qos in self.subscriptions:
             log.debug(f' - "{topic}" (QoS {qos:d})')
         self.client.subscribe(self.subscriptions)

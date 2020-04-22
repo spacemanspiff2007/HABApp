@@ -343,7 +343,7 @@ class HttpConnection:
             payload['function'] = {}
             payload['function']['name'] = group_function
             if group_function_params:
-                payload['function']['params'] = group_function
+                payload['function']['params'] = group_function_params
 
         fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', name), json=payload)
         ret = await self._check_http_response(fut, payload)

@@ -22,10 +22,10 @@ class TestOpenhabInterface(TestBaseRule):
             self.add_test( f'post_update {oh_type}', self.test_post_update, oh_type, get_openhab_test_states(oh_type))
 
         # test json post
-        self.add_test(f'post_update (by_json)', self.test_umlaute)
-        self.add_test(f'test_item_not_found', self.test_openhab_item_not_found)
-        self.add_test(f'Interface Metadata', self.test_metadata)
-        self.add_test(f'Test async order', self.test_async_oder)
+        self.add_test('post_update (by_json)', self.test_umlaute)
+        self.add_test('test_item_not_found', self.test_openhab_item_not_found)
+        self.add_test('Interface Metadata', self.test_metadata)
+        self.add_test('Test async order', self.test_async_oder)
 
     def test_item_exists(self):
         assert not self.openhab.item_exists('item_which_does_not_exist')

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import HABApp
 
-log = logging.getLogger(f'HABApp.Rules')
+log = logging.getLogger('HABApp.Rules')
 
 
 class RuleFile:

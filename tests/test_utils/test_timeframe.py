@@ -49,7 +49,7 @@ class Basic(unittest.TestCase):
                 self.assertEqual(t.is_now(), False)
 
     def test_all_days(self):
-        t = TimeFrame(f'8:30:00-9:31')
+        t = TimeFrame('8:30:00-9:31')
         for d in self.all_days:
             HABApp.util.timeframe._TIME_FUNC = lambda: get_date(d, 8, 30, 1)
             self.assertEqual(t.is_now(), True)

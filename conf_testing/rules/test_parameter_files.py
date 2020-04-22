@@ -8,7 +8,7 @@ log = logging.getLogger('HABApp.TestParameterFiles')
 # User Parameter files to create rules dynamically
 try:
     assert HABApp.Parameter('param_file', 'key') == 10, \
-        f'Loading of Parameters does not work properly'
+        'Loading of Parameters does not work properly'
 except Exception as e:
     log.error(e)
     log.error(HABApp.Parameter('param_file', 'key'))
