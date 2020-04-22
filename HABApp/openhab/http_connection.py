@@ -321,30 +321,34 @@ class HttpConnection:
         else:
             return await ret.json(encoding='utf-8')
 
-    async def async_remove_link(self, item_name, thing_UID, channel) -> bool:
+    async def async_thing_remove_link(self, thing_uid: str, channel: str, item_name: str) -> bool:
         if self.config.general.listen_only:
             return False
 
-        # rest/links/ endpoint needs the channel to be url encoded (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
-        channelUID = urllib.parse.quote(thing_UID + ":" + channel)
-        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}',item=item_name,channel=channelUID)
+        # rest/links/ endpoint needs the channel to be url encoded 
+        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
+        channel_uid = urllib.parse.quote(f"{thing_uid}:{channel}")
+        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
         
-        fut = self.__session.delete(url,json={})
+        fut = self.__session.delete(url, json={})
         
         ret = await self._check_http_response(fut)
         return ret.status == 200
 
-    async def async_link_exists(self, item_name, thing_UID, channel) -> bool:
-        # rest/links/ endpoint needs the channel to be url encoded (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
-        channelUID = urllib.parse.quote(thing_UID + ":" + channel)
-        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}',item=item_name,channel=channelUID)
+    async def async_thing_link_exists(self, thing_uid: str, channel: str, item_name: str) -> bool:
+        # rest/links/ endpoint needs the channel to be url encoded 
+        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
+        channel_uid = urllib.parse.quote(f"{thing_uid}:{channel}")
+        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
         
         fut = self.__session.get(url,json={})
 
-        ret = await self._check_http_response(fut)
+        ret = await self._check_http_response(fut, accept_404=True)
         return ret.status == 200
 
-    async def async_add_link(self, item_name, thing_UID, channel) -> bool:
+    async def async_thing_add_link(self, thing_uid: str, channel: str, item_name: str) -> bool:
         if self.config.general.listen_only:
             return False
 
@@ -353,11 +357,13 @@ class HttpConnection:
         if not exists:
             return False
         
-        # rest/links/ endpoint needs the channel to be url encoded (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
-        channelUID = urllib.parse.quote(thing_UID + ":" + channel)
-        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}',item=item_name,channel=channelUID)
+        # rest/links/ endpoint needs the channel to be url encoded 
+        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
+        channel_uid = urllib.parse.quote(f"{thing_uid}:{channel}")
+        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
         
-        fut = self.__session.put(url,json={})
+        fut = self.__session.put(url, json={})
 
         ret = await self._check_http_response(fut)
         return ret.status == 200
