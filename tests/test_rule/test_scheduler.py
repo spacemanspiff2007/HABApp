@@ -1,9 +1,9 @@
-import HABApp
 import unittest.mock
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, time, timedelta
 
 from pytz import utc
 
+import HABApp
 from HABApp.rule import scheduler
 
 
@@ -35,20 +35,20 @@ def test_workday():
     s.weekdays('workday')
     s.time(datetime(year=2000, month=12, day=30, hour=12))
 
-    assert s._next_call.date() == date(2001, 1, 1)
+    assert s.get_next_call() == datetime(2001, 1, 1, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 2)
+    assert s.get_next_call() == datetime(2001, 1, 2, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 3)
+    assert s.get_next_call() == datetime(2001, 1, 3, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 4)
+    assert s.get_next_call() == datetime(2001, 1, 4, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 5)
+    assert s.get_next_call() == datetime(2001, 1, 5, 12)
 
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 8)
+    assert s.get_next_call() == datetime(2001, 1, 8, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 9)
+    assert s.get_next_call() == datetime(2001, 1, 9, 12)
 
 
 def test_weekend():
@@ -58,19 +58,19 @@ def test_weekend():
     s.weekdays('weekend')
     s.time(datetime(year=2001, month=1, day=1, hour=12))
 
-    assert s._next_call.date() == date(2001, 1, 6)
+    assert s.get_next_call() == datetime(2001, 1, 6, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 7)
+    assert s.get_next_call() == datetime(2001, 1, 7, 12)
 
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 13)
+    assert s.get_next_call() == datetime(2001, 1, 13, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 14)
+    assert s.get_next_call() == datetime(2001, 1, 14, 12)
 
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 20)
+    assert s.get_next_call() == datetime(2001, 1, 20, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 21)
+    assert s.get_next_call() == datetime(2001, 1, 21, 12)
 
 
 def test_sun():
