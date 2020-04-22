@@ -61,11 +61,11 @@ class DayOfWeekScheduledCallback(ScheduledCallbackBase):
         # we have to do it like this so the dst-change works,
         # otherwise we have the wrong hour after the change
         next_date = (self._next_base.date() + timedelta(days=1)) if add_day else self._next_base.date()
-        loc = datetime.combine(next_date, self._time, tzinfo=local_tz)
+        loc = datetime.combine(next_date, self._time)
 
         while not loc.isoweekday() in self._weekdays:
             next_date += timedelta(days=1)
-            loc = datetime.combine(next_date, self._time, tzinfo=local_tz)
+            loc = datetime.combine(next_date, self._time)
 
         self._next_base = loc.astimezone(utc)
         self._update_run_time()
