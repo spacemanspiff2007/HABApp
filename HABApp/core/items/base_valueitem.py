@@ -102,3 +102,123 @@ class BaseValueItem(BaseItem):
         if not isinstance(self.value, (int, float)):
             return NotImplemented
         return self.value > other
+
+    # https://docs.python.org/3/reference/datamodel.html#emulating-numeric-types
+    def __add__(self, other):
+        return self.value.__add__(other)
+    
+    def __sub__(self, other):
+        return self.value.__sub__(other)
+    
+    def __mul__(self, other):
+        return self.value.__mul__(other)
+    
+    def __matmul__(self, other):
+        return self.value.__matmul__(other)
+    
+    def __truediv__(self, other):
+        return self.value.__truediv__(other)
+    
+    def __floordiv__(self, other):
+        return self.value.__floordiv__(other)
+    
+    def __mod__(self, other):
+        return self.value.__mod__(other)
+    
+    def __divmod__(self, other):
+        return self.value.__divmod__(other)
+    
+    def __pow__(self, other):
+        return self.value.__pow__(other)
+    
+    def __lshift__(self, other):
+        return self.value.__lshift__(other)
+    
+    def __rshift__(self, other):
+        return self.value.__rshift__(other)
+    
+    def __and__(self, other):
+        return self.value.__and__(other)
+    
+    def __xor__(self, other):
+        return self.value.__xor__(other)
+    
+    def __or__(self, other):
+        return self.value.__or__(other)
+
+    # Unary arithmetic operations (-, +, abs() and ~).
+    def __neg__(self, other):
+        return self.value.__neg__(other)
+
+    def __pos__(self, other):
+        return self.value.__pos__(other)
+
+    def __abs__(self, other):
+        return self.value.__abs__(other)
+
+    def __invert__(self, other):
+        return self.value.__invert__(other)
+
+    # built-in functions complex(), int() and float().
+    def __complex__(self, other):
+        return self.value.__complex__(other)
+
+    def __int__(self, other):
+        return self.value.__int__(other)
+
+    def __float__(self, other):
+        return self.value.__float__(other)
+
+    # built-in function round() and math functions trunc(), floor() and ceil().
+    def __round__(self, other):
+        return self.value.__round__(other)
+
+    def __trunc__(self, other):
+        return self.value.__trunc__(other)
+
+    def __floor__(self, other):
+        return self.value.__floor__(other)
+
+    def __ceil__(self, other):
+        return self.value.__ceil__(other)
+
+    # we don't support modification in place! We have to override this because otherwise
+    # python falls back to the methods above
+    def __iadd__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __isub__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __imul__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __imatmul__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __itruediv__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __ifloordiv__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __imod__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __ipow__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __ilshift__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __irshift__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __iand__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __ixor__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')
+
+    def __ior__(self, other):
+        return PermissionError('Call not allowed! Use "set_value" or "post_value"')

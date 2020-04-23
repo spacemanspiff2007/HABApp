@@ -1,5 +1,6 @@
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition
 
+
 def test_or():
     _in = {
         "channelUID": "zwave:device:controller:node15:sensor_luminance",
