@@ -77,14 +77,16 @@ class HttpConnection:
     def __get_openhab_url(self, url: str, *args, **kwargs) -> str:
         assert not url.startswith('/')
         url = url.format(*args, **kwargs)
-
-        if url.startswith("rest/links/"):
-            # rest/links/ endpoint needs the channel to be url encoded 
-            # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
-            # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-            url = urllib.parse.quote(url)
-
+        
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
+
+    def __get_link_url(self, thing_uid: str, channel: str, item_name: str) -> str:
+        # rest/links/ endpoint needs the channel to be url encoded 
+        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
+        link_url = urllib.parse.quote(f"{item_name}/{thing_uid}:{channel}")
+
+        return self.__get_openhab_url('rest/links/{link_url:s}', link_url=link_url)
 
     def __set_offline(self, log_msg=''):
 
@@ -333,19 +335,13 @@ class HttpConnection:
         if self.config.general.listen_only:
             return False
 
-        channel_uid = f"{thing_uid}:{channel}"
-        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
-        
-        fut = self.__session.delete(url, json={})
+        fut = self.__session.delete(self.__get_link_url(thing_uid, channel, item_name), json={})
         
         ret = await self._check_http_response(fut)
         return ret.status == 200
 
     async def async_thing_link_exists(self, thing_uid: str, channel: str, item_name: str) -> bool:        
-        channel_uid = f"{thing_uid}:{channel}"
-        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
-        
-        fut = self.__session.get(url,json={})
+        fut = self.__session.get(self.__get_link_url(thing_uid, channel, item_name), json={})
 
         ret = await self._check_http_response(fut, accept_404=True)
         return ret.status == 200
@@ -359,10 +355,7 @@ class HttpConnection:
         if not exists:
             raise ItemNotFoundException(f'Item "{item_name}" does not exist')
         
-        channel_uid = f"{thing_uid}:{channel}"
-        url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
-        
-        fut = self.__session.put(url, json={})
+        fut = self.__session.put(self.__get_link_url(thing_uid, channel, item_name), json={})
 
         ret = await self._check_http_response(fut)
         return ret.status == 200
