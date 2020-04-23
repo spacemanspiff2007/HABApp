@@ -12,6 +12,7 @@ from aiohttp_sse_client import client as sse_client
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
+from HABApp.core.Items import ItemNotFoundException
 from HABApp.config import Openhab as OpenhabConfig
 from HABApp.core.const.json import dump_json, load_json
 from .definitions.rest import OpenhabThingDefinition, ThingNotEditableError, ThingNotFoundError
@@ -76,6 +77,13 @@ class HttpConnection:
     def __get_openhab_url(self, url: str, *args, **kwargs) -> str:
         assert not url.startswith('/')
         url = url.format(*args, **kwargs)
+
+        if url.startswith("rest/links/"):
+            # rest/links/ endpoint needs the channel to be url encoded 
+            # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+            # otherwise the REST-api returns HTTP-Status 500 InternalServerError
+            url = urllib.parse.quote(url)
+
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
 
     def __set_offline(self, log_msg=''):
@@ -325,10 +333,7 @@ class HttpConnection:
         if self.config.general.listen_only:
             return False
 
-        # rest/links/ endpoint needs the channel to be url encoded 
-        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
-        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-        channel_uid = urllib.parse.quote(f"{thing_uid}:{channel}")
+        channel_uid = f"{thing_uid}:{channel}"
         url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
         
         fut = self.__session.delete(url, json={})
@@ -336,11 +341,8 @@ class HttpConnection:
         ret = await self._check_http_response(fut)
         return ret.status == 200
 
-    async def async_thing_link_exists(self, thing_uid: str, channel: str, item_name: str) -> bool:
-        # rest/links/ endpoint needs the channel to be url encoded 
-        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
-        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-        channel_uid = urllib.parse.quote(f"{thing_uid}:{channel}")
+    async def async_thing_link_exists(self, thing_uid: str, channel: str, item_name: str) -> bool:        
+        channel_uid = f"{thing_uid}:{channel}"
         url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
         
         fut = self.__session.get(url,json={})
@@ -355,12 +357,9 @@ class HttpConnection:
         # check for item existence first, otherwhise OpenHAB creates a new item when we add a link with an unknown itemname
         exists = await self.async_item_exists(item_name)        
         if not exists:
-            return False
+            raise ItemNotFoundException(f'Item "{item_name}" does not exist')
         
-        # rest/links/ endpoint needs the channel to be url encoded 
-        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
-        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-        channel_uid = urllib.parse.quote(f"{thing_uid}:{channel}")
+        channel_uid = f"{thing_uid}:{channel}"
         url = self.__get_openhab_url('rest/links/{item:s}/{channel:s}', item=item_name, channel=channel_uid)
         
         fut = self.__session.put(url, json={})
