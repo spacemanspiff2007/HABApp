@@ -104,83 +104,112 @@ class BaseValueItem(BaseItem):
         return self.value > other
 
     # https://docs.python.org/3/reference/datamodel.html#emulating-numeric-types
+    # These methods are called to implement the binary arithmetic operations
     def __add__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__add__(other.value)
         return self.value.__add__(other)
-    
+
     def __sub__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__sub__(other.value)
         return self.value.__sub__(other)
-    
+
     def __mul__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__mul__(other.value)
         return self.value.__mul__(other)
-    
+
     def __matmul__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__matmul__(other.value)
         return self.value.__matmul__(other)
-    
+
     def __truediv__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__truediv__(other.value)
         return self.value.__truediv__(other)
-    
+
     def __floordiv__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__floordiv__(other.value)
         return self.value.__floordiv__(other)
-    
+
     def __mod__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__mod__(other.value)
         return self.value.__mod__(other)
-    
+
     def __divmod__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__divmod__(other.value)
         return self.value.__divmod__(other)
-    
+
     def __pow__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__pow__(other.value)
         return self.value.__pow__(other)
-    
+
     def __lshift__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__lshift__(other.value)
         return self.value.__lshift__(other)
-    
+
     def __rshift__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__rshift__(other.value)
         return self.value.__rshift__(other)
-    
+
     def __and__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__and__(other.value)
         return self.value.__and__(other)
-    
+
     def __xor__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__xor__(other.value)
         return self.value.__xor__(other)
-    
+
     def __or__(self, other):
+        if isinstance(other, BaseValueItem):
+            return self.value.__or__(other.value)
         return self.value.__or__(other)
 
     # Unary arithmetic operations (-, +, abs() and ~).
-    def __neg__(self, other):
-        return self.value.__neg__(other)
+    def __neg__(self):
+        return self.value.__neg__()
 
-    def __pos__(self, other):
-        return self.value.__pos__(other)
+    def __pos__(self):
+        return self.value.__pos__()
 
-    def __abs__(self, other):
-        return self.value.__abs__(other)
+    def __abs__(self):
+        return self.value.__abs__()
 
-    def __invert__(self, other):
-        return self.value.__invert__(other)
+    def __invert__(self):
+        return self.value.__invert__()
 
     # built-in functions complex(), int() and float().
-    def __complex__(self, other):
-        return self.value.__complex__(other)
+    def __complex__(self):
+        return self.value.__complex__()
 
-    def __int__(self, other):
-        return self.value.__int__(other)
+    def __int__(self):
+        return self.value.__int__()
 
-    def __float__(self, other):
-        return self.value.__float__(other)
+    def __float__(self):
+        return self.value.__float__()
 
     # built-in function round() and math functions trunc(), floor() and ceil().
-    def __round__(self, other):
-        return self.value.__round__(other)
+    def __round__(self, ndigits=None):
+        return self.value.__round__(ndigits)
 
-    def __trunc__(self, other):
-        return self.value.__trunc__(other)
+    def __trunc__(self):
+        return self.value.__trunc__()
 
-    def __floor__(self, other):
-        return self.value.__floor__(other)
+    def __floor__(self):
+        return self.value.__floor__()
 
-    def __ceil__(self, other):
-        return self.value.__ceil__(other)
+    def __ceil__(self):
+        return self.value.__ceil__()
 
     # we don't support modification in place! We have to override this because otherwise
     # python falls back to the methods above
