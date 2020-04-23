@@ -30,7 +30,7 @@ class StateDescriptionDefinition(BaseModel):
 
 class GroupFunctionDefinition(BaseModel):
     name: str
-    params: List[str]
+    params: Optional[List[str]]
 
 
 class OpenhabItemDefinition(BaseModel):
