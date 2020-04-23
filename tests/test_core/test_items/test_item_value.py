@@ -1,5 +1,5 @@
 from HABApp.core.items import BaseValueItem
-
+from math import trunc, floor, ceil
 
 def test_numeric():
     a = BaseValueItem('asdf', 1)
@@ -12,6 +12,15 @@ def test_numeric():
 
     assert a + b == 6
     assert a - b == -4
+
+
+def test_built_in():
+    a = BaseValueItem('asdf', 1.49)
+    assert round(a, 1) == 1.5
+    assert round(a) == 1
+    
+    assert floor(a) == 1
+    assert ceil(a) == 2
 
 
 def test_unary():

@@ -1,12 +1,12 @@
 import datetime
-import typing
 import logging
+import typing
+from math import ceil, floor
 
 from pytz import utc
 
 import HABApp
 from .base_item import BaseItem
-
 
 log = logging.getLogger('HABApp')
 
@@ -206,10 +206,10 @@ class BaseValueItem(BaseItem):
         return self.value.__trunc__()
 
     def __floor__(self):
-        return self.value.__floor__()
+        return floor(self.value)
 
     def __ceil__(self):
-        return self.value.__ceil__()
+        return ceil(self.value)
 
     # we don't support modification in place! We have to override this because otherwise
     # python falls back to the methods above
