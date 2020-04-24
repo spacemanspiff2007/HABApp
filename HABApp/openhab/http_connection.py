@@ -16,6 +16,7 @@ from HABApp.core.Items import ItemNotFoundException
 from HABApp.config import Openhab as OpenhabConfig
 from HABApp.core.const.json import dump_json, load_json
 from .definitions.rest import OpenhabThingDefinition, ThingNotEditableError, ThingNotFoundError
+from .definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
@@ -80,11 +81,11 @@ class HttpConnection:
         
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
 
-    def __get_link_url(self, thing_uid: str, channel: str, item_name: str) -> str:
+    def __get_link_url(self, channel_uid: str, item_name: str) -> str:
         # rest/links/ endpoint needs the channel to be url encoded 
         # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
         # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-        link_url = urllib.parse.quote(f"{item_name}/{thing_uid}:{channel}")
+        link_url = urllib.parse.quote(f"{item_name}/{channel_uid}")
 
         return self.__get_openhab_url('rest/links/{link_url:s}', link_url=link_url)
 
@@ -128,7 +129,7 @@ class HttpConnection:
             raise
 
         # Server Errors if openhab is not ready yet
-        if resp.status >= 500:
+        if resp.status >= 500:            
             self.__set_offline(f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}')
             raise OpenhabNotReadyYet()
 
@@ -274,7 +275,6 @@ class HttpConnection:
         asyncio.ensure_future(self._check_http_response(fut, additional_info=state))
 
     async def async_remove_item(self, item_name) -> bool:
-
         if self.config.general.listen_only:
             return False
 
@@ -331,31 +331,42 @@ class HttpConnection:
         else:
             return await ret.json(encoding='utf-8')
 
-    async def async_thing_remove_link(self, thing_uid: str, channel: str, item_name: str) -> bool:
+    async def async_thing_remove_link(self, link_def: ItemChannelLinkDefinition) -> bool:
         if self.config.general.listen_only:
             return False
 
-        fut = self.__session.delete(self.__get_link_url(thing_uid, channel, item_name), json={})
+        fut = self.__session.delete(self.__get_link_url(link_def.channel_uid, link_def.item_name))
         
         ret = await self._check_http_response(fut)
         return ret.status == 200
 
-    async def async_thing_link_exists(self, thing_uid: str, channel: str, item_name: str) -> bool:        
-        fut = self.__session.get(self.__get_link_url(thing_uid, channel, item_name), json={})
+    async def async_thing_get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+        fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
+        ret = await self._check_http_response(fut, accept_404=True)
+        if ret.status == 404:
+            raise LinkNotFoundError(f'Link {item_name} -> {channel_uid} not found!')
+        if ret.status >= 300:
+            return None
+        else:
+            return ItemChannelLinkDefinition.parse_obj(await ret.json(encoding='utf-8'))
+
+    async def async_thing_link_exists(self, channel_uid: str, item_name: str) -> bool:
+        fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
 
         ret = await self._check_http_response(fut, accept_404=True)
         return ret.status == 200
 
-    async def async_thing_add_link(self, thing_uid: str, channel: str, item_name: str) -> bool:
+    async def async_thing_add_link(self, link_def: ItemChannelLinkDefinition) -> bool:
         if self.config.general.listen_only:
             return False
 
         # check for item existence first, otherwhise OpenHAB creates a new item when we add a link with an unknown itemname
-        exists = await self.async_item_exists(item_name)        
+        exists = await self.async_item_exists(link_def.item_name)
         if not exists:
-            raise ItemNotFoundException(f'Item "{item_name}" does not exist')
-        
-        fut = self.__session.put(self.__get_link_url(thing_uid, channel, item_name), json={})
+            raise ItemNotFoundException(f'Item "{link_def.item_name}" does not exist')
+
+        url = self.__get_link_url(link_def.channel_uid,link_def.item_name)
+        fut = self.__session.put(self.__get_link_url(link_def.channel_uid,link_def.item_name), json=link_def.dict(by_alias=True))
 
         ret = await self._check_http_response(fut)
         return ret.status == 200
