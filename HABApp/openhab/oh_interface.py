@@ -214,26 +214,28 @@ class OpenhabInterface:
         data = fut.result()
         return OpenhabItemDefinition.parse_obj(data)
 
-    def thing_get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
-        """ returns the ItemChannelLinkDefinition for a link between a things channel and an item
+    def get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+        """ returns the ItemChannelLinkDefinition for a link between a (things) channel and an item
 
-        :param channel_uid: uid of the channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
+        :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
         :param item_name: name of the item
+        :return: an instance of ItemChannelLinkDefinition or None on error
         """
 
         assert isinstance(channel_uid, str), type(channel_uid)
         assert isinstance(item_name, str), type(item_name)
 
         fut = asyncio.run_coroutine_threadsafe(
-            self.__connection.async_thing_get_link(channel_uid, item_name),
+            self.__connection.async_get_link(channel_uid, item_name),
             loop
         )
         return fut.result()
 
-    def thing_add_link(self, link_def: ItemChannelLinkDefinition) -> bool:
-        """ adds a link between a things channel and an item
+    def create_link(self, link_def: ItemChannelLinkDefinition) -> bool:
+        """ creates a link between a (things) channel and an item
 
         :param link_def: an instance of ItemChannelLinkDefinition with at least channel_uid and item_name set
+        :return: true on successful creation, otherwise false
         """
 
         assert isinstance(link_def, ItemChannelLinkDefinition), type(link_def)
@@ -241,38 +243,40 @@ class OpenhabInterface:
         assert isinstance(link_def.channel_uid, str), type(link_def.channel_uid)
 
         fut = asyncio.run_coroutine_threadsafe(
-            self.__connection.async_thing_add_link(link_def),
+            self.__connection.async_create_link(link_def),
             loop
         )
         return fut.result()
 
-    def thing_remove_link(self, channel_uid: str, item_name: str) -> bool:
-        """ removes a link between a things channel and an item
+    def remove_link(self, channel_uid: str, item_name: str) -> bool:
+        """ removes a link between a (things) channel and an item
 
-        :param channel_uid: uid of the channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
+        :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
         :param item_name: name of the item
+        :return: true on successful removal, otherwise false
         """
 
         link = ItemChannelLinkDefinition(itemName=item_name, channelUID=channel_uid)
 
         fut = asyncio.run_coroutine_threadsafe(
-            self.__connection.async_thing_remove_link(link),
+            self.__connection.async_remove_link(link),
             loop
         )
         return fut.result()
 
-    def thing_link_exists(self, channel_uid: str, item_name: str) -> bool:
+    def link_exists(self, channel_uid: str, item_name: str) -> bool:
         """ check if a things channel is linked to an item
 
         :param channel_uid: uid of the linked channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
         :param item_name: name of the linked item
+        :return: true when the link exists, otherwise false
         """
 
         assert isinstance(channel_uid, str), type(channel_uid)
         assert isinstance(item_name, str), type(item_name)
 
         fut = asyncio.run_coroutine_threadsafe(
-            self.__connection.async_thing_link_exists(channel_uid, item_name),
+            self.__connection.async_link_exists(channel_uid, item_name),
             loop
         )
         return fut.result()

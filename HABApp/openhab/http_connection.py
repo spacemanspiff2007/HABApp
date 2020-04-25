@@ -331,7 +331,7 @@ class HttpConnection:
         else:
             return await ret.json(encoding='utf-8')
 
-    async def async_thing_remove_link(self, link_def: ItemChannelLinkDefinition) -> bool:
+    async def async_remove_link(self, link_def: ItemChannelLinkDefinition) -> bool:
         if self.config.general.listen_only:
             return False
 
@@ -340,7 +340,7 @@ class HttpConnection:
         ret = await self._check_http_response(fut)
         return ret.status == 200
 
-    async def async_thing_get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+    async def async_get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
         fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
         ret = await self._check_http_response(fut, accept_404=True)
         if ret.status == 404:
@@ -350,13 +350,13 @@ class HttpConnection:
         else:
             return ItemChannelLinkDefinition.parse_obj(await ret.json(encoding='utf-8'))
 
-    async def async_thing_link_exists(self, channel_uid: str, item_name: str) -> bool:
+    async def async_link_exists(self, channel_uid: str, item_name: str) -> bool:
         fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
 
         ret = await self._check_http_response(fut, accept_404=True)
         return ret.status == 200
 
-    async def async_thing_add_link(self, link_def: ItemChannelLinkDefinition) -> bool:
+    async def async_create_link(self, link_def: ItemChannelLinkDefinition) -> bool:
         if self.config.general.listen_only:
             return False
 
