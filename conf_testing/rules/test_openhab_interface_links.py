@@ -5,23 +5,12 @@ from HABApp.openhab.items import Thing
 from conf_testing.lib.HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types
 
 class TestOpenhabInterfaceLinks(TestBaseRule):
-    astro_sun_thing: str
-    item_name: str
-    channel_uid: str
-
     def __init__(self):
         super().__init__()
 
-        self.item_name = "TestOpenhabInterfaceLinksItem"
-        self.channel_uid = f"{self.astro_sun_thing}:rise:duration"
-
-        self.astro_sun_thing = self.__find_astro_sun_thing()
-        if self.astro_sun_thing == "":
-            raise Exception("no astro:sun thing found")
-        
-        self.__create_test_item()
-        if not self.openhab.item_exists(self.item_name):
-            raise Exception("item could not be created")
+        self.item_name: str = ""
+        self.astro_sun_thing: str = ""
+        self.channel_uid: str = ""
 
         self.add_test(f"link creation", self.test_create_link)
         self.add_test(f"created link is gettable and equal", self.test_get_link)
@@ -34,7 +23,18 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
     def __get_link_def(self) -> ItemChannelLinkDefinition:
         return ItemChannelLinkDefinition(channelUID=self.channel_uid, itemName=self.item_name,
-                    configuration={"profile": "system:default"})
+                                         configuration={"profile": "system:default"})
+
+    def set_up(self):
+        self.item_name: str = "TestOpenhabInterfaceLinksItem"
+        self.astro_sun_thing: str = self.__find_astro_sun_thing()
+        if self.astro_sun_thing == "":
+            raise Exception("no astro:sun thing found")
+        self.channel_uid: str = f"{self.astro_sun_thing}:rise:duration"
+
+        self.__create_test_item()
+        if not self.openhab.item_exists(self.item_name):
+            raise Exception("item could not be created")
 
     def tear_down(self):
         if self.oh.link_exists(self.channel_uid, self.item_name):
@@ -50,48 +50,40 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
         return found_uid
 
-    def test_update_link(self):        
-        created = self.oh.create_link(self.__get_link_def())
-        assert created
+    def test_update_link(self):
+        assert self.oh.create_link(self.__get_link_def())
 
         changed_def = self.__get_link_def()
         changed_def.configuration["profile"] = "system:offset"
         changed_def.configuration["offset"] = 7.0
 
-        changed_created = self.oh.create_link(changed_def)
-        assert changed_created
+        assert self.oh.create_link(changed_def)
 
         assert self.oh.get_link(self.channel_uid, self.item_name) == changed_def
 
     def test_get_link(self):
-        self.oh.create_link(self.__get_link_def())
+        assert self.oh.create_link(self.__get_link_def())
         link = self.oh.get_link(self.channel_uid, self.item_name)
 
-        assert link is not None
         assert link == self.__get_link_def()
 
     def test_remove_link(self):
-        created = self.oh.create_link(self.__get_link_def())
-        assert created
-
-        removed = self.oh.remove_link(self.channel_uid, self.item_name)
-        assert removed
+        assert self.oh.create_link(self.__get_link_def())
+        
+        assert self.oh.remove_link(self.channel_uid, self.item_name)
 
         assert not self.oh.link_exists(self.channel_uid, self.item_name)
 
     def test_link_existence(self):
-        created = self.oh.create_link(self.__get_link_def())
-        assert created
+        assert self.oh.create_link(self.__get_link_def())
 
         assert self.oh.link_exists(self.channel_uid, self.item_name)
-        
-        removed = self.oh.remove_link(self.channel_uid, self.item_name)
-        assert removed
+
+        assert self.oh.remove_link(self.channel_uid, self.item_name)
 
         assert not self.oh.link_exists(self.channel_uid, self.item_name)
 
     def test_create_link(self):
-        created = self.oh.create_link(self.__get_link_def())
-        assert created
+        assert self.oh.create_link(self.__get_link_def())
 
 TestOpenhabInterfaceLinks()
