@@ -1,9 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseConfig, BaseModel, Extra, Field
-
-BaseConfig.extra = Extra.forbid
-BaseConfig.allow_population_by_field_name = True
+from pydantic import BaseModel, Field
 
 
 class StateOptionDefinition(BaseModel):

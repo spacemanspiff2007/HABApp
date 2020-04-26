@@ -34,8 +34,8 @@ version = ''
 # The full version, including alpha/beta/rc tags
 release = 'beta'
 try:
-    from HABApp.__version__ import __VERSION__
-    version = __VERSION__
+    from HABApp import __version__
+    version = __version__
     print( f'Building doc for {version}')
 except Exception as e:
     print('Exception', e)

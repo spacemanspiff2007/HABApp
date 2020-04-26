@@ -7,7 +7,7 @@ from pathlib import Path
 
 import ruamel.yaml
 
-from HABApp.__version__ import __VERSION__
+from HABApp import __version__
 from . import CONFIG
 from .default_logfile import get_default_logfile
 
@@ -138,5 +138,5 @@ class HABAppConfigLoader:
                     for l in lines[start:]:
                         log.error(l)
 
-        logging.getLogger('HABApp').info(f'HABApp Version {__VERSION__}')
+        logging.getLogger('HABApp').info(f'HABApp Version {__version__}')
         return None
