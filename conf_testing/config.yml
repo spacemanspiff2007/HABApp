@@ -3,11 +3,13 @@ directories:
   rules: rules
   lib: lib
   param: parameters
-  config: config  # Folder from which configuration files will be loaded
+  config: config
+
 location:
-  latitude: 52.52437
-  longitude: 13.41053
+  latitude: 52.5185537
+  longitude: 13.3758636
   elevation: 43
+
 mqtt:
   connection:
     client_id: HABApp
@@ -27,6 +29,7 @@ mqtt:
     - 0
   general:
     listen_only: false
+
 openhab:
   connection:
     host: localhost

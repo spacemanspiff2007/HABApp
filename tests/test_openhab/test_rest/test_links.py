@@ -1,7 +1,7 @@
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition
 
 
-def test_or():
+def test_simple():
     _in = {
         "channelUID": "zwave:device:controller:node15:sensor_luminance",
         "configuration": {},
@@ -10,3 +10,18 @@ def test_or():
     o = ItemChannelLinkDefinition.parse_obj(_in)  # type: ItemChannelLinkDefinition
     assert o.channel_uid == 'zwave:device:controller:node15:sensor_luminance'
     assert o.item_name == 'ZWaveItem1'
+
+
+def test_configuration():
+    _in = {
+        "channelUID": "zwave:device:controller:node15:sensor_luminance",
+        "configuration": {
+            'profile': 'follow',
+            'offset': 1,
+        },
+        "itemName": "ZWaveItem1"
+    }
+    o = ItemChannelLinkDefinition.parse_obj(_in)  # type: ItemChannelLinkDefinition
+    assert o.channel_uid == 'zwave:device:controller:node15:sensor_luminance'
+    assert o.item_name == 'ZWaveItem1'
+    assert o.configuration == {'profile': 'follow', 'offset': 1}

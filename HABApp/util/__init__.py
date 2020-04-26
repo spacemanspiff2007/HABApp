@@ -1,5 +1,3 @@
-from .timeframe import TimeFrame
-
 from .counter_item import CounterItem
 from .period_counter import PeriodCounter
 from .threshold import Threshold
