@@ -23,7 +23,7 @@ __event_lookup: typing.Dict[str, typing.Type[OpenhabEvent]] = {k.__name__: k for
 __event_lookup['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent    # Naming from openhab is inconsistent here
 
 
-def get_event(_in_dict : dict) -> OpenhabEvent:
+def get_event(_in_dict: dict) -> OpenhabEvent:
     event_type: str = _in_dict['type']
     topic: str = _in_dict['topic']
 
@@ -38,3 +38,5 @@ def get_event(_in_dict : dict) -> OpenhabEvent:
         return __event_lookup[event_type].from_dict(topic, payload)
     except KeyError:
         raise ValueError(f'Unknown Event: {event_type:s} for {_in_dict}')
+    except Exception as e:
+        raise ValueError(f'{e}\nCould not get event for\n{_in_dict}')
