@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 
 from pydantic import BaseModel, Field
 
@@ -6,4 +6,4 @@ from pydantic import BaseModel, Field
 class ItemChannelLinkDefinition(BaseModel):
     item_name: str = Field(alias='itemName')
     channel_uid: str = Field(alias='channelUID')
-    configuration: Dict[str, str] = {}
+    configuration: Dict[str, Any] = {}

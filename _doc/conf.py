@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.abspath('./_plugins'))
 # -- Project information -----------------------------------------------------
 
 project = 'HABApp'
-copyright = '2019, spacemanspiff2007'
+copyright = '2020, spacemanspiff2007'
 author = 'spacemanspiff2007'
 
 # The short X.Y version
@@ -215,6 +215,8 @@ todo_include_todos = False
 autodoc_member_order = 'bysource'
 
 execute_code_working_dir = pathlib.Path(__file__).parent.parent
+
+autoclass_content = 'both'
 
 # Skip documentation for overloaded .set_state functions
 RE_SKIP = (

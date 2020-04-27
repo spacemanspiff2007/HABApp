@@ -50,7 +50,6 @@ Documentation
 .. autoclass:: Statistics
    :members:
 
-   .. automethod:: __init__
 
 MultiModeItem
 ------------------------------
@@ -70,7 +69,7 @@ Basic Example
 
     import HABApp
     from HABApp.core.events import ValueUpdateEvent
-    from HABApp.util import MultiModeItem
+    from HABApp.util.multimode import MultiModeItem, ValueMode
 
     class MyMultiModeItemTestRule(HABApp.Rule):
         def __init__(self):
@@ -78,24 +77,25 @@ Basic Example
 
             # create a new MultiModeItem
             item = MultiModeItem.get_create_item('MultiModeTestItem')
-            self.listen_event(item, self.item_update, ValueUpdateEvent)
+            item.listen_event(self.item_update, ValueUpdateEvent)
 
-            # create two different modes which we will use
-            item.create_mode('Automatic', 0, initial_value=5)
-            item.create_mode('Manual', 10, initial_value=0)
+            # create two different modes which we will use and add them to the item
+            auto = ValueMode('Automatic', initial_value=5)
+            manu = ValueMode('Manual', initial_value=0)
+            item.add_mode(0, auto).add_mode(10, manu)
 
-            # This shows how to enable/disable a mode
+            # This shows how to enable/disable a mode and how to get a mode from the item
             print('disable/enable the higher priority mode')
             item.get_mode('manual').set_enabled(False)
             item.get_mode('manual').set_value(11)
 
-            # This shows that changes of the lower priority only show when
+            # This shows that changes of the lower priority is only show when
             # the mode with the higher priority gets disabled
             print('')
             print('Set value of lower priority')
-            item.get_mode('automatic').set_value(55)
+            auto.set_value(55)
             print('Disable higher priority')
-            item.get_mode('manual').set_enabled(False)
+            manu.set_enabled(False)
 
         def item_update(self, event):
             print(f'State: {event.value}')
@@ -131,53 +131,63 @@ Advanced Example
     import logging
     import HABApp
     from HABApp.core.events import ValueUpdateEvent
-    from HABApp.util import MultiModeItem
+    from HABApp.util.multimode import MultiModeItem, ValueMode
 
     class MyMultiModeItemTestRule(HABApp.Rule):
         def __init__(self):
             super().__init__()
 
-            # create a new MultiModeItem and assign logger
-            log = logging.getLogger('AdvancedMultiMode')
-            item = MultiModeItem.get_create_item('MultiModeTestItem', log)
-            self.listen_event(item, self.item_update, ValueUpdateEvent)
+            # create a new MultiModeItem
+            item = MultiModeItem.get_create_item('MultiModeTestItem')
+            item.listen_event(self.item_update, ValueUpdateEvent)
 
-            # create two different modes which we will use
-            item.create_mode('Automatic', 2, initial_value=5)
-            item.create_mode('Manual', 10).set_value(10)
-            print(f'{repr(item.get_mode("Automatic"))}')
-            print(f'{repr(item.get_mode("Manual"))}')
+            # helper to print the heading so we have a nice outpt
+            def print_heading(_heading):
+                print('')
+                print('-' * 80)
+                print(_heading)
+                print('-' * 80)
+                for p, m in item.all_modes():
+                    print(f'Prio {p:2d}: {m}')
+                print('')
+
+
+            log = logging.getLogger('AdvancedMultiMode')
+
+            # create modes and add them
+            auto = ValueMode('Automatic', initial_value=5, logger=log)
+            manu = ValueMode('Manual', initial_value=10, logger=log)
+            item.add_mode(0, auto).add_mode(10, manu)
 
 
             # it is possible to automatically disable a mode
             # this will disable the manual mode if the automatic mode
             # sets a value greater equal manual mode
-            print('')
-            print('-' * 80)
-            print('Automatically disable mode')
-            print('-' * 80)
+            print_heading('Automatically disable mode')
 
             # A custom function can also disable the mode:
-            item.get_mode('manual').auto_disable_func = lambda low, own: low >= own
+            manu.auto_disable_func = lambda low, own: low >= own
 
-            item.get_mode('Automatic').set_value(11)    # <-- manual now gets disabled because
-            item.get_mode('Automatic').set_value(4)     #     the lower priority value is >= itself
+            auto.set_value(11) # <-- manual now gets disabled because
+            auto.set_value(4)  #     the lower priority value is >= itself
 
 
             # It is possible to use functions to calculate the new value for a mode.
             # E.g. shutter control and the manual mode moves the shades. If it's dark the automatic
             # mode closes the shutter again. This could be achievied by automatically disable the
             # manual mode or if the state should be remembered then the max function should be used
-            print('')
-            print('-' * 80)
-            print('Use of functions')
-            print('-' * 80)
-            item.create_mode('Manual', 10, initial_value=5, calc_value_func=max)    # overwrite the earlier declaration
-            item.get_mode('Automatic').set_value(7)
-            item.get_mode('Automatic').set_value(3)
+
+            # create a move and use the max function for output calculation
+            manu = ValueMode('Manual', initial_value=5, logger=log, calc_value_func=max)
+            item.add_mode(10, manu)    # overwrite the earlier added mode
+
+            print_heading('Use of functions')
+
+            auto.set_value(7)   # manu uses max, so the value from auto is used
+            auto.set_value(3)
 
         def item_update(self, event):
-            print(f'State: {event.value}')
+            print(f'Item value: {event.value}')
 
     MyMultiModeItemTestRule()
     # hide
@@ -185,12 +195,72 @@ Advanced Example
     # hide
 
 
+Example SwitchItemValueMode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is controlled by a OpenHAB
+:class:`~HABApp.openhab.items.SwitchItem`. This is very useful if the mode shall be deactived from the OpenHAB sitemaps.
+
+.. execute_code::
+
+    # hide
+    import HABApp
+    from tests import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+
+    from HABApp.openhab.items import SwitchItem
+    HABApp.core.Items.set_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
+    # hide
+
+    import HABApp
+    from HABApp.core.events import ValueUpdateEvent
+    from HABApp.openhab.items import SwitchItem
+    from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode
+
+    class MyMultiModeItemTestRule(HABApp.Rule):
+        def __init__(self):
+            super().__init__()
+
+            # create a new MultiModeItem
+            item = MultiModeItem.get_create_item('MultiModeTestItem')
+
+            # this switch allows to enable/disable the mode
+            switch = SwitchItem.get_item('Automatic_Enabled')
+            print(f'Switch is {switch}')
+
+            # this is how the switch gets linked to the mode
+            # if the switch is on, the mode is on, too
+            mode = SwitchItemValueMode('Automatic', switch)
+            print(mode)
+
+            # Use invert_switch if the desired behaviour is
+            # if the switch is off, the mode is on
+            mode = SwitchItemValueMode('Automatic', switch, invert_switch=True)
+            print(mode)
+
+    MyMultiModeItemTestRule()
+    # hide
+    runner.tear_down()
+    # hide
+
 
 Documentation
-^^^^^^^^^^^^^^^^^^
-.. autoclass:: MultiModeItem
+^^^^^^^^^^^^^^^^^^^^^^
+
+MultiModeItem
+"""""""""""""""""""""""""
+.. autoclass:: HABApp.util.multimode.MultiModeItem
    :members:
 
-.. autoclass:: HABApp.util.multimode_item.MultiModeValue
+ValueMode
+"""""""""""""""""""""""""
+.. autoclass:: HABApp.util.multimode.ValueMode
    :members:
+   :inherited-members:
+
+SwitchItemValueMode
+"""""""""""""""""""""""""
+.. autoclass:: HABApp.util.multimode.SwitchItemValueMode
+   :members:
+   :inherited-members:
 

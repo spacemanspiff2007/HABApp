@@ -11,18 +11,18 @@ LOCK = Lock()
 
 
 class MultiModeItem(Item):
-    """Thread safe value prioritizer :class:`~HABApp.core.items.Item`
+    """Prioritizer :class:`~HABApp.core.items.Item`
 
     :ivar logger: Assign a logger to get log messages about the different modes
     """
 
     @classmethod
-    def get_create_item(cls, name: str, logger=None):
+    def get_create_item(cls, name: str, logger=None, initial_value=None):
         # added 20.04.2020, van be removed in some time
         if logger is not None:
             warnings.warn("'logger' is deprecated, set logger on the mode instead!", DeprecationWarning, 2)
 
-        return super().get_create_item(name, None)
+        return super().get_create_item(name, initial_value)
 
     def __init__(self, name: str, initial_value=None):
         super().__init__(name=name, initial_value=initial_value)
@@ -135,10 +135,14 @@ class MultiModeItem(Item):
         warnings.warn("'create_mode' is deprecated, create a mode and pass it to 'add_mode' instead!",
                       DeprecationWarning, 2)
 
-        m = HABApp.util.multimode_item.ValueModeMode(name=name, initial_value=initial_value)
+        m = HABApp.util.multimode.ValueMode(name=name, initial_value=initial_value)
         m.auto_disable_after = auto_disable_after
         m.auto_disable_func = auto_disable_func
         m.calc_value_func = calc_value_func
 
         self.add_mode(priority, m)
         return m
+
+
+class DeprecatedMultiModeItem(MultiModeItem):
+    warnings.warn("MultiModeItem has moved into package 'HABApp.utils.multimode'", DeprecationWarning, 2)

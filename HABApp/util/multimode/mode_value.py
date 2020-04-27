@@ -5,28 +5,8 @@ from datetime import datetime, timedelta
 from .mode_base import BaseMode
 
 
-# initial_value: typing.Optional[typing.Any] = None,
-# auto_disable_after: typing.Optional[datetime.timedelta] = None,
-# auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]] = None,
-# calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = None
-# ) -> MultiModeValue: \
-#     """Create a new mode with priority
-#
-# :param name: Name of the new mode
-# :param priority: Priority of the mode
-# :param initial_value: Initial value, will also enable the mode
-# :param auto_disable_after: Automatically disable the mode after a timedelta if a recalculate is done
-#                            See :attr:`~HABApp.util.multimode_item.MultiModeValue`
-# :param auto_disable_func: Automatically disable the mode with a custom function
-#                            See :attr:`~HABApp.util.multimode_item.MultiModeValue`
-# :param calc_value_func: See :attr:`~HABApp.util.multimode_item.MultiModeValue`
-# :return: The newly created MultiModeValue
-# """
-#
-
-
-class ValueModeMode(BaseMode):
-    """MultiModeValue
+class ValueMode(BaseMode):
+    """ValueMode
 
     :ivar datetime.datetime last_update: Timestamp of the last update/enable of this value
     :ivar typing.Optional[datetime.timedelta] auto_disable_after: Automatically disable this mode after
@@ -40,17 +20,27 @@ class ValueModeMode(BaseMode):
                            Arguments can be used. First arg is value with lower priority, second argument is own value.
     """
 
-    def __init__(self, name: str, initial_value=None, logger: typing.Optional[logging.Logger] = None,
+    def __init__(self, name: str,
+                 initial_value=None, enabled: typing.Optional[bool] = None, enable_on_value: bool = True,
+                 logger: typing.Optional[logging.Logger] = None,
                  auto_disable_after=None, auto_disable_func=None,
                  calc_value_func=None):
+        """
+        
+        :param name: Name of the mode
+        :param initial_value: initial value of the mode
+        :param enabled: initial enabled state of the mode
+        :param enable_on_value: If ``True`` (default) setting a value (that is not ``None``) will also enable the mode
+        :param logger: logger to log events
+        :param auto_disable_after: see variables
+        :param auto_disable_func: see variables
+        :param calc_value_func: see variables
+        """
         assert isinstance(name, str), type(name)
         super().__init__(name)
 
-        self.__name = name
         self.__value = initial_value
         self.__enabled = False
-
-        self.__low_prio_value = None
 
         self.last_update: datetime = datetime.now()
         self.logger = logger
@@ -59,6 +49,14 @@ class ValueModeMode(BaseMode):
         if initial_value is not None:
             self.__enabled = True
             self.__value = initial_value
+        if enabled is not None:
+            assert enabled in (True, False), enabled
+            self.__enabled = enabled
+
+        self.__low_prio_value = None
+
+        assert isinstance(enable_on_value, bool), type(enable_on_value)
+        self.__enable_on_value: bool = enable_on_value
 
         assert isinstance(auto_disable_after, timedelta) or auto_disable_after is None, type(auto_disable_after)
         self.auto_disable_after: typing.Optional[timedelta] = auto_disable_after
@@ -79,35 +77,38 @@ class ValueModeMode(BaseMode):
     # we don't use the setter here because of stupid inheritance
     # https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
     def set_value(self, value):
-        """Set new value and recalculate overall value
+        """Set new value and recalculate overall value. If ``enable_on_value`` is set, setting a value will also
+        enable the mode.
 
         :param value: new value
         """
-        self.__enabled = True if value is not None else False
         self.__value = value
-
         self.last_update = datetime.now()
 
+        if self.__enable_on_value is True and self.__value is not None:
+            self.__enabled = True
+
         if self.logger is not None:
-            self.logger.info(f'{self.__name} set value to {self.__value}')
+            self.logger.info(f'[{"x" if self.__enabled else " "}] {self.name}: {self.__value}')
 
         self.parent.calculate_value()
-        return
+        return None
 
     def set_enabled(self, value: bool):
         """Enable or disable this value and recalculate overall value
 
         :param value: True/False
         """
-        assert value is True or value is False, value
-        self.__enabled = value
+        assert isinstance(value, bool), value
 
+        self.__enabled = value
         self.last_update = datetime.now()
 
         if self.logger is not None:
-            self.logger.info(f'{self.__name} {"enabled" if self.__enabled else "disabled"}')
+            self.logger.info(f'[{"x" if self.__enabled else " "}] {self.name}')
 
         self.parent.calculate_value()
+        return None
 
     def calculate_lower_priority_value(self) -> typing.Any:
 
@@ -122,6 +123,7 @@ class ValueModeMode(BaseMode):
         return val
 
     def calculate_value(self, value_with_lower_priority: typing.Any) -> typing.Any:
+
         # helper for self.calculate_lower_priority_value
         if self.__low_prio_value is not None:
             self.__low_prio_value = value_with_lower_priority
@@ -133,10 +135,11 @@ class ValueModeMode(BaseMode):
         # Automatically disable after certain time
         if isinstance(self.auto_disable_after, timedelta):
             if datetime.now() > self.last_update + self.auto_disable_after:
-                self.__enabled = True
+                self.__enabled = False
                 self.last_update = datetime.now()
                 if self.logger is not None:
-                    self.logger.info(f'{self.__name} disabled (after {self.auto_disable_after})!')
+                    self.logger.info(f'[{"x" if self.__enabled else " "}] {self.name} '
+                                     f'(after {self.auto_disable_after})!')
 
         # provide user function which can disable a mode
         if self.auto_disable_func is not None:
@@ -144,7 +147,7 @@ class ValueModeMode(BaseMode):
                 self.__enabled = False
                 self.last_update = datetime.now()
                 if self.logger is not None:
-                    self.logger.info(f'{self.__name} disabled')
+                    self.logger.info(f'[{"x" if self.__enabled else " "}] {self.name} (function)')
 
         # check if we may have disabled this mode
         if not self.__enabled:
@@ -155,4 +158,4 @@ class ValueModeMode(BaseMode):
         return self.calc_value_func(value_with_lower_priority, self.__value)
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} {self.__name} enabled: {self.__enabled}, value: {self.__value}>'
+        return f'<{self.__class__.__name__} {self.name} enabled: {self.__enabled}, value: {self.__value}>'

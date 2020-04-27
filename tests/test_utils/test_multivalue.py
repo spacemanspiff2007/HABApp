@@ -1,7 +1,6 @@
 import pytest
 
-from HABApp.util import MultiModeItem
-from HABApp.util.multimode_item import BaseMode, ValueModeMode
+from HABApp.util.multimode import BaseMode, ValueMode, MultiModeItem
 from ..test_core import ItemTests
 
 
@@ -12,8 +11,8 @@ class TestMultiModeItem(ItemTests):
 
 def test_diff_prio():
     p = MultiModeItem('TestItem')
-    p1 = ValueModeMode('modea', '1234')
-    p2 = ValueModeMode('modeb', '4567')
+    p1 = ValueMode('modea', '1234')
+    p2 = ValueMode('modeb', '4567')
     p.add_mode(1, p1).add_mode(2, p2)
 
     p1.set_value(5)
@@ -32,8 +31,8 @@ def test_diff_prio():
 
 def test_calculate_lower_priority_value():
     p = MultiModeItem('TestItem')
-    m1 = ValueModeMode('modea', '1234')
-    m2 = ValueModeMode('modeb', '4567')
+    m1 = ValueMode('modea', '1234')
+    m2 = ValueMode('modeb', '4567')
     p.add_mode(1, m1).add_mode(2, m2)
 
     assert m1.calculate_lower_priority_value() is None
@@ -45,8 +44,8 @@ def test_calculate_lower_priority_value():
 
 def test_auto_disable_1():
     p = MultiModeItem('TestItem')
-    m1 = ValueModeMode('modea', 50)
-    m2 = ValueModeMode('modeb', 60, auto_disable_func= lambda l, o: l > o)
+    m1 = ValueMode('modea', 50)
+    m2 = ValueMode('modeb', 60, auto_disable_func= lambda l, o: l > o)
     p.add_mode(1, m1).add_mode(2, m2)
 
     m1.set_value(50)
@@ -62,8 +61,8 @@ def test_auto_disable_1():
 
 def test_auto_disable_func():
     p = MultiModeItem('TestItem')
-    m1 = ValueModeMode('modea', 50)
-    m2 = ValueModeMode('modeb', 60, auto_disable_func=lambda low, s: low == 40)
+    m1 = ValueMode('modea', 50)
+    m2 = ValueMode('modeb', 60, auto_disable_func=lambda low, s: low == 40)
     p.add_mode(1, m1).add_mode(2, m2)
 
     m2.set_value(60)
