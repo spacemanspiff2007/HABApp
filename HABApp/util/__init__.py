@@ -5,4 +5,4 @@ from .statistics import Statistics
 from . import multimode
 
 # 27.04.2020 - this can be removed in some time
-# from .multimode import MultiModeItem
+from .multimode import MultiModeItem
