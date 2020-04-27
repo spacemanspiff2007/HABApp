@@ -26,7 +26,7 @@ class ValueMode(BaseMode):
                  auto_disable_after=None, auto_disable_func=None,
                  calc_value_func=None):
         """
-        
+
         :param name: Name of the mode
         :param initial_value: initial value of the mode
         :param enabled: initial enabled state of the mode
