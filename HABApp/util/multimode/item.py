@@ -142,7 +142,3 @@ class MultiModeItem(Item):
 
         self.add_mode(priority, m)
         return m
-
-
-class DeprecatedMultiModeItem(MultiModeItem):
-    warnings.warn("MultiModeItem has moved into package 'HABApp.utils.multimode'", DeprecationWarning, 2)

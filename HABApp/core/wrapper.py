@@ -1,19 +1,37 @@
 import asyncio
 import functools
 import logging
+import stackprinter
 import sys
 import traceback
 import typing
 from logging import Logger
+from pathlib import Path
 
 import HABApp
 
 log = logging.getLogger('HABApp')
 
 
+FILENAME = Path(__file__).name
+STACKPRINTER = {
+    'truncate_vals': 2000,
+    'suppressed_paths': (
+        r'\Wwrapper.py$',
+        r'\Wrule_file.py$',
+        r'lib[/\\]runpy.py$',
+    )
+}
+
+
 def __process_exception(func, e: Exception, do_print=False):
-    lines = traceback.format_exc().splitlines()
-    del lines[1:3]  # Remove entries which point to this wrapper
+    # lines = traceback.format_exc().splitlines()
+    # del lines[0:3]
+    lines = stackprinter.format(e, **STACKPRINTER).splitlines()
+
+    # Remove entries which point to this wrapper
+    if FILENAME in lines[0]:
+        del lines[0:2]
 
     # log exception, since it is unexpected we push it to stdout, too
     if do_print:
@@ -106,10 +124,13 @@ class ExceptionToHABApp:
 
         self.raised_exception = True
 
-        tb = traceback.format_exception(exc_type, exc_val, exc_tb)
-        # there is an inconsistent use of newlines and array entries so we normalize it
-        tb = '\n'.join(map(lambda x: x.strip(' \n'), tb))
-        tb = tb.splitlines()
+        # tb = traceback.format_exception(exc_type, exc_val, exc_tb)
+        # # there is an inconsistent use of newlines and array entries so we normalize it
+        # tb = '\n'.join(map(lambda x: x.strip(' \n'), tb))
+        # tb = tb.splitlines()
+
+        tb = stackprinter.format((exc_type, exc_val, exc_tb), **STACKPRINTER).splitlines()
+        
         # possibility to reprocess tb
         if self.proc_tb is not None:
             tb = self.proc_tb(tb)

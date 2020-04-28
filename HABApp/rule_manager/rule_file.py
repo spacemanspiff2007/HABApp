@@ -1,12 +1,16 @@
 import collections
 import logging
 import runpy
-import typing
+import typing, re
 from pathlib import Path
 
 import HABApp
+from HABApp.core.wrapper import STACKPRINTER
 
 log = logging.getLogger('HABApp.Rules')
+
+SKIP_FILES = { re.compile(k.replace('$', ',')) for k in STACKPRINTER['suppressed_paths']}
+
 
 
 class RuleFile:
@@ -55,9 +59,37 @@ class RuleFile:
         return None
 
     def __process_tc(self, tb: list):
-        tb = tb[-5:]
-        tb.insert(0, f"Could not load {self.path}!")
-        return [l.replace('<module>', self.path.name) for l in tb]
+        
+        new_tb = []
+        skip = 0
+        
+        def peek(start, count) -> typing.List[str]:
+            ret = []
+            for i in range(start, start + count):
+                ret.append(tb[i])
+            return ret
+            
+        
+        for i, l in enumerate(tb):
+            # this is the load command
+            for k in SKIP_FILES:
+                if k.search(l):
+                    p = peek(i, 3)
+                    if p[1].startswith(' ' * 4) and p[2].startswith('File'):
+                        skip = 2
+
+            if skip:
+                skip -= 1
+                continue
+
+            new_tb.append(l)
+
+        if not new_tb:
+            new_tb = tb
+
+        # tb = tb[-5:]
+        new_tb.insert(0, f"Could not load {self.path}!")
+        return [l.replace('<module>', self.path.name) for l in new_tb]
 
     def load(self):
 
