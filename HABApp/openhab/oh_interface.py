@@ -256,7 +256,7 @@ class OpenhabInterface:
         :return: true on successful removal, otherwise false
         """
 
-        link = ItemChannelLinkDefinition(itemName=item_name, channelUID=channel_uid)
+        link = ItemChannelLinkDefinition(item_name=item_name, channel_uid=channel_uid)
 
         fut = asyncio.run_coroutine_threadsafe(
             self.__connection.async_remove_link(link),

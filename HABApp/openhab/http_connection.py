@@ -360,13 +360,13 @@ class HttpConnection:
         if self.config.general.listen_only:
             return False
 
-        # check for item existence first, otherwhise OpenHAB creates a new item when we add a link with an unknown itemname
+        # if the passed item doesn't exist OpenHAB creates a new empty item item
         exists = await self.async_item_exists(link_def.item_name)
         if not exists:
             raise ItemNotFoundException(f'Item "{link_def.item_name}" does not exist')
 
         url = self.__get_link_url(link_def.channel_uid,link_def.item_name)
-        fut = self.__session.put(self.__get_link_url(link_def.channel_uid,link_def.item_name), json=link_def.dict(by_alias=True))
+        fut = self.__session.put(url, json=link_def.dict(by_alias=True))
 
         ret = await self._check_http_response(fut)
         return ret.status == 200

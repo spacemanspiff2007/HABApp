@@ -51,13 +51,8 @@ class WrappedFunction:
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
 
     def __format_traceback(self, e: Exception, *args, **kwargs):
-
-        # Skip line 1 and 2 since they contain the wrapper:
-        # 0:  Traceback (most recent call last):
-        # 1:  File "Z:\Python\HABApp\HABApp\core\wrappedfunction.py", line 67, in __run
-        # 2:  self._func(*args, **kwargs)
-        lines = traceback.format_exc().splitlines()
-        del lines[1:3]  # Remove element 1 & 2
+    
+        lines = HABApp.core.wrapper.format_exception(e)
 
         # Log Exception
         self.log.error(f'Error in {self.name}: {e}')
