@@ -9,7 +9,7 @@ import HABApp.openhab.events
 from HABApp.core.const import loop
 from HABApp.core.items.base_valueitem import BaseValueItem
 from HABApp.core.wrapper import log_exception
-from HABApp.openhab.definitions.rest import OpenhabItemDefinition
+from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition
 from . import definitions
 from .http_connection import HttpConnection
@@ -214,6 +214,49 @@ class OpenhabInterface:
         data = fut.result()
         return OpenhabItemDefinition.parse_obj(data)
 
+    def get_items(self) -> typing.List[OpenhabItemDefinition]:
+        """ Returns complete OpenHAB item definitions for all items
+
+        :return: a list of all OpenhabItemdefinitions
+        """
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_get_items(),
+            loop
+        )
+        data = fut.result()
+
+        all_definitions = []
+        for _dict in data:
+            all_definitions.append(OpenhabItemDefinition.parse_obj(_dict))
+
+        return all_definitions
+
+    def get_thing(self, thing_uid: str) -> OpenhabThingDefinition:
+        """ Returns the complete OpenHAB thing definition
+
+        :param thing_uid: uid of the thing
+        :return: an instance of OpenhabThingDefinition or None on error
+        """
+        assert isinstance(thing_uid, str), type(thing_uid)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_get_thing(thing_uid),
+            loop
+        )
+        return fut.result()
+
+    def get_links(self) -> typing.List[ItemChannelLinkDefinition]:
+        """ returns all available ItemChannelLinkDefinitions
+        
+        :return: a list of all ItemChannelLinkDefinitions in OpenHAB
+        """
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_get_links(),
+            loop
+        )
+        return fut.result()
+
     def get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
         """ returns the ItemChannelLinkDefinition for a link between a (things) channel and an item
 
@@ -284,9 +327,9 @@ class OpenhabInterface:
     @log_exception
     def remove_item(self, item_name: str):
         """
-        Removes an item from the openHAB item registry
+        Removes an item and all its links from the openHAB item registry
 
-        :param item_name: name
+        :param item_name: name of the item that should be removed
         """
         if not self.__connection.is_online or self.__connection.is_read_only:
             return None

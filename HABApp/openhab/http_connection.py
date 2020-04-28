@@ -278,6 +278,12 @@ class HttpConnection:
         if self.config.general.listen_only:
             return False
 
+        # remove all links to the item prior removing the item
+        links: typing.List[ItemChannelLinkDefinition] = await self.async_get_links()
+        for link in links:
+            if link.item_name == item_name:
+                await self.async_remove_link(link)
+
         fut = self.__session.delete(self.__get_openhab_url('rest/items/{:s}', item_name))
         ret = await self._check_http_response(fut)
         return ret.status < 300
@@ -340,6 +346,16 @@ class HttpConnection:
         ret = await self._check_http_response(fut)
         return ret.status == 200
 
+    async def async_get_links(self) -> typing.List[ItemChannelLinkDefinition]:
+        fut = self.__session.get(self.__get_openhab_url("rest/links"))
+        ret = await self._check_http_response(fut)
+
+        links: typing.List[ItemChannelLinkDefinition] = []
+        for _dict in await ret.json(encoding='utf-8'):
+            links.append(ItemChannelLinkDefinition.parse_obj(_dict))
+
+        return links
+
     async def async_get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
         fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
         ret = await self._check_http_response(fut, accept_404=True)
@@ -365,7 +381,7 @@ class HttpConnection:
         if not exists:
             raise ItemNotFoundException(f'Item "{link_def.item_name}" does not exist')
 
-        url = self.__get_link_url(link_def.channel_uid,link_def.item_name)
+        url = self.__get_link_url(link_def.channel_uid, link_def.item_name)
         fut = self.__session.put(url, json=link_def.dict(by_alias=True))
 
         ret = await self._check_http_response(fut)

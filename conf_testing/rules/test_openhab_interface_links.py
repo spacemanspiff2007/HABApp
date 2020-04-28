@@ -1,3 +1,5 @@
+import typing
+
 import HABApp
 from HABApp.core.Items import get_all_items
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError
@@ -9,6 +11,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         super().__init__()
 
         self.item_name: str = ""
+        self.other_item_name: str = ""
         self.astro_sun_thing: str = ""
         self.channel_uid: str = ""
 
@@ -17,30 +20,41 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         self.add_test(f"link existence", self.test_link_existence)
         self.add_test(f"link removal", self.test_remove_link)
         self.add_test(f"link update", self.test_update_link)
+        self.add_test(f"get all links", self.test_get_all_links)
+        self.add_test(f"removing a item removes its links", self.test_item_removal_removes_its_links)
 
-    def __create_test_item(self):
+    def __create_test_items(self):
         self.openhab.create_item("Number", self.item_name)
+        self.openhab.create_item("Number", self.other_item_name)
 
     def __get_link_def(self) -> ItemChannelLinkDefinition:
         return ItemChannelLinkDefinition(channelUID=self.channel_uid, itemName=self.item_name,
                                          configuration={"profile": "system:default"})
 
+    def __get_other_link_def(self) -> ItemChannelLinkDefinition:
+        return ItemChannelLinkDefinition(channelUID=self.channel_uid, itemName=self.other_item_name,
+                                         configuration={"profile": "system:default"})
+
     def set_up(self):
         self.item_name: str = "TestOpenhabInterfaceLinksItem"
+        self.other_item_name: str = "TestOpenhabInterfaceLinksOtherItem"
         self.astro_sun_thing: str = self.__find_astro_sun_thing()
         if self.astro_sun_thing == "":
             raise Exception("no astro:sun thing found")
         self.channel_uid: str = f"{self.astro_sun_thing}:rise:duration"
 
-        self.__create_test_item()
+        self.__create_test_items()
         if not self.openhab.item_exists(self.item_name):
             raise Exception("item could not be created")
 
     def tear_down(self):
         if self.oh.link_exists(self.channel_uid, self.item_name):
             self.oh.remove_link(self.channel_uid, self.item_name)
-
         self.openhab.remove_item(self.item_name)
+
+        if self.oh.link_exists(self.channel_uid, self.other_item_name):
+            self.oh.remove_link(self.channel_uid, self.other_item_name)
+        self.openhab.remove_item(self.other_item_name)
 
     def __find_astro_sun_thing(self) -> str:
         found_uid: str = ""
@@ -85,5 +99,33 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
     def test_create_link(self):
         assert self.oh.create_link(self.__get_link_def())
+
+    def test_item_removal_removes_its_links(self):
+        assert self.oh.create_link(self.__get_link_def())
+        assert self.oh.create_link(self.__get_other_link_def())
+
+        # remove other item
+        assert self.oh.remove_item(self.other_item_name)
+
+        links: typing.List[ItemChannelLinkDefinition] = self.oh.get_links()
+        assert len(links) == 1
+        # ensure the only remaining link is the one from item_name
+        assert links[0] == self.__get_link_def()
+
+        # recreate both test items
+        self.__create_test_items()
+
+    def test_get_all_links(self):
+        assert self.oh.create_link(self.__get_link_def())
+        assert self.oh.create_link(self.__get_other_link_def())
+
+        all_links = self.oh.get_links()
+        assert len(all_links) == 2
+
+        link = list(filter(lambda l: l.item_name == self.item_name, all_links))[0]
+        other_link = list(filter(lambda l: l.item_name == self.other_item_name, all_links))[0]
+
+        assert link == self.__get_link_def(), link
+        assert other_link == self.__get_other_link_def(), other_link
 
 TestOpenhabInterfaceLinks()
