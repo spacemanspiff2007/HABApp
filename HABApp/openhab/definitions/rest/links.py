@@ -1,12 +1,17 @@
-from typing import Dict, Any
+import dataclasses
+from typing import Any, Dict
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+from pydantic.dataclasses import dataclass
+
+from .base import RestBase
 
 
-class ItemChannelLinkDefinition(BaseModel):
+@dataclass
+class ItemChannelLinkDefinition(RestBase):
     item_name: str = Field(alias='itemName')
     channel_uid: str = Field(alias='channelUID')
-    configuration: Dict[str, Any] = {}
+    configuration: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
 
 class LinkNotFoundError(Exception):

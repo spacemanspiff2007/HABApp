@@ -50,5 +50,5 @@ def func_a(_l):
     1 / 0
 
 
-def test_func_wrapper():
+def test_func_wrapper(p_mock):
     func_a(['asdf', 'asdf'])

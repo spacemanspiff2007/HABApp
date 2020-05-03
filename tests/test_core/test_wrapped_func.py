@@ -90,7 +90,7 @@ class TestCases(unittest.TestCase):
         assert isinstance(err, HABApp.core.events.habapp_events.HABAppError)
         assert err.func_name == 'tmp'
         assert isinstance(err.exception, ZeroDivisionError)
-        assert err.traceback.startswith('Traceback (most recent call last):')
+        assert err.traceback.startswith('File ')
 
 
 @pytest.mark.asyncio
@@ -133,14 +133,4 @@ async def test_async_error_wrapper():
     assert isinstance(err, HABApp.core.events.habapp_events.HABAppError)
     assert err.func_name == 'tmp'
     assert isinstance(err.exception, ZeroDivisionError)
-    assert err.traceback.startswith('Traceback (most recent call last):')
-
-if __name__ == '__main__':
-    import logging
-    import sys
-    _log = logging.getLogger()
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(logging.Formatter("[{asctime:s}] [{name:25s}] {levelname:8s} | {message:s}", style='{'))
-    _log.addHandler(ch)
-    unittest.main()
+    assert err.traceback.startswith('File ')
