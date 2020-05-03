@@ -33,6 +33,7 @@ def test_creation():
     name = 'ZWaveItem1'
 
     o = ItemChannelLinkDefinition(item_name=name, channel_uid=uid)
+
     o.__pydantic_model__.dict(by_alias=True)
     assert o.channel_uid == uid
     assert o.item_name == name
