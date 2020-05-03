@@ -3,7 +3,6 @@ import concurrent.futures
 import io
 import logging
 import time
-import traceback
 from cProfile import Profile
 from pstats import Stats
 try:
@@ -51,7 +50,7 @@ class WrappedFunction:
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
 
     def __format_traceback(self, e: Exception, *args, **kwargs):
-    
+
         lines = HABApp.core.wrapper.format_exception(e)
 
         # Log Exception

@@ -78,15 +78,13 @@ class HttpConnection:
     def __get_openhab_url(self, url: str, *args, **kwargs) -> str:
         assert not url.startswith('/')
         url = url.format(*args, **kwargs)
-        
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
 
     def __get_link_url(self, channel_uid: str, item_name: str) -> str:
-        # rest/links/ endpoint needs the channel to be url encoded 
+        # rest/links/ endpoint needs the channel to be url encoded
         # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
         # otherwise the REST-api returns HTTP-Status 500 InternalServerError
         link_url = urllib.parse.quote(f"{item_name}/{channel_uid}")
-
         return self.__get_openhab_url('rest/links/{link_url:s}', link_url=link_url)
 
     def __set_offline(self, log_msg=''):
@@ -129,7 +127,7 @@ class HttpConnection:
             raise
 
         # Server Errors if openhab is not ready yet
-        if resp.status >= 500:            
+        if resp.status >= 500:
             self.__set_offline(f'Status {resp.status} for {resp.request_info.method} {resp.request_info.url}')
             raise OpenhabNotReadyYet()
 
@@ -336,7 +334,7 @@ class HttpConnection:
             return False
 
         fut = self.__session.delete(self.__get_link_url(link_def.channel_uid, link_def.item_name))
-        
+
         ret = await self._check_http_response(fut)
         return ret.status == 200
 
@@ -348,7 +346,7 @@ class HttpConnection:
         if ret.status >= 300:
             return None
         else:
-            return ItemChannelLinkDefinition.parse_obj(await ret.json(encoding='utf-8'))
+            return ItemChannelLinkDefinition.__pydantic_model__.parse_obj(await ret.json(encoding='utf-8'))
 
     async def async_link_exists(self, channel_uid: str, item_name: str) -> bool:
         fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
@@ -365,8 +363,8 @@ class HttpConnection:
         if not exists:
             raise ItemNotFoundException(f'Item "{link_def.item_name}" does not exist')
 
-        url = self.__get_link_url(link_def.channel_uid,link_def.item_name)
-        fut = self.__session.put(url, json=link_def.dict(by_alias=True))
+        url = self.__get_link_url(link_def.channel_uid, link_def.item_name)
+        fut = self.__session.put(url, json=link_def.__pydantic_model__.dict(by_alias=True))
 
         ret = await self._check_http_response(fut)
         return ret.status == 200

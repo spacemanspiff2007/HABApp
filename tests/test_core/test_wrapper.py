@@ -47,7 +47,7 @@ def test_error_level(p_mock):
 
 @ignore_exception
 def func_a(_l):
-    1/0
+    1 / 0
 
 
 def test_func_wrapper():

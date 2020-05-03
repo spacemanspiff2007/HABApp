@@ -1,8 +1,8 @@
-import HABApp
 from HABApp.core.Items import get_all_items
-from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError
+from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition
 from HABApp.openhab.items import Thing
-from conf_testing.lib.HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types
+from conf_testing.lib.HABAppTests import TestBaseRule
+
 
 class TestOpenhabInterfaceLinks(TestBaseRule):
     def __init__(self):
@@ -12,17 +12,17 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         self.astro_sun_thing: str = ""
         self.channel_uid: str = ""
 
-        self.add_test(f"link creation", self.test_create_link)
-        self.add_test(f"created link is gettable and equal", self.test_get_link)
-        self.add_test(f"link existence", self.test_link_existence)
-        self.add_test(f"link removal", self.test_remove_link)
-        self.add_test(f"link update", self.test_update_link)
+        self.add_test("link creation", self.test_create_link)
+        self.add_test("created link is gettable and equal", self.test_get_link)
+        self.add_test("link existence", self.test_link_existence)
+        self.add_test("link removal", self.test_remove_link)
+        self.add_test("link update", self.test_update_link)
 
     def __create_test_item(self):
         self.openhab.create_item("Number", self.item_name)
 
     def __get_link_def(self) -> ItemChannelLinkDefinition:
-        return ItemChannelLinkDefinition(channelUID=self.channel_uid, itemName=self.item_name,
+        return ItemChannelLinkDefinition(channel_uid=self.channel_uid, item_name=self.item_name,
                                          configuration={"profile": "system:default"})
 
     def set_up(self):
@@ -69,9 +69,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
     def test_remove_link(self):
         assert self.oh.create_link(self.__get_link_def())
-        
         assert self.oh.remove_link(self.channel_uid, self.item_name)
-
         assert not self.oh.link_exists(self.channel_uid, self.item_name)
 
     def test_link_existence(self):
@@ -85,5 +83,6 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
     def test_create_link(self):
         assert self.oh.create_link(self.__get_link_def())
+
 
 TestOpenhabInterfaceLinks()

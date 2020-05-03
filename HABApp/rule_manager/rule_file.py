@@ -1,11 +1,10 @@
 import collections
 import logging
 import runpy
-import typing, re
+import typing
 from pathlib import Path
 
 import HABApp
-from HABApp.core.wrapper import format_exception
 
 log = logging.getLogger('HABApp.Rules')
 

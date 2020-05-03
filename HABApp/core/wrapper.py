@@ -1,12 +1,13 @@
 import asyncio
 import functools
 import logging
-import stackprinter
-import sys, re
-import traceback
+import re
+import sys
 import typing
 from logging import Logger
 from pathlib import Path
+
+import stackprinter
 
 import HABApp
 
@@ -18,19 +19,22 @@ SUPPRESSED_PATHS = (
 
     # rule file loader
     re.compile(r'[/\\]rule_file.py$'),
-    re.compile(r'lib[/\\]runpy.py$'),
+    re.compile(r'[/\\]runpy.py$'),
 
     # Worker functions
     re.compile(r'[/\\]wrappedfunction.py$'),
+
+    # Don't print stack for used libraries
+    re.compile(r'[/\\]aiohttp[/\\]\w+.py$'),
 )
 
 SKIP_TB = tuple(re.compile(k.pattern.replace('$', ', ')) for k in SUPPRESSED_PATHS)
 
 
-def format_exception(e: typing.Union[Exception, typing.Tuple[typing.Any ,typing.Any, typing.Any,]]) -> typing.List[str]:
+def format_exception(e: typing.Union[Exception, typing.Tuple[typing.Any, typing.Any, typing.Any]]) -> typing.List[str]:
     tb = []
     skip = 0
-    
+
     lines = stackprinter.format(e, truncate_vals=2000, suppressed_paths=SUPPRESSED_PATHS).splitlines()
     for i, line in enumerate(lines):
         if not skip:
@@ -45,7 +49,7 @@ def format_exception(e: typing.Union[Exception, typing.Tuple[typing.Any ,typing.
             continue
 
         tb.append(line)
-    
+
     return tb
 
 
@@ -151,7 +155,7 @@ class ExceptionToHABApp:
         # tb = tb.splitlines()
 
         tb = format_exception((exc_type, exc_val, exc_tb))
-        
+
         # possibility to reprocess tb
         if self.proc_tb is not None:
             tb = self.proc_tb(tb)
