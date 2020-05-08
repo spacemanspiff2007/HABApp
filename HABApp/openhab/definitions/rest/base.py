@@ -1,10 +1,9 @@
-from typing import Any, Dict
+from pydantic import BaseModel, Extra
 
 
-class RestBase:
-    def to_dict(self) -> Dict[str, Any]:
-        return self.__pydantic_model__.dict(by_alias=True)
+class RestBase(BaseModel):
 
-    @classmethod
-    def from_dict(cls, _dict) -> 'RestBase':
-        return cls.__pydantic_model__.parse_obj(_dict)
+    # default configuration for RestAPI models
+    class Config:
+        extra = Extra.forbid
+        allow_population_by_field_name = True

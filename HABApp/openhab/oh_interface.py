@@ -229,7 +229,7 @@ class OpenhabInterface:
         )
         return fut.result()
 
-    def get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+    def get_channel_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
         """ returns the ItemChannelLinkDefinition for a link between a (things) channel and an item
 
         :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
@@ -246,24 +246,26 @@ class OpenhabInterface:
         )
         return fut.result()
 
-    def create_link(self, link_def: ItemChannelLinkDefinition) -> bool:
+    def create_channel_link(self, channel_uid: str, item_name: str, configuration: dict = {}) -> bool:
         """ creates a link between a (things) channel and an item
 
         :param link_def: an instance of ItemChannelLinkDefinition with at least channel_uid and item_name set
         :return: true on successful creation, otherwise false
         """
 
-        assert isinstance(link_def, ItemChannelLinkDefinition), type(link_def)
-        assert isinstance(link_def.item_name, str), type(link_def.item_name)
-        assert isinstance(link_def.channel_uid, str), type(link_def.channel_uid)
+        assert isinstance(channel_uid, str), type(channel_uid)
+        assert isinstance(item_name, str), type(item_name)
+        assert isinstance(configuration, dict), type(configuration)
 
         fut = asyncio.run_coroutine_threadsafe(
-            self.__connection.async_create_link(link_def),
+            self.__connection.async_create_link(
+                ItemChannelLinkDefinition(item_name=item_name, channel_uid=channel_uid, configuration=configuration)
+            ),
             loop
         )
         return fut.result()
 
-    def remove_link(self, channel_uid: str, item_name: str) -> bool:
+    def remove_channel_link(self, channel_uid: str, item_name: str) -> bool:
         """ removes a link between a (things) channel and an item
 
         :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
@@ -279,7 +281,7 @@ class OpenhabInterface:
         )
         return fut.result()
 
-    def link_exists(self, channel_uid: str, item_name: str) -> bool:
+    def channel_link_exists(self, channel_uid: str, item_name: str) -> bool:
         """ check if a things channel is linked to an item
 
         :param channel_uid: uid of the linked channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)

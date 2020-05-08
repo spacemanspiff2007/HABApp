@@ -76,12 +76,18 @@ class ValueMode(BaseMode):
 
     # we don't use the setter here because of stupid inheritance
     # https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
-    def set_value(self, value):
+    def set_value(self, value, only_on_change: bool = False):
         """Set new value and recalculate overall value. If ``enable_on_value`` is set, setting a value will also
         enable the mode.
 
         :param value: new value
+        :param only_on_change: will set/enable the mode only if value differs or the mode is disabled
         """
+
+        # Possibility to set the mode only on change
+        if only_on_change and self.__enabled and self.__value == value:
+            return None
+
         self.__value = value
         self.last_update = datetime.now()
 
@@ -94,12 +100,18 @@ class ValueMode(BaseMode):
         self.parent.calculate_value()
         return None
 
-    def set_enabled(self, value: bool):
+    def set_enabled(self, value: bool, only_on_change: bool = False):
         """Enable or disable this value and recalculate overall value
 
         :param value: True/False
+        :param only_on_change: enable only on change
+        :return:
         """
         assert isinstance(value, bool), value
+
+        # Possibility to enable/disable only on change
+        if only_on_change and value == self.__enabled:
+            return None
 
         self.__enabled = value
         self.last_update = datetime.now()

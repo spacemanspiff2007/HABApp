@@ -346,7 +346,7 @@ class HttpConnection:
         if ret.status >= 300:
             return None
         else:
-            return ItemChannelLinkDefinition.__pydantic_model__.parse_obj(await ret.json(encoding='utf-8'))
+            return ItemChannelLinkDefinition(**await ret.json(encoding='utf-8'))
 
     async def async_link_exists(self, channel_uid: str, item_name: str) -> bool:
         fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
@@ -364,7 +364,7 @@ class HttpConnection:
             raise ItemNotFoundException(f'Item "{link_def.item_name}" does not exist')
 
         url = self.__get_link_url(link_def.channel_uid, link_def.item_name)
-        fut = self.__session.put(url, json=link_def.__pydantic_model__.dict(by_alias=True))
+        fut = self.__session.put(url, json=link_def.dict(by_alias=True))
 
         ret = await self._check_http_response(fut)
         return ret.status == 200
