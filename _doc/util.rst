@@ -215,7 +215,7 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
     import HABApp
     from HABApp.core.events import ValueUpdateEvent
     from HABApp.openhab.items import SwitchItem
-    from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode
+    from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode, ValueMode
 
     class MyMultiModeItemTestRule(HABApp.Rule):
         def __init__(self):
@@ -242,7 +242,6 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
             # Now everything can be enabled/disabled from the openhab sitemap
             item.add_mode(100, mode)
             item.add_mode(101, ValueMode('Manual'))
-        )
 
     MyMultiModeItemTestRule()
     # hide
