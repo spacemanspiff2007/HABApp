@@ -198,7 +198,7 @@ Advanced Example
 Example SwitchItemValueMode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is controlled by a OpenHAB
-:class:`~HABApp.openhab.items.SwitchItem`. This is very useful if the mode shall be deactived from the OpenHAB sitemaps.
+:class:`~HABApp.openhab.items.SwitchItem`. This is very useful if the mode shall be deactivated from the OpenHAB sitemaps.
 
 .. execute_code::
 
@@ -235,8 +235,14 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
 
             # Use invert_switch if the desired behaviour is
             # if the switch is off, the mode is on
-            mode = SwitchItemValueMode('Automatic', switch, invert_switch=True)
+            mode = SwitchItemValueMode('AutomaticOff', switch, invert_switch=True)
             print(mode)
+
+            # This shows how the SwitchItemValueMode can be used to disable any logic except for the manual mode.
+            # Now everything can be enabled/disabled from the openhab sitemap
+            item.add_mode(100, mode)
+            item.add_mode(101, ValueMode('Manual'))
+        )
 
     MyMultiModeItemTestRule()
     # hide
