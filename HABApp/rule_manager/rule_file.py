@@ -6,7 +6,8 @@ from pathlib import Path
 
 import HABApp
 
-log = logging.getLogger(f'HABApp.Rules')
+log = logging.getLogger('HABApp.Rules')
+
 
 
 class RuleFile:
@@ -55,7 +56,6 @@ class RuleFile:
         return None
 
     def __process_tc(self, tb: list):
-        tb = tb[-5:]
         tb.insert(0, f"Could not load {self.path}!")
         return [l.replace('<module>', self.path.name) for l in tb]
 

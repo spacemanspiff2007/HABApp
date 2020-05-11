@@ -1,8 +1,10 @@
 import random
 import string
 
+from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types
+
 import HABApp
-from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem, get_openhab_test_types, get_openhab_test_states
+import time
 
 
 class TestOpenhabInterface(TestBaseRule):
@@ -20,9 +22,10 @@ class TestOpenhabInterface(TestBaseRule):
             self.add_test( f'post_update {oh_type}', self.test_post_update, oh_type, get_openhab_test_states(oh_type))
 
         # test json post
-        self.add_test(f'post_update (by_json)', self.test_umlaute)
-        self.add_test(f'test_item_not_found', self.test_openhab_item_not_found)
-        self.add_test(f'Interface Metadata', self.test_metadata)
+        self.add_test('post_update (by_json)', self.test_umlaute)
+        self.add_test('test_item_not_found', self.test_openhab_item_not_found)
+        self.add_test('Interface Metadata', self.test_metadata)
+        self.add_test('Test async order', self.test_async_oder)
 
     def test_item_exists(self):
         assert not self.openhab.item_exists('item_which_does_not_exist')
@@ -101,6 +104,16 @@ class TestOpenhabInterface(TestBaseRule):
         with OpenhabTmpItem(None, 'String') as item:
             self.openhab.set_metadata(item, 'MyNameSpace', 'MyValue', {'key': 'value'})
             self.openhab.remove_metadata(item, 'MyNameSpace')
+
+    def test_async_oder(self):
+        with OpenhabTmpItem('AsyncOrderTest', 'String') as item, ItemWaiter(item) as waiter:
+            for _ in range(10):
+                for i in range(0, 5):
+                    item.oh_post_update(i)
+            waiter.wait_for_state('4')
+
+            time.sleep(1)
+            return waiter.states_ok
 
 
 TestOpenhabInterface()

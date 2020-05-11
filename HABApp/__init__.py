@@ -1,8 +1,16 @@
+# 1. Static stuff
+from .__version__ import __version__
 
+# 2. Setup used libraries
+import HABApp.__do_setup__
+
+# 3. User configuration
 import HABApp.config
-#
+
+# 4. Core features
 import HABApp.core
 
+# Import the rest
 import HABApp.mqtt
 import HABApp.openhab
 import HABApp.rule

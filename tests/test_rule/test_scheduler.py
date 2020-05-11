@@ -1,9 +1,9 @@
-import HABApp
 import unittest.mock
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, time, timedelta
 
 from pytz import utc
 
+import HABApp
 from HABApp.rule import scheduler
 
 
@@ -21,7 +21,7 @@ def test_one_time():
     func.mock.reset_mock()
     s = scheduler.OneTimeCallback(func)
 
-    s.set_next_run_time(None)
+    s.set_run_time(None)
     s.check_due(datetime.now(tz=utc))
     func.mock.assert_not_called()
     s.execute()
@@ -33,18 +33,22 @@ def test_workday():
     s = scheduler.DayOfWeekScheduledCallback(func)
 
     s.weekdays('workday')
-    s.set_next_run_time(datetime(2001, 1, 1, 12, 30))
-    s._calculate_next_call()
+    s.time(datetime(year=2000, month=12, day=30, hour=12))
 
-    assert s._next_call.date() == date(2001, 1, 2)
+    assert s.get_next_call() == datetime(2001, 1, 1, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 3)
+    assert s.get_next_call() == datetime(2001, 1, 2, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 4)
+    assert s.get_next_call() == datetime(2001, 1, 3, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 5)
+    assert s.get_next_call() == datetime(2001, 1, 4, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 8)
+    assert s.get_next_call() == datetime(2001, 1, 5, 12)
+
+    s._calculate_next_call()
+    assert s.get_next_call() == datetime(2001, 1, 8, 12)
+    s._calculate_next_call()
+    assert s.get_next_call() == datetime(2001, 1, 9, 12)
 
 
 def test_weekend():
@@ -52,14 +56,21 @@ def test_weekend():
     s = scheduler.DayOfWeekScheduledCallback(func)
 
     s.weekdays('weekend')
-    s.set_next_run_time(datetime(2001, 1, 1, 12, 30))
-    s._calculate_next_call()
+    s.time(datetime(year=2001, month=1, day=1, hour=12))
 
-    assert s._next_call.date() == date(2001, 1, 6)
+    assert s.get_next_call() == datetime(2001, 1, 6, 12)
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 7)
+    assert s.get_next_call() == datetime(2001, 1, 7, 12)
+
     s._calculate_next_call()
-    assert s._next_call.date() == date(2001, 1, 13)
+    assert s.get_next_call() == datetime(2001, 1, 13, 12)
+    s._calculate_next_call()
+    assert s.get_next_call() == datetime(2001, 1, 14, 12)
+
+    s._calculate_next_call()
+    assert s.get_next_call() == datetime(2001, 1, 20, 12)
+    s._calculate_next_call()
+    assert s.get_next_call() == datetime(2001, 1, 21, 12)
 
 
 def test_sun():
@@ -73,15 +84,21 @@ def test_sun():
 
     s.sun_trigger('sunrise')
     s._calculate_next_call()
+    assert s._next_base.tzinfo is not None
 
     s.earliest(time(hour=12))
     s._update_run_time()
     assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(12)
 
     s.earliest(None)
-    s.latest(time(hour=4))
+    s.latest(time(hour=2))
     s._update_run_time()
-    assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(4)
+    assert s._next_call.astimezone(scheduler.base.local_tz).time() == time(2)
+
+
+def cmp_ts(a: datetime, b: datetime):
+    diff = abs(a.timestamp() - b.timestamp())
+    assert diff < 0.0001, f'Diff: {diff}\n{a}\n{b}'
 
 
 def test_boundary():
@@ -89,17 +106,31 @@ def test_boundary():
     s = scheduler.reoccurring_cb.ReoccurringScheduledCallback(func)
 
     now = datetime.now()
-    s.set_next_run_time(now + timedelta(seconds=15))
-    assert s.get_next_call() == now + timedelta(seconds=15)
+    s.interval(timedelta(seconds=15))
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=15))
 
     def b_func(d: datetime):
         return d + timedelta(seconds=15)
 
     s.boundary_func(b_func)
-    s._update_run_time()
-    assert s.get_next_call() == now + timedelta(seconds=30)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=30))
 
     # offset etc comes after the custom function
     s.offset(timedelta(seconds=-10))
-    s._update_run_time()
-    assert s.get_next_call() == now + timedelta(seconds=20)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=20))
+
+
+def test_boundary_func():
+    func.mock.reset_mock()
+    s = scheduler.reoccurring_cb.ReoccurringScheduledCallback(func)
+
+    now = datetime.now()
+    s.interval(timedelta(seconds=15))
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=15))
+
+    def b_func(d: datetime):
+        s.offset(timedelta(seconds=15))
+        return d
+
+    s.boundary_func(b_func)
+    cmp_ts(s.get_next_call(), now + timedelta(seconds=30))

@@ -159,7 +159,9 @@ class Rule:
             HABApp.core.const.loop
         )
 
-    def run_every(self, time: TYPING_DATE_TIME, interval, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
+    def run_every(self,
+                  time: TYPING_DATE_TIME, interval: typing.Union[int, datetime.timedelta],
+                  callback, *args, **kwargs) -> ReoccurringScheduledCallback:
         """
         Run a function periodically
 
@@ -172,7 +174,6 @@ class Rule:
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = ReoccurringScheduledCallback(cb, *args, **kwargs)
         future_event.interval(interval)
-        future_event.set_next_run_time(time)
         self.__future_events.append(future_event)
         return future_event
 
@@ -193,15 +194,16 @@ class Rule:
         return future_event
 
     def run_on_day_of_week(self,
-                           time: TYPING_DATE_TIME, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+                           time: datetime.time, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param weekdays:
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
+        assert isinstance(time, datetime.time), type(time)
 
         # names of weekdays in local language
         lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
@@ -222,52 +224,55 @@ class Rule:
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays(weekdays)
-        future_event.set_next_run_time(time)
+        future_event.time(time)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_every_day(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_every_day(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
+        assert isinstance(time, datetime.time), type(time)
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays([1, 2, 3, 4, 5, 6, 7])
-        future_event.set_next_run_time(time)
+        future_event.time(time)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_workdays(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_workdays(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
+        assert isinstance(time, datetime.time), type(time)
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays('workday')
-        future_event.set_next_run_time(time)
+        future_event.time(time)
         self.__future_events.append(future_event)
         return future_event
 
-    def run_on_weekends(self, time: TYPING_DATE_TIME, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
+    def run_on_weekends(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
         """
 
-        :param time: |param_scheduled_time|
+        :param time: datetime.time
         :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
+        assert isinstance(time, datetime.time), type(time)
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays('weekend')
-        future_event.set_next_run_time(time)
+        future_event.time(time)
         self.__future_events.append(future_event)
         return future_event
 
@@ -318,7 +323,7 @@ class Rule:
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = OneTimeCallback(cb, *args, **kwargs)
-        future_event.set_next_run_time(date_time)
+        future_event.set_run_time(date_time)
         self.__future_events.append(future_event)
         return future_event
 
@@ -336,7 +341,7 @@ class Rule:
 
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = OneTimeCallback(cb, *args, **kwargs)
-        future_event.set_next_run_time(fut)
+        future_event.set_run_time(fut)
         self.__future_events.append(future_event)
         return future_event
 
@@ -350,7 +355,7 @@ class Rule:
         """
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = OneTimeCallback(cb, *args, **kwargs)
-        future_event.set_next_run_time(None)
+        future_event.set_run_time(None)
         self.__future_events.append(future_event)
         return future_event
 
@@ -543,7 +548,7 @@ def get_parent_rule() -> Rule:
         try:
             frm = sys._getframe(depth)
         except ValueError:
-            raise RuntimeError(f'Could not find parent rule!')
+            raise RuntimeError('Could not find parent rule!')
 
         __vars = frm.f_locals
         depth += 1

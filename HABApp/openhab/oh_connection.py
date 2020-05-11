@@ -68,9 +68,8 @@ class OpenhabConnection(HttpConnectionEventHandler):
         # todo: move this somewhere proper
         async def wait_and_update():
             await asyncio.sleep(2)
-            for f in HABApp.CONFIG.directories.config.iterdir():
-                if f.name.endswith('.yml'):
-                    await self.update_thing_config(f)
+            for f in HABApp.core.lib.list_files(HABApp.CONFIG.directories.config, '.yml'):
+                await self.update_thing_config(f)
         asyncio.ensure_future(wait_and_update())
 
     @log_exception
@@ -223,10 +222,13 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
     @HABApp.core.wrapper.log_exception
     async def update_thing_config(self, path: Path):
-        if path.name.lower() != 'thingconfig.yml':
+        # we have to check the naming structure because we get file events for the whole folder
+        _name = path.name.lower()
+        if not _name.startswith('thingconfig') or not _name.endswith('.yml'):
             return None
 
         log = logging.getLogger('HABApp.openhab.Config')
+        # we also get events when the file gets deleted
         if not path.is_file():
             log.debug(f'File {path} does not exist -> skipping Thing configuration!')
             return None
@@ -247,7 +249,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
                 continue
 
             if thing.configuration is None:
-                log.error(f'Thing can not be configured!')
+                log.error('Thing can not be configured!')
                 continue
 
             cfg = ThingConfigChanger.from_dict(thing.configuration)
@@ -262,7 +264,7 @@ class OpenhabConnection(HttpConnectionEventHandler):
 
             if not keys_ok:
                 # show list with available entries
-                log.error(f'   Available:')
+                log.error('   Available:')
                 for k, v in sorted(filter(lambda x: isinstance(x[0], str), cfg.items())):
                     if k.startswith('action_') or k in ('node_id', 'wakeup_node'):
                         continue

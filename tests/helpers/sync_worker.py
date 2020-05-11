@@ -12,7 +12,7 @@ class SyncWorker:
         self.listener: typing.List[EventBusListener] = []
 
     def listen_events(self, name: str, cb):
-        listener = EventBusListener(name, WrappedFunction(cb, name=f'TestFunc for name'))
+        listener = EventBusListener(name, WrappedFunction(cb, name=f'TestFunc for {name}'))
         self.listener.append(listener)
         EventBus.add_listener(listener)
 

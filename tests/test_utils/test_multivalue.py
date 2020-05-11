@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.util import MultiModeItem
+from HABApp.util.multimode import BaseMode, ValueMode, MultiModeItem
 from ..test_core import ItemTests
 
 
@@ -11,11 +11,9 @@ class TestMultiModeItem(ItemTests):
 
 def test_diff_prio():
     p = MultiModeItem('TestItem')
-    p.create_mode('modea', 1, '1234')
-    p.create_mode('modeb', 2, '4567')
-
-    p1 = p.get_mode('modea')
-    p2 = p.get_mode('modeb')
+    p1 = ValueMode('modea', '1234')
+    p2 = ValueMode('modeb', '4567')
+    p.add_mode(1, p1).add_mode(2, p2)
 
     p1.set_value(5)
     assert p.value == '4567'
@@ -33,8 +31,9 @@ def test_diff_prio():
 
 def test_calculate_lower_priority_value():
     p = MultiModeItem('TestItem')
-    m1 = p.create_mode('modea', 1, '1234')
-    m2 = p.create_mode('modeb', 2, '4567')
+    m1 = ValueMode('modea', '1234')
+    m2 = ValueMode('modeb', '4567')
+    p.add_mode(1, m1).add_mode(2, m2)
 
     assert m1.calculate_lower_priority_value() is None
     assert m2.calculate_lower_priority_value() == '1234'
@@ -45,8 +44,9 @@ def test_calculate_lower_priority_value():
 
 def test_auto_disable_1():
     p = MultiModeItem('TestItem')
-    m1 = p.create_mode('modea', 1, 50)
-    m2 = p.create_mode('modeb', 2, 60, auto_disable_func= lambda l, o: l > o)
+    m1 = ValueMode('modea', 50)
+    m2 = ValueMode('modeb', 60, auto_disable_func= lambda l, o: l > o)
+    p.add_mode(1, m1).add_mode(2, m2)
 
     m1.set_value(50)
     assert p.value == 60
@@ -61,8 +61,9 @@ def test_auto_disable_1():
 
 def test_auto_disable_func():
     p = MultiModeItem('TestItem')
-    m1 = p.create_mode('modea', 1, 50)
-    m2 = p.create_mode('modeb', 2, 60, auto_disable_func=lambda low, s: low == 40)
+    m1 = ValueMode('modea', 50)
+    m2 = ValueMode('modeb', 60, auto_disable_func=lambda low, s: low == 40)
+    p.add_mode(1, m1).add_mode(2, m2)
 
     m2.set_value(60)
     assert p.value == 60
@@ -83,6 +84,19 @@ def test_unknown():
     with pytest.raises(KeyError):
         p.get_mode('asdf')
 
-    p.create_mode('mode', 1, 50)
+    p.add_mode(1, BaseMode('mode'))
     with pytest.raises(KeyError):
         p.get_mode('asdf')
+
+
+def test_remove():
+    p = MultiModeItem('asdf')
+    m1 = BaseMode('m1')
+    m2 = BaseMode('m2')
+
+    p.add_mode(0, m1)
+    p.add_mode(1, m2)
+
+    p.remove_mode('m1')
+
+    assert p.all_modes() == [(1, m2)]

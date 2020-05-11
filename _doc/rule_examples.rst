@@ -83,7 +83,8 @@ to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more informa
             self.listen_event('HABApp.Errors', self.on_error, HABAppError)
 
         def on_error(self, error_event: HABAppError):
-            print(error_event.to_str())
+            msg = event.to_str() if isinstance(event, HABAppError) else event
+            print(msg)
 
     NotifyOnError()
 

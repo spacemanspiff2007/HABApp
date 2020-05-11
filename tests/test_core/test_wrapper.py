@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 
 import HABApp
-from HABApp.core.wrapper import ExceptionToHABApp
+from HABApp.core.wrapper import ExceptionToHABApp, ignore_exception
 
 log = logging.getLogger('WrapperTest')
 
@@ -28,7 +28,7 @@ def test_error_catch(p_mock):
     with ExceptionToHABApp(log, logging.WARNING):
         1 / 0
     p_mock.assert_called_once()
-    print(p_mock.call_args[0][0] == 'HABApp.Warnings')
+    assert p_mock.call_args[0][0] == HABApp.core.const.topics.WARNINGS
 
 
 def test_error_level(p_mock):
@@ -43,3 +43,12 @@ def test_error_level(p_mock):
         1 / 0
     p_mock.assert_called_once()
     assert p_mock.call_args[0][0] == HABApp.core.const.topics.ERRORS
+
+
+@ignore_exception
+def func_a(_l):
+    1 / 0
+
+
+def test_func_wrapper(p_mock):
+    func_a(['asdf', 'asdf'])

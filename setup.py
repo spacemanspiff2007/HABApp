@@ -1,7 +1,7 @@
 import typing
 from pathlib import Path
 
-import setuptools
+import setuptools  # type: ignore
 
 
 # Load version number without importing HABApp
@@ -9,8 +9,8 @@ def load_version() -> str:
     version: typing.Dict[str, str] = {}
     with open("HABApp/__version__.py") as fp:
         exec(fp.read(), version)
-    assert version['__VERSION__'], version
-    return version['__VERSION__']
+    assert version['__version__'], version
+    return version['__version__']
 
 
 def load_req() -> typing.List[str]:
@@ -23,9 +23,9 @@ def load_req() -> typing.List[str]:
         return f.readlines()
 
 
-__VERSION__ = load_version()
+__version__ = load_version()
 
-print(f'Version: {__VERSION__}')
+print(f'Version: {__version__}')
 print('')
 
 # When we run tox tests we don't have these files available so we skip them
@@ -37,7 +37,7 @@ if readme.is_file():
 
 setuptools.setup(
     name="HABApp",
-    version=__VERSION__,
+    version=__version__,
     author="spaceman_spiff",
     # author_email="",
     description="Easy automation with MQTT and/or openHAB. Create home automation rules in python.",

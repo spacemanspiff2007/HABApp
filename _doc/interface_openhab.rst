@@ -23,7 +23,7 @@ Openhab item types
 ------------------------------
 
 Description and example
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Openhab items are mapped to special classes and provide convenience functions.
 
@@ -48,7 +48,7 @@ Example:
 
 
 NumberItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.NumberItem
    :parts: 1
 
@@ -59,7 +59,7 @@ NumberItem
 
 
 ContactItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.ContactItem
    :parts: 1
 
@@ -70,7 +70,7 @@ ContactItem
 
 
 SwitchItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.SwitchItem
    :parts: 1
 
@@ -81,7 +81,7 @@ SwitchItem
 
 
 DimmerItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.DimmerItem
    :parts: 1
 
@@ -92,7 +92,7 @@ DimmerItem
 
 
 RollershutterItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.RollershutterItem
    :parts: 1
 
@@ -103,7 +103,7 @@ RollershutterItem
 
 
 ColorItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.ColorItem
    :parts: 1
 
@@ -114,7 +114,7 @@ ColorItem
 
 
 StringItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.StringItem
    :parts: 1
 
@@ -125,7 +125,7 @@ StringItem
 
 
 LocationItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.LocationItem
    :parts: 1
 
@@ -136,7 +136,7 @@ LocationItem
 
 
 PlayerItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.PlayerItem
    :parts: 1
 
@@ -147,7 +147,7 @@ PlayerItem
 
 
 GroupItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.GroupItem
    :parts: 1
 
@@ -158,7 +158,7 @@ GroupItem
 
 
 Thing
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.Thing
    :parts: 1
 
@@ -169,7 +169,7 @@ Thing
 
 
 ImageItem
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.ImageItem
    :parts: 1
 
@@ -183,31 +183,40 @@ Textual thing configuration
 ------------------------------
 
 Description
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 HABApp offers a special mechanism to textually define thing configuration parameters for things
 which have been added through the gui. This combines the best of both worlds:
 auto discovery and easy and fast sharing of parameters across things.
 
-Configuration is done in the ``ThingConfig.yml`` file in the ``config`` folder (see :doc:`configuration`).
-Just create an entry with the thing UID and the configuration parameters together with the target value.
-Parameters will be checked/set when HABApp connects to openhab or when the file gets changed.
-
 .. WARNING::
    The value of the parameters will not be checked and will be written as specified. It is recommended to use HABmin or PaperUI to
    generate the initial configuration and use this mechanism to spread it to things of the same type.
 
+Configuration is typically done in the ``ThingConfig.yml`` file in the ``config`` folder (see :doc:`configuration`),
+but can also be spread out to more files like ``ThingConfig_MyThing.yml``. Every file that starts with
+``ThingConfig`` has the ``.yml`` ending will be loaded.
+
+The Parameters will be checked/set when HABApp connects to openHAB or whenever the corresponding file gets changed.
+
 File Structure
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
+The configuration is a simple entry with the thing UID and the configuration parameters together with the target value.
 
 .. code-block:: yaml
 
-    ThingUID:
+    ThingUID1:
         Parameter1:  Value1
         Parameter2:  Value2
 
+    ThingUID2:
+        Parameter1:  Value3
+
 Examples
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~
+
+Simple entry
+"""""""""""""
 
 The following example will show how to set the Z-Wave Parameters 4, 5 and 7 for a ``Philio PST02A`` Z-Wave sensor.
 
@@ -219,6 +228,12 @@ The following example will show how to set the Z-Wave Parameters 4, 5 and 7 for 
       5: 8      # Operation Mode
       7: 20     # Customer Function
 
+.. tip::
+   Integer values can be specified either as integer (``20``) or hex (``0x14``)
+
+
+Entry sharing
+"""""""""""""
 
 If the values should be checked for multiple sensors `yml features anchors <https://en.wikipedia.org/wiki/YAML#Advanced_components>`_
 with ``&`` which then can be referenced with ``*``. This allows to apply the defined parameters quickly to more sensors.
@@ -226,16 +241,16 @@ with ``&`` which then can be referenced with ``*``. This allows to apply the def
 .. code-block:: yaml
 
     # Philio PST02A
-    zwave:device:controller:node3:  &PST02A  # <-- this creates the anchor with the name PST02A
+    zwave:device:controller:node3:  &PST02A  # <-- this creates the anchor node with the name PST02A
       4: 99     # Light Threshold
       5: 8      # Operation Mode
       7: 20     # Customer Function
 
-    zwave:device:controller:node5: *PST02A  # <-- this references the anchor with the name PST02A
+    zwave:device:controller:node5: *PST02A  # <-- this references the anchor node PST02A
     zwave:device:controller:node6: *PST02A
     zwave:device:controller:node7:
-      <<: *PST02A   # <-- this references the anchor in merge mode
-      4: 80         #     and overwrites parameter 4
+      <<: *PST02A   # <-- this references and inserts the content (!) of the anchor node
+      4: 80         #     and then overwrites parameter 4
 
 *Log output*
 
@@ -260,7 +275,7 @@ with ``&`` which then can be referenced with ``*``. This allows to apply the def
 
 
 Parameter overview
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is possible to quickly generate a parameter overview (with current values) simply by specifying an invalid parameter name.
 

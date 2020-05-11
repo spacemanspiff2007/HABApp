@@ -1,19 +1,63 @@
 import asyncio
 import functools
 import logging
+import re
 import sys
-import traceback
 import typing
 from logging import Logger
+from pathlib import Path
+
+import stackprinter
 
 import HABApp
 
 log = logging.getLogger('HABApp')
 
 
-def __process_exception(func, e: Exception, do_print=False):
-    lines = traceback.format_exc().splitlines()
-    del lines[1:3]  # Remove entries which point to this wrapper
+SUPPRESSED_PATHS = (
+    re.compile(f'[/\\\\]{Path(__file__).name}$'),   # this file
+
+    # rule file loader
+    re.compile(r'[/\\]rule_file.py$'),
+    re.compile(r'[/\\]runpy.py$'),
+
+    # Worker functions
+    re.compile(r'[/\\]wrappedfunction.py$'),
+
+    # Don't print stack for used libraries
+    re.compile(r'[/\\]asyncio[/\\]\w+.py$'),
+    re.compile(r'[/\\]aiohttp[/\\]\w+.py$'),
+)
+
+SKIP_TB = tuple(re.compile(k.pattern.replace('$', ', ')) for k in SUPPRESSED_PATHS)
+
+
+def format_exception(e: typing.Union[Exception, typing.Tuple[typing.Any, typing.Any, typing.Any]]) -> typing.List[str]:
+    tb = []
+    skip = 0
+
+    lines = stackprinter.format(e, truncate_vals=2000, suppressed_paths=SUPPRESSED_PATHS).splitlines()
+    for i, line in enumerate(lines):
+        if not skip:
+            for s in SKIP_TB:
+                if s.search(line):
+                    # if it's just a two line traceback we skip it
+                    if lines[i + 1].startswith('    ') and lines[i + 2].startswith('File'):
+                        skip = 2
+                        continue
+        if skip:
+            skip -= 1
+            continue
+
+        tb.append(line)
+
+    return tb
+
+
+def process_exception(func, e: Exception, do_print=False):
+    # lines = traceback.format_exc().splitlines()
+    # del lines[0:3]
+    lines = format_exception(e)
 
     # log exception, since it is unexpected we push it to stdout, too
     if do_print:
@@ -42,7 +86,7 @@ def log_exception(func):
             except asyncio.CancelledError:
                 pass
             except Exception as e:
-                __process_exception(func, e, do_print=True)
+                process_exception(func, e, do_print=True)
                 # re raise exception, since this is something we didn't anticipate
                 raise
 
@@ -53,7 +97,7 @@ def log_exception(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            __process_exception(func, e, do_print=True)
+            process_exception(func, e, do_print=True)
             # re raise exception, since this is something we didn't anticipate
             raise
 
@@ -70,7 +114,7 @@ def ignore_exception(func):
             except asyncio.CancelledError:
                 pass
             except Exception as e:
-                __process_exception(func, e)
+                process_exception(func, e)
                 return None
 
         return a
@@ -80,7 +124,7 @@ def ignore_exception(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            __process_exception(func, e)
+            process_exception(func, e)
             return None
     return f
 
@@ -106,10 +150,13 @@ class ExceptionToHABApp:
 
         self.raised_exception = True
 
-        tb = traceback.format_exception(exc_type, exc_val, exc_tb)
-        # there is an inconsistent use of newlines and array entries so we normalize it
-        tb = '\n'.join(map(lambda x: x.strip(' \n'), tb))
-        tb = tb.splitlines()
+        # tb = traceback.format_exception(exc_type, exc_val, exc_tb)
+        # # there is an inconsistent use of newlines and array entries so we normalize it
+        # tb = '\n'.join(map(lambda x: x.strip(' \n'), tb))
+        # tb = tb.splitlines()
+
+        tb = format_exception((exc_type, exc_val, exc_tb))
+
         # possibility to reprocess tb
         if self.proc_tb is not None:
             tb = self.proc_tb(tb)

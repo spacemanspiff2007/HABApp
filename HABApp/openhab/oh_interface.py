@@ -9,7 +9,8 @@ import HABApp.openhab.events
 from HABApp.core.const import loop
 from HABApp.core.items.base_valueitem import BaseValueItem
 from HABApp.core.wrapper import log_exception
-from HABApp.openhab.definitions.rest import OpenhabItemDefinition
+from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition
+from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition
 from . import definitions
 from .http_connection import HttpConnection
 
@@ -211,7 +212,91 @@ class OpenhabInterface:
             loop
         )
         data = fut.result()
-        return OpenhabItemDefinition.from_dict(data)
+        return OpenhabItemDefinition.parse_obj(data)
+
+    def get_thing(self, thing_name: str) -> OpenhabThingDefinition:
+        """ Return the complete OpenHAB thing definition
+
+        :param thing_name: name of the thing or the item
+        """
+        if isinstance(thing_name, HABApp.core.items.base_item.BaseItem):
+            thing_name = thing_name.name
+        assert isinstance(thing_name, str), type(thing_name)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_get_thing(thing_name),
+            loop
+        )
+        return fut.result()
+
+    def get_channel_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+        """ returns the ItemChannelLinkDefinition for a link between a (things) channel and an item
+
+        :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
+        :param item_name: name of the item
+        :return: an instance of ItemChannelLinkDefinition or None on error
+        """
+
+        assert isinstance(channel_uid, str), type(channel_uid)
+        assert isinstance(item_name, str), type(item_name)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_get_link(channel_uid, item_name),
+            loop
+        )
+        return fut.result()
+
+    def create_channel_link(self, channel_uid: str, item_name: str, configuration: dict = {}) -> bool:
+        """ creates a link between a (things) channel and an item
+
+        :param link_def: an instance of ItemChannelLinkDefinition with at least channel_uid and item_name set
+        :return: true on successful creation, otherwise false
+        """
+
+        assert isinstance(channel_uid, str), type(channel_uid)
+        assert isinstance(item_name, str), type(item_name)
+        assert isinstance(configuration, dict), type(configuration)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_create_link(
+                ItemChannelLinkDefinition(item_name=item_name, channel_uid=channel_uid, configuration=configuration)
+            ),
+            loop
+        )
+        return fut.result()
+
+    def remove_channel_link(self, channel_uid: str, item_name: str) -> bool:
+        """ removes a link between a (things) channel and an item
+
+        :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
+        :param item_name: name of the item
+        :return: true on successful removal, otherwise false
+        """
+
+        link = ItemChannelLinkDefinition(item_name=item_name, channel_uid=channel_uid)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_remove_link(link),
+            loop
+        )
+        return fut.result()
+
+    def channel_link_exists(self, channel_uid: str, item_name: str) -> bool:
+        """ check if a things channel is linked to an item
+
+        :param channel_uid: uid of the linked channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
+        :param item_name: name of the linked item
+        :return: true when the link exists, otherwise false
+        """
+
+        assert isinstance(channel_uid, str), type(channel_uid)
+        assert isinstance(item_name, str), type(item_name)
+
+        fut = asyncio.run_coroutine_threadsafe(
+            self.__connection.async_link_exists(channel_uid, item_name),
+            loop
+        )
+        return fut.result()
 
     @log_exception
     def remove_item(self, item_name: str):

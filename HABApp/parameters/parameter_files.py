@@ -29,7 +29,7 @@ def setup_param_files() -> bool:
     HABApp.core.EventBus.add_listener(
         HABApp.core.EventBusListener(
             HABApp.core.const.topics.PARAM,
-            HABApp.core.WrappedFunction(load_file),
+            HABApp.core.WrappedFunction(unload_file),
             HABApp.core.events.habapp_events.RequestFileUnloadEvent
         )
     )

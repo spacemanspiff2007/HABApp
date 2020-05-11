@@ -1,6 +1,7 @@
 import logging
 import threading
 import traceback
+import typing
 
 import HABApp
 
@@ -19,6 +20,23 @@ class TestResult:
         return f'Processed {self.run:d} Tests: IO: {self.io} NIO: {self.nio}'
 
 
+RULE_CTR = 0
+TESTS_RULES: typing.Dict[int, 'TestBaseRule'] = {}
+
+
+def get_next_id(rule):
+    global RULE_CTR
+    with LOCK:
+        RULE_CTR += 1
+        TESTS_RULES[RULE_CTR] = rule
+        return RULE_CTR
+
+
+def pop_rule(rule_id: int):
+    with LOCK:
+        TESTS_RULES.pop(rule_id)
+
+
 class TestBaseRule(HABApp.Rule):
     """This rule is testing the OpenHAB data types by posting values and checking the events"""
 
@@ -26,36 +44,29 @@ class TestBaseRule(HABApp.Rule):
         super().__init__()
 
         self.__tests_funcs = {}
+        self.tests_started = False
 
-        self.prev_rule: str = None
-        self.next_rule: str = None
-        self.tests_done = False
+        self.__id = get_next_id(self)
+        self.register_on_unload(lambda: pop_rule(self.__id))
 
+        # we have to chain the rules later, because we register the rules only once we loaded successfully.
+        self.run_in(2, self.__execute_run)
+
+    def __execute_run(self):
         with LOCK:
-            # if we have only one rule it's not a list
-            rules = self.get_rule(None)
-            if isinstance(rules, HABApp.Rule):
-                rules = [rules]
+            if self.__id != RULE_CTR:
+                return None
 
-            for rule in rules:
-                if not isinstance(rule, TestBaseRule):
-                    continue
-                if rule is self or rule.tests_done:
-                    continue
+        result = TestResult()
+        for k, rule in sorted(TESTS_RULES.items()):
+            assert isinstance(rule, TestBaseRule)
+            if rule.tests_started:
+                continue
+            rule.run_tests(result)
 
-                if rule.next_rule is None:
-                    rule.next_rule = self.rule_name
-                    self.prev_rule = rule.rule_name
-                    break
-
-        self.run_in(2, self.start_test_execution)
-
-    def start_test_execution(self):
-        if self.prev_rule is not None:
-            return None
-
-        self.run_tests(TestResult())
-
+        log.info(str(result)) if not result.nio else log.error(str(result))
+        print(str(result))
+        return None
 
     def add_test(self, name, func, *args, **kwargs):
         assert name not in self.__tests_funcs, name
@@ -68,6 +79,8 @@ class TestBaseRule(HABApp.Rule):
         pass
 
     def run_tests(self, result: TestResult):
+        self.tests_started = True
+
         try:
             self.set_up()
         except Exception as e:
@@ -119,10 +132,3 @@ class TestBaseRule(HABApp.Rule):
             for line in traceback.format_exc().splitlines():
                 log.error(line)
             result.nio += 1
-
-        # run next rule
-        self.tests_done = False
-        if self.next_rule is not None:
-            self.run_soon(self.get_rule(self.next_rule).run_tests, result)
-        else:
-            log.info( str(result)) if not result.nio else log.error(str(result))

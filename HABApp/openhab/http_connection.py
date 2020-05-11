@@ -4,6 +4,7 @@ import logging
 import traceback
 import typing
 
+import urllib
 import aiohttp
 from aiohttp.client import ClientResponse
 from aiohttp_sse_client import client as sse_client
@@ -11,9 +12,11 @@ from aiohttp_sse_client import client as sse_client
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from ..config import Openhab as OpenhabConfig
-from ..core.const.json import dump_json, load_json
-from .definitions.rest import OpenhabThingDefinition, ThingNotFoundError, ThingNotEditableError
+from HABApp.core.Items import ItemNotFoundException
+from HABApp.config import Openhab as OpenhabConfig
+from HABApp.core.const.json import dump_json, load_json
+from .definitions.rest import OpenhabThingDefinition, ThingNotEditableError, ThingNotFoundError
+from .definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
@@ -76,6 +79,13 @@ class HttpConnection:
         assert not url.startswith('/')
         url = url.format(*args, **kwargs)
         return f'http://{self.__host:s}:{self.__port:d}/{url:s}'
+
+    def __get_link_url(self, channel_uid: str, item_name: str) -> str:
+        # rest/links/ endpoint needs the channel to be url encoded
+        # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
+        # otherwise the REST-api returns HTTP-Status 500 InternalServerError
+        link_url = urllib.parse.quote(f"{item_name}/{channel_uid}")
+        return self.__get_openhab_url('rest/links/{link_url:s}', link_url=link_url)
 
     def __set_offline(self, log_msg=''):
 
@@ -263,7 +273,6 @@ class HttpConnection:
         asyncio.ensure_future(self._check_http_response(fut, additional_info=state))
 
     async def async_remove_item(self, item_name) -> bool:
-
         if self.config.general.listen_only:
             return False
 
@@ -320,6 +329,46 @@ class HttpConnection:
         else:
             return await ret.json(encoding='utf-8')
 
+    async def async_remove_link(self, link_def: ItemChannelLinkDefinition) -> bool:
+        if self.config.general.listen_only:
+            return False
+
+        fut = self.__session.delete(self.__get_link_url(link_def.channel_uid, link_def.item_name))
+
+        ret = await self._check_http_response(fut)
+        return ret.status == 200
+
+    async def async_get_link(self, channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+        fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
+        ret = await self._check_http_response(fut, accept_404=True)
+        if ret.status == 404:
+            raise LinkNotFoundError(f'Link {item_name} -> {channel_uid} not found!')
+        if ret.status >= 300:
+            return None
+        else:
+            return ItemChannelLinkDefinition(**await ret.json(encoding='utf-8'))
+
+    async def async_link_exists(self, channel_uid: str, item_name: str) -> bool:
+        fut = self.__session.get(self.__get_link_url(channel_uid, item_name))
+
+        ret = await self._check_http_response(fut, accept_404=True)
+        return ret.status == 200
+
+    async def async_create_link(self, link_def: ItemChannelLinkDefinition) -> bool:
+        if self.config.general.listen_only:
+            return False
+
+        # if the passed item doesn't exist OpenHAB creates a new empty item item
+        exists = await self.async_item_exists(link_def.item_name)
+        if not exists:
+            raise ItemNotFoundException(f'Item "{link_def.item_name}" does not exist')
+
+        url = self.__get_link_url(link_def.channel_uid, link_def.item_name)
+        fut = self.__session.put(url, json=link_def.dict(by_alias=True))
+
+        ret = await self._check_http_response(fut)
+        return ret.status == 200
+
     async def async_create_item(self, item_type, name, label="", category="", tags=[], groups=[],
                                 group_type=None, group_function=None, group_function_params=[]) -> bool:
 
@@ -343,7 +392,7 @@ class HttpConnection:
             payload['function'] = {}
             payload['function']['name'] = group_function
             if group_function_params:
-                payload['function']['params'] = group_function
+                payload['function']['params'] = group_function_params
 
         fut = self.__session.put(self.__get_openhab_url('rest/items/{:s}', name), json=payload)
         ret = await self._check_http_response(fut, payload)
@@ -409,7 +458,7 @@ class HttpConnection:
         if ret.status >= 300:
             raise ThingNotFoundError(f'Thing {uid} not found!')
 
-        return OpenhabThingDefinition(**await ret.json(encoding='utf-8'))
+        return OpenhabThingDefinition.parse_obj(await ret.json(encoding='utf-8'))
 
     async def async_set_thing_cfg(self, uid: str, cfg: typing.Dict[str, typing.Any]):
         fut = self.__session.put(
