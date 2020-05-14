@@ -54,24 +54,27 @@ def format_exception(e: typing.Union[Exception, typing.Tuple[typing.Any, typing.
     return tb
 
 
-def process_exception(func, e: Exception, do_print=False):
+def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
+                      do_print=False, logger: logging.Logger = log):
     # lines = traceback.format_exc().splitlines()
     # del lines[0:3]
     lines = format_exception(e)
 
+    func_name = func if isinstance(func, str) else func.__name__
+
     # log exception, since it is unexpected we push it to stdout, too
     if do_print:
-        print(f'Error {e} in {func.__name__}:')
-    log.error(f'Error {e} in {func.__name__}:')
+        print(f'Error {e} in {func_name}:')
+    logger.error(f'Error {e} in {func_name}:')
     for line in lines:
         if do_print:
             print(line)
-        log.error(line)
+        logger.error(line)
 
     # send Error to internal event bus so we can reprocess it and notify the user
     HABApp.core.EventBus.post_event(
         HABApp.core.const.topics.ERRORS, HABApp.core.events.habapp_events.HABAppError(
-            func_name=func.__name__, exception=e, traceback='\n'.join(lines)
+            func_name=func_name, exception=e, traceback='\n'.join(lines)
         )
     )
 
