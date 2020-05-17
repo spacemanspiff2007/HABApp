@@ -34,3 +34,14 @@ def test_unary():
 def test_cast():
     assert float(BaseValueItem('asdf', 1)) == 1.0
     assert int(BaseValueItem('asdf', 1.5)) == 1
+
+
+def test_compare():
+    a = BaseValueItem('asdf', 1)
+    assert a < 2
+    assert a <= 2
+    assert a > 0
+    assert a >= 0
+
+    assert a == 1
+    assert a != 4
