@@ -82,25 +82,17 @@ class BaseValueItem(BaseItem):
     def __bool__(self):
         return bool(self.value)
 
-    # rich comparisons only for numeric types (int and float)
+    # rich comparisons
     def __lt__(self, other):
-        if not isinstance(self.value, (int, float)):
-            return NotImplemented
         return self.value < other
 
     def __le__(self, other):
-        if not isinstance(self.value, (int, float)):
-            return NotImplemented
         return self.value <= other
 
     def __ge__(self, other):
-        if not isinstance(self.value, (int, float)):
-            return NotImplemented
         return self.value >= other
 
     def __gt__(self, other):
-        if not isinstance(self.value, (int, float)):
-            return NotImplemented
         return self.value > other
 
     # https://docs.python.org/3/reference/datamodel.html#emulating-numeric-types
