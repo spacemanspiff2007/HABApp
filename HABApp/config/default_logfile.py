@@ -9,8 +9,16 @@ formatters:
 
 
 handlers:
+  # There are several Handlers available:
+  # logging.handlers.RotatingFileHandler:
+  #   Will rotate when the file reaches a certain size (see python logging documentation for args)
+  # HABApp.core.lib.handler.MidnightRotatingFileHandler:
+  #   Will wait until the file reaches a certain size and then rotate on midnight
+  # More handlers:
+  # https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
+
   HABApp_default:
-    class: logging.handlers.RotatingFileHandler
+    class: HABApp.core.lib.handler.MidnightRotatingFileHandler
     filename: 'HABApp.log'
     maxBytes: 1_048_576
     backupCount: 3
@@ -19,7 +27,7 @@ handlers:
     level: DEBUG
 
   EventFile:
-    class: logging.handlers.RotatingFileHandler
+    class: HABApp.core.lib.handler.MidnightRotatingFileHandler
     filename: 'events.log'
     maxBytes: 1_048_576
     backupCount: 3
