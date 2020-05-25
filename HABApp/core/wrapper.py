@@ -173,8 +173,8 @@ class ExceptionToHABApp:
         # log error
         if self.log is not None:
             self.log.log(self.log_level, f'Error "{exc_val}" in {f_name}:')
-            for l in tb:
-                self.log.log(self.log_level, l)
+            for line in tb:
+                self.log.log(self.log_level, line)
 
         # send Error to internal event bus so we can reprocess it and notify the user
         HABApp.core.EventBus.post_event(

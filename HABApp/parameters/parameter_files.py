@@ -56,8 +56,8 @@ def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
             set_parameter_file(path.stem, data)
         except Exception:
             log.error(f"Could not load params from {path.name}!")
-            for l in traceback.format_exc().splitlines():
-                log.error(l)
+            for line in traceback.format_exc().splitlines():
+                log.error(line)
             return None
 
         log.debug(f'Loaded params from {path.name}!')
@@ -71,8 +71,8 @@ def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
             remove_parameter_file(path.stem)
         except Exception:
             log.error(f"Could not remove parameters from {path.name}!")
-            for l in traceback.format_exc().splitlines():
-                log.error(l)
+            for line in traceback.format_exc().splitlines():
+                log.error(line)
             return None
 
         log.debug(f'Removed params from {path.name}!')

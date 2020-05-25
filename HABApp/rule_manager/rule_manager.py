@@ -150,8 +150,8 @@ class RuleManager:
             rule.unload()
         except Exception:
             log.error(f"Could not remove {path}!")
-            for l in traceback.format_exc().splitlines():
-                log.error(l)
+            for line in traceback.format_exc().splitlines():
+                log.error(line)
             return None
         finally:
             if request_lock:
@@ -168,10 +168,7 @@ class RuleManager:
             log.warning(f'Rule file {path} does not exist and can not be loaded!')
             return None
 
-        try:
-            # serialize loading
-            self.__load_lock.acquire()
-
+        with self.__load_lock:
             # Unload if we have already loaded
             with self.__files_lock:
                 already_loaded = path_str in self.files
@@ -181,14 +178,13 @@ class RuleManager:
             log.debug(f'Loading file: {path}')
             with self.__files_lock:
                 self.files[path_str] = file = RuleFile(self, path)
-            file.load()
-        except Exception:
-            log.error(f"Could not load {path}!")
-            for l in traceback.format_exc().splitlines():
-                log.error(l)
-            return None
-        finally:
-            self.__load_lock.release()
+
+            if not file.load():
+                # If the load has failed we remove it again.
+                # Unloading is handled directly in the load function
+                self.files.pop(path_str)
+                log.warning(f'Failed to load {path_str}!')
+                return None
 
         log.debug(f'File {path_str} successfully loaded!')
 
