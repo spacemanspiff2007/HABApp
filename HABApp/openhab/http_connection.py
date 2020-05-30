@@ -180,7 +180,7 @@ class HttpConnection:
             )
 
         self.__session = aiohttp.ClientSession(
-            timeout=aiohttp.ClientTimeout(total=99999999999999999),
+            timeout=aiohttp.ClientTimeout(total=None),
             json_serialize=dump_json,
             auth=auth
         )
