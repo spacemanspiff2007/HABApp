@@ -1,18 +1,18 @@
 aiohttp-sse-client==0.1.7
 aiohttp==3.6.2
-astral==2.1
+astral==2.2
 bidict==0.19.0
 easyco==0.2.2
 paho-mqtt==1.5.0
 pydantic==1.5.1
-pytz==2019.3
+pytz==2020.1
 stackprinter==0.2.3
-tzlocal==2.0.0
+tzlocal==2.1
 voluptuous==0.11.7
 watchdog==0.10.2
 
 # This is optional
-ujson==2.0.3
+ujson==3.0.0
 
 # Backports
-dataclasses;python_version<"3.7"
+dataclasses==0.7;python_version<"3.7"
