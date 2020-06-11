@@ -26,8 +26,8 @@ class SyncWorker:
     def remove(self):
         WrappedFunction._WORKERS = self.worker
         self.worker = None
-        for l in self.listener:
-            l.cancel()
+        for listener in self.listener:
+            listener.cancel()
 
     def __enter__(self):
         assert self.worker is not None

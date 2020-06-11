@@ -55,8 +55,8 @@ class WrappedFunction:
 
         # Log Exception
         self.log.error(f'Error in {self.name}: {e}')
-        for l in lines:
-            self.log.error(l)
+        for line in lines:
+            self.log.error(line)
 
         # create HABApp event, but only if we are not currently processing one
         if not args or not isinstance(args[0], HABApp.core.events.habapp_events.HABAppError):

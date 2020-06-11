@@ -8,6 +8,8 @@ from ..events import ThingStatusInfoEvent
 
 class Thing(BaseItem):
     """Base class for Things
+
+    :ivar str status: Status of the thing (e.g. OFFLINE, ONLINE, ...)
     """
     def __init__(self, name: str):
         super().__init__(name)

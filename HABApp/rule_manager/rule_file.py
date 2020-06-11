@@ -57,9 +57,9 @@ class RuleFile:
 
     def __process_tc(self, tb: list):
         tb.insert(0, f"Could not load {self.path}!")
-        return [l.replace('<module>', self.path.name) for l in tb]
+        return [line.replace('<module>', self.path.name) for line in tb]
 
-    def load(self):
+    def load(self) -> bool:
 
         created_rules = []
 
@@ -81,7 +81,7 @@ class RuleFile:
             for rule in created_rules:
                 with ign:
                     rule._unload()
-            return None
+            return False
 
         len_found = len(created_rules)
         if not len_found:
@@ -98,4 +98,4 @@ class RuleFile:
                 self.rules[rule.rule_name] = rule
                 log.info(f'Added rule "{rule.rule_name}" from {self.path.name}')
 
-        return None
+        return True

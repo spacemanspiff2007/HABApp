@@ -180,7 +180,7 @@ class HttpConnection:
             )
 
         self.__session = aiohttp.ClientSession(
-            timeout=aiohttp.ClientTimeout(total=99999999999999999),
+            timeout=aiohttp.ClientTimeout(total=None),
             json_serialize=dump_json,
             auth=auth
         )
@@ -203,8 +203,8 @@ class HttpConnection:
                 self.async_try_uuid = asyncio.ensure_future(self._try_uuid())
                 log.info('... offline!')
             else:
-                for l in traceback.format_exc().splitlines():
-                    log.error(l)
+                for line in traceback.format_exc().splitlines():
+                    log.error(line)
             return None
 
         log.info( f'Connected to OpenHAB instance {uuid}')
@@ -248,8 +248,8 @@ class HttpConnection:
             disconnect = self._is_disconnect_exception(e)
             lvl = logging.WARNING if disconnect else logging.ERROR
             log.log(lvl, f'SSE request Error: {e}')
-            for l in traceback.format_exc().splitlines():
-                log.log(lvl, l)
+            for line in traceback.format_exc().splitlines():
+                log.log(lvl, line)
 
             # reconnect even if we have an unexpected error
             if not disconnect:
@@ -303,8 +303,8 @@ class HttpConnection:
         except Exception as e:
             # sometimes uuid already works but items not - so we ignore these errors here, too
             if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
-                for l in traceback.format_exc().splitlines():
-                    log.error(l)
+                for line in traceback.format_exc().splitlines():
+                    log.error(line)
             return None
 
     async def async_get_things(self) -> typing.Optional[typing.List[dict]]:
@@ -315,8 +315,8 @@ class HttpConnection:
         except Exception as e:
             # sometimes uuid and items already works but things not - so we ignore these errors here, too
             if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
-                for l in traceback.format_exc().splitlines():
-                    log.error(l)
+                for line in traceback.format_exc().splitlines():
+                    log.error(line)
             return None
 
     async def async_get_item(self, item_name: str) -> dict:

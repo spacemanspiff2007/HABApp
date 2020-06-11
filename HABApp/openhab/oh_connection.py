@@ -134,6 +134,8 @@ class OpenhabConnection(HttpConnectionEventHandler):
         # Events which change the ItemRegistry
         if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
             item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
+            if item is None:
+                return None
 
             # check already existing item so we can print a warning if something changes
             try:
@@ -166,11 +168,13 @@ class OpenhabConnection(HttpConnectionEventHandler):
         for _dict in data:
             item_name = _dict['name']
             new_item = HABApp.openhab.map_items(item_name, _dict['type'], _dict['state'])
+            if new_item is None:
+                continue
 
             try:
                 # if the item already exists and it has the correct type just update its state
                 # Since we load the items before we load the rules this should actually never happen
-                existing_item = HABApp.core.Items.get_item(item_name)
+                existing_item = HABApp.core.Items.get_item(item_name)   # type: HABApp.core.items.BaseValueItem
                 if isinstance(existing_item, new_item.__class__):
                     existing_item.set_value(new_item.value)  # use the converted state from the new item here
                     new_item = existing_item

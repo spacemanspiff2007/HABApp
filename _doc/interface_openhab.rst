@@ -312,6 +312,17 @@ It is possible to quickly generate a parameter overview (with current values) si
     [HABApp.openhab.Config]    ERROR |     -  21: 0
     [HABApp.openhab.Config]    ERROR |     -  22: 0
 
-Example openHAB rule
+Example openHAB rules
 ---------------------
+
+Example 1
+~~~~~~~~~~~~~~~~~~~~~~~~
 .. literalinclude:: ../conf/rules/openhab_rule.py
+
+
+Check status of things
+~~~~~~~~~~~~~~~~~~~~~~~~
+This rule prints the status of all ``Things`` and shows how to subscribe to events of the ``Thing`` status
+
+.. literalinclude:: ../conf/rules/openhab_things.py
+

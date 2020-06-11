@@ -132,11 +132,11 @@ class HABAppConfigLoader:
                     lines = traceback.format_exc().splitlines()
                     # cut away AbsolutePathExpected Exception from log output
                     start = 0
-                    for i, l in enumerate(lines):
-                        if l.startswith('Traceback'):
+                    for i, line in enumerate(lines):
+                        if line.startswith('Traceback'):
                             start = i
-                    for l in lines[start:]:
-                        log.error(l)
+                    for line in lines[start:]:
+                        log.error(line)
 
         logging.getLogger('HABApp').info(f'HABApp Version {__version__}')
         return None
