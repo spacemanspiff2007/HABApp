@@ -6,7 +6,7 @@ easyco==0.2.2
 paho-mqtt==1.5.0
 pydantic==1.5.1
 pytz==2020.1
-stackprinter==0.2.3
+stackprinter==0.2.4
 tzlocal==2.1
 voluptuous==0.11.7
 watchdog==0.10.2

@@ -36,7 +36,7 @@ def format_exception(e: typing.Union[Exception, typing.Tuple[typing.Any, typing.
     tb = []
     skip = 0
 
-    lines = stackprinter.format(e, truncate_vals=2000, suppressed_paths=SUPPRESSED_PATHS).splitlines()
+    lines = stackprinter.format(e, line_wrap=0, truncate_vals=2000, suppressed_paths=SUPPRESSED_PATHS).splitlines()
     for i, line in enumerate(lines):
         if not skip:
             for s in SKIP_TB:
