@@ -14,7 +14,7 @@ class General(ConfigContainer):
         False, description='If True HABApp will not change anything on the openHAB instance.'
     )
     wait_for_openhab: bool = ConfigEntry(
-        False,
+        True,
         description='If True HABApp will wait for items from the openHAB instance before loading any rules on startup'
     )
 
