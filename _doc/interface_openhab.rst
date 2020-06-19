@@ -326,3 +326,43 @@ This rule prints the status of all ``Things`` and shows how to subscribe to even
 
 .. literalinclude:: ../conf/rules/openhab_things.py
 
+Check status if thing is constant
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sometimes ``Things`` recover automatically from small outages. This rule only triggers then the ``Thing`` is constant
+for 60 seconds.
+
+.. execute_code::
+
+    # hide
+    import time, HABApp
+    from tests import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    thing_item = HABApp.openhab.items.Thing('my:thing:uid')
+    HABApp.core.Items.set_item(thing_item)
+    # hide
+    from HABApp import Rule
+    from HABApp.core.events import ItemNoChangeEvent
+    from HABApp.openhab.items import Thing
+
+
+    class CheckThing(Rule):
+        def __init__(self, name: str):
+            super().__init__()
+
+            self.thing = Thing.get_item(name)
+            watcher = self.thing.watch_change(60)
+            self.thing.listen_event(self.thing_no_change, watcher.EVENT)
+
+        def thing_no_change(self, event: ItemNoChangeEvent):
+            print(f'Thing {event.name} constant for {event.seconds}')
+            print(f'Status: {self.thing.status}')
+
+
+    CheckThing('my:thing:uid')
+    # hide
+    thing_item.status = 'ONLINE'
+    HABApp.core.EventBus.post_event('my:thing:uid', ItemNoChangeEvent('test_watch', 60))
+    runner.tear_down()
+    # hide
+
