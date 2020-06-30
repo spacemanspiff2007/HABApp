@@ -13,10 +13,10 @@ All interaction with the openHAB is done through the ``self.oh`` or ``self.openh
 
 Function parameters
 ------------------------------
-.. autoclass:: HABApp.openhab.oh_interface.OpenhabInterface
+.. automodule:: HABApp.openhab.interface
    :members:
+   :imported-members:
 
-.. autoclass:: HABApp.openhab.oh_interface.OpenhabItemDefinition
 
 
 Openhab item types
@@ -157,23 +157,23 @@ GroupItem
    :member-order: groupwise
 
 
-Thing
-~~~~~~~~~~~~~~~~~~~~~~~~
-.. inheritance-diagram:: HABApp.openhab.items.Thing
-   :parts: 1
-
-.. autoclass:: HABApp.openhab.items.Thing
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-
 ImageItem
 ~~~~~~~~~~~~~~~~~~~~~~~~
 .. inheritance-diagram:: HABApp.openhab.items.ImageItem
    :parts: 1
 
 .. autoclass:: HABApp.openhab.items.ImageItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+Thing
+~~~~~~~~~~~~~~~~~~~~~~~~
+.. inheritance-diagram:: HABApp.openhab.items.Thing
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.items.Thing
    :members:
    :inherited-members:
    :member-order: groupwise

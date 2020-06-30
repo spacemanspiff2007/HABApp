@@ -10,6 +10,7 @@ import HABApp.parameters.parameter_files
 from .folder_watcher import FolderWatcher
 from .shutdown_helper import ShutdownHelper
 from HABApp.config import CONFIG
+from HABApp.openhab import connection_logic as openhab_connection
 
 
 class Runtime:
@@ -43,12 +44,12 @@ class Runtime:
 
         self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
 
-        # OpenHAB
-        self.openhab_connection = HABApp.openhab.OpenhabConnection(HABApp.config.CONFIG.openhab, self.shutdown)
-
         # MQTT
         self.mqtt_connection = HABApp.mqtt.MqttConnection(HABApp.config.CONFIG.mqtt, self.shutdown)
         self.mqtt_connection.connect()
+
+        # openhab
+        openhab_connection.setup(self.shutdown),
 
         # Parameter Files
         params_enabled = HABApp.parameters.parameter_files.setup_param_files()
@@ -92,6 +93,6 @@ class Runtime:
     def get_async(self):
         return asyncio.gather(
             self.async_http.create_client(HABApp.core.const.loop),
-            self.openhab_connection.start(),
+            openhab_connection.start(),
             self.rule_manager.get_async(),
         )

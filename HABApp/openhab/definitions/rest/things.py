@@ -29,11 +29,3 @@ class OpenhabThingDefinition(BaseModel):
     statusInfo: Optional[Dict[str, str]]
     firmwareStatus: Optional[Dict[str, str]]
     editable: Optional[bool]
-
-
-class ThingNotFoundError(Exception):
-    pass
-
-
-class ThingNotEditableError(Exception):
-    pass

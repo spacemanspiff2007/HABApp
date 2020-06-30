@@ -1,0 +1,1 @@
+from .persistence_data import OpenhabPersistenceData

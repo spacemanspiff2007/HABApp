@@ -3,7 +3,7 @@ import datetime
 
 from HABApp.core.const import MISSING
 from HABApp.core.items.base_valueitem import BaseValueItem
-from HABApp.openhab import get_openhab_interface
+from HABApp.openhab.interface import post_update, send_command, get_persistence_data
 
 
 class OpenhabItem(BaseValueItem):
@@ -15,14 +15,14 @@ class OpenhabItem(BaseValueItem):
 
         :param value: (optional) value to be sent. If not specified the item value will be used.
         """
-        get_openhab_interface().send_command(self.name, self.value if value is MISSING else value)
+        send_command(self.name, self.value if value is MISSING else value)
 
     def oh_post_update(self, value: typing.Any = MISSING):
         """Post an update to the openHAB item
 
         :param value: (optional) value to be posted. If not specified the item value will be used.
         """
-        get_openhab_interface().post_update(self.name, self.value if value is MISSING else value)
+        post_update(self.name, self.value if value is MISSING else value)
 
     def get_persistence_data(self, persistence: typing.Optional[str] = None,
                              start_time: typing.Optional[datetime.datetime] = None,
@@ -34,6 +34,6 @@ class OpenhabItem(BaseValueItem):
         :param end_time: return only items which are older than this
         """
 
-        return get_openhab_interface().get_persistence_data(
+        return get_persistence_data(
             self.name, persistence, start_time, end_time
         )
