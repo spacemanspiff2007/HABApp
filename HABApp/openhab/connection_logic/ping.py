@@ -26,6 +26,10 @@ class PingPlugin(PluginBase):
     def on_connect(self):
         if not self.IS_CONNECTED:
             return None
+
+        if not HABApp.config.CONFIG.openhab.ping.enabled:
+            return None
+
         self.fut_ping = asyncio.ensure_future(self.async_ping(), loop=HABApp.core.const.loop)
 
     def on_disconnect(self):
