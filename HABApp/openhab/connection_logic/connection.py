@@ -1,5 +1,3 @@
-import typing
-
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
@@ -10,15 +8,6 @@ from HABApp.openhab.map_events import get_event
 from ._plugin import on_connect, on_disconnect, setup_plugins
 
 log = http_connection.log
-
-# Create plugins in this order
-from . import load_items as __load_items    # noqa: E402
-from . import ping as __ping                # noqa: E402
-
-# so we don't remove the plugin imports by accident
-if typing.TYPE_CHECKING:
-    __load_items = __load_items
-    __ping = __ping
 
 
 def setup(shutdown):
@@ -31,7 +20,6 @@ def setup(shutdown):
 
     # shutdown handler for connection
     shutdown.register_func(http_connection.stop_connection)
-
 
     # shutdown handler for plugins
     shutdown.register_func(on_disconnect)

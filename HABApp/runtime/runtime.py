@@ -85,7 +85,7 @@ class Runtime:
                 folder=CONFIG.directories.config,
                 file_ending='.yml',
                 target_func=lambda x: asyncio.run_coroutine_threadsafe(
-                    openhab_connection.sync_thing_cfg.SYNC.update_thing_config(x), HABApp.core.const.loop
+                    openhab_connection.PLUGIN_THING_CFG.update_thing_config(x), HABApp.core.const.loop
                 )
             )
 

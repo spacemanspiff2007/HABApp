@@ -6,11 +6,12 @@ import logging
 import time
 from HABApp.core.wrapper import log_exception
 from ._plugin import PluginBase
+from ..definitions.exceptions import OpenhabNotReadyYet, OpenhabDisconnectedError
 
 log = logging.getLogger('HABApp.openhab.ping')
 
 
-class PingPlugin(PluginBase):
+class PingOpenhab(PluginBase):
     def __init__(self):
         self.__ping_sent = 0
         self.__ping_received = 0
@@ -61,7 +62,7 @@ class PingPlugin(PluginBase):
 
     @log_exception
     async def async_ping(self):
-        await asyncio.sleep(2)
+        await asyncio.sleep(3)
 
         log.debug('Started ping')
         try:
@@ -75,6 +76,8 @@ class PingPlugin(PluginBase):
 
         except asyncio.CancelledError:
             pass
+        except (OpenhabNotReadyYet, OpenhabDisconnectedError):
+            pass
 
 
-PingPlugin.create_plugin()
+PLUGIN_PING = PingOpenhab.create_plugin()

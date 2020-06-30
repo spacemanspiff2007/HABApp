@@ -11,7 +11,7 @@ from ..interface_async import async_get_items, async_get_things
 log = logging.getLogger('HABApp.openhab.items')
 
 
-class LoadOpenhabItems(PluginBase):
+class LoadAllOpenhabItems(PluginBase):
     def __init__(self):
         self.fut: Optional[asyncio.Future] = None
 
@@ -92,4 +92,4 @@ class LoadOpenhabItems(PluginBase):
         return None
 
 
-LoadOpenhabItems.create_plugin()
+PLUGIN_LOAD_ITEMS = LoadAllOpenhabItems.create_plugin()

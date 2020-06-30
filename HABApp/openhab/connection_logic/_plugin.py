@@ -3,7 +3,7 @@ from typing import List
 
 from HABApp.core.wrapper import ExceptionToHABApp
 
-log = logging.getLogger('HABApp.openhab')
+log = logging.getLogger('HABApp.openhab.plugin')
 
 
 class PluginBase:
@@ -46,3 +46,4 @@ def setup_plugins():
     for p in PLUGINS:
         with ExceptionToHABApp(log, ignore_exception=True):
             p.setup()
+            log.debug(f'Setup {p.__class__.__name__} complete')
