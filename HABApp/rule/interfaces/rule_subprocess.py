@@ -1,6 +1,8 @@
 import asyncio
 import typing
 
+from HABApp.core.const import loop
+
 
 class FinishedProcessInfo:
     """Information about the finished process."""
@@ -27,7 +29,8 @@ async def async_subprocess_exec(callback, program: str, *args, capture_output=Tr
             program,
             *args,
             stdout=asyncio.subprocess.PIPE if capture_output else None,
-            stderr=asyncio.subprocess.PIPE if capture_output else None
+            stderr=asyncio.subprocess.PIPE if capture_output else None,
+            loop=loop
         )
 
         b_stdout, b_stderr = await proc.communicate()

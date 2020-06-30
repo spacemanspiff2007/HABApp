@@ -111,4 +111,4 @@ class SyncThingConfig(PluginBase):
             log.info('Config successfully updated!')
 
 
-SyncThingConfig.create_plugin()
+SYNC = SyncThingConfig.create_plugin()
