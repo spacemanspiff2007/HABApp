@@ -13,7 +13,6 @@ def event_loop():
 
 
 class ProcRule(Rule):
-
     def __init__(self):
         super().__init__()
         self.ret = None
