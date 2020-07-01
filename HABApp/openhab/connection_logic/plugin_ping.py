@@ -6,7 +6,7 @@ import logging
 import time
 from HABApp.core.wrapper import log_exception
 from ._plugin import PluginBase
-from ..definitions.exceptions import OpenhabNotReadyYet, OpenhabDisconnectedError
+from HABApp.openhab.exceptions import OpenhabNotReadyYet, OpenhabDisconnectedError
 
 log = logging.getLogger('HABApp.openhab.ping')
 

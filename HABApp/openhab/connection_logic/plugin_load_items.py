@@ -1,33 +1,18 @@
-import asyncio
 import logging
-from typing import Optional
 
 import HABApp
 from HABApp.core import Items
 from HABApp.core.wrapper import ignore_exception
-from ._plugin import PluginBase
+from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
 
 log = logging.getLogger('HABApp.openhab.items')
 
 
-class LoadAllOpenhabItems(PluginBase):
-    def __init__(self):
-        self.fut: Optional[asyncio.Future] = None
-
-    def setup(self):
-        pass
-
-    def on_connect(self):
-        self.fut = asyncio.ensure_future(self.update_all_items(), loop=HABApp.core.const.loop)
-
-    def on_disconnect(self):
-        if self.fut is not None:
-            self.fut.cancel()
-            self.fut = None
+class LoadAllOpenhabItems(OnConnectPlugin):
 
     @ignore_exception
-    async def update_all_items(self):
+    async def on_connect_function(self):
         data = await async_get_items()
         if data is None:
             return None

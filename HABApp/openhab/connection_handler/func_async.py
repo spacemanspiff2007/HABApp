@@ -6,7 +6,7 @@ from urllib.parse import quote as quote_url
 
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
-from HABApp.openhab.definitions.exceptions import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
+from HABApp.openhab.exceptions import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
     ThingNotFoundError, ItemNotEditableError, ItemNotFoundError
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
 from .http_connection import delete, get, post, put, log

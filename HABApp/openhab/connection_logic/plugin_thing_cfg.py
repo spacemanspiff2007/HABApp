@@ -1,38 +1,24 @@
 import asyncio
 import logging
 from pathlib import Path
-from typing import Optional
 
 import HABApp
-from HABApp.openhab.definitions.exceptions import ThingNotFoundError
 from HABApp.openhab.definitions.helpers.thing_config import ThingConfigChanger
-from ._plugin import PluginBase
+from HABApp.openhab.exceptions import ThingNotFoundError
+from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_thing, async_set_thing_cfg
 
 log = logging.getLogger('HABApp.openhab.config')
 
 
-class SyncThingConfig(PluginBase):
-    def __init__(self):
-        self.fut: Optional[asyncio.Future] = None
-
-    def setup(self):
-        pass
-
-    def on_connect(self):
-        async def wait_and_update():
-            try:
-                await asyncio.sleep(2)
-                for f in HABApp.core.lib.list_files(HABApp.CONFIG.directories.config, '.yml'):
-                    await self.update_thing_config(f)
-            except asyncio.CancelledError:
-                pass
-        self.fut = asyncio.ensure_future(wait_and_update(), loop=HABApp.core.const.loop)
-
-    def on_disconnect(self):
-        if self.fut is not None:
-            self.fut.cancel()
-            self.fut = None
+class SyncThingConfig(OnConnectPlugin):
+    async def on_connect_function(self):
+        try:
+            await asyncio.sleep(2)
+            for f in HABApp.core.lib.list_files(HABApp.CONFIG.directories.config, '.yml'):
+                await self.update_thing_config(f)
+        except asyncio.CancelledError:
+            pass
 
     @HABApp.core.wrapper.log_exception
     async def update_thing_config(self, path: Path):

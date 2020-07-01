@@ -13,7 +13,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.const.json import dump_json, load_json
-from HABApp.openhab.definitions.exceptions import OpenhabConnectionNotSetUpError, OpenhabNotReadyYet, \
+from HABApp.openhab.exceptions import OpenhabConnectionNotSetUpError, OpenhabNotReadyYet, \
     OpenhabDisconnectedError
 from .http_connection_waiter import WaitBetweenConnects
 

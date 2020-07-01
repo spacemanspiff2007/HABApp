@@ -1,6 +1,8 @@
+import asyncio
 import logging
-from typing import List
+from typing import List, Optional
 
+from HABApp.core.const import loop
 from HABApp.core.wrapper import ExceptionToHABApp
 
 log = logging.getLogger('HABApp.openhab.plugin')
@@ -22,6 +24,27 @@ class PluginBase:
         raise NotImplementedError()
 
     def on_disconnect(self):
+        raise NotImplementedError()
+
+
+class OnConnectPlugin(PluginBase):
+    """Plugin that runs a function on connect"""
+    def __init__(self):
+        super().__init__()
+        self.fut: Optional[asyncio.Future] = None
+
+    def setup(self):
+        pass
+
+    def on_connect(self):
+        self.fut = asyncio.ensure_future(self.on_connect_function(), loop=loop)
+
+    def on_disconnect(self):
+        if self.fut is not None:
+            self.fut.cancel()
+            self.fut = None
+
+    async def on_connect_function(self):
         raise NotImplementedError()
 
 
