@@ -42,6 +42,8 @@ class PingOpenhab(PluginBase):
             self.fut_ping.cancel()
             self.fut_ping = None
 
+        log.debug('Ping stopped')
+
     def cfg_changed(self):
         self.on_disconnect()
 
@@ -64,7 +66,7 @@ class PingOpenhab(PluginBase):
     async def async_ping(self):
         await asyncio.sleep(3)
 
-        log.debug('Started ping')
+        log.debug('Ping started')
         try:
             while True:
                 await HABApp.openhab.interface_async.async_post_update(
@@ -74,8 +76,6 @@ class PingOpenhab(PluginBase):
                 self.__ping_sent = time.time()
                 await asyncio.sleep(HABApp.config.CONFIG.openhab.ping.interval)
 
-        except asyncio.CancelledError:
-            pass
         except (OpenhabNotReadyYet, OpenhabDisconnectedError):
             pass
 

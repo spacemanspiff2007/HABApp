@@ -4,7 +4,7 @@ import typing
 
 
 class ThingConfigChanger:
-    zw_param = re.compile(r'config_(?P<p>\d+)_(?P<w>\d+)')
+    zw_param = re.compile(r'config_(?P<p>\d+)_(?P<w>\d+)(?:_\w+)?')
     zw_group = re.compile(r'group_(\d+)')
 
     @classmethod
