@@ -20,40 +20,40 @@ The complete description of the file format can be found `here <https://docs.pyt
 but the format should be pretty straight forward.
 
 .. hint::
-   | Is is recommended to use absolute paths as filenames
-   | e.g.: ``/HABApp/logs/my_logfile.log`` or ``c:\HABApp\logs\my_logfile.log`` on Windows
+   | It is recommended to use absolute paths as file names
+   | e.g.: ``/HABApp/logs/my_logfile.log`` or ``c:\HABApp\logs\my_logfile.log``
 
 .. code-block:: yaml
     
     # required, can not be omitted but does nothing
     version : 1
-    
+
     # describes the output format
     formatters:
       HABApp_format:
         format: '[%(asctime)s] [%(name)25s] %(levelname)8s | %(message)s'
-    
+
     # describes the available file handlers
     handlers:
       HABApp_default:
-        class: logging.handlers.RotatingFileHandler
+        class: HABApp.core.lib.handler.MidnightRotatingFileHandler
         filename: 'HABApp.log'
         maxBytes: 10_000_000
         backupCount: 3
-    
+
         formatter: HABApp_format  # use the specified formatter (see above)
         level: DEBUG
-      
+
       MyRuleHandler:
-        class: logging.handlers.RotatingFileHandler
+        class: HABApp.core.lib.handler.MidnightRotatingFileHandler
         filename: 'c:\HABApp\Logs\MyRule.log'    # absolute filename is recommended
         maxBytes: 10_000_000
         backupCount: 3
-    
+
         formatter: HABApp_format  # use the specified formatter (see above)
         level: DEBUG
-    
-    
+
+
     # List all available loggers
     loggers:
       HABApp:
@@ -61,7 +61,7 @@ but the format should be pretty straight forward.
         handlers:
           - HABApp_default  # This logger does log with the default handler
         propagate: False
-    
+
       MyRule:
         level: DEBUG
         handlers:

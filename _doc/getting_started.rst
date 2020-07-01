@@ -1,6 +1,9 @@
 
 Getting Started
 ==================================
+It is really recommended to use a python IDE, for example PyCharm.
+The IDE can provide auto complete and static checks
+which will help you write error free rules and vastly speed up your developement.
 
 First rule
 ------------------------------
@@ -77,7 +80,7 @@ Iterating with items is done through the Item factory methods.
 Posting values will automatically create the corresponding events on the event bus.
 
 .. execute_code::
-    :header_output: Events on the event bus
+    :header_output: Output
 
     # hide
     import logging
@@ -110,6 +113,14 @@ Posting values will automatically create the corresponding events on the event b
             # Post updates to the item through the internal event bus
             self.my_item.post_value('Test')
             self.my_item.post_value('Change')
+
+            # The item value can be used in comparisons through this shortcut ...
+            if self.my_item == 'Change':
+                print('Item value is "Change"')
+            # ... which is the same as this:
+            if self.my_item.value == 'Change':
+                print('Item.value is "Change"')
+
 
     MyFirstRule()
     # hide

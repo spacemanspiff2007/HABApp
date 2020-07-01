@@ -1,65 +1,67 @@
 import asyncio
+import pytest
 import sys
-import unittest
 
+import HABApp
 from HABApp.rule import Rule
 from ..rule_runner import SimpleRuleRunner
-from HABApp.core.const import loop
 
 
-class TestCases(unittest.TestCase):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.runner = SimpleRuleRunner()
-        self.rule: Rule = None
-
-    def setUp(self):
-
-        self.runner.set_up()
-        self.rule = Rule()
-
-    def tearDown(self):
-        self.runner.tear_down()
-        self.rule = None
-
-    def set_ret(self, p1):
-        self.ret = p1
-
-    def test_run_func(self):
-        self.rule.execute_subprocess(
-            self.set_ret, sys.executable, '-c', 'import datetime; print(datetime.datetime.now())', capture_output=True
-        )
-
-        loop.run_until_complete(asyncio.gather(asyncio.sleep(0.5)))
-        self.assertEqual(self.ret.returncode, 0)
-        self.assertTrue(self.ret.stdout.startswith('20'))
-
-    def test_run_func_no_cap(self):
-        self.rule.execute_subprocess(
-            self.set_ret, sys.executable, '-c', 'import datetime; print(datetime.datetime.now())', capture_output=False
-        )
-
-        # Test this call from __main__ to create thread save process watchers
-        if sys.platform != "win32":
-            asyncio.get_child_watcher()
-
-        loop.run_until_complete(asyncio.gather(asyncio.sleep(0.5)))
-        self.assertEqual(self.ret.returncode, 0)
-        self.assertEqual(self.ret.stdout, None)
-        self.assertEqual(self.ret.stderr, None)
+@pytest.yield_fixture()
+def event_loop():
+    yield HABApp.core.const.loop
 
 
-    def test_exception(self):
-        self.rule.execute_subprocess(self.set_ret, 'asdfasdf', capture_output=False)
+class ProcRule(Rule):
+    def __init__(self):
+        super().__init__()
+        self.ret = None
 
-        loop.run_until_complete(asyncio.gather(asyncio.sleep(0.5)))
-        self.assertEqual(self.ret.returncode, -1)
-
-        self.assertTrue(isinstance(self.ret.stderr, str))
-        self.assertNotEqual(self.ret.stderr, '')
+    def set_ret(self, value):
+        self.ret = value
 
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.fixture(scope="function")
+def rule():
+    runner = SimpleRuleRunner()
+    runner.set_up()
+
+    rule = ProcRule()
+
+    yield rule
+
+    runner.tear_down()
+
+
+@pytest.mark.asyncio
+async def test_run_func(rule):
+    rule.execute_subprocess(
+        rule.set_ret, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=True
+    )
+
+    await asyncio.sleep(0.5)
+    assert rule.ret.returncode == 0
+    assert rule.ret.stdout == 'OK'
+    assert rule.ret.stderr == ''
+
+
+@pytest.mark.asyncio
+async def test_run_func_no_cap(rule):
+    rule.execute_subprocess(
+        rule.set_ret, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False
+    )
+
+    await asyncio.sleep(0.5)
+    assert rule.ret.returncode == 0
+    assert rule.ret.stdout is None
+    assert rule.ret.stderr is None
+
+
+@pytest.mark.asyncio
+async def test_invalid_program(rule):
+    rule.execute_subprocess(rule.set_ret, 'ProgramThatDoesNotExist', capture_output=True)
+
+    await asyncio.sleep(0.5)
+    assert rule.ret.returncode == -1
+    assert rule.ret.stdout is None
+    assert isinstance(rule.ret.stderr, str)

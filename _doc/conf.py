@@ -212,10 +212,9 @@ epub_exclude_files = ['search.html']
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-autodoc_member_order = 'bysource'
-
 execute_code_working_dir = pathlib.Path(__file__).parent.parent
 
+autodoc_member_order = 'bysource'
 autoclass_content = 'both'
 
 # Skip documentation for overloaded .set_state functions

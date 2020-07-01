@@ -1,5 +1,5 @@
 from HABApp.openhab.items.base_item import OpenhabItem
-from HABApp.openhab.definitions.commands import OnOffCommand
+from HABApp.openhab.items.commands import OnOffCommand
 from ..definitions import OnOffValue
 
 

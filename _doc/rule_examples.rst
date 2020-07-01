@@ -26,7 +26,6 @@ Get an even when the item is constant for 5 and for 10 seconds.
     runner.set_up()
     HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item)
     # hide
-
     import HABApp
     from HABApp.core.items import Item
     from HABApp.core.events import ItemNoChangeEvent

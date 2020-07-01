@@ -1,5 +1,5 @@
 import typing
-from ..core.const.json import load_json
+from HABApp.core.const.json import load_json
 
 from .events import OpenhabEvent, \
     ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
