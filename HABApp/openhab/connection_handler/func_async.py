@@ -140,6 +140,9 @@ async def async_create_item(item_type, name, label="", category="", tags=[], gro
             payload['function']['params'] = group_function_params
 
     ret = await put(f'items/{name:s}', json=payload)
+    if ret is None:
+        return False
+
     if ret.status == 404:
         raise ItemNotFoundError.from_name(name)
     elif ret.status == 405:

@@ -89,7 +89,7 @@ class TestOpenhabInterface(TestBaseRule):
         try:
             self.openhab.get_item(test_item)
         except Exception as e:
-            if isinstance(e, HABApp.openhab.definitions.exceptions.ItemNotFoundError):
+            if isinstance(e, HABApp.openhab.exceptions.ItemNotFoundError):
                 return True
 
         return 'Exception not raised!'
