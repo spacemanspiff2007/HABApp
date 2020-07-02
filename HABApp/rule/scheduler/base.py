@@ -70,7 +70,7 @@ class ScheduledCallbackBase:
         raise NotImplementedError()
 
     def earliest(self, time_obj: typing.Optional[time]) -> 'ScheduledCallbackBase':
-        """Set earliest boundary as time of day
+        """Set earliest boundary as time of day. ``None`` will disable boundary.
 
         :param time_obj: time obj, scheduler will not run earlier
         """
@@ -82,7 +82,7 @@ class ScheduledCallbackBase:
         return self
 
     def latest(self, time_obj: typing.Optional[time]) -> 'ScheduledCallbackBase':
-        """Set earliest boundary as time of day
+        """Set earliest boundary as time of day. ``None`` will disable boundary.
 
         :param time_obj: time obj, scheduler will not run later
         """
@@ -94,7 +94,7 @@ class ScheduledCallbackBase:
         return self
 
     def offset(self, timedelta_obj: typing.Optional[timedelta]) -> 'ScheduledCallbackBase':
-        """Set a constant offset to the calculation of the next run
+        """Set a constant offset to the calculation of the next run. ``None`` will disable the offset.
 
         :param timedelta_obj: constant offset
         """
@@ -106,7 +106,8 @@ class ScheduledCallbackBase:
         return self
 
     def jitter(self, secs: typing.Optional[int]) -> 'ScheduledCallbackBase':
-        """Add a random jitter per call in the intervall [(-1) * secs ... secs] to the next run
+        """Add a random jitter per call in the intervall [(-1) * secs ... secs] to the next run.
+         ``None`` will disable jitter.
 
         :param secs: jitter in secs
         """
@@ -118,7 +119,8 @@ class ScheduledCallbackBase:
         return self
 
     def boundary_func(self, func: typing.Optional[typing.Callable[[datetime], datetime]]):
-        """Add a function which will be called when the datetime changes. Use this to implement custom boundaries
+        """Add a function which will be called when the datetime changes. Use this to implement custom boundaries.
+         Use ``None`` to disable the boundary function.
 
         :param func: Function which returns a datetime obj, arg is a datetime with the next call time
         """
