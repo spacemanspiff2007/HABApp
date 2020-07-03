@@ -5,6 +5,7 @@ import typing
 from HABApp.core.items.base_item import BaseItem
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.definitions.values import QuantityValue, RawValue
+from HABApp.openhab.definitions.definitions import ITEM_DIMENSIONLESS
 from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerItem, GroupItem, ImageItem, LocationItem, \
     NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem
 
@@ -23,9 +24,10 @@ def map_items(name, openhab_type: str, openhab_value: str) -> typing.Optional[Ba
         # Quantity types are like this: Number:Temperature and have a unit set: "12.3 °C".
         # We have to remove the dimension from the type and remove the unit from the value
         if ':' in openhab_type:
-            openhab_type = openhab_type[:openhab_type.find(':')]
+            openhab_type, dimension = openhab_type.split(':')
             # if the item is not initialized its None and has no dimension
-            if value is not None:
+            # Some people define the dimension as dimensionless, we don't have to do anything here, too
+            if value is not None and dimension != ITEM_DIMENSIONLESS:
                 value, _ = QuantityValue.split_unit(value)
 
         # Specific classes

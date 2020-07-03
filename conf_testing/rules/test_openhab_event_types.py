@@ -1,5 +1,5 @@
 from HABApp.core.events import ValueUpdateEvent
-from HABApp.openhab.definitions import ITEM_DIMENSION
+from HABApp.openhab.definitions.definitions import ITEM_DIMENSION
 
 from HABAppTests import TestBaseRule, EventWaiter, OpenhabTmpItem, get_openhab_test_events, \
     get_openhab_test_types, get_openhab_test_states, ItemWaiter
