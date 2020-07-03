@@ -66,7 +66,9 @@ class QuantityValue(ComplexEventValue):
     @staticmethod
     def split_unit(value: str) -> typing.Tuple[str, str]:
         p = value.rfind(' ')
-        assert p >= 0, f'No unit separator found for QuantityValue in "{value}"'
+        # dimensionless has no unit
+        if p < 0:
+            return value, ''
         val = value[0:p]
         unit = value[p + 1:]
         return val, unit

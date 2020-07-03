@@ -2,7 +2,7 @@ import pytest
 
 from HABApp.openhab.definitions import HSBValue, OnOffValue, OpenClosedValue, PercentValue, QuantityValue, RawValue, \
     UpDownValue
-from HABApp.openhab.definitions import ITEM_DIMENSION
+from HABApp.openhab.definitions import ITEM_DIMENSIONS
 
 
 @pytest.mark.parametrize(
@@ -33,10 +33,11 @@ def test_val_convert(cls, values):
 
 def test_quantity_value():
     unit_of_dimension = {
-        'Length': 'm', 'Temperature': '°C', 'Pressure': 'hPa', 'Speed': 'km/h', 'Intensity': 'W/m²', 'Angle': '°'
+        'Length': 'm', 'Temperature': '°C', 'Pressure': 'hPa', 'Speed': 'km/h', 'Intensity': 'W/m²', 'Angle': '°',
+        'Dimensionless': '',
     }
 
-    for dimension in ITEM_DIMENSION:
+    for dimension in ITEM_DIMENSIONS:
         for val in (-103.3, -3, 0, 0.33535, 5, 55.5, 105.5):
             unit = unit_of_dimension[dimension]
             v = QuantityValue(f'{val} {unit}')

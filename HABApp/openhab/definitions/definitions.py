@@ -3,7 +3,6 @@ ITEM_TYPES = {
     'Color', 'DateTime', 'Location', 'Player', 'Group', 'Image',
 }
 
-ITEM_DIMENSIONLESS: str = 'Dimensionless'
-ITEM_DIMENSION = {'Length', 'Temperature', 'Pressure', 'Speed', 'Intensity', 'Angle', ITEM_DIMENSIONLESS}
+ITEM_DIMENSIONS = {'Length', 'Temperature', 'Pressure', 'Speed', 'Intensity', 'Angle', 'Dimensionless'}
 
 GROUP_FUNCTIONS = {'AND', 'OR', 'NAND', 'NOR', 'AVG', 'MAX', 'MIN', 'SUM'}

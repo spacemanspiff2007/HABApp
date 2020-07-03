@@ -1,5 +1,5 @@
 from HABApp.core.events import ValueUpdateEvent
-from HABApp.openhab.definitions.definitions import ITEM_DIMENSION
+from HABApp.openhab.definitions.definitions import ITEM_DIMENSIONS
 
 from HABAppTests import TestBaseRule, EventWaiter, OpenhabTmpItem, get_openhab_test_events, \
     get_openhab_test_types, get_openhab_test_states, ItemWaiter
@@ -15,7 +15,7 @@ class TestOpenhabEventTypes(TestBaseRule):
         for oh_type in get_openhab_test_types():
             self.add_test( f'{oh_type} events', self.test_events, oh_type, get_openhab_test_events(oh_type))
 
-        for dimension in ITEM_DIMENSION:
+        for dimension in ITEM_DIMENSIONS:
             self.add_test(f'Quantity {dimension} events', self.test_quantity_type_events, dimension)
 
     def test_events(self, item_type, test_values):

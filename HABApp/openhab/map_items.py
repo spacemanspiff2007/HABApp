@@ -5,7 +5,6 @@ import typing
 from HABApp.core.items.base_item import BaseItem
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.definitions.values import QuantityValue, RawValue
-from HABApp.openhab.definitions.definitions import ITEM_DIMENSIONLESS
 from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerItem, GroupItem, ImageItem, LocationItem, \
     NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem
 
@@ -26,8 +25,7 @@ def map_items(name, openhab_type: str, openhab_value: str) -> typing.Optional[Ba
         if ':' in openhab_type:
             openhab_type, dimension = openhab_type.split(':')
             # if the item is not initialized its None and has no dimension
-            # Some people define the dimension as dimensionless, we don't have to do anything here, too
-            if value is not None and dimension != ITEM_DIMENSIONLESS:
+            if value is not None:
                 value, _ = QuantityValue.split_unit(value)
 
         # Specific classes
