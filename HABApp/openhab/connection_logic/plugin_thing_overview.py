@@ -64,19 +64,23 @@ class ThingOverview(OnConnectPlugin):
             if not is_zw:
                 continue
 
+            # optional properties which can be set
             props = node['properties']
             channels = node.get('channels', [])
 
-            zw_node.add(int(props['zwave_nodeid']))
+            # Node-ID, e.g. 5
+            node_id = props.get('zwave_nodeid')
+            zw_node.add(int(node_id) if node_id is not None else '')
 
-            # optional properties
             zw_model.add(props.get('modelId', ''))
             zw_fw.add(props.get('zwave_version', ''))
 
             zw_l_channels.add(
-                ', '.join(map(lambda x: x.get('channelTypeUID', ''), filter(lambda x: x.get('linkedItems'), channels))))
+                ', '.join(map(lambda x: x.get('channelTypeUID', ''), filter(lambda x: x.get('linkedItems'), channels)))
+            )
             zw_u_channels.add(', '.join(
-                map(lambda x: x.get('channelTypeUID', ''), filter(lambda x: not x.get('linkedItems'), channels))))
+                map(lambda x: x.get('channelTypeUID', ''), filter(lambda x: not x.get('linkedItems'), channels)))
+            )
 
         log = logging.getLogger('HABApp.openhab.things')
         for line in thing_table.get_lines(sort_columns=[thing_uid]):

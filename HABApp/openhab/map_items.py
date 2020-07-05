@@ -23,7 +23,7 @@ def map_items(name, openhab_type: str, openhab_value: str) -> typing.Optional[Ba
         # Quantity types are like this: Number:Temperature and have a unit set: "12.3 °C".
         # We have to remove the dimension from the type and remove the unit from the value
         if ':' in openhab_type:
-            openhab_type = openhab_type[:openhab_type.find(':')]
+            openhab_type, dimension = openhab_type.split(':')
             # if the item is not initialized its None and has no dimension
             if value is not None:
                 value, _ = QuantityValue.split_unit(value)
