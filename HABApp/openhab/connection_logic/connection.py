@@ -5,6 +5,7 @@ from HABApp.core import Items
 from HABApp.core.wrapper import ignore_exception
 from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.map_events import get_event
+from HABApp.openhab.map_items import map_item
 from ._plugin import on_connect, on_disconnect, setup_plugins
 
 log = http_connection.log
@@ -57,7 +58,7 @@ def on_sse_event(event_dict: dict):
 
     # Events which change the ItemRegistry
     if isinstance(event, (HABApp.openhab.events.ItemAddedEvent, HABApp.openhab.events.ItemUpdatedEvent)):
-        item = HABApp.openhab.map_items(event.name, event.type, 'NULL')
+        item = map_item(event.name, event.type, 'NULL')
         if item is None:
             return None
 

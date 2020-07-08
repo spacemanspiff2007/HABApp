@@ -3,6 +3,7 @@ import logging
 import HABApp
 from HABApp.core import Items
 from HABApp.core.wrapper import ignore_exception
+from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
 
@@ -20,7 +21,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         found_items = len(data)
         for _dict in data:
             item_name = _dict['name']
-            new_item = HABApp.openhab.map_items(item_name, _dict['type'], _dict['state'])
+            new_item = map_item(item_name, _dict['type'], _dict['state'])
             if new_item is None:
                 continue
 

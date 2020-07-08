@@ -11,7 +11,7 @@ from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerIte
 log = logging.getLogger('HABApp.openhab')
 
 
-def map_items(name, openhab_type: str, openhab_value: str) -> typing.Optional[BaseItem]:
+def map_item(name, openhab_type: str, openhab_value: str) -> typing.Optional[BaseItem]:
     try:
         assert isinstance(openhab_type, str), type(openhab_type)
         assert isinstance(openhab_value, str), type(openhab_value)
