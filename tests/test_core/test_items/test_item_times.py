@@ -54,11 +54,12 @@ async def test_cancel_running(u: UpdatedTime):
     w2 = u.tasks[1]
 
     await asyncio.sleep(1.1)
-    assert w1._task.done()
-    assert not w2._task.done()
+    assert w1._fut.task.done()
+    assert not w2._fut.task.done()
 
     assert w2 in u.tasks
     w2.cancel()
+    await asyncio.sleep(0.05)
     u.set(datetime.now(tz=pytz.utc))
     await asyncio.sleep(0.05)
     assert w2 not in u.tasks

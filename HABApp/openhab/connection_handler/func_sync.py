@@ -12,7 +12,7 @@ from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingD
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \
     async_set_metadata, async_remove_metadata, async_get_channel_link, async_create_channel_link, \
     async_remove_channel_link, async_channel_link_exists, \
-    async_remove_item, async_item_exists
+    async_remove_item, async_item_exists, async_get_persistence_data
 from .. import definitions
 from ..definitions.helpers import OpenhabPersistenceData
 
@@ -215,7 +215,7 @@ def get_persistence_data(item_name: str, persistence: Optional[str],
     assert isinstance(end_time, datetime.datetime) or end_time is None, end_time
 
     fut = asyncio.run_coroutine_threadsafe(
-        get_persistence_data(
+        async_get_persistence_data(
             item_name=item_name, persistence=persistence, start_time=start_time, end_time=end_time
         ),
         loop
@@ -257,9 +257,7 @@ def create_channel_link(channel_uid: str, item_name: str, configuration: dict = 
     assert isinstance(configuration, dict), type(configuration)
 
     fut = asyncio.run_coroutine_threadsafe(
-        async_create_channel_link(
-            ItemChannelLinkDefinition(item_name=item_name, channel_uid=channel_uid, configuration=configuration)
-        ),
+        async_create_channel_link(item_name=item_name, channel_uid=channel_uid, configuration=configuration),
         loop
     )
     return fut.result()

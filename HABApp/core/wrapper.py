@@ -27,6 +27,8 @@ SUPPRESSED_PATHS = (
     # Don't print stack for used libraries
     re.compile(r'[/\\]asyncio[/\\]\w+.py$'),
     re.compile(r'[/\\]aiohttp[/\\]\w+.py$'),
+    re.compile(r'[/\\]voluptuous[/\\]\w+.py$'),
+    re.compile(r'[/\\]pydantic[/\\]\w+.py$'),
 )
 
 SKIP_TB = tuple(re.compile(k.pattern.replace('$', ', ')) for k in SUPPRESSED_PATHS)

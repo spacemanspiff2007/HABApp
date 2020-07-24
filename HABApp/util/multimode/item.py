@@ -5,6 +5,7 @@ from threading import Lock
 
 import HABApp
 from HABApp.core.items import Item
+from HABApp.rule import get_parent_rule
 from .mode_base import BaseMode
 
 LOCK = Lock()

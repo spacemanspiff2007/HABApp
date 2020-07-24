@@ -29,7 +29,7 @@ class ItemTimes:
 
         # don't add the watch two times
         for t in self.tasks:
-            if t._secs == secs:
+            if t._fut.secs == secs:
                 return t
         w = self.WATCH(self.name, secs)
         self.tasks.append(w)
@@ -39,15 +39,14 @@ class ItemTimes:
     async def schedule_events(self):
         clean = False
         for t in self.tasks:
-            if t._secs <= 0:
+            if t._fut.is_canceled:
                 clean = True
             else:
-                # Schedule the new task, todo: rename to asyncio.create_task once we go py3.7 only
-                asyncio.ensure_future(t._schedule_event())
+                t._fut.reset()
 
         # remove canceled tasks
         if clean:
-            self.tasks = [t for t in self.tasks if t._secs > 0]
+            self.tasks = [t for t in self.tasks if not t._fut.is_canceled]
         return None
 
 

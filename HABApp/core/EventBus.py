@@ -20,7 +20,13 @@ _EVENT_LISTENER: typing.Dict[str, typing.List[EventBusListener]] = {}
 def post_event(topic: str, event):
     assert isinstance(topic, str), type(topic)
 
-    _event_log.info(f'{topic:>20s}: {event}')
+    if not isinstance(event, str):
+        event_prv = str(event)
+    else:
+        event_prv = event[:120] + ' ...' if len(event) > 120 else event
+        event_prv = "'" + event_prv.replace('\n', '\\n') + "'"
+
+    _event_log.info(f'{topic:>20s}: {event_prv}')
 
     # Sometimes we have nested data structures which we need to set the value.
     # Once the value in the item registry is updated the data structures provide no benefit thus

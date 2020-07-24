@@ -1,0 +1,149 @@
+import asyncio
+from pathlib import Path
+from typing import Dict, Set
+
+import HABApp
+from HABApp.core.const.utilities import PendingFuture
+from HABApp.core.habapp_logger import log_warning
+from HABApp.openhab.connection_handler.func_async import async_get_things
+from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg
+from HABApp.openhab.connection_logic.plugin_things.filters import THING_ALIAS, CHANNEL_ALIAS
+from HABApp.openhab.connection_logic.plugin_things.filters import apply_filters, log_overview
+from ._log import log
+from .item_worker import create_item, cleanup_items, create_items_file
+from .thing_worker import update_thing_cfg
+from .._plugin import OnConnectPlugin
+
+
+class ManualThingConfig(OnConnectPlugin):
+
+    def __init__(self):
+        super().__init__()
+        self.created_items: Dict[str, Set[str]] = {}
+        self.do_cleanup = PendingFuture(self.clean_items(), 120)
+
+    async def on_connect_function(self):
+        try:
+            await asyncio.sleep(0.3)
+
+            files = list(HABApp.core.lib.list_files(HABApp.CONFIG.directories.config, '.yml'))
+            if not files:
+                return None
+
+            # if oh is not ready we will get None, but we will trigger again on reconnect
+            data = await async_get_things()
+            if data is None:
+                return None
+
+            for f in files:
+                await self.update_thing_config(f, data)
+        except asyncio.CancelledError:
+            pass
+
+    @HABApp.core.wrapper.ignore_exception
+    async def clean_items(self):
+        items = set()
+        for s in self.created_items.values():
+            items.update(s)
+        await cleanup_items(items)
+
+    @HABApp.core.wrapper.ignore_exception
+    async def update_thing_config(self, path: Path, data=None):
+        # we have to check the naming structure because we get file events for the whole folder
+        _name = path.name.lower()
+        if not _name.startswith('thing_') or not _name.endswith('.yml'):
+            return None
+
+        # only load if we don't supply the data
+        if data is None:
+            data = await async_get_things()
+
+        # remove created items
+        self.created_items.pop(path.name, None)
+        created_items = self.created_items.setdefault(path.name, set())
+
+        # shedule cleanup
+        self.do_cleanup.reset()
+
+        # output file
+        output_file = path.with_suffix('.items')
+        if output_file.is_file():
+            output_file.unlink()
+
+        # we also get events when the file gets deleted
+        if not path.is_file():
+            log.debug(f'File {path} does not exist -> skipping Thing configuration!')
+            return None
+        log.debug(f'Loading {path}!')
+
+        # load the config file
+        yml = HABApp.parameters.parameter_files._yml_setup
+        with path.open(mode='r', encoding='utf-8') as file:
+            cfg = yml.load(file)
+        # validate configuration
+        cfg = validate_cfg(cfg)
+
+        # if one entry has test set we show an overview of all the things
+        if any(map(lambda x: x.test, cfg)):
+            log_overview(data, THING_ALIAS, 'Thing overview')
+
+        # process each thing part in the cfg
+        for cfg_entry in cfg:
+            test: bool = cfg_entry.test
+            things = list(apply_filters(cfg_entry.filter, data, test))
+
+            # show a warning we found no Things
+            if not things:
+                log_warning(log, f'No things matched for {cfg_entry.filter}')
+                continue
+
+            # update thing configuration
+            if cfg_entry.thing_config:
+                await update_thing_cfg(cfg_entry.thing_config, things, test)
+
+            # item creation for every thing
+            create_items = {}
+            for thing in things:
+                thing_context = {k: thing.get(alias, '') for k, alias in THING_ALIAS.items()}
+
+                # create items without channel
+                for item_cfg in cfg_entry.get_items(thing_context):
+                    name = item_cfg.name
+                    if name in create_items:
+                        raise ValueError(f'Duplicate item: {name}')
+                    create_items[name] = item_cfg
+
+                # Channel overview, only if we have somethign configured
+                if test and cfg_entry.channels:
+                    log_overview(thing['channels'], CHANNEL_ALIAS, heading='Channels for ' + thing_context['thing_uid'])
+
+                # do channel things
+                for channel_cfg in cfg_entry.channels:
+                    channels = apply_filters(channel_cfg.filter, thing['channels'], test)
+                    for channel in channels:
+                        channel_context = {k: channel.get(alias, '') for k, alias in CHANNEL_ALIAS.items()}
+                        channel_context.update(thing_context)
+
+                        for item_cfg in channel_cfg.get_items(channel_context):
+                            item_cfg.link = channel['uid']
+                            name = item_cfg.name
+
+                            if name in create_items:
+                                raise ValueError(f'Duplicate item: {name}')
+                            create_items[name] = item_cfg
+
+                if test:
+                    log.info('')
+
+            # Create all items
+            for item_cfg in create_items.values():
+                created = await create_item(item_cfg, test)
+                if created:
+                    created_items.add(item_cfg.name)
+
+            self.do_cleanup.reset()
+
+            create_items_file(output_file, create_items)
+
+
+PLUGIN_MANUAL_THING_CFG = ManualThingConfig.create_plugin()
