@@ -80,8 +80,11 @@ class ManualThingConfig(OnConnectPlugin):
         yml = HABApp.parameters.parameter_files._yml_setup
         with path.open(mode='r', encoding='utf-8') as file:
             cfg = yml.load(file)
+
         # validate configuration
         cfg = validate_cfg(cfg)
+        if cfg is None:
+            return None
 
         # if one entry has test set we show an overview of all the things
         if any(map(lambda x: x.test, cfg)):
@@ -132,7 +135,8 @@ class ManualThingConfig(OnConnectPlugin):
                                 raise ValueError(f'Duplicate item: {name}')
                             create_items[name] = item_cfg
 
-                if test:
+                # newline only if we create logs
+                if test and (cfg_entry.create_items or cfg_entry.channels):
                     log.info('')
 
             # Create all items

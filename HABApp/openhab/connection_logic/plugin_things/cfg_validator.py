@@ -1,13 +1,15 @@
 import re
 from dataclasses import dataclass
 from typing import Dict, List
-from typing import Optional, Union, Iterator
+from typing import Iterator, Optional, Union
 
-from pydantic import BaseModel, validator, Field, parse_obj_as
+from pydantic import BaseModel, Field, ValidationError, parse_obj_as, validator
 
-from HABApp.openhab.connection_logic.plugin_things.filters import ThingFilter, ChannelFilter
+from HABApp.core.habapp_logger import HABAppError
+from HABApp.openhab.connection_logic.plugin_things.filters import ChannelFilter, ThingFilter
 from HABApp.openhab.connection_logic.plugin_things.str_builder import StrBuilder
 from HABApp.openhab.definitions.definitions import ITEM_TYPES
+from ._log import log
 
 RE_VALID_NAME = re.compile(r'\w+')
 
@@ -77,7 +79,7 @@ class UserItemCfg(BaseModel):
 
 class UserChannelCfg(BaseModel):
     filter: List[ChannelFilter]
-    link_item: List[UserItemCfg] = Field(default_factory=list, alias='link item')
+    link_items: List[UserItemCfg] = Field(default_factory=list, alias='link items')
 
     class Config:
         allow_population_by_field_name = True
@@ -88,16 +90,16 @@ class UserChannelCfg(BaseModel):
         return create_filters(ChannelFilter, v)
 
     def get_items(self, context: dict) -> Iterator[UserItem]:
-        return map(lambda x: x.get_item(context), self.link_item)
+        return map(lambda x: x.get_item(context), self.link_items)
 
 
 class UserThingCfg(BaseModel):
     test: bool
     filter: List[ThingFilter]
     # order of the type hint matters: int, str!
-    thing_config: Dict[Union[int, str], Union[int, float, str]] = Field(alias='thing config')
-    create_item: List[UserItemCfg] = Field(alias='create item')
-    channels: List[UserChannelCfg]
+    thing_config: Dict[Union[int, str], Union[int, float, str]] = Field(alias='thing config', default_factory=dict)
+    create_items: List[UserItemCfg] = Field(alias='create items', default_factory=list)
+    channels: List[UserChannelCfg] = Field(default_factory=list)
 
     class Config:
         allow_population_by_field_name = True
@@ -108,7 +110,7 @@ class UserThingCfg(BaseModel):
         return create_filters(ThingFilter, v)
 
     def get_items(self, context: dict) -> Iterator[UserItem]:
-        return map(lambda x: x.get_item(context), self.create_item)
+        return map(lambda x: x.get_item(context), self.create_items)
 
 
 def create_filters(cls, v: Union[List[Dict[str, str]], Dict[str, str]]):
@@ -121,8 +123,12 @@ def create_filters(cls, v: Union[List[Dict[str, str]], Dict[str, str]]):
     return r
 
 
-def validate_cfg(_in) -> List[UserThingCfg]:
-    if isinstance(_in, list):
-        return parse_obj_as(List[UserThingCfg], _in)
-    else:
-        return [parse_obj_as(UserThingCfg, _in)]
+def validate_cfg(_in) -> Optional[List[UserThingCfg]]:
+    try:
+        if isinstance(_in, list):
+            return parse_obj_as(List[UserThingCfg], _in)
+        else:
+            return [parse_obj_as(UserThingCfg, _in)]
+    except ValidationError as e:
+        HABAppError(log).add_exception(e).dump()
+        return None

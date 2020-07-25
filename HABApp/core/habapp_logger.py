@@ -38,13 +38,11 @@ class HABAppLogger:
         return self
 
     def add_exception(self, e: Exception):
-        t = str(e)
-        if t.startswith("'") and t.endswith("'"):
-            t = t[1:-1]
-        self.lines.append(t)
+        for line in str(e).splitlines():
+            self.lines.append(line)
         return self
 
-    def dump(self):
+    def dump(self) -> bool:
         if not self.lines:
             return False
 

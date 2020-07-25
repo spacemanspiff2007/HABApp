@@ -19,8 +19,8 @@ def show_config_overview(cfgs: List[ThingConfigChanger], all_params):
         for col, cfg in zip(c_s, cfgs):
             v = cfg.get(p, '')
             col.add(str(v))
-    for l in t.get_lines():
-        log.info(l)
+    for line in t.get_lines():
+        log.info(line)
 
 
 async def update_thing_cfg(target_cfg, things, test: bool):
