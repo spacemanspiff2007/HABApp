@@ -118,7 +118,7 @@ class ManualThingConfig(OnConnectPlugin):
                             raise ValueError(f'Duplicate item: {name}')
                         create_items[name] = item_cfg
 
-                    # Channel overview, only if we have somethign configured
+                    # Channel overview, only if we have something configured
                     if test and cfg_entry.channels:
                         log_overview(thing['channels'], CHANNEL_ALIAS, heading='Channels for ' + thing_context['thing_uid'])
 

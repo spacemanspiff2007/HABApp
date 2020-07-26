@@ -130,14 +130,16 @@ def create_items_file(path: Path, items: Dict[str, UserItem]):
     f_dict = {}
     for k in field_fmt.keys():
         width = max(map(len, map(lambda x: x[k], values)), default=0)
-        # if all entries are missing we do not indent
-        if not width:
-            continue
-        # indent to multiples of 4
-        for _ in range(4):
-            width += 1
-            if not width % 4:
-                break
+        # indent to multiples of 4, if the entries are missing do not indent
+        if width:
+            for _ in range(4):
+                width += 1
+                if not width % 4:
+                    break
+        else:
+            # set with to 1 because format crashes with with=0
+            width = 1
+
         f_dict[f'w_{k}'] = width
 
     fmt_str = ' '.join(f'{{{k}:{{w_{k}}}s}}' for k in field_fmt.keys()) + '\n'
