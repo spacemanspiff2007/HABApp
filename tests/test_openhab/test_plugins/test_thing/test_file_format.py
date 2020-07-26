@@ -1,11 +1,17 @@
 from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg
-
+from pydantic import ValidationError
+import pytest
 
 def test_cfg_optional():
     assert validate_cfg({
         'test': True,
         'filter': {},
     })
+
+
+def test_cfg_err():
+    assert None is validate_cfg({'test': True, 'filter1': {},}, 'filename')
+    assert None is validate_cfg({'test': True, 'filter1': {},})
 
 
 def test_cfg_multiple_filters():

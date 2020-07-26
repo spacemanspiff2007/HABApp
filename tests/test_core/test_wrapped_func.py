@@ -9,7 +9,7 @@ import pytest
 from asynctest import CoroutineMock
 
 from HABApp.core import WrappedFunction
-
+from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
 
 class FileNameRemover(str):
     REGEX = re.compile(r'^\s+File ".+?$', re.MULTILINE)
@@ -40,7 +40,7 @@ class TestCases(unittest.TestCase):
 
         self.err_func: MagicMock = MagicMock()
         self.err_listener = HABApp.core.EventBusListener(
-            'HABApp.Errors', WrappedFunction(self.err_func, name='ErrMock')
+            TOPIC_ERRORS, WrappedFunction(self.err_func, name='ErrMock')
         )
         HABApp.core.EventBus.add_listener(self.err_listener)
 
@@ -122,7 +122,7 @@ async def test_async_error_wrapper():
     f = WrappedFunction(tmp)
     WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
     err_func = CoroutineMock()
-    err_listener = HABApp.core.EventBusListener('HABApp.Errors', WrappedFunction(err_func, name='ErrMock'))
+    err_listener = HABApp.core.EventBusListener(TOPIC_ERRORS, WrappedFunction(err_func, name='ErrMock'))
     HABApp.core.EventBus.add_listener(err_listener)
 
     f.run()

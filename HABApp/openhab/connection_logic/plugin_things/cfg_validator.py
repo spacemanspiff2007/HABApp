@@ -123,12 +123,12 @@ def create_filters(cls, v: Union[List[Dict[str, str]], Dict[str, str]]):
     return r
 
 
-def validate_cfg(_in) -> Optional[List[UserThingCfg]]:
+def validate_cfg(_in, filename: Optional[str] = None) -> Optional[List[UserThingCfg]]:
     try:
         if isinstance(_in, list):
-            return parse_obj_as(List[UserThingCfg], _in)
+            return parse_obj_as(List[UserThingCfg], _in, type_name=filename)
         else:
-            return [parse_obj_as(UserThingCfg, _in)]
+            return [parse_obj_as(UserThingCfg, _in, type_name=filename)]
     except ValidationError as e:
         HABAppError(log).add_exception(e).dump()
         return None

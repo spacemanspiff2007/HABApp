@@ -82,7 +82,7 @@ class ManualThingConfig(OnConnectPlugin):
             cfg = yml.load(file)
 
         # validate configuration
-        cfg = validate_cfg(cfg)
+        cfg = validate_cfg(cfg, path.name)
         if cfg is None:
             return None
 
