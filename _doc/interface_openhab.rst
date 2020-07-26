@@ -185,9 +185,10 @@ Textual thing configuration
 Description
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-HABApp offers a special mechanism to textually define thing configuration parameters for things
-which have been added through the gui. This combines the best of both worlds:
-auto discovery and easy and fast sharing of parameters across things.
+HABApp offers a special mechanism to textually define thing configuration parameters and linked items for things
+which have been added through the gui.
+This combines the best of both worlds:
+auto discovery, easy and fast sharing of parameters across things and automatic consistent naming of items.
 
 .. WARNING::
    The value of the parameters will not be checked and will be written as specified. It is recommended to use HABmin or PaperUI to

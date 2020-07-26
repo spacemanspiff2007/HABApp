@@ -11,6 +11,7 @@ from asynctest import CoroutineMock
 from HABApp.core import WrappedFunction
 from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
 
+
 class FileNameRemover(str):
     REGEX = re.compile(r'^\s+File ".+?$', re.MULTILINE)
 

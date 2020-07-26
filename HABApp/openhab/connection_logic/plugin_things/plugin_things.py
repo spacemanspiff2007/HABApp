@@ -4,9 +4,9 @@ from typing import Dict, Set
 
 import HABApp
 from HABApp.core.const.utilities import PendingFuture
-from HABApp.core.logger import log_warning
+from HABApp.core.logger import log_warning, HABAppError
 from HABApp.openhab.connection_handler.func_async import async_get_things
-from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg
+from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg, InvalidItemNameError
 from HABApp.openhab.connection_logic.plugin_things.filters import THING_ALIAS, CHANNEL_ALIAS
 from HABApp.openhab.connection_logic.plugin_things.filters import apply_filters, log_overview
 from ._log import log
@@ -28,6 +28,7 @@ class ManualThingConfig(OnConnectPlugin):
 
             files = list(HABApp.core.lib.list_files(HABApp.CONFIG.directories.config, '.yml'))
             if not files:
+                log.debug(f'No manual configuration files found in {HABApp.CONFIG.directories.config}')
                 return None
 
             # if oh is not ready we will get None, but we will trigger again on reconnect
@@ -104,40 +105,44 @@ class ManualThingConfig(OnConnectPlugin):
             if cfg_entry.thing_config:
                 await update_thing_cfg(cfg_entry.thing_config, things, test)
 
-            # item creation for every thing
-            create_items = {}
-            for thing in things:
-                thing_context = {k: thing.get(alias, '') for k, alias in THING_ALIAS.items()}
+            try:
+                # item creation for every thing
+                create_items = {}
+                for thing in things:
+                    thing_context = {k: thing.get(alias, '') for k, alias in THING_ALIAS.items()}
 
-                # create items without channel
-                for item_cfg in cfg_entry.get_items(thing_context):
-                    name = item_cfg.name
-                    if name in create_items:
-                        raise ValueError(f'Duplicate item: {name}')
-                    create_items[name] = item_cfg
+                    # create items without channel
+                    for item_cfg in cfg_entry.get_items(thing_context):
+                        name = item_cfg.name
+                        if name in create_items:
+                            raise ValueError(f'Duplicate item: {name}')
+                        create_items[name] = item_cfg
 
-                # Channel overview, only if we have somethign configured
-                if test and cfg_entry.channels:
-                    log_overview(thing['channels'], CHANNEL_ALIAS, heading='Channels for ' + thing_context['thing_uid'])
+                    # Channel overview, only if we have somethign configured
+                    if test and cfg_entry.channels:
+                        log_overview(thing['channels'], CHANNEL_ALIAS, heading='Channels for ' + thing_context['thing_uid'])
 
-                # do channel things
-                for channel_cfg in cfg_entry.channels:
-                    channels = apply_filters(channel_cfg.filter, thing['channels'], test)
-                    for channel in channels:
-                        channel_context = {k: channel.get(alias, '') for k, alias in CHANNEL_ALIAS.items()}
-                        channel_context.update(thing_context)
+                    # do channel things
+                    for channel_cfg in cfg_entry.channels:
+                        channels = apply_filters(channel_cfg.filter, thing['channels'], test)
+                        for channel in channels:
+                            channel_context = {k: channel.get(alias, '') for k, alias in CHANNEL_ALIAS.items()}
+                            channel_context.update(thing_context)
 
-                        for item_cfg in channel_cfg.get_items(channel_context):
-                            item_cfg.link = channel['uid']
-                            name = item_cfg.name
+                            for item_cfg in channel_cfg.get_items(channel_context):
+                                item_cfg.link = channel['uid']
+                                name = item_cfg.name
 
-                            if name in create_items:
-                                raise ValueError(f'Duplicate item: {name}')
-                            create_items[name] = item_cfg
+                                if name in create_items:
+                                    raise ValueError(f'Duplicate item: {name}')
+                                create_items[name] = item_cfg
 
-                # newline only if we create logs
-                if test and (cfg_entry.create_items or cfg_entry.channels):
-                    log.info('')
+                    # newline only if we create logs
+                    if test and (cfg_entry.create_items or cfg_entry.channels):
+                        log.info('')
+            except InvalidItemNameError as e:
+                HABAppError(log).add_exception(e).dump()
+                continue
 
             # Create all items
             for item_cfg in create_items.values():

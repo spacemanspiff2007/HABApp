@@ -37,6 +37,10 @@ class UserItem:
         return ret
 
 
+class InvalidItemNameError(Exception):
+    pass
+
+
 class UserItemCfg(BaseModel):
     type: str
     name: str
@@ -73,7 +77,7 @@ class UserItemCfg(BaseModel):
         # ensure a valid item name, otherwise the creation will definitely fail
         v['name'] = name = v['name'].replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue').replace(' ', '_')
         if not RE_VALID_NAME.fullmatch(name):
-            raise ValueError(f'"{name}" is not a valid name for an item!')
+            raise InvalidItemNameError(f'"{name}" is not a valid name for an item!\n   (created for {context})')
         return UserItem(**v)
 
 
@@ -118,6 +122,8 @@ def create_filters(cls, v: Union[List[Dict[str, str]], Dict[str, str]]):
         v = [v]
     r = []
     for a in v:
+        if not isinstance(a, dict):
+            raise ValueError(f'Entry {a} is not a valid dict!')
         for key, regex in a.items():
             r.append(cls(key, regex))
     return r

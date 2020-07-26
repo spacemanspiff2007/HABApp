@@ -12,9 +12,9 @@ class EventBusListener:
         self.func: WrappedFunction = callback
 
         self.event_filter = event_type
-        
-        self.__is_all = self.event_filter is AllEvents
-        self.__is_single = not isinstance(self.event_filter, (list, tuple, set))
+
+        self.__is_all: bool = self.event_filter is AllEvents
+        self.__is_single: bool = not isinstance(self.event_filter, (list, tuple, set))
 
     def notify_listeners(self, event):
         # We run always
