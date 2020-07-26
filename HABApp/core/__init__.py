@@ -1,7 +1,7 @@
 from . import const
 from . import lib
 from . import wrapper
-from . import habapp_logger
+from . import logger
 
 from .wrappedfunction import WrappedFunction
 

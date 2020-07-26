@@ -3,7 +3,7 @@ import typing
 
 import bidict
 
-from HABApp.core.habapp_logger import log_error
+from HABApp.core.logger import log_error
 from HABApp.openhab.connection_handler.func_async import async_set_thing_cfg
 from ._log import log_cfg as log
 

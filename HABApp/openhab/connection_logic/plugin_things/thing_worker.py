@@ -1,7 +1,7 @@
 import itertools
 from typing import List
 
-from HABApp.core.habapp_logger import HABAppError
+from HABApp.core.logger import HABAppError
 from HABApp.openhab.definitions.helpers.log_table import Table
 from ._log import log_cfg as log
 from .thing_config import ThingConfigChanger

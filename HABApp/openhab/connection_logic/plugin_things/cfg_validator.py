@@ -5,7 +5,7 @@ from typing import Iterator, Optional, Union
 
 from pydantic import BaseModel, Field, ValidationError, parse_obj_as, validator
 
-from HABApp.core.habapp_logger import HABAppError
+from HABApp.core.logger import HABAppError
 from HABApp.openhab.connection_logic.plugin_things.filters import ChannelFilter, ThingFilter
 from HABApp.openhab.connection_logic.plugin_things.str_builder import StrBuilder
 from HABApp.openhab.definitions.definitions import ITEM_TYPES

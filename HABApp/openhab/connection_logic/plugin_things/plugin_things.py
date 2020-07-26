@@ -4,7 +4,7 @@ from typing import Dict, Set
 
 import HABApp
 from HABApp.core.const.utilities import PendingFuture
-from HABApp.core.habapp_logger import log_warning
+from HABApp.core.logger import log_warning
 from HABApp.openhab.connection_handler.func_async import async_get_things
 from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg
 from HABApp.openhab.connection_logic.plugin_things.filters import THING_ALIAS, CHANNEL_ALIAS

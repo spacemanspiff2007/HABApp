@@ -1,4 +1,4 @@
-from HABApp.core.habapp_logger import HABAppLogger, HABAppError, HABAppInfo, HABAppWarning
+from HABApp.core.logger import HABAppLogger, HABAppError, HABAppInfo, HABAppWarning
 from logging import getLogger
 
 
