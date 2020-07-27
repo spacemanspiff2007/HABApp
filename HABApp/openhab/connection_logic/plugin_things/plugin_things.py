@@ -80,7 +80,11 @@ class ManualThingConfig(OnConnectPlugin):
         # load the config file
         yml = HABApp.parameters.parameter_files._yml_setup
         with path.open(mode='r', encoding='utf-8') as file:
-            cfg = yml.load(file)
+            try:
+                cfg = yml.load(file)
+            except Exception as e:
+                HABAppError(log).add_exception(e).dump()
+                return None
 
         # validate configuration
         cfg = validate_cfg(cfg, path.name)
