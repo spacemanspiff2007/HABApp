@@ -54,6 +54,6 @@ async def test_pending_future_cancel():
     await asyncio.sleep(0.01)
     p.reset()
     await asyncio.sleep(0.01)
-    if sys.version_info != (3, 8):
+    if sys.version_info[:2] != (3, 8):
         assert isinstance(exception, asyncio.CancelledError)
     p.cancel()
