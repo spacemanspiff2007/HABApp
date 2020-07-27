@@ -20,7 +20,7 @@ class ManualThingConfig(OnConnectPlugin):
     def __init__(self):
         super().__init__()
         self.created_items: Dict[str, Set[str]] = {}
-        self.do_cleanup = PendingFuture(self.clean_items(), 120)
+        self.do_cleanup = PendingFuture(self.clean_items, 120)
 
     async def on_connect_function(self):
         try:
@@ -108,6 +108,7 @@ class ManualThingConfig(OnConnectPlugin):
             try:
                 # item creation for every thing
                 create_items = {}
+                shown_types = set()
                 for thing in things:
                     thing_context = {k: thing.get(alias, '') for k, alias in THING_ALIAS.items()}
 
@@ -120,7 +121,10 @@ class ManualThingConfig(OnConnectPlugin):
 
                     # Channel overview, only if we have something configured
                     if test and cfg_entry.channels:
-                        log_overview(thing['channels'], CHANNEL_ALIAS, heading='Channels for ' + thing_context['thing_uid'])
+                        __thing_type = thing_context['thing_type']
+                        if __thing_type not in shown_types:
+                            shown_types.add(__thing_type)
+                            log_overview(thing['channels'], CHANNEL_ALIAS, heading=f'Channels for {__thing_type}')
 
                     # do channel things
                     for channel_cfg in cfg_entry.channels:

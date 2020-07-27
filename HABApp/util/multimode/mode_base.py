@@ -22,5 +22,11 @@ class BaseMode:
     def calculate_value(self, lower_prio_value: typing.Any) -> typing.Any:
         raise NotImplementedError()
 
+    def cancel(self):
+        """Remove the mode from the parent ``MultiModeItem`` and stop processing it
+        """
+        self.parent.remove_mode(self.name)
+        self.parent = None
+
 
 from .item import MultiModeItem  # noqa: E402

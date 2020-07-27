@@ -1,4 +1,5 @@
 import datetime
+import logging
 import typing
 import warnings
 from threading import Lock
@@ -91,6 +92,14 @@ class MultiModeItem(Item):
 
             # resort
             self.__sort_modes()
+
+        try:
+            get_parent_rule().register_cancel_obj(mode)
+        except RuntimeError:
+            HABApp.core.logger.log_warning(
+                logger=logging.getLogger('HABApp'), text='Parent rule not found! '
+                f'Automatic unloading of the {self.__class__.__name__} {self.name} will not work!'
+            )
         return self
 
     def all_modes(self) -> typing.List[typing.Tuple[int, BaseMode]]:

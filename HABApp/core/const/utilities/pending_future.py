@@ -1,16 +1,16 @@
 import asyncio
 import typing
 from asyncio import Task, sleep, ensure_future
-from typing import Optional, Union, Coroutine
+from typing import Optional, Awaitable, Callable, Any
 
 
 class PendingFuture:
-    def __init__(self, future: Coroutine, secs: typing.Union[int, float]):
-        assert isinstance(future, Coroutine), type(future)
-        assert isinstance(secs, (int, float)), type(secs)
+    def __init__(self, future: Callable[[], Awaitable[Any]], secs: typing.Union[int, float]):
+        assert asyncio.iscoroutinefunction(future), type(future)
+        assert isinstance(secs, (int, float)) and secs >= 0, f'{secs} ({type(secs)})'
 
+        self.func: Callable[[], Awaitable[Any]] = future
         self.secs = secs
-        self.func: Union[Coroutine] = future
         self.task: Optional[Task] = None
 
         self.is_canceled: bool = False
@@ -40,6 +40,6 @@ class PendingFuture:
     async def __countdown(self):
         try:
             await sleep(self.secs)
-            await self.func
+            await self.func()
         except asyncio.CancelledError:
             pass

@@ -11,7 +11,7 @@ class BaseWatch:
     EVENT: typing.Union[typing.Type[ItemNoUpdateEvent], typing.Type[ItemNoChangeEvent]]
 
     def __init__(self, name: str, secs: typing.Union[int, float]):
-        self._fut = PendingFuture(self._post_event(), secs)
+        self._fut = PendingFuture(self._post_event, secs)
         self._name: str = name
 
     async def _post_event(self):
