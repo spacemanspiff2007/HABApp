@@ -65,7 +65,7 @@ class RuleManager:
                     if isinstance(item, HABApp.openhab.items.OpenhabItem):
                         items_found = True
                         break
-            time.sleep(0.2)
+            time.sleep(2.2)
         else:
             time.sleep(5.2)
 

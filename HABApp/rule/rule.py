@@ -548,7 +548,7 @@ def get_parent_rule() -> Rule:
         try:
             frm = sys._getframe(depth)
         except ValueError:
-            raise RuntimeError('Could not find parent rule!')
+            raise RuntimeError('Could not find parent rule!') from None
 
         __vars = frm.f_locals
         depth += 1

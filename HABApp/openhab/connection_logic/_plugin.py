@@ -16,6 +16,7 @@ class PluginBase:
         c = cls()
         assert c not in PLUGINS
         PLUGINS.append(c)
+        return c
 
     def setup(self):
         raise NotImplementedError()

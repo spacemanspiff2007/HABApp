@@ -27,6 +27,8 @@ SUPPRESSED_PATHS = (
     # Don't print stack for used libraries
     re.compile(r'[/\\]asyncio[/\\]\w+.py$'),
     re.compile(r'[/\\]aiohttp[/\\]\w+.py$'),
+    re.compile(r'[/\\]voluptuous[/\\]\w+.py$'),
+    re.compile(r'[/\\]pydantic[/\\]\w+.py$'),
 )
 
 SKIP_TB = tuple(re.compile(k.pattern.replace('$', ', ')) for k in SUPPRESSED_PATHS)
@@ -81,7 +83,7 @@ def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
 
 def log_exception(func):
     # return async wrapper
-    if asyncio.iscoroutine(func) or asyncio.iscoroutinefunction(func):
+    if asyncio.iscoroutinefunction(func) or asyncio.iscoroutine(func):
         @functools.wraps(func)
         async def a(*args, **kwargs):
             try:
@@ -109,7 +111,7 @@ def log_exception(func):
 
 def ignore_exception(func):
     # return async wrapper
-    if asyncio.iscoroutine(func) or asyncio.iscoroutinefunction(func):
+    if asyncio.iscoroutinefunction(func) or asyncio.iscoroutine(func):
         @functools.wraps(func)
         async def a(*args, **kwargs):
             try:

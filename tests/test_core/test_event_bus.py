@@ -1,36 +1,47 @@
-import unittest
+from pytest import fixture
 
 from HABApp.core import EventBus, EventBusListener, wrappedfunction
+from ..helpers import SyncWorker
 
 
 class TestEvent():
     pass
 
 
-class TestCasesItem(unittest.TestCase):
-
-    def tearDown(self) -> None:
-        EventBus.remove_all_listeners()
-
-    def setUp(self) -> None:
-        EventBus.remove_all_listeners()
-        self.last_event = None
-
-    def event_cb(self, event):
-        self.last_event = event
-
-    def test_event_bus(self):
-        listener = EventBusListener('test', wrappedfunction.WrappedFunction(self.event_cb))
-        EventBus.add_listener(listener)
-
-        self.assertIs(self.last_event, None)
-        for _ in range(10):
-            event = TestEvent
-            EventBus.post_event('test', event)
-            self.assertIs(self.last_event, event)
-
-        EventBus.remove_listener(listener)
+@fixture
+def event_bus():
+    EventBus.remove_all_listeners()
+    yield EventBus
+    EventBus.remove_all_listeners()
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_str_event(event_bus: EventBus):
+    event_history = []
+
+    def set(event):
+        event_history.append(event)
+
+    listener = EventBusListener('str_test', wrappedfunction.WrappedFunction(set))
+    EventBus.add_listener(listener)
+
+    with SyncWorker():
+        EventBus.post_event('str_test', 'str_event')
+
+    assert event_history == ['str_event']
+
+
+def test_multiple_events(event_bus: EventBus):
+    event_history = []
+    target = ['str_event', TestEvent(), 'str_event2']
+
+    def set(event):
+        event_history.append(event)
+
+    listener = EventBusListener('test', wrappedfunction.WrappedFunction(set), (str, TestEvent))
+    EventBus.add_listener(listener)
+
+    with SyncWorker():
+        for k in target:
+            EventBus.post_event('test', k)
+
+    assert event_history == target

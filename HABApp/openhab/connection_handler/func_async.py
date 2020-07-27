@@ -48,13 +48,12 @@ async def async_item_exists(item) -> bool:
 
 
 async def async_get_items(include_habapp_meta=False) -> Optional[List[Dict[str, Any]]]:
-    params = {'recursive': 'false', 'fields': 'state,type,name,editable'}
+    params = None
     if include_habapp_meta:
-        params['fields'] += ',metadata'
-        params['metadata'] = 'HABApp'
+        params = {'metadata': 'HABApp'}
 
     try:
-        resp = await get('items')
+        resp = await get('items', params=params)
         return load_json(await resp.text(encoding='utf-8'))
     except Exception as e:
         # sometimes uuid already works but items not - so we ignore these errors here, too
@@ -72,7 +71,12 @@ async def async_get_item(item: str, include_habapp_meta=False) -> dict:
     if ret.status >= 300:
         return {}
     else:
-        return await ret.json(encoding='utf-8')
+        data = await ret.json(encoding='utf-8')
+        try:
+            data['groups'] = data.pop('groupNames')
+        except KeyError:
+            pass
+        return data
 
 
 async def async_get_things() -> Optional[List[Dict[str, Any]]]:
@@ -172,6 +176,10 @@ async def async_set_metadata(item: str, namespace: str, value: str, config: dict
     return ret.status < 300
 
 
+async def async_set_habapp_metadata(item: str, config: dict):
+    return await async_set_metadata(item, 'HABApp', ' ', config)
+
+
 async def async_set_thing_cfg(uid: str, cfg: typing.Dict[str, typing.Any]):
     ret = await put(f'things/{uid:s}/config', json=cfg)
     if ret is None:
@@ -203,6 +211,15 @@ async def async_remove_channel_link(channel_uid: str, item_name: str) -> bool:
     return ret.status == 200
 
 
+async def async_get_channel_links() -> List[Dict[str, str]]:
+    ret = await get('links')
+    if ret.status >= 300:
+        return None
+    else:
+        return await ret.json(encoding='utf-8')
+
+
+
 async def async_get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
     ret = await get(__get_link_url(channel_uid, item_name), log_404=False)
     if ret.status == 404:
@@ -218,12 +235,12 @@ async def async_channel_link_exists(channel_uid: str, item_name: str) -> bool:
     return ret.status == 200
 
 
-async def async_create_channel_link(link_def: ItemChannelLinkDefinition) -> bool:
+async def async_create_channel_link(channel_uid: str, item_name: str, configuration: Dict[str, Any] = {}) -> bool:
     # if the passed item doesn't exist OpenHAB creates a new empty item item
-    if not await async_item_exists(link_def.item_name):
-        raise ItemNotFoundError.from_name(link_def.item_name)
+    if not await async_item_exists(item_name):
+        raise ItemNotFoundError.from_name(item_name)
 
-    ret = await put(__get_link_url(link_def.channel_uid, link_def.item_name), json=link_def.dict(by_alias=True))
+    ret = await put(__get_link_url(channel_uid, item_name), json=configuration)
     if ret is None:
         return False
     return ret.status == 200

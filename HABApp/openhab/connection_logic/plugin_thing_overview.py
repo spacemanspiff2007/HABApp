@@ -26,14 +26,14 @@ class ThingOverview(OnConnectPlugin):
 
         thing_data = await async_get_things()
 
-        thing_table = Table()
+        thing_table = Table('Things')
         thing_stat = thing_table.add_column('Status', '^')
         thing_label = thing_table.add_column('Label')
         thing_location = thing_table.add_column('Location')
         thing_type = thing_table.add_column('Thing type')
         thing_uid = thing_table.add_column('Thing UID')
 
-        zw_table = Table()
+        zw_table = Table(heading='Z-Wave Things')
         zw_node = zw_table.add_column('Node', '^')
         zw_stat = zw_table.add_column('Status', '^')
         zw_label = zw_table.add_column('Label')

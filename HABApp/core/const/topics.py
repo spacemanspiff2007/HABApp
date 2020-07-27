@@ -7,13 +7,13 @@ except ImportError:
 
 WARNINGS: Final = 'HABApp.Warnings'
 ERRORS: Final = 'HABApp.Errors'
+INFOS: Final = 'HABApp.Infos'
 
 RULES: Final = 'HABApp.Rules'
 PARAM: Final = 'HABApp.Parameters'
 
-
 ALL: typing.List[str] = [
-    WARNINGS, ERRORS,
+    WARNINGS, ERRORS, INFOS,
 
     RULES, PARAM,
 ]

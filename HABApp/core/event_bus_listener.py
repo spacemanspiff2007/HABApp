@@ -13,18 +13,26 @@ class EventBusListener:
 
         self.event_filter = event_type
 
-    def notify_listeners(self, event):
+        self.__is_all: bool = self.event_filter is AllEvents
+        self.__is_single: bool = not isinstance(self.event_filter, (list, tuple, set))
 
-        if self.event_filter is AllEvents or isinstance(event, self.event_filter):
+    def notify_listeners(self, event):
+        # We run always
+        if self.__is_all:
             self.func.run(event)
             return None
 
+        # single filter
+        if self.__is_single:
+            if isinstance(event, self.event_filter):
+                self.func.run(event)
+            return None
+
         # Make it possible to specify multiple classes
-        if isinstance(self.event_filter, list) or isinstance(self.event_filter, set):
-            for cls in self.event_filter:
-                if isinstance(event, cls):
-                    self.func.run(event)
-                    return None
+        for cls in self.event_filter:
+            if isinstance(event, cls):
+                self.func.run(event)
+                return None
 
     def cancel(self):
         """Stop listening on the event bus"""

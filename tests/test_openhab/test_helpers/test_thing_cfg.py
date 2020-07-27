@@ -1,8 +1,11 @@
-from HABApp.openhab.definitions.helpers.thing_config import ThingConfigChanger
+from pytest import fixture, raises
+
+from HABApp.openhab.connection_logic.plugin_things.thing_config import ThingConfigChanger
 
 
-def test_zwave_cfg():
-    c = ThingConfigChanger.from_dict({
+@fixture
+def cfg():
+    return ThingConfigChanger.from_dict('UID', {
         'config_1_1': 0,                # 1 byte
         'config_2_2': 0,                # 2 byte
         'config_10_1_wo': 0,            # unclear what wo means
@@ -10,8 +13,19 @@ def test_zwave_cfg():
         'group_1': ['controller'],
     })
 
-    assert 1 in c
-    assert 2 in c
-    assert 10 in c
-    assert 100 in c
-    assert 'Group1' in c
+
+def test_zwave_cfg(cfg: ThingConfigChanger):
+    assert 1 in cfg
+    assert 2 in cfg
+    assert 10 in cfg
+    assert 100 in cfg
+    assert 'Group1' in cfg
+
+
+def test_set_keys(cfg: ThingConfigChanger):
+    cfg[1] = 5
+
+    with raises(KeyError):
+        cfg[3] = 7
+    with raises(KeyError):
+        cfg['1'] = 7

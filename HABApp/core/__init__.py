@@ -1,6 +1,7 @@
 from . import const
 from . import lib
 from . import wrapper
+from . import logger
 
 from .wrappedfunction import WrappedFunction
 
