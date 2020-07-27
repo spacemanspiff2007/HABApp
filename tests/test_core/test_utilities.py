@@ -53,5 +53,5 @@ async def test_pending_future_cancel():
     await asyncio.sleep(0.001)
     p.reset()
     await asyncio.sleep(0.001)
-    assert isinstance(exception, asyncio.CancelledError)
+    assert isinstance(exception, asyncio.exceptions.CancelledError)
     p.cancel()
