@@ -2,6 +2,12 @@
 [![Build Status](https://travis-ci.org/spacemanspiff2007/HABApp.svg?branch=master)](https://travis-ci.org/spacemanspiff2007/HABApp)
 [![Documentation Status](https://readthedocs.org/projects/habapp/badge/?version=latest)](https://habapp.readthedocs.io/en/latest/?badge=latest)
 [![Updates](https://pyup.io/repos/github/spacemanspiff2007/HABApp/shield.svg)](https://pyup.io/repos/github/spacemanspiff2007/HABApp/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/habapp)
+![PyPI](https://img.shields.io/pypi/v/HABapp)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/habapp?label=pypi%20downloads)
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/habapp?label=docker)
+![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/habapp)
+
 
 _Easy automation with MQTT and/or openHAB_
 
