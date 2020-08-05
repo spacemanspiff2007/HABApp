@@ -3,8 +3,9 @@
 [![Documentation Status](https://readthedocs.org/projects/habapp/badge/?version=latest)](https://habapp.readthedocs.io/en/latest/?badge=latest)
 [![Updates](https://pyup.io/repos/github/spacemanspiff2007/HABApp/shield.svg)](https://pyup.io/repos/github/spacemanspiff2007/HABApp/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/habapp)
+
 ![PyPI](https://img.shields.io/pypi/v/HABapp)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/habapp?label=pypi%20downloads)
+[![Downloads](https://pepy.tech/badge/habapp/month)](https://pepy.tech/project/habapp/month)
 ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/habapp?label=docker)
 ![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/habapp)
 
