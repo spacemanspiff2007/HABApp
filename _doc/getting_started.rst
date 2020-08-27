@@ -78,6 +78,8 @@ Interacting with items
 ------------------------------
 Iterating with items is done through the Item factory methods.
 Posting values will automatically create the corresponding events on the event bus.
+This example will create an item in HABApp and post some updates to it.
+To access items from openhab see :ref:`the openhab item description <OPENHAB_ITEM_TYPES>`.
 
 .. execute_code::
     :header_output: Output

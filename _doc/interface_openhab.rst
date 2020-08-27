@@ -18,6 +18,7 @@ Function parameters
    :imported-members:
 
 
+.. _OPENHAB_ITEM_TYPES:
 
 Openhab item types
 ------------------------------
