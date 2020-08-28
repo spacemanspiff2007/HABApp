@@ -38,6 +38,7 @@ Example:
     HABApp.core.Items.set_item(ContactItem('MyContact', initial_value='OPEN'))
     HABApp.core.Items.set_item(SwitchItem('MySwitch', initial_value='OFF'))
     # hide
+    from HABApp.openhab.items import ContactItem, SwitchItem
 
     my_contact = ContactItem.get_item('MyContact')
     if my_contact.is_open():
