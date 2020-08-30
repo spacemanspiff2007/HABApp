@@ -76,8 +76,10 @@ This often comes in handy if there is some logic that shall be applied to differ
 
 Interacting with items
 ------------------------------
-Iterating with items is done through the Item factory methods.
-Posting values will automatically create the corresponding events on the event bus.
+Iterating with items is done through the corresponding Item factory methods.
+Posting values will automatically create the events on the event bus.
+This example will create an item in HABApp (locally) and post some updates to it.
+To access items from openhab use the correct openhab item type (see :ref:`the openhab item description <OPENHAB_ITEM_TYPES>`).
 
 .. execute_code::
     :header_output: Output
@@ -166,10 +168,12 @@ It is possible to watch items for changes or updates.
 
         # the function has 1 argument which is the event
         def item_changed(self, event: ValueChangeEvent):
-            print(f'{event.name} changed from {event.old_value} to {event.value}')
+            print(f'{event.name} changed from "{event.old_value}" to "{event.value}"')
+            print(f'Last change of {self.my_item.name}: {self.my_item.last_change}')
 
         def item_updated(self, event: ValueUpdateEvent):
-            print(f'{event.name} updated value: {event.value}')
+            print(f'{event.name} updated value: "{event.value}"')
+            print(f'Last update of {self.my_item.name}: {self.my_item.last_update}')
 
     MyFirstRule()
     # hide

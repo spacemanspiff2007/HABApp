@@ -1,6 +1,5 @@
 import logging
 import threading
-import traceback
 
 import ruamel.yaml
 
@@ -54,10 +53,11 @@ def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
             if data is None:
                 data = {}
             set_parameter_file(path.stem, data)
-        except Exception:
-            log.error(f"Could not load params from {path.name}!")
-            for line in traceback.format_exc().splitlines():
-                log.error(line)
+        except Exception as exc:
+            e = HABApp.core.logger.HABAppError(log)
+            e.add(f"Could not load params from {path.name}!")
+            e.add_exception(exc, add_traceback=True)
+            e.dump()
             return None
 
         log.debug(f'Loaded params from {path.name}!')
@@ -69,10 +69,11 @@ def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
     with LOCK:  # serialize to get proper error messages
         try:
             remove_parameter_file(path.stem)
-        except Exception:
-            log.error(f"Could not remove parameters from {path.name}!")
-            for line in traceback.format_exc().splitlines():
-                log.error(line)
+        except Exception as exc:
+            e = HABApp.core.logger.HABAppError(log)
+            e.add(f"Could not remove parameters from {path.name}!")
+            e.add_exception(exc, add_traceback=True)
+            e.dump()
             return None
 
         log.debug(f'Removed params from {path.name}!')

@@ -192,6 +192,8 @@ async def async_set_thing_cfg(uid: str, cfg: typing.Dict[str, typing.Any]):
     elif ret.status >= 300:
         raise ValueError('Something went wrong')
 
+    return ret.status
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Link handling is experimental

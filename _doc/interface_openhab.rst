@@ -18,6 +18,7 @@ Function parameters
    :imported-members:
 
 
+.. _OPENHAB_ITEM_TYPES:
 
 Openhab item types
 ------------------------------
@@ -37,6 +38,7 @@ Example:
     HABApp.core.Items.set_item(ContactItem('MyContact', initial_value='OPEN'))
     HABApp.core.Items.set_item(SwitchItem('MySwitch', initial_value='OFF'))
     # hide
+    from HABApp.openhab.items import ContactItem, SwitchItem
 
     my_contact = ContactItem.get_item('MyContact')
     if my_contact.is_open():
@@ -225,6 +227,8 @@ and how to automatically link items to it.
 .. tip::
    Integer values can be specified either as integer (``20``) or hex (``0x14``)
 
+The entries ``thing config``, ``create items`` and ``channels`` are optional and can be combined as desired.
+
 
 .. code-block:: yaml
 
@@ -236,7 +240,8 @@ and how to automatically link items to it.
    filter:
      thing_type: zwave:philio_pst02a_00_000
 
-   # Set this configuration for all things.
+   # Set this configuration every matching thing. HABApp will automatically only 
+   # change the values which are not already correct.
    # Here it is the z-wave parameters which are responsible for the device behaviour
    thing config:
      4: 99     # Light Threshold

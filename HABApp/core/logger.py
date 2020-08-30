@@ -37,9 +37,12 @@ class HABAppLogger:
         self.lines.append(text.format(*args, **kwargs))
         return self
 
-    def add_exception(self, e: Exception):
-        for line in str(e).splitlines():
-            self.lines.append(line)
+    def add_exception(self, e: Exception, add_traceback: bool = False):
+        if not add_traceback:
+            for line in str(e).splitlines():
+                self.lines.append(line)
+        else:
+            self.lines.extend(HABApp.core.wrapper.format_exception(e))
         return self
 
     def dump(self) -> bool:

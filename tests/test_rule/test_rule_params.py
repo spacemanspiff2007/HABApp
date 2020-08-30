@@ -66,6 +66,22 @@ def test_float_operators(params):
     assert p > 4
 
 
+def test_arithmetic(params):
+    Parameters.set_parameter_file('file', {'key': 1})
+    p = Parameter('file', 'key')
+
+    assert int(p) == 1
+    assert p + 1 == 2
+    assert p - 1 == 0
+    assert p * 3 == 3
+    assert p / 2 == 0.5
+    assert p // 2 == 0
+    assert p << 1 == 2
+    assert p >> 1 == 0
+    assert p | 2 == 3
+    assert p & 2 == 0
+
+
 def test_simple_key_creation(params):
 
     Parameter('file', 'key')
