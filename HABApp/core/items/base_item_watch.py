@@ -3,7 +3,7 @@ import typing
 
 import HABApp
 from ..const import loop
-from ..const.utilities import PendingFuture
+from HABApp.core.lib import PendingFuture
 from ..events import ItemNoChangeEvent, ItemNoUpdateEvent
 
 
