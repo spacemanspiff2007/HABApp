@@ -1,27 +1,29 @@
 import logging
 
 import HABApp
-from .const import topics
+from .const.topics import ERRORS as _T_ERRORS
+from .const.topics import WARNINGS as _T_WARNINGS
+from .const.topics import INFOS as _T_INFOS
 
 
 def log_error(logger: logging.Logger, text: str):
     logger.error(text)
     HABApp.core.EventBus.post_event(
-        topics.ERRORS, text
+        _T_ERRORS, text
     )
 
 
 def log_warning(logger: logging.Logger, text: str):
     logger.warning(text)
     HABApp.core.EventBus.post_event(
-        topics.WARNINGS, text
+        _T_WARNINGS, text
     )
 
 
 def log_info(logger: logging.Logger, text: str):
     logger.info(text)
     HABApp.core.EventBus.post_event(
-        topics.INFOS, text
+        _T_INFOS, text
     )
 
 
@@ -65,14 +67,14 @@ class HABAppLogger:
 
 class HABAppError(HABAppLogger):
     _LEVEL = logging.ERROR
-    _TOPIC = topics.ERRORS
+    _TOPIC = _T_ERRORS
 
 
 class HABAppWarning(HABAppLogger):
     _LEVEL = logging.WARNING
-    _TOPIC = topics.WARNINGS
+    _TOPIC = _T_WARNINGS
 
 
 class HABAppInfo(HABAppLogger):
     _LEVEL = logging.INFO
-    _TOPIC = topics.INFOS
+    _TOPIC = _T_INFOS
