@@ -1,11 +1,13 @@
 from HABApp.core.Items import get_all_items
 from HABApp.openhab.items import Thing
-from conf_testing.lib.HABAppTests import TestBaseRule
+from HABAppTests import TestBaseRule
 
 
 class TestOpenhabInterfaceLinks(TestBaseRule):
     def __init__(self):
         super().__init__()
+
+        self.config.skip_on_failure = True
 
         self.item_name: str = ""
         self.astro_sun_thing: str = ""

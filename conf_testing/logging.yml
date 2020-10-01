@@ -34,6 +34,15 @@ handlers:
     formatter: HABApp_format
     level: DEBUG
 
+  HABApp_rest_file:
+    class: logging.handlers.RotatingFileHandler
+    filename: 'test_rest.log'
+    maxBytes: 10_485_760
+    backupCount: 3
+
+    formatter: HABApp_format
+    level: DEBUG
+
   BufferEventFile:
     class: logging.handlers.MemoryHandler
     capacity: 0
@@ -71,4 +80,10 @@ loggers:
     level: DEBUG
     handlers:
       - HABApp_test_file
+    propagate: False
+
+  HABApp.Rest:
+    level: DEBUG
+    handlers:
+      - HABApp_rest_file
     propagate: False

@@ -16,6 +16,8 @@ class TestMQTTEvents(TestBaseRule):
     def __init__(self):
         super().__init__()
 
+        self.config.skip_on_failure = True
+
         self.mqtt_test_data = ['asdf', 1, 1.1, str({'a': 'b'}), {'key': 'value'}, ['mylist', 'mylistvalue']]
 
         self.add_test('MQTT events', self.test_mqtt_events, MqttValueUpdateEvent)

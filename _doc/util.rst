@@ -86,8 +86,8 @@ Basic Example
 
             # This shows how to enable/disable a mode and how to get a mode from the item
             print('disable/enable the higher priority mode')
-            item.get_mode('manual').set_enabled(False)
-            item.get_mode('manual').set_value(11)
+            item.get_mode('manual').set_enabled(False)  # disable mode
+            item.get_mode('manual').set_value(11)       # setting a value will enable it again
 
             # This shows that changes of the lower priority is only show when
             # the mode with the higher priority gets disabled
