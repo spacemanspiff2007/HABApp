@@ -221,7 +221,6 @@ async def async_get_channel_links() -> List[Dict[str, str]]:
         return await ret.json(encoding='utf-8')
 
 
-
 async def async_get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
     ret = await get(__get_link_url(channel_uid, item_name), log_404=False)
     if ret.status == 404:

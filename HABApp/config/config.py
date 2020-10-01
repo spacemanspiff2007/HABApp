@@ -28,7 +28,6 @@ class Directories(PathContainer):
             if not self.config.is_dir():
                 log.info(f'Manual thing configuration disabled! Folder {self.config} does not exist!')
 
-
             # add path for libraries
             if self.lib.is_dir():
                 lib_path = str(self.lib)

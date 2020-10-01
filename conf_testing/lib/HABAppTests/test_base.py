@@ -64,6 +64,7 @@ class TestBaseRule(HABApp.Rule):
                 continue
             rule.run_tests(result)
 
+        log.info('-' * 120)
         log.info(str(result)) if not result.nio else log.error(str(result))
         print(str(result))
         return None
@@ -103,17 +104,16 @@ class TestBaseRule(HABApp.Rule):
                 func = test_data[0]
                 args = test_data[1]
                 kwargs = test_data[2]
-
                 msg = func(*args, **kwargs)
-                if msg is True or msg is None:
-                    msg = ''
             except Exception as e:
                 log.error(f'Test "{name}" failed: {e}')
-                for line in traceback.format_exc().splitlines():
+                for line in HABApp.core.wrapper.format_exception(e):
                     log.error(line)
                 result.nio += 1
                 continue
 
+            if msg is True or msg is None:
+                msg = ''
             if msg == '':
                 result.io += 1
                 log.info( f'Test {test_current:{width}}/{test_count} "{name}" successful!')
