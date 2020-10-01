@@ -38,7 +38,8 @@ class TestOpenhabEventTypes(TestBaseRule):
     def test_quantity_type_events(self, dimension):
 
         unit_of_dimension = {
-            'Length': 'm', 'Temperature': '°C', 'Pressure': 'hPa', 'Speed': 'km/h', 'Intensity': 'W/m²', 'Angle': '°'
+            'Length': 'm', 'Temperature': '°C', 'Pressure': 'hPa', 'Speed': 'km/h', 'Intensity': 'W/m²', 'Angle': '°',
+            'Dimensionless': '',
         }
 
         item_name = f'{dimension}_event_test'

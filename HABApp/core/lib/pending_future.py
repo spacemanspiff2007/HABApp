@@ -1,7 +1,7 @@
 import asyncio
 import typing
-from asyncio import Task, sleep, ensure_future
-from typing import Optional, Awaitable, Callable, Any
+from asyncio import Task, ensure_future, sleep
+from typing import Any, Awaitable, Callable, Optional
 
 
 class PendingFuture:

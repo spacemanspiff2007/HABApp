@@ -4,7 +4,7 @@ import typing
 
 from HABApp.core.wrapper import log_exception
 from . import EventBusListener
-from .events import ComplexEventValue
+from .events import ComplexEventValue, ValueChangeEvent
 
 _event_log = logging.getLogger('HABApp.EventBus')
 _habapp_log = logging.getLogger('HABApp')
@@ -34,6 +34,8 @@ def post_event(topic: str, event):
     try:
         if isinstance(event.value, ComplexEventValue):
             event.value = event.value.value
+        if isinstance(event, ValueChangeEvent) and isinstance(event.old_value, ComplexEventValue):
+            event.old_value = event.old_value.value
     except AttributeError:
         pass
 

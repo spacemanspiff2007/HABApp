@@ -1,11 +1,13 @@
 from HABApp.core.Items import get_all_items
 from HABApp.openhab.items import Thing
-from conf_testing.lib.HABAppTests import TestBaseRule
+from HABAppTests import TestBaseRule
 
 
 class TestOpenhabInterfaceLinks(TestBaseRule):
     def __init__(self):
         super().__init__()
+
+        self.config.skip_on_failure = True
 
         self.item_name: str = ""
         self.astro_sun_thing: str = ""
@@ -47,20 +49,22 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
     def test_update_link(self):
         assert self.oh.create_channel_link(self.channel_uid, self.item_name, {"profile": "system:default"})
+        assert self.oh.channel_link_exists(self.channel_uid, self.item_name)
 
         new_cfg = {'profile': 'system:offset', 'offset': 7.0}
-
         assert self.oh.create_channel_link(self.channel_uid, self.item_name, new_cfg)
 
-        assert self.oh.get_channel_link(self.channel_uid, self.item_name).configuration == new_cfg
+        channel_link = self.oh.get_channel_link(self.channel_uid, self.item_name)
+        assert channel_link.configuration == new_cfg
 
     def test_get_link(self):
-        assert self.oh.create_channel_link(self.channel_uid, self.item_name, {"profile": "system:default"})
+        target = {"profile": "system:default"}
+        assert self.oh.create_channel_link(self.channel_uid, self.item_name, target)
         link = self.oh.get_channel_link(self.channel_uid, self.item_name)
 
         assert link.item_name == self.item_name
         assert link.channel_uid == self.channel_uid
-        assert link.configuration == {"profile": "system:default"}
+        assert link.configuration == target
 
     def test_remove_link(self):
         assert self.oh.create_channel_link(self.channel_uid, self.item_name, {"profile": "system:default"})
@@ -69,11 +73,9 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
     def test_link_existence(self):
         assert self.oh.create_channel_link(self.channel_uid, self.item_name, {"profile": "system:default"})
-
         assert self.oh.channel_link_exists(self.channel_uid, self.item_name)
 
         assert self.oh.remove_channel_link(self.channel_uid, self.item_name)
-
         assert not self.oh.channel_link_exists(self.channel_uid, self.item_name)
 
     def test_create_link(self):

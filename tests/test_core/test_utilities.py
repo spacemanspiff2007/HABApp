@@ -4,7 +4,7 @@ import sys
 import pytest
 
 import HABApp
-from HABApp.core.const.utilities import PendingFuture
+from HABApp.core.lib import PendingFuture
 
 
 @pytest.yield_fixture()

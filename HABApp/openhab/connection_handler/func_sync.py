@@ -246,9 +246,11 @@ def get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinit
 
 
 def create_channel_link(channel_uid: str, item_name: str, configuration: dict = {}) -> bool:
-    """ creates a link between a (things) channel and an item
+    """creates a link between a (things) channel and an item
 
-    :param link_def: an instance of ItemChannelLinkDefinition with at least channel_uid and item_name set
+    :param channel_uid: uid of the (thing) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
+    :param item_name: name of the item
+    :param configuration: optional configuration for the channel
     :return: true on successful creation, otherwise false
     """
 
@@ -266,7 +268,7 @@ def create_channel_link(channel_uid: str, item_name: str, configuration: dict = 
 def remove_channel_link(channel_uid: str, item_name: str) -> bool:
     """ removes a link between a (things) channel and an item
 
-    :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
+    :param channel_uid: uid of the (thing) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
     :param item_name: name of the item
     :return: true on successful removal, otherwise false
     """

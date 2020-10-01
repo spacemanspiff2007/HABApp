@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Set
 
 import HABApp
-from HABApp.core.const.utilities import PendingFuture
+from HABApp.core.lib import PendingFuture
 from HABApp.core.logger import log_warning, HABAppError
 from HABApp.openhab.connection_handler.func_async import async_get_things
 from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg, InvalidItemNameError
