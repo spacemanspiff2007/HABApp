@@ -241,7 +241,9 @@ async def async_create_channel_link(channel_uid: str, item_name: str, configurat
     if not await async_item_exists(item_name):
         raise ItemNotFoundError.from_name(item_name)
 
-    ret = await put(__get_link_url(channel_uid, item_name), json={'configuration': configuration})
+    ret = await put(__get_link_url(
+        channel_uid, item_name), json={'configuration': configuration} if configuration else None
+    )
     if ret is None:
         return False
     return ret.status == 200
