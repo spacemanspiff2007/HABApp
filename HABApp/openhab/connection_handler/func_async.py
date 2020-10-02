@@ -236,13 +236,16 @@ async def async_channel_link_exists(channel_uid: str, item_name: str) -> bool:
     return ret.status == 200
 
 
-async def async_create_channel_link(channel_uid: str, item_name: str, configuration: Dict[str, Any] = {}) -> bool:
+async def async_create_channel_link(
+        channel_uid: str, item_name: str, configuration: Optional[Dict[str, Any]] = None) -> bool:
+
     # if the passed item doesn't exist OpenHAB creates a new empty item item
+    # this is undesired and why we raise an Exception
     if not await async_item_exists(item_name):
         raise ItemNotFoundError.from_name(item_name)
 
     ret = await put(__get_link_url(
-        channel_uid, item_name), json={'configuration': configuration} if configuration else None
+        channel_uid, item_name), json={'configuration': configuration} if configuration is not None else None
     )
     if ret is None:
         return False

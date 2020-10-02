@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Dict
 
 import HABApp
 import HABApp.core
@@ -245,7 +245,7 @@ def get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinit
     return fut.result()
 
 
-def create_channel_link(channel_uid: str, item_name: str, configuration: dict = {}) -> bool:
+def create_channel_link(channel_uid: str, item_name: str, configuration: Optional[Dict[str, Any]] = None) -> bool:
     """creates a link between a (things) channel and an item
 
     :param channel_uid: uid of the (thing) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)
