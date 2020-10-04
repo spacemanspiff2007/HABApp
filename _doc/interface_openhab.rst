@@ -215,7 +215,8 @@ For each one of these things it is then possible to
 
 There is also a test mode which prints out all required information and does not make any changes.
 
-An ``.items`` file will automatically be created next to the ``.yml`` file containing all created items.
+A valid ``.items`` file will automatically be created next to the ``.yml`` file containing all created items.
+It can be used to get a quick overview what items (would) have been created or copied into the items folder.
 
 File Structure
 ~~~~~~~~~~~~~~~~~~~~

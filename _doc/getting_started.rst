@@ -5,6 +5,10 @@ It is really recommended to use a python IDE, for example PyCharm.
 The IDE can provide auto complete and static checks
 which will help you write error free rules and vastly speed up your developement.
 
+First start HABApp. When it is running it will automatically load and update all rules which
+are created in the configured ``rules`` directory.
+Loading and unloading of rules can be observed in the HABApp logfile.
+
 First rule
 ------------------------------
 Rules are written as classes that inherit from :class:`HABApp.Rule`. Once the class gets instantiated the will run as
