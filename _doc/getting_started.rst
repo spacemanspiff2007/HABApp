@@ -5,9 +5,11 @@ It is really recommended to use a python IDE, for example PyCharm.
 The IDE can provide auto complete and static checks
 which will help you write error free rules and vastly speed up your developement.
 
-First start HABApp. When it is running it will automatically load and update all rules which
-are created in the configured ``rules`` directory.
+First start HABApp and keep it running. It will automatically load and update all rules which
+are created or changed in the configured ``rules`` directory.
 Loading and unloading of rules can be observed in the HABApp logfile.
+
+It is recommended to use HABApp from the console for these examples so the print output can be observed.
 
 First rule
 ------------------------------

@@ -46,9 +46,14 @@ Installation
 
     python3 -m pip install habapp
 
-#. Run HABApp::
+#. Run HABAp::
 
     habapp --config PATH_TO_CONFIGURATION_FOLDER
+
+   If you use openHABian a good configuration folder would be ``/opt/openhab/conf/habapp`` because this is where your other configuration
+   folders are located (e.g. the items and sitemaps folder). Just make sure to manually create the folder ``habapp`` before the start.
+
+
 
 .. hint::
    After the installation take a look how to configure HABApp.

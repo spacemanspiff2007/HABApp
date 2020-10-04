@@ -34,7 +34,7 @@ Configuration contents
         ping:
             enabled: true        # If enabled the configured item will show how long it takes to send an update from HABApp
                                  # and get the updated value back in milliseconds
-            item: 'HABApp_Ping'  # Name of the item
+            item: 'HABApp_Ping'  # Name of the Numberitem that will show the ping
             interval: 10         # Seconds between two pings
 
         connection:
@@ -46,7 +46,7 @@ Configuration contents
         general:
             listen_only: False  # If True  HABApp will not change any value on the openhab instance.
                                 # Useful for testing rules from another machine.
-            wait_for_openhab: False  # If True HABApp will wait for items from the openHAB instance
+            wait_for_openhab: True   # If True HABApp will wait for items from the openHAB instance
                                      # before loading any rules on startup
 
 
