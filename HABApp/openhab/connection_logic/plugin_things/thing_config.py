@@ -8,8 +8,22 @@ from HABApp.openhab.connection_handler.func_async import async_set_thing_cfg
 from ._log import log_cfg as log
 
 
+def ensure_same_types(a, b, key: str):
+    t_a = type(a)
+    t_b = type(b)
+    if t_a is t_b:
+        return None
+
+    _a = str(t_a)
+    _a = _a[7:-1] if _a.startswith('<class ') and _a[-1] == '>' else _a
+
+    _b = str(t_b)
+    _b = _b[7:-1] if _b.startswith('<class ') and _b[-1] == '>' else _b
+    raise ValueError(f"Datatype of parameter '{key}' must be {_a} but is {_b}!")
+
+
 class ThingConfigChanger:
-    zw_param = re.compile(r'config_(?P<p>\d+)_(?P<w>\d+)(?:_\w+)?')
+    zw_param = re.compile(r'config_(?P<param>\d+)_(?P<width>\d+)(?P<bitmask>_\w+)?')
     zw_group = re.compile(r'group_(\d+)')
 
     @classmethod
@@ -20,6 +34,15 @@ class ThingConfigChanger:
             # Z-Wave Params -> 0
             m = ThingConfigChanger.zw_param.fullmatch(k)
             if m:
+                # check if the entry without bitmask is also in the cfg dict because then we use this entry
+                # and split up the bitmask entries accordingly
+                # 154 -> config_154_4
+                # 154_000000FF -> config_154_4_000000FF
+                if m.group(3) is not None:
+                    if f'config_{m.group(1)}_{m.group(2)}' in _in:
+                        c.alias[f'{m.group(1)}{m.group(3)}'] = k
+                        continue
+
                 c.alias[int(m.group(1))] = k
                 continue
 
@@ -43,7 +66,11 @@ class ThingConfigChanger:
         key = self.alias.get(o_key, o_key)
         if key not in self.org:
             raise KeyError(f'Parameter "{o_key}" does not exist for {self.uid}!')
-        if item == self.org[key]:
+
+        org = self.org[key]
+        ensure_same_types(item, org, o_key)
+
+        if item == org:
             return None
         self.new[key] = item
 

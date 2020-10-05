@@ -65,7 +65,7 @@ class RuleManager:
                     if isinstance(item, HABApp.openhab.items.OpenhabItem):
                         items_found = True
                         break
-                
+
                 # stop waiting if we want to shut down
                 if self.runtime.shutdown.requested:
                     return None
