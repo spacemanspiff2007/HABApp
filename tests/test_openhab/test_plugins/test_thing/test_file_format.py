@@ -1,4 +1,4 @@
-from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg
+from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg, UserItemCfg
 
 
 def test_cfg_optional():
@@ -54,3 +54,24 @@ def test_cfg_item_builder():
     a = list(c[0].channels[0].get_items({'thing_uid': 'replaced_uid'}))
     assert a[0].type == 'Number'
     assert a[0].name == 'replaced_uid'
+
+
+def test_item_cfg():
+
+    c = UserItemCfg.parse_obj({
+        'type': 'Switch',
+        'name': 'asdf',
+        'metadata': {'a': 'b'}
+    })
+
+    i = c.get_item({})
+    assert i.metadata == {'a': {'value': 'b', 'config': {}}}
+
+    c = UserItemCfg.parse_obj({
+        'type': 'Switch',
+        'name': 'asdf',
+        'metadata': {'k': {'value': 'b', 'config': {'d': 'e'}}},
+    })
+
+    i = c.get_item({})
+    assert i.metadata == {'k': {'value': 'b', 'config': {'d': 'e'}}}

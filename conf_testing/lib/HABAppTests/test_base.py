@@ -155,6 +155,9 @@ class TestBaseRule(HABApp.Rule):
         if msg == '':
             result.io += 1
             log.info(f'Test {result.run:{width}}/{test_count} "{name}" successful!')
+        elif isinstance(msg, str) and msg.lower() == 'SKIP':
+            result.skipped += 1
+            log.info(f'Test {result.run:{width}}/{test_count} "{name}" skipped!')
         else:
             result.nio += 1
             if isinstance(msg, bool):

@@ -1,5 +1,6 @@
+import json
 import logging
-from pprint import pformat
+import pprint
 
 import HABApp.openhab.connection_handler.http_connection
 from HABApp.openhab.connection_handler.http_connection import HTTP_PREFIX
@@ -36,18 +37,14 @@ class RestPatcher:
                 async def content_func_wrap(*cargs, **ckwargs):
                     t = await content_func(*cargs, **ckwargs)
 
-                    # pretty print the response
-                    obj = pformat(t, indent=2)
-                    if obj[0] == '[' and obj[-1] == ']':
-                        obj = f'[\n {obj[1:-1]}\n]'
-                    elif obj[0] == '{' and obj[-1] == '}':
-                        obj = f'{{\n {obj[1:-1]}\n}}'
-                    lines = obj.splitlines()
-                    if len(lines) <= 1:
-                        self.log.debug(f'{"->":6s}')
+                    if isinstance(t, (dict, list)):
+                        txt = json.dumps(t, indent=2)
                     else:
-                        for i, l in enumerate(lines):
-                            self.log.debug(f'{"->" if not i else "":^6s} {l}')
+                        txt = pprint.pformat(t, indent=2)
+
+                    lines = txt.splitlines()
+                    for i, l in enumerate(lines):
+                        self.log.debug(f'{"->" if not i else "":^6s} {l}')
 
                     return t
                 return content_func_wrap
