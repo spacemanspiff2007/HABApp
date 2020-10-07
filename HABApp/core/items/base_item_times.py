@@ -29,7 +29,7 @@ class ItemTimes:
 
         # don't add the watch two times
         for t in self.tasks:
-            if t._fut.secs == secs:
+            if not t._fut.is_canceled and t._fut.secs == secs:
                 return t
         w = self.WATCH(self.name, secs)
         self.tasks.append(w)
