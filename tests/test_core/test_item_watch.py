@@ -13,7 +13,7 @@ def test_multiple_add(monkeypatch):
     i = Item('test')
     w1 = i.watch_change(5)
     w2 = i.watch_change(5)
-    
+
     assert w1 is w2
 
     w1._fut.cancel()

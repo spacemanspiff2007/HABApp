@@ -109,7 +109,7 @@ async def create_item(item: UserItem, test: bool) -> bool:
         # create new link
         log.debug(f'Creating link from {item.link} to {item.name}')
         if not await async_create_channel_link(item.link, name):
-            log.error(f'Creating link failed!')
+            log.error(f'Creating link from {item.link} to {name} failed!')
             await _remove_item(name, habapp_data)
             return False
 
@@ -134,7 +134,7 @@ async def create_item(item: UserItem, test: bool) -> bool:
             if await async_set_metadata(name, ns, m_val, m_config):
                 habapp_data.created_ns.append(ns)
             else:
-                log.error(f'Creating metadata failed!')
+                log.error(f'Creating metadata for {name} failed!')
                 await _remove_item(name, habapp_data)
                 return False
 
