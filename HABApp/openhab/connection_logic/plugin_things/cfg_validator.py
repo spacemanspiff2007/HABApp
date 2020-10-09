@@ -1,4 +1,5 @@
 import re
+import typing
 from dataclasses import dataclass
 from typing import Dict, List
 from typing import Iterator, Optional, Union
@@ -23,11 +24,12 @@ class UserItem:
     groups: List[str]
     tags: List[str]
     link: Optional[str]
+    metadata: Dict[str, Dict[str, Union[str, int, float]]]
 
     def get_oh_cfg(self) -> Dict[str, Union[str, dict, list]]:
         ret = {}
         for k in self.__annotations__:
-            if k == 'link':
+            if k in ('link', 'metadata'):
                 continue
 
             v = self.__dict__[k]
@@ -41,6 +43,11 @@ class InvalidItemNameError(Exception):
     pass
 
 
+class MetadataCfg(BaseModel):
+    value: str
+    config: Dict[str, typing.Any] = {}
+
+
 class UserItemCfg(BaseModel):
     type: str
     name: str
@@ -48,6 +55,7 @@ class UserItemCfg(BaseModel):
     icon: str = ''
     groups: List[str] = []
     tags: List[str] = []
+    metadata: Optional[Dict[str, MetadataCfg]] = None
 
     @validator('type', always=True)
     def validate_item_type(cls, v):
@@ -62,16 +70,36 @@ class UserItemCfg(BaseModel):
     def validate_make_str_builder(cls, v):
         return StrBuilder(v)
 
+    @validator('metadata', pre=True)
+    def make_meta_cfg(cls, v):
+        if not isinstance(v, dict):
+            return v
+
+        for key, val in v.items():
+            if isinstance(val, str):
+                v[key] = {'value': val}
+        return v
+
     def get_item(self, context: dict) -> UserItem:
         v = {'link': None}
         for k in self.__fields__:
             val = self.__dict__[k]
+
+            # type is const
             if k == 'type':
                 v[k] = val
                 continue
+
+            # metadata is nested
+            if k == 'metadata':
+                v[k] = {k: v.dict() for k, v in val.items()} if val is not None else {}
+                continue
+
+            # resolve str wildcards
             if k in ('groups', 'tags'):
                 v[k] = [s.get_str(context) for s in val]
                 continue
+
             v[k] = val.get_str(context)
 
         # ensure a valid item name, otherwise the creation will definitely fail

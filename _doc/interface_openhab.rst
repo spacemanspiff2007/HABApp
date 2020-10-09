@@ -215,11 +215,15 @@ For each one of these things it is then possible to
 
 There is also a test mode which prints out all required information and does not make any changes.
 
-An ``.items`` file will automatically be created next to the ``.yml`` file containing all created items.
+A valid ``.items`` file will automatically be created next to the ``.yml`` file containing all created items.
+It can be used to get a quick overview what items (would) have been created or copied into the items folder.
 
 File Structure
 ~~~~~~~~~~~~~~~~~~~~
 Configuration is done through a .yml file.
+
+Example
+"""""""""""""""""""""""""""""
 
 The following example will show how to set the Z-Wave Parameters 4, 5, 6 and 8 for a ``Philio PST02A`` Z-Wave sensor
 and how to automatically link items to it.
@@ -228,7 +232,6 @@ and how to automatically link items to it.
    Integer values can be specified either as integer (``20``) or hex (``0x14``)
 
 The entries ``thing config``, ``create items`` and ``channels`` are optional and can be combined as desired.
-
 
 .. code-block:: yaml
 
@@ -278,6 +281,9 @@ The entries ``thing config``, ``create items`` and ``channels`` are optional and
            icon: battery
 
 
+Multiple thing definitions in one file
+""""""""""""""""""""""""""""""""""""""""
+
 It is possible to add multiple thing processors into one file.
 To achieve this the root entry is now a list.
 
@@ -292,16 +298,46 @@ Filters can also be lists e.g. if the have to be applied multiple times to the s
      ...
 
    - test: True
-     # multiple filters on the same field
+     # multiple filters on the same field, all have to match
      filter:
      - thing_type: zwave:fibaro.+
      - thing_type: zwave:fibaro_fgrgbw_00_000
      ...
 
 
+Adding Metadata to items
+"""""""""""""""""""""""""""""
+It is possible to add metadata to the created items through the optional ``metadata`` entry in the item config.
+
+There are two forms how metadata can be set. The implicit form for simple key-value pairs (e.g. ``autoupdate``) or
+the explicit form where the entries are unter ``value`` and ``config`` (e.g. ``alexa``)
+
+.. code-block:: yaml
+   :emphasize-lines: 5,6,8,9,10,11,12
+
+   - type: Number
+     name: '{thing_label, :(.+)$}_Temperature'
+     label: '{thing_label, :(.+)$} Temperature [%d %%]'
+     icon: battery
+     metadata:
+       autoupdate: 'false'
+       homekit: 'TemperatureSensor'
+       alexa:
+         'value': 'Fan'
+         'config':
+           'type': 'oscillating'
+           'speedSteps': 3
+
+The config is equivalent to the following item configuration::
+
+   Number MyLabel_Temperature  "MyLabel Temperature [%d %%]" { autoupdate="false", homekit="TemperatureSensor", alexa="Fan" [ type="oscillating", speedSteps=3 ] }
+
+
+
+
 Wildcards
 ~~~~~~~~~~~~~~~~~~~~
-Wildcards are available for item configuration
+Wildcards are available for item configuration and can be applied to all fields except for 'type' and 'metadata'.
 
 Syntax
 """""""""""""

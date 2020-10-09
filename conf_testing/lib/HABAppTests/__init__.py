@@ -1,4 +1,4 @@
-from .utils import get_random_name
+from .utils import get_random_name, run_coro, find_astro_sun_thing
 
 from .test_base import TestBaseRule, TestResult
 from .event_waiter import EventWaiter

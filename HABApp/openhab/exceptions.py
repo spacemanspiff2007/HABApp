@@ -44,3 +44,13 @@ class ThingNotEditableError(Exception):
     @classmethod
     def from_uid(cls, uid: str):
         return cls(f'Thing "{uid}" is not editable!')
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# RestAPI Errors
+# ----------------------------------------------------------------------------------------------------------------------
+class MetadataNotEditableError(Exception):
+
+    @classmethod
+    def create_text(cls, item: str, namespace: str):
+        return cls(f'Metadata {namespace} for {item} is not editable!')

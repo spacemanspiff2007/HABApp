@@ -10,6 +10,14 @@ def cfg():
         'config_2_2': 0,                # 2 byte
         'config_10_1_wo': 0,            # unclear what wo means
         'config_100_4_000000FF': 0,     # 4 byte with bitmask 0xFF
+
+        # sometimes parameters are inside the dict multiple times with a bitmask
+        "config_154_4_00FF0000": 255,
+        "config_154_4": 4294967295,
+        "config_154_4_7F000000": 127,
+        "config_154_4_000000FF": 255,
+        "config_154_4_0000FF00": 255,
+
         'group_1': ['controller'],
     })
 
@@ -22,6 +30,23 @@ def test_zwave_cfg(cfg: ThingConfigChanger):
     assert 'Group1' in cfg
 
 
+def test_param_split(cfg: ThingConfigChanger):
+    assert 154 in cfg
+    assert cfg.alias[154] == 'config_154_4'
+
+    assert '154_7F000000' in cfg
+    assert cfg.alias['154_7F000000'] == 'config_154_4_7F000000'
+
+    assert '154_00FF0000' in cfg
+    assert cfg.alias['154_00FF0000'] == 'config_154_4_00FF0000'
+
+    assert '154_0000FF00' in cfg
+    assert cfg.alias['154_0000FF00'] == 'config_154_4_0000FF00'
+
+    assert '154_000000FF' in cfg
+    assert cfg.alias['154_000000FF'] == 'config_154_4_000000FF'
+
+
 def test_set_keys(cfg: ThingConfigChanger):
     cfg[1] = 5
 
@@ -29,3 +54,11 @@ def test_set_keys(cfg: ThingConfigChanger):
         cfg[3] = 7
     with raises(KeyError):
         cfg['1'] = 7
+
+
+def test_set_wrong_type(cfg: ThingConfigChanger):
+    with raises(ValueError):
+        cfg[1] = "asdf"
+
+    with raises(ValueError):
+        cfg['Group1'] = 'asdf'

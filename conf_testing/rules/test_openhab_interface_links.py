@@ -27,7 +27,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         self.astro_sun_thing: str = self.__find_astro_sun_thing()
         if self.astro_sun_thing == "":
             raise Exception("no astro:sun thing found")
-        self.channel_uid: str = f"{self.astro_sun_thing}:rise:duration"
+        self.channel_uid: str = f"{self.astro_sun_thing}:rise#start"
 
         self.__create_test_item()
         if not self.openhab.item_exists(self.item_name):

@@ -7,21 +7,35 @@ from .const.topics import INFOS as _T_INFOS
 
 
 def log_error(logger: logging.Logger, text: str):
-    logger.error(text)
+    if '\n' in text:
+        for line in text.splitlines():
+            logger.error(line)
+    else:
+        logger.error(text)
     HABApp.core.EventBus.post_event(
         _T_ERRORS, text
     )
 
 
 def log_warning(logger: logging.Logger, text: str):
-    logger.warning(text)
+    if '\n' in text:
+        for line in text.splitlines():
+            logger.warning(line)
+    else:
+        logger.warning(text)
+
     HABApp.core.EventBus.post_event(
         _T_WARNINGS, text
     )
 
 
 def log_info(logger: logging.Logger, text: str):
-    logger.info(text)
+    if '\n' in text:
+        for line in text.splitlines():
+            logger.info(line)
+    else:
+        logger.info(text)
+
     HABApp.core.EventBus.post_event(
         _T_INFOS, text
     )

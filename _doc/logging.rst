@@ -20,7 +20,7 @@ The complete description of the file format can be found `here <https://docs.pyt
 but the format should be pretty straight forward.
 
 .. hint::
-   | It is recommended to use absolute paths as file names
+   | It is highly recommended to use absolute paths as file names
    | e.g.: ``/HABApp/logs/my_logfile.log`` or ``c:\HABApp\logs\my_logfile.log``
 
 .. code-block:: yaml

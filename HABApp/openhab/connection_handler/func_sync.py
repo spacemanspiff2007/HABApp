@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Dict
 
 import HABApp
 import HABApp.core
@@ -108,16 +108,19 @@ def create_item(item_type: str, name: str, label="", category="",
     return fut.result()
 
 
-def get_item(item_name: str) -> OpenhabItemDefinition:
-    """ Return the complete OpenHAB item definition
+def get_item(item_name: str, metadata: Optional[str] = None) -> OpenhabItemDefinition:
+    """Return the complete OpenHAB item definition
 
     :param item_name: name of the item or item
+    :param metadata: metadata to include (optional)
+    :return:
     """
     if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
         item_name = item_name.name
     assert isinstance(item_name, str), type(item_name)
+    assert metadata is None or isinstance(metadata, str), type(metadata)
 
-    fut = asyncio.run_coroutine_threadsafe(async_get_item(item_name), loop)
+    fut = asyncio.run_coroutine_threadsafe(async_get_item(item_name, metadata=metadata), loop)
     data = fut.result()
     return OpenhabItemDefinition.parse_obj(data)
 
@@ -245,7 +248,7 @@ def get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinit
     return fut.result()
 
 
-def create_channel_link(channel_uid: str, item_name: str, configuration: dict = {}) -> bool:
+def create_channel_link(channel_uid: str, item_name: str, configuration: Optional[Dict[str, Any]] = None) -> bool:
     """creates a link between a (things) channel and an item
 
     :param channel_uid: uid of the (thing) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)

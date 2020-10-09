@@ -7,8 +7,9 @@ from urllib.parse import quote as quote_url
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
 from HABApp.openhab.exceptions import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
-    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError
+    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
+from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from .http_connection import delete, get, post, put, log
 
 
@@ -63,8 +64,8 @@ async def async_get_items(include_habapp_meta=False) -> Optional[List[Dict[str, 
         return None
 
 
-async def async_get_item(item: str, include_habapp_meta=False) -> dict:
-    params = None if not include_habapp_meta else {'metadata': 'HABApp'}
+async def async_get_item(item: str, metadata: Optional[str] = None) -> dict:
+    params = None if metadata is None else {'metadata': metadata}
     ret = await get(f'items/{item:s}', params=params, log_404=False)
     if ret.status == 404:
         raise ItemNotFoundError.from_name(item)
@@ -162,6 +163,11 @@ async def async_remove_metadata(item: str, namespace: str):
     ret = await delete(f'items/{item:s}/metadata/{namespace:s}')
     if ret is None:
         return False
+
+    if ret.status == 404:
+        raise ItemNotFoundError.from_name(item)
+    elif ret.status == 405:
+        raise MetadataNotEditableError.create_text(item, namespace)
     return ret.status < 300
 
 
@@ -173,11 +179,12 @@ async def async_set_metadata(item: str, namespace: str, value: str, config: dict
     ret = await put(f'items/{item:s}/metadata/{namespace:s}', json=payload)
     if ret is None:
         return False
+
+    if ret.status == 404:
+        raise ItemNotFoundError.from_name(item)
+    elif ret.status == 405:
+        raise MetadataNotEditableError.create_text(item, namespace)
     return ret.status < 300
-
-
-async def async_set_habapp_metadata(item: str, config: dict):
-    return await async_set_metadata(item, 'HABApp', ' ', config)
 
 
 async def async_set_thing_cfg(uid: str, cfg: typing.Dict[str, typing.Any]):
@@ -221,6 +228,14 @@ async def async_get_channel_links() -> List[Dict[str, str]]:
         return await ret.json(encoding='utf-8')
 
 
+async def async_get_channel_link_mode_auto() -> bool:
+    ret = await get('links/auto')
+    if ret.status >= 300:
+        return False
+    else:
+        return await ret.json(encoding='utf-8')
+
+
 async def async_get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
     ret = await get(__get_link_url(channel_uid, item_name), log_404=False)
     if ret.status == 404:
@@ -236,12 +251,35 @@ async def async_channel_link_exists(channel_uid: str, item_name: str) -> bool:
     return ret.status == 200
 
 
-async def async_create_channel_link(channel_uid: str, item_name: str, configuration: Dict[str, Any] = {}) -> bool:
+async def async_create_channel_link(
+        channel_uid: str, item_name: str, configuration: Optional[Dict[str, Any]] = None) -> bool:
+
     # if the passed item doesn't exist OpenHAB creates a new empty item item
+    # this is undesired and why we raise an Exception
     if not await async_item_exists(item_name):
         raise ItemNotFoundError.from_name(item_name)
 
-    ret = await put(__get_link_url(channel_uid, item_name), json={'configuration': configuration})
+    ret = await put(
+        __get_link_url(channel_uid, item_name),
+        json={'configuration': configuration} if configuration is not None else {}
+    )
     if ret is None:
         return False
     return ret.status == 200
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Funcs for handling HABApp Metadata
+# ---------------------------------------------------------------------------------------------------------------------
+async def async_remove_habapp_metadata(item: str):
+    return await async_remove_metadata(item, 'HABApp')
+
+
+async def async_set_habapp_metadata(item: str, obj):
+    val, cfg = get_api_vals(obj)
+    return await async_set_metadata(item, 'HABApp', val, cfg)
+
+
+async def async_get_item_with_habapp_meta(item: str) -> dict:
+    data = await async_get_item(item, metadata='HABApp')
+    return load_habapp_meta(data)
