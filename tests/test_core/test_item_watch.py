@@ -1,14 +1,8 @@
-import HABApp
 from HABApp.core.items import Item
+from tests.helpers.parent_rule import DummyRule
 
 
-class DummyRule:
-    def register_cancel_obj(self, obj):
-        pass
-
-
-def test_multiple_add(monkeypatch):
-    monkeypatch.setattr(HABApp.rule, 'get_parent_rule', lambda: DummyRule(), raising=True)
+def test_multiple_add(parent_rule: DummyRule):
 
     i = Item('test')
     w1 = i.watch_change(5)
