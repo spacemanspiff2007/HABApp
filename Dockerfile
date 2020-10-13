@@ -5,7 +5,9 @@ VOLUME [ "/config"]
 # Install required dependencies
 RUN apk add --no-cache \
 # Support for Timezones
-    tzdata
+    tzdata \
+# ujson won't compile without these libs
+    g++
 
 # Always use latest versions
 RUN mkdir -p /usr/src/app
