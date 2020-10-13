@@ -5,7 +5,7 @@ VOLUME [ "/config"]
 # Install required dependencies
 RUN apk add --no-cache \
 # Support for Timezones
-    tzdata \
+    tzdata
 
 # Always use latest versions
 RUN mkdir -p /usr/src/app
