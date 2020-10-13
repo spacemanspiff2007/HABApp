@@ -1,13 +1,14 @@
 language: python
 os: linux
 stages:
-- test
+- unit tests
 - docker
 - docs
 
 jobs:
   include:
     - &python_38
+      stage: unit tests
       python: 3.8
       script: tox
       install: pip install tox
@@ -21,9 +22,10 @@ jobs:
       python: 3.7
       env: TOXENV=py37
 
-    - <<: *python_38
-      python: 3.9
-      env: TOXENV=py39
+# Travis does not support
+#    - <<: *python_38
+#      python: 3.9
+#      env: TOXENV=py39
 
     - <<: *python_38
       stage: docs
@@ -35,6 +37,7 @@ jobs:
       env: TOXENV=docs
 
     - &docker
+      stage: docker
       language: shell
       install:
         # test docker build
