@@ -90,7 +90,7 @@ class ItemUpdatedEvent(OpenhabEvent):
         # 'payload': '[{"type":"Switch","name":"Test","tags":[],"groupNames":[]},
         #              {"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
         # 'type': 'ItemUpdatedEvent'
-        return cls(topic[16:-8], payload[1]['type'])
+        return cls(topic[16:-8], payload[0]['type'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
