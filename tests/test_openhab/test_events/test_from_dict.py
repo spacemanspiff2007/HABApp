@@ -51,7 +51,7 @@ def test_ItemUpdatedEvent():
     })
     assert isinstance(event, ItemUpdatedEvent)
     assert event.name == 'NameUpdated'
-    assert event.type == 'Contact'
+    assert event.type == 'Switch'
 
 
 def test_ItemStateChangedEvent1():

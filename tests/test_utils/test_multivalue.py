@@ -2,6 +2,7 @@ import pytest
 
 from HABApp.util.multimode import BaseMode, ValueMode, MultiModeItem
 from ..test_core import ItemTests
+from tests.helpers.parent_rule import DummyRule
 
 
 class TestMultiModeItem(ItemTests):
@@ -9,7 +10,7 @@ class TestMultiModeItem(ItemTests):
     TEST_VALUES = [0, 'str', (1, 2, 3)]
 
 
-def test_diff_prio():
+def test_diff_prio(parent_rule: DummyRule):
     p = MultiModeItem('TestItem')
     p1 = ValueMode('modea', '1234')
     p2 = ValueMode('modeb', '4567')
@@ -29,7 +30,7 @@ def test_diff_prio():
     assert p.value == 8888
 
 
-def test_calculate_lower_priority_value():
+def test_calculate_lower_priority_value(parent_rule: DummyRule):
     p = MultiModeItem('TestItem')
     m1 = ValueMode('modea', '1234')
     m2 = ValueMode('modeb', '4567')
@@ -42,7 +43,7 @@ def test_calculate_lower_priority_value():
     assert m2.calculate_lower_priority_value() == 'asdf'
 
 
-def test_auto_disable_1():
+def test_auto_disable_1(parent_rule: DummyRule):
     p = MultiModeItem('TestItem')
     m1 = ValueMode('modea', 50)
     m2 = ValueMode('modeb', 60, auto_disable_func= lambda l, o: l > o)
@@ -59,7 +60,7 @@ def test_auto_disable_1():
     assert p.value == 59
 
 
-def test_auto_disable_func():
+def test_auto_disable_func(parent_rule: DummyRule):
     p = MultiModeItem('TestItem')
     m1 = ValueMode('modea', 50)
     m2 = ValueMode('modeb', 60, auto_disable_func=lambda low, s: low == 40)
@@ -79,7 +80,7 @@ def test_auto_disable_func():
     assert m2.enabled is False
 
 
-def test_unknown():
+def test_unknown(parent_rule: DummyRule):
     p = MultiModeItem('asdf')
     with pytest.raises(KeyError):
         p.get_mode('asdf')
@@ -89,7 +90,7 @@ def test_unknown():
         p.get_mode('asdf')
 
 
-def test_remove():
+def test_remove(parent_rule: DummyRule):
     p = MultiModeItem('asdf')
     m1 = BaseMode('m1')
     m2 = BaseMode('m2')

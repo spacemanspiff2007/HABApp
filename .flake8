@@ -6,10 +6,12 @@ ignore =
     E203,
     # E203 whitespace before ':'
     E221,
+    # E241 multiple spaces after ','
+    E241,
     # E251 unexpected spaces around keyword / parameter equals
-    E251
+    E251,
     # E303 too many blank lines
-    E303
+    E303,
 
 max-line-length = 120
 exclude =
@@ -20,8 +22,8 @@ exclude =
     dist,
     conf,
     __init__.py,
-    tests/context.py
+    tests/conftest.py,
 
     # the interfaces will throw unused imports
-    HABApp/openhab/interface.py
-    HABApp/openhab/interface_async.py
+    HABApp/openhab/interface.py,
+    HABApp/openhab/interface_async.py,

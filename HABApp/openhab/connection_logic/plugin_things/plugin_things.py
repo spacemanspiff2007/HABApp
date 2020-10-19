@@ -10,7 +10,8 @@ from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate
 from HABApp.openhab.connection_logic.plugin_things.filters import THING_ALIAS, CHANNEL_ALIAS
 from HABApp.openhab.connection_logic.plugin_things.filters import apply_filters, log_overview
 from ._log import log
-from .item_worker import create_item, cleanup_items, create_items_file
+from .item_worker import create_item, cleanup_items
+from .items_file import create_items_file
 from .thing_worker import update_thing_cfg
 from .._plugin import OnConnectPlugin
 
