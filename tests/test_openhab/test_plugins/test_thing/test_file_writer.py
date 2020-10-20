@@ -35,13 +35,13 @@ def test_creation(tmp_path_factory):
 
     print('\n-' + t.text + '-')
 
-    expected = """String  NewName     {auto_update="False"}
-String  NewName1    {auto_update="False"}
-
-String  Test_zwave_all  "label1"    <icon1>   (grp1)  [tag1, tag2]
-String  Test_zwave_no                                 [tag1]
-String  Test_zwave_o_1                                                {channel = "zwave:link:device"                        }
+    expected = """String  Test_zwave_o_1                                                {channel = "zwave:link:device"                        }
 String  Test_zwave_o_2                                                {channel = "zwave:link:device1",   auto_update="False"}
+String  Test_zwave_no                                 [tag1]
+String  Test_zwave_all  "label1"    <icon1>   (grp1)  [tag1, tag2]
+
+String  NewName     {auto_update="False"}
+String  NewName1    {auto_update="False"}
 
 """
     assert expected == t.text
