@@ -13,6 +13,11 @@ from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habap
 from .http_connection import delete, get, post, put, log, async_get_root, async_get_uuid
 
 
+if typing.TYPE_CHECKING:
+    async_get_root = async_get_root
+    async_get_uuid = async_get_uuid
+
+
 def convert_to_oh_type(_in: Any) -> str:
     if isinstance(_in, datetime.datetime):
         # Add timezone (if not yet defined) to string, then remote anything below ms.

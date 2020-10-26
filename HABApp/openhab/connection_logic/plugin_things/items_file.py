@@ -105,7 +105,7 @@ def create_items_file(path: Path, items_dict: Dict[str, UserItem]):
     # aggregate single entry items to a block
     _aggr = []
     for _name, _items in grouped_items.items():
-        if len(_items) <= 1:
+        if len(_items) <= 1 and _name is not None:
             _aggr.append(_name)
     for _name in _aggr:
         grouped_items[None].extend(grouped_items[_name])

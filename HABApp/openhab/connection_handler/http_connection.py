@@ -223,6 +223,7 @@ async def start_connection():
             HABApp.CONFIG.openhab.connection.password
         )
 
+    # todo: add possibility to configure line size with read_bufsize
     HTTP_SESSION = aiohttp.ClientSession(
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
@@ -236,11 +237,11 @@ async def start_sse_event_listener():
     try:
         # cache so we don't have to look up every event
         call = ON_SSE_EVENT
-        
+
         options = {}
         if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
             options['with_credentials'] = True
-            
+
         event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
 
         async with sse_client.EventSource(

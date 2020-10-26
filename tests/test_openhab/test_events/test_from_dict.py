@@ -1,6 +1,5 @@
 import datetime
 
-import HABApp.openhab.events
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent

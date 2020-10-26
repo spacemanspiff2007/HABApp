@@ -1,11 +1,11 @@
-import datetime, pytest
+import datetime
+import pytest
 
-import HABApp.openhab.events
+from HABApp.openhab.connection_handler.http_connection import patch_for_oh2
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent
 from HABApp.openhab.map_events import get_event
-from HABApp.openhab.connection_handler.http_connection import patch_for_oh2
 
 
 @pytest.fixture
