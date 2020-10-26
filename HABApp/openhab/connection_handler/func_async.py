@@ -10,7 +10,7 @@ from HABApp.openhab.exceptions import OpenhabDisconnectedError, OpenhabNotReadyY
     ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
 from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
-from .http_connection import delete, get, post, put, log
+from .http_connection import delete, get, post, put, log, async_get_root, async_get_uuid
 
 
 def convert_to_oh_type(_in: Any) -> str:
@@ -19,8 +19,6 @@ def convert_to_oh_type(_in: Any) -> str:
         # 2018-11-19T09:47:38.284000+0100 -> 2018-11-19T09:47:38.284+0100
         out = _in.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
         return f'{out[:-8]}{out[-5:]}'
-    # elif isinstance(_in, HABApp.openhab.items.ColorItem):
-    #     return f'{_in.hue:.1f},{_in.saturation:.1f},{_in.value:.1f}'
     elif isinstance(_in, BaseValueItem):
         return str(_in.value)
     elif isinstance(_in, (set, list, tuple, frozenset)):

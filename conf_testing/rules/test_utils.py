@@ -32,6 +32,7 @@ class TestSwitchMode(TestBaseRule):
 
             switch.off()
             waiter.wait_for_state('OFF')
+            assert switch.is_off()
             assert mode.enabled is False, mode.enabled
 
             mode.set_value('asdf')
@@ -67,3 +68,8 @@ class TestSwitchMode(TestBaseRule):
 
 
 TestSwitchMode()
+
+
+
+
+
