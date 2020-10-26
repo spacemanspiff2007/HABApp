@@ -1,5 +1,5 @@
-aiohttp-sse-client==0.1.7
-aiohttp==3.6.2
+aiohttp-sse-client==0.2.0
+aiohttp==3.7.1
 astral==2.2
 bidict==0.21.2
 easyco==0.2.2
@@ -10,9 +10,7 @@ stackprinter==0.2.4
 tzlocal==2.1
 voluptuous==0.12.0
 watchdog==0.10.3
-
-# This is optional
-ujson==3.2.0
+ujson==4.0.1
 
 # Backports
 dataclasses==0.7;python_version<"3.7"

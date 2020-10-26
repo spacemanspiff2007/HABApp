@@ -24,6 +24,8 @@ log_events = logging.getLogger('HABApp.EventBus.openhab')
 IS_ONLINE = False
 IS_READ_ONLY = False
 
+IS_OH2 = False
+
 HTTP_PREFIX: Optional[str] = None
 
 # HTTP options
@@ -221,6 +223,7 @@ async def start_connection():
             HABApp.CONFIG.openhab.connection.password
         )
 
+    # todo: add possibility to configure line size with read_bufsize
     HTTP_SESSION = aiohttp.ClientSession(
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
@@ -235,14 +238,20 @@ async def start_sse_event_listener():
         # cache so we don't have to look up every event
         call = ON_SSE_EVENT
 
+        options = {}
+        if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
+            options['with_credentials'] = True
+
+        event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
+
         async with sse_client.EventSource(
-                url=
-                f'{HTTP_PREFIX}/rest/'
-                "events?topics=smarthome/items/,"  # Item updates
-                "smarthome/channels/,"  # Channel update
-                "smarthome/things/*/status,"  # Thing status updates
-                "smarthome/things/*/statuschanged"  # Thing status changes
+                url=f'{HTTP_PREFIX}/rest/events?topics='
+                    f'{event_prefix}/items/,'                   # Item updates
+                    f'{event_prefix}/channels/,'                # Channel update
+                    f'{event_prefix}/things/*/status,'          # Thing status updates
+                    f'{event_prefix}/things/*/statuschanged'    # Thing status changes
                 ,
+                option=options,
                 session=HTTP_SESSION
         ) as event_source:
             async for event in event_source:
@@ -283,8 +292,26 @@ async def async_get_uuid() -> str:
     return await resp.text(encoding='utf-8')
 
 
+async def async_get_root() -> dict:
+    resp = await get('', log_404=False)
+    if resp.status == 404:
+        return {}
+    return await resp.json(encoding='utf-8')
+
+
+def patch_for_oh2(reverse=False):
+    global IS_OH2
+
+    IS_OH2 = True
+
+    # events are named different
+    HABApp.openhab.events.item_events.NAME_START = 16 if not reverse else 14
+    HABApp.openhab.events.thing_events.NAME_START = 17 if not reverse else 15
+    HABApp.openhab.events.channel_events.NAME_START = 19 if not reverse else 17
+
+
 async def try_uuid():
-    global FUT_UUID, IS_ONLINE, FUT_SSE
+    global FUT_UUID, FUT_SSE, IS_ONLINE
 
     # sleep before reconnect
     await CONNECT_WAIT.wait()
@@ -292,6 +319,7 @@ async def try_uuid():
     log.debug('Trying to connect to OpenHAB ...')
     try:
         uuid = await async_get_uuid()
+        root = await async_get_root()      # this will only work on OH3
     except Exception as e:
         if isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
             log.info('... offline!')
@@ -305,6 +333,12 @@ async def try_uuid():
         log.info(f'Connected read only to OpenHAB instance {uuid}')
     else:
         log.info(f'Connected to OpenHAB instance {uuid}')
+
+    info = root.get('runtimeInfo')
+    if info is None:
+        patch_for_oh2()
+    else:
+        log.info(f'OpenHAB version {info["version"]} ({info["buildString"]})')
 
     IS_ONLINE = True
 

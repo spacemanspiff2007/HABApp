@@ -12,7 +12,7 @@ class OpenhabTmpItem:
         if self.item_name is None:
             self.item_name = get_random_name()
 
-    def __enter__(self) -> HABApp.core.items.Item:
+    def __enter__(self) -> HABApp.openhab.items.OpenhabItem:
         interface = HABApp.openhab.interface
 
         if not interface.item_exists(self.item_name):

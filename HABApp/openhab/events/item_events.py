@@ -4,6 +4,11 @@ import HABApp.core
 from ..map_values import map_openhab_values
 from .base_event import OpenhabEvent
 
+# smarthome/items/NAME/state -> 16
+# openhab/items/NAME/state   -> 14
+# todo: revert this once we go OH3 only
+NAME_START: int = 14
+
 
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     def __init__(self, name: str = '', value: typing.Any = None):
@@ -16,7 +21,7 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # smarthome/items/NAME/state
-        return cls(topic[16:-6], map_openhab_values(payload['type'], payload['value']))
+        return cls(topic[NAME_START:-6], map_openhab_values(payload['type'], payload['value']))
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
@@ -34,7 +39,7 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     def from_dict(cls, topic: str, payload: dict):
         # smarthome/items/Ping/statechanged
         return cls(
-            topic[16:-13],
+            topic[NAME_START:-13],
             map_openhab_values(payload['type'], payload['value']),
             map_openhab_values(payload['oldType'], payload['oldValue'])
         )
@@ -53,7 +58,7 @@ class ItemCommandEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # smarthome/items/NAME/command
-        return cls(topic[16:-8], map_openhab_values(payload['type'], payload['value']))
+        return cls(topic[NAME_START:-8], map_openhab_values(payload['type'], payload['value']))
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
@@ -90,7 +95,7 @@ class ItemUpdatedEvent(OpenhabEvent):
         # 'payload': '[{"type":"Switch","name":"Test","tags":[],"groupNames":[]},
         #              {"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
         # 'type': 'ItemUpdatedEvent'
-        return cls(topic[16:-8], payload[0]['type'])
+        return cls(topic[NAME_START:-8], payload[0]['type'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}>'
@@ -105,7 +110,7 @@ class ItemRemovedEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # smarthome/items/Test/removed
-        return cls(topic[16:-8])
+        return cls(topic[NAME_START:-8])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}>'
@@ -122,7 +127,7 @@ class ItemStatePredictedEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # 'smarthome/items/NAME/statepredicted'
-        return cls(topic[16:-15], map_openhab_values(payload['predictedType'], payload['predictedValue']))
+        return cls(topic[NAME_START:-15], map_openhab_values(payload['predictedType'], payload['predictedValue']))
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'

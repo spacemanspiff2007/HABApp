@@ -97,7 +97,7 @@ def create_items_file(path: Path, items_dict: Dict[str, UserItem]):
     }
 
     grouped_items = {None: []}
-    for _name, _item in sorted(items_dict.items()):
+    for _name, _item in items_dict.items():
         m = RE_GROUP_NAMES.match(_name)
         grp = grouped_items.setdefault(m.group(1) if m is not None else None, [])
         grp.append(_get_item_val_dict(field_fmt, _item))
@@ -105,7 +105,7 @@ def create_items_file(path: Path, items_dict: Dict[str, UserItem]):
     # aggregate single entry items to a block
     _aggr = []
     for _name, _items in grouped_items.items():
-        if len(_items) <= 1:
+        if len(_items) <= 1 and _name is not None:
             _aggr.append(_name)
     for _name in _aggr:
         grouped_items[None].extend(grouped_items[_name])
