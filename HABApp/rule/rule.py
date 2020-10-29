@@ -239,7 +239,7 @@ class Rule:
         assert isinstance(time, datetime.time), type(time)
         cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
-        future_event.weekdays([1, 2, 3, 4, 5, 6, 7])
+        future_event.weekdays('all')
         future_event.time(time)
         self.__future_events.append(future_event)
         return future_event

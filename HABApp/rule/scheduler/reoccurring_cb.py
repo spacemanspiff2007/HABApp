@@ -3,7 +3,7 @@ from datetime import datetime, time, timedelta
 
 from pytz import utc
 
-from .base import ScheduledCallbackBase
+from .base import ScheduledCallbackBase, local_tz
 
 
 class ReoccurringScheduledCallback(ScheduledCallbackBase):
@@ -51,6 +51,8 @@ class DayOfWeekScheduledCallback(ScheduledCallbackBase):
             weekdays = [6, 7]
         elif weekdays == 'workday':
             weekdays = [1, 2, 3, 4, 5]
+        elif weekdays == 'all':
+            weekdays = [1, 2, 3, 4, 5, 6, 7]
         for k in weekdays:
             assert 1 <= k <= 7, k
         self._weekdays = weekdays
@@ -60,12 +62,11 @@ class DayOfWeekScheduledCallback(ScheduledCallbackBase):
 
         # we have to do it like this so the dst-change works,
         # otherwise we have the wrong hour after the change
-        next_date = (self._next_base.date() + timedelta(days=1)) if add_day else self._next_base.date()
-        loc = datetime.combine(next_date, self._time)
+        next_utc = self._next_base + timedelta(days=1) if add_day else self._next_base
+        loc = datetime.combine(next_utc.astimezone(local_tz).date(), self._time)
 
         while not loc.isoweekday() in self._weekdays:
-            next_date += timedelta(days=1)
-            loc = datetime.combine(next_date, self._time)
+            loc += timedelta(days=1)
 
         self._next_base = loc.astimezone(utc)
         self._update_run_time()
