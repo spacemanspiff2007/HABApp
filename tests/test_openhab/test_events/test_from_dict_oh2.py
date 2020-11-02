@@ -4,7 +4,7 @@ import pytest
 from HABApp.openhab.connection_handler.http_connection import patch_for_oh2
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
-    ThingStatusInfoChangedEvent, ThingStatusInfoEvent
+    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent
 from HABApp.openhab.map_events import get_event
 
 
@@ -175,3 +175,15 @@ def test_thing_ConfigStatusInfoEvent(oh2_event):
     assert isinstance(event, ThingConfigStatusInfoEvent)
     assert event.name == 'zwave:device:controller:my_node'
     assert event.messages == [{"parameterName": "switchall_mode", "type": "PENDING"}]
+
+
+def test_thing_FirmwareStatusEvent(oh2_event):
+    data = {
+        'topic': 'smarthome/things/zigbee:device:12345678:9abcdefghijklmno/firmware/status',
+        'payload':
+            '{"thingUID":{"segments":["zigbee","device","12345678","9abcdefghijklmno"]},"firmwareStatus":"UNKNOWN"}',
+        'type': 'FirmwareStatusInfoEvent'
+    }
+    event = get_event(data)
+    assert isinstance(event, ThingFirmwareStatusInfoEvent)
+    assert event.status == 'UNKNOWN'

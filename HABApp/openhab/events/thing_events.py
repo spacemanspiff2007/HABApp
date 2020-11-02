@@ -65,3 +65,18 @@ class ThingConfigStatusInfoEvent(OpenhabEvent):
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, messages: {self.messages}>'
+
+
+class ThingFirmwareStatusInfoEvent(OpenhabEvent):
+    def __init__(self, name: str = '', status: str = ''):
+        super().__init__()
+        self.name: str = name
+        self.status: str = status
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        # 'smarthome/things/zwave:device:controller:my_node/firmware/status'
+        return cls(name=topic[NAME_START:-16], status=payload['firmwareStatus'])
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} status: {self.status}>'
