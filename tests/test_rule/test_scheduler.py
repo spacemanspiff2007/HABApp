@@ -73,6 +73,22 @@ def test_weekend():
     assert s.get_next_call() == datetime(2001, 1, 21, 12)
 
 
+def test_every_day():
+    func.mock.reset_mock()
+    s = scheduler.DayOfWeekScheduledCallback(func)
+
+    s.weekdays('all')
+    s.time(time(hour=0, minute=0))
+
+    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+    assert s.get_next_call() == now + timedelta(days=1)
+    s._calculate_next_call()
+    assert s.get_next_call() == now + timedelta(days=2)
+    s._calculate_next_call()
+    assert s.get_next_call() == now + timedelta(days=3)
+
+
 def test_sun():
     HABApp.CONFIG.location.latitude = 52.52437
     HABApp.CONFIG.location.longitude = 13.41053
