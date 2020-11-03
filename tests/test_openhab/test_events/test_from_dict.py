@@ -1,4 +1,5 @@
-import datetime, pytest
+import datetime
+import pytest
 
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
