@@ -238,10 +238,6 @@ async def start_sse_event_listener():
         # cache so we don't have to look up every event
         call = ON_SSE_EVENT
 
-        options = {}
-        if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
-            options['with_credentials'] = True
-
         event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
 
         async with sse_client.EventSource(
@@ -251,7 +247,6 @@ async def start_sse_event_listener():
                     f'{event_prefix}/things/*/status,'          # Thing status updates
                     f'{event_prefix}/things/*/statuschanged'    # Thing status changes
                 ,
-                option=options,
                 session=HTTP_SESSION
         ) as event_source:
             async for event in event_source:

@@ -65,7 +65,7 @@ class ItemCommandEvent(OpenhabEvent):
 
 
 class ItemAddedEvent(OpenhabEvent):
-    def __init__(self, name: str, type: str):
+    def __init__(self, name: str = '', type: str = ''):
         super().__init__()
 
         self.name: str = name
@@ -83,7 +83,7 @@ class ItemAddedEvent(OpenhabEvent):
 
 
 class ItemUpdatedEvent(OpenhabEvent):
-    def __init__(self, name: str, type: str):
+    def __init__(self, name: str = '', type: str = ''):
         super().__init__()
 
         self.name: str = name

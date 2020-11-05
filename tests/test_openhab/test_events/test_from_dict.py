@@ -1,9 +1,10 @@
 import datetime
+import pytest
 
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent
-from HABApp.openhab.map_events import get_event
+from HABApp.openhab.map_events import get_event, EVENT_LIST
 
 
 def test_ItemStateEvent():
@@ -178,3 +179,10 @@ def test_thing_FirmwareStatusEvent():
     event = get_event(data)
     assert isinstance(event, ThingFirmwareStatusInfoEvent)
     assert event.status == 'UNKNOWN'
+
+
+@pytest.mark.parametrize('cls', [*EVENT_LIST])
+def test_event_has_name(cls):
+    # this test ensure that alle events have a name argument
+    c = cls('asdf')
+    assert c.name == 'asdf'
