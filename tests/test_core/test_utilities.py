@@ -1,5 +1,4 @@
 import asyncio
-import sys
 
 import pytest
 
@@ -46,14 +45,15 @@ async def test_pending_future_cancel():
         nonlocal exception
         try:
             await asyncio.sleep(200)
-        except Exception as e:
+        except BaseException as e:
             exception = e
 
     p = PendingFuture(b, 0)
     p.reset()
-    await asyncio.sleep(0.01)
+    await asyncio.sleep(0.05)
     p.reset()
-    await asyncio.sleep(0.01)
-    if sys.version_info[:2] != (3, 8):
-        assert isinstance(exception, asyncio.CancelledError)
+    await asyncio.sleep(0.05)
     p.cancel()
+
+    assert exception is not None
+    assert isinstance(exception, asyncio.CancelledError)
