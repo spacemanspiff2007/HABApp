@@ -22,10 +22,9 @@ jobs:
       python: 3.7
       env: TOXENV=py37
 
-# Travis does not support
-#    - <<: *python_38
-#      python: 3.9
-#      env: TOXENV=py39
+    - <<: *python_38
+      python: 3.9
+      env: TOXENV=py39
 
     - <<: *python_38
       stage: docs
