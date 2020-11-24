@@ -1,19 +1,10 @@
 import logging
 import threading
 
-import ruamel.yaml
-
 import HABApp
 from .parameters import get_parameter_file, remove_parameter_file, set_parameter_file
 
 log = logging.getLogger('HABApp.RuleParameters')
-
-_yml_setup = ruamel.yaml.YAML()
-_yml_setup.default_flow_style = False
-_yml_setup.default_style = False    # type: ignore
-_yml_setup.width = 1000000          # type: ignore
-_yml_setup.allow_unicode = True
-_yml_setup.sort_base_mapping_type_on_output = False     # type: ignore
 
 LOCK = threading.Lock()
 
@@ -44,12 +35,13 @@ def setup_param_files() -> bool:
 
 
 def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
-    path = event.get_path(HABApp.CONFIG.directories.param)
+    folder = HABApp.CONFIG.directories.param
+    path = event.get_path(folder)
 
     with LOCK:  # serialize to get proper error messages
         try:
             with path.open(mode='r', encoding='utf-8') as file:
-                data = _yml_setup.load(file)
+                data = HABApp.core.const.yml.load(file)
             if data is None:
                 data = {}
             set_parameter_file(path.stem, data)
@@ -60,7 +52,11 @@ def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
             e.dump()
             return None
 
-        log.debug(f'Loaded params from {path.name}!')
+    log.debug(f'Loaded params from {path.name}!')
+    HABApp.core.EventBus.post_event(
+        HABApp.core.const.topics.PARAM,
+        HABApp.core.events.habapp_events.FileLoadSuccessfulEvent.from_path(folder, path)
+    )
 
 
 def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
@@ -86,4 +82,4 @@ def save_file(file: str):
     with LOCK:  # serialize to get proper error messages
         log.info(f'Updated {filename}')
         with filename.open('w', encoding='utf-8') as outfile:
-            _yml_setup.dump(get_parameter_file(file), outfile)
+            HABApp.core.const.yml.dump(get_parameter_file(file), outfile)
