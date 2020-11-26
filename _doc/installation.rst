@@ -103,13 +103,17 @@ Run the follwing command to fix it::
 
 Autostart after reboot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Check where habapp is installed
+
+    which habapp
 
 To automatically start HABApp from the virtual environment after a reboot call::
 
     nano /etc/systemd/system/habapp.service
 
 
-and copy paste the following contents. If the user which is running openhab is not "openhab" replace accordingly::
+and copy paste the following contents. If the user which is running openhab is not "openhab" replace accordingly.
+If your installation is not done in "/opt/habapp/bin" replace accordingly as well::
 
     [Unit]
     Description=HABApp
