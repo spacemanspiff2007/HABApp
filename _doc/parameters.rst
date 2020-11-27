@@ -40,7 +40,7 @@ Parameters are perfect for boundaries (e.g. if value is below param switch somet
 
             self.listen_event('test_item', self.on_change_event, HABApp.core.events.ValueChangeEvent)
 
-        def on_change_event( event):
+        def on_change_event(self, event):
 
             # the parameter can be used like a normal variable, comparison works as expected
             if self.min_value < event.value:
