@@ -94,12 +94,12 @@ Example::
         # If you already have an item you can use the more convenient method of the item
         # to listen to the item events
         my_item = Item.get_item('MyItem')
-        my_item.listen_event(self.item_changed, ValueUpdateEvent)
+        my_item.listen_event(self.on_change, ValueUpdateEvent)
 
-    def on_change(event):
+    def on_change(self, event):
         assert isinstance(event, ValueChangeEvent), type(event)
 
-    def on_update(event):
+    def on_update(self, event):
         assert isinstance(event, ValueUpdateEvent), type(event)
 
 Scheduler
