@@ -198,27 +198,35 @@ If you want to assign a custom name, you can change the rule name easily by assi
 
 *rule_a.py*::
 
-    class ClassA(Rule):
+    import HABApp
+
+    class ClassA(HABApp.Rule):
         ...
+
+        def function_a(self):
+          ...
 
     ClassA()
 
 *rule_b.py*::
 
-    if typing.TYPE_CHECKING:            # This is only here to allow
-        from .class_a import ClassA     # type hints for the IDE
+    import HABApp
+    import typing
 
-    class ClassB(Rule):
+    if typing.TYPE_CHECKING:            # This is only here to allow
+        from .rule_a import ClassA      # type hints for the IDE
+
+    class ClassB(HABApp.Rule):
         ...
 
-        def function_a(self):
+        def function_b(self):
 
             r = self.get_rule('ClassA')  # type: ClassA
             # The comment "# type: ClassA" will signal the IDE that the value returned from the
             # function is an instance of ClassA and thus provide checks and auto complete.
 
             # this calls the function on the instance
-            r.function_b()
+            r.function_a()
 
 
 
