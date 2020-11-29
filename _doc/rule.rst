@@ -214,7 +214,7 @@ If you want to assign a custom name, you can change the rule name easily by assi
     import typing
 
     if typing.TYPE_CHECKING:            # This is only here to allow
-        from .rule_a import ClassA     # type hints for the IDE
+        from .rule_a import ClassA      # type hints for the IDE
 
     class ClassB(HABApp.Rule):
         ...
