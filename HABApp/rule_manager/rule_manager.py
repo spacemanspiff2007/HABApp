@@ -164,7 +164,8 @@ class RuleManager:
     @log_exception
     def request_file_load(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
 
-        path = event.get_path(HABApp.CONFIG.directories.rules)
+        folder = HABApp.CONFIG.directories.rules
+        path = event.get_path(folder)
         path_str = str(path)
 
         # Only load existing files
@@ -191,6 +192,10 @@ class RuleManager:
                 return None
 
         log.debug(f'File {path_str} successfully loaded!')
+
+        HABApp.core.EventBus.post_event(
+            TOPIC_RULES, HABApp.core.events.habapp_events.FileLoadSuccessfulEvent.from_path(folder, path)
+        )
 
         # Do simple checks which prevent errors
         file.check_all_rules()
