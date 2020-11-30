@@ -3,7 +3,7 @@ import typing
 from pathlib import Path
 from threading import Lock
 
-from watchdog.events import FileSystemEvent, FileSystemEventHandler
+from watchdog.events import FileSystemEventHandler
 
 import HABApp
 from HABApp.core.wrapper import ignore_exception
@@ -31,9 +31,7 @@ class SimpleAsyncEventHandler(FileSystemEventHandler):
         return self.__worker_factory(self.__target_func)(Path(dst))
 
     def dispatch(self, event):
-        self.on_any_event(event)
 
-    def on_any_event(self, event: FileSystemEvent):
         # we don't process directory events
         if event.is_directory:
             return None

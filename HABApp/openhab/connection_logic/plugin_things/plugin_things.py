@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, Set, List
 
 import HABApp
 from HABApp.core.lib import PendingFuture
@@ -22,6 +22,10 @@ class ManualThingConfig(OnConnectPlugin):
         super().__init__()
         self.created_items: Dict[str, Set[str]] = {}
         self.do_cleanup = PendingFuture(self.clean_items, 120)
+
+    def setup(self):
+        # watch folder
+        HABApp.core.files.watch_folder(HABApp.CONFIG.directories.config, '.yml', True)
 
     async def on_connect_function(self):
         try:
@@ -48,6 +52,14 @@ class ManualThingConfig(OnConnectPlugin):
         for s in self.created_items.values():
             items.update(s)
         await cleanup_items(items)
+
+    async def update_thing_configs(self, files: List[Path]):
+        data = await async_get_things()
+        if data is None:
+            return None
+
+        for file in files:
+            await self.update_thing_config(file, data)
 
     @HABApp.core.wrapper.ignore_exception
     async def update_thing_config(self, path: Path, data=None):
@@ -79,10 +91,9 @@ class ManualThingConfig(OnConnectPlugin):
         log.debug(f'Loading {path}!')
 
         # load the config file
-        yml = HABApp.parameters.parameter_files._yml_setup
         with path.open(mode='r', encoding='utf-8') as file:
             try:
-                cfg = yml.load(file)
+                cfg = HABApp.core.const.yml.load(file)
             except Exception as e:
                 HABAppError(log).add_exception(e).dump()
                 return None

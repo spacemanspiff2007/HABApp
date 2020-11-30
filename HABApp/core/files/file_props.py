@@ -8,7 +8,7 @@ from HABApp.core.const import yml
 
 class FileProperties(BaseModel):
     depends_on: List[str] = Field(alias='depends on', default_factory=list)
-    reload_on: List[str] = Field(alias='reload on', default_factory=list)
+    reloads_on: List[str] = Field(alias='reloads on', default_factory=list)
 
     class Config:
         extra = Extra.forbid
@@ -41,12 +41,12 @@ def get_props(_str: str) -> FileProperties:
             m = RE_START.search(line)
             if m:
                 cut = len(m.group(1)) + 1
-                cfg.append(line[cut:])
+                cfg.append(line[cut:].lower())
         else:
             do_break = False
             for i, c in enumerate(line):
                 if i > cut:
-                    continue
+                    break
 
                 if c not in ('#', ' ', '\t'):
                     do_break = True
@@ -57,4 +57,6 @@ def get_props(_str: str) -> FileProperties:
             cfg.append(line[cut:])
 
     data = yml.load('\n'.join(cfg))
-    return FileProperties.parse_obj(data.get('HABApp', {}))
+    if data is None:
+        data = {}
+    return FileProperties.parse_obj(data.get('habapp', {}))
