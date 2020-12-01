@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import typing
 from itertools import chain
@@ -9,7 +7,7 @@ from threading import Lock
 import HABApp
 from HABApp.core.wrapper import ignore_exception
 from . import name_from_path
-from .file import HABAppFile, CircularReferenceError
+from .file import CircularReferenceError, HABAppFile
 from .watcher import AggregatingAsyncEventHandler
 
 log = logging.getLogger('HABApp.files')
