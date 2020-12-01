@@ -9,11 +9,6 @@ import HABApp
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
 
 
-@pytest.yield_fixture()
-def event_loop():
-    yield HABApp.core.const.loop
-
-
 @pytest.fixture(scope="function")
 def u():
     a = UpdatedTime('test', datetime.now(tz=pytz.utc))

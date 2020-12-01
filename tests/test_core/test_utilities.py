@@ -2,13 +2,7 @@ import asyncio
 
 import pytest
 
-import HABApp
 from HABApp.core.lib import PendingFuture
-
-
-@pytest.yield_fixture()
-def event_loop():
-    yield HABApp.core.const.loop
 
 
 @pytest.mark.asyncio

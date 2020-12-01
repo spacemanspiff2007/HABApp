@@ -1,15 +1,10 @@
 import asyncio
-import pytest
 import sys
 
-import HABApp
+import pytest
+
 from HABApp.rule import Rule
 from ..rule_runner import SimpleRuleRunner
-
-
-@pytest.yield_fixture()
-def event_loop():
-    yield HABApp.core.const.loop
 
 
 class ProcRule(Rule):

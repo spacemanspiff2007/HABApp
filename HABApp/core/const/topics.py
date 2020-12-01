@@ -5,15 +5,16 @@ try:
 except ImportError:
     Final = str
 
+
+INFOS: Final = 'HABApp.Infos'
 WARNINGS: Final = 'HABApp.Warnings'
 ERRORS: Final = 'HABApp.Errors'
-INFOS: Final = 'HABApp.Infos'
 
-RULES: Final = 'HABApp.Rules'
-PARAM: Final = 'HABApp.Parameters'
+FILES: Final = 'HABApp.Files'
+
 
 ALL: typing.List[str] = [
     WARNINGS, ERRORS, INFOS,
 
-    RULES, PARAM,
+    FILES
 ]

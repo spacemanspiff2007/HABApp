@@ -5,7 +5,7 @@ from .parameters import add_parameter as _add_parameter
 from .parameters import get_value as _get_value
 
 
-class Parameter:
+class BaseParameter:
     def __init__(self, filename: str, *keys, default_value: typing.Any = 'ToDo'):
         """Class to dynamically access parameters which are loaded from file.
 
@@ -16,22 +16,25 @@ class Parameter:
         """
 
         assert isinstance(filename, str), type(filename)
-        self.filename: str = filename
-        self.keys = keys
+        self._filename: str = filename
+        self._keys = keys
 
         # as a convenience try to create the file and the file structure
         if default_value is not None:
-            _add_parameter(self.filename, *self.keys, default_value=default_value)
+            _add_parameter(self._filename, *self._keys, default_value=default_value)
+
+
+class Parameter(BaseParameter):
 
     @property
     def value(self) -> typing.Any:
         """Return the current value. This will do the lookup so make sure to not cache this value, otherwise
         the parameter might not work as expected.
         """
-        return _get_value(self.filename, *self.keys)
+        return _get_value(self._filename, *self._keys)
 
     def __repr__(self):
-        return f'<Parameter file: {self.filename}, keys: {self.keys}, value: {self.value}'
+        return f'<Parameter file: {self._filename}, keys: {self._keys}, value: {self.value}'
 
     def __bool__(self):
         return bool(self.value)
@@ -134,40 +137,93 @@ class Parameter:
     # we don't support modification in place! We have to override this because otherwise
     # python falls back to the methods above
     def __iadd__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __isub__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __imul__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __imatmul__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __itruediv__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __ifloordiv__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __imod__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __ipow__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __ilshift__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __irshift__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __iand__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __ixor__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
 
     def __ior__(self, other):
-        return PermissionError('Parameter can not be changed!')
+        raise PermissionError('Parameter can not be changed!')
+
+
+class DictParameter(BaseParameter):
+    """Implements a dict interface"""
+
+    @property
+    def value(self) -> dict:
+        """Return the current value. This will do the lookup so make sure to not cache this value, otherwise
+        the parameter might not work as expected.
+        """
+        value = _get_value(self._filename, *self._keys)
+        if not isinstance(value, dict):
+            raise ValueError(f'Value "{value}" for {self.__class__.__name__} is not a dict! ({type(value)})')
+        return value
+
+    def __repr__(self):
+        return f'<DictParameter file: {self._filename}, keys: {self._keys}, value: {self.value}'
+
+    def __bool__(self):
+        return bool(self.value)
+
+    def __eq__(self, other):
+        return self.value == other
+
+    def __getitem__(self, item):
+        return self.value[item]
+
+    def __contains__(self, key):
+        return key in self.value
+
+    def __iter__(self):
+        return iter(self.value)
+
+    def __len__(self):
+        return len(self.value)
+
+    def keys(self):
+        return self.value.keys()
+
+    def values(self):
+        return self.value.values()
+
+    def items(self):
+        return self.value.items()
+
+    def get(self, item, default=None):
+        return self.value.get(item, default)
+
+    def __setitem__(self, key, value):
+        raise PermissionError('Parameter can not be changed!')
+
+    def __delitem__(self, key):
+        raise PermissionError('Parameter can not be changed!')

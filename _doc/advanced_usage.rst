@@ -5,9 +5,7 @@ Advanced Usage
 HABApp Topics
 ------------------------------
 There are several internal topics which can be used to react to HABApp changes from within rules.
-An example would be dynamically reloading rules when a parameter file gets reloaded
-(e.g. when :class:`~HABApp.parameters.Parameter` is used to create rules dynamically) or
-an own notifier in case there are errors (e.g. Pushover).
+An example would be dynamically reloading files or an own notifier in case there are errors (e.g. Pushover).
 
 .. list-table::
    :widths: auto
@@ -17,13 +15,17 @@ an own notifier in case there are errors (e.g. Pushover).
      - Description
      - Events
 
-   * - HABApp.Rules
-     - The corresponding events trigger a load/unload of the rule file specified in the event
+   * - HABApp.Files
+     - The corresponding events trigger a load/unload of the file specified in the event
      - :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent` and :class:`~HABApp.core.events.habapp_events.RequestFileUnloadEvent`
 
-   * - HABApp.Parameters
-     - The corresponding events trigger a load/unload of the parameter file specified in the event
-     - :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent` and :class:`~HABApp.core.events.habapp_events.RequestFileUnloadEvent`
+   * - HABApp.Infos
+     - All infos in functions and rules of HABApp create an according event
+     - ``str``
+
+   * - HABApp.Warnings
+     - All warnings in functions and rules of HABApp create an according event
+     - ``str``
 
    * - HABApp.Errors
      - All errors in functions and rules of HABApp create an according event. Use this topic to create an own notifier
@@ -40,6 +42,54 @@ an own notifier in case there are errors (e.g. Pushover).
 
 .. autoclass:: HABApp.core.events.habapp_events.HABAppError
    :members:
+
+File properties
+------------------------------
+For every HABApp file it is possible to specify some properties.
+The properties are specified as a comment (prefixed with ``#``) somewhere at the beginning of the file
+and are in the yml format.
+File names are the same as in the :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent`.
+
+Configuration format
+
+.. code-block:: yaml
+
+    HABApp:
+      depends on:
+       - filename
+      reloads on:
+       - filename
+
+.. list-table::
+   :widths: auto
+   :header-rows: 1
+
+   * - Property
+     - Description
+
+   * - ``depends on``
+     - The file will only get loaded when **all** of the files specified as dependencies have been successfully loaded
+
+   * - ``reloads on``
+     - The file will get automatically reloaded when **one of** the files specified will be reloaded
+
+
+Example
+
+.. code-block:: python
+
+   # Some other stuff
+   #
+   # HABApp:
+   #   depends on:
+   #    - rules/rule_file.py
+   #   reloads on:
+   #    - params/param_file.yml
+
+   import HABApp
+   ...
+
+
 
 AggregationItem
 ------------------------------
@@ -58,8 +108,8 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     # Connect the source item with the aggregation item
     my_agg.aggregation_source('MyInputItem')
 
-    # Aggregate all changes in the last hour
-    my_agg.aggregation_period(3600)
+    # Aggregate all changes in the last two hours
+    my_agg.aggregation_period(2 * 3600)
 
     # Use max as an aggregation function
     my_agg.aggregation_func = max
