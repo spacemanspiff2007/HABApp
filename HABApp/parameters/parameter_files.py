@@ -1,5 +1,6 @@
 import logging
 import threading
+from pathlib import Path
 
 import HABApp
 from HABApp.core.files import file_load_failed, file_load_ok
@@ -15,22 +16,8 @@ def setup_param_files() -> bool:
         log.info(f'Parameter files disabled: Folder {HABApp.CONFIG.directories.param} does not exist!')
         return False
 
-    # listener to remove parameters
-    HABApp.core.EventBus.add_listener(
-        HABApp.core.EventBusListener(
-            HABApp.core.const.topics.FILES,
-            HABApp.core.WrappedFunction(unload_file),
-            HABApp.core.events.habapp_events.RequestFileUnloadEvent
-        )
-    )
-    # listener to add parameters
-    HABApp.core.EventBus.add_listener(
-        HABApp.core.EventBusListener(
-            HABApp.core.const.topics.FILES,
-            HABApp.core.WrappedFunction(load_file),
-            HABApp.core.events.habapp_events.RequestFileLoadEvent
-        )
-    )
+    # Add event bus listener
+    HABApp.core.files.add_event_bus_listener('param', load_file, unload_file, log)
 
     # watch folder and load all files
     watcher = HABApp.core.files.watch_folder(HABApp.CONFIG.directories.param, '.yml', True)
@@ -38,12 +25,7 @@ def setup_param_files() -> bool:
     return True
 
 
-def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
-    if not HABApp.core.files.file_name.is_param(event.filename):
-        return None
-
-    path = event.get_path()
-
+def load_file(name: str, path: Path):
     with LOCK:  # serialize to get proper error messages
         try:
             with path.open(mode='r', encoding='utf-8') as file:
@@ -53,29 +35,24 @@ def load_file(event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
             set_parameter_file(path.stem, data)
         except Exception as exc:
             e = HABApp.core.logger.HABAppError(log)
-            e.add(f"Could not load params from {path.name}!")
+            e.add(f"Could not load parameters for {name} ({path})!")
             e.add_exception(exc, add_traceback=True)
             e.dump()
 
-            file_load_failed(event.filename)
+            file_load_failed(name)
             return None
 
     log.debug(f'Loaded params from {path.name}!')
-    file_load_ok(event.filename)
+    file_load_ok(name)
 
 
-def unload_file(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
-    if not HABApp.core.files.file_name.is_param(event.filename):
-        return None
-
-    path = event.get_path()
-
+def unload_file(name: str, path: Path):
     with LOCK:  # serialize to get proper error messages
         try:
             remove_parameter_file(path.stem)
         except Exception as exc:
             e = HABApp.core.logger.HABAppError(log)
-            e.add(f"Could not remove parameters from {path.name}!")
+            e.add(f"Could not remove parameters for {name} ({path})!")
             e.add_exception(exc, add_traceback=True)
             e.dump()
             return None

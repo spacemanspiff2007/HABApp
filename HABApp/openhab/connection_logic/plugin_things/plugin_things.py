@@ -24,8 +24,21 @@ class ManualThingConfig(OnConnectPlugin):
         self.do_cleanup = PendingFuture(self.clean_items, 120)
 
     def setup(self):
+        # Add event bus listener
+        HABApp.core.EventBus.add_listener(
+            HABApp.core.EventBusListener(
+                HABApp.core.const.topics.FILES,
+                HABApp.core.WrappedFunction(self.file_load_event),
+                HABApp.core.events.habapp_events.RequestFileLoadEvent
+            )
+        )
+
         # watch folder
         HABApp.core.files.watch_folder(HABApp.CONFIG.directories.config, '.yml', True)
+
+    async def file_load_event(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
+        if HABApp.core.files.file_name.is_config(event.name):
+            await self.update_thing_config(event.get_path())
 
     async def on_connect_function(self):
         try:

@@ -81,15 +81,24 @@ def test_reloads():
     ALL['name2'] = f2 = HABAppFile('name2', 'path2', FileProperties())
 
     f1.check_properties()
-    assert f1.properties.reloads_on == ['name2']
+    assert f1.properties.reloads_on == ['name2', 'asdf']
+    assert f2.properties.reloads_on == []
 
 
 def test_circ():
     ALL.clear()
     ALL['name1'] = f1 = HABAppFile('name1', 'path1', FileProperties(depends_on=['name2']))
     ALL['name2'] = f2 = HABAppFile('name2', 'path2', FileProperties(depends_on=['name3']))
-    ALL['name3'] = f2 = HABAppFile('name3', 'path3', FileProperties(depends_on=['name1']))
+    ALL['name3'] = f3 = HABAppFile('name3', 'path3', FileProperties(depends_on=['name1']))
 
     with pytest.raises(CircularReferenceError) as e:
         f1.check_properties()
     assert str(e.value) == "name1 -> name2 -> name3 -> name1"
+
+    with pytest.raises(CircularReferenceError) as e:
+        f2.check_properties()
+    assert str(e.value) == "name2 -> name3 -> name1 -> name2"
+
+    with pytest.raises(CircularReferenceError) as e:
+        f3.check_properties()
+    assert str(e.value) == "name3 -> name1 -> name2 -> name3"

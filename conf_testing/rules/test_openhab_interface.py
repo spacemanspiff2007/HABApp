@@ -97,7 +97,6 @@ class TestOpenhabInterface(TestBaseRule):
     def test_item_definition(self):
         self.openhab.get_item('TestGroupAVG')
         self.openhab.get_item('TestNumber')
-        self.openhab.get_item('TestNumber9')
         self.openhab.get_item('TestString')
 
     def test_metadata(self):

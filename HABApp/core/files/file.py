@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import logging
 import typing
-import HABApp
 from pathlib import Path
-from HABApp.core.wrapper import ignore_exception
+
+import HABApp
+from HABApp.core.const.topics import FILES as T_FILES
 from HABApp.core.events.habapp_events import RequestFileLoadEvent, RequestFileUnloadEvent
 from .file_props import FileProperties, get_props
-from HABApp.core.const.topics import FILES as T_FILES
 
 log = logging.getLogger('HABApp.files')
 
@@ -49,7 +49,6 @@ class HABAppFile:
             if next_file is not None:
                 next_file._check_refs(_stack, prop)
 
-    @ignore_exception
     def check_properties(self):
         self.is_checked = True
 
@@ -58,7 +57,7 @@ class HABAppFile:
         if mis:
             one = len(mis) == 1
             msg = f'File {self.path} depends on file{"" if one else "s"} that ' \
-                  f'do{"es" if one else ""}n\'t exist: {", ".join(mis)}'
+                  f'do{"es" if one else ""}n\'t exist: {", ".join(sorted(mis))}'
             log.error(msg)
             raise FileNotFoundError(msg)
 
@@ -67,7 +66,7 @@ class HABAppFile:
         if mis:
             one = len(mis) == 1
             log.warning(f'File {self.path} reloads on file{"" if one else "s"} that '
-                        f'do{"es" if one else ""}n\'t exist: {", ".join(mis)}')
+                        f'do{"es" if one else ""}n\'t exist: {", ".join(sorted(mis))}')
 
         # check for circular references
         self._check_refs((self.name, ), 'depends_on')
@@ -80,7 +79,11 @@ class HABAppFile:
             return False
 
         for name in self.properties.depends_on:
-            if not ALL.get(name, False).is_loaded:
+            f = ALL.get(name, None)
+            if f is None:
+                return False
+
+            if not f.is_loaded:
                 return False
         return True
 

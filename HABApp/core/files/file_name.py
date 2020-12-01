@@ -2,15 +2,15 @@ import HABApp
 from pathlib import Path
 
 
-_PRE_CONFIGS = 'configs'
-_PRE_PARAMS = 'params'
-_PRE_RULES = 'rules'
+PREFIX_CONFIGS = 'configs'
+PREFIX_PARAMS = 'params'
+PREFIX_RULES = 'rules'
 
 
 def name_from_path(path: Path) -> str:
     _path = path.as_posix()
     d = HABApp.config.CONFIG.directories
-    folders = {_PRE_CONFIGS: d.config.as_posix(), _PRE_PARAMS: d.param.as_posix(), _PRE_RULES: d.rules.as_posix()}
+    folders = {PREFIX_CONFIGS: d.config.as_posix(), PREFIX_PARAMS: d.param.as_posix(), PREFIX_RULES: d.rules.as_posix()}
 
     for prefix, folder in folders.items():
         if _path.startswith(folder):
@@ -21,7 +21,7 @@ def name_from_path(path: Path) -> str:
 
 def path_from_name(name: str) -> Path:
     d = HABApp.config.CONFIG.directories
-    folders = {_PRE_CONFIGS: d.config.as_posix(), _PRE_PARAMS: d.param.as_posix(), _PRE_RULES: d.rules.as_posix()}
+    folders = {PREFIX_CONFIGS: d.config.as_posix(), PREFIX_PARAMS: d.param.as_posix(), PREFIX_RULES: d.rules.as_posix()}
 
     for prefix, folder in folders.items():
         if name.startswith(prefix):
@@ -31,12 +31,12 @@ def path_from_name(name: str) -> Path:
 
 
 def is_config(name: str):
-    return name.startswith(_PRE_CONFIGS)
+    return name.startswith(PREFIX_CONFIGS)
 
 
 def is_param(name: str):
-    return name.startswith(_PRE_PARAMS)
+    return name.startswith(PREFIX_PARAMS)
 
 
 def is_rule(name: str):
-    return name.startswith(_PRE_RULES)
+    return name.startswith(PREFIX_RULES)

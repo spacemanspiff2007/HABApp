@@ -9,13 +9,13 @@ class __FileEventBase:
         return cls(HABApp.core.files.name_from_path(path))
 
     def __init__(self, name: str):
-        self.filename: str = name
+        self.name: str = name
 
     def get_path(self) -> Path:
-        return HABApp.core.files.path_from_name(self.filename)
+        return HABApp.core.files.path_from_name(self.name)
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} filename: {self.filename}>'
+        return f'<{self.__class__.__name__} filename: {self.name}>'
 
 
 class RequestFileLoadEvent(__FileEventBase):

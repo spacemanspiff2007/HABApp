@@ -8,7 +8,7 @@ Parameters are values which can easily be changed without having to reload the r
 Values will be picked up during runtime as soon as they get edited in the corresponding file.
 If the file doesn't exist yet it will automatically be generated in the configured `param` folder.
 Parameters are perfect for boundaries (e.g. if value is below param switch something on).
-
+Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp.parameters.DictParameter` available.
 
 .. execute_code::
     :hide_output:
@@ -71,10 +71,6 @@ Created file:
 
 Changes in the file will be automatically picked up through :class:`~HABApp.parameters.Parameter`.
 
-.. autoclass:: HABApp.parameters.Parameter
-   :members:
-
-   .. automethod:: __init__
 
 Validation
 ------------------------------
@@ -90,8 +86,16 @@ Example
     :hide_output:
 
     # hide
+    from pathlib import Path
+
+    import HABApp
     from HABApp.parameters.parameters import _PARAMETERS
     _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
+
+    # Patch values so we don't get errors
+    HABApp.config.CONFIG.directories.rules = Path('/my_rules/')
+    HABApp.config.CONFIG.directories.config = Path('/my_config/')
+    HABApp.config.CONFIG.directories.param = Path('/my_param/')
     # hide
 
     import HABApp
@@ -106,7 +110,7 @@ Example
     validator = {
         'Test': int,
         'Key': {
-            'mandatory': str,
+            'mandatory_key': str,
             voluptuous.Optional('optional'): int
         }
     }
@@ -119,33 +123,57 @@ Parameteres are not bound to rule instance and thus work everywhere in the rule 
 It is possible to dynamically create rules from the contents of the parameter file.
 
 It's even possible to automatically reload rules if the parameter file has changed:
-Just listen to the ``FileLoadEvent`` of the parameter file and create a  ``FileLoadEvent`` for the rule file, too.
+Just add the "reloads on" entry to the file.
 
 
-Example
+.. code-block:: yaml
+   :caption: my_param.yml
+
+    key1:
+      v: 10
+    key2:
+      v: 12
 
 .. execute_code::
+    :header_code: rule
 
     # hide
     from HABApp.parameters.parameters import _PARAMETERS
-    _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
+    _PARAMETERS['my_param'] = {'key1': {'v': 10}, 'key2': {'v': 12}}
 
     from tests import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # hide
 
+
+
     import HABApp
 
     class MyRule(HABApp.Rule):
         def __init__(self, k, v):
             super().__init__()
+
             print(f'{k}: {v}')
 
-    cfg = HABApp.Parameter( 'param_file_testrule').value    # this will get the file content
+
+    cfg = HABApp.DictParameter('my_param')    # this will get the file content
     for k, v in cfg.items():
         MyRule(k, v)
 
     # hide
     runner.tear_down()
     # hide
+
+
+
+Parameter classes
+------------------------------
+
+.. autoclass:: HABApp.parameters.Parameter
+   :members:
+
+
+.. autoclass:: HABApp.parameters.DictParameter
+   :members:
+
