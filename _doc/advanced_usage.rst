@@ -43,12 +43,22 @@ An example would be dynamically reloading files or an own notifier in case there
 .. autoclass:: HABApp.core.events.habapp_events.HABAppError
    :members:
 
-HABApp file properties
+File properties
 ------------------------------
 For every HABApp file it is possible to specify some properties.
-The properties are specified as a comment (prefixed with ``#``) and
-are in the yml format.
+The properties are specified as a comment (prefixed with ``#``) somewhere at the beginning of the file
+and are in the yml format.
 File names are the same as in the :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent`.
+
+Configuration format
+
+.. code-block:: yaml
+
+    HABApp:
+      depends on:
+       - filename
+      reloads on:
+       - filename
 
 .. list-table::
    :widths: auto
@@ -64,9 +74,11 @@ File names are the same as in the :class:`~HABApp.core.events.habapp_events.Requ
      - The file will get automatically reloaded when **one of** the files specified will be reloaded
 
 
-.. code-block:: python
-   :caption: rule.py
+Example
 
+.. code-block:: python
+
+   # Some other stuff
    #
    # HABApp:
    #   depends on:
@@ -96,8 +108,8 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     # Connect the source item with the aggregation item
     my_agg.aggregation_source('MyInputItem')
 
-    # Aggregate all changes in the last hour
-    my_agg.aggregation_period(3600)
+    # Aggregate all changes in the last two hours
+    my_agg.aggregation_period(2 * 3600)
 
     # Use max as an aggregation function
     my_agg.aggregation_func = max
