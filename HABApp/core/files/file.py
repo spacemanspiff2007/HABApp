@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import typing
 from pathlib import Path
@@ -19,7 +17,7 @@ class CircularReferenceError(Exception):
 class HABAppFile:
 
     @classmethod
-    def from_path(cls, name: str, path: Path) -> HABAppFile:
+    def from_path(cls, name: str, path: Path) -> 'HABAppFile':
         with path.open('r', encoding='utf-8') as f:
             txt = f.read(10 * 1024)
         return cls(name, path, get_props(txt))
