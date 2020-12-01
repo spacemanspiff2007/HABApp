@@ -17,9 +17,11 @@ log = logging.getLogger('HABApp.files')
 LOCK = Lock()
 
 ALL: typing.Dict[str, HABAppFile] = {}
+LOAD_RUNNING = False
 
 
 def process(files: typing.List[Path], load_next: bool = True):
+    global LOAD_RUNNING
 
     for file in files:
         name = name_from_path(file)
@@ -37,8 +39,16 @@ def process(files: typing.List[Path], load_next: bool = True):
         with LOCK:
             ALL[name] = obj
 
-    if load_next:
-        _load_next()
+    if not load_next:
+        return None
+
+    # Start loading only once
+    with LOCK:
+        if LOAD_RUNNING:
+            return None
+        LOAD_RUNNING = True
+
+    _load_next()
 
 
 @ignore_exception
@@ -65,6 +75,8 @@ def file_load_failed(name: str):
 
 
 def _load_next():
+    global LOAD_RUNNING
+
     # check files for dependencies etc.
     for file in list(filter(lambda x: not x.is_checked, ALL.values())):
         try:
@@ -86,6 +98,9 @@ def _load_next():
         if file.can_be_loaded():
             file.load()
             return None
+
+    with LOCK:
+        LOAD_RUNNING = False
 
 
 def watch_folder(folder: Path, file_ending: str, watch_subfolders: bool = False) -> AggregatingAsyncEventHandler:

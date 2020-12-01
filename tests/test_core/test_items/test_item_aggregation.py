@@ -5,12 +5,6 @@ import pytest
 import HABApp
 
 
-@pytest.yield_fixture()
-def event_loop():
-    HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
-    yield HABApp.core.const.loop
-
-
 @pytest.mark.asyncio
 async def test_aggregation_item():
     agg = HABApp.core.items.AggregationItem.get_create_item('MyAggregation')

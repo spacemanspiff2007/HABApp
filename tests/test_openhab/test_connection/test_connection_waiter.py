@@ -1,15 +1,8 @@
 import asyncio
+
 import pytest
 
-import HABApp
 from HABApp.openhab.connection_handler.http_connection_waiter import WaitBetweenConnects
-
-
-@pytest.yield_fixture()
-def event_loop():
-    HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
-    yield HABApp.core.const.loop
-
 
 waited = -1
 
