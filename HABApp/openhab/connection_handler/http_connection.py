@@ -227,7 +227,8 @@ async def start_connection():
     HTTP_SESSION = aiohttp.ClientSession(
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
-        auth=auth
+        auth=auth,
+        read_bufsize=2**19  # 512k buffer
     )
 
     FUT_UUID = asyncio.ensure_future(try_uuid())
