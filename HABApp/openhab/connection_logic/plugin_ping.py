@@ -69,8 +69,13 @@ class PingOpenhab(PluginBase):
         value = event.value
         if value != self.ping_value:
             return None
+        
+        # We only save take the first ping we get
+        if self.ping_new is not None:
+            return None
 
         self.ping_new = round((time.time() - self.ping_sent) * 1000, 1)
+
 
     @log_exception
     async def async_ping(self):
