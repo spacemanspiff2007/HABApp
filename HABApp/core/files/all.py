@@ -5,6 +5,7 @@ from pathlib import Path
 from threading import Lock
 
 import HABApp
+from HABApp.core.logger import HABAppError
 from HABApp.core.wrapper import ignore_exception
 from . import name_from_path
 from .file import CircularReferenceError, HABAppFile
@@ -32,8 +33,14 @@ def process(files: typing.List[Path], load_next: bool = True):
                 existing.unload()
             continue
 
-        # reload/initial load
-        obj = HABAppFile.from_path(name, file)
+        try:
+            # reload/initial load
+            obj = HABAppFile.from_path(name, file)
+        except Exception as e:
+            HABAppError(log).add_exception(e, add_traceback=False).dump()
+            # If we can not load the HABApp properties we skip the file
+            continue
+
         with LOCK:
             ALL[name] = obj
 

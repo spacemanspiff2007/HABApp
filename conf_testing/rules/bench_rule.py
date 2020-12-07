@@ -17,7 +17,7 @@ class OpenhabBenchRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
-        self.item_list = [f"BenchItem{k}" for k in range(300)]
+        self.item_list = [f'BenchItem{k}' for k in range(300)]
 
         self.__b_start = 0
         self.__b_val = random.randint(0, 9999)
