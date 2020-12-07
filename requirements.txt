@@ -13,4 +13,4 @@ watchdog==0.10.4
 ujson==4.0.1
 
 # Backports
-dataclasses==0.7;python_version<"3.8"
+dataclasses==0.7;python_version<"3.7"

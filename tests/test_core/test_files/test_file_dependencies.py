@@ -1,9 +1,9 @@
+import logging
 from pathlib import Path
 
 import HABApp
-import logging
-from HABApp.core.files.all import process, file_load_ok
-from HABApp.core.files.file import HABAppFile, FileProperties
+from HABApp.core.files.all import file_load_ok, process
+from HABApp.core.files.file import FileProperties, HABAppFile
 from ...helpers import SyncWorker
 
 FILE_PROPS = {}
