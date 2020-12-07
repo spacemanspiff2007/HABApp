@@ -69,7 +69,7 @@ class PingOpenhab(PluginBase):
         value = event.value
         if value != self.ping_value:
             return None
-        
+
         # We only save take the first ping we get
         if self.ping_new is not None:
             return None
