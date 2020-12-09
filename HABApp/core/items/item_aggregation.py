@@ -75,6 +75,8 @@ class AggregationItem(BaseValueItem):
         return self
 
     def _on_item_remove(self):
+        super()._on_item_remove()
+
         if self.__listener is not None:
             self.__listener.cancel()
             self.__listener = None
