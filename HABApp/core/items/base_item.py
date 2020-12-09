@@ -1,4 +1,5 @@
 import datetime
+import logging
 import typing
 
 import tzlocal
@@ -109,4 +110,8 @@ class BaseItem:
     def _on_item_remove(self):
         """This function gets called when the item is removed from the item registry
         """
-        pass
+        if self._last_change.tasks or self._last_update.tasks:
+            w = HABApp.core.logger.HABAppWarning(logging.getLogger('HABApp.Item'))
+            w.add(f'Item {self._name} has been removed even though it has item watchers. '
+                  f'If it will be added again the watchers have to be created again, too!')
+            w.dump()

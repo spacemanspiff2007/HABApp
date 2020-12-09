@@ -13,8 +13,9 @@ log = logging.getLogger('HABApp.openhab.ping')
 
 class PingOpenhab(PluginBase):
     def __init__(self):
-        self.__ping_received: float = 0
-        self.__ping_value: Optional[float] = 0
+        self.ping_value: Optional[float] = None
+        self.ping_sent: Optional[float] = None
+        self.ping_new: Optional[float] = None
 
         self.listener: Optional[HABApp.core.EventBusListener] = None
 
@@ -31,23 +32,26 @@ class PingOpenhab(PluginBase):
         if not HABApp.config.CONFIG.openhab.ping.enabled:
             return None
 
+        # initialize
+        self.ping_value = None
+        self.ping_sent = None
+        self.ping_new = None
+
         self.fut_ping = asyncio.ensure_future(self.async_ping(), loop=HABApp.core.const.loop)
 
     def on_disconnect(self):
-        if self.listener is not None:
-            self.listener.cancel()
-            self.listener = None
-
         if self.fut_ping is not None:
             self.fut_ping.cancel()
             self.fut_ping = None
 
-        self.__ping_received = 0
-        self.__ping_value = 0
         log.debug('Ping stopped')
 
     def cfg_changed(self):
         self.on_disconnect()
+
+        if self.listener is not None:
+            self.listener.cancel()
+            self.listener = None
 
         if not HABApp.config.CONFIG.openhab.ping.enabled:
             return None
@@ -63,29 +67,32 @@ class PingOpenhab(PluginBase):
 
     async def ping_received(self, event: HABApp.openhab.events.ItemStateEvent):
         value = event.value
-        self.__ping_received = time.time()
-        self.__ping_value = None if value is None else round(value, 2)
+        if value != self.ping_value:
+            return None
+
+        # We only save take the first ping we get
+        if self.ping_new is not None:
+            return None
+
+        self.ping_new = round((time.time() - self.ping_sent) * 1000, 1)
+
 
     @log_exception
     async def async_ping(self):
         await asyncio.sleep(3)
 
-        sent: Optional[float] = time.time()
-        value: Optional[float] = None
-
         log.debug('Ping started')
         try:
             while True:
-                if self.__ping_value == value:
-                    value = round((self.__ping_received - sent) * 1000, 2)
-                else:
-                    value = None
+
+                self.ping_value = self.ping_new
+                self.ping_new = None
+                self.ping_sent = time.time()
 
                 await HABApp.openhab.interface_async.async_post_update(
                     HABApp.config.CONFIG.openhab.ping.item,
-                    f'{value:.1f}' if value is not None else None
+                    f'{self.ping_value:.1f}' if self.ping_value is not None else None
                 )
-                sent = time.time()
 
                 await asyncio.sleep(HABApp.config.CONFIG.openhab.ping.interval)
 

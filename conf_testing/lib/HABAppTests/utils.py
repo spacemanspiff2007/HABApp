@@ -2,6 +2,7 @@ import asyncio
 import random
 import string
 import typing
+from binascii import b2a_hex
 
 import HABApp
 from HABApp.openhab.items import Thing
@@ -23,3 +24,9 @@ def find_astro_sun_thing() -> str:
             return item.name
 
     raise ValueError('No astro thing found!')
+
+
+def get_bytes_text(value):
+    if isinstance(value, bytes) and len(value) > 100 * 1024:
+        return b2a_hex(value[0:100]).decode() + ' ... ' + b2a_hex(value[-100:]).decode()
+    return value

@@ -1,5 +1,5 @@
 # HABApp
-[![Build Status](https://travis-ci.org/spacemanspiff2007/HABApp.svg?branch=master)](https://travis-ci.org/spacemanspiff2007/HABApp)
+![Tests Status](https://github.com/spacemanspiff2007/HABApp/workflows/Tests/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/habapp/badge/?version=latest)](https://habapp.readthedocs.io/en/latest/?badge=latest)
 [![Updates](https://pyup.io/repos/github/spacemanspiff2007/HABApp/shield.svg)](https://pyup.io/repos/github/spacemanspiff2007/HABApp/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/habapp)

@@ -24,6 +24,10 @@ class ManualThingConfig(OnConnectPlugin):
         self.do_cleanup = PendingFuture(self.clean_items, 120)
 
     def setup(self):
+        if not HABApp.CONFIG.directories.config.is_dir():
+            log.info('Config folder does not exist - textual thing config disabled!')
+            return None
+
         # Add event bus listener
         HABApp.core.EventBus.add_listener(
             HABApp.core.EventBusListener(
