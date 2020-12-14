@@ -112,7 +112,7 @@ def get_item(item_name: str, metadata: Optional[str] = None) -> OpenhabItemDefin
     """Return the complete OpenHAB item definition
 
     :param item_name: name of the item or item
-    :param metadata: metadata to include (optional)
+    :param metadata: metadata to include (optional, comma separated or search expression)
     :return:
     """
     if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):

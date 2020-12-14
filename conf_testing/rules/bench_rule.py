@@ -8,8 +8,8 @@ import HABApp
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.openhab.items import NumberItem
 
-WAIT_PREPARE = 5
-RUN_EVERY = 5
+WAIT_PREPARE = 5 * 60
+RUN_EVERY = 2 * 60
 
 
 class OpenhabBenchRule(HABApp.Rule):
@@ -36,7 +36,7 @@ class OpenhabBenchRule(HABApp.Rule):
         for k in self.item_list:
             self.openhab.create_item('String', k)
 
-        self.run_every(None, datetime.timedelta(minutes=RUN_EVERY), self.bench_start)
+        self.run_every(None, datetime.timedelta(seconds=RUN_EVERY), self.bench_start)
         self.listen_event(self.item_list[-1], self.bench_stop, ValueChangeEvent)
 
         dur = time.time() - start

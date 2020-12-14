@@ -24,9 +24,9 @@ class TestItemEvents(TestBaseRule):
         (self.watch_item.watch_change if changes else self.watch_item.watch_update)(secs)
 
         event = ItemNoUpdateEvent if not changes else ItemNoChangeEvent
+        listener = self.listen_event(self.watch_item, self.check_event, event)
 
         self.ts_set = 0
-        listener = self.listen_event(self.watch_item, self.check_event, event)
 
         for step, value in enumerate(values):
             if step:
