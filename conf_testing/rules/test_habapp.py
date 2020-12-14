@@ -21,7 +21,7 @@ class TestItemEvents(TestBaseRule):
     def item_events(self, changes=False, secs=5, values=[]):
         self.secs = secs
         self.watch_item = Item.get_create_item(get_random_name())
-        (self.watch_item.watch_change if changes else self.watch_item.watch_update)(secs)
+        watcher = (self.watch_item.watch_change if changes else self.watch_item.watch_update)(secs)
 
         event = ItemNoUpdateEvent if not changes else ItemNoChangeEvent
         listener = self.listen_event(self.watch_item, self.check_event, event)
@@ -40,6 +40,7 @@ class TestItemEvents(TestBaseRule):
                     return w.events_ok
 
         listener.cancel()
+        watcher.cancel()
         return True
 
 

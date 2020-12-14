@@ -1,10 +1,13 @@
 import asyncio
 import datetime
+import logging
 import typing
 
 from HABApp.core.wrapper import log_exception
 from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
 from ..const import loop
+
+log = logging.getLogger('HABApp')
 
 
 class ItemTimes:
@@ -26,27 +29,35 @@ class ItemTimes:
 
     def add_watch(self, secs: typing.Union[int, float]) -> BaseWatch:
         assert secs > 0, secs
+        fut = asyncio.run_coroutine_threadsafe(self._add_watch(secs), loop)
+        return fut.result()
 
+    async def _add_watch(self, secs: typing.Union[int, float]) -> BaseWatch:
         # don't add the watch two times
         for t in self.tasks:
-            if not t._fut.is_canceled and t._fut.secs == secs:
+            if not t.fut.is_canceled and t.fut.secs == secs:
+                log.warning(f'Watcher {self.WATCH.__name__} ({t.fut.secs}s) for {self.name} has already been created')
                 return t
+
         w = self.WATCH(self.name, secs)
         self.tasks.append(w)
+        log.debug(f'Added {self.WATCH.__name__} ({w.fut.secs}s) for {self.name}')
         return w
 
     @log_exception
     async def schedule_events(self):
-        clean = False
+        canceled = []
         for t in self.tasks:
-            if t._fut.is_canceled:
-                clean = True
+            if t.fut.is_canceled:
+                canceled.append(t)
             else:
-                t._fut.reset()
+                t.fut.reset()
 
         # remove canceled tasks
-        if clean:
-            self.tasks = [t for t in self.tasks if not t._fut.is_canceled]
+        if canceled:
+            for c in canceled:
+                self.tasks.remove(c)
+                log.debug(f'Removed {self.WATCH.__name__} ({c.fut.secs}s) for {self.name}')
         return None
 
 
