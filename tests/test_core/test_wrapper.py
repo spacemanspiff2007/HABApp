@@ -1,4 +1,4 @@
-import logging
+import logging, aiohttp, asyncio
 from unittest.mock import MagicMock
 
 import pytest
@@ -17,38 +17,56 @@ def p_mock():
     HABApp.core.EventBus.post_event = post_event
 
 
-def test_error_catch(p_mock):
+# def test_error_catch(p_mock):
+#
+#     p_mock.assert_not_called()
+#
+#     with ExceptionToHABApp(log, logging.WARNING):
+#         pass
+#     p_mock.assert_not_called()
+#
+#     with ExceptionToHABApp(log, logging.WARNING):
+#         1 / 0
+#     p_mock.assert_called_once()
+#     assert p_mock.call_args[0][0] == HABApp.core.const.topics.WARNINGS
+#
+#
+# def test_error_level(p_mock):
+#     with ExceptionToHABApp(log, logging.WARNING):
+#         1 / 0
+#     p_mock.assert_called_once()
+#     assert p_mock.call_args[0][0] == HABApp.core.const.topics.WARNINGS
+#
+#     p_mock.reset_mock()
+#
+#     with ExceptionToHABApp(log):
+#         1 / 0
+#     p_mock.assert_called_once()
+#     assert p_mock.call_args[0][0] == HABApp.core.const.topics.ERRORS
+#
+#
+# @ignore_exception
+# def func_a(_l):
+#     1 / 0
+#
+#
+# def test_func_wrapper(p_mock):
+#     func_a(['asdf', 'asdf'])
 
-    p_mock.assert_not_called()
 
-    with ExceptionToHABApp(log, logging.WARNING):
-        pass
-    p_mock.assert_not_called()
+def test_exception_format(p_mock):
+    async def test():
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(0.01)) as session:
+            async with session.get('http://localhost:12345') as resp:
+                pass
 
-    with ExceptionToHABApp(log, logging.WARNING):
-        1 / 0
-    p_mock.assert_called_once()
-    assert p_mock.call_args[0][0] == HABApp.core.const.topics.WARNINGS
+    with ExceptionToHABApp(log) as e:
+        asyncio.get_event_loop().run_until_complete(test())
 
-
-def test_error_level(p_mock):
-    with ExceptionToHABApp(log, logging.WARNING):
-        1 / 0
-    p_mock.assert_called_once()
-    assert p_mock.call_args[0][0] == HABApp.core.const.topics.WARNINGS
-
-    p_mock.reset_mock()
-
-    with ExceptionToHABApp(log):
-        1 / 0
-    p_mock.assert_called_once()
-    assert p_mock.call_args[0][0] == HABApp.core.const.topics.ERRORS
-
-
-@ignore_exception
-def func_a(_l):
-    1 / 0
-
-
-def test_func_wrapper(p_mock):
-    func_a(['asdf', 'asdf'])
+    tb = p_mock.call_args[0][1].traceback
+    
+    # verbose asyncio
+    assert 'self = <ProactorEventLoop running=False closed=False debug=True>' not in tb
+    
+    # verbose aiohttp
+    assert 'async def __aenter__(self) -> _RetType:' not in tb
