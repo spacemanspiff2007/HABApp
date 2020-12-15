@@ -1,8 +1,9 @@
 from HABApp.core.items import Item
 from tests.helpers.parent_rule import DummyRule
+import pytest
 
-
-def test_multiple_add(parent_rule: DummyRule):
+@pytest.mark.asyncio
+async def test_multiple_add(parent_rule: DummyRule):
 
     i = Item('test')
     w1 = i.watch_change(5)
@@ -10,6 +11,6 @@ def test_multiple_add(parent_rule: DummyRule):
 
     assert w1 is w2
 
-    w1._fut.cancel()
+    w1.fut.cancel()
     w2 = i.watch_change(5)
     assert w1 is not w2

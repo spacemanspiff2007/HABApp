@@ -29,10 +29,7 @@ class ItemTimes:
 
     def add_watch(self, secs: typing.Union[int, float]) -> BaseWatch:
         assert secs > 0, secs
-        fut = asyncio.run_coroutine_threadsafe(self._add_watch(secs), loop)
-        return fut.result()
 
-    async def _add_watch(self, secs: typing.Union[int, float]) -> BaseWatch:
         # don't add the watch two times
         for t in self.tasks:
             if not t.fut.is_canceled and t.fut.secs == secs:
