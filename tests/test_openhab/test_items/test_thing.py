@@ -10,7 +10,7 @@ from HABApp.openhab.map_events import get_event
 @pytest.fixture(scope="function")
 def test_thing():
     thing = HABApp.openhab.items.Thing('test_thing')
-    HABApp.core.Items.set_item(thing)
+    HABApp.core.Items.add_item(thing)
 
     yield thing
 

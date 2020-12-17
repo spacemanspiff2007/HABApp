@@ -1,6 +1,8 @@
+import pytest
+
 from HABApp.core.items import Item
 from tests.helpers.parent_rule import DummyRule
-import pytest
+
 
 @pytest.mark.asyncio
 async def test_multiple_add(parent_rule: DummyRule):

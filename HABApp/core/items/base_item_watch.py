@@ -1,11 +1,11 @@
 import asyncio
+import logging
 import typing
 
-import HABApp, logging
-from ..const import loop
+import HABApp
 from HABApp.core.lib import PendingFuture
+from ..const import loop
 from ..events import ItemNoChangeEvent, ItemNoUpdateEvent
-
 
 log = logging.getLogger('HABApp')
 

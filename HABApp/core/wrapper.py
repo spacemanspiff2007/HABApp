@@ -25,7 +25,7 @@ SUPPRESSED_PATHS = (
     re.compile(r'[/\\]wrappedfunction.py$'),
 
     # Don't print stack for used libraries
-    re.compile(r'[/\\](site-packages|lib)[/\\]asyncio[/\\]'),
+    re.compile(r'[/\\](site-packages|lib|python\d\.\d)[/\\]asyncio[/\\]'),
     re.compile(r'[/\\]site-packages[/\\]aiohttp[/\\]'),
     re.compile(r'[/\\]site-packages[/\\]voluptuous[/\\]'),
     re.compile(r'[/\\]site-packages[/\\]pydantic[/\\]'),

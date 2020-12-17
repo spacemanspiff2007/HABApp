@@ -19,25 +19,38 @@ class TestItemEvents(TestBaseRule):
         assert abs(dur) < 0.05, f'Time wrong: {abs(dur):.2f}'
 
     def item_events(self, changes=False, secs=5, values=[]):
+        item_name = get_random_name()
         self.secs = secs
-        self.watch_item = Item.get_create_item(get_random_name())
+        self.watch_item = Item.get_create_item(item_name)
         watcher = (self.watch_item.watch_change if changes else self.watch_item.watch_update)(secs)
 
         event = ItemNoUpdateEvent if not changes else ItemNoChangeEvent
         listener = self.listen_event(self.watch_item, self.check_event, event)
 
-        self.ts_set = 0
+        def _run():
+            self.ts_set = 0
+            for step, value in enumerate(values):
+                if step:
+                    time.sleep(0.2)
+                self.ts_set = time.time()
+                self.watch_item.set_value(value)
+                with EventWaiter(self.watch_item.name, event, secs + 2, check_value=False) as w:
+                    w.wait_for_event(value)
+                    if not w.events_ok:
+                        listener.cancel()
+                        return w.events_ok
+            return True
 
-        for step, value in enumerate(values):
-            if step:
-                time.sleep(0.2)
-            self.ts_set = time.time()
-            self.watch_item.set_value(value)
-            with EventWaiter(self.watch_item.name, event, secs + 2, check_value=False) as w:
-                w.wait_for_event(value)
-                if not w.events_ok:
-                    listener.cancel()
-                    return w.events_ok
+        if not _run():
+            return False
+
+        HABApp.core.Items.pop_item(item_name)
+        assert not HABApp.core.Items.item_exists(item_name)
+        time.sleep(1)
+        self.watch_item = Item.get_create_item(item_name)
+
+        if not _run():
+            return False
 
         listener.cancel()
         watcher.cancel()

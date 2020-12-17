@@ -1,5 +1,4 @@
 import datetime
-import logging
 import typing
 
 import tzlocal
@@ -7,6 +6,8 @@ from pytz import utc
 
 import HABApp
 from .base_item_times import BaseWatch, ChangedTime, UpdatedTime
+from .tmp_data import add_tmp_data as _add_tmp_data
+from .tmp_data import restore_tmp_data as _restore_tmp_data
 
 
 class BaseItem:
@@ -107,11 +108,12 @@ class BaseItem:
         rule = HABApp.rule.get_parent_rule()
         return rule.listen_event(self._name, callback=callback, event_type=event_type)
 
-    def _on_item_remove(self):
-        """This function gets called when the item is removed from the item registry
+    def _on_item_add(self):
+        """This function gets automatically called when the item is added to the item registry
         """
-        if self._last_change.tasks or self._last_update.tasks:
-            w = HABApp.core.logger.HABAppWarning(logging.getLogger('HABApp.Item'))
-            w.add(f'Item {self._name} has been removed even though it has item watchers. '
-                  f'If it will be added again the watchers have to be created again, too!')
-            w.dump()
+        _restore_tmp_data(self)
+
+    def _on_item_remove(self):
+        """This function gets automatically called when the item is removed from the item registry
+        """
+        _add_tmp_data(self)
