@@ -1,8 +1,8 @@
-import aiohttp
 import asyncio
 import logging
 from unittest.mock import MagicMock
 
+import aiohttp
 import pytest
 
 import HABApp

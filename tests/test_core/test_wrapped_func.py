@@ -1,24 +1,14 @@
 import asyncio
-import re
 import typing
 import unittest
+from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 
-import HABApp
 import pytest
-from asynctest import CoroutineMock
 
+import HABApp
 from HABApp.core import WrappedFunction
 from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
-
-
-class FileNameRemover(str):
-    REGEX = re.compile(r'^\s+File ".+?$', re.MULTILINE)
-
-    def __eq__(self, other):
-        a = FileNameRemover.REGEX.sub('', self)
-        b = FileNameRemover.REGEX.sub('', other)
-        return a == b
 
 
 class TestCases(unittest.TestCase):
@@ -96,7 +86,7 @@ class TestCases(unittest.TestCase):
 
 @pytest.mark.asyncio
 async def test_async_run():
-    coro = CoroutineMock()
+    coro = AsyncMock()
     WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
     f = WrappedFunction(coro, name='coro_mock')
     f.run()
@@ -106,7 +96,7 @@ async def test_async_run():
 
 @pytest.mark.asyncio
 async def test_async_args():
-    coro = CoroutineMock()
+    coro = AsyncMock()
     WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
     f = WrappedFunction(coro, name='coro_mock')
     f.run('arg1', 'arg2', kw1='kw1')
@@ -122,7 +112,7 @@ async def test_async_error_wrapper():
 
     f = WrappedFunction(tmp)
     WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
-    err_func = CoroutineMock()
+    err_func = AsyncMock()
     err_listener = HABApp.core.EventBusListener(TOPIC_ERRORS, WrappedFunction(err_func, name='ErrMock'))
     HABApp.core.EventBus.add_listener(err_listener)
 

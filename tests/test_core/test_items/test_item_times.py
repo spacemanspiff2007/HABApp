@@ -8,7 +8,7 @@ import pytz
 import HABApp
 import HABApp.core.items.tmp_data
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
-from ...helpers import SyncWorker
+from ...helpers import TestEventBus
 
 
 @pytest.fixture(scope="function")
@@ -163,7 +163,7 @@ async def test_watcher_update_restore(parent_rule):
 
 
 @pytest.mark.asyncio
-async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime):
+async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, sync_worker, event_bus: TestEventBus):
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''
@@ -172,22 +172,21 @@ async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime):
         nonlocal text_warning
         text_warning = event
 
-    with SyncWorker()as sync:
-        sync.listen_events(HABApp.core.const.topics.WARNINGS, get_log)
+    event_bus.listen_events(HABApp.core.const.topics.WARNINGS, get_log)
 
-        name = 'test_save_restore'
-        item_a = HABApp.core.items.Item(name)
-        HABApp.core.Items.add_item(item_a)
-        item_a.watch_update(1)
+    name = 'test_save_restore'
+    item_a = HABApp.core.items.Item(name)
+    HABApp.core.Items.add_item(item_a)
+    item_a.watch_update(1)
 
-        # remove item
-        assert name not in HABApp.core.items.tmp_data.TMP_DATA
-        HABApp.core.Items.pop_item(name)
-        assert name in HABApp.core.items.tmp_data.TMP_DATA
+    # remove item
+    assert name not in HABApp.core.items.tmp_data.TMP_DATA
+    HABApp.core.Items.pop_item(name)
+    assert name in HABApp.core.items.tmp_data.TMP_DATA
 
-        # ensure that the tmp data gets deleted
-        await asyncio.sleep(0.8)
-        assert name not in HABApp.core.items.tmp_data.TMP_DATA
+    # ensure that the tmp data gets deleted
+    await asyncio.sleep(0.8)
+    assert name not in HABApp.core.items.tmp_data.TMP_DATA
 
-        assert text_warning == 'Item test_save_restore has been deleted 0.7s ago even though it has item watchers.' \
-                               ' If it will be added again the watchers have to be created again, too!'
+    assert text_warning == 'Item test_save_restore has been deleted 0.7s ago even though it has item watchers.' \
+                           ' If it will be added again the watchers have to be created again, too!'
