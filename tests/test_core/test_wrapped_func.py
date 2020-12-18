@@ -1,7 +1,7 @@
 import asyncio
+import sys
 import typing
 import unittest
-from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 
 import pytest
@@ -9,6 +9,11 @@ import pytest
 import HABApp
 from HABApp.core import WrappedFunction
 from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
+
+if sys.version < (3, 8):
+    from mock import AsyncMock
+else:
+    from unittest.mock import AsyncMock
 
 
 class TestCases(unittest.TestCase):
