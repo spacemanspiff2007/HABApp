@@ -10,7 +10,7 @@ import HABApp
 from HABApp.core import WrappedFunction
 from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
 
-if sys.version < (3, 8):
+if sys.version_info < (3, 8):
     from mock import AsyncMock
 else:
     from unittest.mock import AsyncMock

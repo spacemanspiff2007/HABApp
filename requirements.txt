@@ -9,7 +9,7 @@ pytz==2020.4
 stackprinter==0.2.5
 tzlocal==2.1
 voluptuous==0.12.1
-watchdog==0.10.4
+watchdog==1.0.1
 ujson==4.0.1
 
 # Backports
