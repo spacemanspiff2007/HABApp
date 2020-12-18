@@ -6,7 +6,7 @@ from HABApp.core import EventBus, EventBusListener
 from HABApp.core import WrappedFunction
 
 
-class TestEventBus:
+class TmpEventBus:
     def __init__(self):
         self.listener: typing.List[EventBusListener] = []
 
@@ -26,5 +26,5 @@ class TestEventBus:
 
 @pytest.fixture(scope="function")
 def event_bus():
-    with TestEventBus() as tb:
+    with TmpEventBus() as tb:
         yield tb

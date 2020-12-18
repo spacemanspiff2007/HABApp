@@ -4,7 +4,7 @@ import pytest
 
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.items import ColorItem
-from ...helpers import TestEventBus
+from ...helpers import TmpEventBus
 
 
 def test_repr():
@@ -79,7 +79,7 @@ def test_hsv_to_rgb():
     assert i.get_rgb() == (168, 122, 94)
 
 
-def test_post_update(sync_worker, event_bus: TestEventBus):
+def test_post_update(sync_worker, event_bus: TmpEventBus):
     i = ColorItem('test', 23, 44, 66)
 
     mock = MagicMock()

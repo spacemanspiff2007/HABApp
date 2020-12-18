@@ -6,7 +6,7 @@ import pytest
 import HABApp
 from HABApp.core.files.all import file_load_ok, process
 from HABApp.core.files.file import FileProperties, HABAppFile
-from ...helpers import TestEventBus
+from ...helpers import TmpEventBus
 
 FILE_PROPS = {}
 
@@ -42,7 +42,7 @@ def cfg(monkeypatch):
     yield
 
 
-def test_reload_on(cfg, sync_worker, event_bus: TestEventBus):
+def test_reload_on(cfg, sync_worker, event_bus: TmpEventBus):
     order = []
 
     def process_event(event):
@@ -76,7 +76,7 @@ def test_reload_on(cfg, sync_worker, event_bus: TestEventBus):
     order.clear()
 
 
-def test_reload_dep(cfg, sync_worker, event_bus: TestEventBus):
+def test_reload_dep(cfg, sync_worker, event_bus: TmpEventBus):
     order = []
 
     def process_event(event):
@@ -110,7 +110,7 @@ def test_reload_dep(cfg, sync_worker, event_bus: TestEventBus):
     order.clear()
 
 
-def test_missing_dependencies(cfg, sync_worker, event_bus: TestEventBus, caplog):
+def test_missing_dependencies(cfg, sync_worker, event_bus: TmpEventBus, caplog):
     order = []
 
     def process_event(event):
@@ -143,7 +143,7 @@ def test_missing_dependencies(cfg, sync_worker, event_bus: TestEventBus, caplog)
     assert msg2 in caplog.record_tuples
 
 
-def test_missing_loads(cfg, sync_worker, event_bus: TestEventBus, caplog):
+def test_missing_loads(cfg, sync_worker, event_bus: TmpEventBus, caplog):
     order = []
 
     def process_event(event):

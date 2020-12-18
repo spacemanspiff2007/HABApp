@@ -8,7 +8,7 @@ import pytz
 import HABApp
 import HABApp.core.items.tmp_data
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
-from ...helpers import TestEventBus
+from ...helpers import TmpEventBus
 
 
 @pytest.fixture(scope="function")
@@ -163,7 +163,7 @@ async def test_watcher_update_restore(parent_rule):
 
 
 @pytest.mark.asyncio
-async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, sync_worker, event_bus: TestEventBus):
+async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, sync_worker, event_bus: TmpEventBus):
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''
