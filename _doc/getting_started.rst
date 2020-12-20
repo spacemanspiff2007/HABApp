@@ -215,8 +215,11 @@ Trigger an event when an item is constant
             # This will create an event if the item is 10 secs constant
             watcher = self.my_item.watch_change(10)
 
-            # use .EVENT to always listen to the correct event
-            self.listen_event(self.my_item, self.item_constant, watcher.EVENT)
+            # this will automatically listen to the correct event
+            watcher.listen_event(self.item_constant)
+
+            # To listen to multiple ItemNoChangeEvent/ItemNoUpdateEvents use
+            # self.listen_event(self.my_item, self.item_constant, watcher.EVENT)
 
         def item_constant(self, event: ItemNoChangeEvent):
             print(f'{event}')

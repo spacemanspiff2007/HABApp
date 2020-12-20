@@ -28,6 +28,14 @@ class BaseWatch:
         """Cancel the item watch"""
         asyncio.run_coroutine_threadsafe(self.__cancel_watch(), loop)
 
+    def listen_event(self, callback: typing.Callable[[typing.Any], typing.Any]) -> 'HABApp.core.EventBusListener':
+        rule = HABApp.rule.get_parent_rule()
+        cb = HABApp.core.WrappedFunction(callback, name=rule._get_cb_name(callback))
+        listener = HABApp.core.EventBusListener(
+            self.name, cb, self.EVENT, 'seconds', self.fut.secs
+        )
+        return rule._add_event_listener(listener)
+
 
 class ItemNoUpdateWatch(BaseWatch):
     EVENT = ItemNoUpdateEvent

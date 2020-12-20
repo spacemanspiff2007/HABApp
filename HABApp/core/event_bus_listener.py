@@ -1,17 +1,18 @@
 import HABApp
 from HABApp.core.events import AllEvents
 from . import WrappedFunction
-from typing import Optional
+from typing import Optional, Any
 
 
 class EventBusListener:
     def __init__(self, topic, callback, event_type=AllEvents,
-                 prop_name1: Optional[str] = None, prop_value1: Optional[str] = None,
-                 prop_name2: Optional[str] = None, prop_value2: Optional[str] = None,
+                 prop_name1: Optional[str] = None, prop_value1: Optional[Any] = None,
+                 prop_name2: Optional[str] = None, prop_value2: Optional[Any] = None,
                  ):
         assert isinstance(topic, str), type(topic)
         assert isinstance(callback, WrappedFunction)
-        assert prop_name1 is None or isinstance(prop_name1, str)
+        assert prop_name1 is None or isinstance(prop_name1, str), prop_name1
+        assert prop_name2 is None or isinstance(prop_name2, str), prop_name2
 
         self.topic: str = topic
         self.func: WrappedFunction = callback
