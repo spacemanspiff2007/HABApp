@@ -82,6 +82,12 @@ This often comes in handy if there is some logic that shall be applied to differ
 
 Interacting with items
 ------------------------------
+HABApp uses a single dictionary to store both openhab items and locally
+created items (only visible within HABApp). Upon start-up, HABApp retrieves
+a list of openhab items through the REST API and put them in the dictionary
+above. Rules and HABApp derived libraries may add additional local items. See
+the next section for examples on how to do that.
+
 Iterating with items is done through the corresponding Item factory methods.
 Posting values will automatically create the events on the event bus.
 This example will create an item in HABApp (locally) and post some updates to it.
@@ -137,6 +143,62 @@ To access items from openhab use the correct openhab item type (see :ref:`the op
     # hide
 
 
+Working with local items
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Local items are those that only exist in HABApp (i.e. they are not available
+in openhab). There are useful for the following scenarios:
+
+1. To share information between rules.
+2. To simulate openhab items in unit tests.
+
+The formmer affords the rules to not rely on additional global variables to
+share states. The latter allows quick turn-around time for running the unit
+tests.  In fact, the tests can be fully run within an IDE such as pycharm 
+without needing open hab and HABapp running.
+
+Create and add a generic item::
+  item = HABApp.core.items.Item.get_create_item("an-item-name", "a value")
+  " This will create an item and register it with the global item dict
+
+In the majority of cases, we want to have strict typing on the item. This can
+be done like this::
+  item = HABApp.openhab.items.SwitchItem(name, HABApp.openhab.definitions.OnOffValue.ON)
+  HABApp.core.Items.add_item(item)
+
+To remove the above item from the global item dict::
+  HABApp.core.Items.pop_item(item.name)
+
+Changing a local item's value is also quite different compared to open hab
+items. As the items are local, there is no command sent to the open hab REST
+APIs. Also note that many item classes have helper methods that encapsulate the
+commands being sent to open hab. These methods can't be used on local items.
+Examples of them are ``SwitchItem::on(), SwithItem::off(), and DimmerItem.percentage()``.
+
+Here are examples on how to change the value on local items::
+  # no event is triggered when set_value is used.
+  switchItem.set_value(HABApp.openhab.definitions.OnOffValue.ON)
+
+  # an event will be created when post_value is used.
+  dimmerItem.post_value(percentage)
+
+Item equality
+~~~~~~~~~~~~~~~
+When coming over from the Java or jsr223 background, it is naturally to
+compare items like this::
+  if myItem == theOtherItem:
+    # do something
+
+That will most likely not achieve the intended result. The reason is because all
+HABApp items (in package ``HABApp.openhab.items``) implement ``__eq__`` by
+comparing the item's value / state and not the memory address. As such two
+entirely different ``SwitchItem`` would be equals if their values are both 
+``ON`` or ``OFF``. Here's how to properly do the comparison::
+  if myItem is theOtherItem:
+    # do something
+
+  # or alternatively
+  if myItem.name == theOtherItem.name::
+    # do something
 
 Watch items for events
 ------------------------------
