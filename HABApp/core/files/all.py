@@ -44,6 +44,10 @@ def process(files: typing.List[Path], load_next: bool = True):
         with LOCK:
             ALL[name] = obj
 
+            # find all which have this file as dependency and are not valid so it can be checked again
+            for _f in filter(lambda x: not x.is_valid and name in x.properties.depends_on, ALL.values()):
+                _f.is_checked = False
+
     if not load_next:
         return None
 

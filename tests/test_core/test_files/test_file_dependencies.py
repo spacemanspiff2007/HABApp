@@ -171,3 +171,28 @@ def test_missing_loads(cfg, sync_worker, event_bus: TmpEventBus, caplog):
 
     assert msg1 in caplog.record_tuples
     assert msg2 in caplog.record_tuples
+
+
+def test_load_continue_after_missing(cfg, sync_worker, event_bus: TmpEventBus, caplog):
+    order = []
+
+    def process_event(event):
+        order.append(event.name)
+        file_load_ok(event.name)
+
+    FILE_PROPS.clear()
+    FILE_PROPS['params/p1'] = FileProperties(depends_on=['params/p2'], reloads_on=[])
+    FILE_PROPS['params/p2'] = FileProperties()
+
+    event_bus.listen_events(HABApp.core.const.topics.FILES, process_event)
+
+    process([MockFile('p1')])
+
+    # File can not be loaded
+    assert order == []
+
+    # Add missing file
+    process([MockFile('p2')])
+
+    # Both files get loaded
+    assert order == ['params/p2', 'params/p1']
