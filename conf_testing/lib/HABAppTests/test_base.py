@@ -3,6 +3,7 @@ import threading
 import typing
 
 import HABApp
+from HABApp.core.events.habapp_events import HABAppError
 from ._rest_patcher import RestPatcher
 
 log = logging.getLogger('HABApp.Tests')
@@ -32,6 +33,7 @@ class TestResult:
 class TestConfig:
     def __init__(self):
         self.skip_on_failure = False
+        self.warning_is_error = False
 
 
 RULE_CTR = 0
@@ -67,6 +69,23 @@ class TestBaseRule(HABApp.Rule):
 
         # we have to chain the rules later, because we register the rules only once we loaded successfully.
         self.run_in(2, self.__execute_run)
+
+        # collect warnings and infos
+        self.listen_event(HABApp.core.const.topics.WARNINGS, self.__warning)
+        self.listen_event(HABApp.core.const.topics.ERRORS, self.__error)
+        self.__warnings = 0
+        self.__errors = 0
+
+    def __warning(self, event: str):
+        self.__warnings += 1
+        for line in event.splitlines():
+            log.warning(line)
+
+    def __error(self, event):
+        self.__errors += 1
+        msg = event.to_str() if isinstance(event, HABAppError) else event
+        for line in msg.splitlines():
+            log.error(line)
 
     def __execute_run(self):
         with LOCK:
@@ -130,6 +149,9 @@ class TestBaseRule(HABApp.Rule):
 
         result.run += 1
 
+        self.__warnings = 0
+        self.__errors = 0
+
         # add possibility to skip on failure
         if self.config.skip_on_failure:
             if result.nio:
@@ -152,6 +174,12 @@ class TestBaseRule(HABApp.Rule):
 
         if msg is True or msg is None:
             msg = ''
+
+        if self.__errors:
+            msg = f'{", " if msg else ""}{self.__errors} error{"s" if self.__errors != 1 else ""} in worker'
+        if self.config.warning_is_error and self.__warnings:
+            msg = f'{", " if msg else ""}{self.__errors} warning{"s" if self.__errors != 1 else ""} in worker'
+
         if msg == '':
             result.io += 1
             log.info(f'Test {result.run:{width}}/{test_count} "{name}" successful!')

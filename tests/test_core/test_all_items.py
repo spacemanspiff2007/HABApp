@@ -18,7 +18,7 @@ class TestCasesItem(unittest.TestCase):
 
         NAME = 'test'
         created_item = Item(NAME)
-        Items.set_item(created_item)
+        Items.add_item(created_item)
 
         self.assertTrue(Items.item_exists(NAME))
         self.assertIs(created_item, Items.get_item(NAME))

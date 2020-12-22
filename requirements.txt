@@ -8,9 +8,9 @@ pydantic==1.7.3
 pytz==2020.4
 stackprinter==0.2.5
 tzlocal==2.1
-voluptuous==0.12.0
-watchdog==0.10.4
+voluptuous==0.12.1
+watchdog==1.0.1
 ujson==4.0.1
 
 # Backports
-dataclasses==0.7;python_version<"3.7"
+dataclasses==0.8;python_version<"3.7"

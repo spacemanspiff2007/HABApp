@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 import pytest
@@ -14,14 +15,17 @@ def params():
 
     original = HABApp.CONFIG
     HABApp.CONFIG = DummyCfg
-    # Parameters.ParameterFileWatcher.UNITTEST = True
-    # Parameters.setup(None, None)
+
     yield Parameters
+
+    # Clean parameters so they are empty for the next test
     Parameters._PARAMETERS.clear()
 
     # delete possible created files
-    for f in DummyCfg.directories.param.iterdir():
-        if f.name.endswith('.yml'):
+    to_delete = list(filter(lambda _f: _f.name.endswith('.yml'), DummyCfg.directories.param.iterdir()))
+    if to_delete:
+        time.sleep(0.1)
+        for f in to_delete:
             f.unlink()
 
     HABApp.CONFIG = original

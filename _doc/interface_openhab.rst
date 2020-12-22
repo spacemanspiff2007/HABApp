@@ -35,8 +35,8 @@ Example:
     # hide
     import HABApp
     from HABApp.openhab.items import ContactItem, SwitchItem
-    HABApp.core.Items.set_item(ContactItem('MyContact', initial_value='OPEN'))
-    HABApp.core.Items.set_item(SwitchItem('MySwitch', initial_value='OFF'))
+    HABApp.core.Items.add_item(ContactItem('MyContact', initial_value='OPEN'))
+    HABApp.core.Items.add_item(SwitchItem('MySwitch', initial_value='OFF'))
     # hide
     from HABApp.openhab.items import ContactItem, SwitchItem
 
@@ -552,7 +552,7 @@ for 60 seconds.
     runner = SimpleRuleRunner()
     runner.set_up()
     thing_item = HABApp.openhab.items.Thing('my:thing:uid')
-    HABApp.core.Items.set_item(thing_item)
+    HABApp.core.Items.add_item(thing_item)
     # hide
     from HABApp import Rule
     from HABApp.core.events import ItemNoChangeEvent

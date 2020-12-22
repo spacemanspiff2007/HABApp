@@ -209,7 +209,7 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
     runner.set_up()
 
     from HABApp.openhab.items import SwitchItem
-    HABApp.core.Items.set_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
+    HABApp.core.Items.add_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
     # hide
 
     import HABApp

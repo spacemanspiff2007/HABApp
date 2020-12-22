@@ -93,7 +93,7 @@ Example
 
 AggregationItem
 ------------------------------
-The aggregation item is an item which takes the values of another item as an input.
+The aggregation item is an item which takes the values of another item in a time period as an input.
 It then allows to process these values and generate an aggregated output based on it.
 The item makes implementing time logic like "Has it been dark for the last hour?" or
 "Was there frost during the last six hours?" really easy.
@@ -120,3 +120,55 @@ It will automatically update and always reflect the latest changes of ``MyInputI
 
 .. autoclass:: HABApp.core.items.AggregationItem
    :members:
+
+
+Mocking OpenHAB items and events for tests
+--------------------------------------------
+It is possible to create mock items in HABApp which do not exist in Openhab to create unit tests for rules and libraries.
+Ensure that this mechanism is only used for testing because since the items will not exist in openhab they will not get
+updated which can lead to hard to track down errors.
+
+Examples:
+
+Add an openhab mock item to the item registry
+
+.. execute_code::
+   :hide_output:
+
+   import HABApp
+   from HABApp.openhab.items import SwitchItem
+
+   item = SwitchItem('my_switch', 'ON')
+   HABApp.core.Items.add_item(item)
+
+Remove the mock item from the registry
+
+.. execute_code::
+   :hide_output:
+
+   # hide
+   import HABApp
+   from HABApp.openhab.items import SwitchItem
+   HABApp.core.Items.add_item(SwitchItem('my_switch', 'ON'))
+   # hide
+
+
+   HABApp.core.Items.pop_item('my_switch')
+
+Note that there are some item methods that encapsulate communication with openhab
+(e.g.: ``SwitchItem.on(), SwithItem.off(), and DimmerItem.percentage()``)
+These currently do not work with the mock items. The state has to be changed like
+any internal item.
+
+.. execute_code::
+   :hide_output:
+
+   import HABApp
+   from HABApp.openhab.items import SwitchItem
+   from HABApp.openhab.definitions import OnOffValue
+
+   item = SwitchItem('my_switch', 'ON')
+   HABApp.core.Items.add_item(item)
+
+   item.set_value(OnOffValue.ON)    # without bus event
+   item.post_value(OnOffValue.OFF)  # with bus event

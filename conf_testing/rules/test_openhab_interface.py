@@ -16,6 +16,7 @@ class TestOpenhabInterface(TestBaseRule):
         self.add_test('Interface item create/remove', self.test_item_create_delete)
         self.add_test('Interface group create/remove', self.test_item_create_delete_group)
         self.add_test('Interface get item definition', self.test_item_definition)
+        self.add_test('Interface change type', self.test_item_change_type)
 
         # test the states
         for oh_type in get_openhab_test_types():
@@ -40,6 +41,28 @@ class TestOpenhabInterface(TestBaseRule):
 
         self.openhab.remove_item(test_item)
         assert not self.openhab.item_exists(test_item)
+
+    def test_item_change_type(self):
+        test_item = ''.join(random.choice(string.ascii_letters) for _ in range(20))
+        assert not self.openhab.item_exists(test_item)
+
+        self.openhab.create_item('String', test_item)
+        assert self.openhab.item_exists(test_item)
+
+        # change item type to number and ensure HABApp picks up correctly on the new type
+        self.openhab.create_item('Number', test_item)
+
+        end = time.time() + 2
+        while True:
+            time.sleep(0.01)
+            if time.time() > end:
+                HABApp.openhab.items.NumberItem.get_item(test_item)
+                break
+
+            if isinstance(HABApp.core.Items.get_item(test_item), HABApp.openhab.items.NumberItem):
+                break
+
+        self.openhab.remove_item(test_item)
 
     def test_item_create_delete_group(self):
         test_item = ''.join(random.choice(string.ascii_letters) for _ in range(20))

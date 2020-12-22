@@ -62,7 +62,7 @@ but the format should be pretty straight forward.
           - HABApp_default  # This logger does log with the default handler
         propagate: False
 
-      MyRule:
+      MyRule:   # Name of the logger, see example usage
         level: DEBUG
         handlers:
           - MyRuleHandler  # This logger uses the MyRuleHandler

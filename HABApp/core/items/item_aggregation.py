@@ -23,7 +23,7 @@ class AggregationItem(BaseValueItem):
             item = HABApp.core.Items.get_item(name)
         except HABApp.core.Items.ItemNotFoundException:
             item = cls(name)
-            HABApp.core.Items.set_item(item)
+            HABApp.core.Items.add_item(item)
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item

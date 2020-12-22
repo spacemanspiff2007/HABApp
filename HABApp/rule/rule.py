@@ -69,7 +69,6 @@ class Rule:
         self.register_on_unload(self.__cleanup_rule)
         self.register_on_unload(self.__cleanup_objs)
 
-
         # suggest a rule name if it is not
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
@@ -132,7 +131,7 @@ class Rule:
             :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openhab
             or mqtt.
         """
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         listener = HABApp.core.EventBusListener(
             name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name, cb, event_type
         )
@@ -152,7 +151,7 @@ class Rule:
         """
 
         assert isinstance(program, str), type(program)
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
 
         asyncio.run_coroutine_threadsafe(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
@@ -171,7 +170,7 @@ class Rule:
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = ReoccurringScheduledCallback(cb, *args, **kwargs)
         future_event.interval(interval)
         self.__future_events.append(future_event)
@@ -186,7 +185,7 @@ class Rule:
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = SunScheduledCallback(cb, *args, **kwargs)
         future_event.sun_trigger(sun_event)
         future_event._calculate_next_call()
@@ -221,7 +220,7 @@ class Rule:
                 continue
             weekdays[i] = lookup[val.lower()]
 
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays(weekdays)
         future_event.time(time)
@@ -237,7 +236,7 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         assert isinstance(time, datetime.time), type(time)
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays('all')
         future_event.time(time)
@@ -253,7 +252,7 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         assert isinstance(time, datetime.time), type(time)
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays('workday')
         future_event.time(time)
@@ -269,7 +268,7 @@ class Rule:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         assert isinstance(time, datetime.time), type(time)
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
         future_event.weekdays('weekend')
         future_event.time(time)
@@ -321,7 +320,7 @@ class Rule:
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = OneTimeCallback(cb, *args, **kwargs)
         future_event.set_run_time(date_time)
         self.__future_events.append(future_event)
@@ -339,7 +338,7 @@ class Rule:
         assert isinstance(seconds, (int, datetime.timedelta)), f'{seconds} ({type(seconds)})'
         fut = datetime.timedelta(seconds=seconds) if not isinstance(seconds, datetime.timedelta) else seconds
 
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = OneTimeCallback(cb, *args, **kwargs)
         future_event.set_run_time(fut)
         self.__future_events.append(future_event)
@@ -353,7 +352,7 @@ class Rule:
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
-        cb = HABApp.core.WrappedFunction(callback, name=self.__get_rule_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
         future_event = OneTimeCallback(cb, *args, **kwargs)
         future_event.set_run_time(None)
         self.__future_events.append(future_event)
@@ -479,8 +478,13 @@ class Rule:
     # -----------------------------------------------------------------------------------------------------------------
     # internal functions
     # -----------------------------------------------------------------------------------------------------------------
-    def __get_rule_name(self, callback):
+    def _get_cb_name(self, callback):
         return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None
+
+    def _add_event_listener(self, listener: HABApp.core.EventBusListener) -> HABApp.core.EventBusListener:
+        self.__event_listener.append(listener)
+        HABApp.core.EventBus.add_listener(listener)
+        return listener
 
     @HABApp.core.wrapper.log_exception
     def _check_rule(self):

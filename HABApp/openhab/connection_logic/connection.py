@@ -70,11 +70,13 @@ def on_sse_event(event_dict: dict):
                 item = existing_item
             else:
                 log.warning(f'Item changed type from {existing_item.__class__} to {item.__class__}')
+                # remove the item so it can be added again
+                Items.pop_item(item.name)
         except Items.ItemNotFoundException:
             pass
 
         # always overwrite with new definition
-        Items.set_item(item)
+        Items.add_item(item)
 
     elif isinstance(event, HABApp.openhab.events.ItemRemovedEvent):
         Items.pop_item(event.name)

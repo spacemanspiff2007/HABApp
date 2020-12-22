@@ -82,8 +82,23 @@ This often comes in handy if there is some logic that shall be applied to differ
 
 Interacting with items
 ------------------------------
-Iterating with items is done through the corresponding Item factory methods.
-Posting values will automatically create the events on the event bus.
+HABApp uses an internal item registry to store both openhab items and locally
+created items (only visible within HABApp). Upon start-up HABApp retrieves
+a list of openhab items and adds them to the internal registry.
+Rules and HABApp derived libraries may add additional local items which can be used
+to share states across rules and/or files.
+
+An item is created and added to the item registry through the corresponding class factory method
+
+.. execute_code::
+   :hide_output:
+
+   from HABApp.core.items import Item
+
+   # This will create an item in the local (HABApp) item registry
+   item = Item.get_create_item("an-item-name", "a value")
+
+Posting values from the item will automatically create the events on the event bus.
 This example will create an item in HABApp (locally) and post some updates to it.
 To access items from openhab use the correct openhab item type (see :ref:`the openhab item description <OPENHAB_ITEM_TYPES>`).
 
@@ -135,7 +150,6 @@ To access items from openhab use the correct openhab item type (see :ref:`the op
     runner.process_events()
     runner.tear_down()
     # hide
-
 
 
 Watch items for events
@@ -215,8 +229,11 @@ Trigger an event when an item is constant
             # This will create an event if the item is 10 secs constant
             watcher = self.my_item.watch_change(10)
 
-            # use .EVENT to always listen to the correct event
-            self.listen_event(self.my_item, self.item_constant, watcher.EVENT)
+            # this will automatically listen to the correct event
+            watcher.listen_event(self.item_constant)
+
+            # To listen to all ItemNoChangeEvent/ItemNoUpdateEvent independent of the timeout time use
+            # self.listen_event(self.my_item, self.item_constant, watcher.EVENT)
 
         def item_constant(self, event: ItemNoChangeEvent):
             print(f'{event}')

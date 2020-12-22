@@ -83,10 +83,11 @@ class RuleFile:
                     rule._unload()
             return False
 
-        len_found = len(created_rules)
-        if not len_found:
+        if not created_rules:
             log.warning(f'Found no instances of HABApp.Rule in {str(self.path)}')
-        else:
+            return True
+
+        with ign:
             for rule in created_rules:
                 # ensure that we have a rule name
                 rule.rule_name = self.suggest_rule_name(rule)
@@ -97,5 +98,13 @@ class RuleFile:
 
                 self.rules[rule.rule_name] = rule
                 log.info(f'Added rule "{rule.rule_name}" from {self.path.name}')
+
+        if ign.raised_exception:
+            # unload all rule instances which might have already been created otherwise they might
+            # still listen to events and do stuff
+            for rule in created_rules:
+                with ign:
+                    rule._unload()
+            return False
 
         return True

@@ -36,7 +36,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
                 pass
 
             # create new item or change item type
-            Items.set_item(new_item)
+            Items.add_item(new_item)
 
         # remove items which are no longer available
         ist = set(Items.get_all_item_names())
@@ -65,7 +65,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
                 thing = Thing(name)
 
             thing.status = t_dict['statusInfo']['status']
-            HABApp.core.Items.set_item(thing)
+            HABApp.core.Items.add_item(thing)
 
         # remove things which were deleted
         ist = set(HABApp.core.Items.get_all_item_names())
