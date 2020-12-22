@@ -1,9 +1,10 @@
 import asyncio
 from unittest.mock import MagicMock
+from datetime import timedelta
 
 import pytest
 
-from HABApp.core.events import ItemNoUpdateEvent
+from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
 from HABApp.core.items import Item
 from tests.helpers.parent_rule import DummyRule
 from ..helpers import TmpEventBus
@@ -24,22 +25,25 @@ async def test_multiple_add(parent_rule: DummyRule):
 
 
 @pytest.mark.asyncio
-async def test_watch(parent_rule: DummyRule, event_bus: TmpEventBus, sync_worker):
+async def test_watch_update(parent_rule: DummyRule, event_bus: TmpEventBus, sync_worker):
 
-    cb = MagicMock()
-    cb.__name__ = 'MockName'
+    for meth in ('watch_update', 'watch_change'):
 
-    secs = 0.2
+        cb = MagicMock()
+        cb.__name__ = 'MockName'
 
-    i = Item('test')
-    i.watch_update(secs / 2)
-    w = i.watch_update(secs)
-    w.listen_event(cb)
+        secs = 0.2
 
-    i.post_value(1)
-    await asyncio.sleep(0.3)
+        i = Item('test')
+        func = getattr(i, meth)
+        func(secs / 2)
+        w = func(timedelta(seconds=secs))
+        w.listen_event(cb)
 
-    cb.assert_called_once()
-    assert isinstance(cb.call_args[0][0], ItemNoUpdateEvent)
-    assert cb.call_args[0][0].name == 'test'
-    assert cb.call_args[0][0].seconds == secs
+        i.post_value(1)
+        await asyncio.sleep(0.3)
+
+        cb.assert_called_once()
+        assert isinstance(cb.call_args[0][0], ItemNoUpdateEvent if meth == 'watch_update' else ItemNoChangeEvent)
+        assert cb.call_args[0][0].name == 'test'
+        assert cb.call_args[0][0].seconds == secs

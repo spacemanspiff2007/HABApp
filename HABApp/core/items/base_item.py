@@ -62,13 +62,15 @@ class BaseItem:
             ret += f'{", " if ret else ""}{k}: {getattr(self, k)}'
         return f'<{self.__class__.__name__} {ret:s}>'
 
-    def watch_change(self, secs: typing.Union[int, float]) -> BaseWatch:
+    def watch_change(self, secs: typing.Union[int, float, datetime.timedelta]) -> BaseWatch:
         """Generate an event if the item does not change for a certain period of time.
         Has to be called from inside a rule function.
 
         :param secs: secs after which the event will occur, max 1 decimal digit for floats
         :return: The watch obj which can be used to cancel the watch
         """
+        if isinstance(secs, datetime.timedelta):
+            secs = secs.total_seconds()
         if isinstance(secs, float):
             secs = round(secs, 1)
         else:
@@ -78,13 +80,15 @@ class BaseItem:
         HABApp.rule.get_parent_rule().register_cancel_obj(w)
         return w
 
-    def watch_update(self, secs: typing.Union[int, float]) -> BaseWatch:
+    def watch_update(self, secs: typing.Union[int, float, datetime.timedelta]) -> BaseWatch:
         """Generate an event if the item does not receive and update for a certain period of time.
         Has to be called from inside a rule function.
 
         :param secs: secs after which the event will occur, max 1 decimal digit for floats
         :return: The watch obj which can be used to cancel the watch
         """
+        if isinstance(secs, datetime.timedelta):
+            secs = secs.total_seconds()
         if isinstance(secs, float):
             secs = round(secs, 1)
         else:
