@@ -218,7 +218,7 @@ Trigger an event when an item is constant
             # this will automatically listen to the correct event
             watcher.listen_event(self.item_constant)
 
-            # To listen to multiple ItemNoChangeEvent/ItemNoUpdateEvents use
+            # To listen to all ItemNoChangeEvent/ItemNoUpdateEvent independent of the timeout time use
             # self.listen_event(self.my_item, self.item_constant, watcher.EVENT)
 
         def item_constant(self, event: ItemNoChangeEvent):
