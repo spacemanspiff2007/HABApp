@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import logging
 import typing
+from datetime import timedelta
 
 from HABApp.core.wrapper import log_exception
 from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
@@ -27,7 +28,9 @@ class ItemTimes:
             asyncio.run_coroutine_threadsafe(self.schedule_events(), loop)
         return None
 
-    def add_watch(self, secs: typing.Union[int, float]) -> BaseWatch:
+    def add_watch(self, secs: typing.Union[int, float, timedelta]) -> BaseWatch:
+        if isinstance(secs, timedelta):
+            secs = secs.total_seconds()
         assert secs > 0, secs
 
         # don't add the watch two times
