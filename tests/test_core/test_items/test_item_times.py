@@ -43,7 +43,7 @@ def test_sec_timedelta():
 
     # We return the same object because it is the same time
     assert w1 is a.add_watch(timedelta(seconds=1))
-    
+
     w2 = a.add_watch(timedelta(seconds=3))
     assert w2.fut.secs == 3
 
