@@ -41,7 +41,7 @@ async def update_thing_cfg(target_cfg, things, test: bool):
         for c in cfgs:
             try:
                 c[param] = value
-            except KeyError as e:
+            except Exception as e:
                 errs.add_exception(e)
                 skip_cfg.add(c)
 

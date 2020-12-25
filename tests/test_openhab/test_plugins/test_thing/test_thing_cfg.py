@@ -62,3 +62,20 @@ def test_set_wrong_type(cfg: ThingConfigChanger):
 
     with raises(ValueError):
         cfg['Group1'] = 'asdf'
+
+
+def test_eval(cfg: ThingConfigChanger):
+    # This resolves to the default
+    cfg[100] = '$1 * 20 + $10'
+    assert cfg.new == {}
+
+    cfg[1] = 2
+    cfg[10] = 3
+
+    cfg[100] = '$1 * 20 + $10'
+    assert cfg.new['config_100_4_000000FF'] == 43
+
+    with raises(KeyError):
+        cfg[100] = '$1 * 20 + $11'
+
+    cfg[100] = 'int($1 * 20 + $10)'

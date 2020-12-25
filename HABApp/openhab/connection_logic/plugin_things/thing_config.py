@@ -22,6 +22,9 @@ def ensure_same_types(a, b, key: str):
     raise ValueError(f"Datatype of parameter '{key}' must be {_a} but is {_b}!")
 
 
+re_ref = re.compile(r'\$(\d+)')
+
+
 class ThingConfigChanger:
     zw_param = re.compile(r'config_(?P<param>\d+)_(?P<width>\d+)(?P<bitmask>_\w+)?')
     zw_group = re.compile(r'group_(\d+)')
@@ -62,17 +65,40 @@ class ThingConfigChanger:
     def __getitem__(self, key):
         return self.org[self.alias.get(key, key)]
 
-    def __setitem__(self, o_key, item):
+    def __setitem__(self, o_key, value):
         key = self.alias.get(o_key, o_key)
         if key not in self.org:
             raise KeyError(f'Parameter "{o_key}" does not exist for {self.uid}!')
 
-        org = self.org[key]
-        ensure_same_types(item, org, o_key)
+        # Make it possible to substitue refs with $1
+        if isinstance(value, str) and '$' in value:
+            o_value = value
+            refs = re_ref.findall(o_value)
+            # Since we use str.replace we need to start with the longest refs!
+            for ref in sorted(refs, key=len, reverse=True):
+                try:
+                    _ref_key = int(ref)
+                except ValueError:
+                    _ref_key = ref
+                _ref_key = self.alias.get(_ref_key, _ref_key)
 
-        if item == org:
+                try:
+                    _ref_val = self.new.get(_ref_key, self.org[_ref_key])
+                except KeyError:
+                    raise KeyError(f'Reference "{ref}" in "{o_value}" does not exist for {self.uid}!')
+
+                value = value.replace(f'${ref}', str(_ref_val))
+
+            log.debug(f'Evaluating "{value}"')
+            value = eval(value, {}, {})
+            log.debug(f' -> "{value}"')
+
+        org = self.org[key]
+        ensure_same_types(value, org, o_key)
+
+        if value == org:
             return None
-        self.new[key] = item
+        self.new[key] = value
 
     def __contains__(self, key):
         return self.alias.get(key, key) in self.org
