@@ -19,6 +19,8 @@ def cfg():
         "config_154_4_0000FF00": 255,
 
         'group_1': ['controller'],
+
+        'binding_cmdrepollperiod': 2600,
     })
 
 
@@ -75,7 +77,11 @@ def test_eval(cfg: ThingConfigChanger):
     cfg[100] = '$1 * 20 + $10'
     assert cfg.new['config_100_4_000000FF'] == 43
 
-    with raises(KeyError):
+    with raises(KeyError) as e:
         cfg[100] = '$1 * 20 + $11'
+    assert e.value.args[0] == 'Reference "11" in "$1 * 20 + $11" does not exist for UID!'
 
     cfg[100] = 'int($1 * 20 + $10)'
+
+    # Test reference to non z-wave param
+    cfg[100] = 'int($binding_cmdrepollperiod // 1000)'

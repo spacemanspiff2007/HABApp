@@ -22,7 +22,7 @@ def ensure_same_types(a, b, key: str):
     raise ValueError(f"Datatype of parameter '{key}' must be {_a} but is {_b}!")
 
 
-re_ref = re.compile(r'\$(\d+)')
+re_ref = re.compile(r'\$(\w+)')
 
 
 class ThingConfigChanger:
@@ -85,7 +85,7 @@ class ThingConfigChanger:
                 try:
                     _ref_val = self.new.get(_ref_key, self.org[_ref_key])
                 except KeyError:
-                    raise KeyError(f'Reference "{ref}" in "{o_value}" does not exist for {self.uid}!')
+                    raise KeyError(f'Reference "{ref}" in "{o_value}" does not exist for {self.uid}!') from None
 
                 value = value.replace(f'${ref}', str(_ref_val))
 
