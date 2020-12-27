@@ -124,15 +124,17 @@ It will automatically update and always reflect the latest changes of ``MyInputI
 Invoking OpenHAB actions
 ------------------------
 The openhab REST interface does not expose _actions: https://www.openhab.org/docs/configuration/actions.html,
-and thus there is no way to trigger them from HABApp. To work around it, define additional items within openhab.
-Then creates an openhab (note not HABapp) rule to listen to changes on those items, and invoke the appropriate
-openhab actions. On the HABApp side, indirectly execute those actions by setting the values for those items.
+and thus there is no way to trigger them from HABApp. If it is not possible to create and OpenHAB item that
+directly triggers the action there is a way to work around it with additional items within openhab.
+An additional OpenHAB (note not HABapp) rule listens to changes on those items and invokes the appropriate
+openhab actions.
+On the HABApp side these actions are indirectly executed by setting the values for those items.
 
 Below is an example how to invoke the openhab Audio and Voice actions.
 
 First, define couple items to accept values from HABApp, and place them in /etc/openhab2/items/habapp-bridge.items:
-.. execute_code::
-   :hide_output:
+
+.. code-block:: text
 
    String AudioVoiceSinkName
 
@@ -142,8 +144,7 @@ First, define couple items to accept values from HABApp, and place them in /etc/
 
 Second, create the JSR223 script to invoke the actions upon changes in the values of the items above.
 
-.. execute_code::
-   :hide_output:
+.. code-block:: python
 
    from core import osgi                                                                                         
    from core.jsr223 import scope                                                                                 
@@ -186,8 +187,7 @@ Second, create the JSR223 script to invoke the actions upon changes in the value
 
 Finally, define the HABApp functions to indirectly invoke the actions:
 
-.. execute_code::
-   :hide_output:
+.. code-block:: python
 
    def play_local_audio_file(sink_name: str, file_location: str):
        """ Plays a local audio file on the given audio sink. """
