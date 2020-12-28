@@ -211,37 +211,3 @@ execute_code_working_dir = pathlib.Path(__file__).parent.parent
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
-
-# Skip documentation for overloaded .set_state functions
-RE_SKIP = (
-    re.compile(r'(\w+Item).(?:set|post)_value', re.IGNORECASE),
-)
-IGNORE_SKIP = (
-    'ColorItem',
-)
-
-
-def skip_member(app, what, name, obj, skip, options):
-
-    # Debug print
-    # print(app, what, name, obj, skip, options)
-
-    # don't change if we skip anyway
-    if skip:
-        return skip
-
-    for regex in RE_SKIP:
-        m = regex.search(str(obj))
-        if m:
-            # make it possible to ignore skipping
-            if m.group(1) in IGNORE_SKIP:
-                continue
-
-            print(f'Skipping autodoc for {str(obj).split(" ")[1]}')
-            return True
-
-    return skip
-
-
-def setup(app):
-    app.connect('autodoc-skip-member', skip_member)
