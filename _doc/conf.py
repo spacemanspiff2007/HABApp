@@ -15,7 +15,6 @@
 #
 import os
 import pathlib
-import re
 import sys
 
 # required for autodoc

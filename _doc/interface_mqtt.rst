@@ -44,8 +44,10 @@ Rule Interface
       :return: 0 if successful
 
 
-MqttItem
+Mqtt item types
 ------------------------------
+
+
 
 Mqtt items have an additional publish method which make interaction with the mqtt broker easier.
 
@@ -72,11 +74,24 @@ Mqtt items have an additional publish method which make interaction with the mqt
         pass # do something
 
 
+MqttItem
+^^^^^^^^^
+
 .. inheritance-diagram:: HABApp.mqtt.items.MqttItem
    :parts: 1
 
-
 .. autoclass:: HABApp.mqtt.items.MqttItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+MqttPairItem
+^^^^^^^^^^^^^^^^^^
+
+.. inheritance-diagram:: HABApp.mqtt.items.MqttPairItem
+   :parts: 1
+
+.. autoclass:: HABApp.mqtt.items.MqttPairItem
    :members:
    :inherited-members:
    :member-order: groupwise

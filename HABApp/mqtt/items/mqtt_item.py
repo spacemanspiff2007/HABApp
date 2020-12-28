@@ -2,9 +2,15 @@ import HABApp.mqtt.mqtt_interface
 from HABApp.core.items import BaseValueItem
 
 
-class MqttItem(BaseValueItem):
+class MqttBaseItem(BaseValueItem):
+    pass
+
+
+class MqttItem(MqttBaseItem):
+    """A simple item that represents a topic and a value"""
+
     @classmethod
-    def get_create_item(cls, name: str, initial_value=None):
+    def get_create_item(cls, name: str, initial_value=None) -> 'MqttItem':
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 
         :param name: item name

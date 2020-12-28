@@ -19,6 +19,7 @@ Welcome to the HABApp documentation!
    asyncio
    util
    rule_examples
+   class_reference
 
 
 Indices and tables

@@ -29,6 +29,7 @@ class BaseWatch:
         asyncio.run_coroutine_threadsafe(self.__cancel_watch(), loop)
 
     def listen_event(self, callback: typing.Callable[[typing.Any], typing.Any]) -> 'HABApp.core.EventBusListener':
+        """Listen to (only) the event that is emitted by this watcher"""
         rule = HABApp.rule.get_parent_rule()
         cb = HABApp.core.WrappedFunction(callback, name=rule._get_cb_name(callback))
         listener = HABApp.core.EventBusListener(
