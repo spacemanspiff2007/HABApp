@@ -87,6 +87,26 @@ MqttItem
 
 MqttPairItem
 ^^^^^^^^^^^^^^^^^^
+An item that consolidates a topic that reports states from a device and a topic that is used to write to a device.
+
+.. execute_code::
+    :hide_output:
+
+    # hide
+    import HABApp
+    from unittest.mock import MagicMock
+    HABApp.mqtt.mqtt_interface.MQTT_INTERFACE = MagicMock()
+    # hide
+
+    from HABApp.mqtt.items import MqttPairItem
+
+    # MqttPairItem works out of the box with zigbee2mqtt
+    mqtt = MqttPairItem.get_create_item("zigbee2mqtt/my_bulb/brightness")
+    mqtt.publish("255")  # <-- will use the write topic
+
+    # equivalent to
+    mqtt = MqttPairItem.get_create_item("zigbee2mqtt/my_bulb/brightness", write_topic="zigbee2mqtt/my_bulb/set/brightness")
+
 
 .. inheritance-diagram:: HABApp.mqtt.items.MqttPairItem
    :parts: 1
