@@ -335,8 +335,23 @@ The config is equivalent to the following item configuration::
 
 
 
-Wildcards
-~~~~~~~~~~~~~~~~~~~~
+References in thing config
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+It is possible to use references to mathematically build parameters from other parameters.
+Typically this would be fade duration and refresh interval.
+References to other parameter values can be created with ``$``.
+Example:
+
+.. code-block:: yaml
+
+   thing config:
+     5: 8
+     6: '$5 / 2'       # Use value from parameter 5 and divide it by two.
+     7: 'int($5 / 2)'  # it is possible to use normal python datatypes
+
+
+Wildcards for items and channels
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Wildcards are available for item configuration and can be applied to all fields except for 'type' and 'metadata'.
 
 Syntax

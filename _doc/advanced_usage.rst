@@ -121,6 +121,91 @@ It will automatically update and always reflect the latest changes of ``MyInputI
 .. autoclass:: HABApp.core.items.AggregationItem
    :members:
 
+Invoking OpenHAB actions
+------------------------
+The openhab REST interface does not expose _actions: https://www.openhab.org/docs/configuration/actions.html,
+and thus there is no way to trigger them from HABApp. If it is not possible to create and OpenHAB item that
+directly triggers the action there is a way to work around it with additional items within openhab.
+An additional OpenHAB (note not HABapp) rule listens to changes on those items and invokes the appropriate
+openhab actions.
+On the HABApp side these actions are indirectly executed by setting the values for those items.
+
+Below is an example how to invoke the openhab Audio and Voice actions.
+
+First, define couple items to accept values from HABApp, and place them in /etc/openhab2/items/habapp-bridge.items:
+
+.. code-block:: text
+
+   String AudioVoiceSinkName
+
+   String TextToSpeechMessage
+   String AudioFileLocation
+   String AudioStreamUrl
+
+Second, create the JSR223 script to invoke the actions upon changes in the values of the items above.
+
+.. code-block:: python
+
+   from core import osgi                                                                                         
+   from core.jsr223 import scope                                                                                 
+   from core.rules import rule                                                                                   
+   from core.triggers import when                                                                                
+   from org.eclipse.smarthome.model.script.actions import Audio                    
+   from org.eclipse.smarthome.model.script.actions import Voice                    
+                                                                                                                  
+   SINK_ITEM_NAME = 'AudioVoiceSinkName'                                                                         
+                                                                                                                  
+   @rule("Play voice TTS message")                                                                               
+   @when("Item TextToSpeechMessage changed")                                                                     
+   def onTextToSpeechMessageChanged(event):                                                                      
+       ttl = scope.items[event.itemName].toString()                                                              
+       if ttl is not None and ttl != '':                                                                         
+           Voice.say(ttl, None, scope.items[SINK_ITEM_NAME].toString())            
+                                                                                                                 
+           # reset the item to wait for the next message.                          
+           scope.events.sendCommand(event.itemName, '')                            
+                                                                                                                  
+   @rule("Play audio stream URL")                                                                                
+   @when("Item AudioStreamUrl changed")                                                                          
+   def onTextToSpeechMessageChanged(event):                                                                      
+       stream_url = scope.items[event.itemName].toString()                         
+       if stream_url is not None and stream_url != '':                             
+           Audio.playStream(scope.items[SINK_ITEM_NAME].toString(), stream_url)    
+                                                                                                                 
+           # reset the item to wait for the next message.                          
+           scope.events.sendCommand(event.itemName, '')       
+
+   @rule("Play local audio file")                                                                                
+   @when("Item AudioFileLocation changed")                                                                       
+   def onTextToSpeechMessageChanged(event):                                                                      
+       file_location = scope.items[event.itemName].toString()                      
+       if file_location is not None and file_location != '':                       
+           Audio.playSound(scope.items[SINK_ITEM_NAME].toString(), file_location)  
+                                                                                   
+           # reset the item to wait for the next message.                          
+           scope.events.sendCommand(event.itemName, '')    
+
+Finally, define the HABApp functions to indirectly invoke the actions:
+
+.. code-block:: python
+
+   def play_local_audio_file(sink_name: str, file_location: str):
+       """ Plays a local audio file on the given audio sink. """
+       HABApp.openhab.interface.send_command(ACTION_AUDIO_SINK_ITEM_NAME, sink_name)
+       HABApp.openhab.interface.send_command(ACTION_AUDIO_LOCAL_FILE_LOCATION_ITEM_NAME, file_location)
+
+
+   def play_stream_url(sink_name: str, url: str):
+       """ Plays a stream URL on the given audio sink. """
+       HABApp.openhab.interface.send_command(ACTION_AUDIO_SINK_ITEM_NAME, sink_name)
+       HABApp.openhab.interface.send_command(ACTION_AUDIO_STREAM_URL_ITEM_NAME, url)
+
+
+   def play_text_to_speech_message(sink_name: str, tts: str):
+       """ Plays a text to speech message on the given audio sink. """
+       HABApp.openhab.interface.send_command(ACTION_AUDIO_SINK_ITEM_NAME, sink_name)
+       HABApp.openhab.interface.send_command(ACTION_TEXT_TO_SPEECH_MESSAGE_ITEM_NAME, tts)
+
 
 Mocking OpenHAB items and events for tests
 --------------------------------------------

@@ -117,6 +117,7 @@ If your installation is not done in "/opt/habapp/bin" replace accordingly as wel
 
     [Unit]
     Description=HABApp
+    Documentation=https://habapp.readthedocs.io
     After=network-online.target
     
     [Service]

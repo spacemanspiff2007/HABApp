@@ -154,7 +154,7 @@ def builder_ready(app):
     else:
         assert isinstance(folder, Path)
     if not folder.is_dir():
-        log.error( f'Configuration execute_code_working_dir does not point to a directory: {folder}')
+        log.error(f'Configuration execute_code_working_dir does not point to a directory: {folder}')
     WORKING_DIR = folder
 
     # Search for a python package and print a warning if we find none

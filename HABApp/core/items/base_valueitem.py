@@ -41,14 +41,15 @@ class BaseValueItem(BaseItem):
         self.value = new_value
         return state_changed
 
-    def post_value(self, new_value):
+    def post_value(self, new_value) -> bool:
         """Set a new value and post appropriate events on the HABApp event bus
         (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param new_value: new value of the item
+        :return: True if state has changed
         """
         old_value = self.value
-        self.set_value(new_value)
+        state_changed = self.set_value(new_value)
 
         # create events
         HABApp.core.EventBus.post_event(self._name, HABApp.core.events.ValueUpdateEvent(self._name, self.value))
@@ -56,7 +57,7 @@ class BaseValueItem(BaseItem):
             HABApp.core.EventBus.post_event(
                 self._name, HABApp.core.events.ValueChangeEvent(self._name, value=self.value, old_value=old_value)
             )
-        return None
+        return state_changed
 
     def get_value(self, default_value=None) -> typing.Any:
         """Return the value of the item.
