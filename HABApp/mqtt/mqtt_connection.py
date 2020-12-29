@@ -4,13 +4,12 @@ import typing
 import paho.mqtt.client as mqtt
 
 import HABApp
+from HABApp.core import Items
 from HABApp.core.wrapper import log_exception
-
 from HABApp.runtime.shutdown_helper import ShutdownHelper
+from .events import MqttValueChangeEvent, MqttValueUpdateEvent
 from ..config import Mqtt as MqttConfig
 from ..core.const.json import load_json
-
-from .events import MqttValueUpdateEvent, MqttValueChangeEvent
 
 log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.EventBus.mqtt')
@@ -154,13 +153,20 @@ class MqttConnection:
             if log_msg.isEnabledFor(logging.DEBUG):
                 log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload[:20]}...', [])
 
-        # try to get the mqtt item or create a MqttItem as a default
+        _item = None    # type: typing.Optional[HABApp.mqtt.items.MqttBaseItem]
         try:
-            _item = HABApp.core.Items.get_item(topic)
+            _item = Items.get_item(topic)   # type: HABApp.mqtt.items.MqttBaseItem
         except HABApp.core.Items.ItemNotFoundException:
-            _item = HABApp.core.Items.create_item(topic, HABApp.mqtt.items.MqttItem)
+            # only create items for if the message has the retain flag
+            if message.retain:
+                _item = Items.create_item(topic, HABApp.mqtt.items.MqttItem)  # type: HABApp.mqtt.items.MqttItem
 
-        # remember state and update item before doing callbacks
+        # we don't have an item -> we process only the event
+        if _item is None:
+            HABApp.core.EventBus.post_event(topic, MqttValueUpdateEvent(topic, payload))
+            return None
+
+        # Remember state and update item before doing callbacks
         _old_state = _item.value
         _item.set_value(payload)
 
