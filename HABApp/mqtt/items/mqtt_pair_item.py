@@ -1,7 +1,7 @@
 from typing import Optional
 
 import HABApp.mqtt.mqtt_interface
-from . import MqttBaseItem, MqttItem
+from . import MqttBaseItem
 
 
 def build_write_topic(read_topic: str) -> Optional[str]:
@@ -35,12 +35,6 @@ class MqttPairItem(MqttBaseItem):
 
         try:
             item = HABApp.core.Items.get_item(name)
-
-            # Todo: remove the silent overwrite once MqttItems are not longer created automatically
-            if isinstance(item, MqttItem):
-                HABApp.core.Items.pop_item(name)
-                item = cls(name, write_topic=write_topic, initial_value=initial_value)
-                HABApp.core.Items.add_item(item)
         except HABApp.core.Items.ItemNotFoundException:
             item = cls(name, write_topic=write_topic, initial_value=initial_value)
             HABApp.core.Items.add_item(item)
