@@ -1,4 +1,3 @@
-.. _ref_mqtt:
 
 Additional class reference
 ==================================
