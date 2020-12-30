@@ -2,19 +2,20 @@ import logging
 import sys
 from pathlib import Path
 
-from EasyCo import ConfigFile, PathContainer, ConfigEntry
+from EasyCo import ConfigEntry, ConfigFile, PathContainer
 
 from ._conf_location import Location
 from ._conf_mqtt import Mqtt
 from ._conf_openhab import Openhab
+from .platform_defaults import get_log_folder
 
 log = logging.getLogger('HABApp.Config')
 
 
 class Directories(PathContainer):
-    logging: Path = ConfigEntry(Path('log'), description='Folder where the logs will be written to')
+    logging: Path = ConfigEntry(get_log_folder(Path('log')), description='Folder where the logs will be written to')
     rules: Path = ConfigEntry(Path('rules'), description='Folder from which the rule files will be loaded')
-    param: Path = ConfigEntry(Path('param'), description='Folder from which the parameter files will be loaded')
+    param: Path = ConfigEntry(Path('params'), description='Folder from which the parameter files will be loaded')
     config: Path = ConfigEntry(Path('config'), description='Folder from which configuration files will be loaded')
     lib: Path = ConfigEntry(Path('lib'), description='Folder where additional libraries can be placed')
 

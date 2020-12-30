@@ -113,6 +113,12 @@ class HABAppConfigLoader:
                 p = (CONFIG.directories.logging / p).resolve()
                 handler_cfg['filename'] = str(p)
 
+        # make file version optional for config file
+        log_version_info = True  # todo: remove this 06.2021
+        if 'version' not in cfg:
+            cfg['version'] = 1
+            log_version_info = False
+
         # load prepared logging
         try:
             logging.config.dictConfig(cfg)
@@ -139,4 +145,7 @@ class HABAppConfigLoader:
                         log.error(line)
 
         logging.getLogger('HABApp').info(f'HABApp Version {__version__}')
+
+        if log_version_info:
+            log.info('Entry "version" is no longer required in the logging configuration file')
         return None
