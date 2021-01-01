@@ -65,7 +65,10 @@ loggers:
     # Use abs path and rename events.log if we log in the openhab folder
     log_folder = get_log_folder()
     if log_folder is not None:
-        subs['EVENT_FILE'] = (log_folder / 'HABApp_events.log').as_posix()
+        # Absolute so we can log errors if the config is faulty
         subs['HABAPP_FILE'] = (log_folder / subs['HABAPP_FILE']).as_posix()
+
+        # Keep this relative so it is easier to read in the file
+        subs['EVENT_FILE'] = 'HABApp_events.log'
 
     return template.substitute(**subs)

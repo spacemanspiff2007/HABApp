@@ -8,6 +8,7 @@ Welcome to the HABApp documentation!
    :caption: User Documentation
    
    installation
+   about_habapp
    configuration
    getting_started
    logging
