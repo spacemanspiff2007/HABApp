@@ -5,11 +5,23 @@ import pytest
 
 def test_prop_case():
     _in = """# habapp:
-#   depends on:
-#    - my_Param.yml
-#   reloads on:
-#    - my_File.py
-#    - other_file.py
+    #   depends on:
+    #    - my_Param.yml
+    #   reloads on:
+    #    - my_File.py
+    #    - other_file.py
+    """
+    p = get_props(_in)
+    assert p.depends_on == ['my_Param.yml']
+    assert p.reloads_on == ['my_File.py', 'other_file.py']
+
+    _in = """#
+#     habapp:
+#       depends on:
+#        - my_Param.yml
+#       reloads on:
+#        - my_File.py
+#        - other_file.py
 """
     p = get_props(_in)
     assert p.depends_on == ['my_Param.yml']

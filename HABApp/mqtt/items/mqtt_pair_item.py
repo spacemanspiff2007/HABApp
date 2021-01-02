@@ -14,7 +14,8 @@ def build_write_topic(read_topic: str) -> Optional[str]:
 
 
 class MqttPairItem(MqttBaseItem):
-    """An item that represents both a topic that is read only and a corresponding topic that is used to write values"""
+    """An item that represents both a topic that is used to read
+    and a corresponding topic that is used to write values"""
 
     @classmethod
     def get_create_item(cls, name: str, write_topic: Optional[str] = None, initial_value=None) -> 'MqttPairItem':

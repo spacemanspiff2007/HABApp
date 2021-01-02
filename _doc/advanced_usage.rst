@@ -30,7 +30,7 @@ An example would be dynamically reloading files or an own notifier in case there
    * - HABApp.Errors
      - All errors in functions and rules of HABApp create an according event. Use this topic to create an own notifier
        in case of errors (e.g. Pushover).
-     - :class:`~HABApp.core.events.file_events.HABAppError`
+     - :class:`~HABApp.core.events.file_events.HABAppError` or ``str``
 
 
 
@@ -47,8 +47,10 @@ File properties
 ------------------------------
 For every HABApp file it is possible to specify some properties.
 The properties are specified as a comment (prefixed with ``#``) somewhere at the beginning of the file
-and are in the yml format.
-File names are the same as in the :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent`.
+and are in the yml format. They keyword ``HABApp`` can be arbitrarily intended.
+
+.. hint::
+  File names are not absolute but the same as in the :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent`.
 
 Configuration format
 
