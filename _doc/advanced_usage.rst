@@ -50,7 +50,9 @@ The properties are specified as a comment (prefixed with ``#``) somewhere at the
 and are in the yml format. They keyword ``HABApp`` can be arbitrarily intended.
 
 .. hint::
-  File names are not absolute but the same as in the :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent`.
+  File names are not absolute but relative with a folder specific prefix.
+  It's best to use the file name from the :class:`~HABApp.core.events.habapp_events.RequestFileLoadEvent`
+  from the HABApp event bus.
 
 Configuration format
 
