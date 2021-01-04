@@ -40,7 +40,12 @@ class Rule:
         # get the variables from the caller
         depth = 1
         while True:
-            __vars = sys._getframe(depth).f_globals
+            try:
+                __vars = sys._getframe(depth).f_globals
+            except ValueError:
+                raise RuntimeError('Rule files are not meant to be executed directly! '
+                                   'Put the file in the HABApp "rule" folder and HABApp will load it automatically.')
+
             depth += 1
             if '__HABAPP__RUNTIME__' in __vars:
                 __runtime__ = __vars['__HABAPP__RUNTIME__']

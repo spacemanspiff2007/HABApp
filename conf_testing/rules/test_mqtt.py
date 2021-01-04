@@ -51,6 +51,11 @@ class TestMQTTEvents(TestBaseRule):
 
         assert self.mqtt.publish(topic, 'asdf')
         time.sleep(0.1)
+        assert HABApp.core.Items.item_exists(topic) is False
+
+        # We create the item only on retain
+        assert self.mqtt.publish(topic, 'asdf', retain=True)
+        time.sleep(0.1)
         assert HABApp.core.Items.item_exists(topic) is True
 
         HABApp.core.Items.pop_item(topic)
