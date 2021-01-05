@@ -32,9 +32,9 @@ class TestMQTTEvents(TestBaseRule):
     def test_mqtt_pair_item(self):
         topic_read = 'test/topic_read'
         topic_write = 'test/topic_write'
-    
+
         item = MqttPairItem.get_create_item(topic_read, topic_write)
-        
+
         # Ensure we send on the write topic
         with EventWaiter(topic_write, ValueUpdateEvent) as event_waiter:
             item.publish('ddddddd')
@@ -75,7 +75,7 @@ class TestMQTTEvents(TestBaseRule):
 
         # We create the item only on retain
         assert self.mqtt.publish(topic, 'asdf', retain=True)
-        
+
         # We need to reconnect to receive the message
         disconnect()
         connect()

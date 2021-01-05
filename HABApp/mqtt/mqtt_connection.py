@@ -31,7 +31,7 @@ def setup(shutdown_helper: ShutdownHelper):
     # config changes
     config.subscribe.subscribe_for_changes(subscription_changed)
     config.connection.subscribe_for_changes(connect)
-    
+
     # shutdown
     shutdown_helper.register_func(disconnect)
 
@@ -43,43 +43,43 @@ def connect():
         log.info('MQTT disabled')
         disconnect()
         return None
-    
+
     if STATUS.connected:
         log.info('disconnecting')
         STATUS.client.disconnect()
         STATUS.connected = False
-    
+
     STATUS.client = mqtt.Client(
         client_id=config.connection.client_id,
         clean_session=False
     )
-    
+
     if config.connection.tls:
         STATUS.client.tls_set()
-        
+
         # we can only set tls_insecure if we have a tls connection
         if config.connection.tls_insecure:
             log.warning('Verification of server hostname in server certificate disabled!')
             log.warning('Use this only for testing, not for a real system!')
             STATUS.client.tls_insecure_set(True)
-    
+
     # set user/pw if required
     user = config.connection.user
     pw = config.connection.password
     if user:
         STATUS.client.username_pw_set(user, pw if pw else None)
-    
+
     # setup callbacks
     STATUS.client.on_connect = on_connect
     STATUS.client.on_disconnect = on_disconnect
     STATUS.client.on_message = process_msg
-    
+
     STATUS.client.connect_async(
         config.connection.host, port=config.connection.port, keepalive=60
     )
-    
+
     log.info(f'Connecting to {config.connection.host}:{config.connection.port}')
-    
+
     if not STATUS.loop_started:
         STATUS.client.loop_start()
     STATUS.loop_started = True
@@ -93,7 +93,7 @@ def disconnect():
     if STATUS.loop_started:
         STATUS.client.loop_stop()
         STATUS.loop_started = False
-    
+
     STATUS.client = None
 
 
