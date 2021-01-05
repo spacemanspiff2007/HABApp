@@ -2,7 +2,7 @@
 About HABApp
 ==================================
 
-What is HABApp
+About
 ------------------------------
 HABApp is a Python rule engine for home automation.
 It has local items, an event bus and can integrate external systems, e.g. openHAB and MQTT.
