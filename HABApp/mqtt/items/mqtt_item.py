@@ -1,5 +1,6 @@
-import HABApp.mqtt.mqtt_interface
+from HABApp.core import Items
 from HABApp.core.items import BaseValueItem
+from HABApp.mqtt.mqtt_interface import publish
 
 
 class MqttBaseItem(BaseValueItem):
@@ -20,10 +21,10 @@ class MqttItem(MqttBaseItem):
         assert isinstance(name, str), type(name)
 
         try:
-            item = HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
+            item = Items.get_item(name)
+        except Items.ItemNotFoundException:
             item = cls(name, initial_value)
-            HABApp.core.Items.add_item(item)
+            Items.add_item(item)
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
@@ -38,4 +39,4 @@ class MqttItem(MqttBaseItem):
         :return: 0 if successful
         """
 
-        return HABApp.mqtt.mqtt_interface.MQTT_INTERFACE.publish(self.name, payload, qos=qos, retain=retain)
+        return publish(self.name, payload, qos=qos, retain=retain)

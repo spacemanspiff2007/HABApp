@@ -4,8 +4,9 @@ import time
 import HABApp
 from HABApp.core.events import ValueUpdateEvent
 from HABApp.mqtt.events import MqttValueUpdateEvent
-from HABApp.mqtt.items import MqttItem
-from HABAppTests import TestBaseRule, ItemWaiter, EventWaiter
+from HABApp.mqtt.items import MqttItem, MqttPairItem
+from HABApp.mqtt.mqtt_connection import connect, disconnect
+from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule
 
 log = logging.getLogger('HABApp.MqttTestEvents')
 
@@ -26,6 +27,25 @@ class TestMQTTEvents(TestBaseRule):
         self.add_test('MQTT item update', self.test_mqtt_state)
 
         self.add_test('MQTT item creation', self.test_mqtt_item_creation)
+        self.add_test('MQTT pair item', self.test_mqtt_pair_item)
+
+    def test_mqtt_pair_item(self):
+        topic_read = 'test/topic_read'
+        topic_write = 'test/topic_write'
+    
+        item = MqttPairItem.get_create_item(topic_read, topic_write)
+        
+        # Ensure we send on the write topic
+        with EventWaiter(topic_write, ValueUpdateEvent) as event_waiter:
+            item.publish('ddddddd')
+            event_waiter.wait_for_event('ddddddd')
+
+        # Read Topic has to be updated properly
+        with ItemWaiter(item) as item_waiter:
+            self.mqtt.publish(topic_read, 'asdfasdf')
+            item_waiter.wait_for_state(item)
+
+        return event_waiter.events_ok and item_waiter.states_ok
 
     def test_mqtt_events(self, event_type):
         topic = 'test/event_topic'
@@ -55,6 +75,11 @@ class TestMQTTEvents(TestBaseRule):
 
         # We create the item only on retain
         assert self.mqtt.publish(topic, 'asdf', retain=True)
+        
+        # We need to reconnect to receive the message
+        disconnect()
+        connect()
+
         time.sleep(0.1)
         assert HABApp.core.Items.item_exists(topic) is True
 

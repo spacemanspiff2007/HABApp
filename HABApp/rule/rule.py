@@ -79,9 +79,9 @@ class Rule:
 
         # interfaces
         self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = self.__runtime.async_http if not test else None
-        self.mqtt = self.__runtime.mqtt_connection.interface if not test else None
-        self.oh = HABApp.openhab.interface
-        self.openhab = self.oh
+        self.mqtt: HABApp.mqtt.interface = HABApp.mqtt.interface
+        self.oh: HABApp.openhab.interface = HABApp.openhab.interface
+        self.openhab: HABApp.openhab.interface = self.oh
 
     @HABApp.core.wrapper.log_exception
     def __cleanup_objs(self):
