@@ -63,7 +63,7 @@ Upgrading
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #. Stop HABApp
 
-#. Run the following command::
+#. Run the following command (in your activated virtual environment)::
 
     python3 -m pip install --upgrade habapp
 
@@ -124,6 +124,7 @@ If your installation is not done in "/opt/habapp/bin" replace accordingly as wel
     Type=simple
     User=openhab
     Group=openhab
+    UMask=002
     ExecStart=/opt/habapp/bin/habapp -c PATH_TO_CONFIGURATION_FOLDER
     
     [Install]

@@ -1,6 +1,7 @@
 
 Getting Started
 ==================================
+
 It is really recommended to use a python IDE, for example PyCharm.
 The IDE can provide auto complete and static checks
 which will help you write error free rules and vastly speed up your developement.

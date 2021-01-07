@@ -57,7 +57,7 @@ Mqtt items have an additional publish method which make interaction with the mqt
     # hide
     import HABApp
     from unittest.mock import MagicMock
-    HABApp.mqtt.mqtt_interface.MQTT_INTERFACE = MagicMock()
+    HABApp.mqtt.items.mqtt_item.publish = MagicMock()
     # hide
 
     from HABApp.mqtt.items import MqttItem
@@ -88,6 +88,7 @@ MqttItem
 MqttPairItem
 ^^^^^^^^^^^^^^^^^^
 An item that consolidates a topic that reports states from a device and a topic that is used to write to a device.
+It is created on the topic that reports the state from the device.
 
 .. execute_code::
     :hide_output:
@@ -95,7 +96,7 @@ An item that consolidates a topic that reports states from a device and a topic 
     # hide
     import HABApp
     from unittest.mock import MagicMock
-    HABApp.mqtt.mqtt_interface.MQTT_INTERFACE = MagicMock()
+    HABApp.mqtt.items.mqtt_pair_item.publish = MagicMock()
     # hide
 
     from HABApp.mqtt.items import MqttPairItem

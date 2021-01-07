@@ -1,6 +1,7 @@
 from typing import Optional
 
-import HABApp.mqtt.mqtt_interface
+from HABApp.core import Items
+from HABApp.mqtt.mqtt_interface import publish
 from . import MqttBaseItem
 
 
@@ -14,7 +15,8 @@ def build_write_topic(read_topic: str) -> Optional[str]:
 
 
 class MqttPairItem(MqttBaseItem):
-    """An item that represents both a topic that is read only and a corresponding topic that is used to write values"""
+    """An item that represents both a topic that is used to read
+    and a corresponding topic that is used to write values"""
 
     @classmethod
     def get_create_item(cls, name: str, write_topic: Optional[str] = None, initial_value=None) -> 'MqttPairItem':
@@ -34,13 +36,17 @@ class MqttPairItem(MqttBaseItem):
             write_topic = build_write_topic(name)
 
         try:
-            item = HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
+            item = Items.get_item(name)
+        except Items.ItemNotFoundException:
             item = cls(name, write_topic=write_topic, initial_value=initial_value)
-            HABApp.core.Items.add_item(item)
+            Items.add_item(item)
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
+
+    def __init__(self, name: str, initial_value=None, write_topic: Optional[str] = None):
+        super().__init__(name, initial_value)
+        self.write_topic: Optional[str] = write_topic
 
     def publish(self, payload, qos: int = None, retain: bool = None):
         """
@@ -52,8 +58,4 @@ class MqttPairItem(MqttBaseItem):
         :return: 0 if successful
         """
 
-        return HABApp.mqtt.mqtt_interface.MQTT_INTERFACE.publish(self.write_topic, payload, qos=qos, retain=retain)
-
-    def __init__(self, name: str, initial_value=None, write_topic: Optional[str] = None):
-        super().__init__(name, initial_value)
-        self.write_topic: Optional[str] = write_topic
+        return publish(self.write_topic, payload, qos=qos, retain=retain)

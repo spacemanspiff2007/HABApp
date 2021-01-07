@@ -1,5 +1,5 @@
 
-Additional class reference
+Class reference
 ==================================
 
 Reference for returned classes from some functions.
@@ -20,3 +20,4 @@ ItemNoChangeWatch
    :members:
    :inherited-members:
    :member-order: groupwise
+

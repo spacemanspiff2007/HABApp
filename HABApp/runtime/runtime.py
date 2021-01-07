@@ -3,6 +3,7 @@ from pathlib import Path
 
 import HABApp.config
 import HABApp.core
+import HABApp.mqtt.mqtt_connection
 import HABApp.parameters.parameter_files
 import HABApp.rule_manager
 import HABApp.util
@@ -22,9 +23,6 @@ class Runtime:
         # OpenHAB
         self.openhab_connection: HABApp.openhab.OpenhabConnection = None
 
-        # MQTT
-        self.mqtt_connection: HABApp.mqtt.MqttConnection = None
-
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
@@ -40,11 +38,11 @@ class Runtime:
         self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
 
         # MQTT
-        self.mqtt_connection = HABApp.mqtt.MqttConnection(HABApp.config.CONFIG.mqtt, self.shutdown)
-        self.mqtt_connection.connect()
+        HABApp.mqtt.mqtt_connection.setup(self.shutdown)
+        HABApp.mqtt.mqtt_connection.connect()
 
         # openhab
-        openhab_connection.setup(self.shutdown),
+        openhab_connection.setup(self.shutdown)
 
         # Parameter Files
         HABApp.parameters.parameter_files.setup_param_files()
