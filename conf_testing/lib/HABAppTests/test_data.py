@@ -19,7 +19,7 @@ ITEM_STATE = {
     'Number': [-111, 222, -13.13, 55.55],
     'Player': ["PLAY", "PAUSE", "REWIND", "FASTFORWARD"],
     'Rollershutter': [0, 100, 30.5],
-    'String': ['A', 'B', 'C', 'öäüß'],
+    'String': ['A', 'B', 'C', '', 'öäüß'],
     'Switch': ['ON', 'OFF'],
 }
 
