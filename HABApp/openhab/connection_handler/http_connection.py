@@ -65,6 +65,7 @@ async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> O
     assert not url.startswith('/'), url
     url = f'{HTTP_PREFIX}/rest/{url}/'
 
+    # todo: remove this workaround once there is a fix in aiohttp
     headers = None
     if data is not None:
         headers = {'Content-Type': 'text/plain; charset=utf-8'}
@@ -90,6 +91,7 @@ async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Op
     assert not url.startswith('/'), url
     url = f'{HTTP_PREFIX}/rest/{url}/'
 
+    # todo: remove this workaround once there is a fix in aiohttp
     headers = None
     if data is not None:
         headers = {'Content-Type': 'text/plain; charset=utf-8'}
