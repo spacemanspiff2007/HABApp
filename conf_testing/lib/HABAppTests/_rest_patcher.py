@@ -27,11 +27,18 @@ class RestPatcher:
             resp = await to_call(*args, **kwargs)
 
             out = ''
-            if kwargs.get('json'):
+            if kwargs.get('json') is not None:
                 out = f' {kwargs["json"]}'
-            if kwargs.get('data'):
+            if kwargs.get('data') is not None:
                 out = f' "{kwargs["data"]}"'
-            self.log.debug(f'{resp.request_info.method:^6s} {shorten_url(resp.request_info.url)} ({resp.status}){out}')
+
+            self.log.debug(
+                f'{resp.request_info.method:^6s} {shorten_url(resp.request_info.url)} ({resp.status}){out}'
+            )
+
+            if resp.status >= 300:
+                self.log.debug(f'{"":6s} Header request : {resp.request_info.headers}')
+                self.log.debug(f'{"":6s} Header response: {resp.headers}')
 
             def wrap_content(content_func):
                 async def content_func_wrap(*cargs, **ckwargs):

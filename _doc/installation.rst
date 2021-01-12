@@ -12,7 +12,9 @@ Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. hint::
-   HABApp requires at least Python 3.6
+   With openhabian the installation can be performed through the openhabian-config tool (option 2B).
+   HABApp will be installed into ``/opt/habapp``, so it is the same as the installation described here.
+
 .. hint::
    On Windows use the ``python`` command instead of ``python3``
 
