@@ -1,2 +1,2 @@
-from .shutdown_helper import ShutdownHelper
+from . import shutdown
 from .runtime import Runtime

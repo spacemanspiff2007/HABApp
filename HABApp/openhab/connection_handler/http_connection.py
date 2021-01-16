@@ -199,8 +199,8 @@ async def check_response(future: aiohttp.client._RequestContextManager, sent_dat
     return resp
 
 
-def stop_connection():
-    global FUT_UUID, FUT_SSE
+async def stop_connection():
+    global FUT_UUID, FUT_SSE, HTTP_SESSION
     if FUT_UUID is not None and not FUT_UUID.done():
         FUT_UUID.cancel()
         FUT_UUID = None
@@ -209,16 +209,18 @@ def stop_connection():
         FUT_SSE.cancel()
         FUT_SSE = None
 
-
-async def start_connection():
-    global HTTP_PREFIX, HTTP_SESSION, FUT_UUID
-
-    stop_connection()
+    await asyncio.sleep(0)
 
     # If we are already connected properly disconnect
     if HTTP_SESSION is not None:
         await HTTP_SESSION.close()
         HTTP_SESSION = None
+
+
+async def start_connection():
+    global HTTP_PREFIX, HTTP_SESSION, FUT_UUID
+
+    await stop_connection()
 
     host: str = HABApp.CONFIG.openhab.connection.host
     port: str = HABApp.CONFIG.openhab.connection.port

@@ -11,8 +11,8 @@ from ._plugin import on_connect, on_disconnect, setup_plugins
 log = http_connection.log
 
 
-def setup(shutdown):
-    assert isinstance(shutdown, HABApp.runtime.ShutdownHelper), type(shutdown)
+def setup():
+    from HABApp.runtime import shutdown
 
     # initialize callbacks
     http_connection.ON_CONNECTED = on_connect
@@ -31,7 +31,7 @@ def setup(shutdown):
 
 
 async def start():
-    await http_connection.start_connection(),
+    await http_connection.start_connection()
 
 
 @ignore_exception

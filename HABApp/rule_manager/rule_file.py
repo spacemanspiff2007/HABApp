@@ -59,6 +59,15 @@ class RuleFile:
         tb.insert(0, f"Could not load {self.path}!")
         return [line.replace('<module>', self.path.name) for line in tb]
 
+    def create_rules(self, created_rules: list):
+        # It seems like python 3.8 doesn't allow path like objects any more:
+        # https://github.com/spacemanspiff2007/HABApp/issues/111
+        runpy.run_path(str(self.path), run_name=str(self.path), init_globals={
+            '__HABAPP__RUNTIME__': self.rule_manager.runtime,
+            '__HABAPP__RULE_FILE__': self,
+            '__HABAPP__RULES': created_rules,
+        })
+
     def load(self) -> bool:
 
         created_rules = []
@@ -67,13 +76,7 @@ class RuleFile:
         ign.proc_tb = self.__process_tc
 
         with ign:
-            # It seems like python 3.8 doesn't allow path like objects any more:
-            # https://github.com/spacemanspiff2007/HABApp/issues/111
-            runpy.run_path(str(self.path), run_name=str(self.path), init_globals={
-                '__HABAPP__RUNTIME__': self.rule_manager.runtime,
-                '__HABAPP__RULE_FILE__': self,
-                '__HABAPP__RULES': created_rules,
-            })
+            self.create_rules(created_rules)
 
         if ign.raised_exception:
             # unload all rule instances which might have already been created otherwise they might

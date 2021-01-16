@@ -207,17 +207,69 @@ whenever the corresponding file gets changed.
 Principle of operation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 All existing things from openHAB can be filtered by different criteria.
-For each one of these things it is then possible to
+For each one of these remaining things it is then possible to
 
 * Set thing parameters
 * Create items with wildcards taken from the thing
 * | Apply filters to the channels of the thing.
-  | For each matching channel it is possible to link items with wildcards taken from the thing and the matching channel
+  | For each matching channel it is possible to create and link items with wildcards taken from the thing and the matching channel
 
 There is also a test mode which prints out all required information and does not make any changes.
 
 A valid ``.items`` file will automatically be created next to the ``.yml`` file containing all created items.
 It can be used to get a quick overview what items (would) have been created or copied into the items folder.
+
+Filtering
+~~~~~~~~~~~~~~~~~~~~
+The filter value can be applied to any available column from the Thing/Channel.
+An overview over the columns and their values is shown for every Thing when test mode is active.
+The filter value is a regex that has to fully match the value.
+
+.. code-block:: yaml
+
+   filter:
+     COLUMN_NAME: REGULAR_EXPRESSION
+
+e.g.
+
+.. code-block:: yaml
+
+   filter:
+     thing_uid: zwave:device:controller:node35
+
+If multiple filters are specified all have to match to select the Thing or Channel.
+
+.. code-block:: yaml
+
+     # Multiple filters on different columns
+     filter:
+       thing_type: zwave:fibaro.+
+       thing_uid: zwave:device:controller:node35
+
+     # Multiple filters on the same columns (rarely needed)
+     filter:
+     - thing_type: zwave:fibaro.+
+     - thing_type: zwave:fibaro_fgrgbw_00_000
+
+
+Available columns
+"""""""""""""""""""""
+The following columns are available for filtering things:
+
+* ``thing_uid``
+* ``thing_type``
+* ``thing_location``
+* ``thing_label``
+* ``bridge_uid``
+* ``editable``
+
+The following columns are available for filtering channels:
+
+* ``channel_uid``
+* ``channel_type``
+* ``channel_label``
+* ``channel_kind``
+
 
 File Structure
 ~~~~~~~~~~~~~~~~~~~~
@@ -282,8 +334,8 @@ The entries ``thing config``, ``create items`` and ``channels`` are optional and
            icon: battery
 
 
-Multiple thing definitions in one file
-""""""""""""""""""""""""""""""""""""""""
+Multiple  and filter definitions in one file
+"""""""""""""""""""""""""""""""""""""""""""""
 
 It is possible to add multiple thing processors into one file.
 To achieve this the root entry is now a list.

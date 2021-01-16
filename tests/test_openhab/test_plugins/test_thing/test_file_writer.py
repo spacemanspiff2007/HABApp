@@ -35,7 +35,7 @@ def test_creation(tmp_path_factory):
     t = MyStringIO()
     create_items_file(t, {k.name: k for k in objs})
 
-    print('\n' + '-' * 120 + '\n' + t.text + '-' * 120)
+    # print('\n' + '-' * 120 + '\n' + t.text + '-' * 120)
 
     expected = """String  Test_zwave_o_1                                                {channel = "zwave:link:device"                        }
 String  Test_zwave_o_2                                                {channel = "zwave:link:device1",   auto_update="False"}

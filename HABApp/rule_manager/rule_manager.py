@@ -15,6 +15,7 @@ from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
 from .rule_file import RuleFile
+import HABApp.__cmd_args__ as cmd_args
 
 log = logging.getLogger('HABApp.Rules')
 
@@ -51,6 +52,16 @@ class RuleManager:
 
     def setup(self):
 
+        if cmd_args.DO_BENCH:
+            from HABApp.rule_manager.benchmark import BenchFile
+            self.files['bench'] = file = BenchFile(self)
+            if not file.load():
+                log.error('Failed to load Benchmark!')
+                HABApp.runtime.shutdown.request_shutdown()
+                return None
+            file.check_all_rules()
+            return
+
         # Add event bus listener
         HABApp.core.files.add_event_bus_listener('rule', self.request_file_load, self.request_file_unload, log)
 
@@ -72,7 +83,7 @@ class RuleManager:
                         break
 
                 # stop waiting if we want to shut down
-                if self.runtime.shutdown.requested:
+                if HABApp.runtime.shutdown.requested:
                     return None
             time.sleep(2.2)
         else:
@@ -85,7 +96,7 @@ class RuleManager:
     @log_exception
     async def process_scheduled_events(self):
 
-        while not self.runtime.shutdown.requested:
+        while not HABApp.runtime.shutdown.requested:
 
             now = datetime.datetime.now(tz=utc)
 

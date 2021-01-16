@@ -190,7 +190,7 @@ HABApp arguments
 
     # hide
     import HABApp.__main__
-    HABApp.__main__.get_command_line_args(['-h'])
+    HABApp.__cmd_args__.parse_args(['-h'])
     # hide
 
 

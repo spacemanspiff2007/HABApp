@@ -12,7 +12,12 @@ class AsyncHttpConnection:
         self.__client: aiohttp.ClientSession = None
 
     async def create_client(self):
+        assert self.__client is None
+
         self.__client = aiohttp.ClientSession(json_serialize=dump_json, loop=loop)
+
+        from HABApp.runtime import shutdown
+        shutdown.register_func(self.__client.close)
 
     def get(self, url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
             -> aiohttp.client._RequestContextManager:

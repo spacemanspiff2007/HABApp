@@ -125,15 +125,24 @@ class HABAppConfigLoader:
         except Exception as e:
             print(f'Error loading logging config: {e}')
             return None
-        log.debug('Loaded logging config')
 
         # Try rotating the logs on first start
         if self.first_start:
-            for handler in logging._handlerList:
+            for wr in reversed(logging._handlerList[:]):
+                handler = wr()  # weakref -> call it to get object
+
+                # only rotate these types
+                if not isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
+                    continue
+
+                # Rotate only if files have content
+                logfile = Path(handler.baseFilename)
+                if not logfile.is_file() or logfile.stat().st_size <= 0:
+                    continue
+
                 try:
-                    handler = handler()  # weakref -> call it to get object
-                    if isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
-                        handler.doRollover()
+                    handler.acquire()
+                    handler.doRollover()
                 except Exception:
                     lines = traceback.format_exc().splitlines()
                     # cut away AbsolutePathExpected Exception from log output
@@ -143,6 +152,8 @@ class HABAppConfigLoader:
                             start = i
                     for line in lines[start:]:
                         log.error(line)
+                finally:
+                    handler.release()
 
         logging.getLogger('HABApp').info(f'HABApp Version {__version__}')
 
