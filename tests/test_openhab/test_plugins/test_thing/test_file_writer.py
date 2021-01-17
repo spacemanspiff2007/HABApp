@@ -7,6 +7,7 @@ class MyStringIO(io.StringIO):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = None
+        self.exists = False
 
     def open(self, *args, **kwargs):
         return self
@@ -16,7 +17,7 @@ class MyStringIO(io.StringIO):
         super().close(*args, **kwargs)
         
     def is_file(self):
-        return False
+        return self.exists
 
 
 def test_creation(tmp_path_factory):
@@ -52,3 +53,10 @@ String  SoloName
 
 """
     assert expected == t.text
+
+    # When the file already exists we append with newlines
+    t = MyStringIO()
+    t.exists = True
+    create_items_file(t, {k.name: k for k in objs})
+
+    assert '\n\n\n' + expected == t.text
