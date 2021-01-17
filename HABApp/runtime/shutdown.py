@@ -16,7 +16,7 @@ class ShutdownInfo:
     func: Union[Callable[[], typing.Any], Coroutine]
     msg: str
     last: bool
-    
+
 
 _FUNCS: typing.List[ShutdownInfo] = []
 

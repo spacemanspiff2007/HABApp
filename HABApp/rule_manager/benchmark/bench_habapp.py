@@ -23,7 +23,7 @@ class HABAppBenchRule(BenchBaseRule):
         self.bench_started = 0.0
         self.bench_times_container = BenchContainer()
         self.bench_times: BenchTime = None
-        
+
         self.name = ''
         self.values = deque()
 
