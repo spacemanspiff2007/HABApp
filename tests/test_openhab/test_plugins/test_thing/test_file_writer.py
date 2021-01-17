@@ -14,6 +14,9 @@ class MyStringIO(io.StringIO):
     def close(self, *args, **kwargs):
         self.text = self.getvalue()
         super().close(*args, **kwargs)
+        
+    def is_file(self):
+        return False
 
 
 def test_creation(tmp_path_factory):
