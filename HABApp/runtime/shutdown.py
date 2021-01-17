@@ -1,25 +1,34 @@
 import itertools
 import logging
+import logging.handlers
 import traceback
 import typing
 from asyncio import iscoroutinefunction, run_coroutine_threadsafe, sleep
+from dataclasses import dataclass
 from types import FunctionType, MethodType
-import logging.handlers
+from typing import Callable, Coroutine, Union
 
 from HABApp.core.const import loop
 
-_FUNCS: typing.List[typing.Callable[[], typing.Any]] = []
-_FUNCS_LAST: typing.List[typing.Callable[[], typing.Any]] = []
+
+@dataclass(frozen=True)
+class ShutdownInfo:
+    func: Union[Callable[[], typing.Any], Coroutine]
+    msg: str
+    last: bool
+    
+
+_FUNCS: typing.List[ShutdownInfo] = []
 
 requested: bool = False
 
 
-def register_func(func, last=False):
+def register_func(func, last=False, msg: str = ''):
     assert isinstance(func, (FunctionType, MethodType)) or iscoroutinefunction(func), print(type(func))
-    if last:
-        _FUNCS_LAST.append(func)
-    else:
-        _FUNCS.append(func)
+    assert last is True or last is False, last
+    assert isinstance(msg, str)
+
+    _FUNCS.append(ShutdownInfo(func, f'{func.__module__}.{func.__name__}' if not msg else msg, last))
 
 
 def request_shutdown():
@@ -35,15 +44,16 @@ async def _shutdown():
 
     requested = True
 
-    for func in itertools.chain(_FUNCS, _FUNCS_LAST):
+    for obj in itertools.chain(filter(lambda x: not x.last, _FUNCS),
+                               filter(lambda x: x.last, _FUNCS)):
         try:
-            log.debug(f'Calling {func.__module__}.{func.__name__}')
-            if iscoroutinefunction(func):
-                await func()
+            log.debug(f'{obj.msg}')
+            if iscoroutinefunction(obj.func):
+                await obj.func()
             else:
-                func()
-            log.debug(f'{func.__name__} done!')
-            await sleep(0.01)
+                obj.func()
+            log.debug('-> done!')
+            await sleep(0.02)
         except Exception as ex:
             log.error(ex)
             tb = traceback.format_exc().splitlines()

@@ -26,7 +26,7 @@ class Runtime:
 
         # Async Workers & shutdown callback
         HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
-        shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown)
+        shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown, msg='Stopping workers')
 
     def startup(self, config_folder: Path):
 

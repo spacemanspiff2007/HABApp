@@ -22,6 +22,7 @@ class BenchBaseRule(HABApp.Rule):
 
         self.next_rule = next_rule
         next_rule.prev_rule = self
+        return next_rule
 
     def _err_event(self, event):
         self.errors.append(event)
@@ -63,7 +64,7 @@ class BenchBaseRule(HABApp.Rule):
             count = len(self.errors)
             print(f'{count} error{"" if count == 1 else "s"} during Benchmark in {self.rule_name}!')
             for e in self.errors:
-                print(f' - {e.exception}')
+                print(f' - {type(e.exception)}: {e.exception}')
 
         if self.next_rule is None:
             HABApp.runtime.shutdown.request_shutdown()

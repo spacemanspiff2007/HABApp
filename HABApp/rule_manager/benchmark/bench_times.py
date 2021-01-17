@@ -8,7 +8,10 @@ def format_duration(duration: Union[None, str, float]) -> str:
     if isinstance(duration, str):
         return f'{duration:^6s}'
 
-    if duration < 0.01:
+    if duration < 0.0001:
+        # 99.9ns
+        return f'{duration * 1000 * 1000:4.1f}us'
+    elif duration < 0.01:
         # 9.99ms
         return f'{duration * 1000:4.2f}ms'
     elif duration < 0.1:
@@ -66,6 +69,7 @@ class BenchTime:
             per_sec /= 1000
             unit = 'm'
 
-        print(f'{self.name:>{indent_name}s} | {format_duration(total)} | {per_sec:7.{3 - len(unit)}f}{unit} | '
+        print(f'{self.name:>{indent_name}s} | {format_duration(total)} | '
+              f'{per_sec:{7 - len(unit)}.{3 - len(unit)}f}{unit} | '
               f'{format_duration(_medi)} | {format_duration(min(self.times))} | {format_duration(max(self.times))} | '
               f'{format_duration(_mean)}')

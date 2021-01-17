@@ -33,7 +33,7 @@ def setup():
     config.connection.subscribe_for_changes(connect)
 
     # shutdown
-    shutdown.register_func(disconnect)
+    shutdown.register_func(disconnect, msg='Disconnecting MQTT')
 
 
 def connect():

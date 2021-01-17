@@ -24,8 +24,8 @@ def start():
 
     # register for proper shutdown
     from HABApp.runtime import shutdown
-    shutdown.register_func(OBSERVER.stop)
-    shutdown.register_func(OBSERVER.join, last=True)
+    shutdown.register_func(OBSERVER.stop, msg='Stopping folder observer')
+    shutdown.register_func(OBSERVER.join, last=True, msg='Joining folder observer threads')
     return None
 
 

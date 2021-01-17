@@ -94,8 +94,8 @@ class OpenhabBenchRule(BenchBaseRule):
         self.run_rtt('async rtt idle', do_async=True)
 
         self.start_load()
-        self.run_rtt('rtt load (10x)')
-        self.run_rtt('async rtt load (10x)', do_async=True)
+        self.run_rtt('rtt load (+10x)')
+        self.run_rtt('async rtt load (+10x)', do_async=True)
         self.stop_load()
 
         print(' done!\n')
@@ -140,6 +140,8 @@ class OpenhabBenchRule(BenchBaseRule):
         LOCK.acquire(True, 6)
 
         listener.cancel()
+        if LOCK.locked():
+            LOCK.release()
 
         print('.', end='')
 

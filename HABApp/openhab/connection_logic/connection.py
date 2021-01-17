@@ -20,10 +20,10 @@ def setup():
     http_connection.ON_SSE_EVENT = on_sse_event
 
     # shutdown handler for connection
-    shutdown.register_func(http_connection.stop_connection)
+    shutdown.register_func(http_connection.stop_connection, msg='Stopping openHAB connection')
 
     # shutdown handler for plugins
-    shutdown.register_func(on_disconnect)
+    shutdown.register_func(on_disconnect, msg='Stopping openHAB plugins')
 
     # initialize all plugins
     setup_plugins()
