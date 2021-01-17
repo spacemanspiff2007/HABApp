@@ -1,6 +1,10 @@
+import logging
 from pathlib import Path
 
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
+
+log = logging.getLogger('HABApp.file_events')
+log.setLevel(logging.INFO)
 
 
 class BaseWatcher(FileSystemEventHandler):
@@ -14,6 +18,9 @@ class BaseWatcher(FileSystemEventHandler):
         self.watch_subfolders: bool = watch_subfolders
 
     def dispatch(self, event: FileSystemEvent):
+
+        log.debug(event)
+
         # we don't process directory events
         if event.is_directory:
             return None
