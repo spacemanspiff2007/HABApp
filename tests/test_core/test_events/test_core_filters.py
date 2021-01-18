@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.event_bus_listener import EventBusListener, WrappedFunction
+from HABApp.core.event_bus_listener import WrappedFunction
 from HABApp.core.events import EventFilter, ValueChangeEvent, ValueChangeEventFilter, ValueUpdateEvent, \
     ValueUpdateEventFilter
 from tests.helpers import check_class_annotations
@@ -39,15 +39,15 @@ def test_exception_missing():
 def test_create_listener():
 
     f = EventFilter(ValueUpdateEvent, value=1)
-    e = EventBusListener('asdf', WrappedFunction(lambda x: x), **f.get_args())
+    e = f.listener_from_filter('asdf', WrappedFunction(lambda x: x))
 
     assert e.event_filter is ValueUpdateEvent
-    assert e.prop_name1 == 'value'
-    assert e.prop_value1 == 1
+    assert e.attr_name1 == 'value'
+    assert e.attr_value1 == 1
 
     f = ValueChangeEventFilter(old_value='asdf')
-    e = EventBusListener('asdf', WrappedFunction(lambda x: x), **f.get_args())
+    e = f.listener_from_filter('asdf', WrappedFunction(lambda x: x))
 
     assert e.event_filter is ValueChangeEvent
-    assert e.prop_name1 == 'old_value'
-    assert e.prop_value1 == 'asdf'
+    assert e.attr_name1 == 'old_value'
+    assert e.attr_value1 == 'asdf'

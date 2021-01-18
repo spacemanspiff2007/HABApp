@@ -24,14 +24,14 @@ def test_repr(clean_event_bus: EventBus, sync_worker):
     listener = EventBusListener('test_name', f)
     assert listener.desc() == '"test_name" (type AllEvents)'
 
-    listener = EventBusListener('test_name', f, prop_name1='test1', prop_value1='value1')
+    listener = EventBusListener('test_name', f, attr_name1='test1', attr_value1='value1')
     assert listener.desc() == '"test_name" (type AllEvents, test1==value1)'
 
-    listener = EventBusListener('test_name', f, prop_name2='test2', prop_value2='value2')
+    listener = EventBusListener('test_name', f, attr_name2='test2', attr_value2='value2')
     assert listener.desc() == '"test_name" (type AllEvents, test2==value2)'
 
-    listener = EventBusListener('test_name', f, prop_name1='test1', prop_value1='value1',
-                                prop_name2='test2', prop_value2='value2')
+    listener = EventBusListener('test_name', f, attr_name1='test1', attr_value1='value1',
+                                attr_name2='test2', attr_value2='value2')
     assert listener.desc() == '"test_name" (type AllEvents, test1==value1, test2==value2)'
 
 

@@ -32,9 +32,7 @@ class BaseWatch:
         """Listen to (only) the event that is emitted by this watcher"""
         rule = HABApp.rule.get_parent_rule()
         cb = HABApp.core.WrappedFunction(callback, name=rule._get_cb_name(callback))
-        listener = HABApp.core.EventBusListener(
-            self.name, cb, **EventFilter(self.EVENT, seconds=self.fut.secs).get_args()
-        )
+        listener = EventFilter(self.EVENT, seconds=self.fut.secs).listener_from_filter(self.name, cb)
         return rule._add_event_listener(listener)
 
 

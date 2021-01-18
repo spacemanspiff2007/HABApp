@@ -4,3 +4,4 @@ from .item_events import ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent
 from .channel_events import ChannelTriggeredEvent
 from .thing_events import ThingStatusInfoChangedEvent, ThingStatusInfoEvent, \
     ThingConfigStatusInfoEvent, ThingFirmwareStatusInfoEvent
+from .event_filters import ItemStateChangedEventFilter, ItemStateEventFilter

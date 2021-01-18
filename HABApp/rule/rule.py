@@ -141,7 +141,7 @@ class Rule:
         name = name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name
 
         if isinstance(event_type, HABApp.core.events.EventFilter):
-            listener = HABApp.core.EventBusListener(name, cb, **event_type.get_args())
+            listener = event_type.listener_from_filter(name, cb)
         else:
             listener = HABApp.core.EventBusListener(name, cb, event_type)
 

@@ -1,5 +1,6 @@
 from typing import Any
 
+import HABApp
 from HABApp.core.const import MISSING
 from . import ValueChangeEvent, ValueUpdateEvent
 
@@ -15,14 +16,15 @@ class EventFilter:
         self.__cls = cls
         self.__filter = kwargs
 
-    def get_args(self):
-        ret = {'event_type': self.__cls}
+    def listener_from_filter(self, name, cb) -> 'HABApp.core.EventBusListener':
+        kwargs = {'event_type': self.__cls}
         ct = 1
-        for name, value in self.__filter.items():
-            ret[f'prop_name{ct}'] = name
-            ret[f'prop_value{ct}'] = value
+        for k, v in self.__filter.items():
+            kwargs[f'attr_name{ct}'] = k
+            kwargs[f'attr_value{ct}'] = v
             ct += 1
-        return ret
+
+        return HABApp.core.EventBusListener(name, cb, **kwargs)
 
     def __repr__(self):
         name = self.__class__.__name__
