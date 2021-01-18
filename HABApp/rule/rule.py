@@ -125,7 +125,8 @@ class Rule:
 
     def listen_event(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
                      callback: typing.Callable[[typing.Any], typing.Any],
-                     event_type: typing.Union[AllEvents, typing.Any] = AllEvents
+                     event_type: typing.Union['HABApp.core.events.AllEvents',
+                                              'HABApp.core.events.EventFilter', typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
@@ -137,9 +138,13 @@ class Rule:
             or mqtt.
         """
         cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        listener = HABApp.core.EventBusListener(
-            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name, cb, event_type
-        )
+        name = name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name
+
+        if isinstance(event_type, HABApp.core.events.EventFilter):
+            listener = HABApp.core.EventBusListener(name, cb, **event_type.get_args())
+        else:
+            listener = HABApp.core.EventBusListener(name, cb, event_type)
+
         self.__event_listener.append(listener)
         HABApp.core.EventBus.add_listener(listener)
         return listener

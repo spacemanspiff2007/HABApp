@@ -9,6 +9,10 @@ NAME_START: int = 15
 
 
 class ThingStatusInfoEvent(OpenhabEvent):
+    name: str
+    status: str
+    detail: str
+
     def __init__(self, name: str = '', status: str = '', detail: str = ''):
         super().__init__()
 
@@ -26,6 +30,12 @@ class ThingStatusInfoEvent(OpenhabEvent):
 
 
 class ThingStatusInfoChangedEvent(OpenhabEvent):
+    name: str
+    status: str
+    detail: str
+    old_status: str
+    old_detail: str
+
     def __init__(self, name: str = '', status: str = '', detail: str = '', old_status: str = '', old_detail: str = ''):
         super().__init__()
 
@@ -52,6 +62,9 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
 
 
 class ThingConfigStatusInfoEvent(OpenhabEvent):
+    name: str
+    messages: typing.List[typing.Dict[str, str]]
+
     def __init__(self, name: str = '', messages: typing.List[typing.Dict[str, str]] = [{}]):
         super().__init__()
 
@@ -68,6 +81,9 @@ class ThingConfigStatusInfoEvent(OpenhabEvent):
 
 
 class ThingFirmwareStatusInfoEvent(OpenhabEvent):
+    name: str
+    status: str
+
     def __init__(self, name: str = '', status: str = ''):
         super().__init__()
         self.name: str = name

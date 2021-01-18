@@ -1,4 +1,4 @@
-import typing
+from typing import Any, Union
 
 
 class AllEvents:
@@ -7,10 +7,13 @@ class AllEvents:
 
 class ComplexEventValue:
     def __init__(self, value):
-        self.value: typing.Any = value
+        self.value: Any = value
 
 
 class ValueUpdateEvent:
+    name: str
+    value: Any
+
     def __init__(self, name=None, value=None):
         self.name: str = name
         self.value = value
@@ -20,6 +23,10 @@ class ValueUpdateEvent:
 
 
 class ValueChangeEvent:
+    name: str
+    value: Any
+    old_value: Any
+
     def __init__(self, name=None, value=None, old_value=None):
         self.name: str = name
         self.value = value
@@ -30,6 +37,9 @@ class ValueChangeEvent:
 
 
 class ItemNoChangeEvent:
+    name: str
+    seconds: Union[int, float]
+
     def __init__(self, name=None, seconds=None):
         self.name: str = name
         self.seconds: int = seconds
@@ -39,6 +49,9 @@ class ItemNoChangeEvent:
 
 
 class ItemNoUpdateEvent:
+    name: str
+    seconds: Union[int, float]
+
     def __init__(self, name=None, seconds=None):
         self.name: str = name
         self.seconds: int = seconds
