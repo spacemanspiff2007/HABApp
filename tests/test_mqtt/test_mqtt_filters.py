@@ -13,21 +13,21 @@ def test_class_annotations():
 
 def test_create_listener():
     f = MqttValueUpdateEventFilter(value=1)
-    e = f.listener_from_filter('asdf', WrappedFunction(lambda x: x))
+    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
 
     assert e.event_filter is MqttValueUpdateEvent
     assert e.attr_name1 == 'value'
     assert e.attr_value1 == 1
 
     f = MqttValueChangeEventFilter(old_value='asdf')
-    e = f.listener_from_filter('asdf', WrappedFunction(lambda x: x))
+    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
 
     assert e.event_filter is MqttValueChangeEvent
     assert e.attr_name1 == 'old_value'
     assert e.attr_value1 == 'asdf'
 
     f = MqttValueChangeEventFilter(old_value='asdf', value=1)
-    e = f.listener_from_filter('asdf', WrappedFunction(lambda x: x))
+    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
 
     assert e.event_filter is MqttValueChangeEvent
     assert e.attr_name1 == 'value'

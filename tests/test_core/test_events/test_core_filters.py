@@ -39,14 +39,14 @@ def test_exception_missing():
 def test_create_listener():
 
     f = EventFilter(ValueUpdateEvent, value=1)
-    e = f.listener_from_filter('asdf', WrappedFunction(lambda x: x))
+    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
 
     assert e.event_filter is ValueUpdateEvent
     assert e.attr_name1 == 'value'
     assert e.attr_value1 == 1
 
     f = ValueChangeEventFilter(old_value='asdf')
-    e = f.listener_from_filter('asdf', WrappedFunction(lambda x: x))
+    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
 
     assert e.event_filter is ValueChangeEvent
     assert e.attr_name1 == 'old_value'

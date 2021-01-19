@@ -7,7 +7,7 @@ from . import ValueChangeEvent, ValueUpdateEvent
 
 class EventFilter:
     def __init__(self, cls, **kwargs):
-        assert len(kwargs) < 3, 'Filter allows up to two args'
+        assert len(kwargs) < 3, 'Filter allows up to two args that will be filtered'
 
         for arg in kwargs:
             if arg not in cls.__annotations__:
@@ -16,7 +16,7 @@ class EventFilter:
         self.__cls = cls
         self.__filter = kwargs
 
-    def listener_from_filter(self, name, cb) -> 'HABApp.core.EventBusListener':
+    def create_event_listener(self, name, cb) -> 'HABApp.core.EventBusListener':
         kwargs = {'event_type': self.__cls}
         ct = 1
         for k, v in self.__filter.items():
@@ -35,15 +35,19 @@ class EventFilter:
 
 
 class ValueUpdateEventFilter(EventFilter):
-    def __init__(self, *, value):
-        super().__init__(ValueUpdateEvent, value=value)
+    _EVENT_TYPE = ValueUpdateEvent
+
+    def __init__(self, value):
+        super().__init__(self._EVENT_TYPE, value=value)
 
 
 class ValueChangeEventFilter(EventFilter):
-    def __init__(self, *, value: Any = MISSING, old_value: Any = MISSING):
+    _EVENT_TYPE = ValueChangeEvent
+
+    def __init__(self, value: Any = MISSING, old_value: Any = MISSING):
         args = {}
         if value is not MISSING:
             args['value'] = value
         if old_value is not MISSING:
             args['old_value'] = old_value
-        super().__init__(ValueChangeEvent, **args)
+        super().__init__(self._EVENT_TYPE, **args)
