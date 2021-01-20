@@ -18,13 +18,16 @@ Usage:
    print 'Execute this python code'
 """
 import functools
+import re
 import subprocess
 import sys
 import traceback
 from pathlib import Path
+from typing import Optional
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
+from sphinx.errors import ExtensionError
 from sphinx.util import logging
 
 log = logging.getLogger(__name__)
@@ -36,10 +39,25 @@ def PrintException( func):
     def f(*args, **kwargs):
         try:
             return func(*args, **kwargs)
+        except ExtensionError:
+            raise
         except Exception as e:
-            print("{}\n{}".format( e, traceback.format_exc()))
+            print("\n{}\n{}".format( e, traceback.format_exc()))
             raise
     return f
+
+
+re_line = re.compile(r'line (\d+),')
+
+
+class CodeException(Exception):
+    def __init__(self, ret: int, stderr: str):
+        self.ret = ret
+        self.err = stderr
+
+        self.line: Optional[int] = None
+        if m := re_line.search(self.err):
+            self.line = int(m.group(1))
 
 
 class ExecuteCode(Directive):
@@ -105,7 +123,21 @@ class ExecuteCode(Directive):
         if 'header_output' in self.options:
             output.append(nodes.caption(text=self.options['header_output']))
 
-        code_results = execute_code( executed_code, ignore_stderr='ignore_stderr' in self.options)
+        try:
+            code_results = execute_code( executed_code, ignore_stderr='ignore_stderr' in self.options)
+        except CodeException as e:
+            # Newline so we don't have the build message mixed up with logs
+            print('\n')
+
+            for i in range(max(0, e.line - 8), e.line - 1):
+                log.error(f'   {self.content[i]}')
+            log.error(f'   {self.content[e.line - 1]} <--')
+
+            log.error('')
+            for line in e.err.splitlines():
+                log.error(line)
+
+            raise ExtensionError('Could not execute code!') from None
 
         if 'ignore_stderr' not in self.options:
             for out in code_results.split('\n'):
@@ -125,14 +157,14 @@ class ExecuteCode(Directive):
 WORKING_DIR = None
 
 
-@PrintException
 def execute_code(code, ignore_stderr) -> str:
 
     run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=WORKING_DIR)
     if run.returncode != 0:
-        print(f'stdout: {run.stdout.decode()}')
-        print(f'stderr: {run.stderr.decode()}')
-        raise ValueError()
+        # print('')
+        # print(f'stdout: {run.stdout.decode()}')
+        # print(f'stderr: {run.stderr.decode()}')
+        raise CodeException(run.returncode, run.stderr.decode()) from None
 
     if ignore_stderr:
         return run.stdout.decode().strip()

@@ -107,7 +107,7 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     :hide_output:
 
     from HABApp.core.items import AggregationItem
-    my_agg = AggregationItem('MyAggregationItem')
+    my_agg = AggregationItem.get_create_item('MyAggregationItem')
 
     # Connect the source item with the aggregation item
     my_agg.aggregation_source('MyInputItem')
@@ -117,6 +117,8 @@ And since it is just like a normal item triggering on changes etc. is possible, 
 
     # Use max as an aggregation function
     my_agg.aggregation_func = max
+
+    1/0
 
 The value of ``my_agg`` in the example will now always be the maximum of ``MyInputItem`` in the last two hours.
 It will automatically update and always reflect the latest changes of ``MyInputItem``.
