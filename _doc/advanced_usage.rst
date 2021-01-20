@@ -118,7 +118,6 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     # Use max as an aggregation function
     my_agg.aggregation_func = max
 
-    1/0
 
 The value of ``my_agg`` in the example will now always be the maximum of ``MyInputItem`` in the last two hours.
 It will automatically update and always reflect the latest changes of ``MyInputItem``.

@@ -56,21 +56,32 @@ class AggregationItem(BaseValueItem):
         self.__period = period
         return self
 
-    def aggregation_source(self, source: typing.Union[BaseValueItem, str]) -> 'AggregationItem':
+    def aggregation_source(self, source: typing.Union[BaseValueItem, str], event_type: typing.Union[
+            typing.Type['HABApp.core.events.ValueUpdateEvent'],
+            typing.Type['HABApp.core.events.ValueChangeEvent'],
+            'HABApp.core.events.EventFilter', None] = None) -> 'AggregationItem':
         """Set the source item which changes will be aggregated
 
-        :param item_or_name: name or Item obj
+        :param source: name or Item obj
+        :param event_type: optional additional event type of ``EventFilter`` that is used to filter the events
         """
+
         # If we already have one we cancel it
         if self.__listener is not None:
             self.__listener.cancel()
             self.__listener = None
 
-        self.__listener = HABApp.core.EventBusListener(
-            topic=source.name if isinstance(source, HABApp.core.items.BaseValueItem) else source,
-            callback=HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value'),
-            event_type=HABApp.core.events.ValueUpdateEvent
-        )
+        name = source.name if isinstance(source, HABApp.core.items.BaseValueItem) else source
+        cb = HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value')
+
+        if event_type is None:
+            event_type = HABApp.core.events.ValueUpdateEvent
+
+        if isinstance(event_type, HABApp.core.events.EventFilter):
+            self.__listener = event_type.create_event_listener(name, cb)
+        else:
+            self.__listener = HABApp.core.EventBusListener(name, cb, event_type)
+
         HABApp.core.EventBus.add_listener(self.__listener)
         return self
 
