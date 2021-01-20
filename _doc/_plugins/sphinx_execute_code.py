@@ -56,7 +56,8 @@ class CodeException(Exception):
         self.err = stderr
 
         self.line: Optional[int] = None
-        if m := re_line.search(self.err):
+        m = re_line.search(self.err)
+        if m:
             self.line = int(m.group(1))
 
 
