@@ -365,6 +365,8 @@ Mandatory values are ``type`` and ``name``, all other values are optional.
    tags: ['tag1', 'tag1']
 
 
+.. _ref_textual_thing_config_metadata:
+
 Metadata
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 It is possible to add metadata to the created items through the optional ``metadata`` entry in the item config.
