@@ -57,10 +57,10 @@ class BenchTime:
     def show(self, indent_name=0):
         total = sum(self.times)
         count = len(self.times)
-        _mean = mean(self.times)
-        _medi = median(self.times)
+        _mean = mean(self.times) if self.times else 0
+        _medi = median(self.times) if self.times else 0
 
-        per_sec = (count * self.factor) / total
+        per_sec = ((count * self.factor) / total) if total else 0
         unit = ''
         if per_sec > 1000:
             per_sec /= 1000
@@ -71,5 +71,6 @@ class BenchTime:
 
         print(f'{self.name:>{indent_name}s} | {format_duration(total)} | '
               f'{per_sec:{7 - len(unit)}.{3 - len(unit)}f}{unit} | '
-              f'{format_duration(_medi)} | {format_duration(min(self.times))} | {format_duration(max(self.times))} | '
+              f'{format_duration(_medi)} | {format_duration(min(self.times, default=0))} | '
+              f'{format_duration(max(self.times, default=0))} | '
               f'{format_duration(_mean)}')

@@ -56,8 +56,9 @@ class CodeException(Exception):
         self.err = stderr
 
         self.line: Optional[int] = None
-        m = re_line.search(self.err)
-        if m:
+        
+        # Find the last line where the error happened
+        for m in re_line.finditer(self.err):
             self.line = int(m.group(1))
 
 
@@ -109,6 +110,7 @@ class ExecuteCode(Directive):
                 executed_code += line + '\n'
 
         shown_code = shown_code.strip()
+        executed_code = executed_code.strip()
 
         # Show the example code
         if 'hide_code' not in self.options:
@@ -125,14 +127,20 @@ class ExecuteCode(Directive):
             output.append(nodes.caption(text=self.options['header_output']))
 
         try:
-            code_results = execute_code( executed_code, ignore_stderr='ignore_stderr' in self.options)
+            code_results = execute_code(executed_code, ignore_stderr='ignore_stderr' in self.options)
         except CodeException as e:
             # Newline so we don't have the build message mixed up with logs
             print('\n')
 
+            code_lines = executed_code.splitlines()
+
+            # If we don't get the line we print everything
+            if e.line is None:
+                e.line = len(code_lines)
+
             for i in range(max(0, e.line - 8), e.line - 1):
-                log.error(f'   {self.content[i]}')
-            log.error(f'   {self.content[e.line - 1]} <--')
+                log.error(f'   {code_lines[i]}')
+            log.error(f'   {code_lines[e.line - 1]} <--')
 
             log.error('')
             for line in e.err.splitlines():

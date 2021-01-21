@@ -4,6 +4,7 @@ import HABApp
 from HABApp.rule_manager import RuleFile
 from .bench_habapp import HABAppBenchRule
 from .bench_oh import OpenhabBenchRule
+from .bench_mqtt import MqttBenchRule
 
 
 class BenchFile(RuleFile):
@@ -17,6 +18,8 @@ class BenchFile(RuleFile):
         glob['__HABAPP__RULES'] = created_rules
 
         rule_ha = rule = HABAppBenchRule()
+        if HABApp.CONFIG.mqtt.connection.host:
+            rule = rule.link_rule(MqttBenchRule())
         if HABApp.CONFIG.openhab.connection.host:
             rule = rule.link_rule(OpenhabBenchRule())
 

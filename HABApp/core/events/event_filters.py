@@ -6,14 +6,14 @@ from . import ValueChangeEvent, ValueUpdateEvent
 
 
 class EventFilter:
-    def __init__(self, cls, **kwargs):
-        assert len(kwargs) < 3, 'Filter allows up to two args that will be filtered'
+    def __init__(self, event_type, /, **kwargs):
+        assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
 
         for arg in kwargs:
-            if arg not in cls.__annotations__:
-                raise AttributeError(f'Filter attribute "{arg}" does not exist for "{cls.__name__}"')
+            if arg not in event_type.__annotations__:
+                raise AttributeError(f'Filter attribute "{arg}" does not exist for "{event_type.__name__}"')
 
-        self.__cls = cls
+        self.__cls = event_type
         self.__filter = kwargs
 
     def create_event_listener(self, name, cb) -> 'HABApp.core.EventBusListener':

@@ -56,14 +56,12 @@ class AggregationItem(BaseValueItem):
         self.__period = period
         return self
 
-    def aggregation_source(self, source: typing.Union[BaseValueItem, str], event_type: typing.Union[
-            typing.Type['HABApp.core.events.ValueUpdateEvent'],
-            typing.Type['HABApp.core.events.ValueChangeEvent'],
-            'HABApp.core.events.EventFilter', None] = None) -> 'AggregationItem':
+    def aggregation_source(self, source: typing.Union[BaseValueItem, str],
+                           only_changes: bool = False) -> 'AggregationItem':
         """Set the source item which changes will be aggregated
 
         :param source: name or Item obj
-        :param event_type: optional additional event type of ``EventFilter`` that is used to filter the events
+        :param only_changes: if true only value changes instead of value updates will be added
         """
 
         # If we already have one we cancel it
@@ -71,17 +69,11 @@ class AggregationItem(BaseValueItem):
             self.__listener.cancel()
             self.__listener = None
 
-        name = source.name if isinstance(source, HABApp.core.items.BaseValueItem) else source
-        cb = HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value')
-
-        if event_type is None:
-            event_type = HABApp.core.events.ValueUpdateEvent
-
-        if isinstance(event_type, HABApp.core.events.EventFilter):
-            self.__listener = event_type.create_event_listener(name, cb)
-        else:
-            self.__listener = HABApp.core.EventBusListener(name, cb, event_type)
-
+        self.__listener = HABApp.core.EventBusListener(
+            topic=source.name if isinstance(source, HABApp.core.items.BaseValueItem) else source,
+            callback=HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value'),
+            event_type=HABApp.core.events.ValueChangeEvent if only_changes else HABApp.core.events.ValueUpdateEvent
+        )
         HABApp.core.EventBus.add_listener(self.__listener)
         return self
 
