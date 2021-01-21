@@ -7,6 +7,7 @@ class MyStringIO(io.StringIO):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = None
+        self.exists = False
 
     def open(self, *args, **kwargs):
         return self
@@ -14,6 +15,9 @@ class MyStringIO(io.StringIO):
     def close(self, *args, **kwargs):
         self.text = self.getvalue()
         super().close(*args, **kwargs)
+        
+    def is_file(self):
+        return self.exists
 
 
 def test_creation(tmp_path_factory):
@@ -35,7 +39,7 @@ def test_creation(tmp_path_factory):
     t = MyStringIO()
     create_items_file(t, {k.name: k for k in objs})
 
-    print('\n' + '-' * 120 + '\n' + t.text + '-' * 120)
+    # print('\n' + '-' * 120 + '\n' + t.text + '-' * 120)
 
     expected = """String  Test_zwave_o_1                                                {channel = "zwave:link:device"                        }
 String  Test_zwave_o_2                                                {channel = "zwave:link:device1",   auto_update="False"}
@@ -49,3 +53,10 @@ String  SoloName
 
 """
     assert expected == t.text
+
+    # When the file already exists we append with newlines
+    t = MyStringIO()
+    t.exists = True
+    create_items_file(t, {k.name: k for k in objs})
+
+    assert '\n\n\n' + expected == t.text

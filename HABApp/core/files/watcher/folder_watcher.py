@@ -13,21 +13,19 @@ OBSERVER: Optional[Observer] = None
 WATCHES: Dict[str, ObservedWatch] = {}
 
 
-def start(shutdown_helper):
+def start():
     global OBSERVER
 
     # start only once!
     assert OBSERVER is None
 
-    from HABApp.runtime.shutdown_helper import ShutdownHelper
-    assert isinstance(shutdown_helper, ShutdownHelper)
-
     OBSERVER = Observer()
     OBSERVER.start()
 
     # register for proper shutdown
-    shutdown_helper.register_func(OBSERVER.stop)
-    shutdown_helper.register_func(OBSERVER.join, last=True)
+    from HABApp.runtime import shutdown
+    shutdown.register_func(OBSERVER.stop, msg='Stopping folder observer')
+    shutdown.register_func(OBSERVER.join, last=True, msg='Joining folder observer threads')
     return None
 
 

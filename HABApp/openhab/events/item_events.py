@@ -11,6 +11,9 @@ NAME_START: int = 14
 
 
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
+    name: str
+    value: typing.Any
+
     def __init__(self, name: str = '', value: typing.Any = None):
         super().__init__()
 
@@ -28,12 +31,16 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
+    name: str
+    value: typing.Any
+    old_value: typing.Any
+
     def __init__(self, name: str = '', value: typing.Any = None, old_value: typing.Any = None):
         super().__init__()
 
         self.name: str = name
-        self.value = value
-        self.old_value = old_value
+        self.value: typing.Any = value
+        self.old_value: typing.Any = old_value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -49,11 +56,14 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
 
 
 class ItemCommandEvent(OpenhabEvent):
+    name: str
+    value: typing.Any
+
     def __init__(self, name: str = '', value: typing.Any = None):
         super().__init__()
 
         self.name: str = name
-        self.value = value
+        self.value: typing.Any = value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -65,6 +75,9 @@ class ItemCommandEvent(OpenhabEvent):
 
 
 class ItemAddedEvent(OpenhabEvent):
+    name: str
+    type: str
+
     def __init__(self, name: str = '', type: str = ''):
         super().__init__()
 
@@ -83,6 +96,9 @@ class ItemAddedEvent(OpenhabEvent):
 
 
 class ItemUpdatedEvent(OpenhabEvent):
+    name: str
+    type: str
+
     def __init__(self, name: str = '', type: str = ''):
         super().__init__()
 
@@ -102,6 +118,8 @@ class ItemUpdatedEvent(OpenhabEvent):
 
 
 class ItemRemovedEvent(OpenhabEvent):
+    name: str
+
     def __init__(self, name: str = ''):
         super().__init__()
 
@@ -117,6 +135,9 @@ class ItemRemovedEvent(OpenhabEvent):
 
 
 class ItemStatePredictedEvent(OpenhabEvent):
+    name: str
+    value: typing.Any
+
     def __init__(self, name: str = '', value: typing.Any = None):
         super().__init__()
 
@@ -134,14 +155,19 @@ class ItemStatePredictedEvent(OpenhabEvent):
 
 
 class GroupItemStateChangedEvent(OpenhabEvent):
+    name: str
+    item: str
+    value: typing.Any
+    old_value: typing.Any
+
     def __init__(self, name: str = '', item: str = '', value: typing.Any = None, old_value: typing.Any = None):
         super().__init__()
 
         self.name: str = name
         self.item: str = item
 
-        self.value = value
-        self.old_value = old_value
+        self.value: typing.Any = value
+        self.old_value: typing.Any = old_value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):

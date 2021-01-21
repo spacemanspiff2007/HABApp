@@ -107,7 +107,7 @@ class ScheduledCallbackBase:
 
     def jitter(self, secs: typing.Optional[int]) -> 'ScheduledCallbackBase':
         """Add a random jitter per call in the intervall [(-1) * secs ... secs] to the next run.
-         ``None`` will disable jitter.
+        ``None`` will disable jitter.
 
         :param secs: jitter in secs
         """
@@ -120,7 +120,7 @@ class ScheduledCallbackBase:
 
     def boundary_func(self, func: typing.Optional[typing.Callable[[datetime], datetime]]):
         """Add a function which will be called when the datetime changes. Use this to implement custom boundaries.
-         Use ``None`` to disable the boundary function.
+        Use ``None`` to disable the boundary function.
 
         :param func: Function which returns a datetime obj, arg is a datetime with the next call time
         """

@@ -130,5 +130,12 @@ def create_items_file(path: Path, items_dict: Dict[str, UserItem]):
         # newline aber each name block
         lines.append('\n')
 
-    with path.open(mode='w', encoding='utf-8') as file:
+    # If we have multiple parts configs in one file we separate them with newlines
+    if path.is_file():
+        lines.insert(0, '\n')
+        lines.insert(0, '\n')
+        lines.insert(0, '\n')
+
+    # Use append, file was deleted when we loaded the config
+    with path.open(mode='a', encoding='utf-8') as file:
         file.writelines(lines)

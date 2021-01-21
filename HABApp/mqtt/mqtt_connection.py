@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 import HABApp
 from HABApp.core import Items
 from HABApp.core.wrapper import log_exception
-from HABApp.runtime.shutdown_helper import ShutdownHelper
+from HABApp.runtime import shutdown
 from .events import MqttValueChangeEvent, MqttValueUpdateEvent
 from ..core.const.json import load_json
 
@@ -25,7 +25,7 @@ class MqttStatus:
 STATUS = MqttStatus()
 
 
-def setup(shutdown_helper: ShutdownHelper):
+def setup():
     config = HABApp.config.CONFIG.mqtt
 
     # config changes
@@ -33,7 +33,7 @@ def setup(shutdown_helper: ShutdownHelper):
     config.connection.subscribe_for_changes(connect)
 
     # shutdown
-    shutdown_helper.register_func(disconnect)
+    shutdown.register_func(disconnect, msg='Disconnecting MQTT')
 
 
 def connect():

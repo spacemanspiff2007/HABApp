@@ -11,8 +11,8 @@ from ._plugin import on_connect, on_disconnect, setup_plugins
 log = http_connection.log
 
 
-def setup(shutdown):
-    assert isinstance(shutdown, HABApp.runtime.ShutdownHelper), type(shutdown)
+def setup():
+    from HABApp.runtime import shutdown
 
     # initialize callbacks
     http_connection.ON_CONNECTED = on_connect
@@ -20,10 +20,10 @@ def setup(shutdown):
     http_connection.ON_SSE_EVENT = on_sse_event
 
     # shutdown handler for connection
-    shutdown.register_func(http_connection.stop_connection)
+    shutdown.register_func(http_connection.stop_connection, msg='Stopping openHAB connection')
 
     # shutdown handler for plugins
-    shutdown.register_func(on_disconnect)
+    shutdown.register_func(on_disconnect, msg='Stopping openHAB plugins')
 
     # initialize all plugins
     setup_plugins()
@@ -31,7 +31,7 @@ def setup(shutdown):
 
 
 async def start():
-    await http_connection.start_connection(),
+    await http_connection.start_connection()
 
 
 @ignore_exception

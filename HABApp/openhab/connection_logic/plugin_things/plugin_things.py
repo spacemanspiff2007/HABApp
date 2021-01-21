@@ -16,6 +16,10 @@ from .thing_worker import update_thing_cfg
 from .._plugin import OnConnectPlugin
 
 
+class DuplicateItemError(Exception):
+    pass
+
+
 class ManualThingConfig(OnConnectPlugin):
 
     def __init__(self):
@@ -149,7 +153,7 @@ class ManualThingConfig(OnConnectPlugin):
                     for item_cfg in cfg_entry.get_items(thing_context):
                         name = item_cfg.name
                         if name in create_items:
-                            raise ValueError(f'Duplicate item: {name}')
+                            raise DuplicateItemError(f'Duplicate item: {name}')
                         create_items[name] = item_cfg
 
                     # Channel overview, only if we have something configured
@@ -171,7 +175,7 @@ class ManualThingConfig(OnConnectPlugin):
                                 name = item_cfg.name
 
                                 if name in create_items:
-                                    raise ValueError(f'Duplicate item: {name}')
+                                    raise DuplicateItemError(f'Duplicate item: {name}')
                                 create_items[name] = item_cfg
 
                     # newline only if we create logs
@@ -180,6 +184,10 @@ class ManualThingConfig(OnConnectPlugin):
             except InvalidItemNameError as e:
                 HABAppError(log).add_exception(e).dump()
                 continue
+            except DuplicateItemError as e:
+                # Duplicates should never happen, the user clearly made a mistake, that's why we exit here
+                HABAppError(log).add_exception(e).dump()
+                return None
 
             # Create all items
             for item_cfg in create_items.values():

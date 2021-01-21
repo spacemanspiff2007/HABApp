@@ -1,10 +1,12 @@
 .. _ref_openhab:
 
+**************************************
 openHAB
-==================================
+**************************************
+
 
 Interaction with a openHAB
-------------------------------
+======================================
 All interaction with the openHAB is done through the ``self.oh`` or ``self.openhab`` object in the rule
 or through an `````OpenhabItem```.
 
@@ -13,7 +15,7 @@ or through an `````OpenhabItem```.
 
 
 Function parameters
-------------------------------
+--------------------------------------
 .. automodule:: HABApp.openhab.interface
    :members:
    :imported-members:
@@ -22,10 +24,10 @@ Function parameters
 .. _OPENHAB_ITEM_TYPES:
 
 Openhab item types
-------------------------------
+======================================
 
 Description and example
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 Openhab items are mapped to special classes and provide convenience functions.
 
@@ -51,7 +53,7 @@ Example:
 
 
 NumberItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.NumberItem
    :parts: 1
 
@@ -62,7 +64,7 @@ NumberItem
 
 
 ContactItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.ContactItem
    :parts: 1
 
@@ -73,7 +75,7 @@ ContactItem
 
 
 SwitchItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.SwitchItem
    :parts: 1
 
@@ -84,7 +86,7 @@ SwitchItem
 
 
 DimmerItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.DimmerItem
    :parts: 1
 
@@ -95,7 +97,7 @@ DimmerItem
 
 
 RollershutterItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.RollershutterItem
    :parts: 1
 
@@ -106,7 +108,7 @@ RollershutterItem
 
 
 ColorItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.ColorItem
    :parts: 1
 
@@ -117,7 +119,7 @@ ColorItem
 
 
 StringItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.StringItem
    :parts: 1
 
@@ -128,7 +130,7 @@ StringItem
 
 
 LocationItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.LocationItem
    :parts: 1
 
@@ -139,7 +141,7 @@ LocationItem
 
 
 PlayerItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.PlayerItem
    :parts: 1
 
@@ -150,7 +152,7 @@ PlayerItem
 
 
 GroupItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.GroupItem
    :parts: 1
 
@@ -161,7 +163,7 @@ GroupItem
 
 
 ImageItem
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.ImageItem
    :parts: 1
 
@@ -172,7 +174,7 @@ ImageItem
 
 
 Thing
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. inheritance-diagram:: HABApp.openhab.items.Thing
    :parts: 1
 
@@ -183,20 +185,15 @@ Thing
 
 
 Textual thing configuration
-------------------------------
+======================================
 
 Description
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 HABApp offers a special mechanism to textually define thing configuration parameters and linked items for things
 which have been added through the gui.
 This combines the best of both worlds:
 auto discovery, easy and fast sharing of parameters and items across things.
-
-.. WARNING::
-   The value of the configuration parameters will not be checked and will be written as specified.
-   It is recommended to use HABmin or PaperUI to generate the initial configuration and use this mechanism to spread
-   it to things of the same type.
 
 Configuration is done in the ``thing_your_name.yml`` file in the ``config`` folder (see :doc:`configuration`).
 Every file that starts with ``thing_`` has the ``.yml`` ending will be loaded.
@@ -205,27 +202,31 @@ The Parameters and items will be checked/set when HABApp connects to openHAB or
 whenever the corresponding file gets changed.
 
 Principle of operation
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
+
 All existing things from openHAB can be filtered by different criteria.
-For each one of these things it is then possible to
+For each one of these remaining things it is then possible to
 
 * Set thing parameters
-* Create items with wildcards taken from the thing
-* | Apply filters to the channels of the thing.
-  | For each matching channel it is possible to link items with wildcards taken from the thing and the matching channel
+* Create items with values taken from the thing fields
+* | Apply filters to the channels of the thing
+  | For each matching channel it is possible to create and link items with values taken from the thing and the matching channel values
+
 
 There is also a test mode which prints out all required information and does not make any changes.
 
 A valid ``.items`` file will automatically be created next to the ``.yml`` file containing all created items.
 It can be used to get a quick overview what items (would) have been created or copied into the items folder.
 
+
+
 File Structure
-~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 Configuration is done through a .yml file.
 
-Example
-"""""""""""""""""""""""""""""
 
+Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The following example will show how to set the Z-Wave Parameters 4, 5, 6 and 8 for a ``Philio PST02A`` Z-Wave sensor
 and how to automatically link items to it.
 
@@ -282,8 +283,8 @@ The entries ``thing config``, ``create items`` and ``channels`` are optional and
            icon: battery
 
 
-Multiple thing definitions in one file
-""""""""""""""""""""""""""""""""""""""""
+Multiple  and filter definitions in one file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 It is possible to add multiple thing processors into one file.
 To achieve this the root entry is now a list.
@@ -306,8 +307,68 @@ Filters can also be lists e.g. if the have to be applied multiple times to the s
      ...
 
 
-Adding Metadata to items
-"""""""""""""""""""""""""""""
+Thing configuration
+--------------------------------------
+
+With the ``thing config`` block it is possible to set a configuration for each matching thing.
+If the parameters are already correct, they will not be set again.
+
+.. WARNING::
+   The value of the configuration parameters will not be checked and will be written as specified.
+   It is recommended to use HABmin or PaperUI to generate the initial configuration and use this mechanism to spread
+   it to things of the same type.
+
+
+Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: yaml
+
+   thing config:
+     4: 99     # Light Threshold
+     5: 8      # Operation Mode
+     6: 4      # MultiSensor Function Switch
+     7: 20     # Customer Function
+
+References to other parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+It is possible to use references to mathematically build parameters from other parameters.
+Typically this would be fade duration and refresh interval.
+References to other parameter values can be created with ``$``.
+Example:
+
+.. code-block:: yaml
+
+   thing config:
+     5: 8
+     6: '$5 / 2'       # Use value from parameter 5 and divide it by two.
+     7: 'int($5 / 2)'  # it is possible to use normal python data conversions
+
+
+Item configuration
+--------------------------------------
+
+Items can be configured under ``create items -> []`` and ``channels -> [] -> link items -> []``.
+
+Structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Mandatory values are ``type`` and ``name``, all other values are optional.
+
+.. code-block:: yaml
+
+   type: Number
+   name: my_name
+   label: my_label
+   icon: my_icon
+   groups: ['group1', 'group2']
+   tags: ['tag1', 'tag1']
+
+
+.. _ref_textual_thing_config_metadata:
+
+Metadata
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 It is possible to add metadata to the created items through the optional ``metadata`` entry in the item config.
 
 There are two forms how metadata can be set. The implicit form for simple key-value pairs (e.g. ``autoupdate``) or
@@ -335,42 +396,68 @@ The config is equivalent to the following item configuration::
 
 
 
+Fields
+--------------------------------------
 
-References in thing config
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-It is possible to use references to mathematically build parameters from other parameters.
-Typically this would be fade duration and refresh interval.
-References to other parameter values can be created with ``$``.
-Example:
+
+Filtering things/channels
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The filter value can be applied to any available field from the Thing/Channel.
+The filter value is a regex that has to fully match the value.
+
+Syntax:
 
 .. code-block:: yaml
 
-   thing config:
-     5: 8
-     6: '$5 / 2'       # Use value from parameter 5 and divide it by two.
-     7: 'int($5 / 2)'  # it is possible to use normal python datatypes
+   filter:
+     FIELD_NAME: REGULAR_EXPRESSION
+
+e.g.
+
+.. code-block:: yaml
+
+   filter:
+     thing_uid: zwave:device:controller:node35
+
+If multiple filters are specified all have to match to select the Thing or Channel.
+
+.. code-block:: yaml
+
+     # Multiple filters on different columns
+     filter:
+       thing_type: zwave:fibaro.+
+       thing_uid: zwave:device:controller:node35
+
+     # Multiple filters on the same columns (rarely needed)
+     filter:
+     - thing_type: zwave:fibaro.+
+     - thing_type: zwave:fibaro_fgrgbw_00_000
 
 
-Wildcards for items and channels
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Wildcards are available for item configuration and can be applied to all fields except for 'type' and 'metadata'.
+Field values as inputs for items and channels
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Filed values are available for item configuration and can be applied to all fields except for ``type`` and ``metadata``.
 
 Syntax
-"""""""""""""
-Wildcards are framed with ``{}`` so the containing string has to be put in annotation marks.
+""""""""""""""""""""""""""""""""""""""
+Macros that select field values are framed with ``{}`` so the containing string has to be put in annotation marks.
 There are three modes of operation with wildcards:
 
-1. | Just insert the value from the wildcard:
-   | ``{wildcard}``
-2. | Insert a part of the value from the wildcard. A regular expression is used to extract the part and
+1. | Just insert the value from the field:
+   | ``{field}``
+2. | Insert a part of the value from the field. A regular expression is used to extract the part and
      therefore has to contain a capturing group.
-   | ``{wildcard, regex(with_group)}``
-3. | Do a regex, replace on the value from the wildcard and use the result
-   | ``{wildcard, regex, replace}``
+   | ``{field, regex(with_group)}``
+3. | Do a regex replace on the value from the field and use the result
+   | ``{field, regex, replace}``
 
-Available wildcards
-"""""""""""""""""""""
-The following wildcards are available for things:
+Available fields
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. tip::
+   Test mode will show a table with all available fields and their value
+
+The following fields are available for things:
 
 * ``thing_uid``
 * ``thing_type``
@@ -378,22 +465,20 @@ The following wildcards are available for things:
 * ``thing_label``
 * ``bridge_uid``
 
-Additional available wildcards for channels:
+Additional available fields for channels:
 
 * ``channel_uid``
 * ``channel_type``
 * ``channel_label``
 * ``channel_kind``
 
-.. tip::
-   Test mode will show a table with all available wildcards and their value
 
 
 Example
-~~~~~~~~~~
+--------------------------------------
 
 Log output
-"""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This will show the output for the example from `File Structure`_
 
 .. code-block:: text
@@ -498,7 +583,7 @@ This will show the output for the example from `File Structure`_
 
 
 Created items file
-"""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: text
 
@@ -519,44 +604,24 @@ Created items file
    Number   FrontDoor_Temperature       "FrontDoor Temperature [%d %%]"        <battery>                                  {channel = "zwave:device:controller:node5:sensor_temperature"}
 
 
-Entry sharing
-""""""""""""""""
-
-If the values should be reused `yml features anchors <https://en.wikipedia.org/wiki/YAML#Advanced_components>`_
-with ``&`` which then can be referenced with ``*``. This allows to reuse the defined structures:
-
-.. code-block:: yaml
-
-    my_key_value_pairs:  &my_kv  # <-- this creates the anchor node with the name my_kv
-      4: 99     # Light Threshold
-      5: 8      # Operation Mode
-      7: 20     # Customer Function
-
-    value_1: *my_kv  # <-- '*my_kv' references the anchor node my_kv
-    value_2: *my_kv
-    value_3:
-      <<: *my_kv    # <-- '<<: *my_kv' references and inserts the content (!) of the anchor node my_kv
-      4: 80         #     and then overwrites parameter 4
-
-
 
 
 Example openHAB rules
----------------------
+======================================
 
 Example 1
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 .. literalinclude:: ../conf/rules/openhab_rule.py
 
 
 Check status of things
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 This rule prints the status of all ``Things`` and shows how to subscribe to events of the ``Thing`` status
 
 .. literalinclude:: ../conf/rules/openhab_things.py
 
 Check status if thing is constant
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 Sometimes ``Things`` recover automatically from small outages. This rule only triggers then the ``Thing`` is constant
 for 60 seconds.
 

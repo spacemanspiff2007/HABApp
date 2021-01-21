@@ -125,21 +125,28 @@ class Rule:
 
     def listen_event(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
                      callback: typing.Callable[[typing.Any], typing.Any],
-                     event_type: typing.Union[AllEvents, typing.Any] = AllEvents
+                     event_type: typing.Union[typing.Type['HABApp.core.events.AllEvents'],
+                                              'HABApp.core.events.EventFilter', typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
 
         :param name: item or name to listen to. Use None to listen to all events
         :param callback: callback that accepts one parameter which will contain the event
-        :param event_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
-            :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openhab
-            or mqtt.
+        :param event_type: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEvent` or
+            :class:`~HABApp.core.events.ValueChangeEvent` which will also trigger on changes/update from openhab
+            or mqtt. Additionally it can be an instance of :class:`~HABApp.core.events.EventFilter` which additionally
+            filters on the values of the event. There are also templates for the most common filters, e.g.
+            :class:`~HABApp.core.events.ValueUpdateEventFilter` and :class:`~HABApp.core.events.ValueChangeEventFilter`
         """
         cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        listener = HABApp.core.EventBusListener(
-            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name, cb, event_type
-        )
+        name = name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name
+
+        if isinstance(event_type, HABApp.core.events.EventFilter):
+            listener = event_type.create_event_listener(name, cb)
+        else:
+            listener = HABApp.core.EventBusListener(name, cb, event_type)
+
         self.__event_listener.append(listener)
         HABApp.core.EventBus.add_listener(listener)
         return listener

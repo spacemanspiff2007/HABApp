@@ -25,7 +25,7 @@ async def test_multiple_add(parent_rule: DummyRule):
 
 
 @pytest.mark.asyncio
-async def test_watch_update(parent_rule: DummyRule, event_bus: TmpEventBus, sync_worker):
+async def test_watch_update(parent_rule: DummyRule, event_bus: TmpEventBus, sync_worker, caplog):
 
     for meth in ('watch_update', 'watch_change'):
 

@@ -8,14 +8,12 @@ import HABApp.parameters.parameter_files
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.openhab import connection_logic as openhab_connection
-from .shutdown_helper import ShutdownHelper
+from HABApp.runtime import shutdown
 
 
 class Runtime:
 
     def __init__(self):
-        self.shutdown = ShutdownHelper()
-
         self.config: HABApp.config.Config = None
 
         self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = HABApp.rule.interfaces.AsyncHttpConnection()
@@ -28,21 +26,21 @@ class Runtime:
 
         # Async Workers & shutdown callback
         HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
-        self.shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown)
+        shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown, msg='Stopping workers')
 
     def startup(self, config_folder: Path):
 
         # Start Folder watcher!
-        HABApp.core.files.watcher.start(self.shutdown)
+        HABApp.core.files.watcher.start()
 
         self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
 
         # MQTT
-        HABApp.mqtt.mqtt_connection.setup(self.shutdown)
+        HABApp.mqtt.mqtt_connection.setup()
         HABApp.mqtt.mqtt_connection.connect()
 
         # openhab
-        openhab_connection.setup(self.shutdown)
+        openhab_connection.setup()
 
         # Parameter Files
         HABApp.parameters.parameter_files.setup_param_files()

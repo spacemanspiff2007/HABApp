@@ -30,7 +30,7 @@ An example would be dynamically reloading files or an own notifier in case there
    * - HABApp.Errors
      - All errors in functions and rules of HABApp create an according event. Use this topic to create an own notifier
        in case of errors (e.g. Pushover).
-     - :class:`~HABApp.core.events.file_events.HABAppError` or ``str``
+     - :class:`~HABApp.core.events.habapp_events.HABAppError` or ``str``
 
 
 
@@ -107,7 +107,7 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     :hide_output:
 
     from HABApp.core.items import AggregationItem
-    my_agg = AggregationItem('MyAggregationItem')
+    my_agg = AggregationItem.get_create_item('MyAggregationItem')
 
     # Connect the source item with the aggregation item
     my_agg.aggregation_source('MyInputItem')
@@ -118,6 +118,7 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     # Use max as an aggregation function
     my_agg.aggregation_func = max
 
+
 The value of ``my_agg`` in the example will now always be the maximum of ``MyInputItem`` in the last two hours.
 It will automatically update and always reflect the latest changes of ``MyInputItem``.
 
@@ -127,7 +128,7 @@ It will automatically update and always reflect the latest changes of ``MyInputI
 
 Invoking OpenHAB actions
 ------------------------
-The openhab REST interface does not expose _actions: https://www.openhab.org/docs/configuration/actions.html,
+The openhab REST interface does not expose `actions <https://www.openhab.org/docs/configuration/actions.html>`_,
 and thus there is no way to trigger them from HABApp. If it is not possible to create and OpenHAB item that
 directly triggers the action there is a way to work around it with additional items within openhab.
 An additional OpenHAB (note not HABapp) rule listens to changes on those items and invokes the appropriate

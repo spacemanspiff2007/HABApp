@@ -56,11 +56,14 @@ class AggregationItem(BaseValueItem):
         self.__period = period
         return self
 
-    def aggregation_source(self, source: typing.Union[BaseValueItem, str]) -> 'AggregationItem':
+    def aggregation_source(self, source: typing.Union[BaseValueItem, str],
+                           only_changes: bool = False) -> 'AggregationItem':
         """Set the source item which changes will be aggregated
 
-        :param item_or_name: name or Item obj
+        :param source: name or Item obj
+        :param only_changes: if true only value changes instead of value updates will be added
         """
+
         # If we already have one we cancel it
         if self.__listener is not None:
             self.__listener.cancel()
@@ -69,7 +72,7 @@ class AggregationItem(BaseValueItem):
         self.__listener = HABApp.core.EventBusListener(
             topic=source.name if isinstance(source, HABApp.core.items.BaseValueItem) else source,
             callback=HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value'),
-            event_type=HABApp.core.events.ValueChangeEvent
+            event_type=HABApp.core.events.ValueChangeEvent if only_changes else HABApp.core.events.ValueUpdateEvent
         )
         HABApp.core.EventBus.add_listener(self.__listener)
         return self

@@ -7,6 +7,10 @@ NAME_START: int = 17
 
 
 class ChannelTriggeredEvent(OpenhabEvent):
+    name: str
+    event: str
+    channel: str
+
     def __init__(self, name: str = '', event: str = '', channel: str = ''):
         super().__init__()
 
