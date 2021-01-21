@@ -6,7 +6,7 @@ from . import ValueChangeEvent, ValueUpdateEvent
 
 
 class EventFilter:
-    def __init__(self, event_type, /, **kwargs):
+    def __init__(self, event_type, **kwargs):
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
 
         for arg in kwargs:
