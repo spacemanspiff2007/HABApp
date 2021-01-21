@@ -95,8 +95,8 @@ def test_complex_event_unpack(clean_event_bus: EventBus, sync_worker):
     assert vars(arg3) == vars(ValueChangeEvent(item.name, 'ValNew', 'ValOld'))
 
 
-def test_event_filter_single(clean_event_bus: EventBus, sync_worker):
-    events_all, events_filtered1, events_filtered2 = [], [], []
+def test_event_filter(clean_event_bus: EventBus, sync_worker):
+    events_all, events_filtered1, events_filtered2 , events_filtered3 = [], [], [], []
 
     def append_all(event):
         events_all.append(event)
@@ -107,9 +107,13 @@ def test_event_filter_single(clean_event_bus: EventBus, sync_worker):
     def append_filter2(event):
         events_filtered2.append(event)
 
+    def append_filter3(event):
+        events_filtered3.append(event)
+
     name = 'test_filter'
     func1 = wrappedfunction.WrappedFunction(append_filter1)
     func2 = wrappedfunction.WrappedFunction(append_filter2)
+    func3 = wrappedfunction.WrappedFunction(append_filter3)
 
     # listener to all events
     EventBus.add_listener(
@@ -120,22 +124,30 @@ def test_event_filter_single(clean_event_bus: EventBus, sync_worker):
     EventBus.add_listener(listener)
     listener = EventBusListener(name, func2, ValueUpdateEvent, None, None, 'value', 1)
     EventBus.add_listener(listener)
+    listener = EventBusListener(name, func3, ValueChangeEvent, 'old_value', None, 'value', 1)
+    EventBus.add_listener(listener)
 
     event0 = ValueUpdateEvent(name, None)
     event1 = ValueUpdateEvent(name, 'test_value')
     event2 = ValueUpdateEvent(name, 1)
+    event3 = ValueChangeEvent(name, 1, None)
 
     EventBus.post_event(name, event0)
     EventBus.post_event(name, event1)
     EventBus.post_event(name, event2)
+    EventBus.post_event(name, event3)
 
-    assert len(events_all) == 3
+    assert len(events_all) == 4
     assert vars(events_all[0]) == vars(event0)
     assert vars(events_all[1]) == vars(event1)
     assert vars(events_all[2]) == vars(event2)
+    assert vars(events_all[3]) == vars(event3)
 
     assert len(events_filtered1) == 1
     assert vars(events_filtered1[0]) == vars(event1)
 
     assert len(events_filtered2) == 1
     assert vars(events_filtered2[0]) == vars(event2)
+
+    assert len(events_filtered3) == 1
+    assert vars(events_filtered3[0]) == vars(event3)
