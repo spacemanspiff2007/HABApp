@@ -149,7 +149,7 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
             super().__init__()
             my_item = Item.get_item('MyItem')
 
-            # This will only to ValueUpdateEvents where the value==my_value
+            # This will only call the callback for ValueUpdateEvents where the value==my_value
             my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter(value='my_value'))
 
             # This is the same as above but with the generic filter
