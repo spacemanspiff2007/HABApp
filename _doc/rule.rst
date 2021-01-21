@@ -75,7 +75,7 @@ It is possible to listen to events through the :meth:`~HABApp.Rule.listen_event`
 The passed function will be called as soon as an event occurs and the event will pe passed as an argument
 into the function.
 
-There is the possibility to reduce the function call to a certain event type with an additional parameter
+There is the possibility to reduce the function calls to a certain event type with an additional parameter
 (typically :class:`~HABApp.core.ValueUpdateEvent` or :class:`~HABApp.core.ValueChangeEvent`).
 
 .. execute_code::
@@ -113,8 +113,8 @@ There is the possibility to reduce the function call to a certain event type wit
     MyRule()
 
 Additionally there is the possibility to filter not only on the event type but on the event values, too.
-This can be achieved by passing an *instance* of EventFilter as event type.
-There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent` and
+This can be achieved by passing an **instance** of EventFilter as event type.
+There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEventFilter` and
 :class:`~HABApp.core.events.ValueChangeEventFilter`) for the most used event types that provide type hints.
 
 
@@ -122,7 +122,7 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
 .. autoclass:: HABApp.core.events.EventFilter
    :members:
 
-.. autoclass:: HABApp.core.events.ValueUpdateEvent
+.. autoclass:: HABApp.core.events.ValueUpdateEventFilter
    :members:
 
 .. autoclass:: HABApp.core.events.ValueChangeEventFilter
@@ -150,12 +150,12 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
             my_item = Item.get_item('MyItem')
 
             # This will only to ValueUpdateEvents where the value==my_value
-            my_item.listen_event(self.on_val_value, ValueUpdateEventFilter(value='my_value'))
+            my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter(value='my_value'))
 
             # This is the same as above but with the generic filter
-            my_item.listen_event(self.on_val_value, EventFilter(ValueUpdateEvent, value='my_value'))
+            my_item.listen_event(self.on_val_my_value, EventFilter(ValueUpdateEvent, value='my_value'))
 
-        def on_val_value(self, event: ValueUpdateEvent):
+        def on_val_my_value(self, event: ValueUpdateEvent):
             assert isinstance(event, ValueUpdateEvent), type(event)
 
     MyRule()

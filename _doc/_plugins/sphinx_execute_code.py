@@ -56,7 +56,7 @@ class CodeException(Exception):
         self.err = stderr
 
         self.line: Optional[int] = None
-        
+
         # Find the last line where the error happened
         for m in re_line.finditer(self.err):
             self.line = int(m.group(1))
