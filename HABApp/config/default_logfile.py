@@ -1,12 +1,12 @@
 from string import Template
-from .platform_defaults import get_log_folder
+from .platform_defaults import get_log_folder, is_openhabian
 
 
 def get_default_logfile() -> str:
     template = Template("""
 formatters:
   HABApp_format:
-    format: '[%(asctime)s] [%(name)25s] %(levelname)8s | %(message)s'
+    format: ${LOG_FORMAT}
 
 
 handlers:
@@ -60,7 +60,11 @@ loggers:
 """)
 
     # Default values are relative
-    subs = {'EVENT_FILE': 'events.log', 'HABAPP_FILE': 'HABApp.log'}
+    subs = {
+        'EVENT_FILE': 'events.log',
+        'HABAPP_FILE': 'HABApp.log',
+        'LOG_FORMAT': "'[%(asctime)s] [%(name)25s] %(levelname)8s | %(message)s'",
+    }
 
     # Use abs path and rename events.log if we log in the openhab folder
     log_folder = get_log_folder()
@@ -70,5 +74,10 @@ loggers:
 
         # Keep this relative so it is easier to read in the file
         subs['EVENT_FILE'] = 'HABApp_events.log'
+
+    # prepare fronttail integration for openhabian
+    if is_openhabian():
+        subs['LOG_FORMAT'] = "'%(asctime)s.%(msecs)03d [%(levelname)-5s] [%(name)-36s] - %(message)s'\n    " \
+                             "datefmt: '%Y-%m-%d %H:%M:%S'"
 
     return template.substitute(**subs)

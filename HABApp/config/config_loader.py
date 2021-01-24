@@ -10,6 +10,8 @@ import ruamel.yaml
 from HABApp import __version__
 from . import CONFIG
 from .default_logfile import get_default_logfile
+from .platform_defaults import is_openhabian
+
 
 _yaml_param = ruamel.yaml.YAML(typ='safe')
 _yaml_param.default_flow_style = False
@@ -125,6 +127,10 @@ class HABAppConfigLoader:
         except Exception as e:
             print(f'Error loading logging config: {e}')
             return None
+
+        # if we are on openhabian we use the level for fronttail otherwise the syntax highlighting does not work
+        if is_openhabian():
+            logging.addLevelName(logging.WARNING, 'WARN')
 
         # Try rotating the logs on first start
         if self.first_start:
