@@ -134,6 +134,22 @@ If your installation is not done in "/opt/habapp/bin" replace accordingly as wel
 
 Press Ctrl + x to save.
 
+If you want HABApp to be restarted automatically when openHAB is restarted add this file as well "/etc/systemd/system/habapp.service.d/override.conf" or use 
+
+   sudo systemctl edit habapp.service
+
+for openHAB 2.x
+
+    [Unit]
+    After=openhab2.service
+    Requires=openhab2.service
+
+for openHAB 3.x
+
+    [Unit]
+    After=openhab.service
+    Requires=openhab.service
+
 Now execute the following commands to enable autostart::
 
     sudo systemctl --system daemon-reload
