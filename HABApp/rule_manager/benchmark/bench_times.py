@@ -19,10 +19,10 @@ def format_duration(duration: Union[None, str, float]) -> str:
         return f'{duration * 1000:4.1f}ms'
     elif duration < 10:
         # 1.234s
-        return f'{duration:4.3f}s'
+        return f'{duration:5.3f}s'
     else:
         #  19.2s
-        return f'{duration:4.1f}s'
+        return f'{duration:5.1f}s'
 
 
 class BenchContainer:

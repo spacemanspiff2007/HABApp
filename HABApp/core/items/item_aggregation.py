@@ -2,10 +2,11 @@ import asyncio
 import collections
 import time
 import typing
+from datetime import timedelta
 
 import HABApp
 from . import BaseValueItem
-from ..wrapper import ignore_exception
+from ..wrapper import process_exception
 
 
 class AggregationItem(BaseValueItem):
@@ -31,12 +32,14 @@ class AggregationItem(BaseValueItem):
     def __init__(self, name: str):
         super().__init__(name)
         self.__period: float = 0
-        self.__aggregation_func: typing.Callable[[typing.Iterable], typing.Any] = lambda x: None
+        self.__aggregation_func: typing.Callable[[typing.Iterable], typing.Any] = lambda x: x
 
         self._ts: typing.Deque[float] = collections.deque()
         self._vals: typing.Deque[typing.Any] = collections.deque()
 
         self.__listener: typing.Optional[HABApp.core.EventBusListener] = None
+
+        self.__task: typing.Optional[asyncio.Future] = None
 
     def aggregation_func(self, func: typing.Callable[[typing.Iterable], typing.Any]) -> 'AggregationItem':
         """Set the function which will be used to aggregate all values. E.g. ``min`` or ``max``
@@ -47,13 +50,28 @@ class AggregationItem(BaseValueItem):
         self.__aggregation_func = func
         return self
 
-    def aggregation_period(self, period: typing.Union[float, int]) -> 'AggregationItem':
+    def aggregation_period(self, period: typing.Union[float, int, timedelta]) -> 'AggregationItem':
         """Set the period in which the items will be aggregated
 
         :param period: period in seconds
         """
+        if isinstance(period, timedelta):
+            period = period.total_seconds()
+
         assert period > 0, period
         self.__period = period
+
+        # Clean old items (e.g. if we made the period shorter)
+        changed = False
+        while len(self._ts) > 1 and self._ts[1] + self.__period < time.time():
+            self._ts.popleft()
+            self._vals.popleft()
+            changed = True
+
+        if changed:
+            val = self.__aggregation_func(self._vals)
+            self.post_value(val)
+
         return self
 
     def aggregation_source(self, source: typing.Union[BaseValueItem, str],
@@ -84,44 +102,52 @@ class AggregationItem(BaseValueItem):
             self.__listener.cancel()
             self.__listener = None
 
-    async def __force_update(self):
-        start = time.time()
-        await asyncio.sleep(self.__period)
-        sleep = time.time() - start
+        if self.__task is not None:
+            self.__task.cancel()
+            self.__task = None
 
-        # we need to sleep minimum the period, otherwise the value doesn't fall out of the interval
-        # sometimes asyncio.sleep returns a little bit too early - this is what gets prevented here
-        if sleep < self.__period:
-            await asyncio.sleep(self.__period - sleep)
+    async def __update_task(self):
+        try:
+            while len(self._ts) > 1:
+                ts = self._ts[1]
+                now = time.time()
 
-        self._aggregate()
+                left = (ts + self.__period) - now
+                while left > 0:
+                    await asyncio.sleep(left)
+                    # sometimes we wake up to early
+                    now = time.time()
+                    left = (ts + self.__period) - now
+
+                self._ts.popleft()
+                self._vals.popleft()
+
+                # old entries are removed -> now do the aggregation
+                try:
+                    val = self.__aggregation_func(self._vals)
+                except Exception as e:
+                    process_exception(self.__aggregation_func, e)
+                    continue
+                self.post_value(val)
+
+        except Exception as e:
+            process_exception(self.__update_task, e)
+        finally:
+            self.__task = None
+        return None
 
     async def _add_value(self, event: 'HABApp.core.events.ValueChangeEvent'):
         self._ts.append(time.time())
         self._vals.append(event.value)
 
-        # do another update when the value has fallen ouf of the period
-        asyncio.ensure_future(self.__force_update())
+        if self.__task is None:
+            self.__task = asyncio.create_task(self.__update_task())
 
-        self._aggregate()
-        return None
+        try:
+            val = self.__aggregation_func(self._vals)
+        except Exception as e:
+            process_exception(self.__aggregation_func, e)
+            return None
 
-    @ignore_exception
-    def _aggregate(self):
-        # first remove entries which are too old
-        now = time.time()
-        while True:
-            ct = len(self._ts)
-            if ct <= 1:
-                break
-
-            # we keep one item from before the period because its value is valid into the period
-            if (now - self._ts[1]) <= self.__period:
-                break
-
-            self._ts.popleft()
-            self._vals.popleft()
-
-        # old entries are removed -> now do the aggregation
-        val = self.__aggregation_func(self._vals)
         self.post_value(val)
+        return None
