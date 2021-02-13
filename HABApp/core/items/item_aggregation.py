@@ -141,7 +141,8 @@ class AggregationItem(BaseValueItem):
         self._vals.append(event.value)
 
         if self.__task is None:
-            self.__task = asyncio.create_task(self.__update_task())
+            # todo: rename to asyncio.create_task once we go py3.7 only
+            self.__task = asyncio.ensure_future(self.__update_task())
 
         try:
             val = self.__aggregation_func(self._vals)
