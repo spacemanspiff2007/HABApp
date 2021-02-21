@@ -1,18 +1,20 @@
 
-
+**************************************
 Logging
-==================================
+**************************************
 
+Configuration
+======================================
 
 Example usage
-------------------------------
+""""""""""""""""""""""""""""""""""""""
 The logging library is the standard python library.
 
 .. literalinclude:: ../conf/rules/logging_rule.py
 
 
 Example configuration
-------------------------------
+""""""""""""""""""""""""""""""""""""""
 Configuration of logging is done through ``logging.yml``. During the first start a default configuration will be created.
 It is recommended to extend the default configuration.
 
@@ -25,9 +27,6 @@ but the format should be pretty straight forward.
 
 .. code-block:: yaml
     
-    # required, can not be omitted but does nothing
-    version : 1
-
     # describes the output format
     formatters:
       HABApp_format:
@@ -68,4 +67,18 @@ but the format should be pretty straight forward.
           - MyRuleHandler  # This logger uses the MyRuleHandler
         propagate: False
 
-    
+
+Custom log levels
+""""""""""""""""""""""""""""""""""""""
+It is possible to add custom log levels or rename existing levels.
+This is possible via the optional ``levels`` entry in the logging configuration file.
+
+.. code-block:: yaml
+
+    levels:
+      WARNING: WARN  # Changes WARNING to WARN
+      5: TRACE       # Adds a new loglevel "TRACE" with value 5
+
+    formatters:
+      HABApp_format:
+    ...

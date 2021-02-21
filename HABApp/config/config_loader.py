@@ -4,9 +4,11 @@ import time
 import traceback
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
+from typing import Any, Dict, List
 
 import ruamel.yaml
 
+import HABApp
 from HABApp import __version__
 from . import CONFIG
 from .default_logfile import get_default_logfile
@@ -46,19 +48,37 @@ class HABAppConfigLoader:
         # Load Config initially
         self.first_start = True
         try:
-            # try load logging config first. If we use abs path we can log errors when loading config.yml
-            self.on_file_event(self.file_conf_logging)
-            self.on_file_event(self.file_conf_habapp)
+            self.load_cfg()
+            load_cfg = False
+        except Exception:
+            load_cfg = True
+
+        # Load logging configuration.
+        try:
+            self.load_log()
         except AbsolutePathExpected:
-            self.on_file_event(self.file_conf_habapp)
-            self.on_file_event(self.file_conf_logging)
+            # This error only occurs when the config was not loaded because of an exception.
+            # Since we crash in load_cfg again we'll show that error because it's the root cause.
+            pass
+
+        # If there was an error reload the config again so we hopefully can log the error message
+        if load_cfg:
+            self.load_cfg()
+
         self.first_start = False
 
-    def on_file_event(self, path: Path):
-        if path.name == 'config.yml':
-            self.load_cfg()
-        if path.name == 'logging.yml':
-            self.load_log()
+        # Watch folders so we can reload the config on the fly
+        watcher = HABApp.core.files.watcher.AggregatingAsyncEventHandler(
+            self.folder_conf, self.files_changed, file_ending='.yml', watch_subfolders=False
+        )
+        HABApp.core.files.watcher.add_folder_watch(watcher)
+
+    def files_changed(self, paths: List[Path]):
+        for path in paths:
+            if path.name == 'config.yml':
+                self.load_cfg()
+            if path.name == 'logging.yml':
+                self.load_log()
 
     def __check_create_logging(self):
         if self.file_conf_logging.is_file():
@@ -77,7 +97,7 @@ class HABAppConfigLoader:
 
         # check if folders exist and print warnings, maybe because of missing permissions
         if not CONFIG.directories.rules.is_dir():
-            log.warning( f'Folder for rules files does not exist: {CONFIG.directories.rules}')
+            log.warning(f'Folder for rules files does not exist: {CONFIG.directories.rules}')
 
         log.debug('Loaded HABApp config')
         return None
@@ -88,7 +108,7 @@ class HABAppConfigLoader:
             return None
 
         with self.file_conf_logging.open('r', encoding='utf-8') as file:
-            cfg = _yaml_param.load(file)
+            cfg = _yaml_param.load(file)    # type: Dict[str, Any]
 
         # fix filenames
         for handler, handler_cfg in cfg.get('handlers', {}).items():
@@ -119,11 +139,18 @@ class HABAppConfigLoader:
             cfg['version'] = 1
             log_version_info = False
 
+        # Allow the user to set his own logging levels (with aliases)
+        for level, alias in cfg.pop('levels', {}).items():
+            if not isinstance(level, int):
+                level = logging._nameToLevel[level]
+            logging.addLevelName(level, str(alias))
+
         # load prepared logging
         try:
             logging.config.dictConfig(cfg)
         except Exception as e:
             print(f'Error loading logging config: {e}')
+            log.error(f'Error loading logging config: {e}')
             return None
 
         # Try rotating the logs on first start
@@ -142,6 +169,7 @@ class HABAppConfigLoader:
 
                 try:
                     handler.acquire()
+                    handler.close()
                     handler.doRollover()
                 except Exception:
                     lines = traceback.format_exc().splitlines()

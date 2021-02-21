@@ -43,6 +43,7 @@ class Directories(PathContainer):
 class HABAppConfig(ConfigFile):
     location = Location()
     directories = Directories()
+
     mqtt = Mqtt()
     openhab = Openhab()
 
