@@ -62,15 +62,9 @@ class AggregationItem(BaseValueItem):
         self.__period = period
 
         # Clean old items (e.g. if we made the period shorter)
-        changed = False
         while len(self._ts) > 1 and self._ts[1] + self.__period < time.time():
             self._ts.popleft()
             self._vals.popleft()
-            changed = True
-
-        if changed:
-            val = self.__aggregation_func(self._vals)
-            self.post_value(val)
 
         return self
 

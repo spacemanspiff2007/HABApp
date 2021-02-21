@@ -14,7 +14,7 @@ async def test_aggregation_item():
 
     agg.aggregation_period(INTERVAL * 6)
     agg.aggregation_source(src)
-    agg.aggregation_func(max)
+    agg.aggregation_func(lambda x: (max(x), list(x)))
 
     async def post_val(t, v):
         await asyncio.sleep(t)
@@ -27,28 +27,28 @@ async def test_aggregation_item():
     asyncio.ensure_future(post_val(5 * INTERVAL, 2))
 
     await asyncio.sleep(INTERVAL + INTERVAL / 2)
-    assert agg.value == 1
+    assert agg.value == (1, [1])
 
     await asyncio.sleep(INTERVAL)
-    assert agg.value == 3
+    assert agg.value == (3, [1, 3])
 
     await asyncio.sleep(INTERVAL)
-    assert agg.value == 5
+    assert agg.value == (5, [1, 3, 5])
 
     await asyncio.sleep(INTERVAL * 6)    # 0.6 because the value reaches into the interval!
-    assert agg.value == 5
+    assert agg.value == (5, [5, 4, 2])
 
     await asyncio.sleep(INTERVAL)
-    assert agg.value == 4
+    assert agg.value == (4, [4, 2])
 
     await asyncio.sleep(INTERVAL)
-    assert agg.value == 2
+    assert agg.value == (2, [2])
 
     await asyncio.sleep(INTERVAL)
-    assert agg.value == 2
+    assert agg.value == (2, [2])
 
     await asyncio.sleep(INTERVAL)
-    assert agg.value == 2
+    assert agg.value == (2, [2])
 
 
 @pytest.mark.asyncio
@@ -60,7 +60,7 @@ async def test_aggregation_item_cleanup():
 
     agg.aggregation_period(INTERVAL * 6)
     agg.aggregation_source(src)
-    agg.aggregation_func(lambda x: (len(x), list(x)))
+    agg.aggregation_func(lambda x: list(x))
 
     async def post_val(t, v):
         await asyncio.sleep(t)
@@ -76,4 +76,4 @@ async def test_aggregation_item_cleanup():
     await asyncio.sleep(5 * INTERVAL)
 
     agg.aggregation_period(INTERVAL)
-    assert agg.value == (2, [7, 9])
+    assert list(agg._vals) == [7, 9]

@@ -11,7 +11,7 @@ def test_defaults():
 
 def test_valid_yml(monkeypatch):
     """ensure we create valid yml files"""
-    
+
     def ensure_key(key, obj):
         if isinstance(obj, dict):
             for k, v in obj.items():

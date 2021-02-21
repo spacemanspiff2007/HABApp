@@ -83,9 +83,9 @@ loggers:
                 '  Frontail_format:\n' \
                 "    format: '%(asctime)s.%(msecs)03d [%(levelname)-5s] [%(name)-36s] - %(message)s'\n" \
                 "    datefmt: '%Y-%m-%d %H:%M:%S'"
-    
+
             subs['HABAPP_FILE_FORMAT'] = 'Frontail_format'
-    
+
             # frontail expects WARN instead of WARNING
             subs['LOG_LEVELS'] = 'levels:\n  WARNING: WARN\n\n'
 
