@@ -1,9 +1,9 @@
-from typing import Any, Callable, Optional
 import logging
 from pathlib import Path
-from HABApp.core.logger import log_error
+from typing import Any, Callable, Optional
 
 import HABApp
+from HABApp.core.logger import log_error
 
 
 def add_event_bus_listener(
@@ -35,11 +35,12 @@ def add_event_bus_listener(
     def filter_func_unload(event: HABApp.core.events.habapp_events.RequestFileUnloadEvent):
         if not func(event.name):
             return None
+
         name = event.name
         path = event.get_path()
         func_unload(name, path)
 
-    if filter_func_unload is not None:
+    if func_unload is not None:
         HABApp.core.EventBus.add_listener(
             HABApp.core.EventBusListener(
                 HABApp.core.const.topics.FILES,
@@ -48,7 +49,7 @@ def add_event_bus_listener(
             )
         )
 
-    if filter_func_load is not None:
+    if func_load is not None:
         HABApp.core.EventBus.add_listener(
             HABApp.core.EventBusListener(
                 HABApp.core.const.topics.FILES,

@@ -22,7 +22,7 @@ def main() -> typing.Union[int, str]:
 
         def shutdown_handler(sig, frame):
             print('Shutting down ...')
-            app.shutdown.request_shutdown()
+            HABApp.runtime.shutdown.request_shutdown()
 
         # register shutdown helper
         signal.signal(signal.SIGINT, shutdown_handler)

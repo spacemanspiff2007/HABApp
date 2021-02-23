@@ -1,9 +1,10 @@
 import logging
+import typing
 
 import HABApp
 from .const.topics import ERRORS as _T_ERRORS
-from .const.topics import WARNINGS as _T_WARNINGS
 from .const.topics import INFOS as _T_INFOS
+from .const.topics import WARNINGS as _T_WARNINGS
 
 
 def log_error(logger: logging.Logger, text: str):
@@ -46,7 +47,7 @@ class HABAppLogger:
     _TOPIC: str
 
     def __init__(self, log: logging.Logger):
-        self.lines = []
+        self.lines: typing.List[str] = []
         self.logger = log
 
     def add(self, text: str, *args, **kwargs):
