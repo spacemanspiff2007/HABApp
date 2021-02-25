@@ -70,7 +70,7 @@ class RuleFile:
 
     def load(self) -> bool:
 
-        created_rules = []
+        created_rules: typing.List[HABApp.rule.Rule] = []
 
         ign = HABApp.core.wrapper.ExceptionToHABApp(logger=log)
         ign.proc_tb = self.__process_tc

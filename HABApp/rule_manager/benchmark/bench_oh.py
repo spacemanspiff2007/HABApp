@@ -14,6 +14,8 @@ LOCK = Lock()
 class OpenhabBenchRule(BenchBaseRule):
     BENCH_TYPE = 'openHAB'
 
+    RTT_BENCH_MAX = 15
+
     def __init__(self):
         super().__init__()
 
@@ -57,31 +59,48 @@ class OpenhabBenchRule(BenchBaseRule):
     def bench_item_create(self):
         print('Bench item operations ', end='')
 
+        max_duration = 30   # how long should each bench take
+
         times = BenchContainer()
 
+        start_bench = time.time()
         b = times.create('create item')
         for k in self.name_list:
             start = time.time()
             self.openhab.create_item('Number', k, label='MyLabel')
             b.times.append(time.time() - start)
 
+            # limit bench time on weak devices
+            if time.time() - start_bench > max_duration:
+                break
+
         time.sleep(0.2)
 
         print('.', end='')
+        start_bench = time.time()
         b = times.create('update item')
         for k in self.name_list:
             start = time.time()
             self.openhab.create_item('Number', k, label='New Label')
             b.times.append(time.time() - start)
 
+            # limit bench time on weak devices
+            if time.time() - start_bench > max_duration:
+                break
+
         time.sleep(0.2)
 
         print('.', end='')
+        start_bench = time.time()
         b = times.create('delete item')
         for k in self.name_list:
             start = time.time()
             self.openhab.remove_item(k)
             b.times.append(time.time() - start)
+
+            # limit bench time on weak devices
+            if time.time() - start_bench > max_duration:
+                break
 
         print('. done!\n')
         times.show()
@@ -122,7 +141,7 @@ class OpenhabBenchRule(BenchBaseRule):
         self.item_name = self.name_list[0]
         self.openhab.create_item('String', self.item_name, label='MyLabel')
 
-        for i in range(2000):
+        for i in range(3000):
             self.item_values.append(str(random.randint(0, 99999999)))
 
         listener = self.listen_event(
@@ -137,7 +156,7 @@ class OpenhabBenchRule(BenchBaseRule):
 
         self.run_soon(LOCK.acquire)
         time.sleep(1)
-        LOCK.acquire(True, 6)
+        LOCK.acquire(True, OpenhabBenchRule.RTT_BENCH_MAX)
 
         listener.cancel()
         if LOCK.locked():
@@ -152,7 +171,7 @@ class OpenhabBenchRule(BenchBaseRule):
         self.bench_times.times.append(time.time() - self.time_sent)
 
         # Time up -> stop benchmark
-        if time.time() - self.bench_started > 5:
+        if time.time() - self.bench_started > OpenhabBenchRule.RTT_BENCH_MAX:
             LOCK.release()
             return None
 

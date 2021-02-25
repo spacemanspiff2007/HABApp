@@ -11,3 +11,7 @@ def get_log_folder(default: Optional[Path] = None) -> Optional[Path]:
             return path
 
     return default
+
+
+def is_openhabian():
+    return Path('/opt/openhabian').is_dir()
