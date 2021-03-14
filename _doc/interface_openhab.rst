@@ -8,7 +8,7 @@ openHAB
 Interaction with a openHAB
 ======================================
 All interaction with the openHAB is done through the ``self.oh`` or ``self.openhab`` object in the rule
-or through an `````OpenhabItem```.
+or through an ``OpenhabItem``.
 
 .. image:: /gifs/openhab.gif
 

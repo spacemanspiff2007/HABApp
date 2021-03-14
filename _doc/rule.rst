@@ -76,7 +76,20 @@ The passed function will be called as soon as an event occurs and the event will
 into the function.
 
 There is the possibility to reduce the function calls to a certain event type with an additional parameter
-(typically :class:`~HABApp.core.ValueUpdateEvent` or :class:`~HABApp.core.ValueChangeEvent`).
+(typically :class:`~HABApp.core.ValueUpdateEvent` or :class:`~HABApp.core.ValueChangeEvent`). Those two
+events correspond to the OpenHab events ``ItemStateEvent`` and ``ItemStateChangedEvent``. See this 
+`OpenHab page <https://next.openhab.org/docs/developer/utils/events.html#the-core-events>`_ for the 
+explanation of various item events. Besides the two typical events above, HABApp also provides a number
+of event classes (defined in ``item_events.py``) that map directly to the OpenHab item events:
+
+- ``ItemStateEvent``
+- ``ItemStateChangedEvent``
+- ``ItemCommandEvent``
+- ``ItemAddedEvent``
+- ``ItemUpdatedEvent``
+- ``ItemRemovedEvent`` 
+- ``ItemStatePredictedEvent``
+- ``GroupItemStateChangedEvent``
 
 .. execute_code::
     :hide_output:
