@@ -8,7 +8,7 @@ openHAB
 Interaction with a openHAB
 ======================================
 All interaction with the openHAB is done through the ``self.oh`` or ``self.openhab`` object in the rule
-or through an `````OpenhabItem```.
+or through an ``OpenhabItem``.
 
 .. image:: /gifs/openhab.gif
 
@@ -28,8 +28,8 @@ Openhab item types
 
 Description and example
 --------------------------------------
-
-Openhab items are mapped to special classes and provide convenience functions.
+Items that are created from openHAB inherit all from :class:`~HABApp.openhab.items.OpenhabItem` and
+provide convenience functions which simplify many things.
 
 Example:
 
@@ -184,6 +184,199 @@ Thing
    :member-order: groupwise
 
 
+Openhab event types
+======================================
+
+Openhab produces various events that are mapped to the internal event bus.
+On the `OpenHab page <https://next.openhab.org/docs/developer/utils/events.html#the-core-events>`_
+there is an explanation for the various events.
+
+Item events
+--------------------------------------
+
+ItemStateEvent
+""""""""""""""""""""""""""""""""""""""
+Since this event inherits from :class:`~HABApp.core.events.ValueUpdateEvent` you can listen to :class:`~HABApp.core.events.ValueUpdateEvent`
+and it will also trigger for :class:`~HABApp.openhab.events.ItemStateEvent`.
+
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemStateChangedEvent
+""""""""""""""""""""""""""""""""""""""
+Since this event inherits from :class:`~HABApp.core.events.ValueChangeEvent` you can listen to :class:`~HABApp.core.events.ValueChangeEvent`
+and it will also trigger for :class:`~HABApp.openhab.events.ItemStateChangedEvent`.
+
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateChangedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateChangedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemCommandEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ItemCommandEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemCommandEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemAddedEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ItemAddedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemAddedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemUpdatedEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ItemUpdatedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemUpdatedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemRemovedEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ItemRemovedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemRemovedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemStatePredictedEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ItemStatePredictedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStatePredictedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+GroupItemStateChangedEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.GroupItemStateChangedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.GroupItemStateChangedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+Channel events
+--------------------------------------
+
+
+ChannelTriggeredEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ChannelTriggeredEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ChannelTriggeredEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+Thing events
+--------------------------------------
+
+
+ThingStatusInfoChangedEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoChangedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingStatusInfoChangedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingStatusInfoEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingStatusInfoEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingConfigStatusInfoEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ThingConfigStatusInfoEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingConfigStatusInfoEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingFirmwareStatusInfoEvent
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ThingFirmwareStatusInfoEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingFirmwareStatusInfoEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+Event filters
+--------------------------------------
+
+
+ItemStateEventFilter
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateEventFilter
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateEventFilter
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemStateChangedEventFilter
+""""""""""""""""""""""""""""""""""""""
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateChangedEventFilter
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateChangedEventFilter
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
 Textual thing configuration
 ======================================
 
@@ -283,7 +476,7 @@ The entries ``thing config``, ``create items`` and ``channels`` are optional and
            icon: battery
 
 
-Multiple  and filter definitions in one file
+Multiple filters and filter definitions in one file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 It is possible to add multiple thing processors into one file.
@@ -434,9 +627,10 @@ If multiple filters are specified all have to match to select the Thing or Chann
      - thing_type: zwave:fibaro_fgrgbw_00_000
 
 
-Field values as inputs for items and channels
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Filed values are available for item configuration and can be applied to all fields except for ``type`` and ``metadata``.
+Field values as inputs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Filed values are available for item configuration and can be applied to all fields
+in the item configuration except for ``type`` and ``metadata``.
 
 Syntax
 """"""""""""""""""""""""""""""""""""""
