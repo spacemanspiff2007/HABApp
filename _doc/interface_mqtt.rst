@@ -124,7 +124,7 @@ Mqtt events
 MqttValueUpdateEvent
 """"""""""""""""""""""""""""""""""""""
 Since this event inherits from :class:`~HABApp.core.events.ValueUpdateEvent` you can listen to :class:`~HABApp.core.events.ValueUpdateEvent`
-and it will also trigger for :class:`~HABApp.openhab.events.ItemStateEvent`.
+and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueUpdateEvent`.
 
 .. inheritance-diagram:: HABApp.mqtt.events.MqttValueUpdateEvent
    :parts: 1

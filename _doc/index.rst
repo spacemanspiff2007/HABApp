@@ -14,6 +14,7 @@ Welcome to the HABApp documentation!
    logging
    rule
    parameters
+   interface_habapp
    interface_openhab
    interface_mqtt
    advanced_usage

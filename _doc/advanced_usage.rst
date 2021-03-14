@@ -95,37 +95,6 @@ Example
 
 
 
-AggregationItem
-------------------------------
-The aggregation item is an item which takes the values of another item in a time period as an input.
-It then allows to process these values and generate an aggregated output based on it.
-The item makes implementing time logic like "Has it been dark for the last hour?" or
-"Was there frost during the last six hours?" really easy.
-And since it is just like a normal item triggering on changes etc. is possible, too.
-
-.. execute_code::
-    :hide_output:
-
-    from HABApp.core.items import AggregationItem
-    my_agg = AggregationItem.get_create_item('MyAggregationItem')
-
-    # Connect the source item with the aggregation item
-    my_agg.aggregation_source('MyInputItem')
-
-    # Aggregate all changes in the last two hours
-    my_agg.aggregation_period(2 * 3600)
-
-    # Use max as an aggregation function
-    my_agg.aggregation_func = max
-
-
-The value of ``my_agg`` in the example will now always be the maximum of ``MyInputItem`` in the last two hours.
-It will automatically update and always reflect the latest changes of ``MyInputItem``.
-
-
-.. autoclass:: HABApp.core.items.AggregationItem
-   :members:
-
 Invoking OpenHAB actions
 ------------------------
 The openhab REST interface does not expose `actions <https://www.openhab.org/docs/configuration/actions.html>`_,
