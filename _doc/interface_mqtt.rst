@@ -45,6 +45,8 @@ Rule Interface
       :return: 0 if successful
 
 
+.. _MQTT_ITEM_TYPES:
+
 Mqtt item types
 ------------------------------
 
@@ -117,7 +119,9 @@ It is created on the topic that reports the state from the device.
    :member-order: groupwise
 
 
-Mqtt events
+.. _MQTT_EVENT_TYPES:
+
+Mqtt event types
 --------------------------------------
 
 

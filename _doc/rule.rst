@@ -59,6 +59,8 @@ It is possible to check the item value by comparing it
     if my_item.value == 5:
         pass    # do something
 
+An overview over the item types can be found on :ref:`the HABApp item section <HABAPP_ITEM_TYPES>`,
+:ref:`the openhab item section <OPENHAB_ITEM_TYPES>` and the :ref:`the mqtt item section <MQTT_ITEM_TYPES>`
 
 Events
 ------------------------------
@@ -69,6 +71,9 @@ into the function.
 
 There is the possibility to reduce the function calls to a certain event type with an additional parameter
 (typically :class:`~HABApp.core.ValueUpdateEvent` or :class:`~HABApp.core.ValueChangeEvent`).
+
+An overview over the events can be found on :ref:`the HABApp event section <HABAPP_EVENT_TYPES>`,
+:ref:`the openhab event section <OPENHAB_EVENT_TYPES>` and the :ref:`the mqtt event section <MQTT_EVENT_TYPES>`
 
 .. execute_code::
     :hide_output:
@@ -88,8 +93,8 @@ There is the possibility to reduce the function calls to a certain event type wi
     class MyRule(Rule):
         def __init__(self):
             super().__init__()
-            self.listen_event('MyOpenhabItem', self.on_change, ValueChangeEvent)
-            self.listen_event('My/MQTT/Topic', self.on_update, ValueUpdateEvent)
+            self.listen_event('MyOpenhabItem', self.on_change, ValueChangeEvent)    # will trigger only on ValueChangeEvent
+            self.listen_event('My/MQTT/Topic', self.on_update, ValueUpdateEvent)    # will trigger only on ValueUpdateEvent
 
             # If you already have an item you can and should use the more convenient method of the item
             # to listen to the item events

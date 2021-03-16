@@ -13,11 +13,13 @@ HABApp architecture
 ------------------------------
 
 .. image:: /images/architecture.png
+   :width: 800
 
 HABApp folder structure
 ------------------------------
 
 .. image:: /images/folders.png
+   :width: 800
 
 Integration with openHAB
 ------------------------------

@@ -5,6 +5,9 @@ HABApp
 This page describes the HABApp internals
 
 
+.. _HABAPP_ITEM_TYPES:
+
+
 **************************************
 Items
 **************************************
@@ -81,6 +84,7 @@ May not be instantiated directly.
    :member-order: groupwise
 
 
+.. _HABAPP_EVENT_TYPES:
 
 **************************************
 Events

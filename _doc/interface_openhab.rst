@@ -186,6 +186,8 @@ Thing
    :member-order: groupwise
 
 
+.. _OPENHAB_EVENT_TYPES:
+
 **************************************
 Openhab event types
 **************************************
