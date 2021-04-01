@@ -8,16 +8,6 @@ def test_cfg_optional():
     })
 
 
-def test_item_cfg_1():
-    assert validate_cfg({
-        'test': True,
-        'thing config': {
-            8: 0,
-            'Group1': []
-        },
-    })
-
-
 def test_cfg_err():
     assert None is validate_cfg({'test': True, 'filter1': {}}, 'filename')
     assert None is validate_cfg({'test': True, 'filter1': {}})
