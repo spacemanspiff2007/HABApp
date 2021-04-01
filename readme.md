@@ -100,3 +100,7 @@ class MyOpenhabRule(HABApp.Rule):
 
 MyOpenhabRule()
 ```
+
+# Changelog
+#### 0.20.2 (xx.xx.2021)
+- Reworked file watcher
