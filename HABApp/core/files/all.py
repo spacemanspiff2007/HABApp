@@ -19,6 +19,7 @@ ALL: typing.Dict[str, HABAppFile] = {}
 LOAD_RUNNING = False
 
 
+@ignore_exception
 def process(files: typing.List[Path], load_next: bool = True):
     global LOAD_RUNNING
 

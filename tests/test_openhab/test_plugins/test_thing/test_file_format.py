@@ -8,7 +8,7 @@ def test_cfg_optional():
     })
 
 
-def test_item_cfg():
+def test_item_cfg_1():
     assert validate_cfg({
         'test': True,
         'thing config': {

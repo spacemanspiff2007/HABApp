@@ -30,12 +30,12 @@ class AggregatingAsyncEventHandler(__BaseWatcher):
 
         # debounce time
         await asyncio.sleep(0.6)
-        
+
         # check if a new event came
         if self.last_event > ts:
             return None
 
-        # Build Path objs
+        # Copy Path so we're done here
         files = list(self._files)
         self._files.clear()
         self.func(files)
