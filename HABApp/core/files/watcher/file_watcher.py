@@ -8,6 +8,9 @@ from HABApp.core.wrapper import ignore_exception
 from .base_watcher import BaseWatcher as __BaseWatcher
 
 
+DEBOUNCE_TIME: float = 0.6
+
+
 class AggregatingAsyncEventHandler(__BaseWatcher):
     def __init__(self, folder: Path, func: Callable[[List[Path]], Any], file_ending: str,
                  watch_subfolders: bool = False):
@@ -29,7 +32,7 @@ class AggregatingAsyncEventHandler(__BaseWatcher):
         self._files.add(dst)
 
         # debounce time
-        await asyncio.sleep(0.6)
+        await asyncio.sleep(DEBOUNCE_TIME)
 
         # check if a new event came
         if self.last_event > ts:
