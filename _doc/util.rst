@@ -6,6 +6,46 @@ util - helpers and utilities
 
 The util package contains useful classes which make rule creation easier.
 
+Functions
+------------------------------
+
+min
+^^^^^^^^^^^^^^^^^^
+
+This function is very useful together with the all possible functions of :class:`~HABApp.util.multimode.ValueMode` for the
+:class:`~HABApp.util.multimode.MultiModeItem`.
+For example it can be used to automatically disable or calculate the new value of the :class:`~HABApp.util.multimode.ValueMode`
+It behaves like the standard python function except that it will ignore ``None`` values which are sometimes set as the item state.
+
+.. execute_code::
+    :hide_output:
+
+    from HABApp.util.functions import min
+
+    print(min(1, 2, None))
+
+.. autofunction:: HABApp.util.functions.min
+
+
+max
+^^^^^^^^^^^^^^^^^^
+
+This function is very useful together with the all possible functions of :class:`~HABApp.util.multimode.ValueMode` for the
+:class:`~HABApp.util.multimode.MultiModeItem`.
+For example it can be used to automatically disable or calculate the new value of the :class:`~HABApp.util.multimode.ValueMode`
+It behaves like the standard python function except that it will ignore ``None`` values which are sometimes set as the item state.
+
+.. execute_code::
+    :hide_output:
+
+    from HABApp.util.functions import max
+
+    print(max(1, 2, None))
+
+.. autofunction:: HABApp.util.functions.max
+
+
+
 
 CounterItem
 ------------------------------

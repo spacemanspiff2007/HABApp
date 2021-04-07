@@ -9,6 +9,11 @@ NAME_START: int = 15
 
 
 class ThingStatusInfoEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.status:
+    :ivar str ~.detail:
+    """
     name: str
     status: str
     detail: str
@@ -30,6 +35,13 @@ class ThingStatusInfoEvent(OpenhabEvent):
 
 
 class ThingStatusInfoChangedEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.status:
+    :ivar str ~.detail:
+    :ivar str ~.old_status:
+    :ivar str ~.old_detail:
+    """
     name: str
     status: str
     detail: str
@@ -62,6 +74,10 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
 
 
 class ThingConfigStatusInfoEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar list ~.messages:
+    """
     name: str
     messages: typing.List[typing.Dict[str, str]]
 
@@ -81,6 +97,10 @@ class ThingConfigStatusInfoEvent(OpenhabEvent):
 
 
 class ThingFirmwareStatusInfoEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.status:
+    """
     name: str
     status: str
 

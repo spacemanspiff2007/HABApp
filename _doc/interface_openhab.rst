@@ -1,21 +1,22 @@
 .. _ref_openhab:
 
-**************************************
+######################################
 openHAB
+######################################
+
+
 **************************************
-
-
 Interaction with a openHAB
-======================================
+**************************************
 All interaction with the openHAB is done through the ``self.oh`` or ``self.openhab`` object in the rule
-or through an `````OpenhabItem```.
+or through an ``OpenhabItem``.
 
 .. image:: /gifs/openhab.gif
 
 
 
 Function parameters
---------------------------------------
+======================================
 .. automodule:: HABApp.openhab.interface
    :members:
    :imported-members:
@@ -23,13 +24,14 @@ Function parameters
 
 .. _OPENHAB_ITEM_TYPES:
 
+**************************************
 Openhab item types
-======================================
+**************************************
 
 Description and example
---------------------------------------
-
-Openhab items are mapped to special classes and provide convenience functions.
+======================================
+Items that are created from openHAB inherit all from :class:`~HABApp.openhab.items.OpenhabItem` and
+provide convenience functions which simplify many things.
 
 Example:
 
@@ -53,7 +55,7 @@ Example:
 
 
 NumberItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.NumberItem
    :parts: 1
 
@@ -64,7 +66,7 @@ NumberItem
 
 
 ContactItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.ContactItem
    :parts: 1
 
@@ -75,7 +77,7 @@ ContactItem
 
 
 SwitchItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.SwitchItem
    :parts: 1
 
@@ -86,7 +88,7 @@ SwitchItem
 
 
 DimmerItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.DimmerItem
    :parts: 1
 
@@ -97,7 +99,7 @@ DimmerItem
 
 
 RollershutterItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.RollershutterItem
    :parts: 1
 
@@ -108,7 +110,7 @@ RollershutterItem
 
 
 ColorItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.ColorItem
    :parts: 1
 
@@ -119,7 +121,7 @@ ColorItem
 
 
 StringItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.StringItem
    :parts: 1
 
@@ -130,7 +132,7 @@ StringItem
 
 
 LocationItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.LocationItem
    :parts: 1
 
@@ -141,7 +143,7 @@ LocationItem
 
 
 PlayerItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.PlayerItem
    :parts: 1
 
@@ -152,7 +154,7 @@ PlayerItem
 
 
 GroupItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.GroupItem
    :parts: 1
 
@@ -163,7 +165,7 @@ GroupItem
 
 
 ImageItem
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.ImageItem
    :parts: 1
 
@@ -174,7 +176,7 @@ ImageItem
 
 
 Thing
---------------------------------------
+======================================
 .. inheritance-diagram:: HABApp.openhab.items.Thing
    :parts: 1
 
@@ -184,11 +186,208 @@ Thing
    :member-order: groupwise
 
 
-Textual thing configuration
+.. _OPENHAB_EVENT_TYPES:
+
+**************************************
+Openhab event types
+**************************************
+
+Openhab produces various events that are mapped to the internal event bus.
+On the `OpenHab page <https://next.openhab.org/docs/developer/utils/events.html#the-core-events>`_
+there is an explanation for the various events.
+
+Item events
 ======================================
 
-Description
+ItemStateEvent
 --------------------------------------
+Since this event inherits from :class:`~HABApp.core.events.ValueUpdateEvent` you can listen to :class:`~HABApp.core.events.ValueUpdateEvent`
+and it will also trigger for :class:`~HABApp.openhab.events.ItemStateEvent`.
+
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemStateChangedEvent
+--------------------------------------
+Since this event inherits from :class:`~HABApp.core.events.ValueChangeEvent` you can listen to :class:`~HABApp.core.events.ValueChangeEvent`
+and it will also trigger for :class:`~HABApp.openhab.events.ItemStateChangedEvent`.
+
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateChangedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateChangedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemCommandEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemCommandEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemCommandEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemAddedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemAddedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemAddedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemUpdatedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemUpdatedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemUpdatedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemRemovedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemRemovedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemRemovedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemStatePredictedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemStatePredictedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStatePredictedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+GroupItemStateChangedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.GroupItemStateChangedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.GroupItemStateChangedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+Channel events
+======================================
+
+
+ChannelTriggeredEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ChannelTriggeredEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ChannelTriggeredEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+Thing events
+======================================
+
+
+ThingStatusInfoChangedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoChangedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingStatusInfoChangedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingStatusInfoEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingStatusInfoEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingConfigStatusInfoEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingConfigStatusInfoEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingConfigStatusInfoEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingFirmwareStatusInfoEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingFirmwareStatusInfoEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingFirmwareStatusInfoEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+Event filters
+======================================
+
+
+ItemStateEventFilter
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateEventFilter
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateEventFilter
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemStateChangedEventFilter
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateChangedEventFilter
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemStateChangedEventFilter
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+**************************************
+Textual thing configuration
+**************************************
+
+Description
+======================================
 
 HABApp offers a special mechanism to textually define thing configuration parameters and linked items for things
 which have been added through the gui.
@@ -202,7 +401,7 @@ The Parameters and items will be checked/set when HABApp connects to openHAB or
 whenever the corresponding file gets changed.
 
 Principle of operation
---------------------------------------
+======================================
 
 All existing things from openHAB can be filtered by different criteria.
 For each one of these remaining things it is then possible to
@@ -221,12 +420,12 @@ It can be used to get a quick overview what items (would) have been created or c
 
 
 File Structure
---------------------------------------
+======================================
 Configuration is done through a .yml file.
 
 
 Example
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 The following example will show how to set the Z-Wave Parameters 4, 5, 6 and 8 for a ``Philio PST02A`` Z-Wave sensor
 and how to automatically link items to it.
 
@@ -283,8 +482,8 @@ The entries ``thing config``, ``create items`` and ``channels`` are optional and
            icon: battery
 
 
-Multiple  and filter definitions in one file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Multiple filters and filter definitions in one file
+----------------------------------------------------------------------------
 
 It is possible to add multiple thing processors into one file.
 To achieve this the root entry is now a list.
@@ -308,7 +507,7 @@ Filters can also be lists e.g. if the have to be applied multiple times to the s
 
 
 Thing configuration
---------------------------------------
+======================================
 
 With the ``thing config`` block it is possible to set a configuration for each matching thing.
 If the parameters are already correct, they will not be set again.
@@ -320,7 +519,7 @@ If the parameters are already correct, they will not be set again.
 
 
 Example
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
 .. code-block:: yaml
 
@@ -331,7 +530,7 @@ Example
      7: 20     # Customer Function
 
 References to other parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 It is possible to use references to mathematically build parameters from other parameters.
 Typically this would be fade duration and refresh interval.
 References to other parameter values can be created with ``$``.
@@ -346,12 +545,12 @@ Example:
 
 
 Item configuration
---------------------------------------
+======================================
 
 Items can be configured under ``create items -> []`` and ``channels -> [] -> link items -> []``.
 
 Structure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
 Mandatory values are ``type`` and ``name``, all other values are optional.
 
@@ -368,7 +567,7 @@ Mandatory values are ``type`` and ``name``, all other values are optional.
 .. _ref_textual_thing_config_metadata:
 
 Metadata
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 It is possible to add metadata to the created items through the optional ``metadata`` entry in the item config.
 
 There are two forms how metadata can be set. The implicit form for simple key-value pairs (e.g. ``autoupdate``) or
@@ -397,11 +596,11 @@ The config is equivalent to the following item configuration::
 
 
 Fields
---------------------------------------
+======================================
 
 
 Filtering things/channels
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 The filter value can be applied to any available field from the Thing/Channel.
 The filter value is a regex that has to fully match the value.
 
@@ -434,12 +633,13 @@ If multiple filters are specified all have to match to select the Thing or Chann
      - thing_type: zwave:fibaro_fgrgbw_00_000
 
 
-Field values as inputs for items and channels
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Filed values are available for item configuration and can be applied to all fields except for ``type`` and ``metadata``.
+Field values as inputs
+--------------------------------------
+Filed values are available for item configuration and can be applied to all fields
+in the item configuration except for ``type`` and ``metadata``.
 
 Syntax
-""""""""""""""""""""""""""""""""""""""
+--------------------------------------
 Macros that select field values are framed with ``{}`` so the containing string has to be put in annotation marks.
 There are three modes of operation with wildcards:
 
@@ -452,7 +652,7 @@ There are three modes of operation with wildcards:
    | ``{field, regex, replace}``
 
 Available fields
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
 .. tip::
    Test mode will show a table with all available fields and their value
@@ -475,10 +675,10 @@ Additional available fields for channels:
 
 
 Example
---------------------------------------
+======================================
 
 Log output
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 This will show the output for the example from `File Structure`_
 
 .. code-block:: text
@@ -583,7 +783,7 @@ This will show the output for the example from `File Structure`_
 
 
 Created items file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
 .. code-block:: text
 
@@ -605,23 +805,23 @@ Created items file
 
 
 
-
+**************************************
 Example openHAB rules
-======================================
+**************************************
 
 Example 1
---------------------------------------
+======================================
 .. literalinclude:: ../conf/rules/openhab_rule.py
 
 
 Check status of things
---------------------------------------
+======================================
 This rule prints the status of all ``Things`` and shows how to subscribe to events of the ``Thing`` status
 
 .. literalinclude:: ../conf/rules/openhab_things.py
 
 Check status if thing is constant
---------------------------------------
+======================================
 Sometimes ``Things`` recover automatically from small outages. This rule only triggers then the ``Thing`` is constant
 for 60 seconds.
 

@@ -11,6 +11,10 @@ NAME_START: int = 14
 
 
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
+    """
+    :ivar str ~.name:
+    :ivar ~.value:
+    """
     name: str
     value: typing.Any
 
@@ -31,6 +35,11 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
+    """
+    :ivar str ~.name:
+    :ivar ~.value:
+    :ivar ~.old_value:
+    """
     name: str
     value: typing.Any
     old_value: typing.Any
@@ -56,6 +65,10 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
 
 
 class ItemCommandEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar ~.value:
+    """
     name: str
     value: typing.Any
 
@@ -75,6 +88,10 @@ class ItemCommandEvent(OpenhabEvent):
 
 
 class ItemAddedEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.type:
+    """
     name: str
     type: str
 
@@ -96,6 +113,10 @@ class ItemAddedEvent(OpenhabEvent):
 
 
 class ItemUpdatedEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.type:
+    """
     name: str
     type: str
 
@@ -118,6 +139,9 @@ class ItemUpdatedEvent(OpenhabEvent):
 
 
 class ItemRemovedEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    """
     name: str
 
     def __init__(self, name: str = ''):
@@ -135,6 +159,10 @@ class ItemRemovedEvent(OpenhabEvent):
 
 
 class ItemStatePredictedEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar ~.value:
+    """
     name: str
     value: typing.Any
 
@@ -155,6 +183,12 @@ class ItemStatePredictedEvent(OpenhabEvent):
 
 
 class GroupItemStateChangedEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.item:
+    :ivar ~.value:
+    :ivar ~.old_value:
+    """
     name: str
     item: str
     value: typing.Any

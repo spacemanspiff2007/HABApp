@@ -11,10 +11,15 @@ class ComplexEventValue:
 
 
 class ValueUpdateEvent:
+    """
+    :ivar str ~.name:
+    :ivar     ~.value:
+    """
+
     name: str
     value: Any
 
-    def __init__(self, name=None, value=None):
+    def __init__(self, name: str = None, value=None):
         self.name: str = name
         self.value = value
 
@@ -23,11 +28,17 @@ class ValueUpdateEvent:
 
 
 class ValueChangeEvent:
+    """
+    :ivar str ~.name:
+    :ivar     ~.value:
+    :ivar     ~.old_value:
+    """
+
     name: str
     value: Any
     old_value: Any
 
-    def __init__(self, name=None, value=None, old_value=None):
+    def __init__(self, name: str = None, value=None, old_value=None):
         self.name: str = name
         self.value = value
         self.old_value = old_value
@@ -37,6 +48,11 @@ class ValueChangeEvent:
 
 
 class ItemNoChangeEvent:
+    """
+    :ivar str               ~.name:
+    :ivar Union[int, float] ~.seconds:
+    """
+
     name: str
     seconds: Union[int, float]
 
@@ -49,6 +65,10 @@ class ItemNoChangeEvent:
 
 
 class ItemNoUpdateEvent:
+    """
+    :ivar str               ~.name:
+    :ivar Union[int, float] ~.seconds:
+    """
     name: str
     seconds: Union[int, float]
 

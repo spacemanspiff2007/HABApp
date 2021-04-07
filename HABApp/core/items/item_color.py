@@ -8,6 +8,8 @@ PERCENT_FACTOR = 100
 
 
 class ColorItem(BaseValueItem):
+    """Item for dealing with color related values"""
+
     def __init__(self, name: str, hue=0.0, saturation=0.0, brightness=0.0):
         super().__init__(name=name, initial_value=(hue, saturation, brightness))
 

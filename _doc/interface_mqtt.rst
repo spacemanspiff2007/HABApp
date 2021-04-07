@@ -15,6 +15,7 @@ will automatically be created.
 
 Rule Interface
 ------------------------------
+
 .. py:class:: mqtt
       
    .. py:method:: publish(topic: str, payload: typing.Any[, qos: int = None, retain: bool = None]) -> int
@@ -44,10 +45,10 @@ Rule Interface
       :return: 0 if successful
 
 
+.. _MQTT_ITEM_TYPES:
+
 Mqtt item types
 ------------------------------
-
-
 
 Mqtt items have an additional publish method which make interaction with the mqtt broker easier.
 
@@ -75,7 +76,7 @@ Mqtt items have an additional publish method which make interaction with the mqt
 
 
 MqttItem
-^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""
 
 .. inheritance-diagram:: HABApp.mqtt.items.MqttItem
    :parts: 1
@@ -86,7 +87,7 @@ MqttItem
    :member-order: groupwise
 
 MqttPairItem
-^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""
 An item that consolidates a topic that reports states from a device and a topic that is used to write to a device.
 It is created on the topic that reports the state from the device.
 
@@ -118,6 +119,41 @@ It is created on the topic that reports the state from the device.
    :member-order: groupwise
 
 
+.. _MQTT_EVENT_TYPES:
+
+Mqtt event types
+--------------------------------------
+
+
+MqttValueUpdateEvent
+""""""""""""""""""""""""""""""""""""""
+Since this event inherits from :class:`~HABApp.core.events.ValueUpdateEvent` you can listen to :class:`~HABApp.core.events.ValueUpdateEvent`
+and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueUpdateEvent`.
+
+.. inheritance-diagram:: HABApp.mqtt.events.MqttValueUpdateEvent
+   :parts: 1
+
+.. autoclass:: HABApp.mqtt.events.MqttValueUpdateEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+MqttValueChangeEvent
+""""""""""""""""""""""""""""""""""""""
+Since this event inherits from :class:`~HABApp.core.events.ValueChangeEvent` you can listen to :class:`~HABApp.core.events.ValueChangeEvent`
+and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueUpdateEvent`.
+
+.. inheritance-diagram:: HABApp.mqtt.events.MqttValueChangeEvent
+   :parts: 1
+
+.. autoclass:: HABApp.mqtt.events.MqttValueChangeEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+
 Example MQTT rule
-------------------
+--------------------------------------
 .. literalinclude:: ../conf/rules/mqtt_rule.py

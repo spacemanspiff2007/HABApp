@@ -7,6 +7,11 @@ NAME_START: int = 17
 
 
 class ChannelTriggeredEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.event:
+    :ivar str ~.channel:
+    """
     name: str
     event: str
     channel: str

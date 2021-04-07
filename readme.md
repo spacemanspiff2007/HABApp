@@ -5,7 +5,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/habapp)
 
 ![PyPI](https://img.shields.io/pypi/v/HABapp)
-[![Downloads](https://pepy.tech/badge/habapp/month)](https://pepy.tech/project/habapp/month)
+[![Downloads](https://pepy.tech/badge/habapp/month)](https://pepy.tech/project/habapp)
 ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/habapp?label=docker)
 ![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/habapp)
 
@@ -100,3 +100,10 @@ class MyOpenhabRule(HABApp.Rule):
 
 MyOpenhabRule()
 ```
+
+# Changelog
+#### 0.20.2 (07.04.2021)
+- Added HABApp.util.functions with min/max
+- Reworked small parts of the file watcher
+- Doc improvements
+- Dependency updates
