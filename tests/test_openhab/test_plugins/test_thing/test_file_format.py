@@ -8,6 +8,18 @@ def test_cfg_optional():
     })
 
 
+def test_thing_cfg_types():
+    assert validate_cfg({
+        'test': True,
+        'filter': {},
+        'thing config': {
+            1: 0,
+            2: 'str',
+            'Group1': ['asdf']
+        },
+    })
+
+
 def test_cfg_err():
     assert None is validate_cfg({'test': True, 'filter1': {}}, 'filename')
     assert None is validate_cfg({'test': True, 'filter1': {}})

@@ -129,7 +129,8 @@ class UserThingCfg(BaseModel):
     test: bool
     filter: List[ThingFilter]
     # order of the type hint matters: int, str!
-    thing_config: Dict[Union[int, str], Union[int, float, str]] = Field(alias='thing config', default_factory=dict)
+    thing_config: Dict[Union[int, str], Union[int, float, str, List[str]]] = Field(alias='thing config',
+                                                                                   default_factory=dict)
     create_items: List[UserItemCfg] = Field(alias='create items', default_factory=list)
     channels: List[UserChannelCfg] = Field(default_factory=list)
 
