@@ -15,9 +15,7 @@ import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
-from .scheduler import ReoccurringScheduledCallback, OneTimeCallback, DayOfWeekScheduledCallback, \
-    TYPING_DATE_TIME, SunScheduledCallback
-from .scheduler.base import ScheduledCallbackBase as _ScheduledCallbackBase
+from HABApp.rule.habappscheduler import HABAppScheduler
 
 
 log = logging.getLogger('HABApp.Rule')
@@ -66,13 +64,15 @@ class Rule:
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
         self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
-        self.__future_events: typing.List[_ScheduledCallbackBase] = []
         self.__unload_functions: typing.List[typing.Callable[[], None]] = []
         self.__cancel_objs: weakref.WeakSet = weakref.WeakSet()
 
         # schedule cleanup of this rule
         self.register_on_unload(self.__cleanup_rule)
         self.register_on_unload(self.__cleanup_objs)
+
+        # scheduler
+        self.run: HABAppScheduler = HABAppScheduler(self)
 
         # suggest a rule name if it is not
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
@@ -96,17 +96,12 @@ class Rule:
         # Important: set the dicts to None so we don't schedule a future event during _cleanup.
         # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
         event_listeners = self.__event_listener
-        future_events = self.__future_events
-
         self.__event_listener = None
-        self.__future_events = None
 
         # Actually remove the listeners/events
         for listener in event_listeners:
             HABApp.core.EventBus.remove_listener(listener)
 
-        for event in future_events:
-            event.cancel()
         return None
 
     def post_event(self, name, event):
@@ -170,206 +165,6 @@ class Rule:
             HABApp.core.const.loop
         )
 
-    def run_every(self,
-                  time: TYPING_DATE_TIME, interval: typing.Union[int, datetime.timedelta],
-                  callback, *args, **kwargs) -> ReoccurringScheduledCallback:
-        """
-        Run a function periodically
-
-        :param time: |param_scheduled_time|
-        :param interval:
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = ReoccurringScheduledCallback(cb, *args, **kwargs)
-        future_event.interval(interval)
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_on_sun(self, sun_event: str, callback, *args, run_if_missed=False, **kwargs) -> SunScheduledCallback:
-        """Run a function on sunrise/sunset etc
-
-        :param sun_event: 'sunrise', 'sunset', 'dusk', 'dawn'
-        :param run_if_missed: run the event if we missed it for today
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = SunScheduledCallback(cb, *args, **kwargs)
-        future_event.sun_trigger(sun_event)
-        future_event._calculate_next_call()
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_on_day_of_week(self,
-                           time: datetime.time, weekdays, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
-        """
-
-        :param time: datetime.time
-        :param weekdays:
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        assert isinstance(time, datetime.time), type(time)
-
-        # names of weekdays in local language
-        lookup = {datetime.date(2001, 1, i).strftime('%A'): i for i in range(1, 8)}
-        lookup.update({datetime.date(2001, 1, i).strftime('%A')[:3]: i for i in range(1, 8)})
-
-        # abbreviations in German and English
-        lookup.update({"Mo": 1, "Di": 2, "Mi": 3, "Do": 4, "Fr": 5, "Sa": 6, "So": 7})
-        lookup.update({"Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5, "Sat": 6, "Sun": 7})
-        lookup = {k.lower(): v for k, v in lookup.items()}
-
-        if isinstance(weekdays, int) or isinstance(weekdays, str):
-            weekdays = [weekdays]
-        for i, val in enumerate(weekdays):
-            if not isinstance(val, str):
-                continue
-            weekdays[i] = lookup[val.lower()]
-
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
-        future_event.weekdays(weekdays)
-        future_event.time(time)
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_on_every_day(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
-        """
-
-        :param time: datetime.time
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        assert isinstance(time, datetime.time), type(time)
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
-        future_event.weekdays('all')
-        future_event.time(time)
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_on_workdays(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
-        """
-
-        :param time: datetime.time
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        assert isinstance(time, datetime.time), type(time)
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
-        future_event.weekdays('workday')
-        future_event.time(time)
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_on_weekends(self, time: datetime.time, callback, *args, **kwargs) -> DayOfWeekScheduledCallback:
-        """
-
-        :param time: datetime.time
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        assert isinstance(time, datetime.time), type(time)
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = DayOfWeekScheduledCallback(cb, *args, **kwargs)
-        future_event.weekdays('weekend')
-        future_event.time(time)
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_daily(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
-        """
-        Picks a random hour, minute and second and runs the callback every day
-
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        start = datetime.timedelta(seconds=random.randint(0, 24 * 3600 - 1))
-        interval = datetime.timedelta(days=1)
-        return self.run_every(start, interval, callback, *args, **kwargs)
-
-    def run_hourly(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
-        """
-        Picks a random minute and second and run the callback every hour
-
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        start = datetime.timedelta(seconds=random.randint(0, 3600 - 1))
-        interval = datetime.timedelta(seconds=3600)
-        return self.run_every(start, interval, callback, *args, **kwargs)
-
-    def run_minutely(self, callback, *args, **kwargs) -> ReoccurringScheduledCallback:
-        """
-        Picks a random second and runs the callback every minute
-
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        start = datetime.timedelta(seconds=random.randint(0, 60 - 1))
-        interval = datetime.timedelta(seconds=60)
-        return self.run_every(start, interval, callback, *args, **kwargs)
-
-    def run_at(self, date_time: TYPING_DATE_TIME, callback, *args, **kwargs) -> OneTimeCallback:
-        """
-        Run a function at a specified date_time
-
-        :param date_time:
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = OneTimeCallback(cb, *args, **kwargs)
-        future_event.set_run_time(date_time)
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_in(self, seconds: typing.Union[int, datetime.timedelta], callback, *args, **kwargs) -> OneTimeCallback:
-        """
-        Run the callback in x seconds
-
-        :param int seconds: Wait time in seconds or a timedelta obj before calling the function
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        assert isinstance(seconds, (int, datetime.timedelta)), f'{seconds} ({type(seconds)})'
-        fut = datetime.timedelta(seconds=seconds) if not isinstance(seconds, datetime.timedelta) else seconds
-
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = OneTimeCallback(cb, *args, **kwargs)
-        future_event.set_run_time(fut)
-        self.__future_events.append(future_event)
-        return future_event
-
-    def run_soon(self, callback, *args, **kwargs) -> OneTimeCallback:
-        """
-        Run the callback as soon as possible (typically in the next second).
-
-        :param callback: |param_scheduled_cb|
-        :param args: |param_scheduled_cb_args|
-        :param kwargs: |param_scheduled_cb_kwargs|
-        """
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        future_event = OneTimeCallback(cb, *args, **kwargs)
-        future_event.set_run_time(None)
-        self.__future_events.append(future_event)
-        return future_event
-
     def get_rule(self, rule_name: str) -> 'typing.Union[Rule, typing.List[Rule]]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
@@ -391,6 +186,62 @@ class Rule:
         :param obj:
         """
         self.__cancel_objs.add(obj)
+
+    # -----------------------------------------------------------------------------------------------------------------
+    # deprecated functions
+    # -----------------------------------------------------------------------------------------------------------------
+    def run_every(self, time, interval: typing.Union[int, datetime.timedelta],
+                  callback, *args, **kwargs):
+        warnings.warn('self.run_every is deprecated. Please use self.run.every', DeprecationWarning)
+        return self.run.every(time, interval, callback, *args, **kwargs)
+
+    def run_on_sun(self, sun_event: str, callback, *args, **kwargs):
+        warnings.warn('self.run_on_sun is deprecated. Please use self.run.on_sunrise, self.run.on_sunset, ...',
+                      DeprecationWarning)
+        func = {'sunset': self.run.on_sunset, 'sunrise': self.run.on_sunrise,
+                'dusk': self.run.on_sun_dusk, 'dawn': self.run.on_sun_dawn}
+        return func[sun_event](callback, *args, **kwargs)
+
+    def run_on_day_of_week(self, time: datetime.time, weekdays, callback, *args, **kwargs):
+        warnings.warn('self.run_on_day_of_week is deprecated. Please use self.run.on_day_of_week', DeprecationWarning)
+        return self.run.on_every_day(time, weekdays, callback, *args, **kwargs)
+
+    def run_on_every_day(self, time: datetime.time, callback, *args, **kwargs):
+        warnings.warn('self.run_on_every_day is deprecated. Please use self.run.on_every_day', DeprecationWarning)
+        return self.run.on_every_day(time, callback, *args, **kwargs)
+
+    def run_on_workdays(self, time: datetime.time, callback, *args, **kwargs):
+        warnings.warn('self.run_on_workdays is deprecated. Please use self.run.on_workdays', DeprecationWarning)
+        return self.run.on_workdays(time, callback, *args, **kwargs)
+
+    def run_on_weekends(self, time: datetime.time, callback, *args, **kwargs):
+        warnings.warn('self.run_on_weekends is deprecated. Please use self.run.on_weekends', DeprecationWarning)
+        return self.run.on_weekends(time, callback, *args, **kwargs)
+
+    def run_daily(self, callback, *args, **kwargs):
+        warnings.warn('self.run_hourly is deprecated. Please use self.run.every', DeprecationWarning)
+        start = datetime.timedelta(seconds=random.randint(0, 24 * 3600 - 1))
+        return self.run.every(start, datetime.timedelta(days=1), callback, *args, **kwargs)
+
+    def run_hourly(self, callback, *args, **kwargs) :
+        warnings.warn('self.run_hourly is deprecated. Please use self.run.every_hour', DeprecationWarning)
+        return self.run.every_hour(callback, *args, **kwargs)
+
+    def run_minutely(self, callback, *args, **kwargs):
+        warnings.warn('self.run_minutely is deprecated. Please use self.run.every_minute', DeprecationWarning)
+        return self.run.every_minute(callback, *args, **kwargs)
+
+    def run_at(self, date_time, callback, *args, **kwargs):
+        warnings.warn('self.run_at is deprecated. Please use self.run.at', DeprecationWarning)
+        return self.run.at(date_time, callback, *args, **kwargs)
+
+    def run_in(self, seconds: typing.Union[int, datetime.timedelta], callback, *args, **kwargs):
+        warnings.warn('self.run_in is deprecated. Please use self.run.at', DeprecationWarning)
+        return self.run.at(seconds, callback, *args, **kwargs)
+
+    def run_soon(self, callback, *args, **kwargs):
+        warnings.warn('self.run_in is deprecated. Please use self.run.at', DeprecationWarning)
+        return self.run.soon(callback, *args, **kwargs)
 
     # -----------------------------------------------------------------------------------------------------------------
     # internal functions
@@ -420,23 +271,6 @@ class Rule:
             if not HABApp.core.Items.item_exists(listener.topic):
                 log.warning(f'Item "{listener.topic}" does not exist (yet)! '
                             f'self.listen_event in "{self.rule_name}" may not work as intended.')
-
-
-    @HABApp.core.wrapper.log_exception
-    def _process_events(self, now):
-
-        # sheduled events
-        clean_events = False
-        for future_event in self.__future_events:  # type: OneTimeCallback
-            future_event.check_due(now)
-            future_event.execute()
-            if future_event.is_finished:
-                clean_events = True
-
-        # remove finished events
-        if clean_events:
-            self.__future_events = [k for k in self.__future_events if not k.is_finished]
-        return None
 
     @HABApp.core.wrapper.log_exception
     def _unload(self):

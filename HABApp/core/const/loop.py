@@ -1,5 +1,6 @@
 import sys
 import asyncio
+import eascheduler
 
 
 # setup everything so we can create a subprocess, only required for older versions
@@ -16,3 +17,6 @@ if sys.version_info < (3, 8):
 loop = asyncio.get_event_loop()
 loop.set_debug(True)
 loop.slow_callback_duration = 0.02
+
+# Setup scheduler
+eascheduler.schedulers.ThreadSafeAsyncScheduler.LOOP = loop

@@ -49,11 +49,9 @@ class Runtime:
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
         self.rule_manager.setup()
 
-
     @HABApp.core.wrapper.log_exception
     def get_async(self):
         return asyncio.gather(
             self.async_http.create_client(),
             openhab_connection.start(),
-            self.rule_manager.get_async(),
         )

@@ -25,3 +25,72 @@ ItemNoChangeWatch
    :inherited-members:
    :member-order: groupwise
 
+
+Scheduler
+======================================
+
+
+OneTimeJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.OneTimeJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+CountdownJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.CountdownJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+ReoccurringJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.ReoccurringJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+DayOfWeekJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.DayOfWeekJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+DawnJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.DawnJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+SunriseJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.SunriseJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+SunsetJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.SunsetJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+DuskJob
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: eascheduler.jobs.DuskJob
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+

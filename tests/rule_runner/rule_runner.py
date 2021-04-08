@@ -1,8 +1,6 @@
-import datetime
 import sys
 
-import pytz
-
+import HABApp.rule.habappscheduler as ha_sched
 from HABApp.core import WrappedFunction
 from HABApp.runtime import Runtime
 
@@ -24,10 +22,25 @@ class TestRuleFile:
         return parts[-1][:-2]
 
 
+class SyncScheduler:
+    ALL = []
+
+    def __init__(self):
+        SyncScheduler.ALL.append(self)
+        self.jobs = []
+
+    def add_job(self, job):
+        self.jobs.append(job)
+
+    def remove_job(self, job):
+        self.jobs.remove(job)
+
+
 class SimpleRuleRunner:
     def __init__(self):
         self.vars: dict = _get_topmost_globals()
         self.loaded_rules = []
+        self.original_scheduler = None
 
     def submit(self, callback, *args, **kwargs):
         # submit never raises and exception, so we don't do it here, too
@@ -45,6 +58,10 @@ class SimpleRuleRunner:
         self.worker = WrappedFunction._WORKERS
         WrappedFunction._WORKERS = self
 
+        # patch scheduler
+        self.original_scheduler = ha_sched.ThreadSafeAsyncScheduler
+        ha_sched.ThreadSafeAsyncScheduler = SyncScheduler
+
     def tear_down(self):
         self.vars.pop('__UNITTEST__')
         self.vars.pop('__HABAPP__RUNTIME__')
@@ -55,12 +72,12 @@ class SimpleRuleRunner:
         loaded_rules.clear()
 
         WrappedFunction._WORKERS = self.worker
-
+        ha_sched.ThreadSafeAsyncScheduler = self.original_scheduler
 
     def process_events(self):
-        now = datetime.datetime.now(tz=pytz.utc)
-        for rule in self.loaded_rules:
-            rule._process_events(now)
+        for s in SyncScheduler.ALL:
+            for job in s.jobs:
+                job._func.execute()
 
     def __enter__(self):
         self.set_up()

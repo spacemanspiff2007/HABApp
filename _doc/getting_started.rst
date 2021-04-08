@@ -32,9 +32,9 @@ rules in the HABApp rule engine. So lets write a small rule which prints somethi
         def __init__(self):
             super().__init__()
 
-            # Use run_soon to schedule things directly after instantiation,
+            # Use run.at to schedule things directly after instantiation,
             # don't do blocking things in __init__
-            self.run_soon(self.say_something)
+            self.run.soon(self.say_something)
 
         def say_something(self):
             print('That was easy!')

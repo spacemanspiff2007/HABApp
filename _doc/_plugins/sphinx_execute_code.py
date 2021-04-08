@@ -47,7 +47,7 @@ def PrintException( func):
     return f
 
 
-re_line = re.compile(r'line (\d+),')
+re_line = re.compile(r'File "<string>", line (\d+),')
 
 
 class CodeException(Exception):

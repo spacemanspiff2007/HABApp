@@ -1,21 +1,17 @@
 import asyncio
-import datetime
 import logging
-import math
 import threading
 import time
 import typing
-
-from pytz import utc
+from pathlib import Path
 
 import HABApp
-from pathlib import Path
+import HABApp.__cmd_args__ as cmd_args
 from HABApp.core.files import file_load_failed, file_load_ok
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
 from .rule_file import RuleFile
-import HABApp.__cmd_args__ as cmd_args
 
 log = logging.getLogger('HABApp.Rules')
 
@@ -92,39 +88,6 @@ class RuleManager:
         # trigger event for every file
         self.watcher.trigger_all()
         return None
-
-    @log_exception
-    async def process_scheduled_events(self):
-
-        while not HABApp.runtime.shutdown.requested:
-
-            now = datetime.datetime.now(tz=utc)
-
-            # process only once per second
-            if now.second == self.__process_last_sec:
-                await asyncio.sleep(0.1)
-                continue
-
-            # remember sec
-            self.__process_last_sec = now.second
-
-            with self.__files_lock:
-                for file in self.files.values():
-                    assert isinstance(file, RuleFile), type(file)
-                    for rule in file.rules.values():
-                        rule._process_events(now)
-
-            # sleep longer, try to sleep until the next full second
-            end = datetime.datetime.now(tz=utc)
-            if end.second == self.__process_last_sec:
-                frac, whole = math.modf(time.time())
-                sleep_time = 1 - frac + 0.005   # prevent rounding error and add a little bit of security
-                await asyncio.sleep(sleep_time)
-
-
-    @log_exception
-    def get_async(self):
-        return asyncio.gather(self.process_scheduled_events())
 
     @log_exception
     def get_rule(self, rule_name):

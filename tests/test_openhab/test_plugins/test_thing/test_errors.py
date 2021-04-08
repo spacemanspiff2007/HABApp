@@ -38,7 +38,9 @@ async def test_errors(caplog):
 
     await cfg.update_thing_config(file, data)
 
-    assert caplog.records[0].message == 'Duplicate item: Name1'
+    errors = [rec.message for rec in caplog.records if rec.levelno >= 30]
+    assert errors == ['Duplicate item: Name1']
+    caplog.clear()
 
     text = """
 test: False
@@ -58,4 +60,5 @@ channels:
 
     await cfg.update_thing_config(file, data)
 
-    assert caplog.records[1].message == '"â_ß_{_)" is not a valid name for an item!'
+    errors = [rec.message for rec in caplog.records if rec.levelno >= 30]
+    assert errors[0] == '"â_ß_{_)" is not a valid name for an item!'
