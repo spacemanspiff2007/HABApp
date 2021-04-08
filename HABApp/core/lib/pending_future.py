@@ -1,6 +1,6 @@
 import asyncio
 import typing
-from asyncio import Task, ensure_future, sleep, run_coroutine_threadsafe
+from asyncio import Task, sleep, run_coroutine_threadsafe, create_task
 from typing import Any, Awaitable, Callable, Optional
 from HABApp.core.const import loop
 
@@ -38,8 +38,7 @@ class PendingFuture:
         if thread_safe:
             self.task = run_coroutine_threadsafe(self.__countdown(), loop)
         else:
-            # todo: rename to asyncio.create_task once we go py3.7 only
-            self.task = ensure_future(self.__countdown())
+            self.task = create_task(self.__countdown())
 
     async def __countdown(self):
         try:

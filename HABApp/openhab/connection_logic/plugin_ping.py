@@ -37,7 +37,7 @@ class PingOpenhab(PluginBase):
         self.ping_sent = None
         self.ping_new = None
 
-        self.fut_ping = asyncio.ensure_future(self.async_ping(), loop=HABApp.core.const.loop)
+        self.fut_ping = asyncio.create_task(self.async_ping())
 
     def on_disconnect(self):
         if self.fut_ping is not None:

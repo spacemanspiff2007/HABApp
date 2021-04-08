@@ -38,7 +38,7 @@ class OnConnectPlugin(PluginBase):
         pass
 
     def on_connect(self):
-        self.fut = asyncio.ensure_future(self.on_connect_function(), loop=loop)
+        self.fut = asyncio.create_task(self.on_connect_function(), loop=loop)
 
     def on_disconnect(self):
         if self.fut is not None:

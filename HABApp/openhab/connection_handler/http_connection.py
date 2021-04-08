@@ -247,7 +247,7 @@ async def start_connection():
         read_bufsize=2**19  # 512k buffer
     )
 
-    FUT_UUID = asyncio.ensure_future(try_uuid())
+    FUT_UUID = asyncio.create_task(try_uuid())
 
 
 async def start_sse_event_listener():
@@ -340,7 +340,7 @@ async def try_uuid():
                 log.error(line)
 
         # Keep trying to connect
-        FUT_UUID = asyncio.ensure_future(try_uuid())
+        FUT_UUID = asyncio.create_task(try_uuid())
         return None
 
     if IS_READ_ONLY:
@@ -359,7 +359,7 @@ async def try_uuid():
     # start sse processing
     if FUT_SSE is not None:
         FUT_SSE.cancel()
-    FUT_SSE = asyncio.ensure_future(start_sse_event_listener())
+    FUT_SSE = asyncio.create_task(start_sse_event_listener())
 
     ON_CONNECTED()
     return None

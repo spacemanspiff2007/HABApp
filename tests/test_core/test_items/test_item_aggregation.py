@@ -20,11 +20,11 @@ async def test_aggregation_item():
         await asyncio.sleep(t)
         src.post_value(v)
 
-    asyncio.ensure_future(post_val(1 * INTERVAL, 1))
-    asyncio.ensure_future(post_val(2 * INTERVAL, 3))
-    asyncio.ensure_future(post_val(3 * INTERVAL, 5))
-    asyncio.ensure_future(post_val(4 * INTERVAL, 4))
-    asyncio.ensure_future(post_val(5 * INTERVAL, 2))
+    asyncio.create_task(post_val(1 * INTERVAL, 1))
+    asyncio.create_task(post_val(2 * INTERVAL, 3))
+    asyncio.create_task(post_val(3 * INTERVAL, 5))
+    asyncio.create_task(post_val(4 * INTERVAL, 4))
+    asyncio.create_task(post_val(5 * INTERVAL, 2))
 
     await asyncio.sleep(INTERVAL + INTERVAL / 2)
     assert agg.value == (1, [1])
@@ -66,11 +66,11 @@ async def test_aggregation_item_cleanup():
         await asyncio.sleep(t)
         src.post_value(v)
 
-    asyncio.ensure_future(post_val(1 * INTERVAL, 1))
-    asyncio.ensure_future(post_val(2 * INTERVAL, 3))
-    asyncio.ensure_future(post_val(3 * INTERVAL, 5))
-    asyncio.ensure_future(post_val(4 * INTERVAL, 7))
-    asyncio.ensure_future(post_val(5 * INTERVAL, 9))
+    asyncio.create_task(post_val(1 * INTERVAL, 1))
+    asyncio.create_task(post_val(2 * INTERVAL, 3))
+    asyncio.create_task(post_val(3 * INTERVAL, 5))
+    asyncio.create_task(post_val(4 * INTERVAL, 7))
+    asyncio.create_task(post_val(5 * INTERVAL, 9))
 
     await asyncio.sleep(INTERVAL / 2)
     await asyncio.sleep(5 * INTERVAL)
