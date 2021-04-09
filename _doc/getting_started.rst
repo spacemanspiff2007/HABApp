@@ -65,7 +65,7 @@ This often comes in handy if there is some logic that shall be applied to differ
             super().__init__()
             self.param = my_parameter
 
-            self.run_soon(self.say_something)
+            self.run.soon(self.say_something)
 
         def say_something(self):
             print(f'Param {self.param}')
@@ -131,7 +131,7 @@ To access items from openhab use the correct openhab item type (see :ref:`the op
             # Get the item or create it if it does not exist
             self.my_item = Item.get_create_item('Item_Name')
 
-            self.run_soon(self.say_something)
+            self.run.soon(self.say_something)
 
         def say_something(self):
             # Post updates to the item through the internal event bus

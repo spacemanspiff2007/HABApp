@@ -11,10 +11,10 @@ class TestScheduler(TestBaseRule):
     def __init__(self):
         super().__init__()
 
-        f = self.run_on_sun('sunrise', self.sunrise_func)
-        print(f'Sunrise: {f.get_next_call()}')
-        f = self.run_on_sun('sunset', self.sunset_func)
-        print(f'Sunset: {f.get_next_call()}')
+        f = self.run.on_sunrise(self.sunrise_func)
+        print(f'Sunrise: {f.get_next_run()}')
+        f = self.run.on_sunset(self.sunset_func)
+        print(f'Sunset : {f.get_next_run()}')
 
     def sunrise_func(self):
         print('sunrise!')

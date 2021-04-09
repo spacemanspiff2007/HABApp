@@ -69,4 +69,4 @@ class BenchBaseRule(HABApp.Rule):
         if self.next_rule is None:
             HABApp.runtime.shutdown.request_shutdown()
         else:
-            self.run_soon(self.next_rule.do_bench_start)
+            self.run.soon(self.next_rule.do_bench_start)

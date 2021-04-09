@@ -2,7 +2,6 @@ import asyncio
 import logging
 from typing import List, Optional
 
-from HABApp.core.const import loop
 from HABApp.core.wrapper import ExceptionToHABApp
 
 log = logging.getLogger('HABApp.openhab.plugin')
@@ -38,7 +37,7 @@ class OnConnectPlugin(PluginBase):
         pass
 
     def on_connect(self):
-        self.fut = asyncio.create_task(self.on_connect_function(), loop=loop)
+        self.fut = asyncio.create_task(self.on_connect_function())
 
     def on_disconnect(self):
         if self.fut is not None:

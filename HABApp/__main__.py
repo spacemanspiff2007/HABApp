@@ -30,7 +30,8 @@ def main() -> typing.Union[int, str]:
 
         # start workers
         try:
-            HABApp.core.const.loop.run_until_complete(app.get_async())
+            asyncio.ensure_future(app.get_async())
+            HABApp.core.const.loop.run_forever()
         except asyncio.CancelledError:
             pass
     except HABApp.config.InvalidConfigException:

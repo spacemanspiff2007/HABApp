@@ -53,5 +53,5 @@ class Runtime:
     def get_async(self):
         return asyncio.gather(
             self.async_http.create_client(),
-            openhab_connection.start(),
+            openhab_connection.start()
         )
