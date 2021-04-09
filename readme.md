@@ -38,7 +38,7 @@ class ExampleMqttTestRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
-        self.run_every(
+        self.run.every(
             time=datetime.timedelta(seconds=60),
             interval=datetime.timedelta(seconds=30),
             callback=self.publish_rand_value

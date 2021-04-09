@@ -92,7 +92,7 @@ to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more informa
     class FaultyRule(HABApp.Rule):
         def __init__(self):
             super().__init__()
-            self.run_soon(self.faulty_function)
+            self.run.soon(self.faulty_function)
         
         def faulty_function(self):
             1 / 0
