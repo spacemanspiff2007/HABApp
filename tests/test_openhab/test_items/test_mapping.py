@@ -20,9 +20,11 @@ def test_number_unit_of_measurement():
 def test_datetime():
     # Todo: remove this test once we go >= OH3.1
     # Old format
-    assert map_item('test1', 'DateTime', '2018-11-19T09:47:38.284+0100') == \
-           DatetimeItem('test', datetime(2018, 11, 19, 9, 47, 38, 284000))
+    assert map_item('test1', 'DateTime', '2018-11-19T09:47:38.284+0000') == \
+           DatetimeItem('test', datetime(2018, 11, 19,  9, 47, 38, 284000)) or \
+           DatetimeItem('test', datetime(2018, 11, 19, 10, 47, 38, 284000))
 
     # From >= OH3.1
-    assert map_item('test1', 'DateTime', '2021-04-10T22:00:43.043996+0200') == \
-           DatetimeItem('test', datetime(2021, 4, 10, 22, 0, 43, 43996))
+    assert map_item('test1', 'DateTime', '2021-04-10T21:00:43.043996+0000') == \
+           DatetimeItem('test', datetime(2021, 4, 10, 21, 0, 43, 43996)) or \
+           DatetimeItem('test', datetime(2021, 4, 10, 23, 0, 43, 43996))
