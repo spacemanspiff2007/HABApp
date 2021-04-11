@@ -64,8 +64,8 @@ def map_item(name, openhab_type: str, openhab_value: str) -> typing.Optional[Bas
             # Previous OH versions used a datetime string like this:
             # 2018-11-19T09:47:38.284+0100
             # OH 3.1 uses
-            # 2021-04-10T22:00:43.043996+0200 
-            if len(value)==28:
+            # 2021-04-10T22:00:43.043996+0200
+            if len(value) == 28:
                 value = value.replace('+', '000+')
             dt = datetime.datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f%z')
             # all datetimes from openhab have a timezone set so we can't easily compare them
