@@ -61,6 +61,7 @@ def map_item(name, openhab_type: str, openhab_value: str) -> typing.Optional[Bas
         if openhab_type == "DateTime":
             if value is None:
                 return DatetimeItem(name, value)
+            # Todo: remove this once we go >= OH3.1
             # Previous OH versions used a datetime string like this:
             # 2018-11-19T09:47:38.284+0100
             # OH 3.1 uses
