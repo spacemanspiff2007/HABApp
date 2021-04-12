@@ -48,9 +48,17 @@ def on_sse_event(event_dict: dict):
             __item.set_value(event.value)
             HABApp.core.EventBus.post_event(event.name, event)
             return None
-        elif isinstance(event, HABApp.openhab.events.ThingStatusInfoEvent):
+
+        if isinstance(event, HABApp.openhab.events.ThingStatusInfoEvent):
             __thing = Items.get_item(event.name)   # type: HABApp.openhab.items.Thing
             __thing.process_event(event)
+            HABApp.core.EventBus.post_event(event.name, event)
+            return None
+
+        # Workaround because there is no GroupItemStateEvent
+        if isinstance(event, HABApp.openhab.events.GroupItemStateChangedEvent):
+            __item = Items.get_item(event.name)  # type: HABApp.openhab.items.GroupItem
+            __item.set_value(event.value)
             HABApp.core.EventBus.post_event(event.name, event)
             return None
     except HABApp.core.Items.ItemNotFoundException:
