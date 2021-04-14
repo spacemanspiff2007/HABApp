@@ -1,38 +1,50 @@
 import logging
 from pathlib import Path
 
-from watchdog.events import FileSystemEvent, FileSystemEventHandler
+from watchdog.events import FileSystemEvent
 
-log = logging.getLogger('HABApp.file_events')
+log = logging.getLogger('HABApp.file.events')
 log.setLevel(logging.INFO)
 
 
-class BaseWatcher(FileSystemEventHandler):
-    def __init__(self, folder: Path, file_ending: str, watch_subfolders: bool = False):
+class EventFilterBase:
+    def notify(self, path: str) -> bool:
+        raise NotImplementedError()
+
+
+class FileEndingFilter(EventFilterBase):
+    def __init__(self, ending: str):
+        self.ending: str = ending
+
+    def notify(self, path: str) -> bool:
+        return path.endswith(self.ending)
+
+
+class FileSystemEventHandler:
+    def __init__(self, folder: Path, filter: EventFilterBase, watch_subfolders: bool = False):
         assert isinstance(folder, Path), type(folder)
-        assert isinstance(file_ending, str), type(file_ending)
         assert watch_subfolders is True or watch_subfolders is False
 
         self.folder: Path = folder
-        self.file_ending: str = file_ending
         self.watch_subfolders: bool = watch_subfolders
 
+        self.filter: EventFilterBase = filter
+
     def dispatch(self, event: FileSystemEvent):
-
-        log.debug(event)
-
         # we don't process directory events
         if event.is_directory:
             return None
 
+        log.debug(event)
+
         src = event.src_path
-        if src.endswith(self.file_ending):
+        if self.filter.notify(src):
             self.file_changed(src)
 
         # moved events have a dst, so we process it, too
         if hasattr(event, 'dest_path'):
             dst = event.dest_path
-            if dst.endswith(self.file_ending):
+            if self.filter.notify(dst):
                 self.file_changed(dst)
         return None
 

@@ -1,8 +1,12 @@
 import asyncio
+import time
 from pathlib import Path
-from typing import Dict, Set, List
+from typing import Dict, Set, Optional
 
 import HABApp
+from HABApp.core.files.file import HABAppFile
+from HABApp.core.files.folders import add_folder as add_habapp_folder
+from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.lib import PendingFuture
 from HABApp.core.logger import log_warning, HABAppError
 from HABApp.openhab.connection_handler.func_async import async_get_things
@@ -27,43 +31,40 @@ class ManualThingConfig(OnConnectPlugin):
         self.created_items: Dict[str, Set[str]] = {}
         self.do_cleanup = PendingFuture(self.clean_items, 120)
 
+        self.watcher: Optional[AggregatingAsyncEventHandler] = None
+
+        self.cache_ts: float = 0.0
+        self.cache_cfg: dict = {}
+
     def setup(self):
-        if not HABApp.CONFIG.directories.config.is_dir():
+        path = HABApp.CONFIG.directories.config
+        if not path.is_dir():
             log.info('Config folder does not exist - textual thing config disabled!')
             return None
 
-        # Add event bus listener
-        HABApp.core.EventBus.add_listener(
-            HABApp.core.EventBusListener(
-                HABApp.core.const.topics.FILES,
-                HABApp.core.WrappedFunction(self.file_load_event),
-                HABApp.core.events.habapp_events.RequestFileLoadEvent
-            )
-        )
+        class HABAppThingConfigFile(HABAppFile):
+            LOGGER = log
+            LOAD_FUNC = self.file_load
+            UNLOAD_FUNC = self.file_unload
 
-        # watch folder
-        HABApp.core.files.watch_folder(HABApp.CONFIG.directories.config, '.yml', True)
+        folder = add_habapp_folder('config/', path, 50)
+        folder.add_file_type(HABAppThingConfigFile)
+        self.watcher = folder.add_watch('.yml')
 
-    async def file_load_event(self, event: HABApp.core.events.habapp_events.RequestFileLoadEvent):
-        if HABApp.core.files.file_name.is_config(event.name):
-            await self.update_thing_config(event.get_path())
+    async def file_unload(self, prefix: str, path: Path):
+        return None
 
     async def on_connect_function(self):
+        if self.watcher is None:
+            return None
+
         try:
             await asyncio.sleep(0.3)
 
-            files = list(HABApp.core.lib.list_files(HABApp.CONFIG.directories.config, '.yml'))
-            if not files:
-                log.debug(f'No manual configuration files found in {HABApp.CONFIG.directories.config}')
-                return None
+            self.cache_cfg = await async_get_things()
+            self.cache_ts = time.time()
 
-            # if oh is not ready we will get None, but we will trigger again on reconnect
-            data = await async_get_things()
-            if data is None:
-                return None
-
-            for f in files:
-                await self.update_thing_config(f, data)
+            await self.watcher.trigger_all()
         except asyncio.CancelledError:
             pass
 
@@ -74,24 +75,19 @@ class ManualThingConfig(OnConnectPlugin):
             items.update(s)
         await cleanup_items(items)
 
-    async def update_thing_configs(self, files: List[Path]):
-        data = await async_get_things()
-        if data is None:
-            return None
-
-        for file in files:
-            await self.update_thing_config(file, data)
-
-    @HABApp.core.wrapper.ignore_exception
-    async def update_thing_config(self, path: Path, data=None):
+    async def file_load(self, name: str, path: Path):
         # we have to check the naming structure because we get file events for the whole folder
         _name = path.name.lower()
         if not _name.startswith('thing_') or not _name.endswith('.yml'):
+            log.warning(f'Name for "{name}" does not start with "thing_" -> skip!')
             return None
 
         # only load if we don't supply the data
-        if data is None:
-            data = await async_get_things()
+        if time.time() - self.cache_ts > 20 or not self.cache_cfg:
+            self.cache_cfg = await async_get_things()
+            self.cache_ts = time.time()
+
+        data = self.cache_cfg
 
         # remove created items
         self.created_items.pop(path.name, None)
@@ -198,6 +194,8 @@ class ManualThingConfig(OnConnectPlugin):
             self.do_cleanup.reset()
 
             create_items_file(output_file, create_items)
+
+            self.cache_cfg = {}
 
 
 PLUGIN_MANUAL_THING_CFG = ManualThingConfig.create_plugin()

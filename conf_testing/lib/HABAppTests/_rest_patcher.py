@@ -16,10 +16,10 @@ def shorten_url(url: str):
 
 
 class RestPatcher:
-    def __init__(self, name):
+    def __init__(self, name: str):
+        self.name = name
+        self.logged_name = False
         self.log = logging.getLogger('HABApp.Rest')
-        self.log.debug('')
-        self.log.debug(f'{name}:')
 
     def wrap(self, to_call):
         async def resp_wrap(*args, **kwargs):
@@ -31,6 +31,12 @@ class RestPatcher:
                 out = f' {kwargs["json"]}'
             if kwargs.get('data') is not None:
                 out = f' "{kwargs["data"]}"'
+
+            # Log name when we log the first message
+            if not self.logged_name:
+                self.logged_name = True
+                self.log.debug('')
+                self.log.debug(f'{self.name}:')
 
             self.log.debug(
                 f'{resp.request_info.method:^6s} {shorten_url(resp.request_info.url)} ({resp.status}){out}'

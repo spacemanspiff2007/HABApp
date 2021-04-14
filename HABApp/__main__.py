@@ -18,7 +18,6 @@ def main() -> typing.Union[int, str]:
 
     try:
         app = HABApp.runtime.Runtime()
-        app.startup(config_folder=cfg_folder)
 
         def shutdown_handler(sig, frame):
             print('Shutting down ...')
@@ -30,7 +29,7 @@ def main() -> typing.Union[int, str]:
 
         # start workers
         try:
-            asyncio.ensure_future(app.get_async())
+            asyncio.ensure_future(app.start(cfg_folder))
             HABApp.core.const.loop.run_forever()
         except asyncio.CancelledError:
             pass

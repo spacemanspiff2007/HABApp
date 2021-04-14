@@ -9,6 +9,7 @@ from watchdog.events import FileSystemEvent
 
 import HABApp.core.files.watcher.file_watcher
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
+from HABApp.core.files.watcher.base_watcher import FileEndingFilter
 from ...helpers import TmpEventBus
 
 
@@ -19,7 +20,7 @@ async def test_file_events(monkeypatch, event_bus: TmpEventBus, sync_worker):
     monkeypatch.setattr(HABApp.core.files.watcher.file_watcher, 'DEBOUNCE_TIME', wait_time)
 
     m = Mock()
-    handler = AggregatingAsyncEventHandler(Path('folder'), m, '.tmp', False)
+    handler = AggregatingAsyncEventHandler(Path('folder'), m, FileEndingFilter('.tmp'), False)
 
     loop = asyncio.get_event_loop()
 

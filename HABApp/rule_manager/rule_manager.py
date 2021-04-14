@@ -1,13 +1,14 @@
-import asyncio
 import logging
 import threading
-import time
 import typing
+from asyncio import sleep
 from pathlib import Path
 
 import HABApp
 import HABApp.__cmd_args__ as cmd_args
-from HABApp.core.files import file_load_failed, file_load_ok
+from HABApp.core.files.errors import AlreadyHandledFileError
+from HABApp.core.files.file import HABAppFile
+from HABApp.core.files.folders import add_folder as add_habapp_folder
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
@@ -17,16 +18,6 @@ log = logging.getLogger('HABApp.Rules')
 
 
 LOAD_DELAY = 1
-
-
-async def set_load_ok(name: str):
-    await asyncio.sleep(LOAD_DELAY)
-    file_load_ok(name)
-
-
-async def set_load_failed(name: str):
-    await asyncio.sleep(LOAD_DELAY)
-    file_load_failed(name)
 
 
 class RuleManager:
@@ -58,21 +49,25 @@ class RuleManager:
             file.check_all_rules()
             return
 
-        # Add event bus listener
-        HABApp.core.files.add_event_bus_listener('rule', self.request_file_load, self.request_file_unload, log)
+        class HABAppRuleFile(HABAppFile):
+            LOGGER = log
+            LOAD_FUNC = self.request_file_load
+            UNLOAD_FUNC = self.request_file_unload
 
-        # Folder watcher
-        self.watcher = HABApp.core.files.watch_folder(HABApp.CONFIG.directories.rules, '.py', True)
+        path = HABApp.CONFIG.directories.rules
+        folder = add_habapp_folder('rules/', path, 0)
+        folder.add_file_type(HABAppRuleFile)
+        self.watcher = folder.add_watch('.py', True)
 
         # Initial loading of rules
         HABApp.core.WrappedFunction(self.load_rules_on_startup, logger=log, warn_too_long=False).run()
 
-    def load_rules_on_startup(self):
+    async def load_rules_on_startup(self):
 
         if HABApp.CONFIG.openhab.connection.host and HABApp.CONFIG.openhab.general.wait_for_openhab:
             items_found = False
             while not items_found:
-                time.sleep(3)
+                await sleep(3)
                 for item in HABApp.core.Items.get_all_items():
                     if isinstance(item, HABApp.openhab.items.OpenhabItem):
                         items_found = True
@@ -81,12 +76,12 @@ class RuleManager:
                 # stop waiting if we want to shut down
                 if HABApp.runtime.shutdown.requested:
                     return None
-            time.sleep(2.2)
+            await sleep(2.2)
         else:
-            time.sleep(5.2)
+            await sleep(5.2)
 
         # trigger event for every file
-        self.watcher.trigger_all()
+        await self.watcher.trigger_all()
         return None
 
     @log_exception
@@ -109,9 +104,7 @@ class RuleManager:
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]
 
-
-    @log_exception
-    def request_file_unload(self, name: str, path: Path, request_lock=True):
+    async def request_file_unload(self, name: str, path: Path, request_lock=True):
         path_str = str(path)
 
         try:
@@ -125,27 +118,21 @@ class RuleManager:
                 log_warning(log, f'Rule file {path} is not yet loaded and therefore can not be unloaded')
                 return None
 
-            log.debug(f'Removing file: {path}')
+            log.debug(f'Removing file: {name}')
             with self.__files_lock:
                 rule = self.files.pop(path_str)
-            rule.unload()
-        except Exception as e:
-            err = HABApp.core.logger.HABAppError(log)
-            err.add(f"Could not remove {path}!")
-            err.add_exception(e, True)
-            err.dump()
-            return None
+
+            await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, rule.unload)
         finally:
             if request_lock:
                 self.__load_lock.release()
 
-    @log_exception
-    def request_file_load(self, name: str, path: Path):
+    async def request_file_load(self, name: str, path: Path):
         path_str = str(path)
 
         # Only load existing files
         if not path.is_file():
-            log_warning(log, f'Rule file {path} does not exist and can not be loaded!')
+            log_warning(log, f'Rule file {name} ({path}) does not exist and can not be loaded!')
             return None
 
         with self.__load_lock:
@@ -153,26 +140,19 @@ class RuleManager:
             with self.__files_lock:
                 already_loaded = path_str in self.files
             if already_loaded:
-                self.request_file_unload(name, path, request_lock=False)
+                await self.request_file_unload(name, path, request_lock=False)
 
-            log.debug(f'Loading file: {path}')
+            log.debug(f'Loading file: {name}')
             with self.__files_lock:
                 self.files[path_str] = file = RuleFile(self, path)
 
-            if not file.load():
-                # If the load has failed we remove it again.
-                # Unloading is handled directly in the load function
+            ok = await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, file.load)
+            if not ok:
                 self.files.pop(path_str)
                 log.warning(f'Failed to load {path_str}!')
+                raise AlreadyHandledFileError()
 
-                # signal that we have loaded the file but with a small delay
-                asyncio.run_coroutine_threadsafe(set_load_failed(name), HABApp.core.const.loop)
-                return None
-
-        log.debug(f'File {path_str} successfully loaded!')
-
-        # signal that we have loaded the file but with a small delay
-        asyncio.run_coroutine_threadsafe(set_load_ok(name), HABApp.core.const.loop)
+        log.debug(f'File {name} successfully loaded!')
 
         # Do simple checks which prevent errors
         file.check_all_rules()

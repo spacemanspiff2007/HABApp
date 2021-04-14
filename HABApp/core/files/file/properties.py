@@ -18,7 +18,7 @@ class FileProperties(BaseModel):
 RE_START = re.compile(r'^#(\s*)HABApp\s*:', re.IGNORECASE)
 
 
-def get_props(_str: str) -> FileProperties:
+def get_properties(_str: str) -> FileProperties:
 
     cfg = []
     cut = 0

@@ -5,7 +5,7 @@ from typing import Optional, Dict
 from watchdog.observers import Observer
 from watchdog.observers.api import ObservedWatch
 
-from .base_watcher import BaseWatcher
+from .base_watcher import FileSystemEventHandler
 
 LOCK = Lock()
 
@@ -29,9 +29,9 @@ def start():
     return None
 
 
-def add_folder_watch(handler: BaseWatcher):
+def add_folder_watch(handler: FileSystemEventHandler):
     assert OBSERVER is not None
-    assert isinstance(handler, BaseWatcher), type(handler)
+    assert isinstance(handler, FileSystemEventHandler), type(handler)
     assert isinstance(handler.folder, Path) and handler.folder.is_dir()
 
     with LOCK:

@@ -2,22 +2,31 @@ from pathlib import Path
 
 import pytest
 
-import HABApp
-from HABApp.core.files import name_from_path, path_from_name
+from HABApp.core.files.folders import get_path, get_name, add_folder, get_prefixes
+from HABApp.core.files.folders.folders import FOLDERS
 
 
 @pytest.fixture
-def cfg(monkeypatch):
-    monkeypatch.setattr(HABApp.config.CONFIG.directories, 'rules', Path('c:/HABApp/my_rules/'))
-    monkeypatch.setattr(HABApp.config.CONFIG.directories, 'config', Path('c:/HABApp/my_config/'))
-    monkeypatch.setattr(HABApp.config.CONFIG.directories, 'param', Path('c:/HABApp/my_param/'))
+def cfg():
+    FOLDERS.clear()
+    add_folder('rules/', Path('c:/HABApp/my_rules/'), 0)
+    add_folder('configs/', Path('c:/HABApp/my_config/'), 10)
+    add_folder('params/', Path('c:/HABApp/my_param/'), 20)
 
     yield None
 
+    FOLDERS.clear()
+
 
 def cmp(path: Path, name: str):
-    assert name_from_path(path) == name
-    assert path_from_name(name) == path
+    assert get_name(path) == name
+    assert get_path(name) == path
+
+
+def test_prefix_sort(cfg):
+    assert get_prefixes() == ['params/', 'configs/', 'rules/']
+    add_folder('params1/', Path('c:/HABApp/my_para1m/'), 50)
+    assert get_prefixes() == ['params1/', 'params/', 'configs/', 'rules/']
 
 
 def test_from_path(cfg):
@@ -32,4 +41,24 @@ def test_from_path(cfg):
 
 def test_err(cfg):
     with pytest.raises(ValueError):
-        name_from_path(Path('c:/HABApp/rules/rule.py'))
+        get_name(Path('c:/HABApp/rules/rule.py'))
+
+
+def test_mixed():
+    FOLDERS.clear()
+    add_folder('rules/', Path('c:/HABApp/rules'), 1)
+    add_folder('configs/', Path('c:/HABApp/rules/my_config'), 2)
+    add_folder('params/', Path('c:/HABApp/rules/my_param'), 3)
+
+    cmp(Path('c:/HABApp/rules/rule.py'),              'rules/rule.py')
+    cmp(Path('c:/HABApp/rules/my_config/params.yml'), 'configs/params.yml')
+    cmp(Path('c:/HABApp/rules/my_param/cfg.yml'),     'params/cfg.yml')
+
+    FOLDERS.clear()
+    add_folder('rules/', Path('c:/HABApp/rules'), 1)
+    add_folder('configs/', Path('c:/HABApp/rules/my_cfg'), 2)
+    add_folder('params/', Path('c:/HABApp/rules/my_param'), 3)
+
+    cmp(Path('c:/HABApp/rules/rule.py'),           'rules/rule.py')
+    cmp(Path('c:/HABApp/rules/my_cfg/params.yml'), 'configs/params.yml')
+    cmp(Path('c:/HABApp/rules/my_param/cfg.yml'),  'params/cfg.yml')

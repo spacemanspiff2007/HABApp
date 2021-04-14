@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 
 import HABApp.config
@@ -28,12 +27,16 @@ class Runtime:
         HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
         shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown, msg='Stopping workers')
 
-    def startup(self, config_folder: Path):
+    @HABApp.core.wrapper.log_exception
+    async def start(self, config_folder: Path):
 
         # Start Folder watcher!
         HABApp.core.files.watcher.start()
 
         self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
+
+        await HABApp.core.files.setup()
+
 
         # MQTT
         HABApp.mqtt.mqtt_connection.setup()
@@ -43,15 +46,11 @@ class Runtime:
         openhab_connection.setup()
 
         # Parameter Files
-        HABApp.parameters.parameter_files.setup_param_files()
+        await HABApp.parameters.parameter_files.setup_param_files()
 
         # Rule engine
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
         self.rule_manager.setup()
 
-    @HABApp.core.wrapper.log_exception
-    def get_async(self):
-        return asyncio.gather(
-            self.async_http.create_client(),
-            openhab_connection.start()
-        )
+        await self.async_http.create_client()
+        await openhab_connection.start()

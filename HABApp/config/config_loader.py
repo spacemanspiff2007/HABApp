@@ -68,12 +68,13 @@ class HABAppConfigLoader:
         self.first_start = False
 
         # Watch folders so we can reload the config on the fly
+        filter = HABApp.core.files.watcher.FileEndingFilter('.yml')
         watcher = HABApp.core.files.watcher.AggregatingAsyncEventHandler(
-            self.folder_conf, self.files_changed, file_ending='.yml', watch_subfolders=False
+            self.folder_conf, self.files_changed, filter, watch_subfolders=False
         )
         HABApp.core.files.watcher.add_folder_watch(watcher)
 
-    def files_changed(self, paths: List[Path]):
+    async def files_changed(self, paths: List[Path]):
         for path in paths:
             if path.name == 'config.yml':
                 self.load_cfg()

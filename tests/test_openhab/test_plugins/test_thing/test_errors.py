@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from HABApp.openhab.connection_logic.plugin_things.plugin_things import ManualThingConfig
@@ -36,7 +38,9 @@ async def test_errors(caplog):
     file = MockFile('/thing_test.yml', data=text)
     file.warn_on_delete = False
 
-    await cfg.update_thing_config(file, data)
+    cfg.cache_cfg = data
+    cfg.cache_ts = time.time()
+    await cfg.file_load('/thing_test.yml', file)
 
     errors = [rec.message for rec in caplog.records if rec.levelno >= 30]
     assert errors == ['Duplicate item: Name1']
@@ -58,7 +62,9 @@ channels:
     file = MockFile('/thing_test.yml', data=text)
     file.warn_on_delete = False
 
-    await cfg.update_thing_config(file, data)
+    cfg.cache_cfg = data
+    cfg.cache_ts = time.time()
+    await cfg.file_load('/thing_test.yml', file)
 
     errors = [rec.message for rec in caplog.records if rec.levelno >= 30]
     assert errors[0] == '"â_ß_{_)" is not a valid name for an item!'

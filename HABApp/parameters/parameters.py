@@ -49,7 +49,7 @@ def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=Tr
     # todo: move this to file handling so we get the extension
     if old_validator != new_validator:
         name = HABApp.core.files.file_name.PREFIX_PARAMS + '/' + filename + '.yml'
-        path = HABApp.core.files.file_name.path_from_name(name)
+        path = HABApp.core.files.file_name.get_path(name)
         HABApp.core.files.all.process([path])
 
 

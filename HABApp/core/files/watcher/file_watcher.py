@@ -1,20 +1,20 @@
-import asyncio
+from asyncio import run_coroutine_threadsafe, sleep
 from pathlib import Path
 from time import time
-from typing import Any, Callable, List, Set
+from typing import Any, List, Set, Awaitable, Callable
 
 import HABApp
 from HABApp.core.wrapper import ignore_exception
-from .base_watcher import BaseWatcher as __BaseWatcher
-
+from .base_watcher import EventFilterBase
+from .base_watcher import FileSystemEventHandler
 
 DEBOUNCE_TIME: float = 0.6
 
 
-class AggregatingAsyncEventHandler(__BaseWatcher):
-    def __init__(self, folder: Path, func: Callable[[List[Path]], Any], file_ending: str,
+class AggregatingAsyncEventHandler(FileSystemEventHandler):
+    def __init__(self, folder: Path, func: Callable[[List[Path]], Awaitable[Any]], filter: EventFilterBase,
                  watch_subfolders: bool = False):
-        super().__init__(folder, file_ending, watch_subfolders=watch_subfolders)
+        super().__init__(folder, filter, watch_subfolders=watch_subfolders)
 
         self.func = func
 
@@ -24,7 +24,7 @@ class AggregatingAsyncEventHandler(__BaseWatcher):
     @ignore_exception
     def file_changed(self, dst: str):
         # Map from thread to async
-        asyncio.run_coroutine_threadsafe(self._event_waiter(Path(dst)), loop=HABApp.core.const.loop)
+        run_coroutine_threadsafe(self._event_waiter(Path(dst)), loop=HABApp.core.const.loop)
 
     @ignore_exception
     async def _event_waiter(self, dst: Path):
@@ -32,7 +32,7 @@ class AggregatingAsyncEventHandler(__BaseWatcher):
         self._files.add(dst)
 
         # debounce time
-        await asyncio.sleep(DEBOUNCE_TIME)
+        await sleep(DEBOUNCE_TIME)
 
         # check if a new event came
         if self.last_event > ts:
@@ -41,8 +41,10 @@ class AggregatingAsyncEventHandler(__BaseWatcher):
         # Copy Path so we're done here
         files = list(self._files)
         self._files.clear()
-        self.func(files)
 
-    def trigger_all(self):
-        files = HABApp.core.lib.list_files(self.folder, self.file_ending, self.watch_subfolders)
-        self.func(files)
+        # process
+        await self.func(HABApp.core.lib.sort_files(files))
+
+    async def trigger_all(self):
+        files = HABApp.core.lib.list_files(self.folder, self.filter, self.watch_subfolders)
+        await self.func(files)
