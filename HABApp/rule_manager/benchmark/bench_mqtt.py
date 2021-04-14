@@ -40,7 +40,7 @@ class MqttBenchRule(BenchBaseRule):
         pass
         self.cleanup()
 
-    def run(self):
+    def run_bench(self):
         # These are the benchmarks
         self.bench_rtt_time()
 

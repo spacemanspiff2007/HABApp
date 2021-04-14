@@ -12,6 +12,7 @@ from HABApp.core.files.folders import add_folder as add_habapp_folder
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
+from HABApp.runtime import shutdown
 from .rule_file import RuleFile
 
 log = logging.getLogger('HABApp.Rules')
@@ -37,12 +38,16 @@ class RuleManager:
 
         self.watcher: typing.Optional[AggregatingAsyncEventHandler] = None
 
-    def setup(self):
+    async def setup(self):
+
+        # shutdown
+        shutdown.register_func(self.shutdown, msg='Cancel rule schedulers')
 
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
             self.files['bench'] = file = BenchFile(self)
-            if not file.load():
+            ok = await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, file.load)
+            if not ok:
                 log.error('Failed to load Benchmark!')
                 HABApp.runtime.shutdown.request_shutdown()
                 return None
@@ -60,7 +65,7 @@ class RuleManager:
         self.watcher = folder.add_watch('.py', True)
 
         # Initial loading of rules
-        HABApp.core.WrappedFunction(self.load_rules_on_startup, logger=log, warn_too_long=False).run()
+        HABApp.core.WrappedFunction(self.load_rules_on_startup, logger=log).run()
 
     async def load_rules_on_startup(self):
 
@@ -156,3 +161,8 @@ class RuleManager:
 
         # Do simple checks which prevent errors
         file.check_all_rules()
+
+    def shutdown(self):
+        for f in self.files.values():
+            for rule in f.rules.values():
+                rule._unload()

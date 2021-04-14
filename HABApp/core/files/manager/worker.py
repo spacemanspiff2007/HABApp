@@ -82,3 +82,4 @@ async def _process():
         HABApp.core.wrapper.process_exception('file load worker', e, logger=log)
     finally:
         TASK = None
+    log.debug('Worker done!')

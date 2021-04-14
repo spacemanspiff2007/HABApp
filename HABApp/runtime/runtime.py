@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import eascheduler
+
 import HABApp.config
 import HABApp.core
 import HABApp.mqtt.mqtt_connection
@@ -17,13 +19,12 @@ class Runtime:
 
         self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = HABApp.rule.interfaces.AsyncHttpConnection()
 
-        # OpenHAB
-        self.openhab_connection: HABApp.openhab.OpenhabConnection = None
-
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
         # Async Workers & shutdown callback
+        # Setup scheduler
+        eascheduler.schedulers.ThreadSafeAsyncScheduler.LOOP = HABApp.core.const.loop
         HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
         shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown, msg='Stopping workers')
 
@@ -37,7 +38,6 @@ class Runtime:
 
         await HABApp.core.files.setup()
 
-
         # MQTT
         HABApp.mqtt.mqtt_connection.setup()
         HABApp.mqtt.mqtt_connection.connect()
@@ -50,7 +50,9 @@ class Runtime:
 
         # Rule engine
         self.rule_manager = HABApp.rule_manager.RuleManager(self)
-        self.rule_manager.setup()
+        await self.rule_manager.setup()
 
         await self.async_http.create_client()
         await openhab_connection.start()
+
+        shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')

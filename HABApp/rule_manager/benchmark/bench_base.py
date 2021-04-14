@@ -42,7 +42,7 @@ class BenchBaseRule(HABApp.Rule):
                 print('')
 
                 self.set_up()
-                self.run()
+                self.run_bench()
             finally:
                 self.tear_down()
         finally:
@@ -54,7 +54,7 @@ class BenchBaseRule(HABApp.Rule):
     def tear_down(self):
         pass
 
-    def run(self):
+    def run_bench(self):
         raise NotImplementedError()
 
     def do_bench_finished(self):

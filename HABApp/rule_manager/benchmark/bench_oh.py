@@ -51,7 +51,7 @@ class OpenhabBenchRule(BenchBaseRule):
     def tear_down(self):
         self.cleanup()
 
-    def run(self):
+    def run_bench(self):
         # These are the benchmarks
         self.bench_item_create()
         self.bench_rtt_time()
@@ -59,7 +59,7 @@ class OpenhabBenchRule(BenchBaseRule):
     def bench_item_create(self):
         print('Bench item operations ', end='')
 
-        max_duration = 30   # how long should each bench take
+        max_duration = 10   # how long should each bench take
 
         times = BenchContainer()
 
