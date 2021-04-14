@@ -105,7 +105,7 @@ class ManualThingConfig(OnConnectPlugin):
         if not path.is_file():
             log.debug(f'File {path} does not exist -> skipping Thing configuration!')
             return None
-        log.debug(f'Loading {path}!')
+        log.debug(f'Loading {name}!')
 
         # load the config file
         with path.open(mode='r', encoding='utf-8') as file:

@@ -144,7 +144,7 @@ class RuleManager:
 
             log.debug(f'Loading file: {name}')
             with self.__files_lock:
-                self.files[path_str] = file = RuleFile(self, path)
+                self.files[path_str] = file = RuleFile(self, name, path)
 
             ok = await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, file.load)
             if not ok:

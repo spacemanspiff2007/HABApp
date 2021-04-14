@@ -25,6 +25,7 @@ class HABAppFile:
 
         self.state: FileState = FileState.PENDING
         self.properties: FileProperties = properties
+        log.debug(f'{self.name} added')
 
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.name} state: {self.state}>'

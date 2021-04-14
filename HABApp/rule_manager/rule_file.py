@@ -11,12 +11,13 @@ log = logging.getLogger('HABApp.Rules')
 
 
 class RuleFile:
-    def __init__(self, rule_manager, path: Path):
+    def __init__(self, rule_manager, name: str, path: Path):
         from .rule_manager import RuleManager
 
         assert isinstance(rule_manager, RuleManager)
         self.rule_manager = rule_manager
 
+        self.name: str = name
         self.path: Path = path
 
         self.rules = {}  # type: typing.Dict[str, HABApp.Rule]
@@ -52,7 +53,7 @@ class RuleFile:
         for rule in self.rules.values():  # type: HABApp.Rule
             rule._unload()
 
-        log.debug(f'File {self.path} successfully unloaded!')
+        log.debug(f'File {self.name} successfully unloaded!')
         return None
 
     def __process_tc(self, tb: list):
@@ -100,7 +101,7 @@ class RuleFile:
                     raise ValueError(f'Rule name must be unique!\n"{rule.rule_name}" is already used!')
 
                 self.rules[rule.rule_name] = rule
-                log.info(f'Added rule "{rule.rule_name}" from {self.path.name}')
+                log.info(f'Added rule "{rule.rule_name}" from {self.name}')
 
         if ign.raised_exception:
             # unload all rule instances which might have already been created otherwise they might
