@@ -1,5 +1,6 @@
 import logging
 import threading
+import asyncio
 from pathlib import Path
 
 import HABApp
@@ -10,6 +11,7 @@ from .parameters import get_parameter_file, remove_parameter_file, set_parameter
 log = logging.getLogger('HABApp.RuleParameters')
 
 LOCK = threading.Lock()
+PARAM_PREFIX = 'params/'
 
 
 async def load_file(name: str, path: Path):
@@ -52,7 +54,13 @@ async def setup_param_files() -> bool:
         log.info(f'Parameter files disabled: Folder {path} does not exist!')
         return False
 
-    folder = add_habapp_folder('params/', path, 100)
+    folder = add_habapp_folder(PARAM_PREFIX, path, 100)
     folder.add_file_type(HABAppParameterFile)
     watcher = folder.add_watch('.yml')
     await watcher.trigger_all()
+
+
+def reload_param_file(name: str):
+    name = f'{PARAM_PREFIX}{name}.yml'
+    path = HABApp.core.files.folders.get_path(name)
+    asyncio.run_coroutine_threadsafe(HABApp.core.files.manager.process_file(name, path), HABApp.core.const.loop)

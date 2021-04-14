@@ -1,8 +1,6 @@
-import HABApp
 import typing
 
 import voluptuous
-
 
 _PARAMETERS: typing.Dict[str, dict] = {}
 _VALIDATORS: typing.Dict[str, voluptuous.Schema] = {}
@@ -48,9 +46,7 @@ def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=Tr
 
     # todo: move this to file handling so we get the extension
     if old_validator != new_validator:
-        name = HABApp.core.files.file_name.PREFIX_PARAMS + '/' + filename + '.yml'
-        path = HABApp.core.files.file_name.get_path(name)
-        HABApp.core.files.all.process([path])
+        reload_param_file(filename)
 
 
 def add_parameter(file: str, *keys, default_value):
@@ -94,4 +90,4 @@ def get_value(file: str, *keys) -> typing.Any:
 
 
 # Import here to prevent cyclic imports
-from .parameter_files import save_file  # noqa: E402
+from .parameter_files import save_file, reload_param_file  # noqa: E402
