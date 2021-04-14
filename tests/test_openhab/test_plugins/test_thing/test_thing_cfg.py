@@ -21,6 +21,7 @@ def cfg():
         'group_1': ['controller'],
 
         'binding_cmdrepollperiod': 2600,
+        "wakeup_interval": 3600,
     })
 
 
@@ -51,16 +52,19 @@ def test_param_split(cfg: ThingConfigChanger):
 
 def test_set_keys(cfg: ThingConfigChanger):
     cfg[1] = 5
+    cfg['wakeup_interval'] = 7200
 
     with raises(KeyError):
         cfg[3] = 7
+
     with raises(KeyError):
         cfg['1'] = 7
 
 
 def test_set_wrong_type(cfg: ThingConfigChanger):
-    with raises(ValueError):
+    with raises(ValueError) as e:
         cfg[1] = "asdf"
+    assert str(e.value) == "Datatype of parameter '1' must be 'int' but is 'str': 'asdf'"
 
     with raises(ValueError):
         cfg['Group1'] = 'asdf'

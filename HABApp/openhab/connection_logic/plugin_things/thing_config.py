@@ -8,18 +8,18 @@ from HABApp.openhab.connection_handler.func_async import async_set_thing_cfg
 from ._log import log_cfg as log
 
 
-def ensure_same_types(a, b, key: str):
-    t_a = type(a)
-    t_b = type(b)
-    if t_a is t_b:
+def ensure_same_types(key: str, org, val):
+    t_org = type(org)
+    t_val = type(val)
+    if t_org is t_val:
         return None
 
-    _a = str(t_a)
+    _a = str(t_org)
     _a = _a[7:-1] if _a.startswith('<class ') and _a[-1] == '>' else _a
 
-    _b = str(t_b)
+    _b = str(t_val)
     _b = _b[7:-1] if _b.startswith('<class ') and _b[-1] == '>' else _b
-    raise ValueError(f"Datatype of parameter '{key}' must be {_a} but is {_b}!")
+    raise ValueError(f"Datatype of parameter '{key}' must be {_a} but is {_b}: '{val}'")
 
 
 re_ref = re.compile(r'\$(\w+)')
@@ -94,7 +94,7 @@ class ThingConfigChanger:
             log.debug(f' -> "{value}"')
 
         org = self.org[key]
-        ensure_same_types(value, org, o_key)
+        ensure_same_types(o_key, org, value)
 
         if value == org:
             return None
