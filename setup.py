@@ -15,7 +15,7 @@ def load_version() -> str:
 
 def load_req() -> typing.List[str]:
     # When we run tox tests we don't have this file available so we skip them
-    req_file = Path(__file__).with_name('requirements.txt')
+    req_file = Path(__file__).with_name('requirements_setup.txt')
     if not req_file.is_file():
         return ['']
 

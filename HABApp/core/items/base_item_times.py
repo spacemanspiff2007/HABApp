@@ -1,8 +1,8 @@
 import asyncio
-import datetime
 import logging
 import typing
 from datetime import timedelta
+from pendulum import DateTime
 
 from HABApp.core.wrapper import log_exception
 from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
@@ -14,12 +14,12 @@ log = logging.getLogger('HABApp')
 class ItemTimes:
     WATCH: typing.Union[typing.Type[ItemNoUpdateWatch], typing.Type[ItemNoChangeWatch]]
 
-    def __init__(self, name: str, dt: datetime.datetime):
+    def __init__(self, name: str, dt: DateTime):
         self.name: str = name
-        self.dt: datetime.datetime = dt
+        self.dt: DateTime = dt
         self.tasks: typing.List[BaseWatch] = []
 
-    def set(self, dt: datetime.datetime, events=True):
+    def set(self, dt: DateTime, events=True):
         self.dt = dt
         if not self.tasks:
             return

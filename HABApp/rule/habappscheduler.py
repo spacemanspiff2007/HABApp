@@ -1,12 +1,12 @@
 import random
-from datetime import time as dt_time, datetime as dt_datetime, timedelta as dt_timedelta
+from datetime import datetime as dt_datetime, time as dt_time, timedelta as dt_timedelta
 from typing import Callable
-from typing import Union, Iterable
+from typing import Iterable, Union
 
 from eascheduler import SchedulerView
 from eascheduler.executors import ExecutorBase
-from eascheduler.jobs import DayOfWeekJob, ReoccurringJob, CountdownJob, OneTimeJob, DuskJob, DawnJob, SunsetJob, \
-    SunriseJob
+from eascheduler.jobs import CountdownJob, DawnJob, DayOfWeekJob, DuskJob, OneTimeJob, ReoccurringJob, SunriseJob, \
+    SunsetJob
 from eascheduler.schedulers import ThreadSafeAsyncScheduler
 
 import HABApp
@@ -55,14 +55,6 @@ class HABAppScheduler(SchedulerView):
         """
         callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
         return super().on_day_of_week(time, 'all', callback, *args, **kwargs)
-
-    def on_weekends(self, time: Union[dt_time, dt_datetime], callback, *args, **kwargs) -> DayOfWeekJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
-        return super().on_weekends(time, callback, *args, **kwargs)
-
-    def on_workdays(self, time: Union[dt_time, dt_datetime], callback, *args, **kwargs) -> DayOfWeekJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
-        return super().on_workdays(time, callback, *args, **kwargs)
 
     def on_sunrise(self, callback, *args, **kwargs) -> SunriseJob:
         callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))

@@ -1,9 +1,9 @@
-import datetime
 import logging
 import typing
 from math import ceil, floor
 
-from pytz import utc
+from pendulum import UTC
+from pendulum import now as pd_now
 
 import HABApp
 from .base_item import BaseItem
@@ -33,7 +33,7 @@ class BaseValueItem(BaseItem):
         """
         state_changed = self.value != new_value
 
-        _now = datetime.datetime.now(tz=utc)
+        _now = pd_now(UTC)
         if state_changed:
             self._last_change.set(_now)
         self._last_update.set(_now)

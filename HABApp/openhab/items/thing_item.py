@@ -1,6 +1,5 @@
-from datetime import datetime
-
-from pytz import utc
+from pendulum import UTC
+from pendulum import now as pd_now
 
 from HABApp.core.items.base_item import BaseItem
 from ..events import ThingStatusInfoEvent
@@ -17,7 +16,7 @@ class Thing(BaseItem):
         self.status: str = ''
 
     def __update_timestamps(self, changed: bool):
-        _now = datetime.now(tz=utc)
+        _now = pd_now(UTC)
         self._last_update.set(_now)
         if changed:
             self._last_change.set(_now)

@@ -1,8 +1,9 @@
 import datetime
 from typing import Any, Callable, Union
 
-import tzlocal
-from pytz import utc
+from eascheduler.const import local_tz
+from pendulum import UTC, DateTime
+from pendulum import now as pd_now
 
 import HABApp
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
@@ -31,7 +32,7 @@ class BaseItem:
 
         self._name: str = name
 
-        _now = datetime.datetime.now(tz=utc)
+        _now = pd_now(UTC)
         self._last_change: ChangedTime = ChangedTime(self._name, _now)
         self._last_update: UpdatedTime = UpdatedTime(self._name, _now)
 
@@ -43,18 +44,18 @@ class BaseItem:
         return self._name
 
     @property
-    def last_change(self) -> datetime.datetime:
+    def last_change(self) -> DateTime:
         """
         :return: Timestamp of the last time when the item has been changed (read only)
         """
-        return self._last_change.dt.astimezone(tzlocal.get_localzone()).replace(tzinfo=None)
+        return self._last_change.dt.in_timezone(local_tz)
 
     @property
-    def last_update(self) -> datetime.datetime:
+    def last_update(self) -> DateTime:
         """
         :return: Timestamp of the last time when the item has been updated (read only)
         """
-        return self._last_update.dt.astimezone(tzlocal.get_localzone()).replace(tzinfo=None)
+        return self._last_update.dt.in_timezone(local_tz)
 
     def __repr__(self):
         ret = ''

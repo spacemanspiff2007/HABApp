@@ -21,7 +21,7 @@ class MyRule(HABApp.Rule):
         self.run.on_weekends(datetime.time(15, 00), self.run_weekends)
 
     def run_every_3s(self, arg, asdf = None):
-        print( f'run_ever_3s: {time.time():.3f} : {arg}, {asdf}')
+        print(f'run_ever_3s: {time.time():.3f} : {arg}, {asdf}')
 
     def run_mondays(self):
         print('Today is monday!')

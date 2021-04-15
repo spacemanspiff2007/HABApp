@@ -18,9 +18,6 @@ from .rule_file import RuleFile
 log = logging.getLogger('HABApp.Rules')
 
 
-LOAD_DELAY = 1
-
-
 class RuleManager:
 
     def __init__(self, parent):

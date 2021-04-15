@@ -12,12 +12,5 @@ voluptuous==0.12.1
 watchdog==2.0.2
 ujson==4.0.2
 
-
-flake8==3.9.0
-pytest==6.2.3
-pytest-asyncio==0.14.0
-sphinx==3.5.4
-
 # Backports
 dataclasses==0.8;python_version<"3.7"
-mock;python_version<"3.8"
