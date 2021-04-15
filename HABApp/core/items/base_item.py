@@ -48,14 +48,14 @@ class BaseItem:
         """
         :return: Timestamp of the last time when the item has been changed (read only)
         """
-        return self._last_change.dt.in_timezone(local_tz)
+        return self._last_change.dt.in_timezone(local_tz).naive()
 
     @property
     def last_update(self) -> DateTime:
         """
         :return: Timestamp of the last time when the item has been updated (read only)
         """
-        return self._last_update.dt.in_timezone(local_tz)
+        return self._last_update.dt.in_timezone(local_tz).naive()
 
     def __repr__(self):
         ret = ''
