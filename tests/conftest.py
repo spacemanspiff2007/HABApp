@@ -35,6 +35,8 @@ def show_errors(monkeypatch):
     monkeypatch.setattr(HABApp.core.wrapper, 'ignore_exception', raise_err)
     monkeypatch.setattr(HABApp.core.wrapper, 'log_exception', raise_err)
 
+    HABApp.core.EventBus.remove_all_listeners()
+
 
 @pytest.yield_fixture(autouse=True, scope='function')
 def event_loop():
