@@ -204,7 +204,7 @@ class Rule:
 
     def run_on_day_of_week(self, time: datetime.time, weekdays, callback, *args, **kwargs):
         warnings.warn('self.run_on_day_of_week is deprecated. Please use self.run.on_day_of_week', DeprecationWarning)
-        return self.run.on_every_day(time, weekdays, callback, *args, **kwargs)
+        return self.run.on_day_of_week(time, weekdays, callback, *args, **kwargs)
 
     def run_on_every_day(self, time: datetime.time, callback, *args, **kwargs):
         warnings.warn('self.run_on_every_day is deprecated. Please use self.run.on_every_day', DeprecationWarning)
