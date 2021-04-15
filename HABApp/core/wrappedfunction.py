@@ -1,24 +1,20 @@
-import asyncio
-import concurrent.futures
 import io
 import logging
 import time
+from asyncio import create_task, iscoroutinefunction, run_coroutine_threadsafe
 from cProfile import Profile
+from concurrent.futures import ThreadPoolExecutor
+from pstats import SortKey
 from pstats import Stats
-try:
-    from pstats import SortKey   # type: ignore[attr-defined]
-    STAT_SORT_KEY = SortKey.CUMULATIVE
-except ImportError:
-    STAT_SORT_KEY = 'cumulative', 'cumtime'
+from threading import _MainThread, current_thread
 
 import HABApp
-
 
 default_logger = logging.getLogger('HABApp.Worker')
 
 
 class WrappedFunction:
-    _WORKERS = concurrent.futures.ThreadPoolExecutor(10, 'HabApp_')
+    _WORKERS = ThreadPoolExecutor(10, 'HabApp_')
     _EVENT_LOOP = None
 
     def __init__(self, func, logger=None, warn_too_long=True, name=None):
@@ -28,7 +24,7 @@ class WrappedFunction:
         # name of the function
         self.name = self._func.__name__ if not name else name
 
-        self.is_async = asyncio.iscoroutinefunction(self._func)
+        self.is_async = iscoroutinefunction(self._func)
 
         self.__time_submitted = 0.0
 
@@ -44,7 +40,11 @@ class WrappedFunction:
         if self.is_async:
             # schedule run async, we need to pass the event loop because we can create an async WrappedFunction
             # from a worker thread (if we have a mixture between async and non-async)!
-            asyncio.run_coroutine_threadsafe(self.async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
+            if isinstance(current_thread(), _MainThread):
+                create_task(self.async_run(*args, **kwargs))
+            else:
+                run_coroutine_threadsafe(self.async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
+
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
@@ -101,7 +101,7 @@ class WrappedFunction:
             self.log.warning(f'Execution of {self.name} took too long: {__dur:.2f}s')
 
             s = io.StringIO()
-            ps = Stats(pr, stream=s).sort_stats(STAT_SORT_KEY)
+            ps = Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
             ps.print_stats(0.1)  # limit to output to 10% of the lines
 
             for line in s.getvalue().splitlines()[4:]:    # skip the amount of calls and "Ordered by:"
