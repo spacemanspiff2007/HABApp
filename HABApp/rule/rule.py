@@ -102,6 +102,8 @@ class Rule:
         for listener in event_listeners:
             HABApp.core.EventBus.remove_listener(listener)
 
+        # Unload the scheduler
+        self.run._scheduler.cancel_all()
         return None
 
     def post_event(self, name, event):
