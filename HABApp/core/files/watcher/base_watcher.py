@@ -19,6 +19,9 @@ class FileEndingFilter(EventFilterBase):
     def notify(self, path: str) -> bool:
         return path.endswith(self.ending)
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__} ending: {self.ending}>'
+
 
 class FileSystemEventHandler:
     def __init__(self, folder: Path, filter: EventFilterBase, watch_subfolders: bool = False):

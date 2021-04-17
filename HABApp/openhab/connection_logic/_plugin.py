@@ -66,6 +66,7 @@ def on_disconnect():
 
 
 def setup_plugins():
+    log.debug('Starting setup')
     for p in PLUGINS:
         with ExceptionToHABApp(log, ignore_exception=True):
             p.setup()
