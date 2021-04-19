@@ -1,13 +1,13 @@
 from pathlib import Path
 
-import eascheduler
-
 import HABApp.config
 import HABApp.core
 import HABApp.mqtt.mqtt_connection
 import HABApp.parameters.parameter_files
 import HABApp.rule_manager
 import HABApp.util
+import eascheduler
+from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
 
@@ -30,6 +30,8 @@ class Runtime:
 
     @HABApp.core.wrapper.log_exception
     async def start(self, config_folder: Path):
+        # setup exception handler for the scheduler
+        eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
         # Start Folder watcher!
         HABApp.core.files.watcher.start()
