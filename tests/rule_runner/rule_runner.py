@@ -35,6 +35,9 @@ class SyncScheduler:
     def remove_job(self, job):
         self.jobs.remove(job)
 
+    def cancel_all(self):
+        self.jobs.clear()
+
 
 class SimpleRuleRunner:
     def __init__(self):

@@ -4,6 +4,37 @@
 openHAB
 ######################################
 
+**************************************
+Additional configuration
+**************************************
+
+openHAB 2
+======================================
+For openHAB2 there is no additional configuration needed.
+
+openHAB 3
+======================================
+For optimal performance it is recommended to use Basic Auth (available from openHAB 3.1 M3 on).
+It can be enabled through GUI or through textual configuration.
+
+Textual configuration
+--------------------------------------
+The settings are in the ``runtime.cfg``.
+Remove the ``#`` before the entry to activate it.
+
+.. code-block:: text
+
+   ################ REST API ###################
+   org.openhab.restauth:allowBasicAuth=true
+
+
+GUI
+--------------------------------------
+It can be enabled through the gui in ``settings`` -> ``API Security`` -> ``Allow Basic Authentication``.
+
+.. image:: /images/openhab_api_config.png
+
+
 
 **************************************
 Interaction with a openHAB
