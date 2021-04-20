@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from threading import Lock
 from typing import Optional, Dict
@@ -6,6 +7,8 @@ from watchdog.observers import Observer
 from watchdog.observers.api import ObservedWatch
 
 from .base_watcher import FileSystemEventHandler
+
+log = logging.getLogger('HABApp.files.watcher')
 
 LOCK = Lock()
 
@@ -33,6 +36,10 @@ def add_folder_watch(handler: FileSystemEventHandler):
     assert OBSERVER is not None
     assert isinstance(handler, FileSystemEventHandler), type(handler)
     assert isinstance(handler.folder, Path) and handler.folder.is_dir()
+
+    log.debug(
+        f'Adding {"recursive " if handler.watch_subfolders else ""}watcher for {handler.folder} with {handler.filter}'
+    )
 
     with LOCK:
         _folder = str(handler.folder)
