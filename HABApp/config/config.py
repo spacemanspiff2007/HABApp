@@ -20,6 +20,14 @@ class Directories(PathContainer):
     lib: Path = ConfigEntry(Path('lib'), description='Folder where additional libraries can be placed')
 
     def on_all_values_set(self):
+
+        # Configuration folder of HABApp can not be one of the configured folders
+        for name, path in {attr: getattr(self, attr) for attr in ('rules', 'param', 'config')}.items():
+            if path == self.parent_folder:
+                msg = f'Path for {name} can not be the same as the path for the HABApp config! ({path})'
+                log.error(msg)
+                sys.exit(msg)
+
         try:
             # create folder structure if it does not exist
             if not self.rules.is_dir():
