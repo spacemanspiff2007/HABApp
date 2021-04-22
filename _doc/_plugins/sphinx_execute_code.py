@@ -18,6 +18,7 @@ Usage:
    print 'Execute this python code'
 """
 import functools
+import os
 import re
 import subprocess
 import sys
@@ -31,6 +32,8 @@ from sphinx.errors import ExtensionError
 from sphinx.util import logging
 
 log = logging.getLogger(__name__)
+
+ADDITIONAL_PATH = Path(__file__).parent.parent.parent
 
 
 def PrintException( func):
@@ -168,7 +171,14 @@ WORKING_DIR = None
 
 def execute_code(code, ignore_stderr) -> str:
 
-    run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=WORKING_DIR)
+    env = os.environ.copy()
+
+    # Add additional PATH so we find the "tests" folder
+    paths = env['PYTHONPATH'].split(os.pathsep)
+    paths.insert(0, str(ADDITIONAL_PATH))
+    env['PYTHONPATH'] = os.pathsep.join(paths)
+
+    run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=WORKING_DIR, env=env)
     if run.returncode != 0:
         # print('')
         # print(f'stdout: {run.stdout.decode()}')
@@ -215,6 +225,8 @@ def builder_ready(app):
 
 def setup(app):
     """ Register sphinx_execute_code directive with Sphinx """
+
+    assert (ADDITIONAL_PATH / 'tests').is_dir(), ADDITIONAL_PATH
 
     app.add_config_value('execute_code_working_dir', None, 'env')
 

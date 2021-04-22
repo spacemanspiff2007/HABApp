@@ -53,8 +53,6 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
     'sphinx_execute_code',
-    'sphinx_execute_code',
-
     'sphinx.ext.inheritance_diagram',
 ]
 
@@ -206,7 +204,8 @@ epub_exclude_files = ['search.html']
 
 # -- Extension configuration -------------------------------------------------
 
-execute_code_working_dir = pathlib.Path(__file__).parent.parent
+execute_code_working_dir = pathlib.Path(__file__).parent.parent / 'src'
+assert execute_code_working_dir.is_dir(), execute_code_working_dir
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
