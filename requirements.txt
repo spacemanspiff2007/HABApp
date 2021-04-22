@@ -16,7 +16,11 @@ ujson==4.0.2
 flake8==3.9.0
 pytest==6.2.3
 pytest-asyncio==0.14.0
+
+# Documentation
 sphinx==3.5.4
+sphinx-autodoc-typehints
+sphinx_rtd_theme
 
 # Backports
 dataclasses==0.8;python_version<"3.7"

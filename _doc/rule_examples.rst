@@ -55,6 +55,54 @@ Get an even when the item is constant for 5 and for 10 seconds.
     # hide
 
 
+Turn something off after movement
+------------------------------------------
+Turn a device off 30 seconds after one of the movement sensors in a room signals movement.
+
+
+.. execute_code::
+    :hide_output:
+
+    # hide
+    import time, HABApp
+    from tests import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    HABApp.core.Items.create_item('movement_sensor1', HABApp.core.items.Item)
+    HABApp.core.Items.create_item('movement_sensor2', HABApp.core.items.Item)
+    HABApp.core.Items.create_item('my_device', HABApp.core.items.Item)
+    # hide
+    import HABApp
+    from HABApp.core.items import Item
+    from HABApp.core.events import ValueUpdateEvent
+
+    class MyCountdownRule(HABApp.Rule):
+        def __init__(self):
+            super().__init__()
+
+            self.countdown = self.run.countdown(30, self.switch_off)
+            self.device = Item.get_item('my_device')
+
+            self.movement1 = Item.get_item('movement_sensor1')
+            self.movement1.listen_event(self.movement, ValueUpdateEvent)
+
+            self.movement2 = Item.get_item('movement_sensor2')
+            self.movement2.listen_event(self.movement, ValueUpdateEvent)
+
+        def movement(self, event: ValueUpdateEvent):
+            if self.device != 'ON':
+                self.device.post_value('ON')
+
+            self.countdown.reset()
+
+        def switch_off(self):
+            self.device.post_value('OFF')
+
+    MyCountdownRule()
+    # hide
+    runner.tear_down()
+    # hide
+
 Process Errors in Rules
 ------------------------------------------
 This example shows how to create a rule with a function which will be called when **any** rule throws an error.
