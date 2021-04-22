@@ -174,9 +174,12 @@ def execute_code(code, ignore_stderr) -> str:
     env = os.environ.copy()
 
     # Add additional PATH so we find the "tests" folder
-    paths = env['PYTHONPATH'].split(os.pathsep)
-    paths.insert(0, str(ADDITIONAL_PATH))
-    env['PYTHONPATH'] = os.pathsep.join(paths)
+    try:
+        paths = env['PYTHONPATH'].split(os.pathsep)
+        paths.insert(0, str(ADDITIONAL_PATH))
+        env['PYTHONPATH'] = os.pathsep.join(paths)
+    except KeyError:
+        env['PYTHONPATH'] = str(ADDITIONAL_PATH)
 
     run = subprocess.run([sys.executable, '-c', code], capture_output=True, cwd=WORKING_DIR, env=env)
     if run.returncode != 0:
