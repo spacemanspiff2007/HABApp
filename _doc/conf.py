@@ -18,14 +18,14 @@ import pathlib
 import sys
 
 # required for autodoc
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
 
 sys.path.insert(0, os.path.abspath('./_plugins'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'HABApp'
-copyright = '2020, spacemanspiff2007'
+copyright = '2021, spacemanspiff2007'
 author = 'spacemanspiff2007'
 
 # The short X.Y version

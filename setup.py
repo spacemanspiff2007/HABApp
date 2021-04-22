@@ -1,7 +1,7 @@
 import typing
 from pathlib import Path
 
-import setuptools  # type: ignore
+from setuptools import find_packages, setup
 
 
 # Load version number without importing HABApp
@@ -35,7 +35,7 @@ if readme.is_file():
     with readme.open("r", encoding='utf-8') as fh:
         long_description = fh.read()
 
-setuptools.setup(
+setup(
     name="HABApp",
     version=__version__,
     author="spaceman_spiff",
@@ -54,7 +54,8 @@ setuptools.setup(
         'Documentation': 'https://habapp.readthedocs.io/',
         'GitHub': 'https://github.com/spacemanspiff2007/HABApp',
     },
-    packages=setuptools.find_packages(exclude=['tests*']),
+    package_dir={'': 'src'},
+    packages=find_packages('src', exclude=['tests*']),
     install_requires=load_req(),
     classifiers=[
         "Development Status :: 4 - Beta",
