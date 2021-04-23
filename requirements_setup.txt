@@ -4,7 +4,7 @@ bidict==0.21.2
 eascheduler==0.1.0
 easyco==0.2.3
 paho-mqtt==1.5.1
-pendulum<3.0.0
+pendulum==2.1.2
 pydantic==1.8.1
 stackprinter==0.2.5
 tzlocal==2.1

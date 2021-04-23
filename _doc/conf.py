@@ -35,7 +35,7 @@ release = 'beta'
 try:
     from HABApp import __version__
     version = __version__
-    print( f'Building doc for {version}')
+    print(f'Building doc for {version}')
 except Exception as e:
     print('Exception', e)
     version = 'dev'

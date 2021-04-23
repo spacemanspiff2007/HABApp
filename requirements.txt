@@ -1,10 +1,10 @@
 aiohttp-sse-client==0.2.1
 aiohttp==3.7.4
 bidict==0.21.2
-eascheduler==0.0.9
+eascheduler==0.1.0
 easyco==0.2.3
 paho-mqtt==1.5.1
-pendulum<3.0.0
+pendulum==2.1.2
 pydantic==1.8.1
 stackprinter==0.2.5
 tzlocal==2.1
@@ -12,16 +12,13 @@ voluptuous==0.12.1
 watchdog==2.0.2
 ujson==4.0.2
 
-
+# Tests
 flake8==3.9.0
 pytest==6.2.3
 pytest-asyncio==0.14.0
+mock;python_version<"3.8"
 
 # Documentation
 sphinx==3.5.4
 sphinx-autodoc-typehints
 sphinx_rtd_theme
-
-# Backports
-dataclasses==0.8;python_version<"3.7"
-mock;python_version<"3.8"
