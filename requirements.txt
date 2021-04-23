@@ -13,12 +13,6 @@ watchdog==2.0.2
 ujson==4.0.2
 
 # Tests
-flake8==3.9.0
 pytest==6.2.3
-pytest-asyncio==0.14.0
+pytest-asyncio==0.15.1
 mock;python_version<"3.8"
-
-# Documentation
-sphinx==3.5.4
-sphinx-autodoc-typehints
-sphinx_rtd_theme
