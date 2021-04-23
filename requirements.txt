@@ -1,3 +1,4 @@
+# Packages required for HABApp
 aiohttp-sse-client==0.2.1
 aiohttp==3.7.4
 bidict==0.21.2
@@ -12,7 +13,10 @@ voluptuous==0.12.1
 watchdog==2.0.2
 ujson==4.0.2
 
-# Tests
+# Packages to run source tests
 pytest==6.2.3
 pytest-asyncio==0.15.1
 mock;python_version<"3.8"
+
+# Packages for tox tests
+flake8==3.9.1
