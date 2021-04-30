@@ -20,8 +20,8 @@ class RequestFileUnloadEvent(__FileEventBase):
     """
 
 
-class HABAppError:
-    """Contains information about an error in a function
+class HABAppException:
+    """Contains information about an Exception that has occurred in HABApp
 
     :ivar str func_name: name of the function where the error occurred
     :ivar str traceback: traceback
@@ -37,4 +37,4 @@ class HABAppError:
 
     def to_str(self) -> str:
         """Create a readable str with all information"""
-        return f'Error in {self.func_name}: {self.exception}\n{self.traceback}'
+        return f'Exception in {self.func_name}: {self.exception}\n{self.traceback}'

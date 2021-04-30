@@ -12,7 +12,7 @@ Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. hint::
-   | With openhabian the installation can be performed through the openhabian-config tool (option 2B).
+   | With openhabian the complete installation can be performed through the openhabian-config tool (option 2B).
    | HABApp will be installed into ``/opt/habapp``, so it is the same as the installation described here.
 
 .. hint::

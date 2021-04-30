@@ -3,7 +3,7 @@ import threading
 import typing
 
 import HABApp
-from HABApp.core.events.habapp_events import HABAppError
+from HABApp.core.events.habapp_events import HABAppException
 from ._rest_patcher import RestPatcher
 
 log = logging.getLogger('HABApp.Tests')
@@ -83,7 +83,7 @@ class TestBaseRule(HABApp.Rule):
 
     def __error(self, event):
         self.__errors += 1
-        msg = event.to_str() if isinstance(event, HABAppError) else event
+        msg = event.to_str() if isinstance(event, HABAppException) else event
         for line in msg.splitlines():
             log.error(line)
 

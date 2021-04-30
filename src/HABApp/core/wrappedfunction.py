@@ -59,9 +59,9 @@ class WrappedFunction:
             self.log.error(line)
 
         # create HABApp event, but only if we are not currently processing one
-        if not args or not isinstance(args[0], HABApp.core.events.habapp_events.HABAppError):
+        if not args or not isinstance(args[0], HABApp.core.events.habapp_events.HABAppException):
             HABApp.core.EventBus.post_event(
-                HABApp.core.const.topics.ERRORS, HABApp.core.events.habapp_events.HABAppError(
+                HABApp.core.const.topics.ERRORS, HABApp.core.events.habapp_events.HABAppException(
                     func_name=self.name, exception=e, traceback='\n'.join(lines)
                 )
             )

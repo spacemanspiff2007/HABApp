@@ -75,7 +75,7 @@ def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
 
     # send Error to internal event bus so we can reprocess it and notify the user
     HABApp.core.EventBus.post_event(
-        HABApp.core.const.topics.ERRORS, HABApp.core.events.habapp_events.HABAppError(
+        HABApp.core.const.topics.ERRORS, HABApp.core.events.habapp_events.HABAppException(
             func_name=func_name, exception=e, traceback='\n'.join(lines)
         )
     )
@@ -181,7 +181,7 @@ class ExceptionToHABApp:
         # send Error to internal event bus so we can reprocess it and notify the user
         HABApp.core.EventBus.post_event(
             HABApp.core.const.topics.WARNINGS if self.log_level == logging.WARNING else HABApp.core.const.topics.ERRORS,
-            HABApp.core.events.habapp_events.HABAppError(
+            HABApp.core.events.habapp_events.HABAppException(
                 func_name=f_name, exception=exc_val, traceback='\n'.join(tb)
             )
         )
