@@ -120,17 +120,17 @@ to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more informa
     # hide
 
     import HABApp
-    from HABApp.core.events.habapp_events import HABAppError
+    from HABApp.core.events.habapp_events import HABAppException
 
     class NotifyOnError(HABApp.Rule):
         def __init__(self):
             super().__init__()
             
             # Listen to all errors
-            self.listen_event('HABApp.Errors', self.on_error, HABAppError)
+            self.listen_event('HABApp.Errors', self.on_error, HABAppException)
 
-        def on_error(self, error_event: HABAppError):
-            msg = event.to_str() if isinstance(event, HABAppError) else event
+        def on_error(self, error_event: HABAppException):
+            msg = event.to_str() if isinstance(event, HABAppException) else event
             print(msg)
 
     NotifyOnError()

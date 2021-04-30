@@ -24,13 +24,13 @@ An example would be dynamically reloading files or an own notifier in case there
      - ``str``
 
    * - HABApp.Warnings
-     - All warnings in functions and rules of HABApp create an according event
-     - ``str``
+     - All warnings in functions (e.g. caught exceptions) and rules of HABApp create an according event
+     - :class:`~HABApp.core.events.habapp_events.HABAppException` or ``str``
 
    * - HABApp.Errors
      - All errors in functions and rules of HABApp create an according event. Use this topic to create an own notifier
        in case of errors (e.g. Pushover).
-     - :class:`~HABApp.core.events.habapp_events.HABAppError` or ``str``
+     - :class:`~HABApp.core.events.habapp_events.HABAppException` or ``str``
 
 
 
@@ -40,7 +40,7 @@ An example would be dynamically reloading files or an own notifier in case there
 .. autoclass:: HABApp.core.events.habapp_events.RequestFileUnloadEvent
    :members:
 
-.. autoclass:: HABApp.core.events.habapp_events.HABAppError
+.. autoclass:: HABApp.core.events.habapp_events.HABAppException
    :members:
 
 File properties
