@@ -3,7 +3,7 @@ import threading
 import typing
 
 import HABApp
-from HABApp.core.events.habapp_events import HABAppError
+from HABApp.core.events.habapp_events import HABAppException
 from ._rest_patcher import RestPatcher
 
 log = logging.getLogger('HABApp.Tests')
@@ -68,7 +68,7 @@ class TestBaseRule(HABApp.Rule):
         self.config = TestConfig()
 
         # we have to chain the rules later, because we register the rules only once we loaded successfully.
-        self.run_in(2, self.__execute_run)
+        self.run.at(2, self.__execute_run)
 
         # collect warnings and infos
         self.listen_event(HABApp.core.const.topics.WARNINGS, self.__warning)
@@ -83,7 +83,7 @@ class TestBaseRule(HABApp.Rule):
 
     def __error(self, event):
         self.__errors += 1
-        msg = event.to_str() if isinstance(event, HABAppError) else event
+        msg = event.to_str() if isinstance(event, HABAppException) else event
         for line in msg.splitlines():
             log.error(line)
 
@@ -120,7 +120,8 @@ class TestBaseRule(HABApp.Rule):
         self.tests_started = True
 
         try:
-            self.set_up()
+            with RestPatcher(self.__class__.__name__ + '.' + 'set_up'):
+                self.set_up()
         except Exception as e:
             log.error(f'"Set up of {self.__class__.__name__}" failed: {e}')
             for line in HABApp.core.wrapper.format_exception(e):
@@ -136,7 +137,8 @@ class TestBaseRule(HABApp.Rule):
 
         # TEAR DOWN
         try:
-            self.tear_down()
+            with RestPatcher(self.__class__.__name__ + '.' + 'tear_down'):
+                self.tear_down()
         except Exception as e:
             log.error(f'"Set up of {self.__class__.__name__}" failed: {e}')
             for line in HABApp.core.wrapper.format_exception(e):

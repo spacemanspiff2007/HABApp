@@ -7,7 +7,7 @@ import HABApp.openhab.items
     getattr(HABApp.openhab.items, i) for i in dir(HABApp.openhab.items) if i[0] != '_' and i[0].isupper()
 ])
 def test_item_has_name(cls):
-    # this test ensure that alle openhab items inherit from OpenhabItem
+    # this test ensure that all openhab items inherit from OpenhabItem
     c = cls('asdf')
     assert c.name == 'asdf'
     if cls is not HABApp.openhab.items.Thing:

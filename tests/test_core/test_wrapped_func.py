@@ -83,7 +83,7 @@ class TestCases(unittest.TestCase):
 
         self.assertTrue(self.err_func.called)
         err = self.err_func.call_args[0][0]
-        assert isinstance(err, HABApp.core.events.habapp_events.HABAppError)
+        assert isinstance(err, HABApp.core.events.habapp_events.HABAppException)
         assert err.func_name == 'tmp'
         assert isinstance(err.exception, ZeroDivisionError)
         assert err.traceback.startswith('File ')
@@ -126,7 +126,7 @@ async def test_async_error_wrapper():
 
     assert err_func.called
     err = err_func.call_args[0][0]
-    assert isinstance(err, HABApp.core.events.habapp_events.HABAppError)
+    assert isinstance(err, HABApp.core.events.habapp_events.HABAppException)
     assert err.func_name == 'tmp'
     assert isinstance(err.exception, ZeroDivisionError)
     assert err.traceback.startswith('File ')

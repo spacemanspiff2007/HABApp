@@ -1,7 +1,8 @@
 import typing
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-import pytz
+from pendulum import UTC
+from pendulum import now as pd_now
 
 from HABApp.core import Items
 from HABApp.core.items import Item
@@ -43,19 +44,19 @@ class ItemTests:
         for value in self.TEST_VALUES:
             i = self.CLS('test')
             i.set_value(value)
-            i._last_change.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
-            i._last_update.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
+            i._last_change.set(pd_now(UTC) - timedelta(seconds=5), events=False)
+            i._last_update.set(pd_now(UTC) - timedelta(seconds=5), events=False)
             i.set_value(value)
 
-            assert i._last_update.dt > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
-            assert i._last_change.dt < datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_update.dt > pd_now(UTC) - timedelta(milliseconds=100)
+            assert i._last_change.dt < pd_now(UTC) - timedelta(milliseconds=100)
 
     def test_time_value_change(self):
         i = self.CLS('test')
         for value in self.TEST_VALUES:
-            i._last_change.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
-            i._last_update.set(datetime.now(tz=pytz.utc) - timedelta(seconds=5), events=False)
+            i._last_change.set(pd_now(UTC) - timedelta(seconds=5), events=False)
+            i._last_update.set(pd_now(UTC) - timedelta(seconds=5), events=False)
             i.set_value(value)
 
-            assert i._last_update.dt > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
-            assert i._last_change.dt > datetime.now(tz=pytz.utc) - timedelta(milliseconds=100)
+            assert i._last_update.dt > pd_now(UTC) - timedelta(milliseconds=100)
+            assert i._last_change.dt > pd_now(UTC) - timedelta(milliseconds=100)

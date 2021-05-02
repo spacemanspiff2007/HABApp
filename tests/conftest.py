@@ -32,8 +32,14 @@ def raise_err(func):
 
 @pytest.fixture(autouse=True, scope='function')
 def show_errors(monkeypatch):
+    # Patch the wrapper so that we always raise the exception
     monkeypatch.setattr(HABApp.core.wrapper, 'ignore_exception', raise_err)
     monkeypatch.setattr(HABApp.core.wrapper, 'log_exception', raise_err)
+
+    # Delete all existing items/listener from previous tests
+    HABApp.core.EventBus.remove_all_listeners()
+    for name in HABApp.core.Items.get_all_item_names():
+        HABApp.core.Items.pop_item(name)
 
 
 @pytest.yield_fixture(autouse=True, scope='function')
