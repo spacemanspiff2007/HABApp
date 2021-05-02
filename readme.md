@@ -38,7 +38,7 @@ class ExampleMqttTestRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
-        self.run_every(
+        self.run.every(
             time=datetime.timedelta(seconds=60),
             interval=datetime.timedelta(seconds=30),
             callback=self.publish_rand_value
@@ -102,6 +102,35 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 0.30.0 (02.05.2021)
+
+Attention:
+- No more support for python 3.6! 
+- Migration of rules is needed!
+
+Changelog
+- Switched to Apache2.0 License
+- Fix DateTime string parsing for OH 3.1 (#214)
+- State of Groupitem gets set correctly
+- About ~50% performance increase for async calls in rules
+- Significantly less CPU usage when no functions are running
+- Completely reworked the file handling (loading and dependency resolution)
+- Completely reworked the Scheduler!
+  - Has now subsecond accuracity (finally!)
+  - Has a new .coundown() job which can simplify many rules.
+    It is made for functions that do something after a certain period of time (e.g. switch a light off after movement)
+- Added hsb_to_rgb, rgb_to_hsb functions which can be used in rules
+- Better error message if configured foldes overlap with HABApp folders
+- Renamed HABAppError to HABAppException
+- Some Doc improvements
+
+Migration of rules:
+- Search for ``self.run_`` and replace with ``self.run.``
+- Search for ``self.run.in`` and replace with ``self.run.at``
+- Search for ``.get_next_call()`` and replace with ``.get_next_run()`` (But make sure it's a scheduled job)
+- Search for ``HABAppError`` and replace with ``HABAppException``
+
+
 #### 0.20.2 (07.04.2021)
 - Added HABApp.util.functions with min/max
 - Reworked small parts of the file watcher

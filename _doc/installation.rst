@@ -12,8 +12,8 @@ Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. hint::
-   With openhabian the installation can be performed through the openhabian-config tool (option 2B).
-   HABApp will be installed into ``/opt/habapp``, so it is the same as the installation described here.
+   | With openhabian the complete installation can be performed through the openhabian-config tool (option 2B).
+   | HABApp will be installed into ``/opt/habapp``, so it is the same as the installation described here.
 
 .. hint::
    On Windows use the ``python`` command instead of ``python3``
@@ -52,7 +52,8 @@ Installation
 
     habapp --config PATH_TO_CONFIGURATION_FOLDER
 
-   If you use openHABian a good configuration folder would be ``/opt/openhab/conf/habapp`` because this is where your other configuration
+   A good configuration folder for HABApp would be your openhab configuration folder (e.g.
+   ``/opt/openhab/conf/habapp`` or ``/etc/openhab/habapp``) because this is where your other configuration
    folders are located (e.g. the items and sitemaps folder). Just make sure to manually create the folder ``habapp`` before the start.
 
 
@@ -65,43 +66,29 @@ Upgrading
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #. Stop HABApp
 
-#. Run the following command (in your activated virtual environment)::
+#. Activate the virtual environment
+
+    Navigate to the folder where HABApp is installed::
+
+        cd /opt/habapp
+
+    Activate the virtual environment
+
+    Linux::
+
+        source bin/activate
+
+    Windows::
+
+        Scripts\activate
+
+#. Run the following command in your activated virtual environment::
 
     python3 -m pip install --upgrade habapp
 
 #. Start HABApp
 
 #. Observe the logs for errors in case there were changes
-
-
-Error message while installing ujson
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Under windows the installation of ujson may throw the following error but the download link is not working.
-Several working alternatives can be found `here <https://www.scivision.dev/python-windows-visual-c-14-required/>`_.
-
-.. code-block:: none
-
-  Running setup.py install for ujson ... error
-    ERROR: Complete output from command 'C:\Users\User\Desktop\HABapp\habapp\Scripts\python.exe' -u -c 'import setuptools, tokenize;__file__='"'"'C:\\Users\\User\\AppData\\Local\\Temp\\pip-install-4y0tobjp\\ujson\\setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' install --record 'C:\Users\User\AppData\Local\Temp\pip-record-6t2yo712\install-record.txt' --single-version-externally-managed --compile --install-headers 'C:\Users\User\Desktop\HABapp\habapp\include\site\python3.7\ujson':
-    ERROR: Warning: 'classifiers' should be a list, got type 'filter'
-    running install
-    running build
-    running build_ext
-    building 'ujson' extension
-    error: Microsoft Visual C++ 14.0 is required. Get it with "Microsoft Visual C++ Build Tools": https://visualstudio.microsoft.com/downloads/
-    ----------------------------------------
-
-Error message while installing ruamel.yaml
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: none
-
-  _ruamel_yaml.c:4:10: fatal error: Python.h: No such file or directory
-
-Run the follwing command to fix it::
-
-  sudo apt install python3-dev
 
 Autostart after reboot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -145,6 +132,36 @@ It is now possible to start, stop, restart and check the status of HABApp with::
     sudo systemctl stop habapp.service
     sudo systemctl restart habapp.service
     sudo systemctl status habapp.service
+
+
+Error message while installing ujson
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Under windows the installation of ujson may throw the following error but the download link is not working.
+Several working alternatives can be found `here <https://www.scivision.dev/python-windows-visual-c-14-required/>`_.
+
+.. code-block:: none
+
+  Running setup.py install for ujson ... error
+    ERROR: Complete output from command 'C:\Users\User\Desktop\HABapp\habapp\Scripts\python.exe' -u -c 'import setuptools, tokenize;__file__='"'"'C:\\Users\\User\\AppData\\Local\\Temp\\pip-install-4y0tobjp\\ujson\\setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' install --record 'C:\Users\User\AppData\Local\Temp\pip-record-6t2yo712\install-record.txt' --single-version-externally-managed --compile --install-headers 'C:\Users\User\Desktop\HABapp\habapp\include\site\python3.7\ujson':
+    ERROR: Warning: 'classifiers' should be a list, got type 'filter'
+    running install
+    running build
+    running build_ext
+    building 'ujson' extension
+    error: Microsoft Visual C++ 14.0 is required. Get it with "Microsoft Visual C++ Build Tools": https://visualstudio.microsoft.com/downloads/
+    ----------------------------------------
+
+Error message while installing ruamel.yaml
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: none
+
+  _ruamel_yaml.c:4:10: fatal error: Python.h: No such file or directory
+
+Run the follwing command to fix it::
+
+  sudo apt install python3-dev
 
 ----------------------------------
 Docker

@@ -8,7 +8,7 @@ class AsyncRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
-        self.run_soon(self.async_func)
+        self.run.soon(self.async_func)
 
     async def async_func(self):
         await asyncio.sleep(2)

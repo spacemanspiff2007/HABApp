@@ -18,8 +18,8 @@ class ExampleOpenhabToMQTTRule(HABApp.Rule):
     def process_update(self, event):
         assert isinstance(event, ItemStateEvent)
 
-        print( f'/openhab/{event.name} <- {event.value}')
-        self.mqtt.publish( f'/openhab/{event.name}', str(event.value))
+        print(f'/openhab/{event.name} <- {event.value}')
+        self.mqtt.publish(f'/openhab/{event.name}', str(event.value))
 
 
 ExampleOpenhabToMQTTRule()

@@ -161,7 +161,8 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
 Scheduler
 ------------------------------
 With the scheduler it is easy to call functions in the future or periodically.
-Do not use `time.sleep` but rather :meth:`~HABApp.Rule.run_in`.
+Do not use `time.sleep` but rather `self.run.at`.
+Another very useful function is `self.run.countdown` as it can simplify many rules!
 
 .. list-table::
    :widths: auto
@@ -170,45 +171,52 @@ Do not use `time.sleep` but rather :meth:`~HABApp.Rule.run_in`.
    * - Function
      - Description
 
-   * - :meth:`~HABApp.Rule.run_soon`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.soon`
      - Run the callback as soon as possible (typically in the next second).
 
-   * - :meth:`~HABApp.Rule.run_in`
-     - Run the callback in x seconds.
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.at`
+     - Run the callback in x seconds or at a specified time.
 
-   * - :meth:`~HABApp.Rule.run_at`
-     - Run a function at a specified date_time
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.countdown`
+     - Run a function after a time has run down
 
-   * - :meth:`~HABApp.Rule.run_every`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.every`
      - Run a function periodically
 
-   * - :meth:`~HABApp.Rule.run_minutely`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.every_minute`
      - Run a function every minute
 
-   * - :meth:`~HABApp.Rule.run_hourly`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.every_hour`
      - Run a function every hour
 
-   * - :meth:`~HABApp.Rule.run_daily`
-     - Run a function every day
-
-   * - :meth:`~HABApp.Rule.run_on_every_day`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_every_day`
      - Run a function at a specific time every day
 
-   * - :meth:`~HABApp.Rule.run_on_workdays`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_workdays`
      - Run a function at a specific time on workdays
 
-   * - :meth:`~HABApp.Rule.run_on_weekends`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_weekends`
      - Run a function at a specific time on weekends
 
-   * - :meth:`~HABApp.Rule.run_on_day_of_week`
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_day_of_week`
      - Run a function at a specific time on specific days of the week
 
-   * - :meth:`~HABApp.Rule.run_on_sun`
-     - Run a function in relation to the sun (e.g. Sunrise, Sunset)
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sun_dawn`
+     - Run a function on dawn
+
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sunrise`
+     - Run a function on sunrise
+
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sunset`
+     - Run a function on sunset
+
+   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sun_dusk`
+     - Run a function on dusk
+
 
 All functions return an instance of ScheduledCallbackBase
 
-.. autoclass:: HABApp.rule.scheduler.base.ScheduledCallbackBase
+.. autoclass:: HABApp.rule.habappscheduler.HABAppScheduler
    :members:
 
 

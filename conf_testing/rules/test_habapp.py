@@ -74,7 +74,7 @@ class TestItemListener(TestBaseRule):
         self.watch_item = Item.get_create_item(get_random_name())
         listener = self.watch_item.listen_event(self.check_event, ValueUpdateEvent)
 
-        self.run_in(
+        self.run.at(
             1, HABApp.core.EventBus.post_event, self.watch_item.name, ValueUpdateEvent(self.watch_item.name, 123)
         )
 

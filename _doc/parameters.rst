@@ -89,13 +89,12 @@ Example
     from pathlib import Path
 
     import HABApp
+    from HABApp.core.files.folders import add_folder
     from HABApp.parameters.parameters import _PARAMETERS
-    _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
+    from HABApp.parameters.parameter_files import PARAM_PREFIX
 
-    # Patch values so we don't get errors
-    HABApp.config.CONFIG.directories.rules = Path('/my_rules/')
-    HABApp.config.CONFIG.directories.config = Path('/my_config/')
-    HABApp.config.CONFIG.directories.param = Path('/my_param/')
+    add_folder(PARAM_PREFIX, Path('/params'), 0)
+    _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
     # hide
 
     import HABApp

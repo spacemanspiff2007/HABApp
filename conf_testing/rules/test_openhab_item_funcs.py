@@ -53,11 +53,9 @@ class TestOpenhabItemFuncs(TestBaseRule):
             }
         )
 
-
     def add_func_test(self, cls, params: set):
         # <class 'HABApp.openhab.items.switch_item.SwitchItem'> -> SwitchItem
         self.add_test(str(cls).split('.')[-1][:-2], self.test_func, cls, params)
-
 
     def test_func(self, item_type, test_params):
 

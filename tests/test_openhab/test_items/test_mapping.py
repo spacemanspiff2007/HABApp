@@ -1,5 +1,6 @@
 from HABApp.openhab.map_items import map_item
-from HABApp.openhab.items import NumberItem
+from HABApp.openhab.items import NumberItem, DatetimeItem
+from datetime import datetime
 
 
 def test_exception():
@@ -14,3 +15,16 @@ def test_number_unit_of_measurement():
     assert map_item('test5', 'Number:Intensity', '5.0 W/m2') == NumberItem('test', 5)
     assert map_item('test6', 'Number:Dimensionless', '6.0') == NumberItem('test', 6)
     assert map_item('test7', 'Number:Angle', '7.0 °') == NumberItem('test', 7)
+
+
+def test_datetime():
+    # Todo: remove this test once we go >= OH3.1
+    # Old format
+    assert map_item('test1', 'DateTime', '2018-11-19T09:47:38.284+0000') == \
+           DatetimeItem('test', datetime(2018, 11, 19,  9, 47, 38, 284000)) or \
+           DatetimeItem('test', datetime(2018, 11, 19, 10, 47, 38, 284000))
+
+    # From >= OH3.1
+    assert map_item('test1', 'DateTime', '2021-04-10T21:00:43.043996+0000') == \
+           DatetimeItem('test', datetime(2021, 4, 10, 21, 0, 43, 43996)) or \
+           DatetimeItem('test', datetime(2021, 4, 10, 23, 0, 43, 43996))

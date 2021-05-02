@@ -1,3 +1,6 @@
+# HABApp:
+#   depends on: ['asdf']
+
 import time
 
 from HABApp.openhab.connection_handler.func_async import async_create_item, async_get_item, ItemNotFoundError, \

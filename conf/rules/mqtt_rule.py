@@ -5,12 +5,13 @@ import HABApp
 from HABApp.core.events import ValueUpdateEvent
 from HABApp.mqtt.items import MqttItem
 
+
 class ExampleMqttTestRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
-        self.run_every(
-            time=datetime.timedelta(seconds=10),
+        self.run.every(
+            start_time=datetime.timedelta(seconds=10),
             interval=datetime.timedelta(seconds=20),
             callback=self.publish_rand_value
         )

@@ -25,5 +25,5 @@ exclude =
     tests/conftest.py,
 
     # the interfaces will throw unused imports
-    HABApp/openhab/interface.py,
-    HABApp/openhab/interface_async.py,
+    src/HABApp/openhab/interface.py,
+    src/HABApp/openhab/interface_async.py,

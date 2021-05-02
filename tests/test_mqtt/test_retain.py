@@ -7,6 +7,7 @@ class MqttDummyMsg:
         self.topic = topic
         self.payload = payload.encode('utf-8')
         self.retain = retain
+        self.qos = 0
 
 
 def test_retain_create():

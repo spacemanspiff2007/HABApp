@@ -76,7 +76,7 @@ def test_rgb_to_hsv():
 
 def test_hsv_to_rgb():
     i = ColorItem('test', 23, 44, 66)
-    assert i.get_rgb() == (168, 122, 94)
+    assert i.get_rgb() == (168, 123, 94)
 
 
 def test_post_update(sync_worker, event_bus: TmpEventBus):

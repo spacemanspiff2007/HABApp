@@ -1,9 +1,10 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest.mock import MagicMock
 
 import pytest
-import pytz
+from pendulum import UTC
+from pendulum import now as pd_now
 
 import HABApp
 import HABApp.core.items.tmp_data
@@ -13,7 +14,7 @@ from ...helpers import TmpEventBus
 
 @pytest.fixture(scope="function")
 def u():
-    a = UpdatedTime('test', datetime.now(tz=pytz.utc))
+    a = UpdatedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
     w2 = a.add_watch(3)
 
@@ -26,7 +27,7 @@ def u():
 
 @pytest.fixture(scope="function")
 def c():
-    a = ChangedTime('test', datetime.now(tz=pytz.utc))
+    a = ChangedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
     w2 = a.add_watch(3)
 
@@ -38,7 +39,7 @@ def c():
 
 
 def test_sec_timedelta():
-    a = UpdatedTime('test', datetime.now(tz=pytz.utc))
+    a = UpdatedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
 
     # We return the same object because it is the same time
@@ -63,7 +64,7 @@ async def test_rem(u: UpdatedTime):
 
 @pytest.mark.asyncio
 async def test_cancel_running(u: UpdatedTime):
-    u.set(datetime.now(tz=pytz.utc))
+    u.set(pd_now(UTC))
 
     w1 = u.tasks[0]
     w2 = u.tasks[1]
@@ -75,7 +76,7 @@ async def test_cancel_running(u: UpdatedTime):
     assert w2 in u.tasks
     w2.cancel()
     await asyncio.sleep(0.05)
-    u.set(datetime.now(tz=pytz.utc))
+    u.set(pd_now(UTC))
     await asyncio.sleep(0.05)
     assert w2 not in u.tasks
 
@@ -83,11 +84,11 @@ async def test_cancel_running(u: UpdatedTime):
 @pytest.mark.asyncio
 async def test_event_update(u: UpdatedTime):
     m = MagicMock()
-    u.set(datetime.now(tz=pytz.utc))
+    u.set(pd_now(UTC))
     list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'))
     HABApp.core.EventBus.add_listener(list)
 
-    u.set(datetime.now(tz=pytz.utc))
+    u.set(pd_now(UTC))
     await asyncio.sleep(1)
     m.assert_not_called()
 
@@ -113,11 +114,11 @@ async def test_event_update(u: UpdatedTime):
 @pytest.mark.asyncio
 async def test_event_change(c: ChangedTime):
     m = MagicMock()
-    c.set(datetime.now(tz=pytz.utc))
+    c.set(pd_now(UTC))
     list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'))
     HABApp.core.EventBus.add_listener(list)
 
-    c.set(datetime.now(tz=pytz.utc))
+    c.set(pd_now(UTC))
     await asyncio.sleep(1)
     m.assert_not_called()
 
