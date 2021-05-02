@@ -1,6 +1,7 @@
-import colorsys
 import typing
+from typing import Optional
 
+from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
 from .base_valueitem import BaseValueItem
 
 HUE_FACTOR = 360
@@ -57,27 +58,20 @@ class ColorItem(BaseValueItem):
         :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
         :return: rgb tuple
         """
-        r, g, b = colorsys.hsv_to_rgb(
-            self.hue / HUE_FACTOR,
-            self.saturation / PERCENT_FACTOR,
-            self.brightness / PERCENT_FACTOR
-        )
-        return int(r * max_rgb_value), int(g * max_rgb_value), int(b * max_rgb_value)
+        return hsb_to_rgb(self.hue, self.saturation, self.brightness, max_rgb_value=max_rgb_value)
 
-    def set_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
+    def set_rgb(self, r, g, b, max_rgb_value=255, ndigits: Optional[int] = 2) -> 'ColorItem':
         """Set a rgb value
 
         :param r: red value
         :param g: green value
         :param b: blue value
         :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
+        :param ndigits: Round the hsb values to the specified digits, None to disable rounding
         :return: self
         """
-        h, s, v = colorsys.rgb_to_hsv(r / max_rgb_value, g / max_rgb_value, b / max_rgb_value)
-        self.hue = h * HUE_FACTOR
-        self.saturation = s * PERCENT_FACTOR
-        self.brightness = v * PERCENT_FACTOR
-        self.set_value(self.hue, self.saturation, self.brightness)
+        h, s, b = rgb_to_hsb(r, g, b, max_rgb_value=max_rgb_value, ndigits=ndigits)
+        self.set_value(h, s, b)
         return self
 
     def post_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
