@@ -218,6 +218,7 @@ All functions return an instance of ScheduledCallbackBase
 
 .. autoclass:: HABApp.rule.habappscheduler.HABAppScheduler
    :members:
+   :inherited-members:
 
 
 Running external tools
