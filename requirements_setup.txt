@@ -9,7 +9,7 @@ pydantic==1.8.1
 stackprinter==0.2.5
 tzlocal==2.1
 voluptuous==0.12.1
-watchdog==2.0.2
+watchdog==2.1.0
 ujson==4.0.2
 
 # Backports
