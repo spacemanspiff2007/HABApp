@@ -26,7 +26,7 @@ but the format should be pretty straight forward.
    | e.g.: ``/HABApp/logs/my_logfile.log`` or ``c:\HABApp\logs\my_logfile.log``
 
 .. code-block:: yaml
-    
+
     # describes the output format
     formatters:
       HABApp_format:

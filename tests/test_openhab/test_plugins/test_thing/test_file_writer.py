@@ -15,7 +15,7 @@ class MyStringIO(io.StringIO):
     def close(self, *args, **kwargs):
         self.text = self.getvalue()
         super().close(*args, **kwargs)
-        
+
     def is_file(self):
         return self.exists
 

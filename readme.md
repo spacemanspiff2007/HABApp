@@ -105,7 +105,7 @@ MyOpenhabRule()
 #### 0.30.0 (02.05.2021)
 
 Attention:
-- No more support for python 3.6! 
+- No more support for python 3.6!
 - Migration of rules is needed!
 
 Changelog

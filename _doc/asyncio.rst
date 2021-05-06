@@ -19,7 +19,7 @@ Functions
 
 .. autoclass:: HABApp.rule.interfaces.AsyncHttpConnection
    :members:
-   
+
 
 Examples
 ^^^^^^^^^^^^^^^^^^^^^^^^

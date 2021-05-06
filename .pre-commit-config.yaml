@@ -1,0 +1,13 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: ^_doc/(?:images|gifs)
+      - id: trailing-whitespace
+
+  - repo: https://gitlab.com/PyCQA/flake8
+    rev: '3.9.1'
+    hooks:
+    -   id: flake8

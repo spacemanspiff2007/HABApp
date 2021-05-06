@@ -17,30 +17,30 @@ Rule Interface
 ------------------------------
 
 .. py:class:: mqtt
-      
+
    .. py:method:: publish(topic: str, payload: typing.Any[, qos: int = None, retain: bool = None]) -> int
-   
+
       Publish a value under a certain topic.
-   
+
       :param topic: MQTT topic
       :param payload: MQTT Payload
       :param int qos: QoS, can be 0, 1 or 2. If not specified value from configuration file will be used.
       :param bool retain: retain message. If not specified value from configuration file will be used.
       :return: 0 if successful
-   
+
    .. py:method:: subscribe(self, topic: str[, qos: int = None]) -> int
-   
+
       Subscribe to a MQTT topic. Subscriptions will be active until next disconnect.
       For persistent subscriptions use the configuration file
-   
+
       :param topic: MQTT topic to subscribe to
       :param qos: QoS, can be 0, 1 or 2.  If not specified value from configuration file will be used.
       :return: 0 if successful
-   
+
    .. py:method:: unsubscribe(self, topic: str) -> int
-   
+
       Unsubscribe from a MQTT topic
-   
+
       :param topic: MQTT topic
       :return: 0 if successful
 

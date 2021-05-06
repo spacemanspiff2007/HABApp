@@ -3,6 +3,7 @@ from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
 from HABApp.openhab.events import ItemStateEvent, ItemCommandEvent, ItemStateChangedEvent
 from HABApp.openhab.items import SwitchItem, ContactItem, DatetimeItem
 
+
 class MyOpenhabRule(HABApp.Rule):
 
     def __init__(self):

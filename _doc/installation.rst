@@ -108,14 +108,14 @@ If your installation is not done in "/opt/habapp/bin" replace accordingly as wel
     Description=HABApp
     Documentation=https://habapp.readthedocs.io
     After=network-online.target
-    
+
     [Service]
     Type=simple
     User=openhab
     Group=openhab
     UMask=002
     ExecStart=/opt/habapp/bin/habapp -c PATH_TO_CONFIGURATION_FOLDER
-    
+
     [Install]
     WantedBy=multi-user.target
 
@@ -209,5 +209,3 @@ HABApp arguments
     import HABApp.__main__
     HABApp.__cmd_args__.parse_args(['-h'])
     # hide
-
-

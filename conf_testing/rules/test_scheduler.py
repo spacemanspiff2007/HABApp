@@ -12,7 +12,7 @@ class TestScheduler(TestBaseRule):
     def __init__(self):
         super().__init__()
 
-        self.add_test(f'Test scheduler every', self.test_scheduler_every)
+        self.add_test('Test scheduler every', self.test_scheduler_every)
 
         f = self.run.on_sunrise(print, 'sunrise')
         print(f'Sunrise: {f.get_next_run()}')

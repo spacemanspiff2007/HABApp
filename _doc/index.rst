@@ -6,7 +6,7 @@ Welcome to the HABApp documentation!
 .. toctree::
    :maxdepth: 2
    :caption: User Documentation
-   
+
    installation
    about_habapp
    configuration
@@ -27,6 +27,6 @@ Welcome to the HABApp documentation!
 
 Indices and tables
 ==================
-  
+
   * :ref:`genindex`
   * :ref:`modindex`
