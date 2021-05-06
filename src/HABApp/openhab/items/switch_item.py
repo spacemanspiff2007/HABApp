@@ -1,6 +1,6 @@
+from HABApp.openhab.definitions import OnOffValue
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand
-from ..definitions import OnOffValue
 
 
 class SwitchItem(OpenhabItem, OnOffCommand):
