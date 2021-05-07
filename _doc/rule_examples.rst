@@ -125,7 +125,7 @@ to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more informa
     class NotifyOnError(HABApp.Rule):
         def __init__(self):
             super().__init__()
-            
+
             # Listen to all errors
             self.listen_event('HABApp.Errors', self.on_error, HABAppException)
 
@@ -141,7 +141,7 @@ to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more informa
         def __init__(self):
             super().__init__()
             self.run.soon(self.faulty_function)
-        
+
         def faulty_function(self):
             1 / 0
     FaultyRule()

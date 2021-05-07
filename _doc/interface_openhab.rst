@@ -475,7 +475,7 @@ The entries ``thing config``, ``create items`` and ``channels`` are optional and
    filter:
      thing_type: zwave:philio_pst02a_00_000
 
-   # Set this configuration every matching thing. HABApp will automatically only 
+   # Set this configuration every matching thing. HABApp will automatically only
    # change the values which are not already correct.
    # Here it is the z-wave parameters which are responsible for the device behaviour
    thing config:
@@ -890,4 +890,3 @@ for 60 seconds.
     HABApp.core.EventBus.post_event('my:thing:uid', ItemNoChangeEvent('test_watch', 60))
     runner.tear_down()
     # hide
-

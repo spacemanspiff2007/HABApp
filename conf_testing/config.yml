@@ -33,9 +33,9 @@ mqtt:
 openhab:
   connection:
     host: localhost
-    password: ''
     port: 8080
     user: ''
+    password: ''
   general:
     listen_only: false
     wait_for_openhab: true

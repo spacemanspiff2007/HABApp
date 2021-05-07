@@ -15,7 +15,7 @@ If the config does not yet exist in the folder a blank configuration will be cre
 Configuration contents
 ------------------------------
 .. code-block:: yaml
-    
+
     directories:
         logging: log    # If the filename for the logfile in logging.yml is not absolute it will be placed in this directory
         rules: rules    # All *.py files in this folder (and subfolders) will be loaded. Load order will be alphabetical by path.
@@ -59,13 +59,13 @@ Configuration contents
             password: ''
             tls: true
             tls_insecure: false  # do not check certificate
-        
+
         subscribe:         # Changes to Subscribe get picked up without restarting HABApp
             qos: 0         # Default QoS for subscribing
             topics:
             - '#'          # Subscribe to this topic
             - 0            # QoS for previous topic, can be omitted
-        
+
         publish:
             qos: 0          # Default QoS when publishing values
             retain: false   # Default retain flag when publishing values

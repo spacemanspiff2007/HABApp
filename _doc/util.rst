@@ -336,4 +336,3 @@ SwitchItemValueMode
 .. autoclass:: HABApp.util.multimode.SwitchItemValueMode
    :members:
    :inherited-members:
-

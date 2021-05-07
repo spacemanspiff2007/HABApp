@@ -244,4 +244,3 @@ Trigger an event when an item is constant
     HABApp.core.EventBus.post_event('Item_Name', ItemNoChangeEvent('Item_Name', 10))
     runner.tear_down()
     # hide
-

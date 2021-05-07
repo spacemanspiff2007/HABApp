@@ -15,7 +15,10 @@ def _get_item_val_dict(field_fmt: Dict[str, str], item: UserItem):
             continue
         val = item.__dict__[k]
         if isinstance(val, list):
-            val = ', '.join(val)
+            if k == 'tags':
+                val = ', '.join(map('"{}"'.format, val))
+            else:
+                val = ', '.join(val)
 
         new[k] = format.format(val) if val else ''
 

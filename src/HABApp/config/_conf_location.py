@@ -17,4 +17,4 @@ class Location(ConfigContainer):
 
     def on_all_values_set(self):
         log.debug(f'Local Timezone: {eascheduler.const.local_tz}')
-        eascheduler.set_location(self.longitude, self.longitude, self.elevation)
+        eascheduler.set_location(self.latitude, self.longitude, self.elevation)

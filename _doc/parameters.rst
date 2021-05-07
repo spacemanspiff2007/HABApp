@@ -175,4 +175,3 @@ Parameter classes
 
 .. autoclass:: HABApp.parameters.DictParameter
    :members:
-

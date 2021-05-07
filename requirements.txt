@@ -2,21 +2,21 @@
 aiohttp-sse-client==0.2.1
 aiohttp==3.7.4
 bidict==0.21.2
-eascheduler==0.1.1
+eascheduler==0.1.2
 easyco==0.2.3
 paho-mqtt==1.5.1
 pendulum==2.1.2
 pydantic==1.8.1
 stackprinter==0.2.5
-tzlocal==2.1
 voluptuous==0.12.1
-watchdog==2.0.2
+watchdog==2.1.0
 ujson==4.0.2
 
 # Packages to run source tests
-pytest==6.2.3
+pytest==6.2.4
 pytest-asyncio==0.15.1
-mock;python_version<"3.8"
+flake8==3.9.1   # Required for github test
+mock==4.0.3;python_version<"3.8"
 
-# Packages for tox tests
-flake8==3.9.1
+# Packages for source formatting
+pre-commit==2.12.1
