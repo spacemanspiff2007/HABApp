@@ -1,10 +1,10 @@
 import random
 import string
-
-from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types, get_random_name
+import time
 
 import HABApp
-import time
+from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types, \
+    get_random_name
 
 
 class TestOpenhabInterface(TestBaseRule):
@@ -33,7 +33,7 @@ class TestOpenhabInterface(TestBaseRule):
         assert self.openhab.item_exists('TestString')
 
     def test_item_create_delete(self):
-        
+
         test_defs = []
         for type in get_openhab_test_types():
             test_defs.append((type, get_random_name()))
@@ -41,10 +41,10 @@ class TestOpenhabInterface(TestBaseRule):
 
         for item_type, item_name in test_defs:
             assert not self.openhab.item_exists(item_name)
-    
+
             self.openhab.create_item(item_type, item_name)
             assert self.openhab.item_exists(item_name)
-    
+
             self.openhab.remove_item(item_name)
             assert not self.openhab.item_exists(item_name)
 
