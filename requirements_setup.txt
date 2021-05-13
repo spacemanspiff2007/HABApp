@@ -5,7 +5,7 @@ eascheduler==0.1.2
 easyco==0.2.3
 paho-mqtt==1.5.1
 pendulum==2.1.2
-pydantic==1.8.1
+pydantic==1.8.2
 stackprinter==0.2.5
 voluptuous==0.12.1
 watchdog==2.1.0
