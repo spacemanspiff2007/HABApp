@@ -13,8 +13,8 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.const.json import dump_json, load_json
-from HABApp.openhab.exceptions import OpenhabConnectionNotSetUpError, OpenhabNotReadyYet, \
-    OpenhabDisconnectedError
+from HABApp.openhab.errors import OpenhabConnectionNotSetUpError, OpenhabNotReadyYet, \
+    OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
 from .http_connection_waiter import WaitBetweenConnects
 
 log = logging.getLogger('HABApp.openhab.connection')
@@ -44,7 +44,7 @@ ON_DISCONNECTED: typing.Callable = None
 ON_SSE_EVENT: typing.Callable[[typing.Dict[str, Any]], Any] = None
 
 
-async def get(url: str, log_404=True, **kwargs: Any) -> ClientResponse:
+async def get(url: str, log_404=True, disconnect_on_error=False, **kwargs: Any) -> ClientResponse:
     if HTTP_PREFIX is None:
         raise OpenhabConnectionNotSetUpError()
 
@@ -52,7 +52,7 @@ async def get(url: str, log_404=True, **kwargs: Any) -> ClientResponse:
     url = f'{HTTP_PREFIX}/rest/{url}/'
 
     mgr = _RequestContextManager(HTTP_SESSION._request(METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS, **kwargs))
-    return await check_response(mgr, log_404=log_404)
+    return await check_response(mgr, log_404=log_404, disconnect_on_error=disconnect_on_error)
 
 
 async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Optional[ClientResponse]:
@@ -163,7 +163,7 @@ def is_disconnect_exception(e) -> bool:
 
 
 async def check_response(future: aiohttp.client._RequestContextManager, sent_data=None,
-                         log_404=True) -> ClientResponse:
+                         log_404=True, disconnect_on_error=False) -> ClientResponse:
     try:
         resp = await future
     except Exception as e:
@@ -179,6 +179,12 @@ async def check_response(future: aiohttp.client._RequestContextManager, sent_dat
     if status >= 500:
         set_offline(f'Status {status} for {resp.request_info.method} {resp.request_info.url}')
         raise OpenhabNotReadyYet()
+
+    # Sometimes openHAB issues 404 instead of 500 during startup
+    if disconnect_on_error and status >= 400:
+        set_offline(f'Expected success but got status {status} for '
+                    f'{str(resp.request_info.url).replace(HTTP_PREFIX, "")}')
+        raise ExpectedSuccessFromOpenhab()
 
     # Something went wrong - log error message
     log_msg = False
@@ -308,7 +314,7 @@ async def async_get_root() -> dict:
     resp = await get('', log_404=False)
     if resp.status == 404:
         return {}
-    return await resp.json(encoding='utf-8')
+    return await resp.json(loads=load_json, encoding='utf-8')
 
 
 def patch_for_oh2(reverse=False):
@@ -333,7 +339,7 @@ async def try_uuid():
         uuid = await async_get_uuid()
         root = await async_get_root()      # this will only work on OH3
     except Exception as e:
-        if isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
+        if isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet, ExpectedSuccessFromOpenhab)):
             log.info('... offline!')
         else:
             for line in traceback.format_exc().splitlines():

@@ -14,7 +14,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
     @ignore_exception
     async def on_connect_function(self):
-        data = await async_get_items()
+        data = await async_get_items(disconnect_on_error=True)
         if data is None:
             return None
 
@@ -47,9 +47,8 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
         log.info(f'Updated {found_items:d} Items')
 
-
         # try to update things, too
-        data = await async_get_things()
+        data = await async_get_things(disconnect_on_error=True)
         if data is None:
             return None
 
