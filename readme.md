@@ -102,8 +102,13 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 0.30.2 (26.05.2021)
+- Item and Thing loading from openHAB is more robust and disconnects now properly if openHAB is only partly ready
+- Renamed command line argument "-s" to "-wos" or "--wait_os_uptime"
+- Updated dependencies
+
 #### 0.30.1 (07.05.2021)
-- latitude is now set correctly for sunrise/sunset calculation (closes #217) 
+- latitude is now set correctly for sunrise/sunset calculation (closes #217)
 - Added missing " for tags in textual thing configuration
 - Updated scheduler which fixes an overflow error(#216)
 - States of openHAB groups are now unpacked correctly
