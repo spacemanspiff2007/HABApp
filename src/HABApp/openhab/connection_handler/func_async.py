@@ -6,8 +6,8 @@ from urllib.parse import quote as quote_url
 
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
-from HABApp.openhab.exceptions import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
-    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError
+from HABApp.openhab.errors import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
+    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError, ExpectedSuccessFromOpenhab
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
 from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from .http_connection import delete, get, post, put, log, async_get_root, async_get_uuid
@@ -51,17 +51,17 @@ async def async_item_exists(item) -> bool:
     return ret.status == 200
 
 
-async def async_get_items(include_habapp_meta=False) -> Optional[List[Dict[str, Any]]]:
+async def async_get_items(include_habapp_meta=False, disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
     params = None
     if include_habapp_meta:
         params = {'metadata': 'HABApp'}
 
     try:
-        resp = await get('items', params=params)
-        return load_json(await resp.text(encoding='utf-8'))
+        resp = await get('items', disconnect_on_error=disconnect_on_error, params=params)
+        return await resp.json(loads=load_json, encoding='utf-8')
     except Exception as e:
         # sometimes uuid already works but items not - so we ignore these errors here, too
-        if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
+        if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet, ExpectedSuccessFromOpenhab)):
             for line in traceback.format_exc().splitlines():
                 log.error(line)
         return None
@@ -75,7 +75,7 @@ async def async_get_item(item: str, metadata: Optional[str] = None) -> dict:
     if ret.status >= 300:
         return {}
     else:
-        data = await ret.json(encoding='utf-8')
+        data = await ret.json(loads=load_json, encoding='utf-8')
         try:
             data['groups'] = data.pop('groupNames')
         except KeyError:
@@ -83,14 +83,14 @@ async def async_get_item(item: str, metadata: Optional[str] = None) -> dict:
         return data
 
 
-async def async_get_things() -> Optional[List[Dict[str, Any]]]:
+async def async_get_things(disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
 
     try:
-        resp = await get('things')
-        return load_json(await resp.text(encoding='utf-8'))
+        resp = await get('things', disconnect_on_error=disconnect_on_error)
+        return await resp.json(loads=load_json, encoding='utf-8')
     except Exception as e:
         # sometimes uuid and items already works but things not - so we ignore these errors here, too
-        if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet)):
+        if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet, ExpectedSuccessFromOpenhab)):
             for line in traceback.format_exc().splitlines():
                 log.error(line)
         return None
@@ -101,7 +101,7 @@ async def async_get_thing(uid: str) -> OpenhabThingDefinition:
     if ret.status >= 300:
         raise ThingNotFoundError.from_uid(uid)
 
-    return OpenhabThingDefinition.parse_obj(await ret.json(encoding='utf-8'))
+    return OpenhabThingDefinition.parse_obj(await ret.json(loads=load_json, encoding='utf-8'))
 
 
 async def async_get_persistence_data(item_name: str, persistence: typing.Optional[str],
@@ -122,7 +122,7 @@ async def async_get_persistence_data(item_name: str, persistence: typing.Optiona
     if ret.status >= 300:
         return {}
     else:
-        return await ret.json(encoding='utf-8')
+        return await ret.json(loads=load_json, encoding='utf-8')
 
 
 async def async_create_item(item_type, name, label="", category="", tags=[], groups=[],
@@ -228,7 +228,7 @@ async def async_get_channel_links() -> List[Dict[str, str]]:
     if ret.status >= 300:
         return None
     else:
-        return await ret.json(encoding='utf-8')
+        return await ret.json(loads=load_json, encoding='utf-8')
 
 
 async def async_get_channel_link_mode_auto() -> bool:
@@ -236,7 +236,7 @@ async def async_get_channel_link_mode_auto() -> bool:
     if ret.status >= 300:
         return False
     else:
-        return await ret.json(encoding='utf-8')
+        return await ret.json(loads=load_json, encoding='utf-8')
 
 
 async def async_get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
@@ -246,7 +246,7 @@ async def async_get_channel_link(channel_uid: str, item_name: str) -> ItemChanne
     if ret.status >= 300:
         return None
     else:
-        return ItemChannelLinkDefinition(**await ret.json(encoding='utf-8'))
+        return ItemChannelLinkDefinition(**await ret.json(loads=load_json, encoding='utf-8'))
 
 
 async def async_channel_link_exists(channel_uid: str, item_name: str) -> bool:

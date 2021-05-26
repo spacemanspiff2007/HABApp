@@ -1,5 +1,5 @@
 # no external dependencies
-import HABApp.openhab.exceptions
+import HABApp.openhab.errors
 import HABApp.openhab.events
 
 import HABApp.openhab.interface_async

@@ -81,7 +81,7 @@ async def create_item(item: UserItem, test: bool) -> bool:
             if v != existing_item.get(k, ''):
                 existing_ok = False
 
-    except HABApp.openhab.exceptions.ItemNotFoundError:
+    except HABApp.openhab.errors.ItemNotFoundError:
         existing_ok = True
         existing_item = None
         habapp_data = HABAppThingPluginData()

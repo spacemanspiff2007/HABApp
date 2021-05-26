@@ -1,4 +1,5 @@
 import argparse
+import ctypes
 import os
 import sys
 import time
@@ -7,6 +8,20 @@ from pathlib import Path
 
 # Global var if we want to run the benchmark
 DO_BENCH = False
+
+
+def get_uptime() -> float:
+
+    if sys.platform == 'linux':
+        with open('/proc/uptime', 'r') as f:
+            return float(f.readline().split()[0])
+
+    if sys.platform == 'win32':
+        lib = ctypes.windll.kernel32
+        lib.GetTickCount64.restype = ctypes.c_uint64
+        return lib.GetTickCount64() / 1000
+
+    raise NotImplementedError(f'Not supported on {sys.platform}')
 
 
 def parse_args(passed_args=None) -> Path:
@@ -20,9 +35,9 @@ def parse_args(passed_args=None) -> Path:
         default=None
     )
     parser.add_argument(
-        '-s',
-        '--sleep',
-        help='Sleep time in seconds before starting HABApp',
+        '-wos',
+        '--wait_os_uptime',
+        help='Waits for the specified os uptime before starting HABApp',
         type=int,
         default=None
     )
@@ -36,11 +51,14 @@ def parse_args(passed_args=None) -> Path:
 
     DO_BENCH = args.benchmark
 
-    if args.sleep:
-        args.sleep = max(0, args.sleep)
-        print(f'Waiting {args.sleep:d} seconds before starting HABApp ...', end='')
-        time.sleep(args.sleep)
-        print(' done!')
+    if args.wait_os_uptime:
+        args.wait_os_uptime = max(0, args.wait_os_uptime)
+        uptime = get_uptime()
+        if uptime < args.wait_os_uptime:
+            diff = args.wait_os_uptime - uptime
+            print(f'Waiting {diff:.0f} seconds before starting HABApp ...', end='')
+            time.sleep(diff)
+            print(' done!')
 
     path = args.config
     if path is not None:
