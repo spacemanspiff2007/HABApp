@@ -242,7 +242,7 @@ class Rule:
         return self.run.at(seconds, callback, *args, **kwargs)
 
     def run_soon(self, callback, *args, **kwargs):
-        warnings.warn('self.run_in is deprecated. Please use self.run.at', DeprecationWarning)
+        warnings.warn('self.run_soon is deprecated. Please use self.run.soon', DeprecationWarning)
         return self.run.soon(callback, *args, **kwargs)
 
     # -----------------------------------------------------------------------------------------------------------------
