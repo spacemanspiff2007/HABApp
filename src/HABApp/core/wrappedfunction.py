@@ -6,16 +6,16 @@ from cProfile import Profile
 from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
 from pstats import Stats
-from threading import _MainThread, current_thread
-
 import HABApp
+
+from HABApp.core.context import async_context
+from HABApp.core.const import loop
 
 default_logger = logging.getLogger('HABApp.Worker')
 
 
 class WrappedFunction:
     _WORKERS = ThreadPoolExecutor(10, 'HabApp_')
-    _EVENT_LOOP = None
 
     def __init__(self, func, logger=None, warn_too_long=True, name=None):
         assert callable(func)
@@ -38,13 +38,11 @@ class WrappedFunction:
     def run(self, *args, **kwargs):
 
         if self.is_async:
-            # schedule run async, we need to pass the event loop because we can create an async WrappedFunction
-            # from a worker thread (if we have a mixture between async and non-async)!
-            if isinstance(current_thread(), _MainThread):
-                create_task(self.async_run(*args, **kwargs))
+            # If we run in the async context we can create tasks easily
+            if async_context.get(None) is None:
+                run_coroutine_threadsafe(self.async_run(*args, **kwargs), loop=loop)
             else:
-                run_coroutine_threadsafe(self.async_run(*args, **kwargs), loop=WrappedFunction._EVENT_LOOP)
-
+                create_task(self.async_run(*args, **kwargs))
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)
@@ -67,14 +65,17 @@ class WrappedFunction:
             )
 
     async def async_run(self, *args, **kwargs):
+
+        async_context.set('WrappedFunction')
+
         try:
             await self._func(*args, **kwargs)
         except Exception as e:
             self.__format_traceback(e, *args, **kwargs)
+
         return None
 
     def __run(self, *args, **kwargs):
-
         __start = time.time()
 
         # notify if we don't process quickly

@@ -171,52 +171,52 @@ Another very useful function is `self.run.countdown` as it can simplify many rul
    * - Function
      - Description
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.soon`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.soon`
      - Run the callback as soon as possible (typically in the next second).
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.at`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.at`
      - Run the callback in x seconds or at a specified time.
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.countdown`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.countdown`
      - Run a function after a time has run down
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.every`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.every`
      - Run a function periodically
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.every_minute`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.every_minute`
      - Run a function every minute
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.every_hour`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.every_hour`
      - Run a function every hour
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_every_day`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_every_day`
      - Run a function at a specific time every day
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_workdays`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_workdays`
      - Run a function at a specific time on workdays
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_weekends`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_weekends`
      - Run a function at a specific time on weekends
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_day_of_week`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_day_of_week`
      - Run a function at a specific time on specific days of the week
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sun_dawn`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sun_dawn`
      - Run a function on dawn
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sunrise`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sunrise`
      - Run a function on sunrise
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sunset`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sunset`
      - Run a function on sunset
 
-   * - :meth:`~HABApp.rule.habappscheduler.HABAppScheduler.on_sun_dusk`
+   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sun_dusk`
      - Run a function on dusk
 
 
 All functions return an instance of ScheduledCallbackBase
 
-.. autoclass:: HABApp.rule.habappscheduler.HABAppScheduler
+.. autoclass:: HABApp.rule.scheduler.HABAppSchedulerView
    :members:
    :inherited-members:
 

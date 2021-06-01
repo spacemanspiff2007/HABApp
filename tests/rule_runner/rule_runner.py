@@ -1,8 +1,9 @@
 import sys
 
-import HABApp.rule.habappscheduler as ha_sched
+import HABApp.rule.scheduler.habappschedulerview as ha_sched
 from HABApp.core import WrappedFunction
 from HABApp.runtime import Runtime
+from HABApp.core.context import async_context
 
 
 def _get_topmost_globals() -> dict:
@@ -62,10 +63,14 @@ class SimpleRuleRunner:
         WrappedFunction._WORKERS = self
 
         # patch scheduler
-        self.original_scheduler = ha_sched.ThreadSafeAsyncScheduler
-        ha_sched.ThreadSafeAsyncScheduler = SyncScheduler
+        name = '_HABAppScheduler'
+        assert hasattr(ha_sched, name)
+        self.original_scheduler = name, getattr(ha_sched, name)
+        setattr(ha_sched, name, SyncScheduler)
 
     def tear_down(self):
+        async_context.set('Tear down test')
+
         self.vars.pop('__UNITTEST__')
         self.vars.pop('__HABAPP__RUNTIME__')
         self.vars.pop('__HABAPP__RULE_FILE__')
@@ -74,8 +79,9 @@ class SimpleRuleRunner:
             rule._unload()
         loaded_rules.clear()
 
-        WrappedFunction._WORKERS = self.worker
-        ha_sched.ThreadSafeAsyncScheduler = self.original_scheduler
+        # restore patched
+        name, original = self.original_scheduler
+        setattr(ha_sched, name, original)
 
     def process_events(self):
         for s in SyncScheduler.ALL:

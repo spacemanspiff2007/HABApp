@@ -76,7 +76,7 @@ class MqttBenchRule(BenchBaseRule):
         self.time_sent = time.time()
         publish(self.name, self.values[0])
 
-        self.run_soon(LOCK.acquire)
+        self.run.soon(LOCK.acquire)
         time.sleep(1)
         LOCK.acquire(True, 5)
 
