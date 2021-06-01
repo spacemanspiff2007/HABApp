@@ -46,6 +46,18 @@ class SimpleRuleRunner:
         self.loaded_rules = []
         self.original_scheduler = None
 
+        self._patched_objs = []
+
+    def patch_obj(self, obj, name, new_value):
+        assert hasattr(obj, name)
+        self._patched_objs.append((obj, name, getattr(obj, name)))
+        setattr(obj, name, new_value)
+
+    def restore(self):
+        for obj, name, original in self._patched_objs:
+            assert hasattr(obj, name)
+            setattr(obj, name, original)
+
     def submit(self, callback, *args, **kwargs):
         # submit never raises and exception, so we don't do it here, too
         try:
@@ -59,14 +71,12 @@ class SimpleRuleRunner:
         self.vars['__HABAPP__RULE_FILE__'] = TestRuleFile()
         self.vars['__HABAPP__RULES'] = self.loaded_rules = []
 
-        self.worker = WrappedFunction._WORKERS
-        WrappedFunction._WORKERS = self
+        # patch worker with a synchronous worker
+        self.patch_obj(WrappedFunction, '_WORKERS', self)
 
-        # patch scheduler
-        name = '_HABAppScheduler'
-        assert hasattr(ha_sched, name)
-        self.original_scheduler = name, getattr(ha_sched, name)
-        setattr(ha_sched, name, SyncScheduler)
+        # patch scheduler, so we run synchronous
+        self.patch_obj(ha_sched, '_HABAppScheduler', SyncScheduler)
+
 
     def tear_down(self):
         async_context.set('Tear down test')
@@ -80,8 +90,7 @@ class SimpleRuleRunner:
         loaded_rules.clear()
 
         # restore patched
-        name, original = self.original_scheduler
-        setattr(ha_sched, name, original)
+        self.restore()
 
     def process_events(self):
         for s in SyncScheduler.ALL:
