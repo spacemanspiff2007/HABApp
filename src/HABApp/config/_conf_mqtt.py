@@ -37,7 +37,8 @@ class Connection(ConfigContainer):
     user: str = ''
     password: str = ''
     tls: bool = True
-    tls_ca: str = ''
+    tls_ca_cert_path: str = ConfigEntry(
+        default='', description='Path to the CA certificate files that are to be treated as trusted')
     tls_insecure: bool = False
 
 

@@ -19,6 +19,7 @@ mqtt:
     tls: false
     tls_insecure: false
     user: ''
+    tls_ca_cert_path: ''  # Path to the CA certificate files that are to be treated as trusted
   publish:
     qos: 0
     retain: false

@@ -49,43 +49,43 @@ def connect():
         STATUS.client.disconnect()
         STATUS.connected = False
 
-    STATUS.client = mqtt.Client(
+    STATUS.client = mqtt_client = mqtt.Client(
         client_id=config.connection.client_id,
         clean_session=False
     )
 
     if config.connection.tls:
-        STATUS.client.tls_set()
-        if config.connection.tls_ca != "":
-            log.info(f"CA cert path: {config.connection.tls_ca}")
-            STATUS.client.tls_set(config.connection.tls_ca)
+        mqtt_client.tls_set()
+        if config.connection.tls_ca_cert_path != "":
+            log.debug(f"CA cert path: {config.connection.tls_ca_cert_path}")
+            mqtt_client.tls_set(config.connection.tls_ca_cert_path)
         else:
-            STATUS.client.tls_set()
+            mqtt_client.tls_set()
         # we can only set tls_insecure if we have a tls connection
         if config.connection.tls_insecure:
             log.warning('Verification of server hostname in server certificate disabled!')
             log.warning('Use this only for testing, not for a real system!')
-            STATUS.client.tls_insecure_set(True)
+            mqtt_client.tls_insecure_set(True)
 
     # set user/pw if required
     user = config.connection.user
     pw = config.connection.password
     if user:
-        STATUS.client.username_pw_set(user, pw if pw else None)
+        mqtt_client.username_pw_set(user, pw if pw else None)
 
     # setup callbacks
-    STATUS.client.on_connect = on_connect
-    STATUS.client.on_disconnect = on_disconnect
-    STATUS.client.on_message = process_msg
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_disconnect = on_disconnect
+    mqtt_client.on_message = process_msg
 
-    STATUS.client.connect_async(
+    mqtt_client.connect_async(
         config.connection.host, port=config.connection.port, keepalive=60
     )
 
     log.info(f'Connecting to {config.connection.host}:{config.connection.port}')
 
     if not STATUS.loop_started:
-        STATUS.client.loop_start()
+        mqtt_client.loop_start()
     STATUS.loop_started = True
 
 
