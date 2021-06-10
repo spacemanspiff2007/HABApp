@@ -37,6 +37,7 @@ class Connection(ConfigContainer):
     user: str = ''
     password: str = ''
     tls: bool = True
+    tls_ca: str = ''
     tls_insecure: bool = False
 
 

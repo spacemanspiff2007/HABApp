@@ -56,7 +56,11 @@ def connect():
 
     if config.connection.tls:
         STATUS.client.tls_set()
-
+        if config.connection.tls_ca != "":
+            log.info(f"CA cert path: {config.connection.tls_ca}")
+            STATUS.client.tls_set(config.connection.tls_ca)
+        else:
+            STATUS.client.tls_set()
         # we can only set tls_insecure if we have a tls connection
         if config.connection.tls_insecure:
             log.warning('Verification of server hostname in server certificate disabled!')
