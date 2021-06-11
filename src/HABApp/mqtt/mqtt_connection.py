@@ -1,5 +1,6 @@
 import logging
 import typing
+from pathlib import Path
 
 import paho.mqtt.client as mqtt
 
@@ -56,11 +57,18 @@ def connect():
 
     if config.connection.tls:
         mqtt_client.tls_set()
-        if config.connection.tls_ca_cert_path != "":
-            log.debug(f"CA cert path: {config.connection.tls_ca_cert_path}")
-            mqtt_client.tls_set(config.connection.tls_ca_cert_path)
+
+        # add option to specify tls certificate
+        ca_cert = config.connection.tls_ca_cert
+        if ca_cert != "":
+            if not Path(ca_cert).is_file():
+                log.error(f'Ca cert file does not exist: {ca_cert}')
+            else:
+                log.debug(f"CA cert path: {ca_cert}")
+                mqtt_client.tls_set(ca_cert)
         else:
             mqtt_client.tls_set()
+
         # we can only set tls_insecure if we have a tls connection
         if config.connection.tls_insecure:
             log.warning('Verification of server hostname in server certificate disabled!')
