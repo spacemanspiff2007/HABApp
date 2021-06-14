@@ -5,7 +5,7 @@ import asyncio
 import pytest
 
 import HABApp
-from .helpers import params, parent_rule, sync_worker, event_bus
+from .helpers import params, parent_rule, sync_worker, event_bus, get_dummy_cfg
 
 
 if typing.TYPE_CHECKING:
@@ -40,6 +40,15 @@ def show_errors(monkeypatch):
     HABApp.core.EventBus.remove_all_listeners()
     for name in HABApp.core.Items.get_all_item_names():
         HABApp.core.Items.pop_item(name)
+
+
+@pytest.yield_fixture(autouse=True, scope='function')
+def use_dummy_cfg(monkeypatch):
+    cfg = get_dummy_cfg()
+    monkeypatch.setattr(HABApp, 'CONFIG', cfg)
+    monkeypatch.setattr(HABApp.config, 'CONFIG', cfg)
+    monkeypatch.setattr(HABApp.config.config, 'CONFIG', cfg)
+    yield
 
 
 @pytest.yield_fixture(autouse=True, scope='function')
