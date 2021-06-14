@@ -4,7 +4,7 @@ import HABApp
 from HABApp.mqtt.mqtt_connection import connect, STATUS
 
 
-def test_connect(monkeypatch, caplog):
+def test_connect(caplog):
     HABApp.CONFIG.mqtt.connection.host = 'localhost'
     HABApp.CONFIG.mqtt.connection.tls_ca_cert = 'invalid_file_path'
 
