@@ -6,10 +6,10 @@ import paho.mqtt.client as mqtt
 
 import HABApp
 from HABApp.core import Items
+from HABApp.core.const.json import load_json
+from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 from HABApp.core.wrapper import log_exception
 from HABApp.runtime import shutdown
-from .events import MqttValueChangeEvent, MqttValueUpdateEvent
-from ..core.const.json import load_json
 
 log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.EventBus.mqtt')
@@ -56,18 +56,20 @@ def connect():
     )
 
     if config.connection.tls:
-        mqtt_client.tls_set()
-
         # add option to specify tls certificate
         ca_cert = config.connection.tls_ca_cert
         if ca_cert != "":
             if not Path(ca_cert).is_file():
                 log.error(f'Ca cert file does not exist: {ca_cert}')
+                # don't connect without the properly set certificate
+                disconnect()
+                return None
             else:
                 log.debug(f"CA cert path: {ca_cert}")
                 mqtt_client.tls_set(ca_cert)
-        else:
-            mqtt_client.tls_set()
+
+        # enable TLS after (!) we set the certificate
+        mqtt_client.tls_set()
 
         # we can only set tls_insecure if we have a tls connection
         if config.connection.tls_insecure:
