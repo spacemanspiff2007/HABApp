@@ -67,9 +67,8 @@ def connect():
             else:
                 log.debug(f"CA cert path: {ca_cert}")
                 mqtt_client.tls_set(ca_cert)
-
-        # enable TLS after (!) we set the certificate
-        mqtt_client.tls_set()
+        else:
+            mqtt_client.tls_set()
 
         # we can only set tls_insecure if we have a tls connection
         if config.connection.tls_insecure:
