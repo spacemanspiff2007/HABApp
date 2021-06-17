@@ -102,6 +102,12 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 0.30.3 (17.06.2021)
+- add support for custom ca cert for MQTT
+- Scheduler runs only when the rule file has been loaded properly
+- Sync openhab calls raise an error when called from an async context
+- Replaced thread check for asyncio with a contextvar (internal)
+
 #### 0.30.3 (01.06.2021)
 - Scheduler runs only when the rule file has been loaded properly
 - Replaced thread check for asyncio with a contextvar
