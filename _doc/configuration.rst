@@ -59,6 +59,8 @@ Configuration contents
             password: ''
             tls: true
             tls_insecure: false  # do not check certificate
+            tls_ca_cert: ''      # Path to a CA certificate that will be treated as trusted
+                                 # (e.g. when using a self signed certificate)
 
         subscribe:         # Changes to Subscribe get picked up without restarting HABApp
             qos: 0         # Default QoS for subscribing

@@ -14,12 +14,12 @@ mqtt:
   connection:
     client_id: HABApp
     host: localhost
+    user: ''
     password: ''
     port: 1883
     tls: false
     tls_insecure: false
-    user: ''
-    tls_ca_cert_path: ''  # Path to the CA certificate files that are to be treated as trusted
+    tls_ca_cert: ''  # Path to a CA certificate that will be treated as trusted
   publish:
     qos: 0
     retain: false
