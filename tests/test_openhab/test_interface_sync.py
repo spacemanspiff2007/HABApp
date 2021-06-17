@@ -20,20 +20,20 @@ def test_all_imported(func: Callable):
 
 
 @pytest.mark.parametrize('func, args', (
-    (post_update,      ('name', 'value')),
-    (send_command,      ('name', 'value')),
-    (get_item,      ('name', )),
-    (get_thing,     ('name', )),
-    (item_exists,   ('name', )),
-    (remove_item,   ('name', )),
-    (create_item,   ('String', 'name')),
-    (get_persistence_data,   ('name', None, None, None)),
-    (remove_metadata, ('name', 'ns')),
-    (set_metadata,    ('name', 'ns', 'val', {})),
-    (get_channel_link,    ('channel', 'item')),
-    (channel_link_exists, ('channel', 'item')),
-    (remove_channel_link, ('channel', 'item')),
-    (create_channel_link, ('channel', 'item', {})),
+    (post_update,           ('name', 'value')),
+    (send_command,          ('name', 'value')),
+    (get_item,              ('name', )),
+    (get_thing,             ('name', )),
+    (item_exists,           ('name', )),
+    (remove_item,           ('name', )),
+    (create_item,           ('String', 'name')),
+    (get_persistence_data,  ('name', None, None, None)),
+    (remove_metadata,       ('name', 'ns')),
+    (set_metadata,          ('name', 'ns', 'val', {})),
+    (get_channel_link,      ('channel', 'item')),
+    (channel_link_exists,   ('channel', 'item')),
+    (remove_channel_link,   ('channel', 'item')),
+    (create_channel_link,   ('channel', 'item', {})),
 ))
 @pytest.mark.asyncio
 async def test_item_has_name(func, args):
@@ -43,3 +43,6 @@ async def test_item_has_name(func, args):
         with pytest.raises(AsyncContextError) as e:
             func(*args)
         assert e.value.func == func
+    else:
+        # call the function to make sure it doesn't raise an exception
+        func(*args)
