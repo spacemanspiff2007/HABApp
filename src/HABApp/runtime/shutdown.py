@@ -9,6 +9,7 @@ from types import FunctionType, MethodType
 from typing import Callable, Coroutine, Union
 
 from HABApp.core.const import loop
+from HABApp.core.context import async_context
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,8 @@ def request_shutdown():
 async def _shutdown():
     global requested
     "Request execution of all functions"
+
+    async_context.set('Shutdown')
 
     log = logging.getLogger('HABApp.Shutdown')
     log.debug('Requested shutdown')

@@ -75,7 +75,6 @@ class TestCases(unittest.TestCase):
         def tmp():
             1 / 0
 
-        WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
         f = WrappedFunction(tmp)
         self.assertFalse(self.err_func.called)
 
@@ -92,7 +91,6 @@ class TestCases(unittest.TestCase):
 @pytest.mark.asyncio
 async def test_async_run():
     coro = AsyncMock()
-    WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
     f = WrappedFunction(coro, name='coro_mock')
     f.run()
     await asyncio.sleep(0.05)
@@ -102,7 +100,6 @@ async def test_async_run():
 @pytest.mark.asyncio
 async def test_async_args():
     coro = AsyncMock()
-    WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
     f = WrappedFunction(coro, name='coro_mock')
     f.run('arg1', 'arg2', kw1='kw1')
 
@@ -116,7 +113,6 @@ async def test_async_error_wrapper():
         1 / 0
 
     f = WrappedFunction(tmp)
-    WrappedFunction._EVENT_LOOP = asyncio.get_event_loop()
     err_func = AsyncMock()
     err_listener = HABApp.core.EventBusListener(TOPIC_ERRORS, WrappedFunction(err_func, name='ErrMock'))
     HABApp.core.EventBus.add_listener(err_listener)

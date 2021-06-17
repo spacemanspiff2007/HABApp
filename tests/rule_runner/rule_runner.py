@@ -1,8 +1,9 @@
 import sys
 
-import HABApp.rule.habappscheduler as ha_sched
+import HABApp.rule.scheduler.habappschedulerview as ha_sched
 from HABApp.core import WrappedFunction
 from HABApp.runtime import Runtime
+from HABApp.core.context import async_context
 
 
 def _get_topmost_globals() -> dict:
@@ -45,6 +46,18 @@ class SimpleRuleRunner:
         self.loaded_rules = []
         self.original_scheduler = None
 
+        self._patched_objs = []
+
+    def patch_obj(self, obj, name, new_value):
+        assert hasattr(obj, name)
+        self._patched_objs.append((obj, name, getattr(obj, name)))
+        setattr(obj, name, new_value)
+
+    def restore(self):
+        for obj, name, original in self._patched_objs:
+            assert hasattr(obj, name)
+            setattr(obj, name, original)
+
     def submit(self, callback, *args, **kwargs):
         # submit never raises and exception, so we don't do it here, too
         try:
@@ -58,14 +71,16 @@ class SimpleRuleRunner:
         self.vars['__HABAPP__RULE_FILE__'] = TestRuleFile()
         self.vars['__HABAPP__RULES'] = self.loaded_rules = []
 
-        self.worker = WrappedFunction._WORKERS
-        WrappedFunction._WORKERS = self
+        # patch worker with a synchronous worker
+        self.patch_obj(WrappedFunction, '_WORKERS', self)
 
-        # patch scheduler
-        self.original_scheduler = ha_sched.ThreadSafeAsyncScheduler
-        ha_sched.ThreadSafeAsyncScheduler = SyncScheduler
+        # patch scheduler, so we run synchronous
+        self.patch_obj(ha_sched, '_HABAppScheduler', SyncScheduler)
+
 
     def tear_down(self):
+        async_context.set('Tear down test')
+
         self.vars.pop('__UNITTEST__')
         self.vars.pop('__HABAPP__RUNTIME__')
         self.vars.pop('__HABAPP__RULE_FILE__')
@@ -74,8 +89,8 @@ class SimpleRuleRunner:
             rule._unload()
         loaded_rules.clear()
 
-        WrappedFunction._WORKERS = self.worker
-        ha_sched.ThreadSafeAsyncScheduler = self.original_scheduler
+        # restore patched
+        self.restore()
 
     def process_events(self):
         for s in SyncScheduler.ALL:

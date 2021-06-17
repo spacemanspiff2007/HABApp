@@ -23,7 +23,7 @@ class ConfiguredFolder:
     def __init__(self, prefix: str, folder: Path, priority: int):
         self.prefix = prefix
         self.folder = folder
-        self.priority: int = priority
+        self.priority: int = priority   # priority determines the order how the files will be loaded
 
     def add_watch(self, file_ending: str, watch_subfolders: bool = True) -> AggregatingAsyncEventHandler:
         filter = HABApp.core.files.watcher.FileEndingFilter(file_ending)
@@ -40,6 +40,13 @@ def get_prefixes() -> List[str]:
 
 
 def add_folder(prefix: str, folder: Path, priority: int) -> ConfiguredFolder:
+    """Make a folder known
+
+    :param prefix: HABApp file name prefix
+    :param folder: Folder path
+    :param priority: Priority (used to determine the load order)
+    :return: ConfiguredFolder
+    """
     assert prefix and prefix.endswith('/')
     for obj in FOLDERS.values():
         assert obj.priority != priority

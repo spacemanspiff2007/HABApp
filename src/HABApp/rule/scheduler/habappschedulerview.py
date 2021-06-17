@@ -1,30 +1,22 @@
 import random
 from datetime import datetime as dt_datetime, time as dt_time, timedelta as dt_timedelta
-from typing import Callable
-from typing import Iterable, Union
+from typing import Iterable, Union, TYPE_CHECKING
 
+from HABApp.core import WrappedFunction
+from HABApp.rule.scheduler.executor import WrappedFunctionExecutor
+from HABApp.rule.scheduler.scheduler import HABAppScheduler as _HABAppScheduler
 from eascheduler import SchedulerView
-from eascheduler.executors import ExecutorBase
 from eascheduler.jobs import CountdownJob, DawnJob, DayOfWeekJob, DuskJob, OneTimeJob, ReoccurringJob, SunriseJob, \
     SunsetJob
-from eascheduler.schedulers import ThreadSafeAsyncScheduler
-
-import HABApp
-from HABApp.core import WrappedFunction
 
 
-class WrappedFunctionExecutor(ExecutorBase):
-    def __init__(self, func: Callable, *args, **kwargs):
-        assert isinstance(func, WrappedFunction), type(func)
-        super().__init__(func, *args, **kwargs)
-
-    def execute(self):
-        self._func.run(*self._args, **self._kwargs)
+if TYPE_CHECKING:
+    import HABApp
 
 
-class HABAppScheduler(SchedulerView):
+class HABAppSchedulerView(SchedulerView):
     def __init__(self, rule: 'HABApp.rule.Rule'):
-        super().__init__(ThreadSafeAsyncScheduler(), WrappedFunctionExecutor)
+        super().__init__(_HABAppScheduler(), WrappedFunctionExecutor)
         self._rule: 'HABApp.rule.Rule' = rule
 
     def at(self, time: Union[None, dt_datetime, dt_timedelta, dt_time, int], callback, *args, **kwargs) -> OneTimeJob:

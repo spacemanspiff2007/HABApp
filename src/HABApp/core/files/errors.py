@@ -9,7 +9,7 @@ class CircularReferenceError(Exception):
         return f'<{self.__class__.__name__} {" -> ".join(self.stack)}>'
 
 
-class DependencyDoesNotExitError(Exception):
+class DependencyDoesNotExistError(Exception):
     def __init__(self, msg: str):
         self.msg = msg
 

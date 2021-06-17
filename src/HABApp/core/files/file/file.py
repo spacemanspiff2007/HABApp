@@ -5,7 +5,7 @@ import typing
 from pathlib import Path
 from typing import Callable, Awaitable, Any
 
-from HABApp.core.files.errors import CircularReferenceError, DependencyDoesNotExitError, AlreadyHandledFileError
+from HABApp.core.files.errors import CircularReferenceError, DependencyDoesNotExistError, AlreadyHandledFileError
 from HABApp.core.files.file.properties import FileProperties
 from HABApp.core.files.manager.files import FILES, file_state_changed
 from HABApp.core.wrapper import process_exception
@@ -57,7 +57,7 @@ class HABAppFile:
             msg = f'File {self.path} depends on file{"" if one else "s"} that ' \
                   f'do{"es" if one else ""}n\'t exist: {", ".join(sorted(mis))}'
 
-            raise DependencyDoesNotExitError(msg)
+            raise DependencyDoesNotExistError(msg)
 
         # check reload
         mis = set(filter(lambda x: x not in FILES, self.properties.reloads_on))
@@ -72,7 +72,7 @@ class HABAppFile:
 
         try:
             self._check_properties()
-        except DependencyDoesNotExitError as e:
+        except DependencyDoesNotExistError as e:
             if log_msg:
                 log.error(e.msg)
             return self.set_state(FileState.PROPERTIES_ERROR)

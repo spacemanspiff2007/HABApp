@@ -15,7 +15,7 @@ import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
-from HABApp.rule.habappscheduler import HABAppScheduler
+from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
 
 
 log = logging.getLogger('HABApp.Rule')
@@ -72,7 +72,7 @@ class Rule:
         self.register_on_unload(self.__cleanup_objs)
 
         # scheduler
-        self.run: HABAppScheduler = HABAppScheduler(self)
+        self.run: _HABAppSchedulerView = _HABAppSchedulerView(self)
 
         # suggest a rule name if it is not
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
@@ -242,7 +242,7 @@ class Rule:
         return self.run.at(seconds, callback, *args, **kwargs)
 
     def run_soon(self, callback, *args, **kwargs):
-        warnings.warn('self.run_in is deprecated. Please use self.run.at', DeprecationWarning)
+        warnings.warn('self.run_soon is deprecated. Please use self.run.soon', DeprecationWarning)
         return self.run.soon(callback, *args, **kwargs)
 
     # -----------------------------------------------------------------------------------------------------------------
@@ -258,21 +258,24 @@ class Rule:
 
     @HABApp.core.wrapper.log_exception
     def _check_rule(self):
+        # We need items if we want to run the test
+        if HABApp.core.Items.get_all_items():
 
-        # Check if items do exists
-        if not HABApp.core.Items.get_all_items():
-            return None
+            # Check if we have a valid item for all listeners
+            for listener in self.__event_listener:
 
-        for listener in self.__event_listener:
+                # Internal topics - don't warn there
+                if listener.topic in HABApp.core.const.topics.ALL:
+                    continue
 
-            # Internal topics - don't warn there
-            if listener.topic in HABApp.core.const.topics.ALL:
-                continue
+                # check if specific item exists
+                if not HABApp.core.Items.item_exists(listener.topic):
+                    log.warning(f'Item "{listener.topic}" does not exist (yet)! '
+                                f'self.listen_event in "{self.rule_name}" may not work as intended.')
 
-            # check if specific item exists
-            if not HABApp.core.Items.item_exists(listener.topic):
-                log.warning(f'Item "{listener.topic}" does not exist (yet)! '
-                            f'self.listen_event in "{self.rule_name}" may not work as intended.')
+        # enable the scheduler
+        self.run._scheduler.resume()
+
 
     @HABApp.core.wrapper.log_exception
     def _unload(self):

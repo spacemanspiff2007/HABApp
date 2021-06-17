@@ -154,7 +154,7 @@ class OpenhabBenchRule(BenchBaseRule):
         self.time_sent = time.time()
         self.openhab.post_update(self.item_name, self.item_values[0])
 
-        self.run_soon(LOCK.acquire)
+        self.run.soon(LOCK.acquire)
         time.sleep(1)
         LOCK.acquire(True, OpenhabBenchRule.RTT_BENCH_MAX)
 

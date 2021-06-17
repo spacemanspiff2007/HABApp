@@ -23,13 +23,12 @@ class Runtime:
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
         # Async Workers & shutdown callback
-        # Setup scheduler
-        eascheduler.schedulers.ThreadSafeAsyncScheduler.LOOP = HABApp.core.const.loop
-        HABApp.core.WrappedFunction._EVENT_LOOP = HABApp.core.const.loop
         shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown, msg='Stopping workers')
 
     @HABApp.core.wrapper.log_exception
     async def start(self, config_folder: Path):
+        HABApp.core.context.async_context.set('HABApp startup')
+
         # setup exception handler for the scheduler
         eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
