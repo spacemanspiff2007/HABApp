@@ -26,6 +26,7 @@ async def process_file(name: str, file: Path):
         existing = FILES.pop(name, None)
         if existing is not None:
             await existing.unload()
+        log.debug(f'Removed {existing.name}')
         return None
 
     FILES[name] = HABApp.core.files.file.create_file(name, file)
