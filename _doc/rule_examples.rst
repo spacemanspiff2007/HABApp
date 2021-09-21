@@ -17,15 +17,15 @@ Trigger an event when an item is constant
 ------------------------------------------
 Get an even when the item is constant for 5 and for 10 seconds.
 
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import time, HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item)
-    # hide
+    # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
     from HABApp.core.events import ItemNoChangeEvent
@@ -48,11 +48,11 @@ Get an even when the item is constant for 5 and for 10 seconds.
             print(f'{event}')
 
     MyRule()
-    # hide
+    # ------------ hide: start ------------
     HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 5))
     HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 10))
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 
 Turn something off after movement
@@ -60,18 +60,18 @@ Turn something off after movement
 Turn a device off 30 seconds after one of the movement sensors in a room signals movement.
 
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
-    # hide
+    # ------------ hide: start ------------
     import time, HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.create_item('movement_sensor1', HABApp.core.items.Item)
     HABApp.core.Items.create_item('movement_sensor2', HABApp.core.items.Item)
     HABApp.core.Items.create_item('my_device', HABApp.core.items.Item)
-    # hide
+    # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
     from HABApp.core.events import ValueUpdateEvent
@@ -99,9 +99,9 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
             self.device.post_value('OFF')
 
     MyCountdownRule()
-    # hide
+    # ------------ hide: start ------------
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 Process Errors in Rules
 ------------------------------------------
@@ -109,15 +109,14 @@ This example shows how to create a rule with a function which will be called whe
 The rule function then can push the error message to an openhab item or e.g. use Pushover to send the error message
 to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more information).
 
-.. execute_code::
-    :ignore_stderr:
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import datetime
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
+    # ------------ hide: stop -------------
 
     import HABApp
     from HABApp.core.events.habapp_events import HABAppException
@@ -145,7 +144,7 @@ to the mobile device (see :doc:`Avanced Usage <advanced_usage>` for more informa
         def faulty_function(self):
             1 / 0
     FaultyRule()
-    # hide
+    # ------------ hide: start ------------
     runner.process_events()
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------

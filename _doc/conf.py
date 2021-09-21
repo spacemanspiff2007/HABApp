@@ -52,7 +52,7 @@ except Exception as e:
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
-    'sphinx_execute_code',
+    'sphinx_exec_code',
     'sphinx.ext.inheritance_diagram',
 ]
 
@@ -203,9 +203,8 @@ epub_title = project
 epub_exclude_files = ['search.html']
 
 # -- Extension configuration -------------------------------------------------
-
-execute_code_working_dir = pathlib.Path(__file__).parent.parent / 'src'
-assert execute_code_working_dir.is_dir(), execute_code_working_dir
+exec_code_working_dir = '../src'
+exec_code_folders = ['../src', '../tests']
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'

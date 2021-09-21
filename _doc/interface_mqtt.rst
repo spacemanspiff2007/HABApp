@@ -52,14 +52,14 @@ Mqtt item types
 
 Mqtt items have an additional publish method which make interaction with the mqtt broker easier.
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
-    # hide
+    # ------------ hide: start ------------
     import HABApp
     from unittest.mock import MagicMock
     HABApp.mqtt.items.mqtt_item.publish = MagicMock()
-    # hide
+    # ------------ hide: stop -------------
 
     from HABApp.mqtt.items import MqttItem
 
@@ -91,15 +91,14 @@ MqttPairItem
 An item that consolidates a topic that reports states from a device and a topic that is used to write to a device.
 It is created on the topic that reports the state from the device.
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
-    # hide
+    # ------------ hide: start ------------
     import HABApp
     from unittest.mock import MagicMock
     HABApp.mqtt.items.mqtt_pair_item.publish = MagicMock()
-    # hide
-
+    # ------------ hide: stop -------------
     from HABApp.mqtt.items import MqttPairItem
 
     # MqttPairItem works out of the box with zigbee2mqtt

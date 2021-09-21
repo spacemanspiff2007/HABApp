@@ -198,14 +198,14 @@ This way if there were any breaking changes rules can easily be fixed before pro
 HABApp arguments
 ----------------------------------
 
-.. execute_code::
-    :header_code: Execute habapp with "-h" to view possible command line arguments
+.. exec_code::
+    :caption: Execute habapp with "-h" to view possible command line arguments
 
-    # skip
+    # ------------ skip: start ------------
     habapp -h
-    # skip
+    # ------------ skip: stop -------------
 
-    # hide
+    # ------------ hide: start ------------
     import HABApp.__main__
     HABApp.__cmd_args__.parse_args(['-h'])
-    # hide
+    # ------------ hide: stop -------------

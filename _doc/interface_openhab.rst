@@ -66,14 +66,14 @@ provide convenience functions which simplify many things.
 
 Example:
 
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import HABApp
     from HABApp.openhab.items import ContactItem, SwitchItem
     HABApp.core.Items.add_item(ContactItem('MyContact', initial_value='OPEN'))
     HABApp.core.Items.add_item(SwitchItem('MySwitch', initial_value='OFF'))
-    # hide
+    # ------------ hide: stop -------------
     from HABApp.openhab.items import ContactItem, SwitchItem
 
     my_contact = ContactItem.get_item('MyContact')
@@ -856,16 +856,16 @@ Check status if thing is constant
 Sometimes ``Things`` recover automatically from small outages. This rule only triggers then the ``Thing`` is constant
 for 60 seconds.
 
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import time, HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     thing_item = HABApp.openhab.items.Thing('my:thing:uid')
     HABApp.core.Items.add_item(thing_item)
-    # hide
+    # ------------ hide: stop -------------
     from HABApp import Rule
     from HABApp.core.events import ItemNoChangeEvent
     from HABApp.openhab.items import Thing
@@ -885,8 +885,8 @@ for 60 seconds.
 
 
     CheckThing('my:thing:uid')
-    # hide
+    # ------------ hide: start ------------
     thing_item.status = 'ONLINE'
     HABApp.core.EventBus.post_event('my:thing:uid', ItemNoChangeEvent('test_watch', 60))
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------

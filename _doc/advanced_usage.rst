@@ -191,7 +191,7 @@ Examples:
 
 Add an openhab mock item to the item registry
 
-.. execute_code::
+.. exec_code::
    :hide_output:
 
    import HABApp
@@ -202,15 +202,14 @@ Add an openhab mock item to the item registry
 
 Remove the mock item from the registry
 
-.. execute_code::
+.. exec_code::
    :hide_output:
 
-   # hide
+    # ------------ hide: start ------------
    import HABApp
    from HABApp.openhab.items import SwitchItem
    HABApp.core.Items.add_item(SwitchItem('my_switch', 'ON'))
-   # hide
-
+    # ------------ hide: stop -------------
 
    HABApp.core.Items.pop_item('my_switch')
 
@@ -219,7 +218,7 @@ Note that there are some item methods that encapsulate communication with openha
 These currently do not work with the mock items. The state has to be changed like
 any internal item.
 
-.. execute_code::
+.. exec_code::
    :hide_output:
 
    import HABApp

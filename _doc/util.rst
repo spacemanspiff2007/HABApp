@@ -17,7 +17,7 @@ This function is very useful together with the all possible functions of :class:
 For example it can be used to automatically disable or calculate the new value of the :class:`~HABApp.util.multimode.ValueMode`
 It behaves like the standard python function except that it will ignore ``None`` values which are sometimes set as the item state.
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
     from HABApp.util.functions import min
@@ -35,7 +35,7 @@ This function is very useful together with the all possible functions of :class:
 For example it can be used to automatically disable or calculate the new value of the :class:`~HABApp.util.multimode.ValueMode`
 It behaves like the standard python function except that it will ignore ``None`` values which are sometimes set as the item state.
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
     from HABApp.util.functions import max
@@ -50,7 +50,7 @@ rgb_to_hsb
 
 Converts a rgb value to hsb color space
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
     from HABApp.util.functions import rgb_to_hsb
@@ -65,7 +65,7 @@ hsb_to_rgb
 
 Converts a hsb value to the rgb color space
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
     from HABApp.util.functions import hsb_to_rgb
@@ -80,7 +80,7 @@ CounterItem
 
 Example
 ^^^^^^^^^^^^^^^^^^
-.. execute_code::
+.. exec_code::
 
     from HABApp.util import CounterItem
     c = CounterItem.get_create_item('MyCounter', initial_value=5)
@@ -101,12 +101,11 @@ Statistics
 
 Example
 ^^^^^^^^^^^^^^^^^^
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     from HABApp.util import Statistics
-    # hide
-
+    # ------------ hide: stop -------------
     s = Statistics(max_samples=4)
     for i in range(1,4):
         s.add_value(i)
@@ -126,15 +125,14 @@ Very useful when different states or modes overlap, e.g. automatic and manual mo
 
 Basic Example
 ^^^^^^^^^^^^^^^^^^
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
-
+    # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.events import ValueUpdateEvent
     from HABApp.util.multimode import MultiModeItem, ValueMode
@@ -169,15 +167,15 @@ Basic Example
             print(f'State: {event.value}')
 
     MyMultiModeItemTestRule()
-    # hide
+    # ------------ hide: start ------------
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 Advanced Example
 ^^^^^^^^^^^^^^^^^^
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import logging
     import sys
     root = logging.getLogger('AdvancedMultiMode')
@@ -191,11 +189,10 @@ Advanced Example
 
 
     import HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
-
+    # ------------ hide: stop -------------
     import logging
     import HABApp
     from HABApp.core.events import ValueUpdateEvent
@@ -258,9 +255,9 @@ Advanced Example
             print(f'Item value: {event.value}')
 
     MyMultiModeItemTestRule()
-    # hide
+    # ------------ hide: start ------------
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 
 Example SwitchItemValueMode
@@ -268,18 +265,17 @@ Example SwitchItemValueMode
 The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is controlled by a OpenHAB
 :class:`~HABApp.openhab.items.SwitchItem`. This is very useful if the mode shall be deactivated from the OpenHAB sitemaps.
 
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
 
     from HABApp.openhab.items import SwitchItem
     HABApp.core.Items.add_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
-    # hide
-
+    # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.events import ValueUpdateEvent
     from HABApp.openhab.items import SwitchItem
@@ -312,9 +308,9 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
             item.add_mode(101, ValueMode('Manual'))
 
     MyMultiModeItemTestRule()
-    # hide
+    # ------------ hide: start ------------
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 
 Documentation

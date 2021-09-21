@@ -10,17 +10,17 @@ If the file doesn't exist yet it will automatically be generated in the configur
 Parameters are perfect for boundaries (e.g. if value is below param switch something on).
 Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp.parameters.DictParameter` available.
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
-    # hide
+    # ------------ hide: start ------------
     from HABApp.parameters.parameters import _PARAMETERS
     _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
 
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
+    # ------------ hide: stop -------------
 
     import HABApp
 
@@ -52,10 +52,10 @@ Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp
 
     MyRuleWithParameters()
 
-    # hide
+    # ------------ hide: start ------------
     HABApp.core.EventBus.post_event('test_watch', HABApp.core.events.ValueChangeEvent('test_item', 5, 6))
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 Created file:
 
@@ -82,10 +82,10 @@ missing keys etc. when the file is loaded.
 
 Example
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
-    # hide
+    # ------------ hide: start ------------
     from pathlib import Path
 
     import HABApp
@@ -95,8 +95,7 @@ Example
 
     add_folder(PARAM_PREFIX, Path('/params'), 0)
     _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
-    # hide
-
+    # ------------ hide: stop -------------
     import HABApp
     import voluptuous
 
@@ -133,20 +132,17 @@ Just add the "reloads on" entry to the file.
     key2:
       v: 12
 
-.. execute_code::
-    :header_code: rule
+.. exec_code::
+    :caption: rule
 
-    # hide
+    # ------------ hide: start ------------
     from HABApp.parameters.parameters import _PARAMETERS
     _PARAMETERS['my_param'] = {'key1': {'v': 10}, 'key2': {'v': 12}}
 
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
-
-
-
+    # ------------ hide: stop -------------
     import HABApp
 
     class MyRule(HABApp.Rule):
@@ -159,10 +155,9 @@ Just add the "reloads on" entry to the file.
     cfg = HABApp.DictParameter('my_param')    # this will get the file content
     for k, v in cfg.items():
         MyRule(k, v)
-
-    # hide
+    # ------------ hide: start ------------
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 
 
