@@ -5,12 +5,12 @@ from pydantic import BaseModel, Field
 
 class StateOptionDefinition(BaseModel):
     value: str
-    label: str
+    label: Optional[str] = None
 
 
 class CommandOptionDefinition(BaseModel):
     command: str
-    label: str
+    label: Optional[str] = None
 
 
 class CommandDescriptionDefinition(BaseModel):
