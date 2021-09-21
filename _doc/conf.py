@@ -14,13 +14,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import pathlib
 import sys
 
 # required for autodoc
 sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
-
-sys.path.insert(0, os.path.abspath('./_plugins'))
 
 # -- Project information -----------------------------------------------------
 
@@ -35,7 +32,7 @@ release = 'beta'
 try:
     from HABApp import __version__
     version = __version__
-    print(f'Building doc for {version}')
+    print(f'Building docs for {version}')
 except Exception as e:
     print('Exception', e)
     version = 'dev'

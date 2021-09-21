@@ -129,6 +129,17 @@ DimmerItem
    :member-order: groupwise
 
 
+DatetimeItem
+======================================
+.. inheritance-diagram:: HABApp.openhab.items.DatetimeItem
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.items.DatetimeItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
 RollershutterItem
 ======================================
 .. inheritance-diagram:: HABApp.openhab.items.RollershutterItem
