@@ -9,7 +9,6 @@ import HABApp.openhab.events
 from HABApp.core.const import loop
 from HABApp.core.context import async_context, AsyncContextError
 from HABApp.core.items.base_valueitem import BaseValueItem, BaseItem
-from HABApp.core.wrapper import log_exception
 from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \
     async_set_metadata, async_remove_metadata, async_get_channel_link, async_create_channel_link, \
@@ -19,7 +18,6 @@ from .. import definitions
 from ..definitions.helpers import OpenhabPersistenceData
 
 
-@log_exception
 def post_update(item_name: str, state: Any):
     """
     Post an update to the item
@@ -38,7 +36,6 @@ def post_update(item_name: str, state: Any):
         create_task(async_post_update(item_name, state))
 
 
-@log_exception
 def send_command(item_name: str, command):
     """
     Send the specified command to the item
@@ -57,7 +54,6 @@ def send_command(item_name: str, command):
         create_task(async_send_command(item_name, command))
 
 
-@log_exception
 def create_item(item_type: str, name: str, label="", category="",
                 tags: List[str] = [], groups: List[str] = [],
                 group_type: str = '', group_function: str = '', group_function_params: List[str] = []):
@@ -157,7 +153,6 @@ def get_thing(thing_name: str) -> OpenhabThingDefinition:
     return fut.result()
 
 
-@log_exception
 def remove_item(item_name: str):
     """
     Removes an item from the openHAB item registry

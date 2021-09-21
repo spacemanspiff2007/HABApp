@@ -12,6 +12,7 @@ class FileState(Enum):
     PROPERTIES_ERROR = auto()
 
     PENDING = auto()
+    REMOVED = auto()
 
     def __str__(self):
         return str(self.name)
