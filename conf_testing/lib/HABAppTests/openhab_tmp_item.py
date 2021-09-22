@@ -38,7 +38,7 @@ class OpenhabTmpItem:
         return HABApp.openhab.items.OpenhabItem.get_item(self.item_name)
 
     def modify(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
-                group_type: str = '', group_function: str = '', group_function_params: List[str] = []):
+               group_type: str = '', group_function: str = '', group_function_params: List[str] = []):
 
         interface = HABApp.openhab.interface
         interface.create_item(self.item_type, self.item_name, label=label, category=category,

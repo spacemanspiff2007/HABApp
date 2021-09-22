@@ -1,15 +1,13 @@
 import logging
-import threading
 import time
 import typing
 
 import HABApp
 from HABApp.core.events.habapp_events import HABAppException
-from ._rest_patcher import RestPatcher
+from HABAppTests._rest_patcher import RestPatcher
+from ._rule_ids import get_test_rules, get_next_id
 
 log = logging.getLogger('HABApp.Tests')
-
-LOCK = threading.Lock()
 
 
 class TestResult:
@@ -37,23 +35,6 @@ class TestConfig:
         self.warning_is_error = False
 
 
-RULE_CTR = 0
-TESTS_RULES: typing.Dict[int, 'TestBaseRule'] = {}
-
-
-def get_next_id(rule):
-    global RULE_CTR
-    with LOCK:
-        RULE_CTR += 1
-        TESTS_RULES[RULE_CTR] = rule
-        return RULE_CTR
-
-
-def pop_rule(rule_id: int):
-    with LOCK:
-        TESTS_RULES.pop(rule_id)
-
-
 class TestBaseRule(HABApp.Rule):
     """This rule is testing the OpenHAB data types by posting values and checking the events"""
 
@@ -63,8 +44,7 @@ class TestBaseRule(HABApp.Rule):
         self.__tests_funcs = {}
         self.tests_started = False
 
-        self.__id = get_next_id(self)
-        self.register_on_unload(lambda: pop_rule(self.__id))
+        self._rule_id = get_next_id(self)
 
         self.config = TestConfig()
 
@@ -89,21 +69,18 @@ class TestBaseRule(HABApp.Rule):
             log.error(line)
 
     def __execute_run(self):
-        with LOCK:
-            if self.__id != RULE_CTR:
-                return None
+        if not self._rule_id.is_newest():
+            return None
 
         result = TestResult()
-        for k, rule in sorted(TESTS_RULES.items()):
-            assert isinstance(rule, TestBaseRule)
-            if rule.tests_started:
-                continue
+        for rule in get_test_rules():
             r = TestResult()
             rule.run_tests(r)
             result += r
 
         log.info('-' * 120)
         log.info(str(result)) if not result.nio else log.error(str(result))
+        print('-' * 120)
         print(str(result))
         return None
 
@@ -117,39 +94,47 @@ class TestBaseRule(HABApp.Rule):
     def tear_down(self):
         pass
 
-    def run_tests(self, result: TestResult):
+    @staticmethod
+    def _run_patched(name, func, *args, **kwargs) -> [bool, typing.Any]:
         time.sleep(0.05)
-        self.tests_started = True
+
+        msg = None
+        error = False
 
         try:
-            with RestPatcher(self.__class__.__name__ + '.' + 'set_up'):
-                self.set_up()
+            with RestPatcher(name):
+                msg = func(*args, **kwargs)
         except Exception as e:
-            log.error(f'"Set up of {self.__class__.__name__}" failed: {e}')
+            log.error(f'{name} failed: {e}')
             for line in HABApp.core.wrapper.format_exception(e):
                 log.error(line)
+            error = True
+        return error, msg
+
+    def run_tests(self, result: TestResult):
+        self.tests_started = True
+
+        c_name = self.__class__.__name__
+
+        # SET UP
+        err, _ = self._run_patched(f'{c_name}.set_up', self.set_up)
+        if err:
             result.nio += 1
             return None
 
-        time.sleep(0.05)
-
+        # EXECUTE TESTS
         test_count = len(self.__tests_funcs)
+        log.info('')
         log.info(f'Running {test_count} tests for {self.rule_name}')
 
         for name, test_data in self.__tests_funcs.items():
             self.__run_test(name, test_data, result)
 
-        time.sleep(0.05)
-
         # TEAR DOWN
-        try:
-            with RestPatcher(self.__class__.__name__ + '.' + 'tear_down'):
-                self.tear_down()
-        except Exception as e:
-            log.error(f'"Set up of {self.__class__.__name__}" failed: {e}')
-            for line in HABApp.core.wrapper.format_exception(e):
-                log.error(line)
+        err, _ = self._run_patched(f'{c_name}.tear_down', self.tear_down)
+        if err:
             result.nio += 1
+            return None
 
     def __run_test(self, name: str, data: tuple, result: TestResult):
         test_count = len(self.__tests_funcs)
@@ -167,16 +152,12 @@ class TestBaseRule(HABApp.Rule):
                 log.warning(f'Test {result.run:{width}}/{test_count} "{name}" skipped!')
                 return None
 
-        try:
-            func = data[0]
-            args = data[1]
-            kwargs = data[2]
-            with RestPatcher(self.__class__.__name__ + '.' + name):
-                msg = func(*args, **kwargs)
-        except Exception as e:
-            log.error(f'Test "{name}" failed: {e}')
-            for line in HABApp.core.wrapper.format_exception(e):
-                log.error(line)
+        func = data[0]
+        args = data[1]
+        kwargs = data[2]
+
+        err, msg = self._run_patched(self.__class__.__name__ + '.' + name, func, *args, **kwargs)
+        if err:
             result.nio += 1
             return None
 
