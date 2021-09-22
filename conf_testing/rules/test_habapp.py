@@ -19,7 +19,7 @@ class TestItemEvents(TestBaseRule):
         assert abs(dur) < 0.05, f'Time wrong: {abs(dur):.2f}'
 
     def item_events(self, changes=False, secs=5, values=[]):
-        item_name = get_random_name()
+        item_name = get_random_name('HABApp')
         self.secs = secs
         self.watch_item = Item.get_create_item(item_name)
         watcher = (self.watch_item.watch_change if changes else self.watch_item.watch_update)(secs)
@@ -71,7 +71,7 @@ class TestItemListener(TestBaseRule):
         assert event.value == 123, f'Wrong value: {event.value} != 123'
 
     def trigger_event(self):
-        self.watch_item = Item.get_create_item(get_random_name())
+        self.watch_item = Item.get_create_item(get_random_name('HABApp'))
         listener = self.watch_item.listen_event(self.check_event, ValueUpdateEvent)
 
         self.run.at(

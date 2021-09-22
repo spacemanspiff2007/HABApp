@@ -42,5 +42,5 @@ openhab:
     wait_for_openhab: true
   ping:
     enabled: true
-    interval: 10
+    interval: 30
     item: Ping

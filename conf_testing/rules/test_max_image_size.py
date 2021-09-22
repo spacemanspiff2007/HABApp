@@ -20,7 +20,7 @@ class TestMaxImageSize(TestBaseRule):
         _b1 = b'0x00' * 200 * 1024
         _b2 = b'0xFF' * 200 * 1024
 
-        with OpenhabTmpItem(None, 'Image') as item, ItemWaiter(OpenhabItem.get_item(item.name)) as item_waiter, \
+        with OpenhabTmpItem('Image') as item, ItemWaiter(OpenhabItem.get_item(item.name)) as item_waiter, \
                 EventWaiter(item.name, ItemStateChangedEvent) as event_waiter:
             k = 383
             _b1 = b'\xFF\xD8\xFF' + b'\x00' * (1024 - 3) + b'\x00' * (k - 1) * 1024

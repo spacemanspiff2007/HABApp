@@ -14,7 +14,7 @@ class TestMetadata(TestBaseRule):
         self.add_test('create meta', self.create_meta)
 
     def create_meta(self):
-        with OpenhabTmpItem(None, 'String') as tmpitem:
+        with OpenhabTmpItem('String') as tmpitem:
             d = run_coro(async_get_item_with_habapp_meta(tmpitem.name))
             assert d['metadata']['HABApp'] is None
 
@@ -54,7 +54,7 @@ class ChangeItemType(TestBaseRule):
         self.add_test('change_item', self.change_item)
 
     def change_item(self):
-        with OpenhabTmpItem(None, 'Number') as tmpitem:
+        with OpenhabTmpItem('Number') as tmpitem:
             NumberItem.get_item(tmpitem.name)
 
             create_item('String', tmpitem.name)

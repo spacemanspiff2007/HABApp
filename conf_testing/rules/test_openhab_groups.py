@@ -1,5 +1,5 @@
 from HABApp.openhab.items import SwitchItem, GroupItem
-from HABAppTests import ItemWaiter, TestBaseRule, get_random_name
+from HABAppTests import ItemWaiter, TestBaseRule, OpenhabTmpItem
 
 
 class TestOpenhabGroupFunction(TestBaseRule):
@@ -7,27 +7,26 @@ class TestOpenhabGroupFunction(TestBaseRule):
     def __init__(self):
         super().__init__()
 
-        self.group = 'Group_' + get_random_name()
-        self.item1 = 'Item1_' + get_random_name()
-        self.item2 = 'Item2_' + get_random_name()
+        self.group = OpenhabTmpItem('Group')
+        self.item1 = OpenhabTmpItem('Switch')
+        self.item2 = OpenhabTmpItem('Switch')
 
         self.add_test('Group Update', self.test_group_update)
 
     def set_up(self):
-        self.oh.create_item('Switch', self.item1, groups=[self.group])
-        self.oh.create_item('Switch', self.item2, groups=[self.group])
-        self.oh.create_item('Group', self.group, group_type='Switch',
-                            group_function='OR', group_function_params=['ON', 'OFF'])
+        self.item1.create()
+        self.item2.create()
+        self.group.create(group_type='Switch', group_function='OR', group_function_params=['ON', 'OFF'])
 
     def tear_down(self):
-        self.oh.remove_item(self.item1)
-        self.oh.remove_item(self.item2)
-        self.oh.remove_item(self.group)
+        self.item1.remove()
+        self.item2.remove()
+        self.group.remove()
 
     def test_group_update(self):
-        item1 = SwitchItem.get_item(self.item1)
-        item2 = SwitchItem.get_item(self.item2)
-        group = GroupItem.get_item(self.group)
+        item1 = SwitchItem.get_item(self.item1.item_name)
+        item2 = SwitchItem.get_item(self.item2.item_name)
+        group = GroupItem.get_item(self.group.item_name)
 
         with ItemWaiter(group) as waiter:
             waiter.wait_for_state(None)

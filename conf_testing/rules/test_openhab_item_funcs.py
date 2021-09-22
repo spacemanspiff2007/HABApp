@@ -63,7 +63,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
         item_type = str(item_type).split('.')[-1][:-6]
         item_name = f'{item_type}_item_test'
 
-        with OpenhabTmpItem(item_name, item_type) as item, ItemWaiter(OpenhabItem.get_item(item_name)) as waiter:
+        with OpenhabTmpItem(item_type, item_name) as item, ItemWaiter(OpenhabItem.get_item(item_name)) as waiter:
             for test_param in test_params:
                 assert isinstance(test_param, TestParam)
 
@@ -109,7 +109,7 @@ class TestOpenhabItemConvenience(TestBaseRule):
 
     def test_func(self, item_type, func_name, test_vals):
 
-        with OpenhabTmpItem(None, item_type) as tmpitem, ItemWaiter(OpenhabItem.get_item(tmpitem.name)) as waiter:
+        with OpenhabTmpItem(item_type) as tmpitem, ItemWaiter(OpenhabItem.get_item(tmpitem.name)) as waiter:
             for val in test_vals:
                 getattr(tmpitem, func_name)(val)
                 waiter.wait_for_state(val)

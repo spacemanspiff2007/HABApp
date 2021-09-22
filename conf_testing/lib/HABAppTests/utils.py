@@ -8,8 +8,31 @@ import HABApp
 from HABApp.openhab.items import Thing
 
 
-def get_random_name() -> str:
-    return ''.join(random.choice(string.ascii_letters) for _ in range(20))
+RAND_PREFIX = {
+    'String': 'Str', 'Number': 'Num', 'Switch': 'Sw', 'Contact': 'Con', 'Dimmer': 'Dim', 'Rollershutter': 'Rol',
+    'Color': 'Col', 'DateTime': 'Dt', 'Location': 'Loc', 'Player': 'Pl', 'Group': 'Grp', 'Image': 'Img',
+    'HABApp': 'Ha'
+}
+
+
+def _get_fill_char(skip: str, upper=False) -> str:
+    skip += 'il'
+    skip = skip.upper() if upper else skip.lower()
+    rnd = random.choice(string.ascii_uppercase if upper else string.ascii_lowercase)
+    while rnd in skip:
+        rnd = random.choice(string.ascii_uppercase if upper else string.ascii_lowercase)
+    return rnd
+
+
+def get_random_name(item_type: str) -> str:
+    name = name_prev = RAND_PREFIX[item_type.split(':')[0]]
+
+    for c in range(3):
+        name += _get_fill_char(name_prev, upper=True)
+
+    while len(name) < 10:
+        name += _get_fill_char(name_prev)
+    return name
 
 
 def run_coro(coro: typing.Coroutine):

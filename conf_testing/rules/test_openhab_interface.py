@@ -36,7 +36,7 @@ class TestOpenhabInterface(TestBaseRule):
 
         test_defs = []
         for type in get_openhab_test_types():
-            test_defs.append((type, get_random_name()))
+            test_defs.append((type, get_random_name(type)))
         test_defs.append(('Number', 'HABApp_Ping'))
 
         for item_type, item_name in test_defs:
@@ -93,7 +93,7 @@ class TestOpenhabInterface(TestBaseRule):
         if isinstance(values, str):
             values = [values]
 
-        with OpenhabTmpItem(None, oh_type) as item, ItemWaiter(item) as waiter:
+        with OpenhabTmpItem(oh_type) as item, ItemWaiter(item) as waiter:
             for value in values:
                 self.openhab.post_update(item, value)
                 waiter.wait_for_state(value)
@@ -129,12 +129,12 @@ class TestOpenhabInterface(TestBaseRule):
         self.openhab.get_item('TestString')
 
     def test_metadata(self):
-        with OpenhabTmpItem(None, 'String') as item:
+        with OpenhabTmpItem('String') as item:
             self.openhab.set_metadata(item, 'MyNameSpace', 'MyValue', {'key': 'value'})
             self.openhab.remove_metadata(item, 'MyNameSpace')
 
     def test_async_oder(self):
-        with OpenhabTmpItem('AsyncOrderTest', 'String') as item, ItemWaiter(item) as waiter:
+        with OpenhabTmpItem('String', 'AsyncOrderTest') as item, ItemWaiter(item) as waiter:
             for _ in range(10):
                 for i in range(0, 5):
                     item.oh_post_update(i)

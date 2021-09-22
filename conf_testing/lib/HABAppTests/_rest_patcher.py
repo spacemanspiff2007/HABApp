@@ -42,7 +42,7 @@ class RestPatcher:
                 f'{resp.request_info.method:^6s} {shorten_url(resp.request_info.url)} ({resp.status}){out}'
             )
 
-            if resp.status >= 300:
+            if resp.status >= 300 and kwargs['log_404']:
                 self.log.debug(f'{"":6s} Header request : {resp.request_info.headers}')
                 self.log.debug(f'{"":6s} Header response: {resp.headers}')
 
