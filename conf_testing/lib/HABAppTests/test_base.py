@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 import typing
 
 import HABApp
@@ -117,6 +118,7 @@ class TestBaseRule(HABApp.Rule):
         pass
 
     def run_tests(self, result: TestResult):
+        time.sleep(0.05)
         self.tests_started = True
 
         try:
@@ -129,11 +131,15 @@ class TestBaseRule(HABApp.Rule):
             result.nio += 1
             return None
 
+        time.sleep(0.05)
+
         test_count = len(self.__tests_funcs)
         log.info(f'Running {test_count} tests for {self.rule_name}')
 
         for name, test_data in self.__tests_funcs.items():
             self.__run_test(name, test_data, result)
+
+        time.sleep(0.05)
 
         # TEAR DOWN
         try:

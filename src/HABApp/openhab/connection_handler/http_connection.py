@@ -259,7 +259,8 @@ async def start_connection():
 async def start_sse_event_listener():
     try:
         # cache so we don't have to look up every event
-        call = ON_SSE_EVENT
+        _load_json = load_json
+        _see_handler = ON_SSE_EVENT
 
         event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
 
@@ -273,19 +274,24 @@ async def start_sse_event_listener():
                 session=HTTP_SESSION
         ) as event_source:
             async for event in event_source:
+
+                e_str = event.data
+
                 try:
-                    event = load_json(event.data)
+                    e_json = _load_json(e_str)
                 except ValueError:
+                    log_events.warning(f'Invalid json: {e_str}')
                     continue
                 except TypeError:
+                    log_events.warning(f'Invalid json: {e_str}')
                     continue
 
                 # Log sse event
                 if log_events.isEnabledFor(logging.DEBUG):
-                    log_events._log(logging.DEBUG, event, [])
+                    log_events._log(logging.DEBUG, e_str, [])
 
                 # process
-                call(event)
+                _see_handler(e_json)
 
     except asyncio.CancelledError:
         # This exception gets raised if we cancel the coroutine

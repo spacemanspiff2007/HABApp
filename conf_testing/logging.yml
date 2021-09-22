@@ -1,6 +1,8 @@
 formatters:
   HABApp_format:
     format: '[%(asctime)s] [%(name)25s] %(levelname)8s | %(message)s'
+  HABApp_REST:
+    format: '[%(asctime)s] [%(name)11s] %(levelname)8s | %(message)s'
 
 
 handlers:
@@ -37,7 +39,7 @@ handlers:
     maxBytes: 10_485_760
     backupCount: 3
 
-    formatter: HABApp_format
+    formatter: HABApp_REST
     level: DEBUG
 
   BufferEventFile:
