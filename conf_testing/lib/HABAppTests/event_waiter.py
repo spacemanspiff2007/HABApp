@@ -4,6 +4,7 @@ from typing import Union
 
 import HABApp
 from HABApp.core.items import BaseValueItem
+from HABApp.openhab.events import OpenhabEvent
 from .compare_values import get_equal_text, get_bytes_text
 from HABAppTests.errors import TestCaseFailed
 
@@ -33,7 +34,7 @@ class EventWaiter:
         assert isinstance(event, self.event_type)
         self._event = event
 
-    def wait_for_event(self, value=None):
+    def wait_for_event(self, value=None) -> OpenhabEvent:
 
         start = time.time()
         self._event = None
@@ -42,9 +43,8 @@ class EventWaiter:
             time.sleep(0.01)
 
             if time.time() > start + self.timeout:
-                TestCaseFailed(f'Timeout while waiting for ({str(self.event_type).split(".")[-1][:-2]}) '
-                               f'for {self.event_name} with value {get_bytes_text(value)}')
-                return False
+                raise TestCaseFailed(f'Timeout while waiting for ({str(self.event_type).split(".")[-1][:-2]}) '
+                                     f'for {self.event_name} with value {get_bytes_text(value)}')
 
             if self._event is None:
                 continue
@@ -54,7 +54,7 @@ class EventWaiter:
                 self.compare_event_value(value)
 
             self._event = None
-            return True
+            return self.last_event
 
         raise ValueError()
 

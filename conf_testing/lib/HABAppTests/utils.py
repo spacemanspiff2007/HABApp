@@ -8,14 +8,14 @@ import HABApp
 from HABApp.openhab.items import Thing
 
 
-RAND_PREFIX = {
+__RAND_PREFIX = {
     'String': 'Str', 'Number': 'Num', 'Switch': 'Sw', 'Contact': 'Con', 'Dimmer': 'Dim', 'Rollershutter': 'Rol',
     'Color': 'Col', 'DateTime': 'Dt', 'Location': 'Loc', 'Player': 'Pl', 'Group': 'Grp', 'Image': 'Img',
     'HABApp': 'Ha'
 }
 
 
-def _get_fill_char(skip: str, upper=False) -> str:
+def __get_fill_char(skip: str, upper=False) -> str:
     skip += 'il'
     skip = skip.upper() if upper else skip.lower()
     rnd = random.choice(string.ascii_uppercase if upper else string.ascii_lowercase)
@@ -25,13 +25,13 @@ def _get_fill_char(skip: str, upper=False) -> str:
 
 
 def get_random_name(item_type: str) -> str:
-    name = name_prev = RAND_PREFIX[item_type.split(':')[0]]
+    name = name_prev = __RAND_PREFIX[item_type.split(':')[0]]
 
     for c in range(3):
-        name += _get_fill_char(name_prev, upper=True)
+        name += __get_fill_char(name_prev, upper=True)
 
     while len(name) < 10:
-        name += _get_fill_char(name_prev)
+        name += __get_fill_char(name_prev)
     return name
 
 
@@ -51,5 +51,5 @@ def find_astro_sun_thing() -> str:
 
 def get_bytes_text(value):
     if isinstance(value, bytes) and len(value) > 100 * 1024:
-        return b2a_hex(value[0:100]).decode() + ' ... ' + b2a_hex(value[-100:]).decode()
+        return b2a_hex(value[0:40]).decode() + ' ... ' + b2a_hex(value[-40:]).decode()
     return value

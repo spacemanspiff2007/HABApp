@@ -1,5 +1,7 @@
 from HABApp.openhab.items import SwitchItem, GroupItem
-from HABAppTests import ItemWaiter, TestBaseRule, OpenhabTmpItem
+from HABAppTests import ItemWaiter, TestBaseRule, OpenhabTmpItem, EventWaiter
+from HABApp.openhab.events import ItemUpdatedEvent
+from HABAppTests.errors import TestCaseFailed
 
 
 class TestOpenhabGroupFunction(TestBaseRule):
@@ -11,11 +13,12 @@ class TestOpenhabGroupFunction(TestBaseRule):
         self.item1 = OpenhabTmpItem('Switch')
         self.item2 = OpenhabTmpItem('Switch')
 
-        self.add_test('Group Update', self.test_group_update)
+        self.add_test('Group function', self.test_group_update)
+        self.add_test('Group member change', self.add_item_to_grp)
 
     def set_up(self):
-        self.item1.create()
-        self.item2.create()
+        self.item1.create(groups=[self.group.name])
+        self.item2.create(groups=[self.group.name])
         self.group.create(group_type='Switch', group_function='OR', group_function_params=['ON', 'OFF'])
 
     def tear_down(self):
@@ -24,9 +27,9 @@ class TestOpenhabGroupFunction(TestBaseRule):
         self.group.remove()
 
     def test_group_update(self):
-        item1 = SwitchItem.get_item(self.item1.item_name)
-        item2 = SwitchItem.get_item(self.item2.item_name)
-        group = GroupItem.get_item(self.group.item_name)
+        item1 = SwitchItem.get_item(self.item1.name)
+        item2 = SwitchItem.get_item(self.item2.name)
+        group = GroupItem.get_item(self.group.name)
 
         with ItemWaiter(group) as waiter:
             waiter.wait_for_state(None)
@@ -39,6 +42,21 @@ class TestOpenhabGroupFunction(TestBaseRule):
 
             item2.oh_post_update('ON')
             waiter.wait_for_state('ON')
+
+    def add_item_to_grp(self):
+        new_item = OpenhabTmpItem('Switch')
+        try:
+            with EventWaiter(self.group.name, ItemUpdatedEvent) as w:
+                new_item.create(groups=[self.group.name])
+                event = w.wait_for_event()
+                while event.name != self.group.name:
+                    w.wait_for_event()
+        except TestCaseFailed:
+            return None
+        finally:
+            new_item.remove()
+
+        raise TestCaseFailed(f'Event for group {self.group.name} reveived but expected none!')
 
 
 TestOpenhabGroupFunction()
