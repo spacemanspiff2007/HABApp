@@ -45,8 +45,6 @@ class TestMQTTEvents(TestBaseRule):
             self.mqtt.publish(topic_read, 'asdfasdf')
             item_waiter.wait_for_state(item)
 
-        return event_waiter.events_ok and item_waiter.states_ok
-
     def test_mqtt_events(self, event_type):
         topic = 'test/event_topic'
         with EventWaiter(topic, event_type) as waiter:
@@ -54,16 +52,12 @@ class TestMQTTEvents(TestBaseRule):
                 self.mqtt.publish(topic, data)
                 waiter.wait_for_event(data)
 
-        return waiter.events_ok
-
     def test_mqtt_state(self):
         my_item = MqttItem.get_create_item('test/item_topic')
         with ItemWaiter(my_item) as waiter:
             for data in self.mqtt_test_data:
                 my_item.publish(data)
                 waiter.wait_for_state(data)
-
-        return waiter.states_ok
 
     def test_mqtt_item_creation(self):
         topic = 'mqtt/item/creation'

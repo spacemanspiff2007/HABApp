@@ -8,7 +8,6 @@ from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode
 log = logging.getLogger('HABApp.Tests.MultiMode')
 
 
-
 class TestSwitchMode(TestBaseRule):
     """This rule is testing the Parameter implementation"""
 

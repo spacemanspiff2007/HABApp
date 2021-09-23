@@ -20,6 +20,8 @@ class TestCase:
                 if ret:
                     res.set_state(TestResultStatus.FAILED)
                     res.add_msg(f'{ret}')
+                else:
+                    res.set_state(TestResultStatus.PASSED)
         except Exception as e:
             res.exception(e)
 

@@ -40,7 +40,5 @@ class TestOpenhabGroupFunction(TestBaseRule):
             item2.oh_post_update('ON')
             waiter.wait_for_state('ON')
 
-            return waiter.states_ok
-
 
 TestOpenhabGroupFunction()

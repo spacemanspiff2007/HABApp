@@ -1,17 +1,14 @@
 from HABApp.openhab.connection_handler.func_async import async_get_item_with_habapp_meta, async_set_habapp_metadata, \
     async_remove_habapp_metadata
 from HABApp.openhab.definitions.rest.habapp_data import HABAppThingPluginData
-from HABApp.openhab.events import ItemUpdatedEvent
-from HABApp.openhab.interface import create_item
-from HABApp.openhab.items import StringItem, NumberItem, DatetimeItem
-from HABAppTests import TestBaseRule, OpenhabTmpItem, run_coro, EventWaiter
+from HABAppTests import TestBaseRule, OpenhabTmpItem, run_coro
 
 
-class TestMetadata(TestBaseRule):
+class OpenhabMetaData(TestBaseRule):
 
     def __init__(self):
         super().__init__()
-        self.add_test('create meta', self.create_meta)
+        self.add_test('async', self.create_meta)
 
     def create_meta(self):
         with OpenhabTmpItem('String') as tmpitem:
@@ -23,7 +20,6 @@ class TestMetadata(TestBaseRule):
 
             d = run_coro(async_get_item_with_habapp_meta(tmpitem.name))
             assert isinstance(d['metadata']['HABApp'], HABAppThingPluginData)
-
 
             # create valid data
             run_coro(async_set_habapp_metadata(
@@ -41,29 +37,5 @@ class TestMetadata(TestBaseRule):
             d = run_coro(async_get_item_with_habapp_meta(tmpitem.name))
             assert d['metadata']['HABApp'] is None
 
-        return True
 
-
-TestMetadata()
-
-
-class ChangeItemType(TestBaseRule):
-
-    def __init__(self):
-        super().__init__()
-        self.add_test('change_item', self.change_item)
-
-    def change_item(self):
-        with OpenhabTmpItem('Number') as tmpitem:
-            NumberItem.get_item(tmpitem.name)
-
-            create_item('String', tmpitem.name)
-            EventWaiter(tmpitem.name, ItemUpdatedEvent(tmpitem.name, 'String'), 2, False)
-            StringItem.get_item(tmpitem.name)
-
-            create_item('DateTime', tmpitem.name)
-            EventWaiter(tmpitem.name, ItemUpdatedEvent(tmpitem.name, 'DateTime'), 2, False)
-            DatetimeItem.get_item(tmpitem.name)
-
-
-ChangeItemType()
+OpenhabMetaData()

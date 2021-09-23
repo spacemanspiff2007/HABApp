@@ -47,5 +47,3 @@ class OpenhabTmpItem:
 
         with EventWaiter(self.item_name, HABApp.openhab.events.ItemUpdatedEvent) as w:
             w.wait_for_event()
-            if not w.events_ok:
-                raise ValueError(f'Could not modify item {self.item_name}')

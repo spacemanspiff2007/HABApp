@@ -50,7 +50,7 @@ def get_test_rules() -> typing.Iterable['HABAppTests.TestBaseRule']:
             continue
         ret.append(rule)
 
-    return ret
+    return tuple(ret)
 
 
 def test_rules_running() -> bool:

@@ -13,7 +13,7 @@ class TestOpenhabEventTypes(TestBaseRule):
 
         # test the states
         for oh_type in get_openhab_test_types():
-            self.add_test( f'{oh_type} events', self.test_events, oh_type, get_openhab_test_events(oh_type))
+            self.add_test(f'{oh_type} events', self.test_events, oh_type, get_openhab_test_events(oh_type))
 
         for dimension in ITEM_DIMENSIONS:
             self.add_test(f'Quantity {dimension} events', self.test_quantity_type_events, dimension)
@@ -32,9 +32,6 @@ class TestOpenhabEventTypes(TestBaseRule):
                     self.openhab.send_command(item_name, value)
                     waiter.wait_for_event(value)
 
-            all_events_ok = waiter.events_ok
-        return all_events_ok
-
     def test_quantity_type_events(self, dimension):
 
         unit_of_dimension = {
@@ -51,9 +48,6 @@ class TestOpenhabEventTypes(TestBaseRule):
                 self.openhab.post_update(item_name, f'{state} {unit_of_dimension[dimension]}')
                 event_watier.wait_for_event(state)
                 item_waiter.wait_for_state(state)
-
-            all_events_ok = event_watier.events_ok
-        return all_events_ok
 
 
 TestOpenhabEventTypes()

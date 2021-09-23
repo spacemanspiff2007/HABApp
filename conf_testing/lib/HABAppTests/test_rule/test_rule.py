@@ -1,23 +1,11 @@
 import logging
-import time
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 import HABApp
-from HABApp.core.events.habapp_events import HABAppException
-from ._rest_patcher import RestPatcher
-from ._rule_ids import get_test_rules, get_next_id, test_rules_running
-
-
 from HABAppTests.test_rule.test_case import TestResult, TestResultStatus, TestCase
-
-import logging
-from enum import Enum, auto
-from typing import List, Optional
-
-import HABApp
-from HABAppTests.errors import TestCaseFailed, TestCaseWarning
+from ._rule_ids import get_test_rules, get_next_id, test_rules_running
 from ._rule_status import TestRuleStatus
-
 
 log = logging.getLogger('HABApp.Tests')
 
@@ -79,7 +67,7 @@ class TestBaseRule(HABApp.Rule):
             rule._rule_status = TestRuleStatus.PENDING
         for rule in rules:
             ergs.extend(rule._run_tests())
-            
+
         skipped = tuple(filter(lambda x: x.state is TestResultStatus.SKIPPED, ergs))
         passed  = tuple(filter(lambda x: x.state is TestResultStatus.PASSED, ergs))
         warning = tuple(filter(lambda x: x.state is TestResultStatus.WARNING, ergs))
@@ -90,18 +78,18 @@ class TestBaseRule(HABApp.Rule):
             print(msg)
             log.info(msg)
 
-        msg = f'{len(ergs)} executed, {len(passed)} passed, '
+        parts = [f'{len(ergs)} executed', f'{len(passed)} passed']
         if skipped:
-            msg += f'{len(skipped)} skipped, '
+            parts.append(f'{len(skipped)} skipped')
         if warning:
-            msg += f'{len(warning)} warnings, '
-        msg = f'{msg}{len(failed)} failed, '
+            parts.append(f'{len(warning)} warning{"" if len(warning) == 1 else "s"}')
+        parts.append(f'{len(failed)} failed')
         if error:
-            msg += f'{len(error)} errors'
+            parts.append(f'{len(error)} error{"" if len(error) == 1 else "s"}')
 
         plog('')
         plog('-' * 120)
-        plog(msg)
+        plog(', '.join(parts))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event from the worker
@@ -149,7 +137,6 @@ class TestBaseRule(HABApp.Rule):
 
     def _run_tests(self) -> List[TestResult]:
         self._rule_status = TestRuleStatus.RUNNING
-
         self.__worker_events_sub()
 
         results = []
@@ -171,6 +158,7 @@ class TestBaseRule(HABApp.Rule):
             results.append(tr)
 
         self.__worker_events_cancel()
+        self._rule_status = TestRuleStatus.FINISHED
         return results
 
     def __run_tests(self) -> List[TestResult]:

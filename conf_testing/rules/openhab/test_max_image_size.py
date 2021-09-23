@@ -38,9 +38,5 @@ class TestMaxImageSize(TestBaseRule):
 
             log.info(f'Image with {len(_b2) / 1024 :.0f}k ok!')
 
-            test_ok = item_waiter.states_ok and event_waiter.events_ok
-
-        return test_ok
-
 
 TestMaxImageSize()

@@ -10,7 +10,7 @@ log = logging.getLogger('HABApp.Tests')
 
 
 @dataclasses.dataclass(frozen=True)
-class TestParam():
+class TestParam:
     func_name: str
     result: typing.Union[str, float, int, tuple]
     func_params: typing.Union[str, float, int, tuple] = None
@@ -88,10 +88,6 @@ class TestOpenhabItemFuncs(TestBaseRule):
                 # reset state so we don't get false positives
                 item.set_value(None)
 
-            test_ok = waiter.states_ok
-
-        return test_ok
-
 
 TestOpenhabItemFuncs()
 
@@ -118,10 +114,6 @@ class TestOpenhabItemConvenience(TestBaseRule):
                 tmpitem.set_value(val)
                 getattr(tmpitem, func_name)()
                 waiter.wait_for_state(val)
-
-            test_ok = waiter.states_ok
-
-        return test_ok
 
 
 TestOpenhabItemConvenience()
