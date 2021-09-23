@@ -2,6 +2,7 @@ import threading
 import typing
 
 import HABAppTests
+from ._rule_status import TestRuleStatus
 
 LOCK = threading.Lock()
 
@@ -45,8 +46,16 @@ def get_test_rules() -> typing.Iterable['HABAppTests.TestBaseRule']:
     ret = []
     for k, rule in sorted(TESTS_RULES.items()):
         assert isinstance(rule, HABAppTests.TestBaseRule)
-        if rule.tests_started:
+        if rule._rule_status is not TestRuleStatus.CREATED:
             continue
         ret.append(rule)
 
     return ret
+
+
+def test_rules_running() -> bool:
+    for rule in TESTS_RULES.values():
+        status = rule._rule_status
+        if status is not TestRuleStatus.CREATED and status is not TestRuleStatus.FINISHED:
+            return True
+    return False
