@@ -64,8 +64,12 @@ class TestBaseRule(HABApp.Rule):
         ergs = []
         rules = get_test_rules()
         for rule in rules:
+            # mark rules for execution
             rule._rule_status = TestRuleStatus.PENDING
         for rule in rules:
+            # It's possible that we unload a rule before it was run
+            if rule._rule_status is not TestRuleStatus.PENDING:
+                continue
             ergs.extend(rule._run_tests())
 
         skipped = tuple(filter(lambda x: x.state is TestResultStatus.SKIPPED, ergs))

@@ -6,6 +6,20 @@ from . import get_random_name, EventWaiter
 
 
 class OpenhabTmpItem:
+    @staticmethod
+    def use(type: str, name: Optional[str] = None, arg_name: str = 'item'):
+        def decorator(func):
+            def new_func(*args, **kwargs):
+                assert arg_name not in kwargs, f'arg {arg_name} already set'
+                item = OpenhabTmpItem(type, name)
+                try:
+                    kwargs[arg_name] = item
+                    return func(*args, **kwargs)
+                finally:
+                    item.remove()
+            return new_func
+        return decorator
+
     def __init__(self, item_type: str, item_name: Optional[str] = None):
         self.type: str = item_type
         self.name = get_random_name(item_type) if item_name is None else item_name
@@ -19,14 +33,20 @@ class OpenhabTmpItem:
     def remove(self):
         HABApp.openhab.interface.remove_item(self.name)
 
-    def create(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
-               group_type: str = '', group_function: str = '',
-               group_function_params: List[str] = []) -> HABApp.openhab.items.OpenhabItem:
-
+    def _create(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
+                group_type: str = '', group_function: str = '',
+                group_function_params: List[str] = []):
         interface = HABApp.openhab.interface
         interface.create_item(self.type, self.name, label=label, category=category,
                               tags=tags, groups=groups, group_type=group_type,
                               group_function=group_function, group_function_params=group_function_params)
+
+    def create(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
+               group_type: str = '', group_function: str = '',
+               group_function_params: List[str] = []) -> HABApp.openhab.items.OpenhabItem:
+
+        self._create(label=label, category=category, tags=tags, groups=groups, group_type=group_type,
+                     group_function=group_function, group_function_params=group_function_params)
 
         # wait max 1 sec for the item to be created
         stop = time.time() + 1
@@ -40,10 +60,9 @@ class OpenhabTmpItem:
     def modify(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
                group_type: str = '', group_function: str = '', group_function_params: List[str] = []):
 
-        interface = HABApp.openhab.interface
-        interface.create_item(self.type, self.name, label=label, category=category,
-                              tags=tags, groups=groups, group_type=group_type,
-                              group_function=group_function, group_function_params=group_function_params)
-
         with EventWaiter(self.name, HABApp.openhab.events.ItemUpdatedEvent) as w:
+
+            self._create(label=label, category=category, tags=tags, groups=groups, group_type=group_type,
+                         group_function=group_function, group_function_params=group_function_params)
+
             w.wait_for_event()

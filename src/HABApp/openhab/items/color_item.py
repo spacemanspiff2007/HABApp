@@ -11,8 +11,9 @@ PERCENT_FACTOR = 100
 
 class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
 
-    def __init__(self, name: str, h=0.0, s=0.0, b=0.0):
-        super().__init__(name=name, initial_value=(h, s, b))
+    def __init__(self, name: str, h=0.0, s=0.0, b=0.0,
+                 tags: Tuple[str, ...] = tuple(), groups: Tuple[str, ...] = tuple()):
+        super().__init__(name=name, initial_value=(h, s, b), tags=tags, groups=groups)
 
         self.hue: float = min(max(0.0, h), HUE_FACTOR)
         self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)

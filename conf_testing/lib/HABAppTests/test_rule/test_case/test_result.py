@@ -73,7 +73,7 @@ class TestResult:
         if self.state is TestResultStatus.PASSED:
             return log.info(f'{prefix} successful')
         if self.state is TestResultStatus.SKIPPED:
-            return log.info(f'{prefix} skipped')
+            return log.warning(f'{prefix} skipped')
         if self.state is TestResultStatus.WARNING:
             return log.warning(f'{prefix} warning{msg}')
         if self.state is TestResultStatus.FAILED:

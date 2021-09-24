@@ -39,7 +39,8 @@ def get_next_id(rule) -> RuleID:
 
 def pop_test_rule(id: int):
     with LOCK:
-        TESTS_RULES.pop(id)
+        rule = TESTS_RULES.pop(id)
+        rule._rule_status = TestRuleStatus.FINISHED
 
 
 def get_test_rules() -> typing.Iterable['HABAppTests.TestBaseRule']:

@@ -27,14 +27,12 @@ class TestMaxImageSize(TestBaseRule):
             _b2 = b'\xFF\xD8\xFF' + b'\xFF' * (1024 - 3) + b'\x00' * (k - 1) * 1024
 
             item.oh_post_update(_b1)
-            event_waiter.wait_for_event(_b1)
+            event_waiter.wait_for_event(value=_b1)
             item_waiter.wait_for_state(_b1)
 
             item.oh_post_update(_b2)
-            event_waiter.wait_for_event(_b2)
+            event_waiter.wait_for_event(value=_b2, old_value=_b1)
             item_waiter.wait_for_state(_b2)
-            assert event_waiter.last_event.value == _b2
-            assert event_waiter.last_event.old_value == _b1
 
             log.info(f'Image with {len(_b2) / 1024 :.0f}k ok!')
 

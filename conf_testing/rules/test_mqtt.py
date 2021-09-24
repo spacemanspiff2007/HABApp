@@ -38,7 +38,7 @@ class TestMQTTEvents(TestBaseRule):
         # Ensure we send on the write topic
         with EventWaiter(topic_write, ValueUpdateEvent) as event_waiter:
             item.publish('ddddddd')
-            event_waiter.wait_for_event('ddddddd')
+            event_waiter.wait_for_event(value='ddddddd')
 
         # Read Topic has to be updated properly
         with ItemWaiter(item) as item_waiter:
@@ -50,7 +50,7 @@ class TestMQTTEvents(TestBaseRule):
         with EventWaiter(topic, event_type) as waiter:
             for data in self.mqtt_test_data:
                 self.mqtt.publish(topic, data)
-                waiter.wait_for_event(data)
+                waiter.wait_for_event(value=data)
 
     def test_mqtt_state(self):
         my_item = MqttItem.get_create_item('test/item_topic')

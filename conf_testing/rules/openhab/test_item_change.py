@@ -14,12 +14,14 @@ class ChangeItemType(TestBaseRule):
         with OpenhabTmpItem('Number') as tmpitem:
             NumberItem.get_item(tmpitem.name)
 
-            create_item('String', tmpitem.name)
-            EventWaiter(tmpitem.name, ItemUpdatedEvent(tmpitem.name, 'String'), 2, False)
+            with EventWaiter(tmpitem.name, ItemUpdatedEvent, 2) as e:
+                create_item('String', tmpitem.name)
+                e.wait_for_event(type='String', name=tmpitem.name)
             StringItem.get_item(tmpitem.name)
 
-            create_item('DateTime', tmpitem.name)
-            EventWaiter(tmpitem.name, ItemUpdatedEvent(tmpitem.name, 'DateTime'), 2, False)
+            with EventWaiter(tmpitem.name, ItemUpdatedEvent, 2) as e:
+                create_item('DateTime', tmpitem.name)
+                e.wait_for_event(type='DateTime', name=tmpitem.name)
             DatetimeItem.get_item(tmpitem.name)
 
 

@@ -21,16 +21,20 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         found_items = len(data)
         for _dict in data:
             item_name = _dict['name']
-            new_item = map_item(item_name, _dict['type'], _dict['state'])
+            new_item = map_item(item_name, _dict['type'], _dict['state'], tuple(_dict['tags']),
+                                tuple(_dict['groupNames']))   # type: HABApp.openhab.items.OpenhabItem
             if new_item is None:
                 continue
 
             try:
                 # if the item already exists and it has the correct type just update its state
                 # Since we load the items before we load the rules this should actually never happen
-                existing_item = Items.get_item(item_name)   # type: HABApp.core.items.BaseValueItem
+                existing_item = Items.get_item(item_name)   # type: HABApp.openhab.items.OpenhabItem
                 if isinstance(existing_item, new_item.__class__):
                     existing_item.set_value(new_item.value)  # use the converted state from the new item here
+                    existing_item.tags = new_item.tags
+                    existing_item.groups = new_item.groups
+
                     new_item = existing_item
             except Items.ItemNotFoundException:
                 pass

@@ -1,11 +1,11 @@
-import typing
+from typing import Optional, Tuple
 from base64 import b64encode
 
 from HABApp.openhab.items.base_item import OpenhabItem
 from ..definitions import RawValue
 
 
-def _convert_bytes(data: bytes, img_type: typing.Optional[str]) -> str:
+def _convert_bytes(data: bytes, img_type: Optional[str]) -> str:
     assert isinstance(data, bytes), type(data)
 
     # try to automatically found out what kind of file we have
@@ -22,11 +22,12 @@ def _convert_bytes(data: bytes, img_type: typing.Optional[str]) -> str:
 class ImageItem(OpenhabItem):
     """ImageItem which accepts and converts the data types from OpenHAB"""
 
-    def __init__(self, name: str, initial_value=None):
-        super().__init__(name, initial_value)
+    def __init__(self, name: str, initial_value=None,
+                 tags: Tuple[str, ...] = tuple(), groups: Tuple[str, ...] = tuple()):
+        super().__init__(name, initial_value, tags, groups)
 
         # this item is unique because we also save the image type and thus have two states
-        self.image_type: typing.Optional[str] = None
+        self.image_type: Optional[str] = None
 
     def set_value(self, new_value) -> bool:
         assert isinstance(new_value, RawValue) or new_value is None, type(new_value)
@@ -42,7 +43,7 @@ class ImageItem(OpenhabItem):
         # bytes
         return super().set_value(new_value.value)
 
-    def oh_post_update(self, data: bytes, img_type: typing.Optional[str] = None):
+    def oh_post_update(self, data: bytes, img_type: Optional[str] = None):
         """Post an update to an openhab image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
@@ -51,7 +52,7 @@ class ImageItem(OpenhabItem):
         """
         return super().oh_post_update(_convert_bytes(data, img_type))
 
-    def oh_send_command(self, data: bytes, img_type: typing.Optional[str] = None):
+    def oh_send_command(self, data: bytes, img_type: Optional[str] = None):
         """Send a command to an openhab image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 

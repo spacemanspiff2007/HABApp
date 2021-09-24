@@ -25,12 +25,12 @@ class TestOpenhabEventTypes(TestBaseRule):
             for value in test_values:
 
                 self.openhab.post_update(item_name, value)
-                waiter.wait_for_event(value)
+                waiter.wait_for_event(value=value)
 
                 # Contact does not support commands
                 if item_type != 'Contact':
                     self.openhab.send_command(item_name, value)
-                    waiter.wait_for_event(value)
+                    waiter.wait_for_event(value=value)
 
     def test_quantity_type_events(self, dimension):
 
@@ -46,7 +46,7 @@ class TestOpenhabEventTypes(TestBaseRule):
 
             for state in get_openhab_test_states('Number'):
                 self.openhab.post_update(item_name, f'{state} {unit_of_dimension[dimension]}')
-                event_watier.wait_for_event(state)
+                event_watier.wait_for_event(value=state)
                 item_waiter.wait_for_state(state)
 
 

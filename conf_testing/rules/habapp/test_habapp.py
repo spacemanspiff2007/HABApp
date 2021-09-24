@@ -50,8 +50,8 @@ class TestItemEvents(TestBaseRule):
                 time.sleep(0.2)
             self.ts_set = time.time()
             self.watch_item.set_value(value)
-            with EventWaiter(self.watch_item.name, event, self.secs + 2, check_value=False) as w:
-                w.wait_for_event(value)
+            with EventWaiter(self.watch_item.name, event, self.secs + 2) as w:
+                w.wait_for_event(seconds=self.secs)
 
 
 TestItemEvents()
@@ -79,8 +79,8 @@ class TestItemListener(TestBaseRule):
             1, HABApp.core.EventBus.post_event, self.watch_item.name, ValueUpdateEvent(self.watch_item.name, 123)
         )
 
-        with EventWaiter(self.watch_item.name, ValueUpdateEvent, 2, check_value=True) as w:
-            w.wait_for_event(123)
+        with EventWaiter(self.watch_item.name, ValueUpdateEvent, 2) as w:
+            w.wait_for_event(value=123)
 
 
 TestItemListener()
