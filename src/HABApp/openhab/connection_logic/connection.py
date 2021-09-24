@@ -97,7 +97,7 @@ def on_sse_event(event_dict: dict):
                 # it's the same item class so we don't replace it!
                 new_item = existing_item
             else:
-                log.warning(f'Item changed type from {existing_item.__class__} to {new_item.__class__}')
+                log_warning(log, f'Item changed type from {existing_item.__class__} to {new_item.__class__}')
                 # remove the item so it can be added again
                 Items.pop_item(new_item.name)
         except Items.ItemNotFoundException:

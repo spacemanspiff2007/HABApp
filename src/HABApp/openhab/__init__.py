@@ -2,6 +2,8 @@
 import HABApp.openhab.errors
 import HABApp.openhab.events
 
+# isort: split
+
 import HABApp.openhab.interface_async
 import HABApp.openhab.interface
 
