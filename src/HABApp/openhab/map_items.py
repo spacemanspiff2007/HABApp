@@ -12,13 +12,12 @@ from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerIte
 log = logging.getLogger('HABApp.openhab')
 
 
-def map_item(name: str, type: str, value: str, tags: Tuple[str, ...], groups: Tuple[str, ...]) -> \
+def map_item(name: str, type: str, value: Optional[str], tags: Tuple[str, ...], groups: Tuple[str, ...]) -> \
         Optional['HABApp.openhab.items.OpenhabItem']:
     try:
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)
 
-        value: typing.Optional[str] = value
         if value == 'NULL' or value == 'UNDEF':
             value = None
 

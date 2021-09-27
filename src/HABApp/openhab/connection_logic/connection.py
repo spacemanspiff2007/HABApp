@@ -94,10 +94,10 @@ def on_sse_event(event_dict: dict):
             if isinstance(existing_item, new_item.__class__):
                 existing_item.tags = new_item.tags
                 existing_item.groups = new_item.groups
-                # it's the same item class so we don't replace it!
+                # it's the same item class/type so we don't replace it!
                 new_item = existing_item
             else:
-                log_warning(log, f'Item changed type from {existing_item.__class__} to {new_item.__class__}')
+                log_warning(log, f'Item type changed from {existing_item.__class__} to {new_item.__class__}')
                 # remove the item so it can be added again
                 Items.pop_item(new_item.name)
         except Items.ItemNotFoundException:
