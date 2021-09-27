@@ -6,6 +6,7 @@ from HABApp.core.wrapper import ignore_exception
 from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
+from HABApp.openhab.item_to_reg import add_item_to_registry
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -25,22 +26,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
                                 tuple(_dict['groupNames']))   # type: HABApp.openhab.items.OpenhabItem
             if new_item is None:
                 continue
-
-            try:
-                # if the item already exists and it has the correct type just update its state
-                # Since we load the items before we load the rules this should actually never happen
-                existing_item = Items.get_item(item_name)   # type: HABApp.openhab.items.OpenhabItem
-                if isinstance(existing_item, new_item.__class__):
-                    existing_item.set_value(new_item.value)  # use the converted state from the new item here
-                    existing_item.tags = new_item.tags
-                    existing_item.groups = new_item.groups
-
-                    new_item = existing_item
-            except Items.ItemNotFoundException:
-                pass
-
-            # create new item or change item type
-            Items.add_item(new_item)
+            add_item_to_registry(new_item, True)
 
         # remove items which are no longer available
         ist = set(Items.get_all_item_names())

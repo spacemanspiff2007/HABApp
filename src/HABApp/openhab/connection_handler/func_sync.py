@@ -43,9 +43,9 @@ def send_command(item_name: str, command):
     :param item_name: item name or item
     :param command: command
     """
-    assert isinstance(item_name, (str, HABApp.openhab.items.base_item.BaseValueItem)), type(item_name)
+    assert isinstance(item_name, (str, BaseValueItem)), type(item_name)
 
-    if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
+    if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
 
     if async_context.get(None) is None:

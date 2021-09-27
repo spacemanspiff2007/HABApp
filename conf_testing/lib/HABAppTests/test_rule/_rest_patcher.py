@@ -7,7 +7,7 @@ import HABApp.openhab.connection_logic.connection
 from HABApp.openhab.connection_handler.http_connection import HTTP_PREFIX
 
 FUNC_PATH = HABApp.openhab.connection_handler.func_async
-SSE_PATH = HABApp.openhab.connection_logic.connection
+SSE_PATH = HABApp.openhab.connection_handler.sse_handler
 
 
 def shorten_url(url: str):

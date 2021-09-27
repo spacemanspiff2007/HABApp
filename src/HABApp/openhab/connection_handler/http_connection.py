@@ -41,7 +41,6 @@ FUT_SSE: Optional[asyncio.Future] = None
 
 ON_CONNECTED: typing.Callable = None
 ON_DISCONNECTED: typing.Callable = None
-ON_SSE_EVENT: typing.Callable[[typing.Dict[str, Any]], Any] = None
 
 
 async def get(url: str, log_404=True, disconnect_on_error=False, **kwargs: Any) -> ClientResponse:
@@ -260,7 +259,7 @@ async def start_sse_event_listener():
     try:
         # cache so we don't have to look up every event
         _load_json = load_json
-        _see_handler = ON_SSE_EVENT
+        _see_handler = on_sse_event
 
         event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
 
@@ -385,3 +384,7 @@ def __load_cfg():
 # setup config
 __load_cfg()
 HABApp.config.CONFIG.subscribe_for_changes(__load_cfg)
+
+
+# import it here otherwise we get cyclic imports
+from HABApp.openhab.connection_handler.sse_handler import on_sse_event  # noqa: E402

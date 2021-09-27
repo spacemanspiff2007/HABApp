@@ -1,6 +1,5 @@
 import datetime
 import logging
-import typing
 from typing import Tuple, Optional
 
 import HABApp
