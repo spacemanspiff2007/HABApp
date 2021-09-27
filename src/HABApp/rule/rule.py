@@ -16,6 +16,7 @@ import HABApp.util
 from HABApp.core.events import AllEvents
 from .interfaces import async_subprocess_exec
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
+from HABApp.rule import interfaces
 
 
 log = logging.getLogger('HABApp.Rule')
@@ -78,7 +79,7 @@ class Rule:
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
         # interfaces
-        self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = self.__runtime.async_http if not test else None
+        self.async_http = interfaces.http
         self.mqtt: HABApp.mqtt.interface = HABApp.mqtt.interface
         self.oh: HABApp.openhab.interface = HABApp.openhab.interface
         self.openhab: HABApp.openhab.interface = self.oh

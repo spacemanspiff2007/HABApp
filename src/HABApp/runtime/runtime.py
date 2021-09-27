@@ -12,13 +12,13 @@ from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
 
+import HABApp.rule.interfaces._http
+
 
 class Runtime:
 
     def __init__(self):
         self.config: HABApp.config.Config = None
-
-        self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = HABApp.rule.interfaces.AsyncHttpConnection()
 
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
@@ -40,9 +40,8 @@ class Runtime:
 
             await HABApp.core.files.setup()
 
-            # MQTT
-            HABApp.mqtt.mqtt_connection.setup()
-            HABApp.mqtt.mqtt_connection.connect()
+            # generic HTTP
+            await HABApp.rule.interfaces._http.create_client()
 
             # openhab
             openhab_connection.setup()
@@ -54,7 +53,10 @@ class Runtime:
             self.rule_manager = HABApp.rule_manager.RuleManager(self)
             await self.rule_manager.setup()
 
-            await self.async_http.create_client()
+            # MQTT
+            HABApp.mqtt.mqtt_connection.setup()
+            HABApp.mqtt.mqtt_connection.connect()
+
             await openhab_connection.start()
 
             shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')
