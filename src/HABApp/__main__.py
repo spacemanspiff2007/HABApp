@@ -9,6 +9,16 @@ import HABApp
 from HABApp.__cmd_args__ import parse_args
 
 
+def register_signal_handler():
+    def shutdown_handler(sig, frame):
+        print('Shutting down ...')
+        HABApp.runtime.shutdown.request_shutdown()
+
+    # register shutdown helper
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
+
+
 def main() -> typing.Union[int, str]:
 
     # This has do be done before we create HABApp because of the possible sleep time
@@ -18,14 +28,7 @@ def main() -> typing.Union[int, str]:
 
     try:
         app = HABApp.runtime.Runtime()
-
-        def shutdown_handler(sig, frame):
-            print('Shutting down ...')
-            HABApp.runtime.shutdown.request_shutdown()
-
-        # register shutdown helper
-        signal.signal(signal.SIGINT, shutdown_handler)
-        signal.signal(signal.SIGTERM, shutdown_handler)
+        register_signal_handler()
 
         # start workers
         try:
@@ -33,6 +36,7 @@ def main() -> typing.Union[int, str]:
             HABApp.core.const.loop.run_forever()
         except asyncio.CancelledError:
             pass
+
     except HABApp.config.InvalidConfigException:
         pass
     except Exception as e:
