@@ -6,7 +6,7 @@ from HABApp.core.wrapper import ignore_exception
 from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
-from HABApp.openhab.item_to_reg import add_item_to_registry
+from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -26,14 +26,14 @@ class LoadAllOpenhabItems(OnConnectPlugin):
                                 tuple(_dict['groupNames']))   # type: HABApp.openhab.items.OpenhabItem
             if new_item is None:
                 continue
-            add_item_to_registry(new_item, True)
+            add_to_registry(new_item, True)
 
         # remove items which are no longer available
         ist = set(Items.get_all_item_names())
         soll = {k['name'] for k in data}
         for k in ist - soll:
             if isinstance(Items.get_item(k), HABApp.openhab.items.OpenhabItem):
-                Items.pop_item(k)
+                remove_from_registry(k)
 
         log.info(f'Updated {found_items:d} Items')
 

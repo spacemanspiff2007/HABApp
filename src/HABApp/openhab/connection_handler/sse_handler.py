@@ -11,7 +11,7 @@ from HABApp.openhab.events import ThingStatusInfoEvent, GroupItemStateChangedEve
     ItemUpdatedEvent
 from HABApp.openhab.map_events import get_event
 from HABApp.openhab.map_items import map_item
-from HABApp.openhab.item_to_reg import add_item_to_registry
+from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
 
 
 log = http_connection.log
@@ -52,7 +52,7 @@ def on_sse_event(event_dict: dict):
         return None
 
     if isinstance(event, ItemRemovedEvent):
-        Items.pop_item(event.name)
+        remove_from_registry(event.name)
         EventBus.post_event(event.name, event)
         return None
 
@@ -69,7 +69,7 @@ def on_sse_event(event_dict: dict):
             return None
 
     if new_item is not None:
-        add_item_to_registry(new_item)
+        add_to_registry(new_item)
 
     # Send Event to Event Bus
     HABApp.core.EventBus.post_event(event.name, event)

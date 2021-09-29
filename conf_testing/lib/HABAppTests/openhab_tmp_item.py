@@ -20,12 +20,21 @@ class OpenhabTmpItem:
             return new_func
         return decorator
 
+    @staticmethod
+    def create(type: str, name: Optional[str] = None):
+        def decorator(func):
+            def new_func(*args, **kwargs):
+                with OpenhabTmpItem(type, name):
+                    return func(*args, **kwargs)
+            return new_func
+        return decorator
+
     def __init__(self, item_type: str, item_name: Optional[str] = None):
         self.type: str = item_type
         self.name = get_random_name(item_type) if item_name is None else item_name
 
     def __enter__(self) -> HABApp.openhab.items.OpenhabItem:
-        return self.create()
+        return self.create_item()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.remove()
@@ -41,9 +50,9 @@ class OpenhabTmpItem:
                               tags=tags, groups=groups, group_type=group_type,
                               group_function=group_function, group_function_params=group_function_params)
 
-    def create(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
-               group_type: str = '', group_function: str = '',
-               group_function_params: List[str] = []) -> HABApp.openhab.items.OpenhabItem:
+    def create_item(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
+                    group_type: str = '', group_function: str = '',
+                    group_function_params: List[str] = []) -> HABApp.openhab.items.OpenhabItem:
 
         self._create(label=label, category=category, tags=tags, groups=groups, group_type=group_type,
                      group_function=group_function, group_function_params=group_function_params)

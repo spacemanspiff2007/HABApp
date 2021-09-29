@@ -40,5 +40,6 @@ def test_creation():
     assert o.dict(by_alias=True) == {
         "channelUID": "zwave:device:controller:node15:sensor_luminance",
         "itemName": "ZWaveItem1",
-        "configuration": {}
+        "configuration": {},
+        'editable': False,
     }

@@ -17,9 +17,9 @@ class TestOpenhabGroupFunction(TestBaseRule):
         self.add_test('Group member change', self.add_item_to_grp)
 
     def set_up(self):
-        self.item1.create(groups=[self.group.name])
-        self.item2.create(groups=[self.group.name])
-        self.group.create(group_type='Switch', group_function='OR', group_function_params=['ON', 'OFF'])
+        self.item1.create_item(groups=[self.group.name])
+        self.item2.create_item(groups=[self.group.name])
+        self.group.create_item(group_type='Switch', group_function='OR', group_function_params=['ON', 'OFF'])
 
     def tear_down(self):
         self.item1.remove()
@@ -47,7 +47,7 @@ class TestOpenhabGroupFunction(TestBaseRule):
         new_item = OpenhabTmpItem('Switch')
         try:
             with EventWaiter(self.group.name, ItemUpdatedEvent) as w:
-                new_item.create(groups=[self.group.name])
+                new_item.create_item(groups=[self.group.name])
                 event = w.wait_for_event()
                 while event.name != self.group.name:
                     w.wait_for_event()

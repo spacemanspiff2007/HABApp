@@ -1,4 +1,4 @@
-from HABApp.openhab.items import StringItem
+from HABApp.openhab.items import StringItem, GroupItem
 from HABAppTests import TestBaseRule, OpenhabTmpItem
 
 
@@ -17,7 +17,7 @@ class OpenhabItems(TestBaseRule):
 
     @OpenhabTmpItem.use('String', arg_name='oh_item')
     def test_tags(self, oh_item: OpenhabTmpItem):
-        oh_item.create(tags=['tag1', 'tag2'])
+        oh_item.create_item(tags=['tag1', 'tag2'])
 
         item = StringItem.get_item(oh_item.name)
         assert item.tags == ('tag1', 'tag2')
@@ -29,17 +29,30 @@ class OpenhabItems(TestBaseRule):
         assert item.tags == tuple()
 
     @OpenhabTmpItem.use('String', arg_name='oh_item')
+    @OpenhabTmpItem.create('Group', 'group1')
+    @OpenhabTmpItem.create('Group', 'group2')
     def test_groups(self, oh_item: OpenhabTmpItem):
-        oh_item.create(groups=['group1'])
+        grp1 = GroupItem.get_item('group1')
+        grp2 = GroupItem.get_item('group2')
+
+        assert grp1.members == tuple()
+        assert grp2.members == tuple()
+
+        oh_item.create_item(groups=['group1'])
 
         item = StringItem.get_item(oh_item.name)
         assert item.groups == ('group1', )
+        assert grp1.members == (item, )
 
         oh_item.modify(groups=['group1', 'group2'])
         assert item.groups == ('group1', 'group2')
+        assert grp1.members == (item, )
+        assert grp2.members == (item, )
 
         oh_item.modify()
         assert item.groups == tuple()
+        assert grp1.members == tuple()
+        assert grp2.members == tuple()
 
 
 OpenhabItems()
