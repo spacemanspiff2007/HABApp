@@ -16,6 +16,6 @@ class GroupItem(OpenhabItem):
 
     @property
     def members(self) -> Tuple[OpenhabItem, ...]:
-        """All group members"""
+        """Resolves and then returns all group members"""
 
         return get_members(self.name)

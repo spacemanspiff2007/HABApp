@@ -6,7 +6,7 @@ from HABApp.core.wrapper import ignore_exception
 from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
-from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
+from HABApp.openhab.item_to_reg import add_to_registry, fresh_item_sync
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -18,6 +18,8 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         data = await async_get_items(disconnect_on_error=True)
         if data is None:
             return None
+
+        fresh_item_sync()
 
         found_items = len(data)
         for _dict in data:
@@ -33,7 +35,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         soll = {k['name'] for k in data}
         for k in ist - soll:
             if isinstance(Items.get_item(k), HABApp.openhab.items.OpenhabItem):
-                remove_from_registry(k)
+                Items.pop_item(k)
 
         log.info(f'Updated {found_items:d} Items')
 
@@ -46,22 +48,22 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         for t_dict in data:
             name = t_dict['UID']
             try:
-                thing = HABApp.core.Items.get_item(name)
+                thing = Items.get_item(name)
                 if not isinstance(thing, Thing):
                     log.warning(f'Item {name} has the wrong type ({type(thing)}), expected Thing')
                     thing = Thing(name)
-            except HABApp.core.Items.ItemNotFoundException:
+            except Items.ItemNotFoundException:
                 thing = Thing(name)
 
             thing.status = t_dict['statusInfo']['status']
-            HABApp.core.Items.add_item(thing)
+            Items.add_item(thing)
 
         # remove things which were deleted
-        ist = set(HABApp.core.Items.get_all_item_names())
+        ist = set(Items.get_all_item_names())
         soll = {k['UID'] for k in data}
         for k in ist - soll:
-            if isinstance(HABApp.core.Items.get_item(k), Thing):
-                HABApp.core.Items.pop_item(k)
+            if isinstance(Items.get_item(k), Thing):
+                Items.pop_item(k)
 
         log.info(f'Updated {len(data):d} Things')
         return None

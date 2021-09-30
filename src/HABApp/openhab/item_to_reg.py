@@ -23,9 +23,8 @@ def add_to_registry(item: 'HABApp.openhab.items.OpenhabItem', set_value=False):
             existing.set_value(item.value)
 
         # remove old groups
-        for grp in existing.groups:
-            if grp not in item.groups:
-                MEMBERS.setdefault(grp, set()).discard(name)
+        for grp in set(existing.groups) - set(item.groups):
+            MEMBERS.get(grp, set()).discard(name)
 
         # same type - it was only an item update (e.g. label)!
         existing.tags = item.tags
@@ -45,7 +44,7 @@ def remove_from_registry(name: str):
 
     item = Items.get_item(name)  # type: HABApp.openhab.items.OpenhabItem
     for grp in item.groups:
-        MEMBERS.setdefault(grp, set()).discard(name)
+        MEMBERS.get(grp, set()).discard(name)
 
     if isinstance(item, HABApp.openhab.items.GroupItem):
         MEMBERS.pop(name, None)
@@ -55,6 +54,10 @@ def remove_from_registry(name: str):
 
 
 MEMBERS: Dict[str, Set[str]] = {}
+
+
+def fresh_item_sync():
+    MEMBERS.clear()
 
 
 def get_members(group_name: str) -> Tuple['HABApp.openhab.items.OpenhabItem', ...]:
