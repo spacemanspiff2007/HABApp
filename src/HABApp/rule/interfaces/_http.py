@@ -78,7 +78,7 @@ def put(url: str, params: Optional[Mapping[str, str]] = None,
     return CLIENT.put(url, params=params, data=data, json=json, **kwargs)
 
 
-def delete(self, url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
+def delete(url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
         -> aiohttp.client._RequestContextManager:
     """http delete request
 
@@ -95,7 +95,7 @@ def delete(self, url: str, params: Optional[Mapping[str, str]] = None, **kwargs:
     return CLIENT.delete(url, params=params, **kwargs)
 
 
-def get_client_session(self) -> aiohttp.ClientSession:
+def get_client_session() -> aiohttp.ClientSession:
     """Return the aiohttp
     `client session object <https://docs.aiohttp.org/en/stable/client_reference.html#client-session>`_
     for use in aiohttp libraries
