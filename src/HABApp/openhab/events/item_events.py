@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any, FrozenSet
 
 import HABApp.core
 from .base_event import OpenhabEvent
@@ -96,28 +96,29 @@ class ItemAddedEvent(OpenhabEvent):
     """
     name: str
     type: str
-    tags: Tuple[str, ...]
-    groups: Tuple[str, ...]
+    tags: FrozenSet[str]
+    groups: FrozenSet[str]
 
     def __init__(self, name: str = '', type: str = '',
-                 tags: Tuple[str, ...] = tuple(), group_names: Tuple[str, ...] = tuple()):
+                 tags: FrozenSet[str] = frozenset(), group_names: FrozenSet[str] = frozenset()):
         super().__init__()
 
         self.name: str = name
         self.type: str = type
-        self.tags: Tuple[str, ...] = tags
-        self.groups: Tuple[str, ...] = group_names
+        self.tags: FrozenSet[str] = tags
+        self.groups: FrozenSet[str] = group_names
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # {'topic': 'smarthome/items/NAME/added'
         # 'payload': '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}'
         # 'type': 'ItemAddedEvent'}
-        return cls(payload['name'], payload['type'], tuple(payload['tags']), tuple(payload['groupNames']))
+        return cls(payload['name'], payload['type'], frozenset(payload['tags']), frozenset(payload['groupNames']))
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, ' \
-               f'tags: {self.tags}, group_names: {self.groups}>'
+        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""
+        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ""
+        return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, tags:{tags}, groups:{grps}>'
 
 
 class ItemUpdatedEvent(OpenhabEvent):
@@ -129,17 +130,17 @@ class ItemUpdatedEvent(OpenhabEvent):
     """
     name: str
     type: str
-    tags: Tuple[str, ...]
-    groups: Tuple[str, ...]
+    tags: FrozenSet[str]
+    groups: FrozenSet[str]
 
     def __init__(self, name: str = '', type: str = '',
-                 tags: Tuple[str, ...] = tuple(), group_names: Tuple[str, ...] = tuple()):
+                 tags: FrozenSet[str] = tuple(), group_names: FrozenSet[str] = tuple()):
         super().__init__()
 
         self.name: str = name
         self.type: str = type
-        self.tags: Tuple[str, ...] = tags
-        self.groups: Tuple[str, ...] = group_names
+        self.tags: FrozenSet[str] = tags
+        self.groups: FrozenSet[str] = group_names
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -148,11 +149,12 @@ class ItemUpdatedEvent(OpenhabEvent):
         #              {"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
         # 'type': 'ItemUpdatedEvent'
         new = payload[0]
-        return cls(topic[NAME_START:-8], new['type'], tuple(new['tags']), tuple(new['groupNames']))
+        return cls(topic[NAME_START:-8], new['type'], frozenset(new['tags']), frozenset(new['groupNames']))
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, ' \
-               f'tags: {self.tags}, group_names: {self.groups}>'
+        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""
+        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ""
+        return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, tags:{tags}, groups:{grps}>'
 
 
 class ItemRemovedEvent(OpenhabEvent):

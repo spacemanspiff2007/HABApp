@@ -41,6 +41,23 @@ def test_ItemAddedEvent2():
     assert isinstance(event, ItemAddedEvent)
     assert event.name == 'TestColor_OFF'
     assert event.type == 'Color'
+    assert event.tags == frozenset()
+    assert event.groups == frozenset(["TestGroup"])
+    assert str(event) == '<ItemAddedEvent name: TestColor_OFF, type: Color, tags:, groups: {TestGroup}>'
+
+    event = get_event({
+        'topic': 'openhab/items/TestColor_OFF/added',
+        'payload': '{"type":"Color","name":"TestColor_OFF","tags":["test_tag","tag2"],"groupNames":["TestGroup"]}',
+        'type': 'ItemAddedEvent'
+    })
+    assert isinstance(event, ItemAddedEvent)
+    assert event.name == 'TestColor_OFF'
+    assert event.type == 'Color'
+    assert event.tags == frozenset(['test_tag', 'tag2'])
+    assert event.groups == frozenset(['TestGroup'])
+
+    assert str(event) == '<ItemAddedEvent name: TestColor_OFF, type: Color, ' \
+                         'tags: {tag2, test_tag}, groups: {TestGroup}>'
 
 
 def test_ItemUpdatedEvent():
@@ -53,6 +70,22 @@ def test_ItemUpdatedEvent():
     assert isinstance(event, ItemUpdatedEvent)
     assert event.name == 'NameUpdated'
     assert event.type == 'Switch'
+    assert event.tags == frozenset()
+    assert event.groups == frozenset()
+    assert str(event) == '<ItemUpdatedEvent name: NameUpdated, type: Switch, tags:, groups:>'
+
+    event = get_event({
+        'topic': 'openhab/items/NameUpdated/updated',
+        'payload': '[{"type":"Switch","name":"Test","tags":["tag5","tag1"],"groupNames":["def","abc"]},'
+                   '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
+        'type': 'ItemUpdatedEvent'
+    })
+    assert isinstance(event, ItemUpdatedEvent)
+    assert event.name == 'NameUpdated'
+    assert event.type == 'Switch'
+    assert event.tags == frozenset(['tag1', 'tag5'])
+    assert event.groups == frozenset(['abc', 'def'])
+    assert str(event) == '<ItemUpdatedEvent name: NameUpdated, type: Switch, tags: {tag1, tag5}, groups: {abc, def}>'
 
 
 def test_ItemStateChangedEvent1():

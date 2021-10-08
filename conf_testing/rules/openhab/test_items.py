@@ -20,13 +20,13 @@ class OpenhabItems(TestBaseRule):
         oh_item.create_item(tags=['tag1', 'tag2'])
 
         item = StringItem.get_item(oh_item.name)
-        assert item.tags == ('tag1', 'tag2')
+        assert item.tags == {'tag1', 'tag2'}
 
         oh_item.modify(tags=['tag1', 'tag4'])
-        assert item.tags == ('tag1', 'tag4')
+        assert item.tags == {'tag1', 'tag4'}
 
         oh_item.modify()
-        assert item.tags == tuple()
+        assert item.tags == set()
 
     @OpenhabTmpItem.use('String', arg_name='oh_item')
     @OpenhabTmpItem.create('Group', 'group1')
@@ -41,16 +41,16 @@ class OpenhabItems(TestBaseRule):
         oh_item.create_item(groups=['group1'])
 
         item = StringItem.get_item(oh_item.name)
-        assert item.groups == ('group1', )
+        assert item.groups == {'group1'}
         assert grp1.members == (item, )
 
         oh_item.modify(groups=['group1', 'group2'])
-        assert item.groups == ('group1', 'group2')
+        assert item.groups == {'group1', 'group2'}
         assert grp1.members == (item, )
         assert grp2.members == (item, )
 
         oh_item.modify()
-        assert item.groups == tuple()
+        assert item.groups == set()
         assert grp1.members == tuple()
         assert grp2.members == tuple()
 

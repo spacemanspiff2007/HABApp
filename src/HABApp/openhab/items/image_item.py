@@ -1,5 +1,5 @@
-from typing import Optional, Tuple
 from base64 import b64encode
+from typing import FrozenSet, Optional
 
 from HABApp.openhab.items.base_item import OpenhabItem
 from ..definitions import RawValue
@@ -23,7 +23,7 @@ class ImageItem(OpenhabItem):
     """ImageItem which accepts and converts the data types from OpenHAB"""
 
     def __init__(self, name: str, initial_value=None,
-                 tags: Tuple[str, ...] = tuple(), groups: Tuple[str, ...] = tuple()):
+                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset()):
         super().__init__(name, initial_value, tags, groups)
 
         # this item is unique because we also save the image type and thus have two states

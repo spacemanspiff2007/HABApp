@@ -23,7 +23,7 @@ def test_item_1():
         "type": "Contact",
         "name": "Item1Name",
         "label": "Item1Label",
-        "tags": [],
+        "tags": ["Tag1"],
         "groupNames": ["Group1", "Group2"]
     }
     item = OpenhabItemDefinition.parse_obj(_in)  # type: OpenhabItemDefinition
@@ -32,6 +32,7 @@ def test_item_1():
     assert item.label == 'Item1Label'
     assert item.state == 'CLOSED'
     assert item.transformed_state == 'zu'
+    assert item.tags == ["Tag1"]
     assert item.groups == ["Group1", "Group2"]
 
 

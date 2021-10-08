@@ -1,7 +1,6 @@
 import HABApp
 from HABApp.openhab.events import ItemStateEvent
-from HABApp.openhab.items import Thing
-from HABApp.mqtt.items import MqttItem
+from HABApp.openhab.items import OpenhabItem
 
 
 class ExampleOpenhabToMQTTRule(HABApp.Rule):
@@ -10,9 +9,7 @@ class ExampleOpenhabToMQTTRule(HABApp.Rule):
     def __init__(self):
         super().__init__()
 
-        for item in HABApp.core.Items.get_all_items():
-            if isinstance(item, (Thing, MqttItem)):
-                continue
+        for item in self.get_items(OpenhabItem):
             item.listen_event(self.process_update, ItemStateEvent)
 
     def process_update(self, event):

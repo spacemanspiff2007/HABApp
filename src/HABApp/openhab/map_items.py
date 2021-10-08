@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Tuple, Optional
+from typing import FrozenSet, Optional
 
 import HABApp
 from HABApp.core.wrapper import process_exception
@@ -11,7 +11,7 @@ from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerIte
 log = logging.getLogger('HABApp.openhab')
 
 
-def map_item(name: str, type: str, value: Optional[str], tags: Tuple[str, ...], groups: Tuple[str, ...]) -> \
+def map_item(name: str, type: str, value: Optional[str], tags: FrozenSet[str], groups: FrozenSet[str]) -> \
         Optional['HABApp.openhab.items.OpenhabItem']:
     try:
         assert isinstance(type, str)

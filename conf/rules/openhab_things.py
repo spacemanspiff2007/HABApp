@@ -8,8 +8,7 @@ class CheckAllThings(Rule):
     def __init__(self):
         super().__init__()
 
-        for thing in HABApp.core.Items.get_all_items():
-            if isinstance(thing, Thing):
+        for thing in self.get_items(Thing):
                 thing.listen_event(self.thing_status_changed, ThingStatusInfoChangedEvent)
                 print(f'{thing.name}: {thing.status}')
 

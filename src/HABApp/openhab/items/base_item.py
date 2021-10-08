@@ -1,9 +1,9 @@
-from typing import Tuple, Optional, Any
 import datetime
+from typing import Any, FrozenSet, Optional
 
 from HABApp.core.const import MISSING
 from HABApp.core.items.base_valueitem import BaseValueItem
-from HABApp.openhab.interface import post_update, send_command, get_persistence_data
+from HABApp.openhab.interface import get_persistence_data, post_update, send_command
 
 
 class OpenhabItem(BaseValueItem):
@@ -11,10 +11,10 @@ class OpenhabItem(BaseValueItem):
     """
 
     def __init__(self, name: str, initial_value=None,
-                 tags: Tuple[str, ...] = tuple(), groups: Tuple[str, ...] = tuple()):
+                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset()):
         super().__init__(name, initial_value)
-        self.tags: Tuple[str, ...] = tags
-        self.groups: Tuple[str, ...] = groups
+        self.tags: FrozenSet[str] = tags
+        self.groups: FrozenSet[str] = groups
 
     def oh_send_command(self, value: Any = MISSING):
         """Send a command to the openHAB item
