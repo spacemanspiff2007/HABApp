@@ -102,6 +102,16 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 0.31.0 (08.10.2021)
+- added self.get_items to easily search for items in a rule
+- added full support for tags and groups on OpenhabItem
+- Application should now properly shut down when there is a PermissionError
+- Added DatetimeItem to docs
+- Label in commandOption is optional
+- Added message when file is removed
+- Examples in the docs get checked with a newly created sphinx extension
+- Reworked the openhab tests
+
 #### 0.30.3 (17.06.2021)
 - add support for custom ca cert for MQTT
 - Scheduler runs only when the rule file has been loaded properly
