@@ -26,7 +26,6 @@ class TestParamFile(TestBaseRule):
         p = HABApp.Parameter('param_file', 'key')
         assert p < 11
         assert p.value == 10
-        return True
 
 
 TestParamFile()

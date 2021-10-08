@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 import HABApp.config
@@ -11,13 +12,13 @@ from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
 
+import HABApp.rule.interfaces._http
+
 
 class Runtime:
 
     def __init__(self):
         self.config: HABApp.config.Config = None
-
-        self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = HABApp.rule.interfaces.AsyncHttpConnection()
 
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
@@ -25,35 +26,43 @@ class Runtime:
         # Async Workers & shutdown callback
         shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown, msg='Stopping workers')
 
-    @HABApp.core.wrapper.log_exception
     async def start(self, config_folder: Path):
-        HABApp.core.context.async_context.set('HABApp startup')
+        try:
+            HABApp.core.context.async_context.set('HABApp startup')
 
-        # setup exception handler for the scheduler
-        eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
+            # setup exception handler for the scheduler
+            eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
-        # Start Folder watcher!
-        HABApp.core.files.watcher.start()
+            # Start Folder watcher!
+            HABApp.core.files.watcher.start()
 
-        self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
+            self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
 
-        await HABApp.core.files.setup()
+            await HABApp.core.files.setup()
 
-        # MQTT
-        HABApp.mqtt.mqtt_connection.setup()
-        HABApp.mqtt.mqtt_connection.connect()
+            # generic HTTP
+            await HABApp.rule.interfaces._http.create_client()
 
-        # openhab
-        openhab_connection.setup()
+            # openhab
+            openhab_connection.setup()
 
-        # Parameter Files
-        await HABApp.parameters.parameter_files.setup_param_files()
+            # Parameter Files
+            await HABApp.parameters.parameter_files.setup_param_files()
 
-        # Rule engine
-        self.rule_manager = HABApp.rule_manager.RuleManager(self)
-        await self.rule_manager.setup()
+            # Rule engine
+            self.rule_manager = HABApp.rule_manager.RuleManager(self)
+            await self.rule_manager.setup()
 
-        await self.async_http.create_client()
-        await openhab_connection.start()
+            # MQTT
+            HABApp.mqtt.mqtt_connection.setup()
+            HABApp.mqtt.mqtt_connection.connect()
 
-        shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')
+            await openhab_connection.start()
+
+            shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            process_exception('Runtime.start', e)
+            await asyncio.sleep(1)  # Sleep so we can do a graceful shutdown
+            shutdown.request_shutdown()

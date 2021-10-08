@@ -6,9 +6,9 @@ import paho.mqtt.client as mqtt
 
 import HABApp
 from HABApp.core import Items
-from HABApp.core.const.json import load_json
-from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 from HABApp.core.wrapper import log_exception
+from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
+from HABApp.mqtt.mqtt_payload import get_msg_payload
 from HABApp.runtime import shutdown
 
 log = logging.getLogger('HABApp.mqtt.connection')
@@ -150,34 +150,10 @@ def subscription_changed():
 
 @log_exception
 def process_msg(client, userdata, message: mqtt.MQTTMessage):
-    topic: str = message.topic
 
-    try:
-        payload = message.payload.decode("utf-8")
-
-        if log_msg.isEnabledFor(logging.DEBUG):
-            log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload}', [])
-
-        # load json dict and list
-        if payload.startswith('{') and payload.endswith('}') or payload.startswith('[') and payload.endswith(']'):
-            try:
-                payload = load_json(payload)
-            except ValueError:
-                pass
-        else:
-            # try to cast to int/float
-            try:
-                payload = int(payload)
-            except ValueError:
-                try:
-                    payload = float(payload)
-                except ValueError:
-                    pass
-    except UnicodeDecodeError:
-        # Payload ist binary
-        payload = message.payload
-        if log_msg.isEnabledFor(logging.DEBUG):
-            log_msg._log(logging.DEBUG, f'{topic} ({message.qos}): {payload[:20]}...', [])
+    topic, payload = get_msg_payload(message)
+    if topic is None:
+        return None
 
     _item = None    # type: typing.Optional[HABApp.mqtt.items.MqttBaseItem]
     try:

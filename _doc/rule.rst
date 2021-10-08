@@ -25,8 +25,8 @@ The preferred way to get and create items is through the class factories :class:
 and :class:`~HABApp.core.items.Item.get_create_item` since this ensures the proper item class and provides type hints when
 using an IDE!
 
-.. execute_code::
-    :header_code: Example:
+.. exec_code::
+    :caption: Example:
     :hide_output:
 
     from HABApp.core.items import Item
@@ -40,13 +40,13 @@ If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent
 
 It is possible to check the item value by comparing it
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
-    # hide
+    # ------------ hide: start ------------
     from HABApp.core.items import Item
     Item.get_create_item('MyItem', initial_value=5)
-    # hide
+    # ------------ hide: stop -------------
 
     from HABApp.core.items import Item
     my_item = Item.get_item('MyItem')
@@ -75,17 +75,17 @@ There is the possibility to reduce the function calls to a certain event type wi
 An overview over the events can be found on :ref:`the HABApp event section <HABAPP_EVENT_TYPES>`,
 :ref:`the openhab event section <OPENHAB_EVENT_TYPES>` and the :ref:`the mqtt event section <MQTT_EVENT_TYPES>`
 
-.. execute_code::
+.. exec_code::
     :hide_output:
-    :header_code: Example
+    :caption: Example
 
-    # hide
+    # ------------ hide: start ------------
     import time, HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.create_item('MyItem', HABApp.core.items.Item)
-    # hide
+    # ------------ hide: stop -------------
     from HABApp import Rule
     from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
     from HABApp.core.items import Item
@@ -126,17 +126,17 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
    :members:
 
 
-.. execute_code::
+.. exec_code::
     :hide_output:
-    :header_code: Example
+    :caption: Example
 
-    # hide
+    # ------------ hide: start ------------
     import time, HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.create_item('MyItem', HABApp.core.items.Item)
-    # hide
+    # ------------ hide: stop -------------
     from HABApp import Rule
     from HABApp.core.events import EventFilter, ValueUpdateEventFilter, ValueUpdateEvent
     from HABApp.core.items import Item

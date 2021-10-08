@@ -17,7 +17,7 @@ class BugLinks(TestBaseRule):
     def create_meta(self):
         astro_thing = find_astro_sun_thing()
         astro_channel = f"{astro_thing}:rise#start"
-        name = get_random_name()
+        name = get_random_name('DateTime')
 
         # create item and link
         run_coro(async_create_item('DateTime', name, 'MyCustomLabel', tags=['Tag1']))

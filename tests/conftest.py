@@ -36,11 +36,6 @@ def show_errors(monkeypatch):
     monkeypatch.setattr(HABApp.core.wrapper, 'ignore_exception', raise_err)
     monkeypatch.setattr(HABApp.core.wrapper, 'log_exception', raise_err)
 
-    # Delete all existing items/listener from previous tests
-    HABApp.core.EventBus.remove_all_listeners()
-    for name in HABApp.core.Items.get_all_item_names():
-        HABApp.core.Items.pop_item(name)
-
 
 @pytest.yield_fixture(autouse=True, scope='function')
 def use_dummy_cfg(monkeypatch):
@@ -54,3 +49,13 @@ def use_dummy_cfg(monkeypatch):
 @pytest.yield_fixture(autouse=True, scope='function')
 def event_loop():
     yield HABApp.core.const.loop
+
+
+@pytest.yield_fixture(autouse=True, scope='function')
+def cleanup_registry():
+    yield
+
+    # Delete all existing items/listener from previous tests
+    HABApp.core.EventBus.remove_all_listeners()
+    for name in HABApp.core.Items.get_all_item_names():
+        HABApp.core.Items.pop_item(name)

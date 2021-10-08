@@ -14,13 +14,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import pathlib
 import sys
 
 # required for autodoc
 sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
-
-sys.path.insert(0, os.path.abspath('./_plugins'))
 
 # -- Project information -----------------------------------------------------
 
@@ -35,7 +32,7 @@ release = 'beta'
 try:
     from HABApp import __version__
     version = __version__
-    print(f'Building doc for {version}')
+    print(f'Building docs for {version}')
 except Exception as e:
     print('Exception', e)
     version = 'dev'
@@ -52,7 +49,7 @@ except Exception as e:
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
-    'sphinx_execute_code',
+    'sphinx_exec_code',
     'sphinx.ext.inheritance_diagram',
 ]
 
@@ -203,9 +200,8 @@ epub_title = project
 epub_exclude_files = ['search.html']
 
 # -- Extension configuration -------------------------------------------------
-
-execute_code_working_dir = pathlib.Path(__file__).parent.parent / 'src'
-assert execute_code_working_dir.is_dir(), execute_code_working_dir
+exec_code_working_dir = '../src'
+exec_code_folders = ['../src', '../tests']
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'

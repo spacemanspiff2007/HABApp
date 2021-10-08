@@ -2,11 +2,13 @@ import asyncio
 import datetime
 import logging
 import random
+import re
 import sys
 import traceback
 import typing
 import warnings
 import weakref
+from typing import Iterable, Union
 
 import HABApp
 import HABApp.core
@@ -14,9 +16,10 @@ import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.events import AllEvents
-from .interfaces import async_subprocess_exec
+from HABApp.core.items.base_item import BaseItem, TYPE_ITEM, TYPE_ITEM_CLS
+from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
-
+from .interfaces import async_subprocess_exec
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -78,7 +81,7 @@ class Rule:
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
         # interfaces
-        self.async_http: HABApp.rule.interfaces.AsyncHttpConnection = self.__runtime.async_http if not test else None
+        self.async_http = interfaces.http
         self.mqtt: HABApp.mqtt.interface = HABApp.mqtt.interface
         self.oh: HABApp.openhab.interface = HABApp.openhab.interface
         self.openhab: HABApp.openhab.interface = self.oh
@@ -120,10 +123,10 @@ class Rule:
             event
         )
 
-    def listen_event(self, name: typing.Union[HABApp.core.items.BaseValueItem, str],
+    def listen_event(self, name: Union[HABApp.core.items.BaseValueItem, str],
                      callback: typing.Callable[[typing.Any], typing.Any],
-                     event_type: typing.Union[typing.Type['HABApp.core.events.AllEvents'],
-                                              'HABApp.core.events.EventFilter', typing.Any] = AllEvents
+                     event_type: Union[typing.Type['HABApp.core.events.AllEvents'],
+                                       'HABApp.core.events.EventFilter', typing.Any] = AllEvents
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
@@ -167,7 +170,7 @@ class Rule:
             HABApp.core.const.loop
         )
 
-    def get_rule(self, rule_name: str) -> 'typing.Union[Rule, typing.List[Rule]]':
+    def get_rule(self, rule_name: str) -> 'Union[Rule, typing.List[Rule]]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
@@ -189,11 +192,59 @@ class Rule:
         """
         self.__cancel_objs.add(obj)
 
+    @staticmethod
+    def get_items(type: Union[typing.Tuple[TYPE_ITEM_CLS, ...], TYPE_ITEM_CLS] = None,
+                  name: Union[str, typing.Pattern[str]] = None,
+                  tags: Union[str, Iterable[str]] = None,
+                  groups: Union[str, Iterable[str]] = None
+                  ) -> Union[typing.List[TYPE_ITEM], typing.List[BaseItem]]:
+        """Search the HABApp item registry and return the found items.
+
+        :param type: item has to be an instance of this class
+        :param name: str (will be compiled) or regex that is used to search the Name
+        :param tags: item must have these tags (will return only instances of OpenhabItem)
+        :param groups: item must be a member of these groups (will return only instances of OpenhabItem)
+        :return: Items that match all the passed criteria
+        """
+
+        if name is not None:
+            if isinstance(name, str):
+                name = re.compile(name, re.IGNORECASE)
+
+        _tags, _groups = None, None
+        if tags is not None:
+            _tags = set(tags) if not isinstance(tags, str) else {tags}
+        if groups is not None:
+            _groups = set(groups) if not isinstance(groups, str) else {groups}
+
+        OpenhabItem = HABApp.openhab.items.OpenhabItem
+        if _tags or _groups:
+            if type is None:
+                type = OpenhabItem
+            if not issubclass(type, OpenhabItem):
+                raise ValueError('Searching for tags and groups only works for OpenhabItem or its Subclasses')
+
+        ret = []
+        for item in HABApp.core.Items.get_all_items():  # type: HABApp.core.items.base_valueitem.BaseItem
+            if type is not None and not isinstance(item, type):
+                continue
+
+            if name is not None and not name.search(item.name):
+                continue
+
+            if _tags is not None and not _tags.issubset(item.tags):
+                continue
+
+            if _groups is not None and not _groups.issubset(item.groups):
+                continue
+
+            ret.append(item)
+        return ret
+
     # -----------------------------------------------------------------------------------------------------------------
     # deprecated functions
     # -----------------------------------------------------------------------------------------------------------------
-    def run_every(self, time, interval: typing.Union[int, datetime.timedelta],
-                  callback, *args, **kwargs):
+    def run_every(self, time, interval: Union[int, datetime.timedelta], callback, *args, **kwargs):
         warnings.warn('self.run_every is deprecated. Please use self.run.every', DeprecationWarning)
         return self.run.every(time, interval, callback, *args, **kwargs)
 
@@ -237,7 +288,7 @@ class Rule:
         warnings.warn('self.run_at is deprecated. Please use self.run.at', DeprecationWarning)
         return self.run.at(date_time, callback, *args, **kwargs)
 
-    def run_in(self, seconds: typing.Union[int, datetime.timedelta], callback, *args, **kwargs):
+    def run_in(self, seconds: Union[int, datetime.timedelta], callback, *args, **kwargs):
         warnings.warn('self.run_in is deprecated. Please use self.run.at', DeprecationWarning)
         return self.run.at(seconds, callback, *args, **kwargs)
 

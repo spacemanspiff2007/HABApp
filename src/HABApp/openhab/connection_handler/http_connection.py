@@ -41,7 +41,6 @@ FUT_SSE: Optional[asyncio.Future] = None
 
 ON_CONNECTED: typing.Callable = None
 ON_DISCONNECTED: typing.Callable = None
-ON_SSE_EVENT: typing.Callable[[typing.Dict[str, Any]], Any] = None
 
 
 async def get(url: str, log_404=True, disconnect_on_error=False, **kwargs: Any) -> ClientResponse:
@@ -259,7 +258,8 @@ async def start_connection():
 async def start_sse_event_listener():
     try:
         # cache so we don't have to look up every event
-        call = ON_SSE_EVENT
+        _load_json = load_json
+        _see_handler = on_sse_event
 
         event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
 
@@ -273,19 +273,24 @@ async def start_sse_event_listener():
                 session=HTTP_SESSION
         ) as event_source:
             async for event in event_source:
+
+                e_str = event.data
+
                 try:
-                    event = load_json(event.data)
+                    e_json = _load_json(e_str)
                 except ValueError:
+                    log_events.warning(f'Invalid json: {e_str}')
                     continue
                 except TypeError:
+                    log_events.warning(f'Invalid json: {e_str}')
                     continue
 
                 # Log sse event
                 if log_events.isEnabledFor(logging.DEBUG):
-                    log_events._log(logging.DEBUG, event, [])
+                    log_events._log(logging.DEBUG, e_str, [])
 
                 # process
-                call(event)
+                _see_handler(e_json)
 
     except asyncio.CancelledError:
         # This exception gets raised if we cancel the coroutine
@@ -379,3 +384,7 @@ def __load_cfg():
 # setup config
 __load_cfg()
 HABApp.config.CONFIG.subscribe_for_changes(__load_cfg)
+
+
+# import it here otherwise we get cyclic imports
+from HABApp.openhab.connection_handler.sse_handler import on_sse_event  # noqa: E402

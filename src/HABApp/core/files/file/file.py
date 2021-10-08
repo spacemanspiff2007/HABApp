@@ -125,7 +125,7 @@ class HABAppFile:
             self.set_state(FileState.FAILED)
             return None
 
-        self.set_state(FileState.PENDING)
+        self.set_state(FileState.REMOVED)
         return None
 
     def file_changed(self, file: HABAppFile):

@@ -5,6 +5,7 @@ from HABApp.mqtt.mqtt_connection import process_msg
 class MqttDummyMsg:
     def __init__(self, topic='', payload='', retain=False):
         self.topic = topic
+        self._topic = topic.encode('utf-8')
         self.payload = payload.encode('utf-8')
         self.retain = retain
         self.qos = 0

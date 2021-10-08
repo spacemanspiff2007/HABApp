@@ -8,7 +8,6 @@ from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode
 log = logging.getLogger('HABApp.Tests.MultiMode')
 
 
-
 class TestSwitchMode(TestBaseRule):
     """This rule is testing the Parameter implementation"""
 
@@ -19,9 +18,9 @@ class TestSwitchMode(TestBaseRule):
         self.add_test('SwitchItemValueMode inverted', self.test_sw_mode_inverted)
 
     def test_sw_mode(self):
-        mm = MultiModeItem.get_create_item(get_random_name())
+        mm = MultiModeItem.get_create_item(get_random_name('HABApp'))
 
-        with OpenhabTmpItem(None, 'Switch') as switch, ItemWaiter(OpenhabItem.get_item(switch.name)) as waiter:
+        with OpenhabTmpItem('Switch') as switch, ItemWaiter(OpenhabItem.get_item(switch.name)) as waiter:
             switch.on()
             waiter.wait_for_state('ON')
 
@@ -44,9 +43,9 @@ class TestSwitchMode(TestBaseRule):
         HABApp.core.Items.pop_item(mm.name)
 
     def test_sw_mode_inverted(self):
-        mm = MultiModeItem.get_create_item(get_random_name())
+        mm = MultiModeItem.get_create_item(get_random_name('HABApp'))
 
-        with OpenhabTmpItem(None, 'Switch') as switch, ItemWaiter(OpenhabItem.get_item(switch.name)) as waiter:
+        with OpenhabTmpItem('Switch') as switch, ItemWaiter(OpenhabItem.get_item(switch.name)) as waiter:
             switch.on()
             waiter.wait_for_state('ON')
 

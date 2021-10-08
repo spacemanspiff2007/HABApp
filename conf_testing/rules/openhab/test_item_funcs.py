@@ -10,7 +10,7 @@ log = logging.getLogger('HABApp.Tests')
 
 
 @dataclasses.dataclass(frozen=True)
-class TestParam():
+class TestParam:
     func_name: str
     result: typing.Union[str, float, int, tuple]
     func_params: typing.Union[str, float, int, tuple] = None
@@ -63,7 +63,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
         item_type = str(item_type).split('.')[-1][:-6]
         item_name = f'{item_type}_item_test'
 
-        with OpenhabTmpItem(item_name, item_type) as item, ItemWaiter(OpenhabItem.get_item(item_name)) as waiter:
+        with OpenhabTmpItem(item_type, item_name) as item, ItemWaiter(OpenhabItem.get_item(item_name)) as waiter:
             for test_param in test_params:
                 assert isinstance(test_param, TestParam)
 
@@ -88,10 +88,6 @@ class TestOpenhabItemFuncs(TestBaseRule):
                 # reset state so we don't get false positives
                 item.set_value(None)
 
-            test_ok = waiter.states_ok
-
-        return test_ok
-
 
 TestOpenhabItemFuncs()
 
@@ -109,7 +105,7 @@ class TestOpenhabItemConvenience(TestBaseRule):
 
     def test_func(self, item_type, func_name, test_vals):
 
-        with OpenhabTmpItem(None, item_type) as tmpitem, ItemWaiter(OpenhabItem.get_item(tmpitem.name)) as waiter:
+        with OpenhabTmpItem(item_type) as tmpitem, ItemWaiter(OpenhabItem.get_item(tmpitem.name)) as waiter:
             for val in test_vals:
                 getattr(tmpitem, func_name)(val)
                 waiter.wait_for_state(val)
@@ -118,10 +114,6 @@ class TestOpenhabItemConvenience(TestBaseRule):
                 tmpitem.set_value(val)
                 getattr(tmpitem, func_name)()
                 waiter.wait_for_state(val)
-
-            test_ok = waiter.states_ok
-
-        return test_ok
 
 
 TestOpenhabItemConvenience()

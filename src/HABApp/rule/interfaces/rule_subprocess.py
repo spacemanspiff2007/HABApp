@@ -20,7 +20,6 @@ async def async_subprocess_exec(callback, program: str, *args, capture_output=Tr
     proc = None
     stdout = None
     stderr = None
-    ret_code = None
 
     try:
         proc = await asyncio.create_subprocess_exec(

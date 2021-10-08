@@ -1,17 +1,15 @@
 import random
 from datetime import datetime as dt_datetime, time as dt_time, timedelta as dt_timedelta
-from typing import Iterable, Union, TYPE_CHECKING
+from typing import Iterable, Union
 
-from HABApp.core import WrappedFunction
-from HABApp.rule.scheduler.executor import WrappedFunctionExecutor
-from HABApp.rule.scheduler.scheduler import HABAppScheduler as _HABAppScheduler
 from eascheduler import SchedulerView
 from eascheduler.jobs import CountdownJob, DawnJob, DayOfWeekJob, DuskJob, OneTimeJob, ReoccurringJob, SunriseJob, \
     SunsetJob
 
-
-if TYPE_CHECKING:
-    import HABApp
+import HABApp
+from HABApp.core import WrappedFunction
+from HABApp.rule.scheduler.executor import WrappedFunctionExecutor
+from HABApp.rule.scheduler.scheduler import HABAppScheduler as _HABAppScheduler
 
 
 class HABAppSchedulerView(SchedulerView):

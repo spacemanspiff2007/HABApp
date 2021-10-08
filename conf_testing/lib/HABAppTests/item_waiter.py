@@ -2,9 +2,11 @@ import logging
 import time
 
 import HABApp
-from .compare_values import get_equal_text
-log = logging.getLogger('HABApp.Tests')
+from HABAppTests.compare_values import get_equal_text
+from HABAppTests.errors import TestCaseFailed
 
+
+log = logging.getLogger('HABApp.Tests')
 
 
 class ItemWaiter:
@@ -14,8 +16,6 @@ class ItemWaiter:
 
         self.timeout = timeout
         self.item_compare = item_compare
-
-        self.states_ok = True
 
     def wait_for_state(self, state=None):
 
@@ -28,9 +28,7 @@ class ItemWaiter:
                 return True
 
             if time.time() > end:
-                self.states_ok = False
-                log.error(f'Timeout waiting for {self.item.name} {get_equal_text(state, self.item.value)}')
-                return False
+                raise TestCaseFailed(f'Timeout waiting for {self.item.name} {get_equal_text(state, self.item.value)}')
 
         raise ValueError()
 

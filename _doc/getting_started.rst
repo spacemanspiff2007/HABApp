@@ -18,13 +18,13 @@ Rules are written as classes that inherit from :class:`HABApp.Rule`. Once the cl
 rules in the HABApp rule engine. So lets write a small rule which prints something.
 
 
-.. execute_code::
+.. exec_code::
 
-    # hide
-    from tests import SimpleRuleRunner
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
+    # ------------ hide: stop -------------
     import HABApp
 
     # Rules are classes that inherit from HABApp.Rule
@@ -41,23 +41,23 @@ rules in the HABApp rule engine. So lets write a small rule which prints somethi
 
     # Rules
     MyFirstRule()
-    # hide
+    # ------------ hide: start ------------
     runner.process_events()
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 A more generic rule
 ------------------------------
 It is also possible to instantiate the rules with parameters.
 This often comes in handy if there is some logic that shall be applied to different items.
 
-.. execute_code::
+.. exec_code::
 
-    # hide
-    from tests import SimpleRuleRunner
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
+    # ------------ hide: stop -------------
     import HABApp
 
     class MyFirstRule(HABApp.Rule):
@@ -75,10 +75,10 @@ This often comes in handy if there is some logic that shall be applied to differ
         MyFirstRule(i)
     for t in ['Text 1', 'Text 2']:
         MyFirstRule(t)
-    # hide
+    # ------------ hide: start ------------
     runner.process_events()
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 
 Interacting with items
@@ -91,7 +91,7 @@ to share states across rules and/or files.
 
 An item is created and added to the item registry through the corresponding class factory method
 
-.. execute_code::
+.. exec_code::
    :hide_output:
 
    from HABApp.core.items import Item
@@ -103,10 +103,10 @@ Posting values from the item will automatically create the events on the event b
 This example will create an item in HABApp (locally) and post some updates to it.
 To access items from openhab use the correct openhab item type (see :ref:`the openhab item description <OPENHAB_ITEM_TYPES>`).
 
-.. execute_code::
-    :header_output: Output
+.. exec_code::
+    :caption: Output
 
-    # hide
+    # ------------ hide: start ------------
     import logging
     import sys
     root = logging.getLogger('HABApp')
@@ -118,10 +118,10 @@ To access items from openhab use the correct openhab item type (see :ref:`the op
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
+    # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
 
@@ -147,10 +147,10 @@ To access items from openhab use the correct openhab item type (see :ref:`the op
 
 
     MyFirstRule()
-    # hide
+    # ------------ hide: start ------------
     runner.process_events()
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 
 Watch items for events
@@ -158,16 +158,16 @@ Watch items for events
 It is possible to watch items for changes or updates.
 
 
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     from HABApp.core.items import Item
     Item.get_create_item('Item_Name', initial_value='Some value')
 
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    # hide
+    # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
     from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
@@ -197,25 +197,25 @@ It is possible to watch items for changes or updates.
             print(f'Last update of {self.my_item.name}: {self.my_item.last_update}')
 
     MyFirstRule()
-    # hide
+    # ------------ hide: start ------------
     i = Item.get_create_item('Item_Name')
     i.post_value('Changed value')
     runner.process_events()
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------
 
 Trigger an event when an item is constant
 ------------------------------------------
 
-.. execute_code::
+.. exec_code::
 
-    # hide
+    # ------------ hide: start ------------
     import time, HABApp
-    from tests import SimpleRuleRunner
+    from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item)
-    # hide
+    # ------------ hide: stop -------------
 
     import HABApp
     from HABApp.core.items import Item
@@ -240,7 +240,7 @@ Trigger an event when an item is constant
             print(f'{event}')
 
     MyFirstRule()
-    # hide
+    # ------------ hide: start ------------
     HABApp.core.EventBus.post_event('Item_Name', ItemNoChangeEvent('Item_Name', 10))
     runner.tear_down()
-    # hide
+    # ------------ hide: stop -------------

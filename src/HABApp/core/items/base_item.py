@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Callable, Union
+from typing import Any, Callable, Type, Union, TypeVar
 
 from eascheduler.const import local_tz
 from pendulum import UTC, DateTime
@@ -122,3 +122,8 @@ class BaseItem:
         """This function gets automatically called when the item is removed from the item registry
         """
         _add_tmp_data(self)
+
+
+# Hints for functions that use an item class as an input parameter
+TYPE_ITEM = TypeVar('TYPE_ITEM', bound=BaseItem)
+TYPE_ITEM_CLS = Type[TYPE_ITEM]

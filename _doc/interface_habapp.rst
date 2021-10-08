@@ -40,7 +40,7 @@ The item makes implementing time logic like "Has it been dark for the last hour?
 "Was there frost during the last six hours?" really easy.
 And since it is just like a normal item triggering on changes etc. is possible, too.
 
-.. execute_code::
+.. exec_code::
     :hide_output:
 
     from HABApp.core.items import AggregationItem
