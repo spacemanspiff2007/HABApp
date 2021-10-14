@@ -42,8 +42,8 @@ class ThingOverview(OnConnectPlugin):
         zw_fw = zw_table.add_column('Firmware', '^')
         zw_type = zw_table.add_column('Thing type')
         zw_uid = zw_table.add_column('Thing UID')
-        zw_l_channels = zw_table.add_column('Linked channel types')
-        zw_u_channels = zw_table.add_column('Unlinked channel types')
+        # zw_l_channels = zw_table.add_column('Linked channel types')
+        # zw_u_channels = zw_table.add_column('Unlinked channel types')
 
         for node in thing_data:
             uid = node['UID']
@@ -66,7 +66,7 @@ class ThingOverview(OnConnectPlugin):
 
             # optional properties which can be set
             props = node['properties']
-            channels = node.get('channels', [])
+            # channels = node.get('channels', [])
 
             # Node-ID, e.g. 5
             node_id = props.get('zwave_nodeid')
@@ -75,12 +75,14 @@ class ThingOverview(OnConnectPlugin):
             zw_model.add(props.get('modelId', ''))
             zw_fw.add(props.get('zwave_version', ''))
 
-            zw_l_channels.add(
-                ', '.join(map(lambda x: x.get('channelTypeUID', ''), filter(lambda x: x.get('linkedItems'), channels)))
-            )
-            zw_u_channels.add(', '.join(
-                map(lambda x: x.get('channelTypeUID', ''), filter(lambda x: not x.get('linkedItems'), channels)))
-            )
+            # This generates very long logs and doesn't look good
+            # zw_l_channels.add(
+            #     tuple(map(lambda x: x.get('channelTypeUID', ''), filter(lambda x: x.get('linkedItems'), channels)))
+            # )
+            # zw_u_channels.add(
+            #     tuple(map(lambda x: x.get('channelTypeUID', ''),
+            #               filter(lambda x: not x.get('linkedItems'), channels)))
+            # )
 
         log = logging.getLogger('HABApp.openhab.things')
         for line in thing_table.get_lines(sort_columns=[thing_uid]):
