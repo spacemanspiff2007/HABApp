@@ -1,6 +1,6 @@
 import time
 from typing import List, Optional
-
+from functools import wraps
 import HABApp
 from . import get_random_name, EventWaiter
 
@@ -9,6 +9,7 @@ class OpenhabTmpItem:
     @staticmethod
     def use(type: str, name: Optional[str] = None, arg_name: str = 'item'):
         def decorator(func):
+            @wraps(func)
             def new_func(*args, **kwargs):
                 assert arg_name not in kwargs, f'arg {arg_name} already set'
                 item = OpenhabTmpItem(type, name)
@@ -21,10 +22,14 @@ class OpenhabTmpItem:
         return decorator
 
     @staticmethod
-    def create(type: str, name: Optional[str] = None):
+    def create(type: str, name: Optional[str] = None, arg_name: Optional[str] = None):
         def decorator(func):
+            @wraps(func)
             def new_func(*args, **kwargs):
-                with OpenhabTmpItem(type, name):
+                with OpenhabTmpItem(type, name) as f:
+                    if arg_name is not None:
+                        assert arg_name not in kwargs, f'arg {arg_name} already set'
+                        kwargs[arg_name] = f
                     return func(*args, **kwargs)
             return new_func
         return decorator

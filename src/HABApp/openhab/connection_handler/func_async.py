@@ -51,10 +51,15 @@ async def async_item_exists(item) -> bool:
     return ret.status == 200
 
 
-async def async_get_items(include_habapp_meta=False, disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
+async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = None,
+                          disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
     params = None
     if include_habapp_meta:
         params = {'metadata': 'HABApp'}
+    if metadata is not None:
+        if params is not None:
+            raise ValueError('Use include_habapp_meta or metadata')
+        params = {'metadata': metadata}
 
     try:
         resp = await get('items', disconnect_on_error=disconnect_on_error, params=params)
