@@ -4,19 +4,18 @@ from typing import Union
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.core import Items, EventBus
+from HABApp.core import EventBus, Items
 from HABApp.core.Items import ItemNotFoundException
 from HABApp.core.events import ValueUpdateEvent
 from HABApp.core.logger import log_warning
-from HABApp.core.wrapper import ignore_exception, process_exception
+from HABApp.core.wrapper import process_exception
 from HABApp.openhab.connection_handler import http_connection
-from HABApp.openhab.events import ThingStatusInfoEvent, GroupItemStateChangedEvent, ItemRemovedEvent, ItemAddedEvent, \
-    ItemUpdatedEvent
+from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
+    ThingStatusInfoEvent
+from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
 from HABApp.openhab.map_events import get_event
 from HABApp.openhab.map_items import map_item
-from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
 
-from immutables import Map
 log = http_connection.log
 
 
@@ -72,7 +71,7 @@ def on_sse_event(event_dict: dict):
 
 async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
     name = event.name
-    
+
     # Since metadata is not part of the event we have to request it
     cfg = await HABApp.openhab.interface_async.async_get_item(name, metadata='.+')
 

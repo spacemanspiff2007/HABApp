@@ -13,7 +13,7 @@ def test_exception():
 
 def test_metadata():
     make_number = partial(map_item, 'test', 'Number', None, frozenset(), frozenset())
-    
+
     item = make_number({'ns1': {'value': 'v1'}})
     assert isinstance(item.metadata, Map)
     assert item.metadata['ns1'].value == 'v1'
