@@ -196,7 +196,9 @@ class Rule:
     def get_items(type: Union[typing.Tuple[TYPE_ITEM_CLS, ...], TYPE_ITEM_CLS] = None,
                   name: Union[str, typing.Pattern[str]] = None,
                   tags: Union[str, Iterable[str]] = None,
-                  groups: Union[str, Iterable[str]] = None
+                  groups: Union[str, Iterable[str]] = None,
+                  metadata: Union[str, typing.Pattern[str]] = None,
+                  metadata_value: Union[str, typing.Pattern[str]] = None,
                   ) -> Union[typing.List[TYPE_ITEM], typing.List[BaseItem]]:
         """Search the HABApp item registry and return the found items.
 
@@ -204,12 +206,18 @@ class Rule:
         :param name: str (will be compiled) or regex that is used to search the Name
         :param tags: item must have these tags (will return only instances of OpenhabItem)
         :param groups: item must be a member of these groups (will return only instances of OpenhabItem)
+        :param metadata: str (will be compiled) or regex that is used to search the metadata (e.g. 'homekit')
+        :param metadata_value: str (will be compiled) or regex that is used to search the metadata value
+                               (e.g. 'TargetTemperature')
         :return: Items that match all the passed criteria
         """
 
-        if name is not None:
-            if isinstance(name, str):
-                name = re.compile(name, re.IGNORECASE)
+        if name is not None and isinstance(name, str):
+            name = re.compile(name, re.IGNORECASE)
+        if metadata is not None and isinstance(metadata, str):
+            metadata = re.compile(metadata, re.IGNORECASE)
+        if metadata_value is not None and isinstance(metadata_value, str):
+            metadata_value = re.compile(metadata_value, re.IGNORECASE)
 
         _tags, _groups = None, None
         if tags is not None:
@@ -218,11 +226,11 @@ class Rule:
             _groups = set(groups) if not isinstance(groups, str) else {groups}
 
         OpenhabItem = HABApp.openhab.items.OpenhabItem
-        if _tags or _groups:
+        if _tags or _groups or metadata or metadata_value:
             if type is None:
                 type = OpenhabItem
             if not issubclass(type, OpenhabItem):
-                raise ValueError('Searching for tags and groups only works for OpenhabItem or its Subclasses')
+                raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its Subclasses')
 
         ret = []
         for item in HABApp.core.Items.get_all_items():  # type: HABApp.core.items.base_valueitem.BaseItem
@@ -236,6 +244,13 @@ class Rule:
                 continue
 
             if _groups is not None and not _groups.issubset(item.groups):
+                continue
+
+            if metadata is not None and not any(map(metadata.search, item.metadata)):
+                continue
+
+            if metadata_value is not None and not any(
+                    map(metadata_value.search, map(lambda x: x[0], item.metadata.values()))):
                 continue
 
             ret.append(item)

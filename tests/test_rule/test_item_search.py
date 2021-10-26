@@ -4,6 +4,7 @@ from HABApp import Rule
 from HABApp.core import Items
 from HABApp.core.items import Item, BaseValueItem
 from HABApp.openhab.items import OpenhabItem, SwitchItem
+from HABApp.openhab.items.base_item import MetaData
 
 
 def test_search_type():
@@ -23,8 +24,10 @@ def test_search_type():
 
 
 def test_search_oh():
-    item1 = OpenhabItem('oh_item_1', tags=frozenset(['tag1', 'tag2', 'tag3']), groups=frozenset(['grp1', 'grp2']))
-    item2 = SwitchItem('oh_item_2', tags=frozenset(['tag1', 'tag2', 'tag4']), groups=frozenset(['grp2', 'grp3']))
+    item1 = OpenhabItem('oh_item_1', tags=frozenset(['tag1', 'tag2', 'tag3']),
+                        groups=frozenset(['grp1', 'grp2']), metadata={'meta1': MetaData('meta_v1')})
+    item2 = SwitchItem('oh_item_2', tags=frozenset(['tag1', 'tag2', 'tag4']),
+                       groups=frozenset(['grp2', 'grp3']), metadata={'meta2': MetaData('meta_v2', config={'a': 'b'})})
     item3 = Item('item_2')
 
     assert Rule.get_items() == []
@@ -42,6 +45,15 @@ def test_search_oh():
 
     assert Rule.get_items(groups='grp1', tags='tag1') == [item1]
     assert Rule.get_items(groups='grp2', tags='tag4') == [item2]
+
+    assert Rule.get_items(metadata='meta1') == [item1]
+    assert Rule.get_items(metadata='meta2') == [item2]
+    assert Rule.get_items(metadata=r'meta\d') == [item1, item2]
+
+    assert Rule.get_items(metadata_value='meta_v1') == [item1]
+    assert Rule.get_items(metadata_value='meta_v2') == [item2]
+    assert Rule.get_items(metadata_value=r'meta_v\d') == [item1, item2]
+    assert Rule.get_items(groups='grp1', metadata_value=r'meta_v\d') == [item1]
 
 
 def test_classcheck():
