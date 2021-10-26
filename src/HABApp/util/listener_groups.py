@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Union
 
 from HABApp.core.event_bus_listener import EventBusListener
 from HABApp.core.events import AllEvents, EventFilter
@@ -99,8 +99,8 @@ class EventListenerGroup:
 
     def add_no_update_watcher(self, item: BaseItem, callback: Optional[Callable[[Any], Any]] = None,
                               seconds: Optional[Union[int, float]] = None) -> 'EventListenerGroup':
-        """Add an no update watcher to the group. This will create a no update watcher and the corresponding
-        event listener that will trigger the callback
+        """Add an no update watcher to the group. On ``listen`` this will create a no update watcher and
+         the corresponding event listener that will trigger the callback
 
         :param item: Item
         :param callback: Callback or default callback if omitted
@@ -126,8 +126,8 @@ class EventListenerGroup:
 
     def add_no_change_watcher(self, item: BaseItem, callback: Optional[Callable[[Any], Any]] = None,
                               seconds: Optional[Union[int, float]] = None) -> 'EventListenerGroup':
-        """Add an no change watcher to the group. This will create a no change watcher and the corresponding
-        event listener that will trigger the callback
+        """Add an no change watcher to the group. On ``listen`` this this will create a no change watcher and
+         the corresponding event listener that will trigger the callback
 
         :param item: Item
         :param callback: Callback or default callback if omitted

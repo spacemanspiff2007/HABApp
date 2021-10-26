@@ -115,11 +115,12 @@ def create_item(item_type: str, name: str, label="", category="",
     return fut.result()
 
 
-def get_item(item_name: str, metadata: Optional[str] = None) -> OpenhabItemDefinition:
+def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False) -> OpenhabItemDefinition:
     """Return the complete OpenHAB item definition
 
     :param item_name: name of the item or item
     :param metadata: metadata to include (optional, comma separated or search expression)
+    :param all_metadata: if true the result will include all item metadata
     :return:
     """
     if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
@@ -131,7 +132,8 @@ def get_item(item_name: str, metadata: Optional[str] = None) -> OpenhabItemDefin
     if async_context.get(None) is not None:
         raise AsyncContextError(get_item)
 
-    fut = asyncio.run_coroutine_threadsafe(async_get_item(item_name, metadata=metadata), loop)
+    fut = asyncio.run_coroutine_threadsafe(
+        async_get_item(item_name, metadata=metadata, all_metadata=all_metadata), loop)
     data = fut.result()
     return OpenhabItemDefinition.parse_obj(data)
 

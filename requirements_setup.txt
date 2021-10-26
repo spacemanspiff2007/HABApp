@@ -10,3 +10,4 @@ stackprinter==0.2.5
 voluptuous==0.12.1
 watchdog==2.1.2
 ujson==4.0.2
+immutables==0.16

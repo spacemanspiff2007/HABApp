@@ -51,7 +51,7 @@ async def async_item_exists(item) -> bool:
     return ret.status == 200
 
 
-async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = None,
+async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = None, all_metadata=False,
                           disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
     params = None
     if include_habapp_meta:
@@ -60,6 +60,8 @@ async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = N
         if params is not None:
             raise ValueError('Use include_habapp_meta or metadata')
         params = {'metadata': metadata}
+    if all_metadata:
+        params = {'metadata': '.+'}
 
     try:
         resp = await get('items', disconnect_on_error=disconnect_on_error, params=params)
@@ -72,8 +74,11 @@ async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = N
         return None
 
 
-async def async_get_item(item: str, metadata: Optional[str] = None) -> dict:
+async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata=False) -> dict:
     params = None if metadata is None else {'metadata': metadata}
+    if all_metadata:
+        params = {'metadata': '.+'}
+
     ret = await get(f'items/{item:s}', params=params, log_404=False)
     if ret.status == 404:
         raise ItemNotFoundError.from_name(item)

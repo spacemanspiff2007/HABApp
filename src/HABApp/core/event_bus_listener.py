@@ -1,7 +1,8 @@
+from typing import Any, Optional
+
 import HABApp
+from HABApp.core import WrappedFunction
 from HABApp.core.events import AllEvents
-from . import WrappedFunction
-from typing import Optional, Any
 
 
 class EventBusListener:
