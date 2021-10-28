@@ -11,6 +11,7 @@ import eascheduler
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
+from HABApp.core.context import async_context
 
 import HABApp.rule.interfaces._http
 
@@ -28,7 +29,7 @@ class Runtime:
 
     async def start(self, config_folder: Path):
         try:
-            HABApp.core.context.async_context.set('HABApp startup')
+            token = async_context.set('HABApp startup')
 
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
@@ -60,6 +61,8 @@ class Runtime:
             await openhab_connection.start()
 
             shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')
+
+            async_context.reset(token)
         except asyncio.CancelledError:
             pass
         except Exception as e:
