@@ -50,7 +50,11 @@ class EventListenerGroup:
         self._default_seconds = default_seconds
 
     @property
-    def active(self):
+    def active(self) -> bool:
+        """
+
+        :return: True if the listeners are currently active
+        """
         return self._is_active
 
     def listen(self):
