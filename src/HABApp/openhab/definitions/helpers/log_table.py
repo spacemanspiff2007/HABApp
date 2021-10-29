@@ -1,27 +1,59 @@
 from collections import OrderedDict
-from typing import Optional, Dict, List, Union
+from typing import Optional, Dict, List, Union, Tuple, Any
 
 
 class Column:
-    def __init__(self, name: str, align: Optional[str] = None, alias: Optional[str] = None):
+    wrap: int = 80
+
+    def __init__(self, name: str, align: Optional[str] = None, alias: Optional[str] = None, wrap: Optional[int] = None):
         self.name: str = name
         self.alias: Optional[str] = alias
 
-        self.width: int = len(name) if alias is None else len(alias)
         self.align: Optional[str] = align
+        if wrap is not None:
+            self.wrap = wrap
 
-        self.entries = []
+        self.width: int = len(name) if alias is None else len(alias)
+        self.entries: List[Tuple[Any, ...]] = []
 
-    def format_entry(self, pos: int) -> str:
-        val = self.entries[pos]
-        if isinstance(val, bool):
-            val = str(val)
-        f = f'{{:{""if self.align is None else self.align}{self.width:d}}}'
-        return f.format(val)
+    def get_lines(self, pos: int) -> int:
+        return len(self.entries[pos])
+
+    def format_entry(self, pos: int, lines: int) -> List[str]:
+        ret = []
+
+        objs = self.entries[pos]
+        size = len(objs)
+        for i in range(lines):
+            if i >= size:
+                ret.append(self.width * ' ')
+                continue
+            val = objs[i]
+            if isinstance(val, bool):
+                val = str(val)
+            f = f'{{:{""if self.align is None else self.align}{self.width:d}}}'
+            ret.append(f.format(val))
+        return ret
 
     def add(self, val):
-        self.width = max(self.width, len(str(val)))
-        self.entries.append(val)
+        _res = []
+        if isinstance(val, (list, set, tuple)):
+            _len = 0
+            _str = ''
+            for obj in val:
+                if _len >= self.wrap:
+                    _len = 0
+                    _res.append(_str)
+                    _str = ''
+                _str = f'{_str}, {obj}' if _str else f'{obj}'
+                _len = len(_str)
+            _res.append(_str)
+        else:
+            _res.append(val)
+
+        for k in _res:
+            self.width = max(self.width, len(str(k)))
+        self.entries.append(tuple(_res))
 
 
 class Table:
@@ -29,15 +61,16 @@ class Table:
         self.columns: Dict[str, Column] = OrderedDict()
         self.heading: str = heading
 
-    def add_column(self, name: str, align: Optional[str] = None, alias: Optional[str] = None) -> Column:
-        self.columns[name] = c = Column(name, align, alias)
+    def add_column(self, name: str, align: Optional[str] = None, alias: Optional[str] = None,
+                   wrap: Optional[int] = None) -> Column:
+        self.columns[name] = c = Column(name, align, alias, wrap)
         return c
 
     def add_dict(self, _in: dict):
         for k, col in self.columns.items():
             col.add(_in[k])
 
-    def get_lines(self, sort_columns: List[Union[str, Column]] = None):
+    def get_lines(self, sort_columns: List[Union[str, Column]] = None) -> List[str]:
         # check if all tables have the same length
         vals = list(self.columns.values())
         len1 = len(vals[0].entries)
@@ -79,7 +112,12 @@ class Table:
         ret.append(line_sep)
 
         for t, i in sorted(lines_dict.items()):
-            ret.append('| ' + ' | '.join(map(lambda x: x.format_entry(i), self.columns.values())) + ' |')
+            lines = max(map(lambda x: x.get_lines(i), self.columns.values()))
+
+            grid = tuple(map(lambda x: x.format_entry(i, lines), self.columns.values()))  # type: Tuple[List[str], ...]
+            for col_i in range(lines):
+                cols = [obj[col_i] for obj in grid]
+                ret.append('| ' + ' | '.join(cols) + ' |')
 
         ret.append(line_sep)
         return ret

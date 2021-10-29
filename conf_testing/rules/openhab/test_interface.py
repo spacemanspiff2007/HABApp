@@ -99,12 +99,12 @@ class TestOpenhabInterface(TestBaseRule):
                     self.openhab.send_command(item, value)
                     waiter.wait_for_state(value)
 
-    def test_umlaute(self):
+    @OpenhabTmpItem.use('String')
+    def test_umlaute(self, item: OpenhabTmpItem):
         LABEL = 'äöß'
-        NAME = 'TestUmlaute'
 
-        self.openhab.create_item('String', NAME, label=LABEL)
-        ret = self.openhab.get_item(NAME)
+        self.openhab.create_item('String', item.name, label=LABEL)
+        ret = self.openhab.get_item(item.name)
         assert ret.label == LABEL, f'"{LABEL}" != "{ret.label}"'
 
     def test_openhab_item_not_found(self):

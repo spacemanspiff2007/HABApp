@@ -14,6 +14,12 @@ def test_ItemStateEvent():
     assert event.name == 'Ping'
     assert event.value == '1'
 
+    event = get_event({'topic': 'openhab/items/my_item_name/state',
+                       'payload': '{"type":"String","value":"NONE"}', 'type': 'ItemStateEvent'})
+    assert isinstance(event, ItemStateEvent)
+    assert event.name == 'my_item_name'
+    assert event.value is None
+
 
 def test_ItemCommandEvent():
     event = get_event({'topic': 'openhab/items/Ping/command', 'payload': '{"type":"String","value":"1"}',

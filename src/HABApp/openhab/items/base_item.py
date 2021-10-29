@@ -1,9 +1,16 @@
 import datetime
-from typing import Any, FrozenSet, Optional
+from typing import Any, FrozenSet, Mapping, NamedTuple, Optional
+
+from immutables import Map
 
 from HABApp.core.const import MISSING
 from HABApp.core.items.base_valueitem import BaseValueItem
 from HABApp.openhab.interface import get_persistence_data, post_update, send_command
+
+
+class MetaData(NamedTuple):
+    value: str
+    config: Mapping[str, Any] = Map()
 
 
 class OpenhabItem(BaseValueItem):
@@ -11,10 +18,12 @@ class OpenhabItem(BaseValueItem):
     """
 
     def __init__(self, name: str, initial_value=None,
-                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset()):
+                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                 metadata: Mapping[str, MetaData] = Map()):
         super().__init__(name, initial_value)
         self.tags: FrozenSet[str] = tags
         self.groups: FrozenSet[str] = groups
+        self.metadata: Mapping[str, MetaData] = metadata
 
     def oh_send_command(self, value: Any = MISSING):
         """Send a command to the openHAB item

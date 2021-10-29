@@ -14,7 +14,7 @@ class HABAppScheduler(AsyncScheduler):
         self.pause()
 
     async def _run_next(self):
-        async_context.set('HABAppSchedulerView')
+        async_context.set('HABAppScheduler')
         return await super()._run_next()
 
     async def __add_job(self, job: ScheduledJobBase):

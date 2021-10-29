@@ -1,7 +1,9 @@
-from typing import Optional, Tuple
+from typing import FrozenSet, Mapping, Optional, Tuple
+
+from immutables import Map
 
 from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
-from HABApp.openhab.items.base_item import OpenhabItem
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 from ..definitions import HSBValue, OnOffValue, PercentValue
 
@@ -12,8 +14,9 @@ PERCENT_FACTOR = 100
 class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
 
     def __init__(self, name: str, h=0.0, s=0.0, b=0.0,
-                 tags: Tuple[str, ...] = tuple(), groups: Tuple[str, ...] = tuple()):
-        super().__init__(name=name, initial_value=(h, s, b), tags=tags, groups=groups)
+                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                 metadata: Mapping[str, MetaData] = Map()):
+        super().__init__(name=name, initial_value=(h, s, b), tags=tags, groups=groups, metadata=metadata)
 
         self.hue: float = min(max(0.0, h), HUE_FACTOR)
         self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)

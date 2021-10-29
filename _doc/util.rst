@@ -117,6 +117,67 @@ Documentation
 .. autoclass:: Statistics
    :members:
 
+EventListenerGroup
+------------------------------
+EventListenerGroup is a helper class which allows to subscribe to multiple items at once.
+All subscriptions can be canceled together, too.
+This is useful if e.g. something has to be done once after a sensor reports a value.
+
+Example
+^^^^^^^^^^^^^^^^^^
+This is a rule which will turn on the lights once (!) in a room on the first movement in the morning.
+The lights will only turn on after 4 and before 8 and two movement sensors are used to pick up movement.
+
+
+.. exec_code::
+
+    # ------------ hide: start ------------
+    import HABApp
+    from rule_runner import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    HABApp.core.Items.add_item(HABApp.openhab.items.SwitchItem('RoomLights'))
+    HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor1'))
+    HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor2'))
+    # ------------ hide: stop -------------
+    from datetime import time
+
+    from HABApp import Rule
+    from HABApp.core.events import ValueChangeEvent
+    from HABApp.openhab.items import SwitchItem, NumberItem
+    from HABApp.util import EventListenerGroup
+
+
+    class EventListenerGroupExample(Rule):
+        def __init__(self):
+            super().__init__()
+            self.lights = SwitchItem.get_item('RoomLights')
+            self.sensor_move_1 = NumberItem.get_item('MovementSensor1')
+            self.sensor_move_1 = NumberItem.get_item('MovementSensor2')
+
+            # use the defaults so we don't have to pass the callback and event filter in add_listener
+            self.group = EventListenerGroup(default_callback=self.sensor_changed, default_event_filter=ValueChangeEvent).\
+                add_listener(self.sensor_move_1).add_listener(self.sensor_move_1)
+
+            self.run.on_every_day(time(4), self.listen_sensors)
+            self.run.on_every_day(time(8), self.sensors_cancel)
+
+        def listen_sensors(self):
+            self.listeners.listen()
+
+        def sensors_cancel(self):
+            self.listeners.cancel()
+
+        def sensor_changed(self, event):
+            self.listeners.cancel()
+            self.lights.on()
+
+
+    EventListenerGroupExample()
+
+
+.. autoclass:: EventListenerGroup
+   :members:
 
 MultiModeItem
 ------------------------------

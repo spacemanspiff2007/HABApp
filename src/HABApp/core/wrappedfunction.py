@@ -66,13 +66,14 @@ class WrappedFunction:
 
     async def async_run(self, *args, **kwargs):
 
-        async_context.set('WrappedFunction')
+        token = async_context.set('WrappedFunction')
 
         try:
             await self._func(*args, **kwargs)
         except Exception as e:
             self.__format_traceback(e, *args, **kwargs)
 
+        async_context.reset(token)
         return None
 
     def __run(self, *args, **kwargs):

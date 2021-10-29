@@ -15,7 +15,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
     @ignore_exception
     async def on_connect_function(self):
-        data = await async_get_items(disconnect_on_error=True)
+        data = await async_get_items(disconnect_on_error=True, all_metadata=True)
         if data is None:
             return None
 
@@ -24,8 +24,9 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         found_items = len(data)
         for _dict in data:
             item_name = _dict['name']
-            new_item = map_item(item_name, _dict['type'], _dict['state'], tuple(_dict['tags']),
-                                tuple(_dict['groupNames']))   # type: HABApp.openhab.items.OpenhabItem
+            new_item = map_item(item_name, _dict['type'], _dict['state'],
+                                frozenset(_dict['tags']), frozenset(_dict['groupNames']),
+                                _dict.get('metadata', {}))   # type: HABApp.openhab.items.OpenhabItem
             if new_item is None:
                 continue
             add_to_registry(new_item, True)

@@ -45,7 +45,7 @@ class TestOpenhabEventTypes(TestBaseRule):
                 ItemWaiter(item) as item_waiter:
 
             for state in get_openhab_test_states('Number'):
-                self.openhab.post_update(item_name, f'{state} {unit_of_dimension[dimension]}')
+                self.openhab.post_update(item_name, f'{state} {unit_of_dimension[dimension]}'.strip())
                 event_watier.wait_for_event(value=state)
                 item_waiter.wait_for_state(state)
 

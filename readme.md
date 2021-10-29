@@ -102,6 +102,11 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 0.31.1 (29.10.2021)
+- Added support for item metadata
+- Added possibility to search for items by metadata
+- Added EventListenerGroup to subscribe/cancel multiple listeners at once
+
 #### 0.31.0 (08.10.2021)
 - added self.get_items to easily search for items in a rule
 - added full support for tags and groups on OpenhabItem
