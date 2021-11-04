@@ -235,7 +235,7 @@ async def start_connection():
         HTTP_PREFIX = None
         return None
 
-    HTTP_PREFIX = f'http://{host:s}:{port:d}'
+    HTTP_PREFIX = f'https' if HABApp.CONFIG.openhab.connection.ssl else f'http' + f'://{host:s}:{port:d}'
 
     auth = None
     if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:

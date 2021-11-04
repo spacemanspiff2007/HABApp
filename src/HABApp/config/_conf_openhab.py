@@ -22,6 +22,7 @@ class General(ConfigContainer):
 class Connection(ConfigContainer):
     host: str = 'localhost'
     port: int = 8080
+    ssl: bool = False
     user: str = ''
     password: str = ''
 
