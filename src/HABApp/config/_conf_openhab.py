@@ -23,6 +23,7 @@ class Connection(ConfigContainer):
     host: str = 'localhost'
     port: int = 8080
     ssl: bool = False
+    ssl_verify: bool = False
     user: str = ''
     password: str = ''
 

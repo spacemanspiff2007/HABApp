@@ -249,6 +249,7 @@ async def start_connection():
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
         auth=auth,
+        ssl=HABApp.CONFIG.openhab.connection.ssl_verify,
         read_bufsize=2**19  # 512k buffer
     )
 
