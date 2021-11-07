@@ -152,7 +152,7 @@ def set_offline(log_msg=''):
 def is_disconnect_exception(e) -> bool:
     if not isinstance(e, (
             # aiohttp Exceptions
-            aiohttp.ClientPayloadError, aiohttp.ClientConnectorError, aiohttp.ClientOSError,
+            aiohttp.ClientPayloadError, aiohttp.ClientConnectorError, aiohttp.ClientOSError, 
 
             # aiohttp_sse_client Exceptions
             ConnectionRefusedError, ConnectionError, ConnectionAbortedError)):
@@ -275,7 +275,8 @@ async def start_sse_event_listener():
                     f'{event_prefix}/things/*/status,'          # Thing status updates
                     f'{event_prefix}/things/*/statuschanged'    # Thing status changes
                 ,
-                session=HTTP_SESSION
+                session=HTTP_SESSION,
+                ssl=HTTP_SSL_VERIFY
         ) as event_source:
             async for event in event_source:
 
