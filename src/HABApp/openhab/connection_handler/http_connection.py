@@ -3,6 +3,7 @@ import logging
 import traceback
 import typing
 from typing import Any, Optional
+from HABApp.config.config import CONFIG
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -50,7 +51,7 @@ async def get(url: str, log_404=True, disconnect_on_error=False, **kwargs: Any) 
     assert not url.startswith('/'), url
     url = f'{HTTP_PREFIX}/rest/{url}/'
 
-    mgr = _RequestContextManager(HTTP_SESSION._request(METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS, **kwargs))
+    mgr = _RequestContextManager(HTTP_SESSION._request(METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HABApp.CONFIG.openhab.connection.ssl_verify, **kwargs))
     return await check_response(mgr, log_404=log_404, disconnect_on_error=disconnect_on_error)
 
 
@@ -71,7 +72,7 @@ async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> O
 
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
-            METH_POST, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, data=data, json=json, **kwargs
+            METH_POST, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, ssl=HABApp.CONFIG.openhab.connection.ssl_verify, data=data, json=json, **kwargs
         )
     )
 
@@ -97,7 +98,7 @@ async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Op
 
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
-            METH_PUT, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, data=data, json=json, **kwargs
+            METH_PUT, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, ssl=HABApp.CONFIG.openhab.connection.ssl_verify, data=data, json=json, **kwargs
         )
     )
 
@@ -117,7 +118,7 @@ async def delete(url: str, log_404=True, json=None, data=None, **kwargs: Any) ->
     url = f'{HTTP_PREFIX}/rest/{url}/'
 
     mgr = _RequestContextManager(
-        HTTP_SESSION._request(METH_DELETE, url, allow_redirects=HTTP_ALLOW_REDIRECTS, data=data, json=json, **kwargs)
+        HTTP_SESSION._request(METH_DELETE, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HABApp.CONFIG.openhab.connection.ssl_verify, data=data, json=json, **kwargs)
     )
 
     if data is None:
@@ -234,8 +235,8 @@ async def start_connection():
     if host == '':
         HTTP_PREFIX = None
         return None
-
-    HTTP_PREFIX = f'https' if HABApp.CONFIG.openhab.connection.ssl else f'http' + f'://{host:s}:{port:d}'
+    http_schema = f'https' if HABApp.CONFIG.openhab.connection.ssl else f'http'
+    HTTP_PREFIX =  http_schema + f'://{host:s}:{port:d}'
 
     auth = None
     if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
@@ -249,7 +250,6 @@ async def start_connection():
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
         auth=auth,
-        ssl=HABApp.CONFIG.openhab.connection.ssl_verify,
         read_bufsize=2**19  # 512k buffer
     )
 
