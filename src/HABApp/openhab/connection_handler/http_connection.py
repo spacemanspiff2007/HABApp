@@ -3,7 +3,6 @@ import logging
 import traceback
 import typing
 from typing import Any, Optional
-from HABApp.config.config import CONFIG
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -237,8 +236,11 @@ async def start_connection():
         HTTP_PREFIX = None
         return None
     http_schema = f'https' if HABApp.CONFIG.openhab.connection.ssl else f'http'
-    HTTP_PREFIX =  http_schema + f'://{host:s}:{port:d}'
+
+    HTTP_PREFIX = f'{http_schema:s}://{host:s}:{port:d}'
     HTTP_SSL_VERIFY = None if HABApp.CONFIG.openhab.connection.ssl_verify else False
+    log.debug(f'Schema {http_schema:s} selected for SSL setting {HABApp.CONFIG.openhab.connection.ssl}')
+    log.debug(f'Verfifying SSL: {HTTP_SSL_VERIFY} for verification setting {HABApp.CONFIG.openhab.connection.ssl_verify}')
 
     auth = None
     if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
