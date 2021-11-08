@@ -51,7 +51,9 @@ async def get(url: str, log_404=True, disconnect_on_error=False, **kwargs: Any) 
     assert not url.startswith('/'), url
     url = f'{HTTP_PREFIX}/rest/{url}/'
 
-    mgr = _RequestContextManager(HTTP_SESSION._request(METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_SSL_VERIFY, **kwargs))
+    mgr = _RequestContextManager(HTTP_SESSION._request(
+        METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS,
+        ssl=HTTP_SSL_VERIFY, **kwargs))
     return await check_response(mgr, log_404=log_404, disconnect_on_error=disconnect_on_error)
 
 
@@ -72,7 +74,8 @@ async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> O
 
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
-            METH_POST, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, ssl=HTTP_SSL_VERIFY, data=data, json=json, **kwargs
+            METH_POST, url, allow_redirects=HTTP_ALLOW_REDIRECTS,
+            headers=headers, ssl=HTTP_SSL_VERIFY, data=data, json=json, **kwargs
         )
     )
 
@@ -98,7 +101,8 @@ async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Op
 
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
-            METH_PUT, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, ssl=HTTP_SSL_VERIFY, data=data, json=json, **kwargs
+            METH_PUT, url, allow_redirects=HTTP_ALLOW_REDIRECTS,
+            headers=headers, ssl=HTTP_SSL_VERIFY, data=data, json=json, **kwargs
         )
     )
 
@@ -118,7 +122,9 @@ async def delete(url: str, log_404=True, json=None, data=None, **kwargs: Any) ->
     url = f'{HTTP_PREFIX}/rest/{url}/'
 
     mgr = _RequestContextManager(
-        HTTP_SESSION._request(METH_DELETE, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_SSL_VERIFY, data=data, json=json, **kwargs)
+        HTTP_SESSION._request(
+            METH_DELETE, url, allow_redirects=HTTP_ALLOW_REDIRECTS,
+            ssl=HTTP_SSL_VERIFY, data=data, json=json, **kwargs)
     )
 
     if data is None:
@@ -152,7 +158,7 @@ def set_offline(log_msg=''):
 def is_disconnect_exception(e) -> bool:
     if not isinstance(e, (
             # aiohttp Exceptions
-            aiohttp.ClientPayloadError, aiohttp.ClientConnectorError, aiohttp.ClientOSError, 
+            aiohttp.ClientPayloadError, aiohttp.ClientConnectorError, aiohttp.ClientOSError,
 
             # aiohttp_sse_client Exceptions
             ConnectionRefusedError, ConnectionError, ConnectionAbortedError)):
@@ -235,12 +241,13 @@ async def start_connection():
     if host == '':
         HTTP_PREFIX = None
         return None
-    http_schema = f'https' if HABApp.CONFIG.openhab.connection.ssl else f'http'
+    http_schema = 'https' if HABApp.CONFIG.openhab.connection.ssl else 'http'
 
     HTTP_PREFIX = f'{http_schema:s}://{host:s}:{port:d}'
     HTTP_SSL_VERIFY = None if HABApp.CONFIG.openhab.connection.ssl_verify else False
     log.debug(f'Schema {http_schema:s} selected for SSL setting {HABApp.CONFIG.openhab.connection.ssl}')
-    log.debug(f'Verfifying SSL: {HTTP_SSL_VERIFY} for verification setting {HABApp.CONFIG.openhab.connection.ssl_verify}')
+    log.debug(f'Verfifying SSL: {HTTP_SSL_VERIFY} for verification setting \
+        {HABApp.CONFIG.openhab.connection.ssl_verify}')
 
     auth = None
     if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
