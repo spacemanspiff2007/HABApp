@@ -61,7 +61,6 @@ Mqtt items have an additional publish method which make interaction with the mqt
     import HABApp
     from unittest.mock import MagicMock
     HABApp.mqtt.items.mqtt_item.publish = MagicMock()
-    my_callback = lambda x: x
     # ------------ hide: stop -------------
 
     from HABApp.mqtt.items import MqttItem
@@ -77,9 +76,6 @@ Mqtt items have an additional publish method which make interaction with the mqt
     # comparing the item to get the state works, too
     if my_mqtt_item == 'test':
         pass # do something
-
-    # The event listener works as expected
-    my_mqtt_item.listen_event(my_callback, ValueChangeEvent)
 
 
 MqttItem
