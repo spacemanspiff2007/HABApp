@@ -1,23 +1,26 @@
 # Packages required for HABApp
 aiohttp-sse-client==0.2.1
-aiohttp==3.7.4
-bidict==0.21.2
+aiohttp==3.8.1
+bidict==0.21.4
 eascheduler==0.1.4
 easyco==0.2.3
-paho-mqtt==1.5.1
-pendulum==2.1.2
+paho-mqtt==1.6.1
 pydantic==1.8.2
 stackprinter==0.2.5
-voluptuous==0.12.1
-watchdog==2.1.2
-ujson==4.0.2
+voluptuous==0.12.2
+watchdog==2.1.6
+ujson==4.3.0
 immutables==0.16
 
+# install pendulum last because the setup sometimes fails :S
+pendulum==2.1.2
+
+
 # Packages to run source tests
-pytest==6.2.4
-pytest-asyncio==0.15.1
-flake8==3.9.2   # Required for github test
+pytest==6.2.5
+pytest-asyncio==0.16.0
+flake8==4.0.1   # Required for github test
 mock==4.0.3;python_version<"3.8"
 
 # Packages for source formatting
-pre-commit==2.13.0
+pre-commit==2.16.0

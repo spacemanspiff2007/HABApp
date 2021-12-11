@@ -53,7 +53,8 @@ def publish(topic: str, payload: typing.Any, qos: int = None, retain: bool = Non
 
 def subscribe(topic: str, qos: int = None) -> int:
     """
-    Subscribe to a MQTT topic. Subscriptions will be active until next disconnect
+    Subscribe to a MQTT topic. Note that subscriptions made this way are volatile and will only remain until
+    the next disconnect.
 
     :param topic: MQTT topic to subscribe to
     :param qos: QoS, can be 0, 1 or 2.  If not specified value from configuration file will be used.

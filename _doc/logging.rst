@@ -14,7 +14,7 @@ but the format should be pretty straight forward.
 
 .. hint::
    | It is highly recommended to use an absolute path as a file name, at least for the ``HABApp.log``
-   | If the HABApp configuration is invalid HABApp can still log the errors that have occurred.
+   | That way even if the HABApp configuration is invalid HABApp can still log the errors that have occurred.
    | e.g.: ``/HABApp/logs/habapp.log`` or ``c:\HABApp\logs\habapp.log``
 
 Example
