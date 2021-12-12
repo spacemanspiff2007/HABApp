@@ -153,11 +153,11 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
             super().__init__()
             self.lights = SwitchItem.get_item('RoomLights')
             self.sensor_move_1 = NumberItem.get_item('MovementSensor1')
-            self.sensor_move_1 = NumberItem.get_item('MovementSensor2')
+            self.sensor_move_2 = NumberItem.get_item('MovementSensor2')
 
             # use the defaults so we don't have to pass the callback and event filter in add_listener
-            self.group = EventListenerGroup(default_callback=self.sensor_changed, default_event_filter=ValueChangeEvent).\
-                add_listener(self.sensor_move_1).add_listener(self.sensor_move_1)
+            self.group = EventListenerGroup().add_listener(
+                [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEvent)
 
             self.run.on_every_day(time(4), self.listen_sensors)
             self.run.on_every_day(time(8), self.sensors_cancel)
