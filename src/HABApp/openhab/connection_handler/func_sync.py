@@ -13,7 +13,7 @@ from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingD
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \
     async_set_metadata, async_remove_metadata, async_get_channel_link, async_create_channel_link, \
     async_remove_channel_link, async_channel_link_exists, \
-    async_remove_item, async_item_exists, async_get_persistence_data
+    async_remove_item, async_item_exists, async_get_persistence_data, async_set_persistence_data
 from .. import definitions
 from ..definitions.helpers import OpenhabPersistenceData
 
@@ -242,7 +242,7 @@ def get_persistence_data(item_name: str, persistence: Optional[str],
                          end_time: Optional[datetime.datetime]) -> OpenhabPersistenceData:
     """Query historical data from the OpenHAB persistence service
 
-    :param item_name: name of the persistet item
+    :param item_name: name of the persistent item
     :param persistence: name of the persistence service (e.g. ``rrd4j``, ``mapdb``). If not set default will be used
     :param start_time: return only items which are newer than this
     :param end_time: return only items which are older than this
@@ -265,6 +265,29 @@ def get_persistence_data(item_name: str, persistence: Optional[str],
 
     ret = fut.result()
     return OpenhabPersistenceData.from_dict(ret)
+
+
+def set_persistence_data(item_name: str, persistence: Optional[str], time: datetime.datetime, state: Any):
+    """Set a measurement for a item in the persistence serivce
+
+    :param item_name: name of the persistent item
+    :param persistence: name of the persistence service (e.g. ``rrd4j``, ``mapdb``). If not set default will be used
+    :param time: time of measurement
+    :param state: state which will be set
+    """
+    assert isinstance(item_name, str) and item_name, item_name
+    assert isinstance(persistence, str) or persistence is None, persistence
+    assert isinstance(time, datetime.datetime), time
+
+    # This function is blocking so it can't be called in the async context
+    if async_context.get(None) is not None:
+        raise AsyncContextError(get_persistence_data)
+
+    fut = asyncio.run_coroutine_threadsafe(
+        async_set_persistence_data(item_name=item_name, persistence=persistence, time=time, state=state), loop
+    )
+
+    return fut.result()
 
 
 # ---------------------------------------------------------------------------------------------------------------------

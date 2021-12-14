@@ -122,13 +122,30 @@ async def async_get_persistence_data(item_name: str, persistence: typing.Optiona
     if persistence:
         params['serviceId'] = persistence
     if start_time is not None:
-        params['starttime'] = start_time.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+        params['starttime'] = convert_to_oh_type(start_time)
     if end_time is not None:
-        params['endtime'] = end_time.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+        params['endtime'] = convert_to_oh_type(end_time)
     if not params:
         params = None
 
     ret = await get(f'persistence/items/{item_name:s}', params=params)
+    if ret.status >= 300:
+        return {}
+    else:
+        return await ret.json(loads=load_json, encoding='utf-8')
+
+
+async def async_set_persistence_data(item_name: str, persistence: typing.Optional[str],
+                                     time: datetime.datetime, state: typing.Any):
+    params = {
+        'itemname': item_name,
+        'time': convert_to_oh_type(time),
+        'state': convert_to_oh_type(state),
+    }
+    if persistence is not None:
+        params['serviceId'] = persistence
+
+    ret = await put(f'persistence/items/{item_name:s}', params=params)
     if ret.status >= 300:
         return {}
     else:
