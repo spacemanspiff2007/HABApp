@@ -5,8 +5,47 @@ import sys
 import traceback
 import typing
 
-import HABApp
-from HABApp.__cmd_args__ import parse_args
+
+def get_debug_info() -> str:
+    import platform
+    import sys
+
+    info = {
+        'Platform': platform.platform(),
+        'Machine': platform.machine(),
+        'Python version': sys.version,
+    }
+
+    ret = '\n'.join('{:20s}: {:s}'.format(k, str(v).replace('\n', '')) for k, v in info.items())
+
+    try:
+        import pkg_resources
+        installed_packages = {p.key: p.version for p in sorted(pkg_resources.working_set, key=lambda x: x.key)}
+
+        indent = max(map(len, installed_packages.keys()), default=1) + 2
+        table = '\n'.join(f'{k:{indent}s}: {v}' for k, v in installed_packages.items())
+
+        ret += f'\n\nInstalled Packages\n{"-" * 80}\n{table}'
+
+    except Exception as e:
+        ret += f'\n\nCould not get installed Packages!\nError: {str(e)}'
+
+    return ret
+
+
+def print_debug_info():
+    print('Debug information\n')
+    print(get_debug_info())
+
+
+try:
+    import HABApp
+    from HABApp.__cmd_args__ import parse_args
+    from HABApp.__splash_screen__ import show_screen
+except (ModuleNotFoundError, ImportError) as e:
+    print(f'Error!\nDependency "{e.name}" is missing!\n')
+    print_debug_info()
+    sys.exit(100)
 
 
 def register_signal_handler():
@@ -23,6 +62,12 @@ def main() -> typing.Union[int, str]:
 
     # This has do be done before we create HABApp because of the possible sleep time
     cfg_folder = parse_args()
+
+    show_screen()
+
+    if HABApp.__cmd_args__.DO_DEBUG:
+        print_debug_info()
+        sys.exit(0)
 
     log = logging.getLogger('HABApp')
 

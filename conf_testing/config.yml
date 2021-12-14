@@ -1,5 +1,5 @@
 directories:
-  logging: ../conf/log
+  logging: log
   rules: rules
   lib: lib
   param: parameters
@@ -12,7 +12,7 @@ location:
 
 mqtt:
   connection:
-    client_id: HABApp
+    client_id: HABAppTesting
     host: localhost
     user: ''
     password: ''

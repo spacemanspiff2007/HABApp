@@ -8,6 +8,7 @@ from pathlib import Path
 
 # Global var if we want to run the benchmark
 DO_BENCH = False
+DO_DEBUG = False
 
 
 def get_uptime() -> float:
@@ -25,7 +26,7 @@ def get_uptime() -> float:
 
 
 def parse_args(passed_args=None) -> Path:
-    global DO_BENCH
+    global DO_BENCH, DO_DEBUG
 
     parser = argparse.ArgumentParser(description='Start HABApp')
     parser.add_argument(
@@ -47,9 +48,16 @@ def parse_args(passed_args=None) -> Path:
         help='Do a Benchmark based on the current config',
         action='store_true'
     )
+    parser.add_argument(
+        '-di',
+        '--debug_info',
+        help='Print debug information',
+        action='store_true'
+    )
     args = parser.parse_args(passed_args)
 
     DO_BENCH = args.benchmark
+    DO_DEBUG = args.debug_info
 
     if args.wait_os_uptime:
         args.wait_os_uptime = max(0, args.wait_os_uptime)
