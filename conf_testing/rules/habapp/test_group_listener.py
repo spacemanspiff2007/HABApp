@@ -19,8 +19,8 @@ class TestListenerGroup(TestBaseRule):
         self.my_item1 = Item.get_create_item('EventGroupItem_1')
         self.my_item2 = Item.get_create_item('EventGroupItem_2')
 
-        self.grp = EventListenerGroup()
-        self.grp.add_listener([self.my_item1, self.my_item2], self.__callback, ValueUpdateEvent)
+        self.grp = EventListenerGroup().add_listener(
+            [self.my_item1, self.my_item2], self.__callback, ValueUpdateEvent)
 
         self.add_test('Test EventListenerGroup', self.test_basic)
         self.add_test('Test EventListenerGroup deactivate', self.test_deactivate)
@@ -30,11 +30,11 @@ class TestListenerGroup(TestBaseRule):
     def __callback(self, event):
         self.calls.append(event)
 
-    def wait_for_cb(self, l: int, min_time=None):
+    def wait_for_cb(self, expected_len: int, min_time=None):
         start = time.time()
         while True:
             dur = time.time() - start
-            if len(self.calls) == l:
+            if len(self.calls) == expected_len:
                 if min_time is None:
                     break
                 if dur > min_time:

@@ -155,7 +155,7 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
             self.sensor_move_1 = NumberItem.get_item('MovementSensor1')
             self.sensor_move_2 = NumberItem.get_item('MovementSensor2')
 
-            # use the defaults so we don't have to pass the callback and event filter in add_listener
+            # use a list of items which will be subscribed with the same callback and event
             self.group = EventListenerGroup().add_listener(
                 [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEvent)
 
