@@ -50,7 +50,7 @@ def parse_args(passed_args=None) -> Path:
     )
     parser.add_argument(
         '-di',
-        '--debug_info',
+        '--debug-info',
         help='Print debug information',
         action='store_true'
     )

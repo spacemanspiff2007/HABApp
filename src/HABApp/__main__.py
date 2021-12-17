@@ -35,7 +35,7 @@ def get_debug_info() -> str:
 
 
 def print_debug_info():
-    print('Debug information\n')
+    print(f'Debug information\n{"-" * 80}')
     print(get_debug_info())
 
 
@@ -43,8 +43,8 @@ try:
     import HABApp
     from HABApp.__cmd_args__ import parse_args
     from HABApp.__splash_screen__ import show_screen
-except (ModuleNotFoundError, ImportError) as e:
-    print(f'Error!\nDependency "{e.name}" is missing!\n')
+except (ModuleNotFoundError, ImportError) as dep_err:
+    print(f'Error!\nDependency "{dep_err.name}" is missing!\n\n')
     print_debug_info()
     sys.exit(100)
 
