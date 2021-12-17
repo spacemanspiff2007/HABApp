@@ -131,9 +131,9 @@ class EventListenerGroup:
         if not obj.active:
             return False
 
-        obj.active = False
         if cancel_if_active:
             obj.cancel()
+        obj.active = False
         return True
 
     def __add_objs(self, cls, item: Union[BaseItem, Iterable[BaseItem]], callback: Callable[[Any], Any],
