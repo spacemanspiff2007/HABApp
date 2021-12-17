@@ -109,7 +109,7 @@ MyOpenhabRule()
 - May doc updates
 - Reworked EventListenerGroup
 
-- #### 0.31.1 (29.10.2021)
+#### 0.31.1 (29.10.2021)
 - Added support for item metadata
 - Added possibility to search for items by metadata
 - Added EventListenerGroup to subscribe/cancel multiple listeners at once
