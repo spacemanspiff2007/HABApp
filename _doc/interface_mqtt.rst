@@ -30,8 +30,10 @@ Rule Interface
 
    .. py:method:: subscribe(self, topic: str[, qos: int = None]) -> int
 
-      Subscribe to a MQTT topic. Subscriptions will be active until next disconnect.
-      For persistent subscriptions use the configuration file
+      Subscribe to a MQTT topic. Please note that subscriptions made this way are volatile,
+      and will only remain until the next disconnect.
+      For persistent subscriptions use the corresponding entry in the configuration file.
+      By default HABApp listens to all topics so the topics can be used in listen_event.
 
       :param topic: MQTT topic to subscribe to
       :param qos: QoS, can be 0, 1 or 2.  If not specified value from configuration file will be used.
@@ -62,9 +64,10 @@ Mqtt items have an additional publish method which make interaction with the mqt
     # ------------ hide: stop -------------
 
     from HABApp.mqtt.items import MqttItem
+    from HABApp.core.events import ValueChangeEvent
 
-    # items can be created manually or will be automatically
-    # created when the first mqtt message is received
+    # Messages with a retain flag will automatically create a corresponding item in HABApp.
+    # All other items have to be created manually
     my_mqtt_item = MqttItem.get_create_item('test/topic')
 
     # easy to publish values

@@ -1,13 +1,15 @@
 aiohttp-sse-client==0.2.1
-aiohttp==3.7.4
-bidict==0.21.2
+aiohttp==3.8.1
+bidict==0.21.4
 eascheduler==0.1.4
 easyco==0.2.3
-paho-mqtt==1.5.1
-pendulum==2.1.2
+paho-mqtt==1.6.1
 pydantic==1.8.2
 stackprinter==0.2.5
-voluptuous==0.12.1
-watchdog==2.1.2
-ujson==4.0.2
+voluptuous==0.12.2
+watchdog==2.1.6
+ujson==4.3.0
 immutables==0.16
+
+# install pendulum last because the setup sometimes fails :S
+pendulum==2.1.2

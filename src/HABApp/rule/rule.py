@@ -77,7 +77,7 @@ class Rule:
         # scheduler
         self.run: _HABAppSchedulerView = _HABAppSchedulerView(self)
 
-        # suggest a rule name if it is not
+        # suggest a rule name
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
 
         # interfaces

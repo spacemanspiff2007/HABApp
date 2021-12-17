@@ -1,158 +1,132 @@
 from unittest.mock import Mock
 
-from HABApp.core.events import AllEvents
+import pytest
+
+import HABApp.util.listener_groups
+from HABApp.core.items.base_valueitem import BaseItem
 from HABApp.util import EventListenerGroup
+from HABApp.util.listener_groups import EventListenerCreator, ListenerCreatorNotFoundError
 
 
-def test_listen():
-    item1 = Mock()
-    item1.listen_event = Mock()
-    item2 = Mock()
-    item2.listen_event = Mock()
+class PatchedBaseItem(BaseItem):
+    NAME = 'PatchedBaseItem'
 
-    cb = Mock(name='cb_mock')
+    def __init__(self):
+        super().__init__(PatchedBaseItem.NAME)
 
-    grp = EventListenerGroup(cb)
-    grp.add_listener(item1)
-    item1.listen_event.assert_not_called()
+    listener = Mock()
+    listen_event = Mock(return_value=listener)
 
-    # Assert that multiple calls will only create the listener once
-    for i in range(5):
-        grp.listen()
-        item1.listen_event.assert_called_once_with(cb, AllEvents)
+    no_x_watch = Mock()
+    no_x_watch.listen_event = Mock(return_value=listener)
+    watch_change = Mock(return_value=no_x_watch)
+    watch_update = Mock(return_value=no_x_watch)
 
-    assert grp.active
-
-    grp.add_listener(item2)
-    item1.listen_event.assert_called_once_with(cb, AllEvents)
-    item2.listen_event.assert_called_once_with(cb, AllEvents)
-
-    objs = grp._subs.copy()
-    assert len(objs) == 2
-    for o in objs:
-        assert 'cancel' not in o.__dir__()
-
-    grp.cancel()
-    assert not grp.active
-
-    for o in objs:
-        cancel = o.cancel
-        assert isinstance(cancel, Mock)
-        cancel.assert_called_once_with()
-
-    assert grp._subs == []
+    def reset(self):
+        self.listener.reset_mock()
+        self.listen_event.reset_mock()
+        self.no_x_watch.reset_mock()
+        self.watch_change.reset_mock()
+        self.watch_update.reset_mock()
 
 
-def test_change():
-    item1 = Mock()
-    item1_ret = Mock()
-    item1.watch_change = Mock(return_value=item1_ret)
-    item2 = Mock()
-    item2_ret = Mock()
-    item2.watch_change = Mock(return_value=item2_ret)
-
-    cb = Mock(name='cb_mock')
-
-    grp = EventListenerGroup(cb, default_seconds=20)
-    grp.add_no_change_watcher(item1, seconds=30)
-    item1.watch_change.assert_not_called()
-    item2.watch_change.assert_not_called()
-
-    # Assert that multiple calls will only create the listener once
-    for i in range(5):
-        grp.listen()
-        item1.watch_change.assert_called_once_with(30)
-        item1_ret.listen_event.assert_called_once_with(cb)
-        item2.watch_change.assert_not_called()
-
-    assert grp.active
-
-    # ensure that the watcher is added immediately when we are active
-    grp.add_no_change_watcher(item2)
-    item1.watch_change.assert_called_once_with(30)
-    item1_ret.listen_event.assert_called_once_with(cb)
-    item2.watch_change.assert_called_once_with(20)
-    item2_ret.listen_event.assert_called_once_with(cb)
-
-    # check that the cancel gets cleaned properly
-    objs = grp._subs.copy()
-    assert len(objs) == 2
-    for o in objs:
-        assert 'cancel' not in o.__dir__()
-
-    grp.cancel()
-    assert not grp.active
-
-    for o in objs:
-        cancel = o.cancel
-        assert isinstance(cancel, Mock)
-        cancel.assert_called_once_with()
-
-    assert grp._subs == []
+def patched_item() -> BaseItem:
+    item = PatchedBaseItem()
+    item.reset()
+    return item
 
 
-def test_update():
-    item1 = Mock()
-    item1_ret = Mock()
-    item1.watch_update = Mock(return_value=item1_ret)
-    item2 = Mock()
-    item2_ret = Mock()
-    item2.watch_update = Mock(return_value=item2_ret)
+def test_not_found():
+    msg = 'ListenerCreator for "asdf" not found!'
 
-    cb = Mock(name='cb_mock')
+    g = EventListenerGroup()
 
-    grp = EventListenerGroup(cb, default_seconds=20)
-    grp.add_no_update_watcher(item1, seconds=30)
-    item1.watch_update.assert_not_called()
-    item2.watch_update.assert_not_called()
+    with pytest.raises(ListenerCreatorNotFoundError) as e:
+        g.activate_listener('asdf')
+    assert str(e.value) == msg
 
-    # Assert that multiple calls will only create the listener once
-    for i in range(5):
-        grp.listen()
-        item1.watch_update.assert_called_once_with(30)
-        item1_ret.listen_event.assert_called_once_with(cb)
-        item2.watch_update.assert_not_called()
+    with pytest.raises(ListenerCreatorNotFoundError) as e:
+        g.deactivate_listener('asdf')
+    assert str(e.value) == msg
 
-    assert grp.active
+    g.add_listener(patched_item(), Mock(), object(), alias='asdf')
+    g.activate_listener('asdf')
+    g.deactivate_listener('asdf')
 
-    # ensure that the watcher is added immediately when we are active
-    grp.add_no_update_watcher(item2)
-    item1.watch_update.assert_called_once_with(30)
-    item1_ret.listen_event.assert_called_once_with(cb)
-    item2.watch_update.assert_called_once_with(20)
-    item2_ret.listen_event.assert_called_once_with(cb)
-
-    # check that the cancel gets cleaned properly
-    objs = grp._subs.copy()
-    assert len(objs) == 2
-    for o in objs:
-        assert 'cancel' not in o.__dir__()
-
-    grp.cancel()
-    assert not grp.active
-
-    for o in objs:
-        cancel = o.cancel
-        assert isinstance(cancel, Mock)
-        cancel.assert_called_once_with()
-
-    assert grp._subs == []
+    g.add_listener(patched_item(), Mock(), object())
+    g.activate_listener('PatchedBaseItem')
+    g.deactivate_listener('PatchedBaseItem')
 
 
-def test_overwrite_defaults():
-    item1 = Mock()
-    item1.listen_event = Mock()
+@pytest.mark.parametrize('func', ('add_listener', 'add_no_update_watcher', 'add_no_change_watcher'))
+def test_activate_deactivate(func):
+    g = EventListenerGroup()
+    item = patched_item()
+    cb = object()
+    p1 = object()
 
-    default_cb = Mock(name='cb_default')
-    grp = EventListenerGroup(default_cb)
+    def assert_called_once():
+        if func == 'add_listener':
+            item.listen_event.assert_called_once_with(cb, p1)
+        else:
+            if func == 'add_no_change_watcher':
+                item.watch_change.assert_called_once_with(p1)
+            else:
+                item.watch_update.assert_called_once_with(p1)
+            item.no_x_watch.listen_event.assert_called_once_with(cb)
 
-    cb, f = Mock(), Mock()
-    grp.add_listener(item1, cb, f)
+    getattr(g, func)(item, cb, p1)
 
-    item1.listen_event.assert_not_called()
+    assert not g.active
 
-    # Assert that multiple calls will only create the listener once
-    for i in range(5):
-        grp.listen()
-        item1.listen_event.assert_called_once_with(cb, f)
-    assert grp.active
+    g.listen()
+
+    assert g.active
+    assert_called_once()
+
+    assert g.active
+    assert_called_once()
+
+    g.cancel()
+
+    assert not g.active
+    item.listener.cancel.assert_called_once_with()
+
+    assert not g.active
+    item.listener.cancel.assert_called_once_with()
+
+
+def test_activate():
+    g = EventListenerGroup()
+    g._items['a'] = m = Mock()
+
+    m.active = True
+    assert not g.activate_listener('a')
+    m.listen.assert_not_called()
+
+    m.active = False
+    assert g.activate_listener('a')
+    m.listen.assert_not_called()
+
+    m.active = False
+    g.listen()
+    m.listen.assert_called_once_with()
+
+    assert g.activate_listener('a')
+    assert m.active
+    assert len(m.listen.mock_calls) == 2
+
+
+def test_listen_add(monkeypatch):
+    m = Mock()
+    monkeypatch.setattr(HABApp.util.listener_groups, EventListenerCreator.__name__, Mock(return_value=m))
+
+    item = patched_item()
+    cb = object()
+    p1 = object()
+
+    g = EventListenerGroup()
+    g.listen()
+
+    g.add_listener(item, cb, p1)
+    m.listen.assert_called_once_with()

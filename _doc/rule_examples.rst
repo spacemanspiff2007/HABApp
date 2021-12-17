@@ -33,19 +33,27 @@ Get an even when the item is constant for 5 and for 10 seconds.
     class MyRule(HABApp.Rule):
         def __init__(self):
             super().__init__()
+
             my_item = Item.get_item('test_watch')
 
-            my_item.watch_change(5)     # Create event when item doesn't change for  5 secs
-            my_item.watch_change(10)    # Create event when item doesn't change for 10 secs
+            # Create an event when the item doesn't change for 5 secs and
+            # create a watcher for ItemNoChangeEvent with 5s const time
+            my_item.watch_change(5).listen_event(self.item_constant_5s)
 
-            # Listen to these events
-            self.listen_event(my_item, self.item_constant, ItemNoChangeEvent)
+            # Just create an event when the item doesn't change for 10 secs
+            my_item.watch_change(10)
 
-            # Set the item to a value
+            # Listen to all ItemNoChangeEvents for the item
+            my_item.listen_event(self.item_constant, ItemNoChangeEvent)
+
+            # Set the item to a value to generate the ItemNoChangeEvent events
             my_item.set_value('my_value')
 
+        def item_constant_5s(self, event):
+            print(f'Item 5s const: {event}')
+
         def item_constant(self, event):
-            print(f'{event}')
+            print(f'Item const: {event}')
 
     MyRule()
     # ------------ hide: start ------------
