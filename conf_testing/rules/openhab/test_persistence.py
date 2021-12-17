@@ -26,7 +26,7 @@ class TestPersistence(TestBaseRule):
         d = self.openhab.get_persistence_data(self.item, 'mapdb', now - timedelta(seconds=5), now)
         was = d.get_data()
 
-        assert list(was.values()) != [1]
+        assert list(was.values()) == [1]
 
         self.openhab.set_persistence_data(self.item, 'mapdb', now, 2)
 

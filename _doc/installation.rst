@@ -40,9 +40,9 @@ Installation
 
     Scripts\activate
 
-#. Upgrade pip::
+#. Upgrade pip and setuptools::
 
-    python3 -m pip install --upgrade pip
+    python3 -m pip install --upgrade pip setuptools
 
 #. Install HABApp::
 

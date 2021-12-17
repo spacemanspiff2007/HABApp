@@ -1,17 +1,17 @@
 import datetime
 import traceback
 import typing
+import warnings
 from typing import Any, Optional, Dict, List
 from urllib.parse import quote as quote_url
 
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
-from HABApp.openhab.errors import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
-    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError, ExpectedSuccessFromOpenhab
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
 from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
+from HABApp.openhab.errors import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
+    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError, ExpectedSuccessFromOpenhab
 from .http_connection import delete, get, post, put, log, async_get_root, async_get_uuid
-
 
 if typing.TYPE_CHECKING:
     async_get_root = async_get_root
@@ -137,6 +137,11 @@ async def async_get_persistence_data(item_name: str, persistence: typing.Optiona
 
 async def async_set_persistence_data(item_name: str, persistence: typing.Optional[str],
                                      time: datetime.datetime, state: typing.Any):
+
+    # This does not work as of OH 3.2
+    warnings.warn(f'{async_set_persistence_data.__name__} calls a part of the openHAB API which is buggy!',
+                  category=ResourceWarning)
+
     params = {
         'itemname': item_name,
         'time': convert_to_oh_type(time),
