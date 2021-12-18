@@ -131,7 +131,7 @@ class Rule:
         """
         Register an event listener
 
-        :param name: item or name to listen to. Use None to listen to all events
+        :param name: item or name to listen to
         :param callback: callback that accepts one parameter which will contain the event
         :param event_type: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEvent` or
             :class:`~HABApp.core.events.ValueChangeEvent` which will also trigger on changes/update from openhab

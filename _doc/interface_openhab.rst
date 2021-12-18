@@ -888,7 +888,7 @@ for 60 seconds.
 
             self.thing = Thing.get_item(name)
             watcher = self.thing.watch_change(60)
-            self.thing.listen_event(self.thing_no_change, watcher.EVENT)
+            watcher.listen_event(self.thing_no_change)
 
         def thing_no_change(self, event: ItemNoChangeEvent):
             print(f'Thing {event.name} constant for {event.seconds}')
