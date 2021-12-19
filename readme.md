@@ -160,8 +160,8 @@ Changelog
 - Significantly less CPU usage when no functions are running
 - Completely reworked the file handling (loading and dependency resolution)
 - Completely reworked the Scheduler!
-  - Has now subsecond accuracity (finally!)
-  - Has a new .coundown() job which can simplify many rules.
+  - Has now subsecond accuracy (finally!)
+  - Has a new .countdown() job which can simplify many rules.
     It is made for functions that do something after a certain period of time (e.g. switch a light off after movement)
 - Added hsb_to_rgb, rgb_to_hsb functions which can be used in rules
 - Better error message if configured foldes overlap with HABApp folders
