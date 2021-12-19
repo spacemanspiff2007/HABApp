@@ -23,15 +23,15 @@ HABApp folder structure
 
 Integration with openHAB
 ------------------------------
-HABApp connects to the openhab event stream and automatically updates the local openhab items when an item in openhab changes.
+HABApp connects to the openHAB event stream and automatically updates the local openHAB items when an item in openHAB changes.
 These item values are cached, so accessing and working with items in rules is very fast.
-The events from openhab are also mirrored to the internal event bus which means that triggering on these
+The events from openHAB are also mirrored to the internal event bus which means that triggering on these
 events is also possible.
 
-When HABApp connects to openhab for the first time it will load all items/things from the openhab instance and create local items.
-The name of the local openhab items is equal to the name in openhab.
+When HABApp connects to openHAB for the first time it will load all items/things from the openHAB instance and create local items.
+The name of the local openHAB items is equal to the name in openHAB.
 
-Posting updates, sending commands or any other openhab interface call will issue a corresponding REST-API call to change openhab.
+Posting updates, sending commands or any other openHAB interface call will issue a corresponding REST-API call to change openHAB.
 
 Integration with MQTT
 ------------------------------

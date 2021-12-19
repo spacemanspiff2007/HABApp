@@ -15,8 +15,8 @@ Rule
 Interacting with items
 ------------------------------
 Items are like variables. They have a name and a value (which can be anything).
-Items from openhab use the item name from openhab and get created when HABApp successfully connects to
-openhab or when the openhab configuration changes.
+Items from openHAB use the item name from openHAB and get created when HABApp successfully connects to
+openHAB or when the openHAB configuration changes.
 Items from MQTT use the topic as item name and get created as soon as a message gets processed.
 
 Some item types provide convenience functions, so it is advised to always set the correct item type.
@@ -60,7 +60,7 @@ It is possible to check the item value by comparing it
         pass    # do something
 
 An overview over the item types can be found on :ref:`the HABApp item section <HABAPP_ITEM_TYPES>`,
-:ref:`the openhab item section <OPENHAB_ITEM_TYPES>` and the :ref:`the mqtt item section <MQTT_ITEM_TYPES>`
+:ref:`the openHAB item section <OPENHAB_ITEM_TYPES>` and the :ref:`the mqtt item section <MQTT_ITEM_TYPES>`
 
 Events
 ------------------------------
@@ -73,7 +73,7 @@ There is the possibility to reduce the function calls to a certain event type wi
 (typically :class:`~HABApp.core.ValueUpdateEvent` or :class:`~HABApp.core.ValueChangeEvent`).
 
 An overview over the events can be found on :ref:`the HABApp event section <HABAPP_EVENT_TYPES>`,
-:ref:`the openhab event section <OPENHAB_EVENT_TYPES>` and the :ref:`the mqtt event section <MQTT_EVENT_TYPES>`
+:ref:`the openHAB event section <OPENHAB_EVENT_TYPES>` and the :ref:`the mqtt event section <MQTT_EVENT_TYPES>`
 
 .. exec_code::
     :hide_output:

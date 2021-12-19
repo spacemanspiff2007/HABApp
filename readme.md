@@ -13,7 +13,7 @@
 _Easy automation with MQTT and/or openHAB_
 
 
-HABApp is a asyncio/multithread application that connects to an openhab instance and/or a MQTT broker.
+HABApp is a asyncio/multithread application that connects to an openHAB instance and/or a MQTT broker.
 It is possible to create rules that listen to events from these instances and then react accordingly.
 
 ## Goals
@@ -88,7 +88,7 @@ class MyOpenhabRule(HABApp.Rule):
         assert isinstance(event, ValueChangeEvent)
         print( f'{event}')
 
-        # interaction is available through self.openhab or self.oh
+        # interaction is available through self.openHAB or self.oh
         self.openhab.send_command('TestItemCommand', 'ON')
 
     def item_command(self, event):
@@ -122,18 +122,18 @@ MyOpenhabRule()
 - Label in commandOption is optional
 - Added message when file is removed
 - Examples in the docs get checked with a newly created sphinx extension
-- Reworked the openhab tests
+- Reworked the openHAB tests
 
 #### 0.30.3 (17.06.2021)
 - add support for custom ca cert for MQTT
 - Scheduler runs only when the rule file has been loaded properly
-- Sync openhab calls raise an error when called from an async context
+- Sync openHAB calls raise an error when called from an async context
 - Replaced thread check for asyncio with a contextvar (internal)
 
 #### 0.30.3 (01.06.2021)
 - Scheduler runs only when the rule file has been loaded properly
 - Replaced thread check for asyncio with a contextvar
-- Sync openhab calls raise an error when called from an async context
+- Sync openHAB calls raise an error when called from an async context
 
 #### 0.30.2 (26.05.2021)
 - Item and Thing loading from openHAB is more robust and disconnects now properly if openHAB is only partly ready

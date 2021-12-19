@@ -3,7 +3,7 @@ from EasyCo import ConfigContainer, ConfigEntry
 
 class Ping(ConfigContainer):
     enabled: bool = ConfigEntry(True, description='If enabled the configured item will show how long it takes to send '
-                                                  'an update from HABApp and get the updated value back from openhab'
+                                                  'an update from HABApp and get the updated value back from openHAB'
                                                   'in milliseconds')
     item: str = ConfigEntry('HABApp_Ping', description='Name of the Numberitem')
     interval: int = ConfigEntry(10, description='Seconds between two pings')

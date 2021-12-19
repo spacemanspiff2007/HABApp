@@ -20,8 +20,8 @@ EVENT_LIST = [
 ]
 
 __event_lookup: typing.Dict[str, typing.Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
-__event_lookup['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming from openhab is inconsistent here
-__event_lookup['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openhab is inconsistent here
+__event_lookup['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming from openHAB is inconsistent here
+__event_lookup['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openHAB is inconsistent here
 
 
 def get_event(_in_dict: dict) -> OpenhabEvent:

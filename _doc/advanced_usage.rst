@@ -97,14 +97,14 @@ Example
 
 Invoking OpenHAB actions
 ------------------------
-The openhab REST interface does not expose `actions <https://www.openhab.org/docs/configuration/actions.html>`_,
+The openHAB REST interface does not expose `actions <https://www.openhab.org/docs/configuration/actions.html>`_,
 and thus there is no way to trigger them from HABApp. If it is not possible to create and OpenHAB item that
-directly triggers the action there is a way to work around it with additional items within openhab.
+directly triggers the action there is a way to work around it with additional items within openHAB.
 An additional OpenHAB (note not HABapp) rule listens to changes on those items and invokes the appropriate
 openhab actions.
 On the HABApp side these actions are indirectly executed by setting the values for those items.
 
-Below is an example how to invoke the openhab Audio and Voice actions.
+Below is an example how to invoke the openHAB Audio and Voice actions.
 
 First, define couple items to accept values from HABApp, and place them in /etc/openhab2/items/habapp-bridge.items:
 
@@ -184,12 +184,12 @@ Finally, define the HABApp functions to indirectly invoke the actions:
 Mocking OpenHAB items and events for tests
 --------------------------------------------
 It is possible to create mock items in HABApp which do not exist in Openhab to create unit tests for rules and libraries.
-Ensure that this mechanism is only used for testing because since the items will not exist in openhab they will not get
+Ensure that this mechanism is only used for testing because since the items will not exist in openHAB they will not get
 updated which can lead to hard to track down errors.
 
 Examples:
 
-Add an openhab mock item to the item registry
+Add an openHAB mock item to the item registry
 
 .. exec_code::
    :hide_output:

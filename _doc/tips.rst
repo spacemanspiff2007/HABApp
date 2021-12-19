@@ -35,7 +35,7 @@ autoupdate
 --------------------------------------
 
 If external devices are capable of reporting their state (e.g. Z-Wave) it is always advised to use disable ``autoupdate`` for these items.
-This prevents openhab from guessing the item state based on the command and forces it to use the actual reported value.
+This prevents openHAB from guessing the item state based on the command and forces it to use the actual reported value.
 If in doubt if the device supports reporting their state watch the state after sending a command with ``autoupdate`` off.
 If the state changes ``autoupdate`` can remain off.
 
