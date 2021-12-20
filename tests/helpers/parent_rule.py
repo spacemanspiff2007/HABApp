@@ -21,7 +21,4 @@ def parent_rule(monkeypatch):
     # patch both imports imports
     monkeypatch.setattr(HABApp.rule_ctx, 'get_rule_context', ret_dummy_rule_context, raising=True)
 
-    # util imports
-    monkeypatch.setattr(HABApp.util.multimode.item, 'get_rule_context', ret_dummy_rule_context, raising=True)
-
     yield rule

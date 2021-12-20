@@ -3,7 +3,7 @@ from typing import Optional
 
 
 def get_log_folder(default: Optional[Path] = None) -> Optional[Path]:
-    # As a default we log into the openhab folder
+    # As a default we log into the openHAB folder
     choices = ('/var/log/openhab', '/opt/openhab/userdata/logs')
     for choice in choices:
         path = Path(choice)

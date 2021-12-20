@@ -68,7 +68,7 @@ loggers:
         'LOG_LEVELS': '',
     }
 
-    # Use abs path and rename events.log if we log in the openhab folder
+    # Use abs path and rename events.log if we log in the openHAB folder
     log_folder = get_log_folder()
     if log_folder is not None:
         # Absolute so we can log errors if the config is faulty

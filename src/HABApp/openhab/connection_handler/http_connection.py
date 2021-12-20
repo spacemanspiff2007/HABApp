@@ -174,7 +174,7 @@ async def check_response(future: aiohttp.client._RequestContextManager, sent_dat
 
     status = resp.status
 
-    # Server Errors if openhab is not ready yet
+    # Server Errors if openHAB is not ready yet
     if status >= 500:
         set_offline(f'Status {status} for {resp.request_info.method} {resp.request_info.url}')
         raise OpenhabNotReadyYet()

@@ -52,7 +52,7 @@ Installation
 
     habapp --config PATH_TO_CONFIGURATION_FOLDER
 
-   A good configuration folder for HABApp would be your openhab configuration folder (e.g.
+   A good configuration folder for HABApp would be your openHAB configuration folder (e.g.
    ``/opt/openhab/conf/habapp`` or ``/etc/openhab/habapp``) because this is where your other configuration
    folders are located (e.g. the items and sitemaps folder). Just make sure to manually create the folder ``habapp`` before the start.
 
@@ -101,7 +101,7 @@ To automatically start HABApp from the virtual environment after a reboot call::
     nano /etc/systemd/system/habapp.service
 
 
-and copy paste the following contents. If the user which is running openhab is not "openhab" replace accordingly.
+and copy paste the following contents. If the user which is running openHAB is not "openhab" replace accordingly.
 If your installation is not done in "/opt/habapp/bin" replace accordingly as well::
 
     [Unit]

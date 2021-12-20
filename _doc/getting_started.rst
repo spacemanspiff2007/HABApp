@@ -83,9 +83,9 @@ This often comes in handy if there is some logic that shall be applied to differ
 
 Interacting with items
 ------------------------------
-HABApp uses an internal item registry to store both openhab items and locally
+HABApp uses an internal item registry to store both openHAB items and locally
 created items (only visible within HABApp). Upon start-up HABApp retrieves
-a list of openhab items and adds them to the internal registry.
+a list of openHAB items and adds them to the internal registry.
 Rules and HABApp derived libraries may add additional local items which can be used
 to share states across rules and/or files.
 
@@ -101,7 +101,7 @@ An item is created and added to the item registry through the corresponding clas
 
 Posting values from the item will automatically create the events on the event bus.
 This example will create an item in HABApp (locally) and post some updates to it.
-To access items from openhab use the correct openhab item type (see :ref:`the openhab item description <OPENHAB_ITEM_TYPES>`).
+To access items from openHAB use the correct openHAB item type (see :ref:`the openHAB item description <OPENHAB_ITEM_TYPES>`).
 
 .. exec_code::
     :caption: Output

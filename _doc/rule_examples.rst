@@ -114,7 +114,7 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
 Process Errors in Rules
 ------------------------------------------
 This example shows how to create a rule with a function which will be called when **any** rule throws an error.
-The rule function then can push the error message to an openhab item or e.g. use Pushover to send the error message
+The rule function then can push the error message to an openHAB item or e.g. use Pushover to send the error message
 to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more information).
 
 .. exec_code::

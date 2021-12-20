@@ -57,7 +57,7 @@ def on_sse_event(event_dict: dict):
             EventBus.post_event(event.name, event)
             return None
 
-        # These events require that we query openhab because of the metadata so we have to do it in a task
+        # These events require that we query openHAB because of the metadata so we have to do it in a task
         # They also change the item registry
         if isinstance(event, (ItemAddedEvent, ItemUpdatedEvent)):
             create_task(item_event(event))

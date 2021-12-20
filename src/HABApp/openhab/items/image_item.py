@@ -47,7 +47,7 @@ class ImageItem(OpenhabItem):
         return super().set_value(new_value.value)
 
     def oh_post_update(self, data: bytes, img_type: Optional[str] = None):
-        """Post an update to an openhab image with new image data. Image type is automatically detected,
+        """Post an update to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param data: image data
@@ -56,7 +56,7 @@ class ImageItem(OpenhabItem):
         return super().oh_post_update(_convert_bytes(data, img_type))
 
     def oh_send_command(self, data: bytes, img_type: Optional[str] = None):
-        """Send a command to an openhab image with new image data. Image type is automatically detected,
+        """Send a command to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param data: image data

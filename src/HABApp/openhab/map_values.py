@@ -34,7 +34,7 @@ def map_openhab_values(openhab_type: str, openhab_value: str):
         if len(openhab_value) == 28:
             openhab_value = openhab_value.replace('+', '000+')
         dt = datetime.datetime.strptime(openhab_value, '%Y-%m-%dT%H:%M:%S.%f%z')
-        # all datetimes from openhab have a timezone set so we can't easily compare them
+        # all datetimes from openHAB have a timezone set so we can't easily compare them
         # --> TypeError: can't compare offset-naive and offset-aware datetimes
         dt = dt.astimezone(tz=None)   # Changes datetime object so it uses system timezone
         dt = dt.replace(tzinfo=None)  # Removes timezone awareness

@@ -364,7 +364,7 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
             print(mode)
 
             # This shows how the SwitchItemValueMode can be used to disable any logic except for the manual mode.
-            # Now everything can be enabled/disabled from the openhab sitemap
+            # Now everything can be enabled/disabled from the openHAB sitemap
             item.add_mode(100, mode)
             item.add_mode(101, ValueMode('Manual'))
 
