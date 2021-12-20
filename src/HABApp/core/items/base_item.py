@@ -77,9 +77,8 @@ class BaseItem:
         else:
             assert isinstance(secs, int)
         assert secs > 0, secs
-        w = self._last_change.add_watch(secs)
-        HABApp.rule.get_parent_rule().register_cancel_obj(w)
-        return w
+
+        return self._last_change.add_watch(secs)
 
     def watch_update(self, secs: Union[int, float, datetime.timedelta]) -> ItemNoUpdateWatch:
         """Generate an event if the item does not receive and update for a certain period of time.
@@ -95,9 +94,8 @@ class BaseItem:
         else:
             assert isinstance(secs, int)
         assert secs > 0, secs
-        w = self._last_update.add_watch(secs)
-        HABApp.rule.get_parent_rule().register_cancel_obj(w)
-        return w
+
+        return self._last_update.add_watch(secs)
 
     def listen_event(self, callback: Callable[[Any], Any],
                      event_type: Union['HABApp.core.events.AllEvents', 'HABApp.core.events.EventFilter', Any]
@@ -110,8 +108,8 @@ class BaseItem:
             :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openHAB
             or mqtt.
         """
-        rule = HABApp.rule.get_parent_rule()
-        return rule.listen_event(self._name, callback=callback, event_type=event_type)
+        rule_ctx = HABApp.rule_ctx.get_rule_context()
+        return rule_ctx.rule.listen_event(self._name, callback=callback, event_type=event_type)
 
     def _on_item_add(self):
         """This function gets automatically called when the item is added to the item registry

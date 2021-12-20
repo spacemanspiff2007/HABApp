@@ -77,7 +77,6 @@ class SimpleRuleRunner:
         # patch scheduler, so we run synchronous
         self.patch_obj(ha_sched, '_HABAppScheduler', SyncScheduler)
 
-
     def tear_down(self):
         async_context.set('Tear down test')
 
@@ -86,7 +85,7 @@ class SimpleRuleRunner:
         self.vars.pop('__HABAPP__RULE_FILE__')
         loaded_rules = self.vars.pop('__HABAPP__RULES')
         for rule in loaded_rules:
-            rule._unload()
+            rule._habapp_rule_ctx.unload_rule()
         loaded_rules.clear()
 
         # restore patched

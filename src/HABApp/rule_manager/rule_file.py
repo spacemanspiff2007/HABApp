@@ -41,7 +41,7 @@ class RuleFile:
 
     def check_all_rules(self):
         for rule in self.rules.values():  # type: HABApp.Rule
-            rule._check_rule()
+            HABApp.rule_ctx.get_rule_context(rule).check_rule()
 
     def unload(self):
 
@@ -51,7 +51,7 @@ class RuleFile:
 
         # unload all registered callbacks
         for rule in self.rules.values():  # type: HABApp.Rule
-            rule._unload()
+            HABApp.rule_ctx.get_rule_context(rule).unload_rule()
 
         log.debug(f'File {self.name} successfully unloaded!')
         return None
@@ -84,7 +84,7 @@ class RuleFile:
             # still listen to events and do stuff
             for rule in created_rules:
                 with ign:
-                    rule._unload()
+                    rule._habapp_rule_ctx.unload_rule()
             return False
 
         if not created_rules:
@@ -108,7 +108,7 @@ class RuleFile:
             # still listen to events and do stuff
             for rule in created_rules:
                 with ign:
-                    rule._unload()
+                    rule._habapp_rule_ctx.unload_rule()
             return False
 
         return True

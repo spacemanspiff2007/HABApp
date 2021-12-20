@@ -21,8 +21,10 @@ def u():
     yield a
 
     # cancel the rest of the running tasks
-    w1.cancel()
-    w2.cancel()
+    if w1._habapp_rule_ctx is not None:
+        w1.cancel()
+    if w2._habapp_rule_ctx is not None:
+        w2.cancel()
 
 
 @pytest.fixture(scope="function")
@@ -34,11 +36,13 @@ def c():
     yield a
 
     # cancel the rest of the running tasks
-    w1.cancel()
-    w2.cancel()
+    if w1._habapp_rule_ctx is not None:
+        w1.cancel()
+    if w2._habapp_rule_ctx is not None:
+        w2.cancel()
 
 
-def test_sec_timedelta():
+def test_sec_timedelta(parent_rule):
     a = UpdatedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
 
@@ -57,13 +61,13 @@ def test_sec_timedelta():
 
 
 @pytest.mark.asyncio
-async def test_rem(u: UpdatedTime):
+async def test_rem(parent_rule, u: UpdatedTime):
     for t in u.tasks:
         t.cancel()
 
 
 @pytest.mark.asyncio
-async def test_cancel_running(u: UpdatedTime):
+async def test_cancel_running(parent_rule, u: UpdatedTime):
     u.set(pd_now(UTC))
 
     w1 = u.tasks[0]
@@ -82,7 +86,7 @@ async def test_cancel_running(u: UpdatedTime):
 
 
 @pytest.mark.asyncio
-async def test_event_update(u: UpdatedTime):
+async def test_event_update(parent_rule, u: UpdatedTime):
     m = MagicMock()
     u.set(pd_now(UTC))
     list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'))
@@ -112,7 +116,7 @@ async def test_event_update(u: UpdatedTime):
 
 
 @pytest.mark.asyncio
-async def test_event_change(c: ChangedTime):
+async def test_event_change(parent_rule, c: ChangedTime):
     m = MagicMock()
     c.set(pd_now(UTC))
     list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'))

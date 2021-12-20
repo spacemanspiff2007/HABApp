@@ -32,8 +32,6 @@ def get_next_id(rule) -> RuleID:
         TESTS_RULES[RULE_CTR] = rule
 
         obj = RuleID(RULE_CTR)
-
-    rule.register_on_unload(obj.remove)
     return obj
 
 

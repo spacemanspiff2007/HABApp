@@ -1,9 +1,11 @@
 import typing
+import HABApp
 
 
-class BaseMode:
+class BaseMode(HABApp.rule_ctx.RuleBoundCancelObj):
 
     def __init__(self, name: str):
+        super(BaseMode, self).__init__()
         self.name: str = name
 
         self.__mode_lower_prio: typing.Optional[BaseMode] = None
@@ -25,6 +27,7 @@ class BaseMode:
     def cancel(self):
         """Remove the mode from the parent ``MultiModeItem`` and stop processing it
         """
+        super(BaseMode, self).cancel()
         self.parent.remove_mode(self.name)
         self.parent = None
 

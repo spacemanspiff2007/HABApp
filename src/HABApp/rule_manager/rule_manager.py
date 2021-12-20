@@ -161,5 +161,4 @@ class RuleManager:
 
     def shutdown(self):
         for f in self.files.values():
-            for rule in f.rules.values():
-                rule._unload()
+            f.unload()

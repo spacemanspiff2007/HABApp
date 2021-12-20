@@ -3,7 +3,7 @@ import threading
 import typing
 
 from HABApp.core.wrapper import log_exception
-from . import EventBusListener
+from HABApp.core.event_bus_listener import EventBusListenerBase
 from .events import ComplexEventValue, ValueChangeEvent
 
 _event_log = logging.getLogger('HABApp.EventBus')
@@ -13,7 +13,7 @@ _habapp_log = logging.getLogger('HABApp')
 _LOCK = threading.Lock()
 
 
-_EVENT_LISTENERS: typing.Dict[str, typing.List[EventBusListener]] = {}
+_EVENT_LISTENERS: typing.Dict[str, typing.List[EventBusListenerBase]] = {}
 
 
 @log_exception
@@ -40,45 +40,47 @@ def post_event(topic: str, event):
         pass
 
     # Notify all listeners
-    for listener in _EVENT_LISTENERS.get(topic, []):
-        listener.notify_listeners(event)
+    listener = _EVENT_LISTENERS.get(topic, None)
+    if listener is not None:
+        for listener in _EVENT_LISTENERS.get(topic, []):
+            listener.notify_listeners(event)
 
     return None
 
 
 @log_exception
-def add_listener(listener: EventBusListener):
-    assert isinstance(listener, EventBusListener)
+def add_listener(listener: EventBusListenerBase):
+    assert isinstance(listener, EventBusListenerBase)
 
     with _LOCK:
         item_listeners = _EVENT_LISTENERS.setdefault(listener.topic, [])
 
         # don't add the same listener twice
         if listener in item_listeners:
-            _habapp_log.warning(f'Event listener for {listener.desc()} has already been added!')
+            _habapp_log.warning(f'Event listener for {listener.describe()} has already been added!')
             return None
 
         # add listener
         item_listeners.append(listener)
-        _habapp_log.debug(f'Added event listener for {listener.desc()}')
+        _habapp_log.debug(f'Added event listener for {listener.describe()}')
         return None
 
 
 @log_exception
-def remove_listener(listener: EventBusListener):
-    assert isinstance(listener, EventBusListener)
+def remove_listener(listener: EventBusListenerBase):
+    assert isinstance(listener, EventBusListenerBase)
 
     with _LOCK:
         item_listeners = _EVENT_LISTENERS.get(listener.topic, [])
 
         # print warning if we try to remove it twice
         if listener not in item_listeners:
-            _habapp_log.warning(f'Event listener for {listener.desc()} has already been removed!')
+            _habapp_log.warning(f'Event listener for {listener.describe()} has already been removed!')
             return None
 
         # remove listener
         item_listeners.remove(listener)
-        _habapp_log.debug(f'Removed event listener for {listener.desc()}')
+        _habapp_log.debug(f'Removed event listener for {listener.describe()}')
 
 
 @log_exception

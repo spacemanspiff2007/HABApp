@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.event_bus_listener import WrappedFunction
+from HABApp.core.wrappedfunction import WrappedFunction
 from HABApp.core.events import EventFilter, ValueChangeEvent, ValueChangeEventFilter, ValueUpdateEvent, \
     ValueUpdateEventFilter
 from tests.helpers import check_class_annotations

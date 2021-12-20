@@ -37,6 +37,9 @@ class TestBaseRule(HABApp.Rule):
         # we have to chain the rules later, because we register the rules only once we loaded successfully.
         self.run.at(2, self.__execute_run)
 
+    def on_rule_unload(self):
+        self._rule_id.remove()
+
     # ------------------------------------------------------------------------------------------------------------------
     # Overrides and test
     def set_up(self):

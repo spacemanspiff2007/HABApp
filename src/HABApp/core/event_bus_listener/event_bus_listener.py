@@ -1,21 +1,20 @@
 from typing import Any, Optional
 
-import HABApp
 from HABApp.core import WrappedFunction
 from HABApp.core.events import AllEvents
+from .base import EventBusListenerBase
 
 
-class EventBusListener:
+class EventBusListener(EventBusListenerBase):
     def __init__(self, topic, callback, event_type=AllEvents,
                  attr_name1: Optional[str] = None, attr_value1: Optional[Any] = None,
                  attr_name2: Optional[str] = None, attr_value2: Optional[Any] = None,
                  ):
-        assert isinstance(topic, str), type(topic)
+        super().__init__(topic)
         assert isinstance(callback, WrappedFunction)
         assert attr_name1 is None or isinstance(attr_name1, str), attr_name1
         assert attr_name2 is None or isinstance(attr_name2, str), attr_name2
 
-        self.topic: str = topic
         self.func: WrappedFunction = callback
 
         self.event_filter = event_type
@@ -63,11 +62,7 @@ class EventBusListener:
                 self.func.run(event)
                 return None
 
-    def cancel(self):
-        """Stop listening on the event bus"""
-        HABApp.core.EventBus.remove_listener(self)
-
-    def desc(self):
+    def describe(self):
         # return description
         _type = str(self.event_filter)
         if _type.startswith("<class '"):

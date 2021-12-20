@@ -1,12 +1,10 @@
 import datetime
-import logging
 import typing
 import warnings
 from threading import Lock
 
 import HABApp
 from HABApp.core.items import Item
-from HABApp.rule import get_parent_rule
 from .mode_base import BaseMode
 
 LOCK = Lock()
@@ -61,7 +59,7 @@ class MultiModeItem(Item):
         """Remove mode if it exists
 
         :param name: name of the mode (case insensitive)
-        :return: True if something was removed, False if nothign was found
+        :return: True if something was removed, False if nothing was found
         """
         assert isinstance(name, str), type(name)
 
@@ -92,14 +90,6 @@ class MultiModeItem(Item):
 
             # resort
             self.__sort_modes()
-
-        try:
-            get_parent_rule().register_cancel_obj(mode)
-        except RuntimeError:
-            HABApp.core.logger.log_warning(
-                logger=logging.getLogger('HABApp'), text='Parent rule not found! '
-                f'Automatic unloading of the {self.__class__.__name__} {self.name} will not work!'
-            )
         return self
 
     def all_modes(self) -> typing.List[typing.Tuple[int, BaseMode]]:
