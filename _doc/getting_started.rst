@@ -4,7 +4,7 @@ Getting Started
 
 It is really recommended to use a python IDE, for example PyCharm.
 The IDE can provide auto complete and static checks
-which will help you write error free rules and vastly speed up your developement.
+which will help you write error free rules and vastly speed up your development.
 
 First start HABApp and keep it running. It will automatically load and update all rules which
 are created or changed in the configured ``rules`` directory.

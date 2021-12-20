@@ -214,7 +214,7 @@ Remove the mock item from the registry
    HABApp.core.Items.pop_item('my_switch')
 
 Note that there are some item methods that encapsulate communication with openhab
-(e.g.: ``SwitchItem.on(), SwithItem.off(), and DimmerItem.percentage()``)
+(e.g.: ``SwitchItem.on(), SwitchItem.off(), and DimmerItem.percentage()``)
 These currently do not work with the mock items. The state has to be changed like
 any internal item.
 
