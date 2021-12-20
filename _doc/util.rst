@@ -155,7 +155,7 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
             self.sensor_move_1 = NumberItem.get_item('MovementSensor1')
             self.sensor_move_2 = NumberItem.get_item('MovementSensor2')
 
-            # use the defaults so we don't have to pass the callback and event filter in add_listener
+            # use a list of items which will be subscribed with the same callback and event
             self.group = EventListenerGroup().add_listener(
                 [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEvent)
 
@@ -267,7 +267,7 @@ Advanced Example
             item = MultiModeItem.get_create_item('MultiModeTestItem')
             item.listen_event(self.item_update, ValueUpdateEvent)
 
-            # helper to print the heading so we have a nice outpt
+            # helper to print the heading so we have a nice output
             def print_heading(_heading):
                 print('')
                 print('-' * 80)
@@ -300,7 +300,7 @@ Advanced Example
 
             # It is possible to use functions to calculate the new value for a mode.
             # E.g. shutter control and the manual mode moves the shades. If it's dark the automatic
-            # mode closes the shutter again. This could be achievied by automatically disable the
+            # mode closes the shutter again. This could be achieved by automatically disable the
             # manual mode or if the state should be remembered then the max function should be used
 
             # create a move and use the max function for output calculation

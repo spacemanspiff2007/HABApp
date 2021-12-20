@@ -613,7 +613,7 @@ Metadata
 It is possible to add metadata to the created items through the optional ``metadata`` entry in the item config.
 
 There are two forms how metadata can be set. The implicit form for simple key-value pairs (e.g. ``autoupdate``) or
-the explicit form where the entries are unter ``value`` and ``config`` (e.g. ``alexa``)
+the explicit form where the entries are under ``value`` and ``config`` (e.g. ``alexa``)
 
 .. code-block:: yaml
    :emphasize-lines: 5,6,8,9,10,11,12
@@ -888,7 +888,7 @@ for 60 seconds.
 
             self.thing = Thing.get_item(name)
             watcher = self.thing.watch_change(60)
-            self.thing.listen_event(self.thing_no_change, watcher.EVENT)
+            watcher.listen_event(self.thing_no_change)
 
         def thing_no_change(self, event: ItemNoChangeEvent):
             print(f'Thing {event.name} constant for {event.seconds}')
