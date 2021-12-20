@@ -170,6 +170,7 @@ class HABAppConfigLoader:
 
                 try:
                     handler.acquire()
+                    handler.flush()
                     handler.close()
                     handler.doRollover()
                 except Exception:

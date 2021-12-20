@@ -32,10 +32,10 @@ class BaseWatch(HABApp.rule_ctx.RuleBoundCancelObj):
 
     def listen_event(self, callback: typing.Callable[[typing.Any], typing.Any]) -> 'HABApp.core.EventBusListener':
         """Listen to (only) the event that is emitted by this watcher"""
-        ctx = HABApp.rule_ctx.get_rule_context()
-        cb = HABApp.core.WrappedFunction(callback, name=ctx.get_callback_name(callback))
+        rule_ctx = HABApp.rule_ctx.get_rule_context()
+        cb = HABApp.core.WrappedFunction(callback, rule_ctx=rule_ctx)
         listener = EventFilter(self.EVENT, seconds=self.fut.secs).create_event_listener(self.name, cb)
-        return ctx.add_event_listener(listener)
+        return rule_ctx.add_event_listener(listener)
 
 
 class ItemNoUpdateWatch(BaseWatch):

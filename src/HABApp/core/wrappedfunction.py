@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
 from pstats import Stats
 import HABApp
+from typing import Optional
 
 from HABApp.core.context import async_context
 from HABApp.core.const import loop
@@ -17,12 +18,22 @@ default_logger = logging.getLogger('HABApp.Worker')
 class WrappedFunction:
     _WORKERS = ThreadPoolExecutor(10, 'HabApp_')
 
-    def __init__(self, func, logger=None, warn_too_long=True, name=None):
+    def __init__(self, func, logger=None, warn_too_long=True, name: Optional[str] = None,
+                 rule_ctx: Optional['HABApp.rule_ctx.HABAppRuleContext'] = None):
+
+        # Allow setting of the rule context
+        self._habapp_rule_ctx = rule_ctx
+
         assert callable(func)
         self._func = func
 
         # name of the function
-        self.name = self._func.__name__ if not name else name
+        if name is None:
+            if rule_ctx is not None:
+                name = rule_ctx.get_callback_name(func)
+            else:
+                name = self._func.__name__
+        self.name = name
 
         self.is_async = iscoroutinefunction(self._func)
 

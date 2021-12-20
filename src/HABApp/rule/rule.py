@@ -115,7 +115,7 @@ class Rule:
             filters on the values of the event. There are also templates for the most common filters, e.g.
             :class:`~HABApp.core.events.ValueUpdateEventFilter` and :class:`~HABApp.core.events.ValueChangeEventFilter`
         """
-        cb = HABApp.core.WrappedFunction(callback, name=self._habapp_rule_ctx.get_callback_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, rule_ctx=self._habapp_rule_ctx)
         name = name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name
 
         if isinstance(event_type, HABApp.core.events.EventFilter):
@@ -137,7 +137,7 @@ class Rule:
         """
 
         assert isinstance(program, str), type(program)
-        cb = HABApp.core.WrappedFunction(callback, name=self._habapp_rule_ctx.get_callback_name(callback))
+        cb = HABApp.core.WrappedFunction(callback, rule_ctx=self._habapp_rule_ctx)
 
         asyncio.run_coroutine_threadsafe(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),

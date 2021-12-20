@@ -8,8 +8,6 @@ class DummyRule:
         self.rule_name = 'DummyRule'
         self._habapp_rule_ctx = HABApp.rule_ctx.HABAppRuleContext(self)
 
-        self.__dict__['_Rule__event_listener'] = []
-
 
 @fixture
 def parent_rule(monkeypatch):
