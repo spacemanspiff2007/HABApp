@@ -1,6 +1,4 @@
 from . import functions
-from .counter_item import CounterItem
-from .period_counter import PeriodCounter
 from .threshold import Threshold
 from .statistics import Statistics
 from . import multimode

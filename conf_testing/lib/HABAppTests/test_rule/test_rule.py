@@ -106,13 +106,13 @@ class TestBaseRule(HABApp.Rule):
     def __event_error(self, event):
         self.__errors.append(event)
 
-    def __worker_events_sub(self):
+    def _worker_events_sub(self):
         assert self.__sub_warning is None
         assert self.__sub_errors is None
         self.__sub_warning = self.listen_event(HABApp.core.const.topics.WARNINGS, self.__event_warning)
         self.__sub_errors = self.listen_event(HABApp.core.const.topics.ERRORS, self.__event_error)
 
-    def __worker_events_cancel(self):
+    def _worker_events_cancel(self):
         if self.__sub_warning is not None:
             self.__sub_warning.cancel()
         if self.__sub_errors is not None:
@@ -144,7 +144,7 @@ class TestBaseRule(HABApp.Rule):
 
     def _run_tests(self) -> List[TestResult]:
         self._rule_status = TestRuleStatus.RUNNING
-        self.__worker_events_sub()
+        self._worker_events_sub()
 
         results = []
 
@@ -164,7 +164,7 @@ class TestBaseRule(HABApp.Rule):
         if tr.state is not tr.state.PASSED:
             results.append(tr)
 
-        self.__worker_events_cancel()
+        self._worker_events_cancel()
         self._rule_status = TestRuleStatus.FINISHED
         return results
 

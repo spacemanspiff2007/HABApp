@@ -1,5 +1,6 @@
-from typing import Set, Optional
 import logging
+from typing import Set, Optional
+
 import HABApp
 
 log = logging.getLogger('HABApp.Rule')
@@ -51,17 +52,14 @@ class HABAppRuleContext:
             rule.run._scheduler.cancel_all()
             rule.run._habapp_rule_ctx = None
 
-            # Actually remove the listeners/events
-            while self.event_listeners:
-                listener = next(iter(self.event_listeners))
-                listener.cancel()
-            self.event_listener = None
-
-            # Remove the cancel objects
-            while self.cancel_objects:
-                listener = next(iter(self.cancel_objects))
-                listener.cancel()
-            self.cancel_objects = None
+            # cancel things and set obj to None
+            for name in ('event_listeners', 'cancel_objects'):
+                obj = getattr(self, name)
+                while obj:
+                    with HABApp.core.wrapper.ExceptionToHABApp(log):
+                        to_cancel = next(iter(obj))
+                        to_cancel.cancel()
+                setattr(self, name, None)   # Set to None so we crash if we want to schedule new stuff
 
             # clean references
             self.rule = None
