@@ -5,7 +5,7 @@ import pytest
 import HABApp.util.listener_groups
 from HABApp.core.items.base_valueitem import BaseItem
 from HABApp.util import EventListenerGroup
-from HABApp.util.listener_groups import EventListenerCreator, ListenerCreatorNotFoundError
+from HABApp.util.listener_groups.listener_groups import EventListenerCreator, ListenerCreatorNotFoundError
 
 
 class PatchedBaseItem(BaseItem):
