@@ -5,6 +5,7 @@ import sys
 import time
 import typing
 from pathlib import Path
+from HABApp.__splash_screen__ import show_screen
 
 # Global var if we want to run the benchmark
 DO_BENCH = False
@@ -29,6 +30,12 @@ def parse_args(passed_args=None) -> Path:
     global DO_BENCH, DO_DEBUG
 
     parser = argparse.ArgumentParser(description='Start HABApp')
+    parser.add_argument(
+        '-v',
+        '--version',
+        help='show version of HABApp',
+        action='store_true'
+    )
     parser.add_argument(
         '-c',
         '--config',
@@ -58,6 +65,10 @@ def parse_args(passed_args=None) -> Path:
 
     DO_BENCH = args.benchmark
     DO_DEBUG = args.debug_info
+
+    if args.version:
+        show_screen()
+        sys.exit(0)
 
     if args.wait_os_uptime:
         args.wait_os_uptime = max(0, args.wait_os_uptime)
