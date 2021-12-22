@@ -75,27 +75,6 @@ Converts a hsb value to the rgb color space
 .. autofunction:: HABApp.util.functions.hsb_to_rgb
 
 
-CounterItem
-------------------------------
-
-Example
-^^^^^^^^^^^^^^^^^^
-.. exec_code::
-
-    from HABApp.util import CounterItem
-    c = CounterItem.get_create_item('MyCounter', initial_value=5)
-    print(c.increase())
-    print(c.decrease())
-    print(c.reset())
-
-Documentation
-^^^^^^^^^^^^^^^^^^
-.. autoclass:: CounterItem
-   :members:
-
-   .. automethod:: __init__
-
-
 Statistics
 ------------------------------
 
@@ -115,6 +94,86 @@ Example
 Documentation
 ^^^^^^^^^^^^^^^^^^
 .. autoclass:: Statistics
+   :members:
+
+Fade
+------------------------------
+Fade is a helper class which allows to easily fade a value up or down.
+
+Example
+^^^^^^^^^^^^^^^^^^
+This example shows how to fade a Dimmer from 0 to 100 in 30 secs
+
+
+.. exec_code::
+
+    # ------------ hide: start ------------
+    import HABApp
+    from rule_runner import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+    # ------------ hide: stop -------------
+
+    from HABApp import Rule
+    from HABApp.openhab.items import DimmerItem
+    from HABApp.util import Fade
+
+    class FadeExample(Rule):
+        def __init__(self):
+            super().__init__()
+            self.dimmer = DimmerItem.get_item('Dimmer1')
+            self.fade = Fade(callback=self.fade_value)  # self.dimmer.percent would also be a good callback in this example
+
+            # Setup the fade and schedule its execution
+            # Fade from 0 to 100 in 30s
+            self.fade.setup(0, 100, 30).schedule_fade()
+
+        def fade_value(self, value):
+            self.dimmer.percent(value)
+
+    FadeExample()
+
+
+This example shows how to fade three values together (e.g. for an RGB strip)
+
+
+.. exec_code::
+
+    # ------------ hide: start ------------
+    import HABApp
+    from rule_runner import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+    # ------------ hide: stop -------------
+
+    from HABApp import Rule
+    from HABApp.openhab.items import DimmerItem
+    from HABApp.util import Fade
+
+    class Fade3Example(Rule):
+        def __init__(self):
+            super().__init__()
+            self.fade1 = Fade(callback=self.fade_value)
+            self.fade2 = Fade()
+            self.fade3 = Fade()
+
+            # Setup the fades and schedule the execution of one fade where the value gets updated every sec
+            self.fade3.setup(0, 100, 30)
+            self.fade2.setup(0, 50, 30)
+            self.fade1.setup(0, 25, 30, min_step_duration=1).schedule_fade()
+
+        def fade_value(self, value):
+            value1 = value
+            value2 = self.fade2.get_value()
+            value3 = self.fade3.get_value()
+
+    Fade3Example()
+
+Documentation
+^^^^^^^^^^^^^^^^^^
+.. autoclass:: Fade
    :members:
 
 EventListenerGroup
@@ -172,9 +231,10 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
             self.listeners.cancel()
             self.lights.on()
 
-
     EventListenerGroupExample()
 
+Documentation
+^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: EventListenerGroup
    :members:

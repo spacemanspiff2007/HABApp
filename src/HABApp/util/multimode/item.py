@@ -12,8 +12,6 @@ LOCK = Lock()
 
 class MultiModeItem(Item):
     """Prioritizer :class:`~HABApp.core.items.Item`
-
-    :ivar logger: Assign a logger to get log messages about the different modes
     """
 
     @classmethod
