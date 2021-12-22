@@ -31,7 +31,7 @@ def check_class_annotations(module_name: str, exclude: Optional[Iterable[str]] =
             dict(inspect.getmembers(c, lambda x: not inspect.ismethod(x))).items())
         )
 
-        annotations = get_annotations(c)
+        annotations = get_annotations(cls)
 
         # Check that all vars are in __annotations__
         for arg_name in args:
