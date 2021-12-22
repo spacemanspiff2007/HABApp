@@ -1,16 +1,24 @@
+import inspect
+import sys
 from typing import Any
 
 import HABApp
 from HABApp.core.const import MISSING
 from . import ValueChangeEvent, ValueUpdateEvent
 
+if sys.version_info >= (3, 10):
+    get_annotations = inspect.get_annotations
+else:
+    get_annotations = lambda x: getattr(x, '__annotations__')
+
 
 class EventFilter:
     def __init__(self, event_type, **kwargs):
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
 
+        annotations = get_annotations(event_type)
         for arg in kwargs:
-            if arg not in event_type.__annotations__:
+            if arg not in annotations:
                 raise AttributeError(f'Filter attribute "{arg}" does not exist for "{event_type.__name__}"')
 
         self.__cls = event_type
