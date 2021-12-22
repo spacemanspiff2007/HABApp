@@ -3,11 +3,6 @@ import inspect
 import sys
 from typing import Iterable, Optional
 
-if sys.version_info >= (3, 10):
-    get_annotations = inspect.get_annotations
-else:
-    get_annotations = lambda x: getattr(x, '__annotations__')
-
 
 def get_module_classes(module_name: str, exclude: Optional[Iterable[str]] = None, skip_imports=True):
     if exclude is None:
@@ -31,15 +26,13 @@ def check_class_annotations(module_name: str, exclude: Optional[Iterable[str]] =
             dict(inspect.getmembers(c, lambda x: not inspect.ismethod(x))).items())
         )
 
-        annotations = get_annotations(cls)
-
         # Check that all vars are in __annotations__
         for arg_name in args:
-            assert arg_name in annotations, f'"{arg_name}" is missing in annotations!"\n' \
+            assert arg_name in c.__annotations__, f'"{arg_name}" is missing in annotations!"\n' \
                                                   f'members    : {", ".join(sorted(args))}\n' \
-                                                  f'annotations: {", ".join(sorted(annotations))}'
+                                                  f'annotations: {", ".join(sorted(c.__annotations__))}'
 
-        for arg_name in annotations:
+        for arg_name in c.__annotations__:
             assert arg_name in args, f'"{arg_name}" is missing in args!"\n' \
                                      f'members    : {", ".join(sorted(args))}\n' \
-                                     f'annotations: {", ".join(sorted(annotations))}'
+                                     f'annotations: {", ".join(sorted(c.__annotations__))}'
