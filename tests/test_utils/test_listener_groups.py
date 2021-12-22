@@ -119,7 +119,8 @@ def test_activate():
 
 def test_listen_add(monkeypatch):
     m = Mock()
-    monkeypatch.setattr(HABApp.util.listener_groups, EventListenerCreator.__name__, Mock(return_value=m))
+    monkeypatch.setattr(
+        HABApp.util.listener_groups.listener_groups, EventListenerCreator.__name__, Mock(return_value=m))
 
     item = patched_item()
     cb = object()
