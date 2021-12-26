@@ -215,7 +215,7 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
             self.sensor_move_2 = NumberItem.get_item('MovementSensor2')
 
             # use a list of items which will be subscribed with the same callback and event
-            self.group = EventListenerGroup().add_listener(
+            self.listeners = EventListenerGroup().add_listener(
                 [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEvent)
 
             self.run.on_every_day(time(4), self.listen_sensors)
@@ -276,7 +276,7 @@ Basic Example
             item.get_mode('manual').set_enabled(False)  # disable mode
             item.get_mode('manual').set_value(11)       # setting a value will enable it again
 
-            # This shows that changes of the lower priority is only show when
+            # This shows that changes of the lower priority is only shown when
             # the mode with the higher priority gets disabled
             print('')
             print('Set value of lower priority')
@@ -360,7 +360,7 @@ Advanced Example
 
             # It is possible to use functions to calculate the new value for a mode.
             # E.g. shutter control and the manual mode moves the shades. If it's dark the automatic
-            # mode closes the shutter again. This could be achieved by automatically disable the
+            # mode closes the shutter again. This could be achieved by automatically disabling the
             # manual mode or if the state should be remembered then the max function should be used
 
             # create a move and use the max function for output calculation
@@ -383,7 +383,7 @@ Advanced Example
 
 Example SwitchItemValueMode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is controlled by a OpenHAB
+The SwitchItemValueMode is same as ValueMode but enabled/disabled of the mode is controlled by a OpenHAB
 :class:`~HABApp.openhab.items.SwitchItem`. This is very useful if the mode shall be deactivated from the OpenHAB sitemaps.
 
 .. exec_code::
