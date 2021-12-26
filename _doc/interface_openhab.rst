@@ -864,7 +864,7 @@ This rule prints the status of all ``Things`` and shows how to subscribe to even
 
 Check status if thing is constant
 ======================================
-Sometimes ``Things`` recover automatically from small outages. This rule only triggers then the ``Thing`` is constant
+Sometimes ``Things`` recover automatically from small outages. This rule only triggers when the ``Thing`` is constant
 for 60 seconds.
 
 .. exec_code::
