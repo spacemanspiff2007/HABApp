@@ -95,18 +95,18 @@ Example
 
 
 
-Invoking OpenHAB actions
+Invoking openHAB actions
 ------------------------
 The openHAB REST interface does not expose `actions <https://www.openhab.org/docs/configuration/actions.html>`_,
-and thus there is no way to trigger them from HABApp. If it is not possible to create and OpenHAB item that
-directly triggers the action there is a way to work around it with additional items within openHAB.
-An additional OpenHAB (note not HABapp) rule listens to changes on those items and invokes the appropriate
-openhab actions.
+and thus there is no way to trigger them from HABApp. Even if it is not possible to create an openHAB item that
+directly triggers the action, there is a way to work around it with additional items within openHAB.
+An additional openHAB (note not HABapp) rule listens to changes on those items and invokes the appropriate
+openHAB actions.
 On the HABApp side these actions are indirectly executed by setting the values for those items.
 
 Below is an example how to invoke the openHAB Audio and Voice actions.
 
-First, define couple items to accept values from HABApp, and place them in /etc/openhab2/items/habapp-bridge.items:
+First, define a couple of items to accept values from HABApp, and place them in /etc/openhab2/items/habapp-bridge.items:
 
 .. code-block:: text
 
@@ -141,7 +141,7 @@ Second, create the JSR223 script to invoke the actions upon changes in the value
 
    @rule("Play audio stream URL")
    @when("Item AudioStreamUrl changed")
-   def onTextToSpeechMessageChanged(event):
+   def onAudioStreamURLChanged(event):
        stream_url = scope.items[event.itemName].toString()
        if stream_url is not None and stream_url != '':
            Audio.playStream(scope.items[SINK_ITEM_NAME].toString(), stream_url)
@@ -151,7 +151,7 @@ Second, create the JSR223 script to invoke the actions upon changes in the value
 
    @rule("Play local audio file")
    @when("Item AudioFileLocation changed")
-   def onTextToSpeechMessageChanged(event):
+   def onAudioFileLocationChanged(event):
        file_location = scope.items[event.itemName].toString()
        if file_location is not None and file_location != '':
            Audio.playSound(scope.items[SINK_ITEM_NAME].toString(), file_location)
@@ -181,9 +181,9 @@ Finally, define the HABApp functions to indirectly invoke the actions:
        HABApp.openhab.interface.send_command(ACTION_TEXT_TO_SPEECH_MESSAGE_ITEM_NAME, tts)
 
 
-Mocking OpenHAB items and events for tests
+Mocking openHAB items and events for tests
 --------------------------------------------
-It is possible to create mock items in HABApp which do not exist in Openhab to create unit tests for rules and libraries.
+It is possible to create mock items in HABApp which do not exist in openHAB to create unit tests for rules and libraries.
 Ensure that this mechanism is only used for testing because since the items will not exist in openHAB they will not get
 updated which can lead to hard to track down errors.
 

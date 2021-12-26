@@ -323,8 +323,8 @@ Advanced Example
 
 Example SwitchItemValueMode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is controlled by a OpenHAB
-:class:`~HABApp.openhab.items.SwitchItem`. This is very useful if the mode shall be deactivated from the OpenHAB sitemaps.
+The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is controlled by a openHAB
+:class:`~HABApp.openhab.items.SwitchItem`. This is very useful if the mode shall be deactivated from the openHAB sitemaps.
 
 .. exec_code::
 
