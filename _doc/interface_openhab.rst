@@ -56,12 +56,12 @@ Function parameters
 .. _OPENHAB_ITEM_TYPES:
 
 **************************************
-Openhab item types
+openhab item types
 **************************************
 
 Description and example
 ======================================
-Items that are created from openHAB inherit all from :class:`~HABApp.openhab.items.OpenhabItem` and
+Items that are created from openHAB inherit all from :class:`~HABApp.openHAB.items.OpenhabItem` and
 provide convenience functions which simplify many things.
 
 Example:
@@ -231,11 +231,11 @@ Thing
 .. _OPENHAB_EVENT_TYPES:
 
 **************************************
-Openhab event types
+openHAB event types
 **************************************
 
-Openhab produces various events that are mapped to the internal event bus.
-On the `OpenHab page <https://next.openhab.org/docs/developer/utils/events.html#the-core-events>`_
+openHAB produces various events that are mapped to the internal event bus.
+On the `openHAB page <https://next.openhab.org/docs/developer/utils/events.html#the-core-events>`_
 there is an explanation for the various events.
 
 Item events

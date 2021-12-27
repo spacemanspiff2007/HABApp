@@ -58,7 +58,7 @@ class ExampleMqttTestRule(HABApp.Rule):
 ExampleMqttTestRule()
 ```
 
-### Openhab rule example
+### openHAB rule example
 ```python
 import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
