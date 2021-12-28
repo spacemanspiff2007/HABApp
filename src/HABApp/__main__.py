@@ -41,7 +41,7 @@ def print_debug_info():
 
 try:
     import HABApp
-    from HABApp.__cmd_args__ import parse_args
+    from HABApp.__cmd_args__ import parse_args, find_config_folder
     from HABApp.__splash_screen__ import show_screen
 except (ModuleNotFoundError, ImportError) as dep_err:
     print(f'Error!\nDependency "{dep_err.name}" is missing!\n\n')
@@ -61,16 +61,18 @@ def register_signal_handler():
 
 def main() -> typing.Union[int, str]:
 
-    # This has do be done before we create HABApp because of the possible sleep time
-    cfg_folder = parse_args()
-
     show_screen()
+
+    # This has do be done before we create HABApp because of the possible sleep time
+    args = parse_args()
 
     if HABApp.__cmd_args__.DO_DEBUG:
         print_debug_info()
         sys.exit(0)
 
     log = logging.getLogger('HABApp')
+
+    cfg_folder = find_config_folder(args.config)
 
     try:
         app = HABApp.runtime.Runtime()

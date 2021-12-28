@@ -25,7 +25,7 @@ def get_uptime() -> float:
     raise NotImplementedError(f'Not supported on {sys.platform}')
 
 
-def parse_args(passed_args=None) -> Path:
+def parse_args(passed_args=None) -> argparse.Namespace:
     global DO_BENCH, DO_DEBUG
 
     parser = argparse.ArgumentParser(description='Start HABApp')
@@ -68,10 +68,7 @@ def parse_args(passed_args=None) -> Path:
             time.sleep(diff)
             print(' done!')
 
-    path = args.config
-    if path is not None:
-        path = Path(path).resolve()
-    return find_config_folder(path)
+    return args
 
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
@@ -95,6 +92,8 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
         if v_env:
             check_path.append(Path(v_env) / 'HABApp')  # Virtual env dir
     else:
+        arg_config_path = Path(arg_config_path).resolve()
+
         # in case the user specifies the config.yml we automatically switch to the parent folder
         if arg_config_path.name.lower() == 'config.yml' and arg_config_path.is_file():
             arg_config_path = arg_config_path.parent

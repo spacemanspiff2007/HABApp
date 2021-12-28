@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 from HABApp.core.events import EventFilter
@@ -115,7 +116,8 @@ class EventListenerGroup:
         return self
 
     def add_no_update_watcher(self, item: Union[BaseItem, Iterable[BaseItem]], callback: Callable[[Any], Any],
-                              seconds: Union[int, float], alias: Optional[str] = None) -> 'EventListenerGroup':
+                              seconds: Union[int, float, timedelta], alias: Optional[str] = None
+                              ) -> 'EventListenerGroup':
         """Add an no update watcher to the group. On ``listen`` this will create a no update watcher and
          the corresponding event listener that will trigger the callback
 
@@ -130,7 +132,8 @@ class EventListenerGroup:
         return self
 
     def add_no_change_watcher(self, item: Union[BaseItem, Iterable[BaseItem]], callback: Callable[[Any], Any],
-                              seconds: Union[int, float], alias: Optional[str] = None) -> 'EventListenerGroup':
+                              seconds: Union[int, float, timedelta], alias: Optional[str] = None
+                              ) -> 'EventListenerGroup':
         """Add an no change watcher to the group. On ``listen`` this this will create a no change watcher and
          the corresponding event listener that will trigger the callback
 
