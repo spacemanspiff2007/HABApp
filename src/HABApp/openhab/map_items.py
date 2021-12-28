@@ -106,7 +106,7 @@ def map_item(name: str, type: str, value: Optional[str],
         if type == "Player":
             return PlayerItem(name, value, tags=tags, groups=groups, metadata=meta)
 
-        raise ValueError(f'Unknown Openhab type: {type} for {name}')
+        raise ValueError(f'Unknown openHAB type: {type} for {name}')
 
     except Exception as e:
         process_exception('map_items', e, logger=log)
