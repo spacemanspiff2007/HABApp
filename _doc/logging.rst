@@ -132,3 +132,19 @@ This is possible via the optional ``levels`` entry in the logging configuration 
     formatters:
       HABApp_format:
     ...
+
+
+Logging to stdout
+======================================
+
+The following handler writes to stdout
+
+.. code-block:: yaml
+
+    handlers:
+      StdOutHandler:
+        class: logging.StreamHandler
+        stream: ext://sys.stdout
+
+        formatter: HABApp_format
+        level: DEBUG
