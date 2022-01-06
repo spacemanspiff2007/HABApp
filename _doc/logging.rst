@@ -22,7 +22,8 @@ Example
 
 Usage
 --------------------------------------
-The logging library is the standard python library.
+The logging library is the standard python library and an extensive description can be found
+`in the official documentation <https://docs.python.org/3/library/logging.html>`_.
 
 .. literalinclude:: ../conf/rules/logging_rule.py
 
