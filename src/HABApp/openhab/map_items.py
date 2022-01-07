@@ -8,7 +8,7 @@ import HABApp
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.definitions.values import QuantityValue, RawValue
 from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerItem, GroupItem, ImageItem, LocationItem, \
-    NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem
+    NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem, CallItem
 from HABApp.openhab.items.base_item import MetaData
 
 log = logging.getLogger('HABApp.openhab')
@@ -105,6 +105,9 @@ def map_item(name: str, type: str, value: Optional[str],
 
         if type == "Player":
             return PlayerItem(name, value, tags=tags, groups=groups, metadata=meta)
+
+        if type == "Call":
+            return CallItem(name, value, tags=tags, groups=groups, metadata=meta)
 
         raise ValueError(f'Unknown openHAB type: {type} for {name}')
 
