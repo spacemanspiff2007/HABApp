@@ -23,4 +23,4 @@ class EventBusListenerBase:
         # If we have a context remove the listener from there, too
         if self._habapp_rule_ctx is not None:
             self._habapp_rule_ctx.remove_event_listener(self)
-        self._habapp_rule_ctx = None
+            self._habapp_rule_ctx = None

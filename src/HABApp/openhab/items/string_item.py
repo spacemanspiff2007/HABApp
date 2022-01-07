@@ -14,4 +14,9 @@ class PlayerItem(OpenhabItem):
 
 
 class CallItem(OpenhabItem):
-    """PlayerItem which accepts and converts the data types from OpenHAB"""
+    """CallItem which accepts and converts the data types from OpenHAB"""
+
+    def set_value(self, new_value) -> bool:
+        if isinstance(new_value, str) and ',' in new_value:
+            new_value = tuple(new_value.split(','))
+        return super().set_value(new_value)

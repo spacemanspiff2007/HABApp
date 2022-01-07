@@ -63,5 +63,6 @@ def fresh_item_sync():
 def get_members(group_name: str) -> Tuple['HABApp.openhab.items.OpenhabItem', ...]:
     ret = []
     for name in MEMBERS.get(group_name, []):
-        ret.append(Items.get_item(name))
+        item = Items.get_item(name)  # type: HABApp.openhab.items.OpenhabItem
+        ret.append(item)
     return tuple(sorted(ret, key=lambda x: x.name))
