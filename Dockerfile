@@ -24,6 +24,7 @@ RUN set -eux; \
  	apk add --no-cache \
     	bash \
 		su-exec \
+		tini \
 # Support for Timezones
     	tzdata; \
     mkdir -p ${HABAPP_HOME}; \
@@ -42,4 +43,4 @@ WORKDIR ${HABAPP_HOME}
 VOLUME ["${HABAPP_HOME}/config"]
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["su-exec", "habapp", "python", "-m", "HABApp", "--config", "/habapp/config"]
+CMD ["su-exec", "habapp", "/sbin/tini", "--", "python", "-m", "HABApp", "--config", "/habapp/config"]
