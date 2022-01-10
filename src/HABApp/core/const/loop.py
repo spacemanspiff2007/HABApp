@@ -12,6 +12,6 @@ if sys.version_info < (3, 8):
         asyncio.get_child_watcher()
 
 
-loop = asyncio.get_event_loop()
+loop = asyncio.get_event_loop_policy().get_event_loop()
 loop.set_debug(True)
 loop.slow_callback_duration = 0.02

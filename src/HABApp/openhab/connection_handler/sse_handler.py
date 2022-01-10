@@ -15,6 +15,7 @@ from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, It
 from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
 from HABApp.openhab.map_events import get_event
 from HABApp.openhab.map_items import map_item
+from HABApp.openhab.definitions.topics import ITEMS as ITEMS_TOPIC
 
 log = http_connection.log
 
@@ -52,17 +53,19 @@ def on_sse_event(event_dict: dict):
             EventBus.post_event(event.name, event)
             return None
 
+        # Events that remove items from the item registry
         if isinstance(event, ItemRemovedEvent):
             remove_from_registry(event.name)
-            EventBus.post_event(event.name, event)
+            EventBus.post_event(ITEMS_TOPIC, event)
             return None
 
+        # Events that add items to the item registry
         # These events require that we query openHAB because of the metadata so we have to do it in a task
-        # They also change the item registry
         if isinstance(event, (ItemAddedEvent, ItemUpdatedEvent)):
             create_task(item_event(event))
             return None
 
+        # Unknown Event -> just forward it to the event bus
         HABApp.core.EventBus.post_event(event.name, event)
     except Exception as e:
         process_exception(func=on_sse_event, e=e)
@@ -81,5 +84,5 @@ async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
 
     add_to_registry(new_item)
     # Send Event to Event Bus
-    HABApp.core.EventBus.post_event(name, event)
+    HABApp.core.EventBus.post_event(ITEMS_TOPIC, event)
     return None

@@ -80,7 +80,7 @@ def main() -> typing.Union[int, str]:
 
         # start workers
         try:
-            asyncio.ensure_future(app.start(cfg_folder))
+            HABApp.core.const.loop.create_task(app.start(cfg_folder))
             HABApp.core.const.loop.run_forever()
         except asyncio.CancelledError:
             pass
