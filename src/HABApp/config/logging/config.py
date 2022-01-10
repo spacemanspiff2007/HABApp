@@ -1,11 +1,11 @@
 import logging
 import logging.config
-from pathlib import Path
 import traceback
+from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+from pathlib import Path
 from typing import Any, Dict, List, Tuple, Optional
 
 from easyconfig.yaml import yaml_safe as _yaml_safe
-from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler, BufferingHandler
 
 from HABApp.config.config import CONFIG
 from HABApp.config.errors import AbsolutePathExpected
@@ -45,7 +45,6 @@ def get_logging_dict(path: Path, log_msgs: List[Tuple[int, str]]) -> Optional[di
             handler_cfg['filename'] = str(p)
 
     # make file version optional for config file
-    log_version_info = True  # todo: remove this 06.2021
     if 'version' not in cfg:
         cfg['version'] = 1
     else:

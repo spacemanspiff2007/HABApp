@@ -1,7 +1,9 @@
 from pathlib import Path
 from string import Template
-from HABApp.config.platform_defaults import get_log_folder, is_openhabian
 from time import sleep
+
+from HABApp.config.platform_defaults import get_log_folder, is_openhabian
+
 
 def get_default_logfile() -> str:
     template = Template("""

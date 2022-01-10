@@ -6,8 +6,8 @@ from pydantic import Field, AnyHttpUrl, constr
 
 class Ping(ConfigModel):
     enabled: bool = Field(True, description='If enabled the configured item will show how long it takes to send '
-                                                  'an update from HABApp and get the updated value back from openHAB'
-                                                  'in milliseconds')
+                                            'an update from HABApp and get the updated value back from openHAB'
+                                            'in milliseconds')
     item: str = Field('HABApp_Ping', description='Name of the Numberitem')
     interval: int = Field(10, description='Seconds between two pings')
 

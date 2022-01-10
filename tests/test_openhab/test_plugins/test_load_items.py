@@ -6,7 +6,7 @@ import pytest
 
 from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.connection_logic.plugin_load_items import LoadAllOpenhabItems
-from HABApp import CONFIG
+
 
 class FalseFuture:
     @staticmethod
