@@ -27,16 +27,15 @@ mqtt:
     qos: 0
     topics:
     - '#'
-    - 0
   general:
     listen_only: false
 
 openhab:
   connection:
-    host: localhost
-    port: 8080
-    user: 'asdf'
-    password: 'asdf'
+    user: asdf
+    password: asdf
+    url: http://localhost:8080  # Connect to this url
+    verify_ssl: true            # Check certificates when using https
   general:
     listen_only: false
     wait_for_openhab: true

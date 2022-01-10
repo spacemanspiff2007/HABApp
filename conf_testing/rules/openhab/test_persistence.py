@@ -36,4 +36,5 @@ class TestPersistence(TestBaseRule):
         assert list(ist.values()) == [2], ist
 
 
-TestPersistence()
+# Todo: Enable when OH3.3 supports this
+# TestPersistence()

@@ -21,15 +21,15 @@ log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
 
 
-IS_ONLINE = False
-IS_READ_ONLY = False
+IS_ONLINE: bool = False
+IS_READ_ONLY: bool = False
+IS_NOT_SET_UP: bool = True
 
 IS_OH2 = False
 
-HTTP_PREFIX: Optional[str] = None
-
 # HTTP options
 HTTP_ALLOW_REDIRECTS: bool = True
+HTTP_VERIFY_SSL: Optional[bool] = None
 HTTP_SESSION: aiohttp.ClientSession = None
 
 CONNECT_WAIT: WaitBetweenConnects = WaitBetweenConnects()
@@ -44,25 +44,21 @@ ON_DISCONNECTED: typing.Callable = None
 
 
 async def get(url: str, log_404=True, disconnect_on_error=False, **kwargs: Any) -> ClientResponse:
-    if HTTP_PREFIX is None:
+    if IS_NOT_SET_UP:
         raise OpenhabConnectionNotSetUpError()
 
-    assert not url.startswith('/'), url
-    url = f'{HTTP_PREFIX}/rest/{url}/'
-
-    mgr = _RequestContextManager(HTTP_SESSION._request(METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS, **kwargs))
+    mgr = _RequestContextManager(
+        HTTP_SESSION._request(METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_VERIFY_SSL, **kwargs)
+    )
     return await check_response(mgr, log_404=log_404, disconnect_on_error=disconnect_on_error)
 
 
 async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Optional[ClientResponse]:
-    if HTTP_PREFIX is None:
+    if IS_NOT_SET_UP:
         raise OpenhabConnectionNotSetUpError()
 
     if IS_READ_ONLY or not IS_ONLINE:
         return None
-
-    assert not url.startswith('/'), url
-    url = f'{HTTP_PREFIX}/rest/{url}/'
 
     # todo: remove this workaround once there is a fix in aiohttp
     headers = None
@@ -71,7 +67,8 @@ async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> O
 
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
-            METH_POST, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, data=data, json=json, **kwargs
+            METH_POST, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_VERIFY_SSL,
+            headers=headers, data=data, json=json, **kwargs
         )
     )
 
@@ -81,14 +78,11 @@ async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> O
 
 
 async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Optional[ClientResponse]:
-    if HTTP_PREFIX is None:
+    if IS_NOT_SET_UP:
         raise OpenhabConnectionNotSetUpError()
 
     if IS_READ_ONLY or not IS_ONLINE:
         return None
-
-    assert not url.startswith('/'), url
-    url = f'{HTTP_PREFIX}/rest/{url}/'
 
     # todo: remove this workaround once there is a fix in aiohttp
     headers = None
@@ -97,7 +91,8 @@ async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Op
 
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
-            METH_PUT, url, allow_redirects=HTTP_ALLOW_REDIRECTS, headers=headers, data=data, json=json, **kwargs
+            METH_PUT, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_VERIFY_SSL,
+            headers=headers, data=data, json=json, **kwargs
         )
     )
 
@@ -107,17 +102,15 @@ async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Op
 
 
 async def delete(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Optional[ClientResponse]:
-    if HTTP_PREFIX is None:
+    if IS_NOT_SET_UP:
         raise OpenhabConnectionNotSetUpError()
 
     if IS_READ_ONLY or not IS_ONLINE:
         return None
 
-    assert not url.startswith('/'), url
-    url = f'{HTTP_PREFIX}/rest/{url}/'
-
     mgr = _RequestContextManager(
-        HTTP_SESSION._request(METH_DELETE, url, allow_redirects=HTTP_ALLOW_REDIRECTS, data=data, json=json, **kwargs)
+        HTTP_SESSION._request(METH_DELETE, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_VERIFY_SSL,
+                              data=data, json=json, **kwargs)
     )
 
     if data is None:
@@ -182,7 +175,7 @@ async def check_response(future: aiohttp.client._RequestContextManager, sent_dat
     # Sometimes openHAB issues 404 instead of 500 during startup
     if disconnect_on_error and status >= 400:
         set_offline(f'Expected success but got status {status} for '
-                    f'{str(resp.request_info.url).replace(HTTP_PREFIX, "")}')
+                    f'{str(resp.request_info.url).replace(HABApp.CONFIG.openhab.connection.url, "")}')
         raise ExpectedSuccessFromOpenhab()
 
     # Something went wrong - log error message
@@ -223,19 +216,17 @@ async def stop_connection():
 
 
 async def start_connection():
-    global HTTP_PREFIX, HTTP_SESSION, FUT_UUID
+    global HTTP_SESSION, FUT_UUID, IS_NOT_SET_UP, HTTP_VERIFY_SSL
 
     await stop_connection()
 
-    host: str = HABApp.CONFIG.openhab.connection.host
-    port: str = HABApp.CONFIG.openhab.connection.port
+    url: str = HABApp.CONFIG.openhab.connection.url
 
-    # do not run without host
-    if host == '':
-        HTTP_PREFIX = None
+    # do not run without an url
+    if url == '':
+        IS_NOT_SET_UP = True
         return None
-
-    HTTP_PREFIX = f'http://{host:s}:{port:d}'
+    IS_NOT_SET_UP = False
 
     auth = None
     if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
@@ -244,12 +235,19 @@ async def start_connection():
             HABApp.CONFIG.openhab.connection.password
         )
 
+    if not HABApp.CONFIG.openhab.connection.verify_ssl:
+        HTTP_VERIFY_SSL = False
+        log.info('Verify ssl set to False!')
+    else:
+        HTTP_VERIFY_SSL = None
+
     # todo: add possibility to configure line size with read_bufsize
     HTTP_SESSION = aiohttp.ClientSession(
+        base_url=url,
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
         auth=auth,
-        read_bufsize=2**19  # 512k buffer
+        read_bufsize=2**19  # 512k buffer,
     )
 
     FUT_UUID = asyncio.create_task(try_uuid())
@@ -264,13 +262,14 @@ async def start_sse_event_listener():
         event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
 
         async with sse_client.EventSource(
-                url=f'{HTTP_PREFIX}/rest/events?topics='
+                url=f'/rest/events?topics='
                     f'{event_prefix}/items/,'                   # Item updates
                     f'{event_prefix}/channels/,'                # Channel update
                     f'{event_prefix}/things/*/status,'          # Thing status updates
                     f'{event_prefix}/things/*/statuschanged'    # Thing status changes
                 ,
-                session=HTTP_SESSION
+                session=HTTP_SESSION,
+                ssl=None if HABApp.CONFIG.openhab.connection.verify_ssl else False
         ) as event_source:
             async for event in event_source:
 
@@ -309,14 +308,14 @@ async def start_sse_event_listener():
 
 
 async def async_get_uuid() -> str:
-    resp = await get('uuid', log_404=False)
+    resp = await get('/rest/uuid', log_404=False)
     if resp.status >= 300:
         raise OpenhabNotReadyYet()
     return await resp.text(encoding='utf-8')
 
 
 async def async_get_root() -> dict:
-    resp = await get('', log_404=False)
+    resp = await get('/rest/', log_404=False)
     if resp.status == 404:
         return {}
     return await resp.json(loads=load_json, encoding='utf-8')

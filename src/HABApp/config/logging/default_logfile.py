@@ -1,6 +1,7 @@
+from pathlib import Path
 from string import Template
-from .platform_defaults import get_log_folder, is_openhabian
-
+from HABApp.config.platform_defaults import get_log_folder, is_openhabian
+from time import sleep
 
 def get_default_logfile() -> str:
     template = Template("""
@@ -14,7 +15,7 @@ handlers:
   #  - logging.handlers.RotatingFileHandler:
   #    Will rotate when the file reaches a certain size (see python logging documentation for args)
   #  - HABApp.core.lib.handler.MidnightRotatingFileHandler:
-  #    Will wait until the file reaches a certain size and then rotate on midnight
+  #    Will wait until the file reaches a certain size and then will rotate on midnight
   #  - More handlers:
   #    https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
 
@@ -90,3 +91,15 @@ loggers:
             subs['LOG_LEVELS'] = 'levels:\n  WARNING: WARN\n\n'
 
     return template.substitute(**subs)
+
+
+def create_default_logfile(path: Path) -> bool:
+    if path.is_file():
+        return False
+
+    print(f'Creating {path.name} in {path.parent}')
+    with path.open('w', encoding='utf-8') as file:
+        file.write(get_default_logfile())
+
+    sleep(0.01)
+    return True

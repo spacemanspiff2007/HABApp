@@ -4,7 +4,7 @@ import pprint
 
 import HABApp.openhab.connection_handler.http_connection
 import HABApp.openhab.connection_logic.connection
-from HABApp.openhab.connection_handler.http_connection import HTTP_PREFIX
+from HABApp.config import CONFIG
 
 FUNC_PATH = HABApp.openhab.connection_handler.func_async
 SSE_PATH = HABApp.openhab.connection_handler.sse_handler
@@ -12,8 +12,9 @@ SSE_PATH = HABApp.openhab.connection_handler.sse_handler
 
 def shorten_url(url: str):
     url = str(url)
-    if url.startswith(HTTP_PREFIX):
-        return url[len(HTTP_PREFIX):]
+    cfg = CONFIG.openhab.connection.url
+    if url.startswith(cfg):
+        return url[len(cfg):]
     return url
 
 

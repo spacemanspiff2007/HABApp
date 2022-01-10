@@ -66,7 +66,7 @@ class RuleManager:
 
     async def load_rules_on_startup(self):
 
-        if HABApp.CONFIG.openhab.connection.host and HABApp.CONFIG.openhab.general.wait_for_openhab:
+        if HABApp.CONFIG.openhab.connection.url and HABApp.CONFIG.openhab.general.wait_for_openhab:
             items_found = False
             while not items_found:
                 await sleep(3)

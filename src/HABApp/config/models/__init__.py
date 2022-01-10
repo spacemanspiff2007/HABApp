@@ -1,0 +1,1 @@
+from .habapp import HABAppConfig

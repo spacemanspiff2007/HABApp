@@ -4,12 +4,13 @@ bidict==0.21.4
 eascheduler==0.1.4
 easyco==0.2.3
 paho-mqtt==1.6.1
-pydantic==1.8.2
+pydantic==1.9.0
 stackprinter==0.2.5
 voluptuous==0.12.2
 watchdog==2.1.6
-ujson==5.0.0
+ujson==5.1.0
 immutables==0.16
+typing-extensions==4.0.1;python_version<"3.8"
 
 # install pendulum last because the setup sometimes fails :S
 pendulum==2.1.2

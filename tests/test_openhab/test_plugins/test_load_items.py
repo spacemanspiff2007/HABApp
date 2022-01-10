@@ -6,7 +6,7 @@ import pytest
 
 from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.connection_logic.plugin_load_items import LoadAllOpenhabItems
-
+from HABApp import CONFIG
 
 class FalseFuture:
     @staticmethod
@@ -35,7 +35,7 @@ RESPONSES: Dict[str, List[DummyResp]] = {}
 
 
 class MySession:
-    _PREFIX = 'TEST/rest/'
+    _PREFIX = '/rest/'
 
     @staticmethod
     async def _request(meth: str, url: str, **kwargs):
@@ -59,17 +59,17 @@ async def test_disconnect(monkeypatch, caplog):
     # Disable automatic reconnect
     monkeypatch.setattr(http_connection, 'try_uuid', lambda: 1)
     monkeypatch.setattr(http_connection, 'FUT_UUID', FalseFuture)
+    monkeypatch.setattr(http_connection, 'IS_NOT_SET_UP', False)
     monkeypatch.setattr(http_connection.asyncio, 'run_coroutine_threadsafe', lambda x, y: FalseFuture)
 
     # Use dummy session
     monkeypatch.setattr(http_connection, 'ON_DISCONNECTED', disconnect_cb)
-    monkeypatch.setattr(http_connection, 'HTTP_PREFIX', 'TEST')
     monkeypatch.setattr(http_connection, 'HTTP_SESSION', MySession)
 
     # 404 on item request
     disconnect_cb.assert_not_called()
 
-    MySession.add_resp(DummyResp('items/', 404))
+    MySession.add_resp(DummyResp('items', 404))
     p = LoadAllOpenhabItems()
     await p.on_connect_function()
 
@@ -79,8 +79,8 @@ async def test_disconnect(monkeypatch, caplog):
     # 404 on thing request
     disconnect_cb.assert_not_called()
 
-    MySession.add_resp(DummyResp('items/', 200, json=[]))
-    MySession.add_resp(DummyResp('things/', 404))
+    MySession.add_resp(DummyResp('items', 200, json=[]))
+    MySession.add_resp(DummyResp('things', 404))
     p = LoadAllOpenhabItems()
     await p.on_connect_function()
 
@@ -90,8 +90,8 @@ async def test_disconnect(monkeypatch, caplog):
     # everything works
     disconnect_cb.assert_not_called()
 
-    MySession.add_resp(DummyResp('items/', 200, json=[]))
-    MySession.add_resp(DummyResp('things/', 200, json=[]))
+    MySession.add_resp(DummyResp('items', 200, json=[]))
+    MySession.add_resp(DummyResp('things', 200, json=[]))
     p = LoadAllOpenhabItems()
     await p.on_connect_function()
 

@@ -37,17 +37,17 @@ def convert_to_oh_type(_in: Any) -> str:
 async def async_post_update(item, state: Any):
     if not isinstance(state, str):
         state = convert_to_oh_type(state)
-    await put(f'items/{item:s}/state', data=state)
+    await put(f'/rest/items/{item:s}/state', data=state)
 
 
 async def async_send_command(item, state: Any):
     if not isinstance(state, str):
         state = convert_to_oh_type(state)
-    await post(f'items/{item:s}', data=state)
+    await post(f'/rest/items/{item:s}', data=state)
 
 
 async def async_item_exists(item) -> bool:
-    ret = await get(f'items/{item:s}', log_404=False)
+    ret = await get(f'/rest/items/{item:s}', log_404=False)
     return ret.status == 200
 
 
@@ -64,7 +64,7 @@ async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = N
         params = {'metadata': '.+'}
 
     try:
-        resp = await get('items', disconnect_on_error=disconnect_on_error, params=params)
+        resp = await get('/rest/items', disconnect_on_error=disconnect_on_error, params=params)
         return await resp.json(loads=load_json, encoding='utf-8')
     except Exception as e:
         # sometimes uuid already works but items not - so we ignore these errors here, too
@@ -79,7 +79,7 @@ async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata
     if all_metadata:
         params = {'metadata': '.+'}
 
-    ret = await get(f'items/{item:s}', params=params, log_404=False)
+    ret = await get(f'/rest/items/{item:s}', params=params, log_404=False)
     if ret.status == 404:
         raise ItemNotFoundError.from_name(item)
     if ret.status >= 300:
@@ -96,7 +96,7 @@ async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata
 async def async_get_things(disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
 
     try:
-        resp = await get('things', disconnect_on_error=disconnect_on_error)
+        resp = await get('/rest/things', disconnect_on_error=disconnect_on_error)
         return await resp.json(loads=load_json, encoding='utf-8')
     except Exception as e:
         # sometimes uuid and items already works but things not - so we ignore these errors here, too
@@ -107,7 +107,7 @@ async def async_get_things(disconnect_on_error=False) -> Optional[List[Dict[str,
 
 
 async def async_get_thing(uid: str) -> OpenhabThingDefinition:
-    ret = await get(f'things/{uid:s}')
+    ret = await get(f'/rest/things/{uid:s}')
     if ret.status >= 300:
         raise ThingNotFoundError.from_uid(uid)
 
@@ -128,7 +128,7 @@ async def async_get_persistence_data(item_name: str, persistence: typing.Optiona
     if not params:
         params = None
 
-    ret = await get(f'persistence/items/{item_name:s}', params=params)
+    ret = await get(f'/rest/persistence/items/{item_name:s}', params=params)
     if ret.status >= 300:
         return {}
     else:
@@ -150,7 +150,7 @@ async def async_set_persistence_data(item_name: str, persistence: typing.Optiona
     if persistence is not None:
         params['serviceId'] = persistence
 
-    ret = await put(f'persistence/items/{item_name:s}', params=params)
+    ret = await put(f'/rest/persistence/items/{item_name:s}', params=params)
     if ret.status >= 300:
         return {}
     else:
@@ -179,7 +179,7 @@ async def async_create_item(item_type, name, label="", category="", tags=[], gro
         if group_function_params:
             payload['function']['params'] = group_function_params
 
-    ret = await put(f'items/{name:s}', json=payload)
+    ret = await put(f'/rest/items/{name:s}', json=payload)
     if ret is None:
         return False
 
@@ -191,11 +191,11 @@ async def async_create_item(item_type, name, label="", category="", tags=[], gro
 
 
 async def async_remove_item(item):
-    await delete(f'items/{item:s}')
+    await delete(f'/rest/items/{item:s}')
 
 
 async def async_remove_metadata(item: str, namespace: str):
-    ret = await delete(f'items/{item:s}/metadata/{namespace:s}')
+    ret = await delete(f'/rest/items/{item:s}/metadata/{namespace:s}')
     if ret is None:
         return False
 
@@ -211,7 +211,7 @@ async def async_set_metadata(item: str, namespace: str, value: str, config: dict
         'value': value,
         'config': config
     }
-    ret = await put(f'items/{item:s}/metadata/{namespace:s}', json=payload)
+    ret = await put(f'/rest/items/{item:s}/metadata/{namespace:s}', json=payload)
     if ret is None:
         return False
 
@@ -223,7 +223,7 @@ async def async_set_metadata(item: str, namespace: str, value: str, config: dict
 
 
 async def async_set_thing_cfg(uid: str, cfg: typing.Dict[str, typing.Any]):
-    ret = await put(f'things/{uid:s}/config', json=cfg)
+    ret = await put(f'/rest/things/{uid:s}/config', json=cfg)
     if ret is None:
         return None
 
@@ -245,7 +245,7 @@ def __get_link_url(channel_uid: str, item_name: str) -> str:
     # rest/links/ endpoint needs the channel to be url encoded
     # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
     # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-    return 'links/' + quote_url(f"{item_name}/{channel_uid}")
+    return '/rest/links/' + quote_url(f"{item_name}/{channel_uid}")
 
 
 async def async_remove_channel_link(channel_uid: str, item_name: str) -> bool:
@@ -256,7 +256,7 @@ async def async_remove_channel_link(channel_uid: str, item_name: str) -> bool:
 
 
 async def async_get_channel_links() -> List[Dict[str, str]]:
-    ret = await get('links')
+    ret = await get('/rest/links')
     if ret.status >= 300:
         return None
     else:
@@ -264,7 +264,7 @@ async def async_get_channel_links() -> List[Dict[str, str]]:
 
 
 async def async_get_channel_link_mode_auto() -> bool:
-    ret = await get('links/auto')
+    ret = await get('/rest/links/auto')
     if ret.status >= 300:
         return False
     else:

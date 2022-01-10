@@ -37,7 +37,8 @@ class Runtime:
             # Start Folder watcher!
             HABApp.core.files.watcher.start()
 
-            self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
+            # Load config
+            HABApp.config.load_config(config_folder)
 
             await HABApp.core.files.setup()
 
@@ -63,6 +64,9 @@ class Runtime:
             shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')
 
             async_context.reset(token)
+
+        except HABApp.config.InvalidConfigError:
+            shutdown.request_shutdown()
         except asyncio.CancelledError:
             pass
         except Exception as e:
