@@ -16,26 +16,25 @@ COPY --from=buildimage /root/wheels /root/wheels
 COPY container/entrypoint.sh /entrypoint.sh
 
 ENV HABAPP_HOME=/habapp \
-    USER_ID=9001 \
-    GROUP_ID=9001
+	USER_ID=9001 \
+	GROUP_ID=9001
 
 RUN set -eux; \
 # Install required dependencies
- 	apk add --no-cache \
-    	bash \
+	apk add --no-cache \
+		bash \
 		su-exec \
 		tini \
-# Support for Timezones
-    	tzdata; \
-    mkdir -p ${HABAPP_HOME}; \
-    mkdir -p ${HABAPP_HOME}/config; \
+		tzdata; \
+	mkdir -p ${HABAPP_HOME}; \
+	mkdir -p ${HABAPP_HOME}/config; \
 # install HABApp
-    pip3 install \
-        --no-index \
-        --find-links=/root/wheels \
+	pip3 install \
+    	--no-index \
+    	--find-links=/root/wheels \
 		habapp; \
 # prepare entrypoint script
-    chmod +x /entrypoint.sh; \
+	chmod +x /entrypoint.sh; \
 # clean up
 	rm -rf /root/wheels
 	
