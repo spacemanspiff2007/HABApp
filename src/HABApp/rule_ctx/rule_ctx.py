@@ -71,7 +71,7 @@ class HABAppRuleContext:
     def check_rule(self):
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             # We need items if we want to run the test
-            if HABApp.core.Items.get_all_items():
+            if HABApp.core.Items.get_items():
 
                 # Check if we have a valid item for all listeners
                 for listener in self.event_listeners:

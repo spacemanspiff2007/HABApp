@@ -1,4 +1,5 @@
 import HABApp
+from HABApp.core.errors import ItemNotFoundException
 from . import BaseValueItem
 
 
@@ -17,7 +18,7 @@ class Item(BaseValueItem):
 
         try:
             item = HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
+        except ItemNotFoundException:
             item = cls(name, initial_value)
             HABApp.core.Items.add_item(item)
 

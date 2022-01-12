@@ -34,7 +34,7 @@ class OpenhabBenchRule(BenchBaseRule):
     def cleanup(self):
         self.stop_load()
 
-        all_items = set(HABApp.core.Items.get_all_item_names())
+        all_items = set(HABApp.core.Items.get_item_names())
         to_rem = set(self.name_list) & all_items
 
         if not to_rem:

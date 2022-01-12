@@ -1,4 +1,5 @@
 from HABApp.core import Items
+from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.items import BaseValueItem
 from HABApp.mqtt.mqtt_interface import publish
 
@@ -22,7 +23,7 @@ class MqttItem(MqttBaseItem):
 
         try:
             item = Items.get_item(name)
-        except Items.ItemNotFoundException:
+        except ItemNotFoundException:
             item = cls(name, initial_value)
             Items.add_item(item)
 

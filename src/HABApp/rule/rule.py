@@ -189,7 +189,7 @@ class Rule:
                 raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its Subclasses')
 
         ret = []
-        for item in HABApp.core.Items.get_all_items():  # type: HABApp.core.items.base_valueitem.BaseItem
+        for item in HABApp.core.Items.get_items():  # type: HABApp.core.items.base_valueitem.BaseItem
             if type is not None and not isinstance(item, type):
                 continue
 

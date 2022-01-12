@@ -5,7 +5,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core import EventBus, Items
-from HABApp.core.Items import ItemNotFoundException
+from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.events import ValueUpdateEvent
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception

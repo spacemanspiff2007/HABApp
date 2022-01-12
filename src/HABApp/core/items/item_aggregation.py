@@ -5,6 +5,7 @@ import typing
 from datetime import timedelta
 
 import HABApp
+from HABApp.core.errors import ItemNotFoundException
 from . import BaseValueItem
 from ..wrapper import process_exception
 
@@ -22,7 +23,7 @@ class AggregationItem(BaseValueItem):
 
         try:
             item = HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
+        except ItemNotFoundException:
             item = cls(name)
             HABApp.core.Items.add_item(item)
 

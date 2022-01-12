@@ -70,7 +70,7 @@ class RuleManager:
             items_found = False
             while not items_found:
                 await sleep(3)
-                for item in HABApp.core.Items.get_all_items():
+                for item in HABApp.core.Items.get_items():
                     if isinstance(item, HABApp.openhab.items.OpenhabItem):
                         items_found = True
                         break

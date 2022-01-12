@@ -10,6 +10,7 @@ from HABApp.core.wrapper import log_exception
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 from HABApp.mqtt.mqtt_payload import get_msg_payload
 from HABApp.runtime import shutdown
+from HABApp.core.errors import ItemNotFoundException
 
 log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.EventBus.mqtt')
@@ -158,10 +159,10 @@ def process_msg(client, userdata, message: mqtt.MQTTMessage):
     _item = None    # type: typing.Optional[HABApp.mqtt.items.MqttBaseItem]
     try:
         _item = Items.get_item(topic)   # type: HABApp.mqtt.items.MqttBaseItem
-    except HABApp.core.Items.ItemNotFoundException:
+    except ItemNotFoundException:
         # only create items for if the message has the retain flag
         if message.retain:
-            _item = Items.create_item(topic, HABApp.mqtt.items.MqttItem)  # type: HABApp.mqtt.items.MqttItem
+            _item = Items.add_item(HABApp.mqtt.items.MqttItem(topic))
 
     # we don't have an item -> we process only the event
     if _item is None:

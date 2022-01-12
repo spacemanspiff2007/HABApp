@@ -111,12 +111,12 @@ class BaseItem:
         rule_ctx = HABApp.rule_ctx.get_rule_context()
         return rule_ctx.rule.listen_event(self._name, callback=callback, event_type=event_type)
 
-    def _on_item_add(self):
+    def _on_item_added(self):
         """This function gets automatically called when the item is added to the item registry
         """
         _restore_tmp_data(self)
 
-    def _on_item_remove(self):
+    def _on_item_removed(self):
         """This function gets automatically called when the item is removed from the item registry
         """
         _add_tmp_data(self)

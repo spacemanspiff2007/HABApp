@@ -13,5 +13,8 @@ import HABApp.core.events
 import HABApp.core.files
 import HABApp.core.items
 
-import HABApp.core.EventBus
-import HABApp.core.Items
+import HABApp.core.event_bus as __eb
+EventBus = __eb.EventBus()
+
+import HABApp.core.item_registry as __it
+Items = __it.ItemRegistry()

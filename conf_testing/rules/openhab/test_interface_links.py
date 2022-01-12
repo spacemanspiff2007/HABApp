@@ -1,4 +1,4 @@
-from HABApp.core.Items import get_all_items
+from HABApp.core import Items
 from HABApp.openhab.items import Thing
 from HABAppTests import TestBaseRule
 
@@ -41,7 +41,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
     def __find_astro_sun_thing(self) -> str:
         found_uid: str = ""
-        for item in get_all_items():
+        for item in Items.get_items():
             if isinstance(item, Thing) and item.name.startswith("astro:sun"):
                 found_uid = item.name
 

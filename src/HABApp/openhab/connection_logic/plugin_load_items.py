@@ -7,6 +7,7 @@ from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
 from HABApp.openhab.item_to_reg import add_to_registry, fresh_item_sync
+from HABApp.core.errors import ItemNotFoundException
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -32,7 +33,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
             add_to_registry(new_item, True)
 
         # remove items which are no longer available
-        ist = set(Items.get_all_item_names())
+        ist = set(Items.get_item_names())
         soll = {k['name'] for k in data}
         for k in ist - soll:
             if isinstance(Items.get_item(k), HABApp.openhab.items.OpenhabItem):
@@ -53,14 +54,14 @@ class LoadAllOpenhabItems(OnConnectPlugin):
                 if not isinstance(thing, Thing):
                     log.warning(f'Item {name} has the wrong type ({type(thing)}), expected Thing')
                     thing = Thing(name)
-            except Items.ItemNotFoundException:
+            except ItemNotFoundException:
                 thing = Thing(name)
 
             thing.status = t_dict['statusInfo']['status']
             Items.add_item(thing)
 
         # remove things which were deleted
-        ist = set(Items.get_all_item_names())
+        ist = set(Items.get_item_names())
         soll = {k['UID'] for k in data}
         for k in ist - soll:
             if isinstance(Items.get_item(k), Thing):

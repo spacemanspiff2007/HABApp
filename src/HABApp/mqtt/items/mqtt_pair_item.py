@@ -1,6 +1,7 @@
 from typing import Optional
 
 from HABApp.core import Items
+from HABApp.core.errors import ItemNotFoundException
 from HABApp.mqtt.mqtt_interface import publish
 from . import MqttBaseItem
 
@@ -37,9 +38,8 @@ class MqttPairItem(MqttBaseItem):
 
         try:
             item = Items.get_item(name)
-        except Items.ItemNotFoundException:
-            item = cls(name, write_topic=write_topic, initial_value=initial_value)
-            Items.add_item(item)
+        except ItemNotFoundException:
+            item = Items.add_item(cls(name, write_topic=write_topic, initial_value=initial_value))
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
