@@ -18,4 +18,3 @@ class ItemRegistryBase:
 
     def pop_item(self, name: Union[str, TYPE_ITEM]) -> TYPE_ITEM:
         raise NotImplementedError()
-
