@@ -1,16 +1,13 @@
-FROM python:3.9-alpine as buildimage
+FROM python:3.9-slim as buildimage
 
 COPY . /tmp/app_install
 
 RUN set -eux;\
-	apk add --no-cache \
-# ujson won't compile without these libs
-		g++; \
 # wheel all packages for habapp
 	cd /tmp/app_install; \
 	pip wheel --wheel-dir=/root/wheels --use-feature=in-tree-build .
 
-FROM python:3.9-alpine
+FROM python:3.9-slim
 
 COPY --from=buildimage /root/wheels /root/wheels
 COPY container/entrypoint.sh /entrypoint.sh
@@ -21,11 +18,13 @@ ENV HABAPP_HOME=/habapp \
 
 RUN set -eux; \
 # Install required dependencies
-	apk add --no-cache \
-		bash \
-		su-exec \
-		tini \
-		tzdata; \
+	apt-get update; \
+	DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+		gosu \
+		tini; \
+	ln -s -f $(which gosu) /usr/local/bin/gosu; \
+	apt-get clean; \
+	rm -rf /var/lib/apt/lists/*; \
 	mkdir -p ${HABAPP_HOME}; \
 	mkdir -p ${HABAPP_HOME}/config; \
 # install HABApp
@@ -42,4 +41,4 @@ WORKDIR ${HABAPP_HOME}
 VOLUME ["${HABAPP_HOME}/config"]
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["su-exec", "habapp", "/sbin/tini", "--", "python", "-m", "HABApp", "--config", "/habapp/config"]
+CMD ["gosu", "habapp", "tini", "--", "python", "-m", "HABApp", "--config", "/habapp/config"]
