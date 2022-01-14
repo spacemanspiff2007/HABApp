@@ -123,5 +123,5 @@ class BaseItem:
 
 
 # Hints for functions that use an item class as an input parameter
-TYPE_ITEM = TypeVar('TYPE_ITEM', bound=BaseItem)
-TYPE_ITEM_CLS = Type[TYPE_ITEM]
+TYPE_ITEM_OBJ = TypeVar('TYPE_ITEM_OBJ', bound=BaseItem)
+TYPE_ITEM_CLS = Type[TYPE_ITEM_OBJ]

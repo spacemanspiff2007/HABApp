@@ -84,7 +84,7 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
     from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    HABApp.core.Items.create_item('MyItem', HABApp.core.items.Item)
+    HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
     # ------------ hide: stop -------------
     from HABApp import Rule
     from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
@@ -135,7 +135,7 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
     from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    HABApp.core.Items.create_item('MyItem', HABApp.core.items.Item)
+    HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
     # ------------ hide: stop -------------
     from HABApp import Rule
     from HABApp.core.events import EventFilter, ValueUpdateEventFilter, ValueUpdateEvent

@@ -4,7 +4,7 @@ from typing import Dict, Union, Tuple
 
 from HABApp.core.errors import ItemNotFoundException, ItemAlreadyExistsError
 from HABApp.core.item_registry import ItemRegistryBase
-from HABApp.core.items.base_item import BaseItem, TYPE_ITEM
+from HABApp.core.items.base_item import BaseItem, TYPE_ITEM_OBJ
 
 log = logging.getLogger('HABApp.Items')
 
@@ -12,26 +12,26 @@ log = logging.getLogger('HABApp.Items')
 class ItemRegistry(ItemRegistryBase):
     def __init__(self):
         self._lock = threading.Lock()
-        self._items: Dict[str, TYPE_ITEM] = {}
+        self._items: Dict[str, TYPE_ITEM_OBJ] = {}
 
-    def item_exists(self, name: Union[str, TYPE_ITEM]) -> bool:
+    def item_exists(self, name: Union[str, TYPE_ITEM_OBJ]) -> bool:
         if isinstance(name, BaseItem):
             name = name.name
         return name in self._items
 
-    def get_item(self, name: str) -> TYPE_ITEM:
+    def get_item(self, name: str) -> TYPE_ITEM_OBJ:
         try:
             return self._items[name]
         except KeyError:
             raise ItemNotFoundException(name) from None
 
-    def get_items(self) -> Tuple[TYPE_ITEM, ...]:
+    def get_items(self) -> Tuple[TYPE_ITEM_OBJ, ...]:
         return tuple(self._items.values())
 
     def get_item_names(self) -> Tuple[str, ...]:
         return tuple(self._items.keys())
 
-    def add_item(self, item: TYPE_ITEM) -> TYPE_ITEM:
+    def add_item(self, item: TYPE_ITEM_OBJ) -> TYPE_ITEM_OBJ:
         assert isinstance(item, BaseItem), type(item)
         name = item.name
 
@@ -40,7 +40,7 @@ class ItemRegistry(ItemRegistryBase):
             if existing is not None:
                 # adding the same item multiple times will not cause an exception
                 if existing is item:
-                    return TYPE_ITEM
+                    return TYPE_ITEM_OBJ
 
                 # adding a new item with the same name raises an exception
                 raise ItemAlreadyExistsError(name)
@@ -51,7 +51,7 @@ class ItemRegistry(ItemRegistryBase):
         item._on_item_added()
         return item
 
-    def pop_item(self, name: Union[str, TYPE_ITEM]) -> TYPE_ITEM:
+    def pop_item(self, name: Union[str, TYPE_ITEM_OBJ]) -> TYPE_ITEM_OBJ:
         if isinstance(name, BaseItem):
             name = name.name
 

@@ -214,7 +214,7 @@ Trigger an event when an item is constant
     from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    HABApp.core.Items.create_item('test_watch', HABApp.core.items.Item)
+    HABApp.core.Items.add_item(HABApp.core.items.Item('test_watch'))
     # ------------ hide: stop -------------
 
     import HABApp

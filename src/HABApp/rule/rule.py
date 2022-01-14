@@ -12,7 +12,7 @@ import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.events import AllEvents
-from HABApp.core.items.base_item import BaseItem, TYPE_ITEM, TYPE_ITEM_CLS
+from HABApp.core.items.base_item import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
 from .interfaces import async_subprocess_exec
@@ -155,7 +155,7 @@ class Rule:
                   groups: Union[str, Iterable[str]] = None,
                   metadata: Union[str, typing.Pattern[str]] = None,
                   metadata_value: Union[str, typing.Pattern[str]] = None,
-                  ) -> Union[typing.List[TYPE_ITEM], typing.List[BaseItem]]:
+                  ) -> Union[typing.List[TYPE_ITEM_OBJ], typing.List[BaseItem]]:
         """Search the HABApp item registry and return the found items.
 
         :param type: item has to be an instance of this class
