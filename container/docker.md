@@ -43,7 +43,7 @@ docker pull spacemanspiff2007/habapp:latest
 Add a logging.yml to your configuration directory which makes HABApp to log to stdout you will see the logs when running with parameter `-it` or by running command:
 
 ```bash
-docker logs -f
+docker logs -f habapp
 ```
 
 ## Advanced usage
