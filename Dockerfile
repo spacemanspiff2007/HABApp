@@ -41,4 +41,4 @@ WORKDIR ${HABAPP_HOME}
 VOLUME ["${HABAPP_HOME}/config"]
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["gosu", "habapp", "tini", "--", "python", "-m", "HABApp", "--config", "/habapp/config"]
+CMD ["gosu", "habapp", "tini", "--", "python", "-m", "HABApp", "--config", "./config"]
