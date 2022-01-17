@@ -31,11 +31,7 @@ class ItemTimes(Generic[WATCH_TYPE]):
             create_task(self.schedule_events())
         return None
 
-    def add_watch(self, secs: typing.Union[int, float, timedelta]) -> WATCH_TYPE:
-        if isinstance(secs, timedelta):
-            secs = secs.total_seconds()
-        assert secs > 0, secs
-
+    def add_watch(self, secs: typing.Union[int, float]) -> WATCH_TYPE:
         # don't add the watch two times
         for t in self.tasks:
             if not t.fut.is_canceled and t.fut.secs == secs:

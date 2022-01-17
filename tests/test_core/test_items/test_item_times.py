@@ -47,17 +47,14 @@ def test_sec_timedelta(parent_rule):
     w1 = a.add_watch(1)
 
     # We return the same object because it is the same time
-    assert w1 is a.add_watch(timedelta(seconds=1))
+    assert w1 is a.add_watch(1)
+    assert w1 is a.add_watch(1.0)
 
-    w2 = a.add_watch(timedelta(seconds=3))
+    w2 = a.add_watch(3)
     assert w2.fut.secs == 3
-
-    w3 = a.add_watch(timedelta(minutes=3))
-    assert w3.fut.secs == 3 * 60
 
     w1.cancel()
     w2.cancel()
-    w3.cancel()
 
 
 @pytest.mark.asyncio
