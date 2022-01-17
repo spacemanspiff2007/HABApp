@@ -1,10 +1,7 @@
-
-
 ==================================
 Installation & Usage
 ==================================
 
-----------------------------------
 Virtual environment
 ----------------------------------
 
@@ -92,7 +89,7 @@ Upgrading
 
 Autostart after reboot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Check where habapp is installed
+Check where habapp is installed::
 
     which habapp
 
@@ -163,22 +160,81 @@ Run the follwing command to fix it::
 
   sudo apt install python3-dev
 
-----------------------------------
+
 Docker
 ----------------------------------
 
-Installation
+Image installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is also available::
+Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is available:
 
-    docker pull spacemanspiff2007/habapp
+.. code-block:: bash
 
-To have the proper timestamps in the logs set the ``TZ`` environment variable of the container accordingly (e.g. ``TZ=Europe/Berlin``).
-Set ``USER_ID`` and ``GROUP_ID`` (both defaults to 9001) for the habapp user.
+    docker pull spacemanspiff2007/habapp:latest
+
+The image supports the following environment variables.
+
+.. list-table::
+    :widths: 25 75
+    :header-rows: 1
+
+    * - Variable
+      - Description
+    * - ``TZ``
+      - Timezone used for the container (e.g. ``Europe/Berlin``).
+    * - ``USER_ID``
+      - User id at which HABApp will run (Optional, default: ``9001``)
+    * - ``GROUP_ID``
+      - Group id at which HABApp will run (Optional, default: ``USER_ID``)
 
 
-Updating docker on Synology
+Running image from command line
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+    docker run --rm -it --name habapp \
+        -v ${PWD}/habapp_config:/habapp/config \
+        -e TZ=Europe/Berlin \
+        -e USER_ID=9001 \
+        -e GROUP_ID=9001 \
+        spacemanspiff2007/habapp:latest
+
+Parameters explained
+
+.. list-table::
+    :widths: 25 75
+    :header-rows: 1
+
+    * - Parameter
+      - Description
+    * - ``--rm``
+      - Remove container when stopped
+    * - ``-it``
+      - Run in interactive mode (Optional) -> You can stop HABApp by pressing STRG+C and see stdout
+    * - ``--name habapp``
+      - Give the container an unique name to interact with it
+    * - ``-e TZ=Europe/Berlin``
+      - Set environment variable with timezone
+    * - ``-e USER_ID=9001``
+      - Set environment variable with wser id at which HABApp will run (Optional, default: 9001)
+    * - ``-e GROUP_ID=9001``
+      - Set environment variable with group id at which HABApp will run (Optional, default: USER_ID)
+    * - ``spacemanspiff2007/habapp:latest``
+      - Name of the image that will be run
+
+Updating image from command line
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+    docker stop habapp
+
+    docker pull spacemanspiff2007/habapp:latest
+
+
+Updating image on Synology
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To update your HABApp docker within Synology NAS, you just have to do the following:
 
@@ -187,16 +243,75 @@ It will overwrite the old one on the NAS.
 Then stop the container. After selecting "Action" -> "Clear" on the HABapp container, the container is there, but without any content.
 After starting the container again, everything should immediately work again.
 
-----------------------------------
-Upgrading to a newer version
-----------------------------------
+Additional python libraries
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you want to use some additional python libraries you can do this by writing your own
+Dockerfile using this image as base image. The HABApp image is based on the python-slim image
+so you can install packages by using apt and pip.
+
+Example Dockerfile installing scipy, pandas and numpy libraries:
+
+.. code-block:: dockerfile
+    :emphasize-lines: 12,30
+
+    FROM spacemanspiff2007/habapp:latest as buildimage
+
+    RUN set -eux; \
+    # Install required build dependencies (Optional)
+        apt-get update; \
+        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+            build-essentials; \
+    # Prepare python packages
+        pip3 wheel \
+            --wheel-dir=/root/wheels \
+            # Replace 'scipy pandas numpy' with your libraries
+            scipy pandas numpy
+
+    FROM spacemanspiff2007/habapp:latest
+
+    COPY --from=buildimage /root/wheels /root/wheels
+
+    RUN set -eux; \
+    # Install required runtime dependencies (Optional)
+        apt-get update; \
+        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+            bash; \
+        apt-get clean; \
+        rm -rf /var/lib/apt/lists/*; \
+    # Install python packages and cleanup
+        pip3 install \
+            --no-index \
+            --find-links=/root/wheels \
+            # Replace 'scipy pandas numpy' with your libraries
+            scipy pandas numpy; \
+        rm -rf /root/wheels
+
+Build image
+
+.. code-block:: bash
+
+    docker build -t my_habapp_extended:latest .
+
+Start image (same as with provided image but the image name is different).
+
+.. code-block:: bash
+
+    docker run --rm -it --name habapp \
+        -v ${PWD}/habapp_config:/habapp/config \
+        -e TZ=Europe/Berlin \
+        -e USER_ID=9001 \
+        -e GROUP_ID=9001 \
+        my_habapp_extended:latest
+
+Upgrading to a newer version of HABApp
+--------------------------------------
 
 It is recommended to upgrade the installation on another machine. Configure your production instance in the configuration
 and set the ``listen_only`` switch(es) in the configuration to ``True``. Observe the logs for any errors.
 This way if there were any breaking changes rules can easily be fixed before problems occur on the running installation.
 
-----------------------------------
-HABApp arguments
+
+Command line arguments
 ----------------------------------
 
 .. exec_code::
@@ -210,3 +325,41 @@ HABApp arguments
     import HABApp.__main__
     HABApp.__cmd_args__.parse_args(['-h'])
     # ------------ hide: stop -------------
+
+
+PyCharm
+----------------------------------
+It's recommended to use PyCharm as an IDE for writing rules. The IDE can provide auto complete and static checks
+which will help write error free rules and vastly speed up development.
+
+Type hints and checks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To enable type hints and checks HABApp needs to be installed in the python environment
+that is currently used by PyCharm.
+Ensure that the HABApp version for PyCharm matches the HABApp version that is currently deployed and running the rules.
+It is recommended to create a new virtual environment when creating a new project for HABApp.
+
+Go to ``Settings`` and view the current python environment settings.
+
+.. image:: /images/pycharm_settings.png
+
+Install the HABApp package through the ``+`` symbol.
+Once the installation was successful PyCharm will provide checks and hints.
+
+.. image:: /images/pycharm_settings_install.png
+
+Start HABApp from PyCharm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+It is possible to start HABApp directly from pycharm e.g. to debug things.
+Open the run configurations.
+
+.. image:: /images/pycharm_run.png
+
+Switch to ``Module name`` execution with the small dropdown arrow.
+It's still necessary to supply a configuration file which can be done in the ``Parameters`` line.
+
+.. image:: /images/pycharm_run_settings.png
+
+| After a click on "OK" HABApp can be run/debugged directly from pycharm.
+| It's even possible to create breakpoints in rules and inspect all objects.

@@ -4,7 +4,8 @@ import sys
 from typing import Iterable, Optional, Union, Tuple, List, Callable
 
 # Todo: Make this positional only if we go >= python 3.8
-# def get_module_classes(module_name: str, /, exclude: Optional[Iterable[Union[str, type]]] = None, include_imported=True,
+# def get_module_classes(module_name: str, /, exclude: Optional[Iterable[Union[str, type]]] = None,
+#                        include_imported=True,
 #                        subclass: Union[None, type, Tuple[type, ...]] = None, include_subclass=True):
 
 
