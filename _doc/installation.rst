@@ -175,6 +175,7 @@ Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>
     docker pull spacemanspiff2007/habapp
 
 To have the proper timestamps in the logs set the ``TZ`` environment variable of the container accordingly (e.g. ``TZ=Europe/Berlin``).
+Set ``USER_ID`` and ``GROUP_ID`` (both defaults to 9001) for the habapp user.
 
 
 Updating docker on Synology
