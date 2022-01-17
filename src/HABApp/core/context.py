@@ -21,6 +21,6 @@ class AsyncContextError(Exception):
 
 def create_task(coro: _Coroutine) -> _Future:
     if async_context.get(None) is None:
-        return _run_coroutine_threadsafe(coro, loop).result()
+        return _run_coroutine_threadsafe(coro, loop)
     else:
         return _create_task(coro)
