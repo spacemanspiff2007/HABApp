@@ -28,7 +28,7 @@ Get an even when the item is constant for 5 and for 10 seconds.
     # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
-    from HABApp.core.events import ItemNoChangeEvent
+    from HABApp.core.events import ItemNoChangeEvent, EventFilter
 
     class MyRule(HABApp.Rule):
         def __init__(self):
@@ -44,7 +44,7 @@ Get an even when the item is constant for 5 and for 10 seconds.
             my_item.watch_change(10)
 
             # Listen to all ItemNoChangeEvents for the item
-            my_item.listen_event(self.item_constant, ItemNoChangeEvent)
+            my_item.listen_event(self.item_constant, EventFilter(ItemNoChangeEvent))
 
             # Set the item to a value to generate the ItemNoChangeEvent events
             my_item.set_value('my_value')
@@ -83,7 +83,7 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
     # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
-    from HABApp.core.events import ValueUpdateEvent
+    from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 
     class MyCountdownRule(HABApp.Rule):
         def __init__(self):
@@ -93,10 +93,10 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
             self.device = Item.get_item('my_device')
 
             self.movement1 = Item.get_item('movement_sensor1')
-            self.movement1.listen_event(self.movement, ValueUpdateEvent)
+            self.movement1.listen_event(self.movement, ValueUpdateEventFilter())
 
             self.movement2 = Item.get_item('movement_sensor2')
-            self.movement2.listen_event(self.movement, ValueUpdateEvent)
+            self.movement2.listen_event(self.movement, ValueUpdateEventFilter())
 
         def movement(self, event: ValueUpdateEvent):
             if self.device != 'ON':
@@ -129,13 +129,14 @@ to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more inform
 
     import HABApp
     from HABApp.core.events.habapp_events import HABAppException
+    from HABApp.core.events import EventFilter
 
     class NotifyOnError(HABApp.Rule):
         def __init__(self):
             super().__init__()
 
             # Listen to all errors
-            self.listen_event('HABApp.Errors', self.on_error, HABAppException)
+            self.listen_event('HABApp.Errors', self.on_error, EventFilter(HABAppException))
 
         def on_error(self, error_event: HABAppException):
             msg = event.to_str() if isinstance(event, HABAppException) else event

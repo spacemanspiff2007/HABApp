@@ -87,7 +87,7 @@ class AggregationItem(BaseValueItem):
             callback=HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value'),
             event_filter=HABApp.core.events.EventFilter(
                 HABApp.core.events.ValueChangeEvent if only_changes else HABApp.core.events.ValueUpdateEvent)
-         )
+        )
         HABApp.core.EventBus.add_listener(self.__listener)
         return self
 

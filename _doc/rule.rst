@@ -62,18 +62,18 @@ It is possible to check the item value by comparing it
 An overview over the item types can be found on :ref:`the HABApp item section <HABAPP_ITEM_TYPES>`,
 :ref:`the openHAB item section <OPENHAB_ITEM_TYPES>` and the :ref:`the mqtt item section <MQTT_ITEM_TYPES>`
 
-Events
+Interacting with events
 ------------------------------
 
 It is possible to listen to events through the :meth:`~HABApp.Rule.listen_event` function.
 The passed function will be called as soon as an event occurs and the event will pe passed as an argument
 into the function.
 
-There is the possibility to reduce the function calls to a certain event type with an additional parameter
-(typically :class:`~HABApp.core.ValueUpdateEvent` or :class:`~HABApp.core.ValueChangeEvent`).
+There is the possibility to reduce the function calls to a certain event type with an additional event filter
+(typically :class:`~HABApp.core.ValueUpdateEventFilter` or :class:`~HABApp.core.ValueChangeEventFilter`).
 
 An overview over the events can be found on :ref:`the HABApp event section <HABAPP_EVENT_TYPES>`,
-:ref:`the openHAB event section <OPENHAB_EVENT_TYPES>` and the :ref:`the mqtt event section <MQTT_EVENT_TYPES>`
+:ref:`the openHAB event section <OPENHAB_EVENT_TYPES>` and the :ref:`the MQTT event section <MQTT_EVENT_TYPES>`
 
 .. exec_code::
     :hide_output:
@@ -87,19 +87,19 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
     HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
     # ------------ hide: stop -------------
     from HABApp import Rule
-    from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+    from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, ValueChangeEventFilter, ValueUpdateEventFilter
     from HABApp.core.items import Item
 
     class MyRule(Rule):
         def __init__(self):
             super().__init__()
-            self.listen_event('MyOpenhabItem', self.on_change, ValueChangeEvent)    # will trigger only on ValueChangeEvent
-            self.listen_event('My/MQTT/Topic', self.on_update, ValueUpdateEvent)    # will trigger only on ValueUpdateEvent
+            self.listen_event('MyOpenhabItem', self.on_change, ValueChangeEventFilter())  # trigger only on ValueChangeEvent
+            self.listen_event('My/MQTT/Topic', self.on_update, ValueUpdateEventFilter())  # trigger only on ValueUpdateEvent
 
             # If you already have an item you can and should use the more convenient method of the item
             # to listen to the item events
             my_item = Item.get_item('MyItem')
-            my_item.listen_event(self.on_change, ValueUpdateEvent)
+            my_item.listen_event(self.on_change, ValueUpdateEventFilter())
 
         def on_change(self, event: ValueChangeEvent):
             assert isinstance(event, ValueChangeEvent), type(event)
@@ -110,19 +110,39 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
     MyRule()
 
 Additionally there is the possibility to filter not only on the event type but on the event values, too.
-This can be achieved by passing an **instance** of EventFilter as event type.
+This can be achieved by passing the value to the event filter.
 There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEventFilter` and
 :class:`~HABApp.core.events.ValueChangeEventFilter`) for the most used event types that provide type hints.
 
 
+AllEventsFilter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: HABApp.core.events.AllEventsFilter
+   :members:
 
+EventFilter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: HABApp.core.events.EventFilter
    :members:
 
+ValueUpdateEventFilter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: HABApp.core.events.ValueUpdateEventFilter
    :members:
 
+ValueChangeEventFilter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: HABApp.core.events.ValueChangeEventFilter
+   :members:
+
+AndFilterGroup
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: HABApp.core.events.AndFilterGroup
+   :members:
+
+OrFilterGroup
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: HABApp.core.events.OrFilterGroup
    :members:
 
 
@@ -138,7 +158,7 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
     HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
     # ------------ hide: stop -------------
     from HABApp import Rule
-    from HABApp.core.events import EventFilter, ValueUpdateEventFilter, ValueUpdateEvent
+    from HABApp.core.events import EventFilter, ValueUpdateEventFilter, ValueUpdateEvent, OrFilterGroup
     from HABApp.core.items import Item
 
     class MyRule(Rule):
@@ -152,7 +172,18 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
             # This is the same as above but with the generic filter
             my_item.listen_event(self.on_val_my_value, EventFilter(ValueUpdateEvent, value='my_value'))
 
+            # trigger if the value is 1 or 2 by using both filters with or
+            my_item.listen_event(
+                self.value_1_or_2,
+                OrFilterGroup(
+                    ValueUpdateEventFilter(value=1), ValueUpdateEventFilter(value=2)
+                )
+            )
+
         def on_val_my_value(self, event: ValueUpdateEvent):
+            assert isinstance(event, ValueUpdateEvent), type(event)
+
+        def value_1_or_2(self, event: ValueUpdateEvent):
             assert isinstance(event, ValueUpdateEvent), type(event)
 
     MyRule()

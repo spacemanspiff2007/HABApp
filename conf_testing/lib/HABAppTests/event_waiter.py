@@ -1,12 +1,12 @@
 import logging
 import time
-from typing import TypeVar, Type, Dict, Any
+from typing import TypeVar, Dict, Any
 from typing import Union
 
 import HABApp
-from HABApp.core.items import BaseValueItem
-from HABApp.core.events.filter import ValueUpdateEventFilter, ValueChangeEventFilter, TYPE_FILTER_OBJ,  EventFilter
+from HABApp.core.events.filter import TYPE_FILTER_OBJ, EventFilter
 from HABApp.core.events.filter.base import EventFilterBase
+from HABApp.core.items import BaseValueItem
 from HABAppTests.errors import TestCaseFailed
 from .compare_values import get_equal_text, get_value_text
 

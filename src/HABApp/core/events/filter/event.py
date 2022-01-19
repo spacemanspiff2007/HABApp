@@ -3,7 +3,7 @@ from HABApp.core.const.hints import ANY_CLASS
 
 
 class EventFilter(EventFilterBase):
-    """Triggers on event types and their values (optional)"""
+    """Triggers on event types and optionally on their values, too"""
 
     def __init__(self, event_class: ANY_CLASS, **kwargs):
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'

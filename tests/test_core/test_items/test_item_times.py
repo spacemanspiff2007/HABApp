@@ -1,5 +1,4 @@
 import asyncio
-from datetime import timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -8,8 +7,8 @@ from pendulum import now as pd_now
 
 import HABApp
 import HABApp.core.items.tmp_data
-from HABApp.core.items.base_item import ChangedTime, UpdatedTime
 from HABApp.core.events import AllEventsFilter
+from HABApp.core.items.base_item import ChangedTime, UpdatedTime
 from ...helpers import TmpEventBus
 
 

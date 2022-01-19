@@ -170,7 +170,7 @@ It is possible to watch items for changes or updates.
     # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
-    from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
+    from HABApp.core.events import ValueUpdateEventFilter, ValueChangeEventFilter, ValueChangeEvent, ValueUpdateEvent
 
     class MyFirstRule(HABApp.Rule):
         def __init__(self):
@@ -179,13 +179,14 @@ It is possible to watch items for changes or updates.
             self.my_item = Item.get_create_item('Item_Name')
 
             # Run this function whenever the item receives an ValueUpdateEvent
-            self.listen_event(self.my_item, self.item_updated, ValueUpdateEvent)
+            self.listen_event(self.my_item, self.item_updated, ValueUpdateEventFilter())
 
             # Run this function whenever the item receives an ValueChangeEvent
-            self.listen_event(self.my_item, self.item_changed, ValueChangeEvent)
+            self.listen_event(self.my_item, self.item_changed, ValueChangeEventFilter())
 
             # If you already have an item you can use the more convenient method of the item
-            self.my_item.listen_event(self.item_changed, ValueChangeEvent)
+            # This is the recommended way to use event listener
+            self.my_item.listen_event(self.item_changed, ValueChangeEventFilter())
 
         # the function has 1 argument which is the event
         def item_changed(self, event: ValueChangeEvent):

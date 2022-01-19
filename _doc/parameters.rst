@@ -22,23 +22,24 @@ Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp
     runner.set_up()
     # ------------ hide: stop -------------
 
-    import HABApp
+    from HABApp import Rule, Parameter
+    from HABApp.core.events import ValueChangeEventFilter
 
-    class MyRuleWithParameters(HABApp.Rule):
+    class MyRuleWithParameters(Rule):
         def __init__(self):
             super().__init__()
 
             # construct parameter once, default_value can be anything
-            self.min_value = HABApp.Parameter( 'param_file_testrule', 'min_value', default_value=10)
+            self.min_value = Parameter( 'param_file_testrule', 'min_value', default_value=10)
 
             # deeper structuring is possible through specifying multiple keys
-            self.min_value_nested = HABApp.Parameter(
+            self.min_value_nested = Parameter(
                 'param_file_testrule',
                 'Rule A', 'subkey1', 'subkey2',
                 default_value=['a', 'b', 'c'] # defaults can also be dicts or lists
             )
 
-            self.listen_event('test_item', self.on_change_event, HABApp.core.events.ValueChangeEvent)
+            self.listen_event('test_item', self.on_change_event, ValueChangeEventFilter())
 
         def on_change_event(self, event):
 
@@ -53,6 +54,7 @@ Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp
     MyRuleWithParameters()
 
     # ------------ hide: start ------------
+    import HABApp
     HABApp.core.EventBus.post_event('test_watch', HABApp.core.events.ValueChangeEvent('test_item', 5, 6))
     runner.tear_down()
     # ------------ hide: stop -------------

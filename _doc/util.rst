@@ -255,7 +255,7 @@ Basic Example
     runner.set_up()
     # ------------ hide: stop -------------
     import HABApp
-    from HABApp.core.events import ValueUpdateEvent
+    from HABApp.core.events import ValueUpdateEventFilter
     from HABApp.util.multimode import MultiModeItem, ValueMode
 
     class MyMultiModeItemTestRule(HABApp.Rule):
@@ -264,7 +264,7 @@ Basic Example
 
             # create a new MultiModeItem
             item = MultiModeItem.get_create_item('MultiModeTestItem')
-            item.listen_event(self.item_update, ValueUpdateEvent)
+            item.listen_event(self.item_update, ValueUpdateEventFilter())
 
             # create two different modes which we will use and add them to the item
             auto = ValueMode('Automatic', initial_value=5)
@@ -316,7 +316,7 @@ Advanced Example
     # ------------ hide: stop -------------
     import logging
     import HABApp
-    from HABApp.core.events import ValueUpdateEvent
+    from HABApp.core.events import ValueUpdateEventFilter
     from HABApp.util.multimode import MultiModeItem, ValueMode
 
     class MyMultiModeItemTestRule(HABApp.Rule):
@@ -325,7 +325,7 @@ Advanced Example
 
             # create a new MultiModeItem
             item = MultiModeItem.get_create_item('MultiModeTestItem')
-            item.listen_event(self.item_update, ValueUpdateEvent)
+            item.listen_event(self.item_update, ValueUpdateEventFilter())
 
             # helper to print the heading so we have a nice output
             def print_heading(_heading):
@@ -398,7 +398,6 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
     HABApp.core.Items.add_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
     # ------------ hide: stop -------------
     import HABApp
-    from HABApp.core.events import ValueUpdateEvent
     from HABApp.openhab.items import SwitchItem
     from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode, ValueMode
 

@@ -2,8 +2,8 @@ import logging
 import time
 
 import HABApp
-from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
-from HABApp.mqtt.events import MqttValueUpdateEvent, MqttValueUpdateEventFilter
+from HABApp.core.events import ValueUpdateEventFilter
+from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
 from HABApp.mqtt.mqtt_connection import connect, disconnect
 from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule

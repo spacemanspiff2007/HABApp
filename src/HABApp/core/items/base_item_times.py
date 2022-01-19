@@ -1,6 +1,5 @@
 import logging
 import typing
-from datetime import timedelta
 from typing import Generic, TypeVar, List
 
 from pendulum import DateTime

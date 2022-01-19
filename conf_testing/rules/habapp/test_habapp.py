@@ -1,7 +1,8 @@
 import time
 
 import HABApp
-from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent, ValueUpdateEvent, EventFilter, ValueUpdateEventFilter
+from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent, ValueUpdateEvent, EventFilter, \
+    ValueUpdateEventFilter
 from HABApp.core.items import Item
 from HABAppTests import TestBaseRule, EventWaiter, get_random_name
 

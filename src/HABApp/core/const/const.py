@@ -5,7 +5,7 @@ from enum import Enum
 class _MissingType(Enum):
     MISSING = object()
 
-    def __str__(self):
+    def __repr__(self):
         return '<Missing>'
 
 

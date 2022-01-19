@@ -1,15 +1,14 @@
-import datetime
-from typing import Any, Callable, Type, Union, TypeVar, Optional
+from typing import Any, Callable, Type, TypeVar, Optional
 
-from eascheduler.const import local_tz
 from pendulum import UTC, DateTime
 from pendulum import now as pd_now
 
 import HABApp
+from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
+from eascheduler.const import local_tz
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
 from .tmp_data import add_tmp_data as _add_tmp_data
 from .tmp_data import restore_tmp_data as _restore_tmp_data
-from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
 
 
 class BaseItem:

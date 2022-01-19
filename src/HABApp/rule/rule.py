@@ -119,7 +119,7 @@ class Rule:
         if event_filter is None:
             event_filter = HABApp.core.events.AllEventsFilter()
         if not isinstance(event_filter, HABApp.core.events.filter.base.EventFilterBase):
-            raise ValueError(f'Argument event_filter must be an event filter (is {type(event_filter)})')
+            raise ValueError(f'Argument event_filter must be an event filter (is {event_filter})')
 
         listener = HABApp.core.EventBusListener(name, cb, event_filter)
         return self._habapp_rule_ctx.add_event_listener(listener)

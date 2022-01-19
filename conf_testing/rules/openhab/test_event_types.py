@@ -1,4 +1,4 @@
-from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
+from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.openhab.definitions.definitions import ITEM_DIMENSIONS
 
 from HABAppTests import TestBaseRule, EventWaiter, OpenhabTmpItem, get_openhab_test_events, \
