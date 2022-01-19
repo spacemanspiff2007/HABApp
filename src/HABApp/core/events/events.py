@@ -1,10 +1,6 @@
 from typing import Any, Union
 
 
-class AllEvents:
-    pass
-
-
 class ComplexEventValue:
     def __init__(self, value):
         self.value: Any = value

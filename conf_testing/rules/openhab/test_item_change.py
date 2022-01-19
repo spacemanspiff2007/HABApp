@@ -1,3 +1,5 @@
+from HABApp.core.events import EventFilter
+from HABApp.openhab.definitions.topics import ITEMS
 from HABApp.openhab.events import ItemUpdatedEvent
 from HABApp.openhab.interface import create_item
 from HABApp.openhab.items import StringItem, NumberItem, DatetimeItem
@@ -14,12 +16,12 @@ class ChangeItemType(TestBaseRule):
         with OpenhabTmpItem('Number') as tmpitem:
             NumberItem.get_item(tmpitem.name)
 
-            with EventWaiter(tmpitem.name, ItemUpdatedEvent, 2) as e:
+            with EventWaiter(ITEMS, EventFilter(ItemUpdatedEvent), 2) as e:
                 create_item('String', tmpitem.name)
                 e.wait_for_event(type='String', name=tmpitem.name)
             StringItem.get_item(tmpitem.name)
 
-            with EventWaiter(tmpitem.name, ItemUpdatedEvent, 2) as e:
+            with EventWaiter(ITEMS, EventFilter(ItemUpdatedEvent), 2) as e:
                 create_item('DateTime', tmpitem.name)
                 e.wait_for_event(type='DateTime', name=tmpitem.name)
             DatetimeItem.get_item(tmpitem.name)

@@ -55,14 +55,14 @@ class SwitchItemValueMode(ValueMode):
                          calc_value_func=calc_value_func)
 
         # setup listener as the last thing
-        switch_item.listen_event(self.__switch_changed, HABApp.core.events.ValueChangeEvent)
+        switch_item.listen_event(self.__switch_changed, HABApp.core.events.ValueChangeEventFilter())
         return
 
     # this is the original enabled method
     __set_enable = ValueMode.set_enabled
 
     # prevent direct calling
-    def set_enabled(self, value: bool):
+    def set_enabled(self, value: bool, only_on_change: bool = False):
         """"""  # so it doesn't show in Sphinx
         raise PermissionError('Enabled is controlled through the switch item!')
 

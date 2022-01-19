@@ -74,7 +74,7 @@ class OpenhabTmpItem:
     def modify(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
                group_type: str = '', group_function: str = '', group_function_params: List[str] = []):
 
-        with EventWaiter(self.name, HABApp.openhab.events.ItemUpdatedEvent) as w:
+        with EventWaiter(self.name, HABApp.core.events.EventFilter(HABApp.openhab.events.ItemUpdatedEvent)) as w:
 
             self._create(label=label, category=category, tags=tags, groups=groups, group_type=group_type,
                          group_function=group_function, group_function_params=group_function_params)

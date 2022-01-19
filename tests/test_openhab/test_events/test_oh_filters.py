@@ -1,4 +1,3 @@
-from HABApp.core.wrappedfunction import WrappedFunction
 from HABApp.openhab.events import ItemStateChangedEvent, ItemStateChangedEventFilter, ItemStateEvent, \
     ItemStateEventFilter
 from tests.helpers import check_class_annotations
@@ -11,27 +10,21 @@ def test_class_annotations():
     check_class_annotations('HABApp.openhab.events', exclude=exclude, skip_imports=False)
 
 
-def test_create_listener():
+def test_oh_filters():
 
     f = ItemStateEventFilter(value=1)
-    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
-
-    assert e.event_filter is ItemStateEvent
-    assert e.attr_name1 == 'value'
-    assert e.attr_value1 == 1
+    assert f.event_class is ItemStateEvent
+    assert f.attr_name1 == 'value'
+    assert f.attr_value1 == 1
 
     f = ItemStateChangedEventFilter(old_value='asdf')
-    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
-
-    assert e.event_filter is ItemStateChangedEvent
-    assert e.attr_name1 == 'old_value'
-    assert e.attr_value1 == 'asdf'
+    assert f.event_class is ItemStateChangedEvent
+    assert f.attr_name1 == 'old_value'
+    assert f.attr_value1 == 'asdf'
 
     f = ItemStateChangedEventFilter(old_value='asdf', value=1)
-    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
-
-    assert e.event_filter is ItemStateChangedEvent
-    assert e.attr_name1 == 'value'
-    assert e.attr_value1 == 1
-    assert e.attr_name2 == 'old_value'
-    assert e.attr_value2 == 'asdf'
+    assert f.event_class is ItemStateChangedEvent
+    assert f.attr_name1 == 'value'
+    assert f.attr_value1 == 1
+    assert f.attr_name2 == 'old_value'
+    assert f.attr_value2 == 'asdf'

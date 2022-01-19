@@ -23,7 +23,7 @@ class ItemRegistryBase:
     def pop_item(self, name: Union[str, TYPE_ITEM_OBJ]) -> TYPE_ITEM_OBJ:
         raise NotImplementedError()
 
-    # Todo: find a good way to implement this
+    # Todo: find a good way to implement and type hint this
     # def search_items(self, type: Union[Tuple[TYPE_ITEM_CLS, ...], TYPE_ITEM_CLS] = None,
     #                  name: Union[str, Pattern[str]] = None,
     #                  tags: Union[str, Iterable[str]] = None,

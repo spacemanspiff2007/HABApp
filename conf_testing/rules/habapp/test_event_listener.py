@@ -1,6 +1,6 @@
 import logging
 
-from HABApp.core.events import ValueChangeEvent
+from HABApp.core.events import ValueChangeEventFilter
 from HABApp.core.items import Item
 from HABApp.util import EventListenerGroup
 from HABAppTests import TestBaseRule, get_random_name
@@ -20,7 +20,7 @@ class TestNoWarningOnRuleUnload(TestBaseRule):
     def test_unload(self):
         item = Item.get_create_item(get_random_name('HABApp'))
 
-        grp = EventListenerGroup().add_listener(item, self.cb, ValueChangeEvent)
+        grp = EventListenerGroup().add_listener(item, self.cb, ValueChangeEventFilter())
 
         for _ in range(20):
             grp.listen()

@@ -34,7 +34,7 @@ class BaseWatch(HABApp.rule_ctx.RuleBoundCancelObj):
         """Listen to (only) the event that is emitted by this watcher"""
         rule_ctx = HABApp.rule_ctx.get_rule_context()
         cb = HABApp.core.WrappedFunction(callback, rule_ctx=rule_ctx)
-        listener = EventFilter(self.EVENT, seconds=self.fut.secs).create_event_listener(self.name, cb)
+        listener = HABApp.core.EventBusListener(self.name, cb, EventFilter(self.EVENT, seconds=self.fut.secs))
         return rule_ctx.add_event_listener(listener)
 
 

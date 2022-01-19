@@ -2,16 +2,16 @@
 import pytest
 import typing
 
-from HABApp.core import EventBus, EventBusListener
-from HABApp.core import WrappedFunction
+from HABApp.core import EventBus, EventBusListener, WrappedFunction
+from HABApp.core.events.filter.base import EventFilterBase
 
 
 class TmpEventBus:
     def __init__(self):
         self.listener: typing.List[EventBusListener] = []
 
-    def listen_events(self, name: str, cb):
-        listener = EventBusListener(name, WrappedFunction(cb, name=f'TestFunc for {name}'))
+    def listen_events(self, name: str, cb, filter: EventFilterBase):
+        listener = EventBusListener(name, WrappedFunction(cb, name=f'TestFunc for {name}'), filter)
         self.listener.append(listener)
         EventBus.add_listener(listener)
 

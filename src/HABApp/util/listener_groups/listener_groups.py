@@ -1,8 +1,8 @@
-from datetime import timedelta
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
-from HABApp.core.events import EventFilter
 from HABApp.core.items.base_valueitem import BaseItem
+from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF
+from HABApp.core.events.filter import TYPE_FILTER_OBJ
 from .listener_creator import ListenerCreatorBase, EventListenerCreator, \
     NoChangeEventListenerCreator, NoUpdateEventListenerCreator
 
@@ -101,7 +101,7 @@ class EventListenerGroup:
                 obj.listen()
 
     def add_listener(self, item: Union[BaseItem, Iterable[BaseItem]], callback: Callable[[Any], Any],
-                     event_filter: EventFilter, alias: Optional[str] = None) -> 'EventListenerGroup':
+                     event_filter: TYPE_FILTER_OBJ, alias: Optional[str] = None) -> 'EventListenerGroup':
         """Add an event listener to the group
 
         :param item: Single or multiple items
@@ -116,7 +116,7 @@ class EventListenerGroup:
         return self
 
     def add_no_update_watcher(self, item: Union[BaseItem, Iterable[BaseItem]], callback: Callable[[Any], Any],
-                              seconds: Union[int, float, timedelta], alias: Optional[str] = None
+                              seconds: TH_POSITIVE_TIME_DIFF, alias: Optional[str] = None
                               ) -> 'EventListenerGroup':
         """Add an no update watcher to the group. On ``listen`` this will create a no update watcher and
          the corresponding event listener that will trigger the callback
@@ -132,7 +132,7 @@ class EventListenerGroup:
         return self
 
     def add_no_change_watcher(self, item: Union[BaseItem, Iterable[BaseItem]], callback: Callable[[Any], Any],
-                              seconds: Union[int, float, timedelta], alias: Optional[str] = None
+                              seconds: TH_POSITIVE_TIME_DIFF, alias: Optional[str] = None
                               ) -> 'EventListenerGroup':
         """Add an no change watcher to the group. On ``listen`` this this will create a no change watcher and
          the corresponding event listener that will trigger the callback

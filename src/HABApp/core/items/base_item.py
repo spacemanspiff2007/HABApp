@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Callable, Type, Union, TypeVar
+from typing import Any, Callable, Type, Union, TypeVar, Optional
 
 from eascheduler.const import local_tz
 from pendulum import UTC, DateTime
@@ -85,18 +85,20 @@ class BaseItem:
         return self._last_update.add_watch(secs)
 
     def listen_event(self, callback: Callable[[Any], Any],
-                     event_type: Union['HABApp.core.events.AllEvents', 'HABApp.core.events.EventFilter', Any]
+                     event_filter: Optional['HABApp.core.events.filter.TYPE_FILTER_OBJ'] = None
                      ) -> 'HABApp.core.EventBusListener':
         """
         Register an event listener which listens to all event that the item receives
 
         :param callback: callback that accepts one parameter which will contain the event
-        :param event_type: Event filter. This is typically :class:`~HABApp.core.ValueUpdateEvent` or
-            :class:`~HABApp.core.ValueChangeEvent` which will also trigger on changes/update from openHAB
-            or mqtt.
+        :param event_filter: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEventFilter` or
+            :class:`~HABApp.core.events.ValueChangeEventFilter` which will also trigger on changes/update from openhab
+            or mqtt. Additionally it can be an instance of :class:`~HABApp.core.events.EventFilter` which additionally
+            filters on the values of the event. It is also possible to group filters logically with, e.g.
+            :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
         rule_ctx = HABApp.rule_ctx.get_rule_context()
-        return rule_ctx.rule.listen_event(self._name, callback=callback, event_type=event_type)
+        return rule_ctx.rule.listen_event(self._name, callback=callback, event_filter=event_filter)
 
     def _on_item_added(self):
         """This function gets automatically called when the item is added to the item registry

@@ -59,7 +59,7 @@ class PingOpenhab(PluginBase):
         self.listener = HABApp.core.EventBusListener(
             HABApp.config.CONFIG.openhab.ping.item,
             HABApp.core.WrappedFunction(self.ping_received),
-            HABApp.openhab.events.ItemStateEvent
+            HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateEvent)
         )
         HABApp.core.EventBus.add_listener(self.listener)
 

@@ -42,7 +42,6 @@ class EventBus(EventBusBase):
         if listeners is not None:
             for listener in listeners:
                 listener.notify_listeners(event)
-
         return None
 
     def add_listener(self, listener: EventBusListenerBase):

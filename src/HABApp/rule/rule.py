@@ -11,7 +11,6 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core.events import AllEvents
 from HABApp.core.items.base_item import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
@@ -101,28 +100,28 @@ class Rule:
 
     def listen_event(self, name: Union[HABApp.core.items.BaseValueItem, str],
                      callback: typing.Callable[[typing.Any], typing.Any],
-                     event_type: Union[typing.Type['HABApp.core.events.AllEvents'],
-                                       'HABApp.core.events.EventFilter', typing.Any] = AllEvents
+                     event_filter: typing.Optional[HABApp.core.events.filter.TYPE_FILTER_OBJ] = None
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
 
         :param name: item or name to listen to
         :param callback: callback that accepts one parameter which will contain the event
-        :param event_type: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEvent` or
-            :class:`~HABApp.core.events.ValueChangeEvent` which will also trigger on changes/update from openhab
+        :param event_filter: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEventFilter` or
+            :class:`~HABApp.core.events.ValueChangeEventFilter` which will also trigger on changes/update from openhab
             or mqtt. Additionally it can be an instance of :class:`~HABApp.core.events.EventFilter` which additionally
-            filters on the values of the event. There are also templates for the most common filters, e.g.
-            :class:`~HABApp.core.events.ValueUpdateEventFilter` and :class:`~HABApp.core.events.ValueChangeEventFilter`
+            filters on the values of the event. It is also possible to group filters logically with, e.g.
+            :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
         cb = HABApp.core.WrappedFunction(callback, rule_ctx=self._habapp_rule_ctx)
         name = name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name
 
-        if isinstance(event_type, HABApp.core.events.EventFilter):
-            listener = event_type.create_event_listener(name, cb)
-        else:
-            listener = HABApp.core.EventBusListener(name, cb, event_type)
+        if event_filter is None:
+            event_filter = HABApp.core.events.AllEventsFilter()
+        if not isinstance(event_filter, HABApp.core.events.filter.base.EventFilterBase):
+            raise ValueError(f'Argument event_filter must be an event filter (is {type(event_filter)})')
 
+        listener = HABApp.core.EventBusListener(name, cb, event_filter)
         return self._habapp_rule_ctx.add_event_listener(listener)
 
     def execute_subprocess(self, callback, program, *args, capture_output=True):

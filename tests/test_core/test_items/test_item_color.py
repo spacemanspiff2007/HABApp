@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, AllEventsFilter
 from HABApp.core.items import ColorItem
 from ...helpers import TmpEventBus
 
@@ -83,7 +83,7 @@ def test_post_update(sync_worker, event_bus: TmpEventBus):
     i = ColorItem('test', 23, 44, 66)
 
     mock = MagicMock()
-    event_bus.listen_events(i.name, mock)
+    event_bus.listen_events(i.name, mock, AllEventsFilter())
     mock.assert_not_called()
 
     i.post_value(1, 2, 3)

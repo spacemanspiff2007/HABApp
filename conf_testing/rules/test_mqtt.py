@@ -2,8 +2,8 @@ import logging
 import time
 
 import HABApp
-from HABApp.core.events import ValueUpdateEvent
-from HABApp.mqtt.events import MqttValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
+from HABApp.mqtt.events import MqttValueUpdateEvent, MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
 from HABApp.mqtt.mqtt_connection import connect, disconnect
 from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule
@@ -21,8 +21,8 @@ class TestMQTTEvents(TestBaseRule):
 
         self.mqtt_test_data = ['asdf', 1, 1.1, str({'a': 'b'}), {'key': 'value'}, ['mylist', 'mylistvalue']]
 
-        self.add_test('MQTT events', self.test_mqtt_events, MqttValueUpdateEvent)
-        self.add_test('MQTT ValueUpdate events', self.test_mqtt_events, ValueUpdateEvent)
+        self.add_test('MQTT events', self.test_mqtt_events, MqttValueUpdateEventFilter())
+        self.add_test('MQTT ValueUpdate events', self.test_mqtt_events, ValueUpdateEventFilter())
 
         self.add_test('MQTT item update', self.test_mqtt_state)
 
@@ -36,7 +36,7 @@ class TestMQTTEvents(TestBaseRule):
         item = MqttPairItem.get_create_item(topic_read, topic_write)
 
         # Ensure we send on the write topic
-        with EventWaiter(topic_write, ValueUpdateEvent) as event_waiter:
+        with EventWaiter(topic_write, ValueUpdateEventFilter()) as event_waiter:
             item.publish('ddddddd')
             event_waiter.wait_for_event(value='ddddddd')
 

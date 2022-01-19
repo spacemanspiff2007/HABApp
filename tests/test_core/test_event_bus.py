@@ -4,6 +4,7 @@ from pytest import fixture
 
 from HABApp.core import EventBus, EventBusListener, wrappedfunction
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.events.filter import AllEventsFilter, EventFilter, OrFilterGroup
 from HABApp.core.items import Item
 
 
@@ -21,18 +22,11 @@ def clean_event_bus():
 def test_repr(clean_event_bus: EventBus, sync_worker):
     f = wrappedfunction.WrappedFunction(lambda x: x)
 
-    listener = EventBusListener('test_name', f)
-    assert listener.describe() == '"test_name" (type AllEvents)'
+    listener = EventBusListener('test_name', f, AllEventsFilter())
+    assert listener.describe() == '"test_name" (filter=AllEventsFilter())'
 
-    listener = EventBusListener('test_name', f, attr_name1='test1', attr_value1='value1')
-    assert listener.describe() == '"test_name" (type AllEvents, test1==value1)'
-
-    listener = EventBusListener('test_name', f, attr_name2='test2', attr_value2='value2')
-    assert listener.describe() == '"test_name" (type AllEvents, test2==value2)'
-
-    listener = EventBusListener('test_name', f, attr_name1='test1', attr_value1='value1',
-                                attr_name2='test2', attr_value2='value2')
-    assert listener.describe() == '"test_name" (type AllEvents, test1==value1, test2==value2)'
+    listener = EventBusListener('test_name', f, EventFilter(ValueUpdateEvent, value='test1'))
+    assert listener.describe() == '"test_name" (filter=EventFilter(type=ValueUpdateEvent, value=test1))'
 
 
 def test_str_event(clean_event_bus: EventBus, sync_worker):
@@ -42,7 +36,7 @@ def test_str_event(clean_event_bus: EventBus, sync_worker):
         event_history.append(event)
     func = wrappedfunction.WrappedFunction(append_event)
 
-    listener = EventBusListener('str_test', func)
+    listener = EventBusListener('str_test', func, AllEventsFilter())
     EventBus.add_listener(listener)
 
     EventBus.post_event('str_test', 'str_event')
@@ -56,7 +50,9 @@ def test_multiple_events(clean_event_bus: EventBus, sync_worker):
     def append_event(event):
         event_history.append(event)
 
-    listener = EventBusListener('test', wrappedfunction.WrappedFunction(append_event), (str, TestEvent))
+    listener = EventBusListener(
+        'test', wrappedfunction.WrappedFunction(append_event),
+        OrFilterGroup(EventFilter(str), EventFilter(TestEvent)))
     EventBus.add_listener(listener)
 
     for k in target:
@@ -71,7 +67,7 @@ def test_complex_event_unpack(clean_event_bus: EventBus, sync_worker):
     assert not m.called
 
     item = Item.get_create_item('test_complex')
-    listener = EventBusListener(item.name, wrappedfunction.WrappedFunction(m, name='test'))
+    listener = EventBusListener(item.name, wrappedfunction.WrappedFunction(m, name='test'), AllEventsFilter())
     EventBus.add_listener(listener)
 
     item.post_value(ComplexEventValue('ValOld'))
@@ -93,61 +89,3 @@ def test_complex_event_unpack(clean_event_bus: EventBus, sync_worker):
     # Events for second post_value
     assert vars(arg2) == vars(ValueUpdateEvent(item.name, 'ValNew'))
     assert vars(arg3) == vars(ValueChangeEvent(item.name, 'ValNew', 'ValOld'))
-
-
-def test_event_filter(clean_event_bus: EventBus, sync_worker):
-    events_all, events_filtered1, events_filtered2 , events_filtered3 = [], [], [], []
-
-    def append_all(event):
-        events_all.append(event)
-
-    def append_filter1(event):
-        events_filtered1.append(event)
-
-    def append_filter2(event):
-        events_filtered2.append(event)
-
-    def append_filter3(event):
-        events_filtered3.append(event)
-
-    name = 'test_filter'
-    func1 = wrappedfunction.WrappedFunction(append_filter1)
-    func2 = wrappedfunction.WrappedFunction(append_filter2)
-    func3 = wrappedfunction.WrappedFunction(append_filter3)
-
-    # listener to all events
-    EventBus.add_listener(
-        EventBusListener(name, wrappedfunction.WrappedFunction(append_all))
-    )
-
-    listener = EventBusListener(name, func1, ValueUpdateEvent, 'value', 'test_value')
-    EventBus.add_listener(listener)
-    listener = EventBusListener(name, func2, ValueUpdateEvent, None, None, 'value', 1)
-    EventBus.add_listener(listener)
-    listener = EventBusListener(name, func3, ValueChangeEvent, 'old_value', None, 'value', 1)
-    EventBus.add_listener(listener)
-
-    event0 = ValueUpdateEvent(name, None)
-    event1 = ValueUpdateEvent(name, 'test_value')
-    event2 = ValueUpdateEvent(name, 1)
-    event3 = ValueChangeEvent(name, 1, None)
-
-    EventBus.post_event(name, event0)
-    EventBus.post_event(name, event1)
-    EventBus.post_event(name, event2)
-    EventBus.post_event(name, event3)
-
-    assert len(events_all) == 4
-    assert vars(events_all[0]) == vars(event0)
-    assert vars(events_all[1]) == vars(event1)
-    assert vars(events_all[2]) == vars(event2)
-    assert vars(events_all[3]) == vars(event3)
-
-    assert len(events_filtered1) == 1
-    assert vars(events_filtered1[0]) == vars(event1)
-
-    assert len(events_filtered2) == 1
-    assert vars(events_filtered2[0]) == vars(event2)
-
-    assert len(events_filtered3) == 1
-    assert vars(events_filtered3[0]) == vars(event3)

@@ -5,6 +5,8 @@ from typing import Union
 
 import HABApp
 from HABApp.core.items import BaseValueItem
+from HABApp.core.events.filter import ValueUpdateEventFilter, ValueChangeEventFilter, TYPE_FILTER_OBJ,  EventFilter
+from HABApp.core.events.filter.base import EventFilterBase
 from HABAppTests.errors import TestCaseFailed
 from .compare_values import get_equal_text, get_value_text
 
@@ -14,25 +16,28 @@ EVENT_TYPE = TypeVar('EVENT_TYPE')
 
 
 class EventWaiter:
-    def __init__(self, name: Union[BaseValueItem, str], event_type: Type[EVENT_TYPE], timeout=1):
+    def __init__(self, name: Union[BaseValueItem, str],
+                 event_filter: TYPE_FILTER_OBJ, timeout=1):
         if isinstance(name, BaseValueItem):
             name = name.name
         assert isinstance(name, str)
+        assert isinstance(event_filter, EventFilterBase)
 
         self.name = name
-        self.event_type = event_type
+        self.event_filter = event_filter
         self.timeout = timeout
 
         self.event_listener = HABApp.core.EventBusListener(
             self.name,
             HABApp.core.WrappedFunction(self.__process_event),
-            self.event_type
+            self.event_filter
         )
 
         self._received_events = []
 
     def __process_event(self, event):
-        assert isinstance(event, self.event_type)
+        if isinstance(self.event_filter, EventFilter):
+            assert isinstance(event, self.event_filter.event_class)
         self._received_events.append(event)
 
     def clear(self):
@@ -47,7 +52,7 @@ class EventWaiter:
 
             if time.time() > start + self.timeout:
                 expected_values = "with " + ", ".join([f"{__k}={__v}" for __k, __v in kwargs.items()]) if kwargs else ""
-                raise TestCaseFailed(f'Timeout while waiting for ({str(self.event_type).split(".")[-1][:-2]}) '
+                raise TestCaseFailed(f'Timeout while waiting for {self.event_filter.describe()} '
                                      f'for {self.name} {expected_values}')
 
             if not self._received_events:

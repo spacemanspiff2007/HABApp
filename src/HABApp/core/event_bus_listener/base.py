@@ -1,5 +1,6 @@
-import HABApp
 from typing import Optional
+
+import HABApp
 
 
 class EventBusListenerBase:

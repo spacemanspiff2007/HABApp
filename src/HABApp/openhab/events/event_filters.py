@@ -1,4 +1,4 @@
-from HABApp.core.events import ValueChangeEventFilter, ValueUpdateEventFilter
+from HABApp.core.events.filter import ValueChangeEventFilter, ValueUpdateEventFilter
 from . import ItemStateChangedEvent, ItemStateEvent
 
 

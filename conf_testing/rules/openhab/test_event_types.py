@@ -1,4 +1,4 @@
-from HABApp.core.events import ValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 from HABApp.openhab.definitions.definitions import ITEM_DIMENSIONS
 
 from HABAppTests import TestBaseRule, EventWaiter, OpenhabTmpItem, get_openhab_test_events, \
@@ -21,7 +21,7 @@ class TestOpenhabEventTypes(TestBaseRule):
     def test_events(self, item_type, test_values):
         item_name = f'{item_type}_value_test'
 
-        with OpenhabTmpItem(item_type, item_name), EventWaiter(item_name, ValueUpdateEvent) as waiter:
+        with OpenhabTmpItem(item_type, item_name), EventWaiter(item_name, ValueUpdateEventFilter()) as waiter:
             for value in test_values:
 
                 self.openhab.post_update(item_name, value)
@@ -41,7 +41,7 @@ class TestOpenhabEventTypes(TestBaseRule):
 
         item_name = f'{dimension}_event_test'
         with OpenhabTmpItem(f'Number:{dimension}', item_name) as item, \
-                EventWaiter(item_name, ValueUpdateEvent) as event_watier, \
+                EventWaiter(item_name, ValueUpdateEventFilter()) as event_watier, \
                 ItemWaiter(item) as item_waiter:
 
             for state in get_openhab_test_states('Number'):
