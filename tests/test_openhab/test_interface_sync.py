@@ -3,7 +3,7 @@ from typing import Callable
 import pytest
 
 import HABApp.openhab.interface
-from HABApp.core.context import async_context, AsyncContextError
+from HABApp.core.asyncio import async_context, AsyncContextError
 from HABApp.openhab.interface import \
     post_update, send_command, \
     get_item, item_exists, remove_item, create_item, \

@@ -9,7 +9,7 @@ from types import FunctionType, MethodType
 from typing import Callable, Coroutine, Union
 
 from HABApp.core.const import loop
-from HABApp.core.context import async_context
+from HABApp.core.asyncio import async_context
 
 
 @dataclass(frozen=True)

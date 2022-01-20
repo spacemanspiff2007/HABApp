@@ -3,7 +3,7 @@ import sys
 import HABApp.rule.scheduler.habappschedulerview as ha_sched
 from HABApp.core import WrappedFunction
 from HABApp.runtime import Runtime
-from HABApp.core.context import async_context
+from HABApp.core.asyncio import async_context
 
 
 def _get_topmost_globals() -> dict:

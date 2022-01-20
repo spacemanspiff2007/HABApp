@@ -1,9 +1,8 @@
-import asyncio
 import logging
 import typing
 
 import HABApp
-from HABApp.core.const import loop
+from HABApp.core.asyncio import create_task
 from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent, EventFilter
 from HABApp.core.lib import PendingFuture
 
@@ -28,7 +27,7 @@ class BaseWatch(HABApp.rule_ctx.RuleBoundCancelObj):
     def cancel(self):
         """Cancel the item watch"""
         super().cancel()
-        asyncio.run_coroutine_threadsafe(self.__cancel_watch(), loop)
+        create_task(self.__cancel_watch())
 
     def listen_event(self, callback: typing.Callable[[typing.Any], typing.Any]) -> 'HABApp.core.EventBusListener':
         """Listen to (only) the event that is emitted by this watcher"""

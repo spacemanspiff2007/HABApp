@@ -7,7 +7,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.const import loop
-from HABApp.core.context import async_context, AsyncContextError
+from HABApp.core.asyncio import async_context, AsyncContextError
 from HABApp.core.items.base_valueitem import BaseValueItem, BaseItem
 from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \

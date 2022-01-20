@@ -1,5 +1,4 @@
 from asyncio import Future as _Future
-from asyncio import create_task as _create_task
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
 from contextvars import ContextVar as _ContextVar
 from typing import Callable as _Callable
@@ -23,4 +22,4 @@ def create_task(coro: _Coroutine) -> _Future:
     if async_context.get(None) is None:
         return _run_coroutine_threadsafe(coro, loop)
     else:
-        return _create_task(coro)
+        return loop.create_task(coro)

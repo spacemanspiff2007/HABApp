@@ -11,7 +11,7 @@ import eascheduler
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
-from HABApp.core.context import async_context
+from HABApp.core.asyncio import async_context
 
 import HABApp.rule.interfaces._http
 

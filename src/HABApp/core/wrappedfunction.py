@@ -9,7 +9,7 @@ from pstats import Stats
 import HABApp
 from typing import Optional
 
-from HABApp.core.context import async_context
+from HABApp.core.asyncio import async_context
 from HABApp.core.const import loop
 
 default_logger = logging.getLogger('HABApp.Worker')

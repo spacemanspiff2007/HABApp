@@ -1,11 +1,12 @@
+from HABApp.core.const import MISSING
+from HABApp.core.const.hints import TH_ANY_CLASS
 from .base import EventFilterBase
-from HABApp.core.const.hints import ANY_CLASS
 
 
 class EventFilter(EventFilterBase):
     """Triggers on event types and optionally on their values, too"""
 
-    def __init__(self, event_class: ANY_CLASS, **kwargs):
+    def __init__(self, event_class: TH_ANY_CLASS, **kwargs):
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
 
         self.event_class = event_class
@@ -17,6 +18,9 @@ class EventFilter(EventFilterBase):
         self.attr_value2 = None
 
         for arg, value in kwargs.items():
+            if value is MISSING:
+                continue
+
             if arg not in event_class.__annotations__:
                 raise AttributeError(f'Filter attribute "{arg}" does not exist for "{event_class.__name__}"')
 
@@ -56,7 +60,7 @@ class EventFilter(EventFilterBase):
 
 
 class TypeBoundEventFilter(EventFilter):
-    """Class to inherit from if the filter criteria always is hardcoded instance check"""
+    """Class to inherit from if the filter criteria always is a hardcoded instance check"""
 
     def describe(self) -> str:
 

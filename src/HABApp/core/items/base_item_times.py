@@ -4,7 +4,7 @@ from typing import Generic, TypeVar, List
 
 from pendulum import DateTime
 
-from HABApp.core.context import create_task
+from HABApp.core.asyncio import create_task
 from HABApp.core.wrapper import log_exception
 from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
 

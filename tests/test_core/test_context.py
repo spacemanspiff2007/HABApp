@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.context import async_context, AsyncContextError
+from HABApp.core.asyncio import async_context, AsyncContextError
 
 
 @pytest.mark.asyncio
