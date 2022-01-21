@@ -1,12 +1,12 @@
+import asyncio
 import functools
 import typing
 
-import asyncio
 import pytest
 
 import HABApp
+from HABApp.core.asyncio import async_context
 from .helpers import params, parent_rule, sync_worker, event_bus, get_dummy_cfg
-
 
 if typing.TYPE_CHECKING:
     parent_rule = parent_rule
@@ -48,7 +48,11 @@ def use_dummy_cfg(monkeypatch):
 
 @pytest.yield_fixture(autouse=True, scope='function')
 def event_loop():
+    token = async_context.set('pytest')
+
     yield HABApp.core.const.loop
+
+    async_context.reset(token)
 
 
 @pytest.yield_fixture(autouse=True, scope='function')

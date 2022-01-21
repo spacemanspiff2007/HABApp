@@ -46,7 +46,6 @@ try:
 except (ModuleNotFoundError, ImportError) as dep_err:
     print(f'Error!\nDependency "{dep_err.name}" is missing!\n\n')
     print_debug_info()
-    raise
     sys.exit(100)
 
 
