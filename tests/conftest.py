@@ -46,7 +46,7 @@ def use_dummy_cfg(monkeypatch):
     yield
 
 
-@pytest.yield_fixture(autouse=True, scope='function')
+@pytest.yield_fixture(autouse=True, scope='session')
 def event_loop():
     token = async_context.set('pytest')
 

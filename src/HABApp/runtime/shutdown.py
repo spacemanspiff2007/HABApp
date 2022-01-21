@@ -3,13 +3,12 @@ import logging
 import logging.handlers
 import traceback
 import typing
-from asyncio import iscoroutinefunction, run_coroutine_threadsafe, sleep
+from asyncio import iscoroutinefunction, sleep
 from dataclasses import dataclass
 from types import FunctionType, MethodType
 from typing import Callable, Coroutine, Union
 
-from HABApp.core.const import loop
-from HABApp.core.asyncio import async_context
+from HABApp.core.asyncio import async_context, create_task
 
 
 @dataclass(frozen=True)
@@ -33,7 +32,7 @@ def register_func(func, last=False, msg: str = ''):
 
 
 def request_shutdown():
-    run_coroutine_threadsafe(_shutdown(), loop)
+    create_task(_shutdown())
 
 
 async def _shutdown():

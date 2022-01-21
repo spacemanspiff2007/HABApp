@@ -1,16 +1,15 @@
 import io
 import logging
 import time
-from asyncio import create_task, iscoroutinefunction, run_coroutine_threadsafe
+from asyncio import iscoroutinefunction
 from cProfile import Profile
 from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
 from pstats import Stats
-import HABApp
 from typing import Optional
 
-from HABApp.core.asyncio import async_context
-from HABApp.core.const import loop
+import HABApp
+from HABApp.core.asyncio import async_context, create_task
 
 default_logger = logging.getLogger('HABApp.Worker')
 
@@ -49,11 +48,7 @@ class WrappedFunction:
     def run(self, *args, **kwargs):
 
         if self.is_async:
-            # If we run in the async context we can create tasks easily
-            if async_context.get(None) is None:
-                run_coroutine_threadsafe(self.async_run(*args, **kwargs), loop=loop)
-            else:
-                create_task(self.async_run(*args, **kwargs))
+            create_task(self.async_run(*args, **kwargs))
         else:
             self.__time_submitted = time.time()
             WrappedFunction._WORKERS.submit(self.__run, *args, **kwargs)

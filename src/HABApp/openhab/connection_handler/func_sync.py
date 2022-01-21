@@ -1,13 +1,10 @@
-import asyncio
 import datetime
-from asyncio import create_task, run_coroutine_threadsafe
 from typing import Any, Optional, List, Dict
 
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.core.const import loop
-from HABApp.core.asyncio import async_context, AsyncContextError
+from HABApp.core.asyncio import run_coro_from_thread, create_task
 from HABApp.core.base import BaseValueItem, BaseItem
 from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \
@@ -30,10 +27,7 @@ def post_update(item_name: str, state: Any):
     if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
 
-    if async_context.get(None) is None:
-        run_coroutine_threadsafe(async_post_update(item_name, state), loop)
-    else:
-        create_task(async_post_update(item_name, state))
+    create_task(async_post_update(item_name, state))
 
 
 def send_command(item_name: str, command):
@@ -48,10 +42,7 @@ def send_command(item_name: str, command):
     if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
 
-    if async_context.get(None) is None:
-        asyncio.run_coroutine_threadsafe(async_send_command(item_name, command), loop)
-    else:
-        create_task(async_send_command(item_name, command))
+    create_task(async_send_command(item_name, command))
 
 
 def create_item(item_type: str, name: str, label="", category="",
@@ -100,19 +91,14 @@ def create_item(item_type: str, name: str, label="", category="",
             assert group_function in definitions.GROUP_FUNCTIONS, \
                 f'{item_type} is not a group function: {", ".join(definitions.GROUP_FUNCTIONS)}'
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(create_item)
-
-    fut = asyncio.run_coroutine_threadsafe(
+    return run_coro_from_thread(
         async_create_item(
             item_type, name,
             label=label, category=category, tags=tags, groups=groups,
             group_type=group_type, group_function=group_function, group_function_params=group_function_params
         ),
-        loop
+        calling=create_item
     )
-    return fut.result()
 
 
 def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False) -> OpenhabItemDefinition:
@@ -128,13 +114,8 @@ def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False)
     assert isinstance(item_name, str), type(item_name)
     assert metadata is None or isinstance(metadata, str), type(metadata)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(get_item)
-
-    fut = asyncio.run_coroutine_threadsafe(
-        async_get_item(item_name, metadata=metadata, all_metadata=all_metadata), loop)
-    data = fut.result()
+    data = run_coro_from_thread(
+        async_get_item(item_name, metadata=metadata, all_metadata=all_metadata), calling=get_item)
     return OpenhabItemDefinition.parse_obj(data)
 
 
@@ -148,12 +129,7 @@ def get_thing(thing_name: str) -> OpenhabThingDefinition:
         thing_name = thing_name.name
     assert isinstance(thing_name, str), type(thing_name)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(get_thing)
-
-    fut = asyncio.run_coroutine_threadsafe(async_get_thing(thing_name), loop)
-    return fut.result()
+    return run_coro_from_thread(async_get_thing(thing_name), calling=get_thing)
 
 
 def remove_item(item_name: str):
@@ -164,13 +140,7 @@ def remove_item(item_name: str):
     :return: True if item was found and removed
     """
     assert isinstance(item_name, str), type(item_name)
-
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(remove_item)
-
-    fut = asyncio.run_coroutine_threadsafe(async_remove_item(item_name), loop)
-    return fut.result()
+    return run_coro_from_thread(async_remove_item(item_name), calling=remove_item)
 
 
 def item_exists(item_name: str):
@@ -182,12 +152,7 @@ def item_exists(item_name: str):
     """
     assert isinstance(item_name, str), type(item_name)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(item_exists)
-
-    fut = asyncio.run_coroutine_threadsafe(async_item_exists(item_name), loop)
-    return fut.result()
+    return run_coro_from_thread(async_item_exists(item_name), calling=item_exists)
 
 
 def set_metadata(item_name: str, namespace: str, value: str, config: dict):
@@ -207,14 +172,9 @@ def set_metadata(item_name: str, namespace: str, value: str, config: dict):
     assert isinstance(value, str), type(value)
     assert isinstance(config, dict), type(config)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(set_metadata)
-
-    fut = asyncio.run_coroutine_threadsafe(
-        async_set_metadata(item=item_name, namespace=namespace, value=value, config=config), loop
+    return run_coro_from_thread(
+        async_set_metadata(item=item_name, namespace=namespace, value=value, config=config), calling=set_metadata
     )
-    return fut.result()
 
 
 def remove_metadata(item_name: str, namespace: str):
@@ -230,14 +190,7 @@ def remove_metadata(item_name: str, namespace: str):
     assert isinstance(item_name, str), type(item_name)
     assert isinstance(namespace, str), type(namespace)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(remove_metadata)
-
-    fut = asyncio.run_coroutine_threadsafe(
-        async_remove_metadata(item=item_name, namespace=namespace), loop
-    )
-    return fut.result()
+    return run_coro_from_thread(async_remove_metadata(item=item_name, namespace=namespace), calling=remove_metadata)
 
 
 def get_persistence_data(item_name: str, persistence: Optional[str],
@@ -256,18 +209,12 @@ def get_persistence_data(item_name: str, persistence: Optional[str],
     assert isinstance(start_time, datetime.datetime) or start_time is None, start_time
     assert isinstance(end_time, datetime.datetime) or end_time is None, end_time
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(get_persistence_data)
-
-    fut = asyncio.run_coroutine_threadsafe(
+    ret = run_coro_from_thread(
         async_get_persistence_data(
             item_name=item_name, persistence=persistence, start_time=start_time, end_time=end_time
         ),
-        loop
+        calling=get_persistence_data
     )
-
-    ret = fut.result()
     return OpenhabPersistenceData.from_dict(ret)
 
 
@@ -284,16 +231,10 @@ def set_persistence_data(item_name: str, persistence: Optional[str], time: datet
     assert isinstance(persistence, str) or persistence is None, persistence
     assert isinstance(time, datetime.datetime), time
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(get_persistence_data)
-
-    fut = asyncio.run_coroutine_threadsafe(
-        async_set_persistence_data(item_name=item_name, persistence=persistence, time=time, state=state), loop
+    return run_coro_from_thread(
+        async_set_persistence_data(item_name=item_name, persistence=persistence, time=time, state=state),
+        calling=set_persistence_data
     )
-
-    return fut.result()
-
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Link handling is experimental
@@ -311,12 +252,7 @@ def get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinit
     assert isinstance(channel_uid, str), type(channel_uid)
     assert isinstance(item_name, str), type(item_name)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(get_channel_link)
-
-    fut = asyncio.run_coroutine_threadsafe(async_get_channel_link(channel_uid, item_name), loop)
-    return fut.result()
+    return run_coro_from_thread(async_get_channel_link(channel_uid, item_name), calling=get_channel_link)
 
 
 def create_channel_link(channel_uid: str, item_name: str, configuration: Optional[Dict[str, Any]] = None) -> bool:
@@ -331,15 +267,10 @@ def create_channel_link(channel_uid: str, item_name: str, configuration: Optiona
     assert isinstance(item_name, str), type(item_name)
     assert isinstance(configuration, dict), type(configuration)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(create_channel_link)
-
-    fut = asyncio.run_coroutine_threadsafe(
+    return run_coro_from_thread(
         async_create_channel_link(item_name=item_name, channel_uid=channel_uid, configuration=configuration),
-        loop
+        calling=create_channel_link
     )
-    return fut.result()
 
 
 def remove_channel_link(channel_uid: str, item_name: str) -> bool:
@@ -349,13 +280,10 @@ def remove_channel_link(channel_uid: str, item_name: str) -> bool:
     :param item_name: name of the item
     :return: True on successful removal, otherwise False
     """
+    assert isinstance(channel_uid, str), type(channel_uid)
+    assert isinstance(item_name, str), type(item_name)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(remove_channel_link)
-
-    fut = asyncio.run_coroutine_threadsafe(async_remove_channel_link(channel_uid, item_name), loop)
-    return fut.result()
+    return run_coro_from_thread(async_remove_channel_link(channel_uid, item_name), calling=remove_channel_link)
 
 
 def channel_link_exists(channel_uid: str, item_name: str) -> bool:
@@ -368,9 +296,4 @@ def channel_link_exists(channel_uid: str, item_name: str) -> bool:
     assert isinstance(channel_uid, str), type(channel_uid)
     assert isinstance(item_name, str), type(item_name)
 
-    # This function is blocking so it can't be called in the async context
-    if async_context.get(None) is not None:
-        raise AsyncContextError(channel_link_exists)
-
-    fut = asyncio.run_coroutine_threadsafe(async_channel_link_exists(channel_uid, item_name), loop)
-    return fut.result()
+    return run_coro_from_thread(async_channel_link_exists(channel_uid, item_name), calling=channel_link_exists)

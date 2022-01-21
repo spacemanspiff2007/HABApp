@@ -2,7 +2,7 @@ from typing import Any, Optional, Mapping
 
 import aiohttp
 
-from HABApp.core.const import loop
+import HABApp
 from HABApp.core.const.json import dump_json
 
 
@@ -13,7 +13,7 @@ async def create_client():
     global CLIENT
     assert CLIENT is None
 
-    CLIENT = aiohttp.ClientSession(json_serialize=dump_json, loop=loop)
+    CLIENT = aiohttp.ClientSession(json_serialize=dump_json, loop=HABApp.core.const.loop)
 
     from HABApp.runtime import shutdown
     shutdown.register_func(CLIENT.close, msg='Closing generic http connection')

@@ -1,8 +1,10 @@
 from asyncio import Future as _Future
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
 from contextvars import ContextVar as _ContextVar
+from typing import Any as _Any
 from typing import Callable as _Callable
 from typing import Coroutine as _Coroutine
+from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
 
@@ -23,3 +25,15 @@ def create_task(coro: _Coroutine) -> _Future:
         return _run_coroutine_threadsafe(coro, loop)
     else:
         return loop.create_task(coro)
+
+
+_CORO_RET = _TypeVar('_CORO_RET')
+
+
+def run_coro_from_thread(coro: _Coroutine[_Any, _Any, _CORO_RET], calling: _Callable) -> _CORO_RET:
+    # This function call is blocking so it can't be called in the async context
+    if async_context.get(None) is not None:
+        raise AsyncContextError(calling)
+
+    fut = _run_coroutine_threadsafe(coro, loop)
+    return fut.result()
