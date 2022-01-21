@@ -12,7 +12,7 @@ Watches
 ItemNoUpdateWatch
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: HABApp.core.items.base_item_watch.ItemNoUpdateWatch
+.. autoclass:: HABApp.core.base.item.ItemNoUpdateWatch
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -20,7 +20,7 @@ ItemNoUpdateWatch
 ItemNoChangeWatch
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: HABApp.core.items.base_item_watch.ItemNoChangeWatch
+.. autoclass:: HABApp.core.base.item.ItemNoChangeWatch
    :members:
    :inherited-members:
    :member-order: groupwise

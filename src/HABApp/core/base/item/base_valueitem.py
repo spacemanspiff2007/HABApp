@@ -53,7 +53,7 @@ class BaseValueItem(BaseItem):
 
         # create events
         HABApp.core.EventBus.post_event(self._name, HABApp.core.events.ValueUpdateEvent(self._name, self.value))
-        if old_value != self.value:
+        if state_changed:
             HABApp.core.EventBus.post_event(
                 self._name, HABApp.core.events.ValueChangeEvent(self._name, value=self.value, old_value=old_value)
             )

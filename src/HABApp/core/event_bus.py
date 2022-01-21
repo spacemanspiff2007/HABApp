@@ -2,8 +2,7 @@ import logging
 import threading
 from typing import Any, Dict, List
 
-from HABApp.core.event_bus import EventBusBase
-from HABApp.core.event_bus_listener import EventBusListenerBase
+from HABApp.core.base import EventBusBase, EventBusListenerBase
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent
 
 event_log = logging.getLogger('HABApp.EventBus')

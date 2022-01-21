@@ -3,7 +3,7 @@ import pytest
 import typing
 
 from HABApp.core import EventBus, EventBusListener, WrappedFunction
-from HABApp.core.events.filter.base import EventFilterBase
+from HABApp.core.base import EventFilterBase
 
 
 class TmpEventBus:

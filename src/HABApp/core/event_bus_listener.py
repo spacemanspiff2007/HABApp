@@ -1,6 +1,6 @@
 from HABApp.core import WrappedFunction
-from HABApp.core.events.filter.base import TYPE_FILTER_OBJ
-from .base import EventBusListenerBase
+from HABApp.core.base import TYPE_FILTER_OBJ, EventBusListenerBase
+import HABApp
 
 
 class EventBusListener(EventBusListenerBase):
@@ -17,3 +17,12 @@ class EventBusListener(EventBusListenerBase):
 
     def describe(self):
         return f'"{self.topic}" (filter={self.filter.describe()})'
+
+    def cancel(self):
+        """Stop listening on the event bus"""
+        HABApp.core.EventBus.remove_listener(self)
+
+        # If we have a context remove the listener from there, too
+        if self._habapp_rule_ctx is not None:
+            self._habapp_rule_ctx.remove_event_listener(self)
+            self._habapp_rule_ctx = None

@@ -1,7 +1,7 @@
-from .base import EventFilterBase
+from HABApp.core.base import EventFilterBase
 
 
-class AllEventsFilter(EventFilterBase):
+class NoEventFilter(EventFilterBase):
     """Triggers on all events"""
 
     def trigger(self, event) -> bool:

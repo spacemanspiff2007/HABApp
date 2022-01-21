@@ -3,8 +3,7 @@ import threading
 from typing import Dict, Union, Tuple
 
 from HABApp.core.errors import ItemNotFoundException, ItemAlreadyExistsError
-from HABApp.core.item_registry import ItemRegistryBase
-from HABApp.core.items.base_item import BaseItem, TYPE_ITEM_OBJ
+from HABApp.core.base import ItemRegistryBase, BaseItem, TYPE_ITEM_OBJ
 
 log = logging.getLogger('HABApp.Items')
 

@@ -1,7 +1,7 @@
 import pytest
 
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
-from HABApp.core.events.filter import EventFilter, ValueChangeEventFilter, ValueUpdateEventFilter, AllEventsFilter, \
+from HABApp.core.events.filter import EventFilter, ValueChangeEventFilter, ValueUpdateEventFilter, NoEventFilter, \
     OrFilterGroup, AndFilterGroup
 from tests.helpers import check_class_annotations
 
@@ -13,7 +13,7 @@ def test_class_annotations():
 
 
 def test_repr():
-    assert AllEventsFilter().describe() == 'AllEventsFilter()'
+    assert NoEventFilter().describe() == 'NoEventFilter()'
 
     f = EventFilter(ValueUpdateEvent, value=1)
     assert f.describe() == 'EventFilter(type=ValueUpdateEvent, value=1)'
@@ -30,6 +30,12 @@ def test_repr():
     f = ValueChangeEventFilter(value=1.5, old_value=3)
     assert f.describe() == 'ValueChangeEventFilter(value=1.5, old_value=3)'
 
+    f = AndFilterGroup(ValueChangeEventFilter(old_value=1), ValueChangeEventFilter(value=2))
+    assert f.describe() == '(ValueChangeEventFilter(old_value=1) and ValueChangeEventFilter(value=2))'
+
+    f = OrFilterGroup(ValueChangeEventFilter(old_value=1), ValueChangeEventFilter(value=2))
+    assert f.describe() == '(ValueChangeEventFilter(old_value=1) or ValueChangeEventFilter(value=2))'
+
 
 def test_exception_missing():
     with pytest.raises(AttributeError) as e:
@@ -39,11 +45,11 @@ def test_exception_missing():
 
 
 def test_all_events():
-    assert AllEventsFilter().trigger(None) is True
-    assert AllEventsFilter().trigger('') is True
-    assert AllEventsFilter().trigger(False) is True
-    assert AllEventsFilter().trigger(True) is True
-    assert AllEventsFilter().trigger('AnyStr') is True
+    assert NoEventFilter().trigger(None) is True
+    assert NoEventFilter().trigger('') is True
+    assert NoEventFilter().trigger(False) is True
+    assert NoEventFilter().trigger(True) is True
+    assert NoEventFilter().trigger('AnyStr') is True
 
 
 def test_value_change_event_filter():

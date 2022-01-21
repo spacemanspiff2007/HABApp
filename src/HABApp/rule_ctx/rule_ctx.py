@@ -12,7 +12,7 @@ class HABAppRuleContext:
 
         self.rule: 'HABApp.rule.Rule' = rule
 
-        self.event_listeners: Set['HABApp.core.event_bus_listener.EventBusListenerBase'] = set()
+        self.event_listeners: Set['HABApp.core.base.TYPE_EVENT_BUS_LISTENER'] = set()
         self.cancel_objects: Set['HABApp.rule_ctx.RuleBoundCancelObj'] = set()
 
     def add_event_listener(self, obj: 'HABApp.core.event_bus_listener.EventBusListenerBase')\
@@ -66,7 +66,7 @@ class HABAppRuleContext:
             rule._habapp_rule_ctx = None
 
             # user implementation
-            rule.on_rule_unload()
+            rule.on_rule_removed()
 
     def check_rule(self):
         with HABApp.core.wrapper.ExceptionToHABApp(log):
@@ -89,4 +89,4 @@ class HABAppRuleContext:
             self.rule.run._scheduler.resume()
 
             # user implementation
-            self.rule.on_rule_load()
+            self.rule.on_rule_loaded()

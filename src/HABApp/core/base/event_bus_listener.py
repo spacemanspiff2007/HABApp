@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING, TypeVar
 
-import HABApp
+if TYPE_CHECKING:
+    import HABApp
 
 
 class EventBusListenerBase:
@@ -18,10 +19,7 @@ class EventBusListenerBase:
         raise NotImplementedError()
 
     def cancel(self):
-        """Stop listening on the event bus"""
-        HABApp.core.EventBus.remove_listener(self)
+        raise NotImplementedError()
 
-        # If we have a context remove the listener from there, too
-        if self._habapp_rule_ctx is not None:
-            self._habapp_rule_ctx.remove_event_listener(self)
-            self._habapp_rule_ctx = None
+
+TYPE_EVENT_BUS_LISTENER = TypeVar('TYPE_EVENT_BUS_LISTENER', bound=EventBusListenerBase)

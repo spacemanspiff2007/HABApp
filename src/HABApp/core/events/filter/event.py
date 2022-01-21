@@ -1,6 +1,6 @@
 from HABApp.core.const import MISSING
 from HABApp.core.const.hints import TH_ANY_CLASS
-from .base import EventFilterBase
+from HABApp.core.base import EventFilterBase
 
 
 class EventFilter(EventFilterBase):

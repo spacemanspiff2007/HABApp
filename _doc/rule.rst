@@ -115,9 +115,9 @@ There are convenience Filters (e.g. :class:`~HABApp.core.events.ValueUpdateEvent
 :class:`~HABApp.core.events.ValueChangeEventFilter`) for the most used event types that provide type hints.
 
 
-AllEventsFilter
+NoEventFilter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: HABApp.core.events.AllEventsFilter
+.. autoclass:: HABApp.core.events.NoEventFilter
    :members:
 
 EventFilter

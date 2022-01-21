@@ -2,16 +2,16 @@ import asyncio
 import logging
 import re
 import sys
-import typing
 import warnings
-from typing import Iterable, Union
+from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List
 
 import HABApp
 import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core.items.base_item import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS
+from HABApp.core.lib.parameters import TYPE_EVENT_CALLBACK
+from HABApp.core.base import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, TYPE_FILTER_OBJ, BaseValueItem
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
 from .interfaces import async_subprocess_exec
@@ -76,15 +76,15 @@ class Rule:
         self.oh: HABApp.openhab.interface = HABApp.openhab.interface
         self.openhab: HABApp.openhab.interface = self.oh
 
-    def on_rule_load(self):
+    def on_rule_loaded(self):
         """Override this to implement logic that will be called when the rule and the file has been successfully loaded
         """
 
-    def on_rule_unload(self):
+    def on_rule_removed(self):
         """Override this to implement logic that will be called when the rule has been unloaded.
         """
 
-    def post_event(self, name, event):
+    def post_event(self, name: Union[TYPE_ITEM_OBJ, str], event: Any):
         """
         Post an event to the event bus
 
@@ -92,15 +92,15 @@ class Rule:
         :param event: Event class to be used (must be class instance)
         :return:
         """
-        assert isinstance(name, (str, HABApp.core.items.BaseValueItem)), type(name)
+        assert isinstance(name, (str, BaseValueItem)), type(name)
         return HABApp.core.EventBus.post_event(
-            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name,
+            name.name if isinstance(name, BaseValueItem) else name,
             event
         )
 
-    def listen_event(self, name: Union[HABApp.core.items.BaseValueItem, str],
-                     callback: typing.Callable[[typing.Any], typing.Any],
-                     event_filter: typing.Optional[HABApp.core.events.filter.TYPE_FILTER_OBJ] = None
+    def listen_event(self, name: Union[TYPE_ITEM_OBJ, str],
+                     callback: TYPE_EVENT_CALLBACK,
+                     event_filter: Optional[TYPE_FILTER_OBJ] = None
                      ) -> HABApp.core.EventBusListener:
         """
         Register an event listener
@@ -114,17 +114,17 @@ class Rule:
             :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
         cb = HABApp.core.WrappedFunction(callback, rule_ctx=self._habapp_rule_ctx)
-        name = name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name
+        name = name.name if isinstance(name, BaseItem) else name
 
         if event_filter is None:
-            event_filter = HABApp.core.events.AllEventsFilter()
-        if not isinstance(event_filter, HABApp.core.events.filter.base.EventFilterBase):
+            event_filter = HABApp.core.events.NoEventFilter()
+        if not isinstance(event_filter, HABApp.core.base.EventFilterBase):
             raise ValueError(f'Argument event_filter must be an event filter (is {event_filter})')
 
         listener = HABApp.core.EventBusListener(name, cb, event_filter)
         return self._habapp_rule_ctx.add_event_listener(listener)
 
-    def execute_subprocess(self, callback, program, *args, capture_output=True):
+    def execute_subprocess(self, callback: TYPE_EVENT_CALLBACK, program, *args, capture_output=True):
         """Run another program
 
         :param callback: |param_scheduled_cb| after process has finished. First parameter will
@@ -143,18 +143,18 @@ class Rule:
             HABApp.core.const.loop
         )
 
-    def get_rule(self, rule_name: str) -> 'Union[Rule, typing.List[Rule]]':
+    def get_rule(self, rule_name: str) -> 'Union[Rule, List[Rule]]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     @staticmethod
-    def get_items(type: Union[typing.Tuple[TYPE_ITEM_CLS, ...], TYPE_ITEM_CLS] = None,
-                  name: Union[str, typing.Pattern[str]] = None,
+    def get_items(type: Union[Tuple[TYPE_ITEM_CLS, ...], TYPE_ITEM_CLS] = None,
+                  name: Union[str, Pattern[str]] = None,
                   tags: Union[str, Iterable[str]] = None,
                   groups: Union[str, Iterable[str]] = None,
-                  metadata: Union[str, typing.Pattern[str]] = None,
-                  metadata_value: Union[str, typing.Pattern[str]] = None,
-                  ) -> Union[typing.List[TYPE_ITEM_OBJ], typing.List[BaseItem]]:
+                  metadata: Union[str, Pattern[str]] = None,
+                  metadata_value: Union[str, Pattern[str]] = None,
+                  ) -> Union[List[TYPE_ITEM_OBJ], List[BaseItem]]:
         """Search the HABApp item registry and return the found items.
 
         :param type: item has to be an instance of this class
@@ -188,7 +188,7 @@ class Rule:
                 raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its Subclasses')
 
         ret = []
-        for item in HABApp.core.Items.get_items():  # type: HABApp.core.items.base_valueitem.BaseItem
+        for item in HABApp.core.Items.get_items():  # type: HABApp.core.base.BaseItem
             if type is not None and not isinstance(item, type):
                 continue
 

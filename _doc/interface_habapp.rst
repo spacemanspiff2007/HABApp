@@ -72,13 +72,13 @@ It will automatically update and always reflect the latest changes of ``MyInputI
 
 BaseValueItem
 ======================================
-Base class for items with values. All items that have a value must inherit from :class:`~HABApp.core.items.BaseValueItem`
+Base class for items with values. All items that have a value must inherit from :class:`~HABApp.core.base.BaseValueItem`
 May not be instantiated directly.
 
-.. inheritance-diagram:: HABApp.core.items.BaseValueItem
+.. inheritance-diagram:: HABApp.core.base.BaseValueItem
    :parts: 1
 
-.. autoclass:: HABApp.core.items.BaseValueItem
+.. autoclass:: HABApp.core.base.BaseValueItem
    :members:
    :inherited-members:
    :member-order: groupwise

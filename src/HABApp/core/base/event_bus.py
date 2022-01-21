@@ -1,5 +1,5 @@
 from typing import Any
-from HABApp.core.event_bus_listener import EventBusListenerBase
+from HABApp.core.base import EventBusListenerBase
 
 
 class EventBusBase:

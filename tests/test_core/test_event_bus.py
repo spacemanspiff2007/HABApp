@@ -4,7 +4,7 @@ from pytest import fixture
 
 from HABApp.core import EventBus, EventBusListener, wrappedfunction
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent, ValueUpdateEvent
-from HABApp.core.events.filter import AllEventsFilter, EventFilter, OrFilterGroup
+from HABApp.core.events.filter import NoEventFilter, EventFilter, OrFilterGroup
 from HABApp.core.items import Item
 
 
@@ -22,8 +22,8 @@ def clean_event_bus():
 def test_repr(clean_event_bus: EventBus, sync_worker):
     f = wrappedfunction.WrappedFunction(lambda x: x)
 
-    listener = EventBusListener('test_name', f, AllEventsFilter())
-    assert listener.describe() == '"test_name" (filter=AllEventsFilter())'
+    listener = EventBusListener('test_name', f, NoEventFilter())
+    assert listener.describe() == '"test_name" (filter=NoEventFilter())'
 
     listener = EventBusListener('test_name', f, EventFilter(ValueUpdateEvent, value='test1'))
     assert listener.describe() == '"test_name" (filter=EventFilter(type=ValueUpdateEvent, value=test1))'
@@ -36,7 +36,7 @@ def test_str_event(clean_event_bus: EventBus, sync_worker):
         event_history.append(event)
     func = wrappedfunction.WrappedFunction(append_event)
 
-    listener = EventBusListener('str_test', func, AllEventsFilter())
+    listener = EventBusListener('str_test', func, NoEventFilter())
     EventBus.add_listener(listener)
 
     EventBus.post_event('str_test', 'str_event')
@@ -67,7 +67,7 @@ def test_complex_event_unpack(clean_event_bus: EventBus, sync_worker):
     assert not m.called
 
     item = Item.get_create_item('test_complex')
-    listener = EventBusListener(item.name, wrappedfunction.WrappedFunction(m, name='test'), AllEventsFilter())
+    listener = EventBusListener(item.name, wrappedfunction.WrappedFunction(m, name='test'), NoEventFilter())
     EventBus.add_listener(listener)
 
     item.post_value(ComplexEventValue('ValOld'))

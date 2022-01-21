@@ -1,6 +1,6 @@
 from typing import Tuple, Union
 
-from HABApp.core.items.base_item import BaseItem, TYPE_ITEM_OBJ
+from HABApp.core.base import BaseItem, TYPE_ITEM_OBJ
 
 
 class ItemRegistryBase:

@@ -1,4 +1,4 @@
-from typing import Tuple, TypeVar, Any
+from typing import TypeVar, Any
 
 
 class EventFilterBase:
@@ -14,14 +14,3 @@ class EventFilterBase:
 
 # Hints for functions that use an item class as an input parameter
 TYPE_FILTER_OBJ = TypeVar('TYPE_FILTER_OBJ', bound=EventFilterBase)
-
-
-class EventFilterBaseGroup(EventFilterBase):
-    def __init__(self, *args: TYPE_FILTER_OBJ):
-        self.filters: Tuple[TYPE_FILTER_OBJ, ...] = args
-
-    def trigger(self, event) -> bool:
-        raise NotImplementedError()
-
-    def describe(self):
-        raise NotImplementedError()

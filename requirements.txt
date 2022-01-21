@@ -23,11 +23,11 @@ pendulum==2.1.2
 # Packages to run source tests
 # -----------------------------------------------------------------------------
 pytest==6.2.5
-pytest-asyncio==0.16.0
+pytest-asyncio==0.17.2
 flake8==4.0.1   # Required for github test
 mock==4.0.3;python_version<"3.8"
 
 # -----------------------------------------------------------------------------
 # Packages for source formatting
 # -----------------------------------------------------------------------------
-pre-commit==2.16.0
+pre-commit==2.17.0

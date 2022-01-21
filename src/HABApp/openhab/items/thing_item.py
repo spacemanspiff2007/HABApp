@@ -1,7 +1,7 @@
 from pendulum import UTC
 from pendulum import now as pd_now
 
-from HABApp.core.items.base_item import BaseItem
+from HABApp.core.base import BaseItem
 from ..events import ThingStatusInfoEvent
 
 

@@ -1,6 +1,6 @@
 import HABApp
 from HABApp.core.errors import ItemNotFoundException
-from . import BaseValueItem
+from HABApp.core.base import BaseValueItem
 
 
 class Item(BaseValueItem):
