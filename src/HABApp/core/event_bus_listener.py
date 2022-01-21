@@ -1,14 +1,13 @@
-from HABApp.core import WrappedFunction
-from HABApp.core.base import TYPE_FILTER_OBJ, EventBusListenerBase
 import HABApp
+from HABApp.core.base import TYPE_FILTER_OBJ, EventBusListenerBase, TYPE_WRAPPED_FUNC_OBJ, WrappedFunctionBase
 
 
 class EventBusListener(EventBusListenerBase):
-    def __init__(self, topic, callback, event_filter: TYPE_FILTER_OBJ):
+    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: TYPE_FILTER_OBJ):
         super().__init__(topic)
-        assert isinstance(callback, WrappedFunction)
+        assert isinstance(callback, WrappedFunctionBase)
 
-        self.func: WrappedFunction = callback
+        self.func: TYPE_WRAPPED_FUNC_OBJ = callback
         self.filter: TYPE_FILTER_OBJ = event_filter
 
     def notify_listeners(self, event):

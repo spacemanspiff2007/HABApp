@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
 from pstats import Stats
 from typing import Optional
+from HABApp.core.base import WrappedFunctionBase
 
 import HABApp
 from HABApp.core.asyncio import async_context, create_task
@@ -14,7 +15,7 @@ from HABApp.core.asyncio import async_context, create_task
 default_logger = logging.getLogger('HABApp.Worker')
 
 
-class WrappedFunction:
+class WrappedFunction(WrappedFunctionBase):
     _WORKERS = ThreadPoolExecutor(10, 'HabApp_')
 
     def __init__(self, func, logger=None, warn_too_long=True, name: Optional[str] = None,
