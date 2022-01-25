@@ -60,7 +60,8 @@ class BaseValueItem(BaseItem):
         return state_changed
 
     def get_value(self, default_value=None) -> typing.Any:
-        """Return the value of the item.
+        """Return the value of the item. This is a helper function that returns a default
+        in case the item value is None.
 
         :param default_value: Return this value if the item value is None
         :return: value of the item

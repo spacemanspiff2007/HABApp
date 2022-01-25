@@ -6,47 +6,10 @@ import traceback
 import typing
 
 
-def get_debug_info() -> str:
-    import platform
-    import sys
-
-    info = {
-        'Platform': platform.platform(),
-        'Machine': platform.machine(),
-        'Python version': sys.version,
-    }
-
-    ret = '\n'.join('{:20s}: {:s}'.format(k, str(v).replace('\n', '')) for k, v in info.items())
-
-    try:
-        import pkg_resources
-        installed_packages = {p.key: p.version for p in sorted(pkg_resources.working_set, key=lambda x: x.key)}
-
-        indent = max(map(len, installed_packages.keys()), default=1) + 2
-        table = '\n'.join(f'{k:{indent}s}: {v}' for k, v in installed_packages.items())
-
-        if installed_packages:
-            ret += f'\n\nInstalled Packages\n{"-" * 80}\n{table}'
-
-    except Exception as e:
-        ret += f'\n\nCould not get installed Packages!\nError: {str(e)}'
-
-    return ret
-
-
-def print_debug_info():
-    print(f'Debug information\n{"-" * 80}')
-    print(get_debug_info())
-
-
-try:
-    import HABApp
-    from HABApp.__cmd_args__ import parse_args, find_config_folder
-    from HABApp.__splash_screen__ import show_screen
-except (ModuleNotFoundError, ImportError) as dep_err:
-    print(f'Error!\nDependency "{dep_err.name}" is missing!\n\n')
-    print_debug_info()
-    sys.exit(100)
+import HABApp
+from HABApp.__cmd_args__ import parse_args, find_config_folder
+from HABApp.__splash_screen__ import show_screen
+from HABApp.__debug_info__ import print_debug_info
 
 
 def register_signal_handler():
