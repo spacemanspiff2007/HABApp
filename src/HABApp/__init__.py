@@ -2,7 +2,7 @@
 from .__version__ import __version__
 
 # 2. Setup used libraries and check installation
-import HABApp.__do_setup__
+import HABApp.__setup_packages__
 
 # 3. User configuration
 import HABApp.config

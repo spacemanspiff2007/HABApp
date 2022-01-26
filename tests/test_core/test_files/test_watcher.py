@@ -10,11 +10,10 @@ from watchdog.events import FileSystemEvent
 import HABApp.core.files.watcher.file_watcher
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.files.watcher.base_watcher import FileEndingFilter
-from ...helpers import TmpEventBus
 
 
 @pytest.mark.asyncio
-async def test_file_events(monkeypatch, event_bus: TmpEventBus, sync_worker):
+async def test_file_events(monkeypatch, sync_worker):
 
     wait_time = 0.1
     monkeypatch.setattr(HABApp.core.files.watcher.file_watcher, 'DEBOUNCE_TIME', wait_time)

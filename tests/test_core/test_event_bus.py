@@ -1,25 +1,17 @@
 from unittest.mock import MagicMock
 
-from pytest import fixture
-
-from HABApp.core import EventBus, EventBusListener, wrappedfunction
+from HABApp.core import wrappedfunction
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.events.filter import NoEventFilter, EventFilter, OrFilterGroup
-from HABApp.core.items import Item
+from HABApp.core.impl import EventBus
+from HABApp.core.impl import EventBusListener
 
 
 class TestEvent:
     pass
 
 
-@fixture
-def clean_event_bus():
-    EventBus.remove_all_listeners()
-    yield EventBus
-    EventBus.remove_all_listeners()
-
-
-def test_repr(clean_event_bus: EventBus, sync_worker):
+def test_repr(sync_worker):
     f = wrappedfunction.WrappedFunction(lambda x: x)
 
     listener = EventBusListener('test_name', f, NoEventFilter())
@@ -29,22 +21,24 @@ def test_repr(clean_event_bus: EventBus, sync_worker):
     assert listener.describe() == '"test_name" (filter=EventFilter(type=ValueUpdateEvent, value=test1))'
 
 
-def test_str_event(clean_event_bus: EventBus, sync_worker):
+def test_str_event(sync_worker):
     event_history = []
+    eb = EventBus()
 
     def append_event(event):
         event_history.append(event)
     func = wrappedfunction.WrappedFunction(append_event)
 
     listener = EventBusListener('str_test', func, NoEventFilter())
-    EventBus.add_listener(listener)
+    eb.add_listener(listener)
 
-    EventBus.post_event('str_test', 'str_event')
+    eb.post_event('str_test', 'str_event')
     assert event_history == ['str_event']
 
 
-def test_multiple_events(clean_event_bus: EventBus, sync_worker):
+def test_multiple_events(sync_worker):
     event_history = []
+    eb = EventBus()
     target = ['str_event', TestEvent(), 'str_event2']
 
     def append_event(event):
@@ -53,25 +47,26 @@ def test_multiple_events(clean_event_bus: EventBus, sync_worker):
     listener = EventBusListener(
         'test', wrappedfunction.WrappedFunction(append_event),
         OrFilterGroup(EventFilter(str), EventFilter(TestEvent)))
-    EventBus.add_listener(listener)
+    eb.add_listener(listener)
 
     for k in target:
-        EventBus.post_event('test', k)
+        eb.post_event('test', k)
 
     assert event_history == target
 
 
-def test_complex_event_unpack(clean_event_bus: EventBus, sync_worker):
+def test_complex_event_unpack(sync_worker):
     """Test that the ComplexEventValue get properly unpacked"""
     m = MagicMock()
     assert not m.called
+    eb = EventBus()
 
-    item = Item.get_create_item('test_complex')
-    listener = EventBusListener(item.name, wrappedfunction.WrappedFunction(m, name='test'), NoEventFilter())
-    EventBus.add_listener(listener)
+    listener = EventBusListener('test_complex', wrappedfunction.WrappedFunction(m, name='test'), NoEventFilter())
+    eb.add_listener(listener)
 
-    item.post_value(ComplexEventValue('ValOld'))
-    item.post_value(ComplexEventValue('ValNew'))
+    eb.post_event('test_complex', ValueUpdateEvent('test_complex', ComplexEventValue('ValOld')))
+    eb.post_event('test_complex',
+                  ValueChangeEvent('test_complex', ComplexEventValue('ValNew'), ComplexEventValue('ValOld')))
 
     # assert that we have been called with exactly one arg
     for k in m.call_args_list:
@@ -79,13 +74,7 @@ def test_complex_event_unpack(clean_event_bus: EventBus, sync_worker):
 
     arg0 = m.call_args_list[0][0][0]
     arg1 = m.call_args_list[1][0][0]
-    arg2 = m.call_args_list[2][0][0]
-    arg3 = m.call_args_list[3][0][0]
 
     # Events for first post_value
-    assert vars(arg0) == vars(ValueUpdateEvent(item.name, 'ValOld'))
-    assert vars(arg1) == vars(ValueChangeEvent(item.name, 'ValOld', None))
-
-    # Events for second post_value
-    assert vars(arg2) == vars(ValueUpdateEvent(item.name, 'ValNew'))
-    assert vars(arg3) == vars(ValueChangeEvent(item.name, 'ValNew', 'ValOld'))
+    assert vars(arg0) == vars(ValueUpdateEvent('test_complex', 'ValOld'))
+    assert vars(arg1) == vars(ValueChangeEvent('test_complex', 'ValNew', 'ValOld'))

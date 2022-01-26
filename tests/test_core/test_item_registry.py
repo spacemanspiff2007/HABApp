@@ -1,17 +1,19 @@
-from HABApp.core import Items
 from HABApp.core.items import Item
+from HABApp.core.impl import ItemRegistry
 
 
 def test_basics():
-    name = 'test'
-    created_item = Item(name)
-    Items.add_item(created_item)
+    item_name = 'test'
 
-    assert Items.item_exists(name)
-    assert created_item is Items.get_item(name)
+    ir = ItemRegistry()
+    created_item = Item(item_name)
+    ir.add_item(created_item)
 
-    assert Items.get_item_names() == (name, )
-    assert Items.get_items() == (created_item, )
+    assert ir.item_exists(item_name)
+    assert created_item is ir.get_item(item_name)
 
-    assert created_item == Items.pop_item(name)
-    assert Items.get_items() == tuple()
+    assert ir.get_item_names() == (item_name, )
+    assert ir.get_items() == (created_item, )
+
+    assert created_item == ir.pop_item(item_name)
+    assert ir.get_items() == tuple()

@@ -6,7 +6,7 @@ from datetime import timedelta
 
 import HABApp
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.base import BaseValueItem
+from HABApp.core.base import BaseValueItem, TYPE_EVENT_BUS_LISTENER
 from ..wrapper import process_exception
 
 
@@ -38,7 +38,7 @@ class AggregationItem(BaseValueItem):
         self._ts: typing.Deque[float] = collections.deque()
         self._vals: typing.Deque[typing.Any] = collections.deque()
 
-        self.__listener: typing.Optional[HABApp.core.EventBusListener] = None
+        self.__listener: typing.Optional[TYPE_EVENT_BUS_LISTENER] = None
 
         self.__task: typing.Optional[asyncio.Future] = None
 
@@ -82,7 +82,7 @@ class AggregationItem(BaseValueItem):
             self.__listener.cancel()
             self.__listener = None
 
-        self.__listener = HABApp.core.EventBusListener(
+        self.__listener = HABApp.core.impl.EventBusListener(
             topic=source.name if isinstance(source, HABApp.core.base.BaseValueItem) else source,
             callback=HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value'),
             event_filter=HABApp.core.events.EventFilter(

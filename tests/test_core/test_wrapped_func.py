@@ -36,7 +36,7 @@ class TestCases(unittest.TestCase):
         self.worker = WrappedFunction._WORKERS
 
         self.err_func: MagicMock = MagicMock()
-        self.err_listener = HABApp.core.EventBusListener(
+        self.err_listener = HABApp.core.impl.EventBusListener(
             TOPIC_ERRORS, WrappedFunction(self.err_func, name='ErrMock'), NoEventFilter()
         )
         HABApp.core.EventBus.add_listener(self.err_listener)
@@ -115,7 +115,7 @@ async def test_async_error_wrapper():
 
     f = WrappedFunction(tmp)
     err_func = AsyncMock()
-    err_listener = HABApp.core.EventBusListener(
+    err_listener = HABApp.core.impl.EventBusListener(
         TOPIC_ERRORS, WrappedFunction(err_func, name='ErrMock'), NoEventFilter())
     HABApp.core.EventBus.add_listener(err_listener)
 

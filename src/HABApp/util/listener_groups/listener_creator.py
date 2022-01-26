@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional, Union
 
-from HABApp.core.event_bus_listener import EventBusListener
+from HABApp.core.impl.event_bus_listener import EventBusListener
 from HABApp.core.events import EventFilter
 from HABApp.core.base import BaseItem
 

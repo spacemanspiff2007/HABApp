@@ -1,13 +1,12 @@
 import asyncio
-from unittest.mock import MagicMock
 from datetime import timedelta
+from unittest.mock import MagicMock
 
 import pytest
 
 from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
 from HABApp.core.items import Item
 from tests.helpers.parent_rule import DummyRule
-from ..helpers import TmpEventBus
 
 
 @pytest.mark.asyncio
@@ -25,7 +24,7 @@ async def test_multiple_add(parent_rule: DummyRule):
 
 
 @pytest.mark.asyncio
-async def test_watch_update(parent_rule: DummyRule, event_bus: TmpEventBus, sync_worker, caplog):
+async def test_watch_update(parent_rule: DummyRule, sync_worker, caplog):
 
     for meth in ('watch_update', 'watch_change'):
 

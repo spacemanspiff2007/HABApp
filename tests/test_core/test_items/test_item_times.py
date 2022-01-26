@@ -9,7 +9,7 @@ import HABApp
 import HABApp.core.base.item.tmp_data
 from HABApp.core.events import NoEventFilter
 from HABApp.core.base.item.base_item import ChangedTime, UpdatedTime
-from ...helpers import TmpEventBus
+from tests.helpers import TestEventBus
 
 
 @pytest.fixture(scope="function")
@@ -86,7 +86,7 @@ async def test_cancel_running(parent_rule, u: UpdatedTime):
 async def test_event_update(parent_rule, u: UpdatedTime):
     m = MagicMock()
     u.set(pd_now(UTC))
-    list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'), NoEventFilter())
+    list = HABApp.core.impl.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'), NoEventFilter())
     HABApp.core.EventBus.add_listener(list)
 
     u.set(pd_now(UTC))
@@ -116,7 +116,7 @@ async def test_event_update(parent_rule, u: UpdatedTime):
 async def test_event_change(parent_rule, c: ChangedTime):
     m = MagicMock()
     c.set(pd_now(UTC))
-    list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'), NoEventFilter())
+    list = HABApp.core.impl.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'), NoEventFilter())
     HABApp.core.EventBus.add_listener(list)
 
     c.set(pd_now(UTC))
@@ -183,7 +183,7 @@ async def test_watcher_update_restore(parent_rule):
 
 
 @pytest.mark.asyncio
-async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, sync_worker, event_bus: TmpEventBus):
+async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, sync_worker, eb: TestEventBus):
     monkeypatch.setattr(HABApp.core.base.item.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''
@@ -192,7 +192,7 @@ async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, 
         nonlocal text_warning
         text_warning = event
 
-    event_bus.listen_events(HABApp.core.const.topics.WARNINGS, get_log, NoEventFilter())
+    eb.listen_events(HABApp.core.const.topics.WARNINGS, get_log, NoEventFilter())
 
     name = 'test_save_restore'
     item_a = HABApp.core.items.Item(name)

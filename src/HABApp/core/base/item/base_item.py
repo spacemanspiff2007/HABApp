@@ -3,12 +3,14 @@ from typing import Any, Callable, Type, TypeVar, Optional
 from pendulum import UTC, DateTime
 from pendulum import now as pd_now
 
-import HABApp
-from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
-from eascheduler.const import local_tz
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
 from .tmp_data import add_tmp_data as _add_tmp_data
 from .tmp_data import restore_tmp_data as _restore_tmp_data
+
+import HABApp
+from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
+from HABApp.core.base import get_item
+from eascheduler.const import local_tz
 
 
 class BaseItem:
@@ -22,7 +24,7 @@ class BaseItem:
         :param name: Name of the item
         """
         assert isinstance(name, str), type(name)
-        item = HABApp.core.Items.get_item(name)
+        item = get_item(name)
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
@@ -84,8 +86,8 @@ class BaseItem:
         return self._last_update.add_watch(secs)
 
     def listen_event(self, callback: Callable[[Any], Any],
-                     event_filter: Optional['HABApp.core.events.filter.TYPE_FILTER_OBJ'] = None
-                     ) -> 'HABApp.core.EventBusListener':
+                     event_filter: Optional['HABApp.core.base.TYPE_FILTER_OBJ'] = None
+                     ) -> 'HABApp.core.base.TYPE_EVENT_BUS_LISTENER':
         """
         Register an event listener which listens to all event that the item receives
 

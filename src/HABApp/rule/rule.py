@@ -10,8 +10,9 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
+from HABApp.core.base import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, TYPE_FILTER_OBJ, BaseValueItem, \
+    TYPE_EVENT_BUS_LISTENER
 from HABApp.core.lib.parameters import TYPE_EVENT_CALLBACK
-from HABApp.core.base import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, TYPE_FILTER_OBJ, BaseValueItem
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
 from .interfaces import async_subprocess_exec
@@ -101,7 +102,7 @@ class Rule:
     def listen_event(self, name: Union[TYPE_ITEM_OBJ, str],
                      callback: TYPE_EVENT_CALLBACK,
                      event_filter: Optional[TYPE_FILTER_OBJ] = None
-                     ) -> HABApp.core.EventBusListener:
+                     ) -> TYPE_EVENT_BUS_LISTENER:
         """
         Register an event listener
 

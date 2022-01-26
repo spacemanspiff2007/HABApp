@@ -1,10 +1,11 @@
 import logging
 import typing
 
-import HABApp
-from .const.topics import ERRORS as _T_ERRORS
-from .const.topics import INFOS as _T_INFOS
-from .const.topics import WARNINGS as _T_WARNINGS
+from HABApp.core.base import post_event
+from HABApp.core.lib import format_exception
+from HABApp.core.const.topics import ERRORS as _T_ERRORS
+from HABApp.core.const.topics import INFOS as _T_INFOS
+from HABApp.core.const.topics import WARNINGS as _T_WARNINGS
 
 
 def log_error(logger: logging.Logger, text: str):
@@ -13,7 +14,7 @@ def log_error(logger: logging.Logger, text: str):
             logger.error(line)
     else:
         logger.error(text)
-    HABApp.core.EventBus.post_event(
+    post_event(
         _T_ERRORS, text
     )
 
@@ -25,7 +26,7 @@ def log_warning(logger: logging.Logger, text: str):
     else:
         logger.warning(text)
 
-    HABApp.core.EventBus.post_event(
+    post_event(
         _T_WARNINGS, text
     )
 
@@ -37,7 +38,7 @@ def log_info(logger: logging.Logger, text: str):
     else:
         logger.info(text)
 
-    HABApp.core.EventBus.post_event(
+    post_event(
         _T_INFOS, text
     )
 
@@ -59,7 +60,7 @@ class HABAppLogger:
             for line in str(e).splitlines():
                 self.lines.append(line)
         else:
-            self.lines.extend(HABApp.core.wrapper.format_exception(e))
+            self.lines.extend(format_exception(e))
         return self
 
     def dump(self) -> bool:
@@ -70,7 +71,7 @@ class HABAppLogger:
             for line in self.lines:
                 self.logger._log(self._LEVEL, line, [])
 
-        HABApp.core.EventBus.post_event(
+        post_event(
             self._TOPIC, '\n'.join(self.lines)
         )
         self.lines.clear()

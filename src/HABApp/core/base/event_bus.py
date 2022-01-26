@@ -1,5 +1,10 @@
-from typing import Any
+from typing import Any, TypeVar
 from HABApp.core.base import EventBusListenerBase
+from HABApp.core.errors import ObjHasNotBeenReplacedError
+
+
+def post_event(topic: str, event: Any):
+    raise ObjHasNotBeenReplacedError(post_event)
 
 
 class EventBusBase:
@@ -14,3 +19,6 @@ class EventBusBase:
 
     def remove_all_listeners(self):
         raise NotImplementedError()
+
+
+TYPE_EVENT_BUS = TypeVar('TYPE_EVENT_BUS', bound=EventBusBase)

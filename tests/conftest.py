@@ -4,15 +4,18 @@ import typing
 
 import pytest
 
-import HABApp
+import HABApp, tests
 from HABApp.core.asyncio import async_context
-from .helpers import params, parent_rule, sync_worker, event_bus, get_dummy_cfg
+from HABApp.core.base import replace_dummy_objs
+from HABApp.core.base.replace_dummy_objs import replace_dummy_objs, ReplacedObjects
+from HABApp.core.impl import EventBus, ItemRegistry
+from .helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg
 
 if typing.TYPE_CHECKING:
     parent_rule = parent_rule
     params = params
     sync_worker = sync_worker
-    event_bus = event_bus
+    eb = eb
 
 
 def raise_err(func):
@@ -55,11 +58,26 @@ def event_loop():
     async_context.reset(token)
 
 
+@pytest.yield_fixture(scope='function')
+def ir():
+    ir = ItemRegistry()
+    yield ir
+    for name in ir.get_item_names():
+        ir.pop_item(name)
+
+
 @pytest.yield_fixture(autouse=True, scope='function')
-def cleanup_registry():
+def clean_objs(ir: ItemRegistry, eb: EventBus):
+
+    objs = ReplacedObjects()
+
+    for mod in (HABApp, tests):
+        replace_dummy_objs(mod, HABApp.core.EventBus, eb, replaced_objs=objs)
+        replace_dummy_objs(mod, HABApp.core.base.post_event, eb.post_event, replaced_objs=objs)
+
+        replace_dummy_objs(mod, HABApp.core.Items, ir, replaced_objs=objs)
+        replace_dummy_objs(mod, HABApp.core.base.get_item, ir.get_item, replaced_objs=objs)
+
     yield
 
-    # Delete all existing items/listener from previous tests
-    HABApp.core.EventBus.remove_all_listeners()
-    for name in HABApp.core.Items.get_item_names():
-        HABApp.core.Items.pop_item(name)
+    objs.restore()

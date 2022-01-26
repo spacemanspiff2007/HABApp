@@ -1,20 +1,17 @@
 import pytest
 
 import HABApp
+from HABApp.core.base import TYPE_ITEM_REGISTRY
 from HABApp.openhab.events import ThingStatusInfoEvent
 from HABApp.openhab.items import Thing
-
 from HABApp.openhab.map_events import get_event
 
 
 @pytest.fixture(scope="function")
-def test_thing():
+def test_thing(ir: TYPE_ITEM_REGISTRY):
     thing = HABApp.openhab.items.Thing('test_thing')
-    HABApp.core.Items.add_item(thing)
-
-    yield thing
-
-    HABApp.core.Items.pop_item('test_thing')
+    yield ir.add_item(thing)
+    ir.pop_item('test_thing')
 
 
 def get_dict(status: str):

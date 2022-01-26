@@ -4,7 +4,7 @@ import pytest
 
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, NoEventFilter
 from HABApp.core.items import ColorItem
-from ...helpers import TmpEventBus
+from tests.helpers import TestEventBus
 
 
 def test_repr():
@@ -79,11 +79,11 @@ def test_hsv_to_rgb():
     assert i.get_rgb() == (168, 123, 94)
 
 
-def test_post_update(sync_worker, event_bus: TmpEventBus):
+def test_post_update(sync_worker, eb: TestEventBus):
     i = ColorItem('test', 23, 44, 66)
 
     mock = MagicMock()
-    event_bus.listen_events(i.name, mock, NoEventFilter())
+    eb.listen_events(i.name, mock, NoEventFilter())
     mock.assert_not_called()
 
     i.post_value(1, 2, 3)

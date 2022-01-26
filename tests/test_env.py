@@ -3,6 +3,8 @@ from pathlib import Path
 
 import HABApp.__check_dependency_packages__
 
+my_obj: 'float'
+
 
 def test_installation_check():
     re_name = re.compile(r'^([A-Za-z-]{3,})')
