@@ -41,7 +41,7 @@ class HABAppRuleContext:
         obj._habapp_rule_ctx = self
         return self
 
-    def get_callback_name(self, callback) -> Optional[str]:
+    def get_callback_name(self, callback: callable) -> Optional[str]:
         return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None
 
     def unload_rule(self):

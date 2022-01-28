@@ -1,4 +1,4 @@
-import typing
+from typing import Dict, Type
 from HABApp.core.const.json import load_json
 
 from .events import OpenhabEvent, \
@@ -19,7 +19,7 @@ EVENT_LIST = [
     ThingStatusInfoEvent, ThingStatusInfoChangedEvent, ThingFirmwareStatusInfoEvent
 ]
 
-__event_lookup: typing.Dict[str, typing.Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
+__event_lookup: Dict[str, Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
 __event_lookup['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming from openHAB is inconsistent here
 __event_lookup['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openHAB is inconsistent here
 

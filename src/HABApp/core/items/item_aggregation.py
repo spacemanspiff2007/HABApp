@@ -84,15 +84,15 @@ class AggregationItem(BaseValueItem):
 
         self.__listener = HABApp.core.impl.EventBusListener(
             topic=source.name if isinstance(source, HABApp.core.base.BaseValueItem) else source,
-            callback=HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value'),
+            callback=HABApp.core.impl.wrap_func(self._add_value, name=f'{self.name}.add_value'),
             event_filter=HABApp.core.events.EventFilter(
                 HABApp.core.events.ValueChangeEvent if only_changes else HABApp.core.events.ValueUpdateEvent)
         )
         HABApp.core.EventBus.add_listener(self.__listener)
         return self
 
-    def _on_item_remove(self):
-        super()._on_item_remove()
+    def _on_item_removed(self):
+        super()._on_item_removed()
 
         if self.__listener is not None:
             self.__listener.cancel()

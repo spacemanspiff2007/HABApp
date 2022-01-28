@@ -4,9 +4,9 @@ from typing import TypeVar, Dict, Any
 from typing import Union
 
 import HABApp
-from HABApp.core.events.filter import TYPE_FILTER_OBJ, EventFilter
-from HABApp.core.events.filter.base import EventFilterBase
-from HABApp.core.items import BaseValueItem
+from HABApp.core.base import TYPE_FILTER_OBJ, EventFilterBase, BaseValueItem
+from HABApp.core.impl import EventBusListener
+from HABApp.core.events.filter import EventFilter
 from HABAppTests.errors import TestCaseFailed
 from .compare_values import get_equal_text, get_value_text
 
@@ -27,9 +27,9 @@ class EventWaiter:
         self.event_filter = event_filter
         self.timeout = timeout
 
-        self.event_listener = HABApp.core.EventBusListener(
+        self.event_listener = EventBusListener(
             self.name,
-            HABApp.core.WrappedFunction(self.__process_event),
+            HABApp.core.impl.wrap_func(self.__process_event),
             self.event_filter
         )
 

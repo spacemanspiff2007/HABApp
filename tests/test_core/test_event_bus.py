@@ -1,10 +1,10 @@
 from unittest.mock import MagicMock
 
-from HABApp.core import wrappedfunction
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.events.filter import NoEventFilter, EventFilter, OrFilterGroup
 from HABApp.core.impl import EventBus
 from HABApp.core.impl import EventBusListener
+from HABApp.core.impl import wrap_func
 
 
 class TestEvent:
@@ -12,7 +12,7 @@ class TestEvent:
 
 
 def test_repr(sync_worker):
-    f = wrappedfunction.WrappedFunction(lambda x: x)
+    f = wrap_func(lambda x: x)
 
     listener = EventBusListener('test_name', f, NoEventFilter())
     assert listener.describe() == '"test_name" (filter=NoEventFilter())'
@@ -27,7 +27,7 @@ def test_str_event(sync_worker):
 
     def append_event(event):
         event_history.append(event)
-    func = wrappedfunction.WrappedFunction(append_event)
+    func = wrap_func(append_event)
 
     listener = EventBusListener('str_test', func, NoEventFilter())
     eb.add_listener(listener)
@@ -45,7 +45,7 @@ def test_multiple_events(sync_worker):
         event_history.append(event)
 
     listener = EventBusListener(
-        'test', wrappedfunction.WrappedFunction(append_event),
+        'test', wrap_func(append_event),
         OrFilterGroup(EventFilter(str), EventFilter(TestEvent)))
     eb.add_listener(listener)
 
@@ -61,7 +61,7 @@ def test_complex_event_unpack(sync_worker):
     assert not m.called
     eb = EventBus()
 
-    listener = EventBusListener('test_complex', wrappedfunction.WrappedFunction(m, name='test'), NoEventFilter())
+    listener = EventBusListener('test_complex', wrap_func(m, name='test'), NoEventFilter())
     eb.add_listener(listener)
 
     eb.post_event('test_complex', ValueUpdateEvent('test_complex', ComplexEventValue('ValOld')))

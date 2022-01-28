@@ -43,7 +43,8 @@ class RuleManager:
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
             self.files['bench'] = file = BenchFile(self)
-            ok = await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, file.load)
+            ok = await HABApp.core.const.loop.run_in_executor(
+                HABApp.core.impl.wrapped_function.wrapped_sync.WORKERS, file.load)
             if not ok:
                 log.error('Failed to load Benchmark!')
                 HABApp.runtime.shutdown.request_shutdown()
@@ -62,7 +63,7 @@ class RuleManager:
         self.watcher = folder.add_watch('.py', True)
 
         # Initial loading of rules
-        HABApp.core.WrappedFunction(self.load_rules_on_startup, logger=log).run()
+        HABApp.core.impl.wrap_func(self.load_rules_on_startup, logger=log).run()
 
     async def load_rules_on_startup(self):
 
@@ -124,7 +125,8 @@ class RuleManager:
             with self.__files_lock:
                 rule = self.files.pop(path_str)
 
-            await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, rule.unload)
+            await HABApp.core.const.loop.run_in_executor(
+                HABApp.core.impl.wrapped_function.wrapped_sync.WORKERS, rule.unload)
         finally:
             if request_lock:
                 self.__load_lock.release()
@@ -148,7 +150,8 @@ class RuleManager:
             with self.__files_lock:
                 self.files[path_str] = file = RuleFile(self, name, path)
 
-            ok = await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, file.load)
+            ok = await HABApp.core.const.loop.run_in_executor(
+                HABApp.core.impl.wrapped_function.wrapped_sync.WORKERS, file.load)
             if not ok:
                 self.files.pop(path_str)
                 log.warning(f'Failed to load {path_str}!')

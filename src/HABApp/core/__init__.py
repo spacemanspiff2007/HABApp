@@ -12,7 +12,6 @@ from HABApp.core import base
 from HABApp.core import wrapper
 from HABApp.core import logger
 
-from HABApp.core.wrappedfunction import WrappedFunction
 
 import HABApp.core.events
 import HABApp.core.files

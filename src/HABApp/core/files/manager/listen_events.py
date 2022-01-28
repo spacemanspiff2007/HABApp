@@ -17,12 +17,12 @@ async def _process_event(event: Union[RequestFileUnloadEvent, RequestFileLoadEve
 async def setup_file_manager():
     # Setup events so we can process load/unload
     HABApp.core.EventBus.add_listener(
-        HABApp.core.EventBusListener(
-            T_FILES, HABApp.core.WrappedFunction(_process_event), EventFilter(RequestFileUnloadEvent)
+        HABApp.core.impl.EventBusListener(
+            T_FILES, HABApp.core.impl.wrap_func(_process_event), EventFilter(RequestFileUnloadEvent)
         )
     )
     HABApp.core.EventBus.add_listener(
-        HABApp.core.EventBusListener(
-            T_FILES, HABApp.core.WrappedFunction(_process_event), EventFilter(RequestFileLoadEvent)
+        HABApp.core.impl.EventBusListener(
+            T_FILES, HABApp.core.impl.wrap_func(_process_event), EventFilter(RequestFileLoadEvent)
         )
     )

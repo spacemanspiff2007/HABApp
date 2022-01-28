@@ -1,7 +1,7 @@
 import sys
 
 import HABApp.rule.scheduler.habappschedulerview as ha_sched
-from HABApp.core import WrappedFunction
+from HABApp.core.impl.wrapped_function import wrapped_sync
 from HABApp.runtime import Runtime
 from HABApp.core.asyncio import async_context
 
@@ -72,7 +72,7 @@ class SimpleRuleRunner:
         self.vars['__HABAPP__RULES'] = self.loaded_rules = []
 
         # patch worker with a synchronous worker
-        self.patch_obj(WrappedFunction, '_WORKERS', self)
+        self.patch_obj(wrapped_sync, 'WORKERS', self)
 
         # patch scheduler, so we run synchronous
         self.patch_obj(ha_sched, '_HABAppScheduler', SyncScheduler)

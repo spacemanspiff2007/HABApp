@@ -4,6 +4,7 @@ from contextvars import ContextVar as _ContextVar
 from typing import Any as _Any
 from typing import Callable as _Callable
 from typing import Coroutine as _Coroutine
+from typing import Optional as _Optional
 from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
@@ -20,11 +21,11 @@ class AsyncContextError(Exception):
         return f'Function "{self.func.__name__}" may not be called from an async context!'
 
 
-def create_task(coro: _Coroutine) -> _Future:
+def create_task(coro: _Coroutine, name: _Optional[str] = None) -> _Future:
     if async_context.get(None) is None:
         return _run_coroutine_threadsafe(coro, loop)
     else:
-        return loop.create_task(coro)
+        return loop.create_task(coro, name=name)
 
 
 _CORO_RET = _TypeVar('_CORO_RET')

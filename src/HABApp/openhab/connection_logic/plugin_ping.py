@@ -56,9 +56,9 @@ class PingOpenhab(PluginBase):
         if not HABApp.config.CONFIG.openhab.ping.enabled:
             return None
 
-        self.listener = HABApp.core.EventBusListener(
+        self.listener = HABApp.core.impl.EventBusListener(
             HABApp.config.CONFIG.openhab.ping.item,
-            HABApp.core.WrappedFunction(self.ping_received),
+            HABApp.core.impl.wrap_func(self.ping_received),
             HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateEvent)
         )
         HABApp.core.EventBus.add_listener(self.listener)

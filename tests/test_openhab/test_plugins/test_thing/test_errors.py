@@ -68,3 +68,5 @@ channels:
 
     errors = [rec.message for rec in caplog.records if rec.levelno >= 30]
     assert errors[0] == '"â_ß_{_)" is not a valid name for an item!'
+
+    cfg.do_cleanup.cancel()

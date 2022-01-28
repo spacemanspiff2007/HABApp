@@ -4,9 +4,9 @@ import typing
 
 import pytest
 
-import HABApp, tests
+import HABApp
+import tests
 from HABApp.core.asyncio import async_context
-from HABApp.core.base import replace_dummy_objs
 from HABApp.core.base.replace_dummy_objs import replace_dummy_objs, ReplacedObjects
 from HABApp.core.impl import EventBus, ItemRegistry
 from .helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg

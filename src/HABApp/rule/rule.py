@@ -12,9 +12,10 @@ import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.base import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, TYPE_FILTER_OBJ, BaseValueItem, \
     TYPE_EVENT_BUS_LISTENER
-from HABApp.core.lib.parameters import TYPE_EVENT_CALLBACK
+from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
+from HABApp.core.impl import wrap_func
 from .interfaces import async_subprocess_exec
 
 log = logging.getLogger('HABApp.Rule')
@@ -114,7 +115,7 @@ class Rule:
             filters on the values of the event. It is also possible to group filters logically with, e.g.
             :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
-        cb = HABApp.core.WrappedFunction(callback, rule_ctx=self._habapp_rule_ctx)
+        cb = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
         name = name.name if isinstance(name, BaseItem) else name
 
         if event_filter is None:
@@ -122,7 +123,7 @@ class Rule:
         if not isinstance(event_filter, HABApp.core.base.EventFilterBase):
             raise ValueError(f'Argument event_filter must be an event filter (is {event_filter})')
 
-        listener = HABApp.core.EventBusListener(name, cb, event_filter)
+        listener = HABApp.core.impl.EventBusListener(name, cb, event_filter)
         return self._habapp_rule_ctx.add_event_listener(listener)
 
     def execute_subprocess(self, callback: TYPE_EVENT_CALLBACK, program, *args, capture_output=True):
@@ -137,7 +138,7 @@ class Rule:
         """
 
         assert isinstance(program, str), type(program)
-        cb = HABApp.core.WrappedFunction(callback, rule_ctx=self._habapp_rule_ctx)
+        cb = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
 
         asyncio.run_coroutine_threadsafe(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),

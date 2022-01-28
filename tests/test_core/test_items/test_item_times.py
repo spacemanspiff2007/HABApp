@@ -10,6 +10,7 @@ import HABApp.core.base.item.tmp_data
 from HABApp.core.events import NoEventFilter
 from HABApp.core.base.item.base_item import ChangedTime, UpdatedTime
 from tests.helpers import TestEventBus
+from HABApp.core.impl import wrap_func
 
 
 @pytest.fixture(scope="function")
@@ -83,10 +84,10 @@ async def test_cancel_running(parent_rule, u: UpdatedTime):
 
 
 @pytest.mark.asyncio
-async def test_event_update(parent_rule, u: UpdatedTime):
+async def test_event_update(parent_rule, u: UpdatedTime, sync_worker):
     m = MagicMock()
     u.set(pd_now(UTC))
-    list = HABApp.core.impl.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'), NoEventFilter())
+    list = HABApp.core.impl.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
     HABApp.core.EventBus.add_listener(list)
 
     u.set(pd_now(UTC))
@@ -113,10 +114,10 @@ async def test_event_update(parent_rule, u: UpdatedTime):
 
 
 @pytest.mark.asyncio
-async def test_event_change(parent_rule, c: ChangedTime):
+async def test_event_change(parent_rule, c: ChangedTime, sync_worker):
     m = MagicMock()
     c.set(pd_now(UTC))
-    list = HABApp.core.impl.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'), NoEventFilter())
+    list = HABApp.core.impl.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
     HABApp.core.EventBus.add_listener(list)
 
     c.set(pd_now(UTC))

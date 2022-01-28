@@ -2,7 +2,7 @@ from datetime import timedelta
 from time import time
 from typing import Union, Optional
 
-from HABApp.core.wrappedfunction import WrappedFunction
+from HABApp.core.impl import wrap_func
 from HABApp.rule_ctx import RuleBoundCancelObj
 
 VAL_TYPE = Union[int, float]
@@ -47,7 +47,7 @@ class Fade:
         self._fade_finished = True
 
         self._fade_worker: Optional[FadeWorker] = None
-        self.__callback = WrappedFunction(callback) if callback is not None else None
+        self.__callback = wrap_func(callback) if callback is not None else None
 
         self.value = 0
 

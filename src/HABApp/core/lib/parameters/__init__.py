@@ -1,2 +1,1 @@
 from .positive_time_diff import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
-from .callbacks import TYPE_EVENT_CALLBACK, TYPE_SCHEDULER_CALLBACK

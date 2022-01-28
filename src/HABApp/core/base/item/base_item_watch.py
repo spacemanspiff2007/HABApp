@@ -5,6 +5,7 @@ import HABApp
 from HABApp.core.asyncio import create_task
 from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent, EventFilter
 from HABApp.core.lib import PendingFuture
+from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 
 log = logging.getLogger('HABApp')
 
@@ -29,11 +30,10 @@ class BaseWatch(HABApp.rule_ctx.RuleBoundCancelObj):
         super().cancel()
         create_task(self.__cancel_watch())
 
-    def listen_event(self, callback: typing.Callable[[typing.Any], typing.Any]
-                     ) -> 'HABApp.core.base.TYPE_EVENT_BUS_LISTENER':
+    def listen_event(self, callback: TYPE_EVENT_CALLBACK) -> 'HABApp.core.base.TYPE_EVENT_BUS_LISTENER':
         """Listen to (only) the event that is emitted by this watcher"""
         rule_ctx = HABApp.rule_ctx.get_rule_context()
-        cb = HABApp.core.WrappedFunction(callback, rule_ctx=rule_ctx)
+        cb = HABApp.core.impl.wrap_func(callback, rule_ctx=rule_ctx)
         listener = HABApp.core.impl.EventBusListener(self.name, cb, EventFilter(self.EVENT, seconds=self.fut.secs))
         return rule_ctx.add_event_listener(listener)
 

@@ -7,9 +7,10 @@ from unittest.mock import MagicMock
 import pytest
 
 import HABApp
-from HABApp.core import WrappedFunction
+from HABApp.core.impl import wrap_func
 from HABApp.core.events import NoEventFilter
 from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
+from HABApp.core.impl.wrapped_function import wrapped_sync
 
 if sys.version_info < (3, 8):
     from mock import AsyncMock
@@ -33,21 +34,21 @@ class TestCases(unittest.TestCase):
         self.last_args = None
         self.last_kwargs = None
 
-        self.worker = WrappedFunction._WORKERS
+        self.worker = wrapped_sync.WORKERS
 
         self.err_func: MagicMock = MagicMock()
         self.err_listener = HABApp.core.impl.EventBusListener(
-            TOPIC_ERRORS, WrappedFunction(self.err_func, name='ErrMock'), NoEventFilter()
+            TOPIC_ERRORS, wrap_func(self.err_func, name='ErrMock'), NoEventFilter()
         )
         HABApp.core.EventBus.add_listener(self.err_listener)
 
         class CExecutor:
             def submit(self, callback, *args, **kwargs):
                 callback(*args, **kwargs)
-        WrappedFunction._WORKERS = CExecutor()
+        wrapped_sync.WORKERS = CExecutor()
 
     def tearDown(self):
-        WrappedFunction._WORKERS = self.worker
+        wrapped_sync.WORKERS = self.worker
         HABApp.core.EventBus.remove_listener(self.err_listener)
 
     def func_call(self, *args, **kwargs):
@@ -61,12 +62,12 @@ class TestCases(unittest.TestCase):
         self.last_kwargs = kwargs
 
     def test_sync_run(self):
-        f = WrappedFunction(self.func_call)
+        f = wrap_func(self.func_call)
         f.run()
         self.assertTrue(self.func_called)
 
     def test_sync_args(self):
-        f = WrappedFunction(self.func_call)
+        f = wrap_func(self.func_call)
         f.run('sarg1', 'sarg2', skw1='skw1')
         self.assertTrue(self.func_called)
         self.assertEqual(self.last_args, ('sarg1', 'sarg2'))
@@ -76,7 +77,7 @@ class TestCases(unittest.TestCase):
         def tmp():
             1 / 0
 
-        f = WrappedFunction(tmp)
+        f = wrap_func(tmp)
         self.assertFalse(self.err_func.called)
 
         f.run()
@@ -92,7 +93,7 @@ class TestCases(unittest.TestCase):
 @pytest.mark.asyncio
 async def test_async_run():
     coro = AsyncMock()
-    f = WrappedFunction(coro, name='coro_mock')
+    f = wrap_func(coro, name='coro_mock')
     f.run()
     await asyncio.sleep(0.05)
     coro.assert_awaited_once()
@@ -101,7 +102,7 @@ async def test_async_run():
 @pytest.mark.asyncio
 async def test_async_args():
     coro = AsyncMock()
-    f = WrappedFunction(coro, name='coro_mock')
+    f = wrap_func(coro, name='coro_mock')
     f.run('arg1', 'arg2', kw1='kw1')
 
     await asyncio.sleep(0.05)
@@ -113,10 +114,10 @@ async def test_async_error_wrapper():
     async def tmp():
         1 / 0
 
-    f = WrappedFunction(tmp)
+    f = wrap_func(tmp)
     err_func = AsyncMock()
     err_listener = HABApp.core.impl.EventBusListener(
-        TOPIC_ERRORS, WrappedFunction(err_func, name='ErrMock'), NoEventFilter())
+        TOPIC_ERRORS, wrap_func(err_func, name='ErrMock'), NoEventFilter())
     HABApp.core.EventBus.add_listener(err_listener)
 
     f.run()

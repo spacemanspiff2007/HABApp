@@ -1,12 +1,12 @@
 from HABApp.core.const import MISSING
-from HABApp.core.const.hints import TH_ANY_CLASS
+from HABApp.core.const.hints import TYPE_ANY_CLASS
 from HABApp.core.base import EventFilterBase
 
 
 class EventFilter(EventFilterBase):
     """Triggers on event types and optionally on their values, too"""
 
-    def __init__(self, event_class: TH_ANY_CLASS, **kwargs):
+    def __init__(self, event_class: TYPE_ANY_CLASS, **kwargs):
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
 
         self.event_class = event_class
