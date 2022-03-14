@@ -1,3 +1,14 @@
+# ----------------------------------------------------------------------------------------------------------------------
+# This rule requires the following items:
+# ----------------------------------------------------------------------------------------------------------------------
+#
+# Group				TestGroup
+# Group:Number:AVG 	TestGroupAVG
+#
+# String    TestString  (TestGroup)  				[TestTag]  {meta1="test" [key="value"]}
+# Number	TestNumber	(TestGroup, TestGroupAVG)
+#
+# ----------------------------------------------------------------------------------------------------------------------
 import time
 
 import HABApp

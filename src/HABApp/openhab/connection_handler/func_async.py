@@ -86,10 +86,6 @@ async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata
         return {}
     else:
         data = await ret.json(loads=load_json, encoding='utf-8')
-        try:
-            data['groups'] = data.pop('groupNames')
-        except KeyError:
-            pass
         return data
 
 
