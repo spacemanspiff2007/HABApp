@@ -4,7 +4,7 @@ from HABApp.core.const.json import load_json
 from .events import OpenhabEvent, \
     ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent, \
-    ChannelTriggeredEvent, \
+    ChannelTriggeredEvent, ChannelDescriptionChangedEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingConfigStatusInfoEvent, ThingFirmwareStatusInfoEvent
 
 EVENT_LIST = [
@@ -13,7 +13,7 @@ EVENT_LIST = [
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent,
 
     # channel events
-    ChannelTriggeredEvent,
+    ChannelTriggeredEvent, ChannelDescriptionChangedEvent,
 
     # thing events
     ThingStatusInfoEvent, ThingStatusInfoChangedEvent, ThingFirmwareStatusInfoEvent

@@ -3,7 +3,7 @@ import pytest
 
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, ThingConfigStatusInfoEvent, \
-    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent
+    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, ChannelDescriptionChangedEvent
 from HABApp.openhab.map_events import get_event, EVENT_LIST
 
 
@@ -155,6 +155,20 @@ def test_ChannelTriggeredEvent():
     assert event.name == 'mihome:sensor_switch:00000000000000:button'
     assert event.channel == 'mihome:sensor_switch:11111111111111:button'
     assert event.event == 'SHORT_PRESSED'
+
+
+def test_ChannelDescriptionChangedEvent():
+    data = {
+        'topic': 'openhab/channels/lgwebos:WebOSTV:**********************:channel/descriptionchanged',
+        'payload': '{"field":"STATE_OPTIONS","channelUID":"lgwebos:WebOSTV:**********************:channel",'
+                   '"linkedItemNames":[],"value":"{\\"options\\":[]}"}',
+        'type': 'ChannelDescriptionChangedEvent'
+    }
+    event = get_event(data)
+    assert isinstance(event, ChannelDescriptionChangedEvent)
+    assert event.name == 'lgwebos:WebOSTV:**********************:channel'
+    assert event.field == 'STATE_OPTIONS'
+    assert event.value == '{"options":[]}'
 
 
 def test_thing_info_events():
