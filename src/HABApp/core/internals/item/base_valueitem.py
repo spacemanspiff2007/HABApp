@@ -5,10 +5,13 @@ from math import ceil, floor
 from pendulum import UTC
 from pendulum import now as pd_now
 
-import HABApp
-from .base_item import BaseItem
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.internals import uses_post_event
+from HABApp.core.internals.item.base_item import BaseItem
 
 log = logging.getLogger('HABApp')
+
+post_event = uses_post_event()
 
 
 class BaseValueItem(BaseItem):
@@ -52,10 +55,10 @@ class BaseValueItem(BaseItem):
         state_changed = self.set_value(new_value)
 
         # create events
-        HABApp.core.EventBus.post_event(self._name, HABApp.core.events.ValueUpdateEvent(self._name, self.value))
+        post_event(self._name, ValueUpdateEvent(self._name, self.value))
         if state_changed:
-            HABApp.core.EventBus.post_event(
-                self._name, HABApp.core.events.ValueChangeEvent(self._name, value=self.value, old_value=old_value)
+            post_event(
+                self._name, ValueChangeEvent(self._name, value=self.value, old_value=old_value)
             )
         return state_changed
 

@@ -1,8 +1,9 @@
 import typing
-import HABApp
+
+from HABApp.core.internals import AutoContextBoundObj
 
 
-class BaseMode(HABApp.rule_ctx.RuleBoundCancelObj):
+class BaseMode(AutoContextBoundObj):
 
     def __init__(self, name: str):
         super(BaseMode, self).__init__()
@@ -27,7 +28,7 @@ class BaseMode(HABApp.rule_ctx.RuleBoundCancelObj):
     def cancel(self):
         """Remove the mode from the parent ``MultiModeItem`` and stop processing it
         """
-        super(BaseMode, self).cancel()
+        self._ctx_unlink()
         self.parent.remove_mode(self.name)
         self.parent = None
 

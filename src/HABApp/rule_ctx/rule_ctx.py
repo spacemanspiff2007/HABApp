@@ -2,18 +2,21 @@ import logging
 from typing import Set, Optional
 
 import HABApp
+from HABApp.core.internals import Context
+from HABApp.core.internals import uses_event_bus
+
+event_bus = uses_event_bus()
 
 log = logging.getLogger('HABApp.Rule')
 
 
-class HABAppRuleContext:
+class HABAppRuleContext(Context):
     def __init__(self, rule: 'HABApp.rule.Rule'):
         super().__init__()
 
         self.rule: 'HABApp.rule.Rule' = rule
 
         self.event_listeners: Set['HABApp.core.base.TYPE_EVENT_BUS_LISTENER'] = set()
-        self.cancel_objects: Set['HABApp.rule_ctx.RuleBoundCancelObj'] = set()
 
     def add_event_listener(self, obj: 'HABApp.core.event_bus_listener.EventBusListenerBase')\
             -> 'HABApp.core.event_bus_listener.EventBusListenerBase':
@@ -21,25 +24,11 @@ class HABAppRuleContext:
         assert obj not in self.event_listeners
         self.event_listeners.add(obj)
         self.set_rule_context(obj)
-        HABApp.core.EventBus.add_listener(obj)
+        event_bus.add_listener(obj)
         return obj
 
     def remove_event_listener(self, obj: 'HABApp.core.event_bus_listener.EventBusListenerBase'):
-        self.event_listeners.remove(obj)
-
-    def add_cancel_object(self, obj: 'HABApp.rule_ctx.RuleBoundCancelObj') -> 'HABAppRuleContext':
-        assert obj not in self.cancel_objects
-        self.cancel_objects.add(obj)
-        return self
-
-    def remove_cancel_obj(self, obj: 'HABApp.rule_ctx.RuleBoundCancelObj'):
-        self.cancel_objects.remove(obj)
-
-    def set_rule_context(self, obj) -> 'HABAppRuleContext':
-        assert hasattr(obj, '_habapp_rule_ctx')
-        assert obj._habapp_rule_ctx is None
-        obj._habapp_rule_ctx = self
-        return self
+        self.event_listners.remove(obj)
 
     def get_callback_name(self, callback: callable) -> Optional[str]:
         return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None

@@ -4,9 +4,9 @@ from typing import Union
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.core import EventBus, Items
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.events import ValueUpdateEvent
+from HABApp.core.internals import uses_post_event, uses_get_item
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.connection_handler import http_connection
@@ -20,6 +20,10 @@ from HABApp.openhab.definitions.topics import ITEMS as ITEMS_TOPIC
 log = http_connection.log
 
 
+post_event = uses_post_event()
+get_item = uses_get_item()
+
+
 def on_sse_event(event_dict: dict):
     try:
         # Lookup corresponding OpenHAB event
@@ -29,34 +33,34 @@ def on_sse_event(event_dict: dict):
         # so the items have the correct state when we process the event in a rule
         try:
             if isinstance(event, ValueUpdateEvent):
-                __item = Items.get_item(event.name)  # type: HABApp.core.items.base_item.BaseValueItem
+                __item = get_item(event.name)  # type: HABApp.core.items.base_item.BaseValueItem
                 __item.set_value(event.value)
-                EventBus.post_event(event.name, event)
+                post_event(event.name, event)
                 return None
 
             if isinstance(event, ThingStatusInfoEvent):
-                __thing = Items.get_item(event.name)   # type: HABApp.openhab.items.Thing
+                __thing = get_item(event.name)   # type: HABApp.openhab.items.Thing
                 __thing.process_event(event)
-                EventBus.post_event(event.name, event)
+                post_event(event.name, event)
                 return None
 
             # Workaround because there is no GroupItemStateEvent
             if isinstance(event, GroupItemStateChangedEvent):
-                __item = Items.get_item(event.name)  # type: HABApp.openhab.items.GroupItem
+                __item = get_item(event.name)  # type: HABApp.openhab.items.GroupItem
                 __item.set_value(event.value)
-                EventBus.post_event(event.name, event)
+                post_event(event.name, event)
                 return None
         except ItemNotFoundException:
             log_warning(log, f'Received {event.__class__.__name__} for {event.name} but item does not exist!')
 
             # Post the event anyway
-            EventBus.post_event(event.name, event)
+            post_event(event.name, event)
             return None
 
         # Events that remove items from the item registry
         if isinstance(event, ItemRemovedEvent):
             remove_from_registry(event.name)
-            EventBus.post_event(ITEMS_TOPIC, event)
+            post_event(ITEMS_TOPIC, event)
             return None
 
         # Events that add items to the item registry
@@ -66,7 +70,7 @@ def on_sse_event(event_dict: dict):
             return None
 
         # Unknown Event -> just forward it to the event bus
-        HABApp.core.EventBus.post_event(event.name, event)
+        post_event(event.name, event)
     except Exception as e:
         process_exception(func=on_sse_event, e=e)
         return None
@@ -84,5 +88,5 @@ async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
 
     add_to_registry(new_item)
     # Send Event to Event Bus
-    HABApp.core.EventBus.post_event(ITEMS_TOPIC, event)
+    post_event(ITEMS_TOPIC, event)
     return None

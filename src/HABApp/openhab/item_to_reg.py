@@ -2,10 +2,12 @@ import logging
 from typing import Dict, Set, Tuple
 
 import HABApp
-from HABApp.core import Items
+from HABApp.core.internals import uses_item_registry
 from HABApp.core.logger import log_warning
 
 log = logging.getLogger('HABApp.openhab.items')
+
+Items = uses_item_registry()
 
 
 def add_to_registry(item: 'HABApp.openhab.items.OpenhabItem', set_value=False):

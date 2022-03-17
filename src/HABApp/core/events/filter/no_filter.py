@@ -1,4 +1,4 @@
-from HABApp.core.base import EventFilterBase
+from HABApp.core.internals import EventFilterBase
 
 
 class NoEventFilter(EventFilterBase):

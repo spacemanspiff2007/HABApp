@@ -1,9 +1,6 @@
-
 import pytest
 
-from HABApp.core.base import EventFilterBase
-from HABApp.core.impl import EventBusListener, EventBus
-from HABApp.core.impl import wrap_func
+from HABApp.core.internals import EventFilterBase, EventBusListener, EventBus, wrap_func
 
 
 class TestEventBus(EventBus):

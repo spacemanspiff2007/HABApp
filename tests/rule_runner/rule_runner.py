@@ -1,7 +1,7 @@
 import sys
 
 import HABApp.rule.scheduler.habappschedulerview as ha_sched
-from HABApp.core.impl.wrapped_function import wrapped_sync
+from HABApp.core.internals.wrapped_function import wrapped_sync
 from HABApp.runtime import Runtime
 from HABApp.core.asyncio import async_context
 

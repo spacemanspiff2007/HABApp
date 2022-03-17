@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.impl.wrapped_function import wrapped_sync
+from HABApp.core.internals.wrapped_function import wrapped_sync
 
 
 class SyncTestWorker:

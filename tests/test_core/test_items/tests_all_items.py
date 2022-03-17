@@ -4,7 +4,7 @@ from datetime import timedelta
 from pendulum import UTC
 from pendulum import now as pd_now
 
-from HABApp.core.base import TYPE_ITEM_REGISTRY
+from HABApp.core.internals import TYPE_ITEM_REGISTRY
 from HABApp.core.items import Item
 
 

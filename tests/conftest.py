@@ -7,8 +7,7 @@ import pytest
 import HABApp
 import tests
 from HABApp.core.asyncio import async_context
-from HABApp.core.base.replace_dummy_objs import replace_dummy_objs, ReplacedObjects
-from HABApp.core.impl import EventBus, ItemRegistry
+from HABApp.core.internals import setup_internals, EventBus, ItemRegistry
 from .helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg
 
 if typing.TYPE_CHECKING:
@@ -68,16 +67,9 @@ def ir():
 
 @pytest.yield_fixture(autouse=True, scope='function')
 def clean_objs(ir: ItemRegistry, eb: EventBus):
-
-    objs = ReplacedObjects()
-
-    for mod in (HABApp, tests):
-        replace_dummy_objs(mod, HABApp.core.EventBus, eb, replaced_objs=objs)
-        replace_dummy_objs(mod, HABApp.core.base.post_event, eb.post_event, replaced_objs=objs)
-
-        replace_dummy_objs(mod, HABApp.core.Items, ir, replaced_objs=objs)
-        replace_dummy_objs(mod, HABApp.core.base.get_item, ir.get_item, replaced_objs=objs)
+    restore = setup_internals(ir, eb, final=False)
 
     yield
 
-    objs.restore()
+    for r in restore:
+        r.restore()

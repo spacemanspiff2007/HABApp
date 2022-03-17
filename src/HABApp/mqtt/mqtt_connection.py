@@ -5,7 +5,8 @@ from pathlib import Path
 import paho.mqtt.client as mqtt
 
 import HABApp
-from HABApp.core import Items
+
+from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
 from HABApp.core.wrapper import log_exception
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 from HABApp.mqtt.mqtt_payload import get_msg_payload
@@ -14,6 +15,11 @@ from HABApp.core.errors import ItemNotFoundException
 
 log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.EventBus.mqtt')
+
+
+post_event = uses_post_event()
+get_item = uses_get_item()
+Items = uses_item_registry()
 
 
 class MqttStatus:
@@ -158,7 +164,7 @@ def process_msg(client, userdata, message: mqtt.MQTTMessage):
 
     _item = None    # type: typing.Optional[HABApp.mqtt.items.MqttBaseItem]
     try:
-        _item = Items.get_item(topic)   # type: HABApp.mqtt.items.MqttBaseItem
+        _item = get_item(topic)   # type: HABApp.mqtt.items.MqttBaseItem
     except ItemNotFoundException:
         # only create items for if the message has the retain flag
         if message.retain:
@@ -166,7 +172,7 @@ def process_msg(client, userdata, message: mqtt.MQTTMessage):
 
     # we don't have an item -> we process only the event
     if _item is None:
-        HABApp.core.EventBus.post_event(topic, MqttValueUpdateEvent(topic, payload))
+        post_event(topic, MqttValueUpdateEvent(topic, payload))
         return None
 
     # Remember state and update item before doing callbacks
@@ -174,6 +180,6 @@ def process_msg(client, userdata, message: mqtt.MQTTMessage):
     _item.set_value(payload)
 
     # Post events
-    HABApp.core.EventBus.post_event(topic, MqttValueUpdateEvent(topic, payload))
+    post_event(topic, MqttValueUpdateEvent(topic, payload))
     if _old_state != payload:
-        HABApp.core.EventBus.post_event(topic, MqttValueChangeEvent(topic, payload, _old_state))
+        post_event(topic, MqttValueChangeEvent(topic, payload, _old_state))

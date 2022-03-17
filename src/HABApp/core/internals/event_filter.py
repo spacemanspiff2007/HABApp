@@ -13,4 +13,4 @@ class EventFilterBase:
 
 
 # Hints for functions that use an item class as an input parameter
-TYPE_FILTER_OBJ = TypeVar('TYPE_FILTER_OBJ', bound=EventFilterBase)
+TYPE_EVENT_FILTER_OBJ = TypeVar('TYPE_EVENT_FILTER_OBJ', bound=EventFilterBase)

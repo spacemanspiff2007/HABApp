@@ -1,6 +1,6 @@
 from typing import Callable
 
-from HABApp.core.base import WrappedFunctionBase
+from HABApp.core.internals.wrapped_function import WrappedFunctionBase
 from eascheduler.executors import ExecutorBase
 
 

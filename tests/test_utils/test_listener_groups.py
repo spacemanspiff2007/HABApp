@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 import HABApp.util.listener_groups
-from HABApp.core.base import BaseItem
+from HABApp.core.internals import BaseItem
 from HABApp.util import EventListenerGroup
 from HABApp.util.listener_groups.listener_groups import EventListenerCreator, ListenerCreatorNotFoundError
 

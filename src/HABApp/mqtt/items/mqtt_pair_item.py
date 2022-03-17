@@ -1,9 +1,11 @@
 from typing import Optional
 
-from HABApp.core import Items
 from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.internals import uses_item_registry
 from HABApp.mqtt.mqtt_interface import publish
 from . import MqttBaseItem
+
+Items = uses_item_registry()
 
 
 def build_write_topic(read_topic: str) -> Optional[str]:

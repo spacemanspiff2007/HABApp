@@ -1,18 +1,21 @@
 import logging
 import threading
-from typing import Any, Dict, List
+from typing import Any, TypeVar
+from typing import Dict, List
 
-from HABApp.core.base import EventBusBase, EventBusListenerBase
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent
+from .base_listener import EventBusBaseListener
 
 event_log = logging.getLogger('HABApp.EventBus')
 habapp_log = logging.getLogger('HABApp')
 
+_TYPE_LISTENER = TypeVar('_TYPE_LISTENER', bound=EventBusBaseListener)
 
-class EventBus(EventBusBase):
+
+class EventBus:
     def __init__(self):
         self._lock = threading.Lock()
-        self._listeners: Dict[str, List[EventBusListenerBase]] = {}
+        self._listeners: Dict[str, List[EventBusBaseListener]] = {}
 
     def post_event(self, topic: str, event: Any):
         assert isinstance(topic, str), type(topic)
@@ -43,8 +46,8 @@ class EventBus(EventBusBase):
                 listener.notify_listeners(event)
         return None
 
-    def add_listener(self, listener: EventBusListenerBase):
-        assert isinstance(listener, EventBusListenerBase)
+    def add_listener(self, listener: _TYPE_LISTENER):
+        assert isinstance(listener, EventBusBaseListener)
 
         with self._lock:
             item_listeners = self._listeners.setdefault(listener.topic, [])
@@ -59,8 +62,8 @@ class EventBus(EventBusBase):
             habapp_log.debug(f'Added event listener for {listener.describe()}')
             return None
 
-    def remove_listener(self, listener: EventBusListenerBase):
-        assert isinstance(listener, EventBusListenerBase)
+    def remove_listener(self, listener: _TYPE_LISTENER):
+        assert isinstance(listener, EventBusBaseListener)
 
         with self._lock:
             item_listeners = self._listeners.get(listener.topic, [])
@@ -73,7 +76,11 @@ class EventBus(EventBusBase):
             # remove listener
             item_listeners.remove(listener)
             habapp_log.debug(f'Removed event listener for {listener.describe()}')
+            return None
 
     def remove_all_listeners(self):
         with self._lock:
             self._listeners.clear()
+
+
+TYPE_EVENT_BUS = TypeVar('TYPE_EVENT_BUS', bound=EventBus)

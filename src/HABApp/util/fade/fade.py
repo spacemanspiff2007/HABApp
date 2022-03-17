@@ -2,13 +2,13 @@ from datetime import timedelta
 from time import time
 from typing import Union, Optional
 
-from HABApp.core.impl import wrap_func
-from HABApp.rule_ctx import RuleBoundCancelObj
+from HABApp.core.internals import wrap_func, AutoContextBoundObj
+
 
 VAL_TYPE = Union[int, float]
 
 
-class FadeWorker(RuleBoundCancelObj):
+class FadeWorker(AutoContextBoundObj):
 
     def __init__(self, parent: 'Fade', interval: float):
         super().__init__()
@@ -16,7 +16,7 @@ class FadeWorker(RuleBoundCancelObj):
         self.scheduler = self._habapp_rule_ctx.rule.run.every(None, interval, self.parent._scheduled_worker)
 
     def cancel(self):
-        super().cancel()
+        self._ctx_unlink()
         self.scheduler.cancel()
         self.scheduler = None
 

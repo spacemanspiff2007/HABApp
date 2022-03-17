@@ -7,10 +7,11 @@ from unittest.mock import MagicMock
 import pytest
 
 import HABApp
-from HABApp.core.impl import wrap_func
+from HABApp.core.internals import wrap_func
 from HABApp.core.events import NoEventFilter
 from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
-from HABApp.core.impl.wrapped_function import wrapped_sync
+from HABApp.core.internals.wrapped_function import wrapped_sync
+from HABApp.core.internals import EventBusListener
 
 if sys.version_info < (3, 8):
     from mock import AsyncMock
@@ -37,7 +38,7 @@ class TestCases(unittest.TestCase):
         self.worker = wrapped_sync.WORKERS
 
         self.err_func: MagicMock = MagicMock()
-        self.err_listener = HABApp.core.impl.EventBusListener(
+        self.err_listener = EventBusListener(
             TOPIC_ERRORS, wrap_func(self.err_func, name='ErrMock'), NoEventFilter()
         )
         HABApp.core.EventBus.add_listener(self.err_listener)

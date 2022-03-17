@@ -1,7 +1,10 @@
-from HABApp.core import Items
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.base import BaseValueItem
+from HABApp.core.internals import uses_get_item, uses_item_registry
+from HABApp.core.internals.item import BaseValueItem
 from HABApp.mqtt.mqtt_interface import publish
+
+get_item = uses_get_item()
+item_registry = uses_item_registry()
 
 
 class MqttBaseItem(BaseValueItem):
@@ -22,10 +25,10 @@ class MqttItem(MqttBaseItem):
         assert isinstance(name, str), type(name)
 
         try:
-            item = Items.get_item(name)
+            item = get_item(name)
         except ItemNotFoundException:
             item = cls(name, initial_value)
-            Items.add_item(item)
+            item_registry.add_item(item)
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item

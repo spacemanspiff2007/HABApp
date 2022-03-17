@@ -1,5 +1,5 @@
 from HABApp.core.items import Item
-from HABApp.core.impl import ItemRegistry
+from HABApp.core.internals import ItemRegistry
 
 
 def test_basics():

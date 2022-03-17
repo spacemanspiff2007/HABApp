@@ -6,8 +6,12 @@ from datetime import timedelta
 
 import HABApp
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.base import BaseValueItem, TYPE_EVENT_BUS_LISTENER
-from ..wrapper import process_exception
+from HABApp.core.internals import BaseValueItem, TYPE_EVENT_BUS_LISTENER, uses_get_item, uses_item_registry
+from HABApp.core.wrapper import process_exception
+
+
+get_item = uses_get_item()
+item_registry = uses_item_registry()
 
 
 class AggregationItem(BaseValueItem):
@@ -22,10 +26,10 @@ class AggregationItem(BaseValueItem):
         assert isinstance(name, str), type(name)
 
         try:
-            item = HABApp.core.Items.get_item(name)
+            item = get_item(name)
         except ItemNotFoundException:
             item = cls(name)
-            HABApp.core.Items.add_item(item)
+            item_registry.add_item(item)
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item

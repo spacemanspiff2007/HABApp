@@ -11,7 +11,7 @@ import HABApp.rule_manager
 import HABApp.util
 import eascheduler
 from HABApp.core.asyncio import async_context
-from HABApp.core.base.replace_dummy_objs import replace_dummy_objs
+from HABApp.core.internals import setup_internals
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
@@ -27,7 +27,7 @@ class Runtime:
 
         # Async Workers & shutdown callback
         shutdown.register_func(
-            HABApp.core.impl.wrapped_function.wrapped_sync.stop_thread_pool, msg='Stopping thread pool')
+            HABApp.core.internals.wrapped_function.wrapped_sync.stop_thread_pool, msg='Stopping thread pool')
 
     async def start(self, config_folder: Path):
         try:
@@ -43,16 +43,10 @@ class Runtime:
             HABApp.config.load_config(config_folder)
 
             # Todo: load this from config
-            HABApp.core.impl.wrapped_function.create_thread_pool(10)
+            HABApp.core.internals.wrapped_function.create_thread_pool(10)
 
-            # replace dummy objects
-            # Todo: move this to plugin
-            eb = HABApp.core.impl.EventBus()
-            ir = HABApp.core.impl.ItemRegistry()
-            objs = replace_dummy_objs(HABApp, HABApp.core.EventBus, eb)
-            replace_dummy_objs(HABApp, HABApp.core.base.post_event, eb.post_event, replaced_objs=objs)
-            replace_dummy_objs(HABApp, HABApp.core.Items, ir, replaced_objs=objs)
-            replace_dummy_objs(HABApp, HABApp.core.base.get_item, ir.get_item, replaced_objs=objs)
+            # replace proxy objects
+            setup_internals(HABApp.core.internals.ItemRegistry(), HABApp.core.internals.EventBus())
 
             await HABApp.core.files.setup()
 

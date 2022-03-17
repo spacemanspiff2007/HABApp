@@ -9,35 +9,36 @@ from eascheduler.jobs import CountdownJob, DawnJob, DayOfWeekJob, DuskJob, OneTi
 import HABApp
 import HABApp.rule_ctx
 from HABApp.core.const.hints import TYPE_SCHEDULER_CALLBACK
-from HABApp.core.impl import wrap_func
+from HABApp.core.internals import wrap_func
 from HABApp.rule.scheduler.executor import WrappedFunctionExecutor
 from HABApp.rule.scheduler.scheduler import HABAppScheduler as _HABAppScheduler
+from HABApp.core.internals import ContextMixin, TYPE_CONTEXT_OBJ
 
 
-class HABAppSchedulerView(SchedulerView):
+class HABAppSchedulerView(SchedulerView, ContextMixin):
     def __init__(self, rule: 'HABApp.rule_ctx.HABAppRuleContext'):
         super().__init__(_HABAppScheduler(), WrappedFunctionExecutor)
-        self._habapp_rule_ctx: 'HABApp.rule_ctx.HABAppRuleContext' = rule
+        self._habapp_rule_ctx: TYPE_CONTEXT_OBJ = rule
 
     def at(self, time: Union[None, dt_datetime, dt_timedelta, dt_time, int],
            callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> OneTimeJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().at(time, callback, *args, **kwargs)
 
     def countdown(self, expire_time: Union[dt_timedelta, float, int],
                   callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> CountdownJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().countdown(expire_time, callback, *args, **kwargs)
 
     def every(self, start_time: Union[None, dt_datetime, dt_timedelta, dt_time, int],
               interval: Union[int, float, dt_timedelta],
               callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> ReoccurringJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().every(start_time, interval, callback, *args, **kwargs)
 
     def on_day_of_week(self, time: Union[dt_time, dt_datetime], weekdays: Union[str, Iterable[Union[str, int]]],
                        callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> DayOfWeekJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_day_of_week(time, weekdays, callback, *args, **kwargs)
 
     def on_every_day(self, time: Union[dt_time, dt_datetime],
@@ -49,23 +50,23 @@ class HABAppSchedulerView(SchedulerView):
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_day_of_week(time, 'all', callback, *args, **kwargs)
 
     def on_sunrise(self, callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> SunriseJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sunrise(callback, *args, **kwargs)
 
     def on_sunset(self, callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> SunsetJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sunset(callback, *args, **kwargs)
 
     def on_sun_dawn(self, callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> DawnJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sun_dawn(callback, *args, **kwargs)
 
     def on_sun_dusk(self, callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> DuskJob:
-        callback = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sun_dusk(callback, *args, **kwargs)
 
     def soon(self, callback: TYPE_SCHEDULER_CALLBACK, *args, **kwargs) -> OneTimeJob:

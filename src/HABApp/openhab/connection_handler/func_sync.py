@@ -5,7 +5,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.asyncio import run_coro_from_thread, create_task
-from HABApp.core.base import BaseValueItem, BaseItem
+from HABApp.core.internals import BaseValueItem, BaseItem
 from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \
     async_set_metadata, async_remove_metadata, async_get_channel_link, async_create_channel_link, \

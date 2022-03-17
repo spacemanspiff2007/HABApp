@@ -1,11 +1,14 @@
 import logging
 import typing
 
-from HABApp.core.base import post_event
+from HABApp.core.internals import uses_post_event
 from HABApp.core.lib import format_exception
 from HABApp.core.const.topics import ERRORS as _T_ERRORS
 from HABApp.core.const.topics import INFOS as _T_INFOS
 from HABApp.core.const.topics import WARNINGS as _T_WARNINGS
+
+
+post_event = uses_post_event()
 
 
 def log_error(logger: logging.Logger, text: str):

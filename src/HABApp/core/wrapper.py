@@ -5,10 +5,15 @@ import sys
 import typing
 from logging import Logger
 
-import HABApp
+from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
+from HABApp.core.const.topics import WARNINGS as TOPIC_WARNINGS
+from HABApp.core.events.habapp_events import HABAppException
+from HABApp.core.internals import uses_post_event
 from HABApp.core.lib import format_exception
 
 log = logging.getLogger('HABApp')
+
+post_event = uses_post_event()
 
 
 def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
@@ -29,11 +34,7 @@ def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
         logger.error(line)
 
     # send Error to internal event bus so we can reprocess it and notify the user
-    HABApp.core.EventBus.post_event(
-        HABApp.core.const.topics.ERRORS, HABApp.core.events.habapp_events.HABAppException(
-            func_name=func_name, exception=e, traceback='\n'.join(lines)
-        )
-    )
+    post_event(TOPIC_ERRORS, HABAppException(func_name=func_name, exception=e, traceback='\n'.join(lines)))
 
 
 def log_exception(func):
@@ -134,10 +135,8 @@ class ExceptionToHABApp:
                 self.log.log(self.log_level, line)
 
         # send Error to internal event bus so we can reprocess it and notify the user
-        HABApp.core.EventBus.post_event(
-            HABApp.core.const.topics.WARNINGS if self.log_level == logging.WARNING else HABApp.core.const.topics.ERRORS,
-            HABApp.core.events.habapp_events.HABAppException(
-                func_name=f_name, exception=exc_val, traceback='\n'.join(tb)
-            )
+        post_event(
+            TOPIC_WARNINGS if self.log_level == logging.WARNING else TOPIC_ERRORS,
+            HABAppException(func_name=f_name, exception=exc_val, traceback='\n'.join(tb))
         )
         return self.ignore_exception

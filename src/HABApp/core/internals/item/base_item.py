@@ -9,11 +9,18 @@ from .tmp_data import restore_tmp_data as _restore_tmp_data
 
 import HABApp
 from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
-from HABApp.core.base import get_item
+from HABApp.core.internals import uses_get_item
 from eascheduler.const import local_tz
 
 
-class BaseItem:
+from HABApp.core.internals.item_registry import ItemRegistryItem
+from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, TYPE_EVENT_BUS_LISTENER
+
+
+get_item = uses_get_item()
+
+
+class BaseItem(ItemRegistryItem):
     """BaseItem, all items must inherit from this class
     """
 
@@ -29,21 +36,11 @@ class BaseItem:
         return item
 
     def __init__(self, name: str):
-        super().__init__()
-        assert isinstance(name, str), type(name)
-
-        self._name: str = name
+        super().__init__(name)
 
         _now = pd_now(UTC)
         self._last_change: ChangedTime = ChangedTime(self._name, _now)
         self._last_update: UpdatedTime = UpdatedTime(self._name, _now)
-
-    @property
-    def name(self) -> str:
-        """
-        :return: Name of the item (read only)
-        """
-        return self._name
 
     @property
     def last_change(self) -> DateTime:
@@ -86,8 +83,8 @@ class BaseItem:
         return self._last_update.add_watch(secs)
 
     def listen_event(self, callback: Callable[[Any], Any],
-                     event_filter: Optional['HABApp.core.base.TYPE_FILTER_OBJ'] = None
-                     ) -> 'HABApp.core.base.TYPE_EVENT_BUS_LISTENER':
+                     event_filter: Optional[TYPE_EVENT_FILTER_OBJ] = None
+                     ) -> TYPE_EVENT_BUS_LISTENER:
         """
         Register an event listener which listens to all event that the item receives
 

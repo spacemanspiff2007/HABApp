@@ -5,13 +5,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
 from pstats import Stats
 from time import time
-from typing import Callable, Any, TYPE_CHECKING
+from typing import Callable, Any
 from typing import Optional
 
-from .base import WrappedFunctionBaseImpl
-
-if TYPE_CHECKING:
-    import HABApp
+from HABApp.core.internals import TYPE_CONTEXT_OBJ
+from .base import WrappedFunctionBase
 
 WORKERS: Optional[ThreadPoolExecutor] = None
 
@@ -31,18 +29,18 @@ def stop_thread_pool():
         WORKERS = None
 
 
-TYPE_HINT_FUNC = Callable[..., Any]
+TYPE_HINT_FUNC_SYNC = Callable[..., Any]
 
 
-class WrappedSyncFunction(WrappedFunctionBaseImpl):
+class WrappedSyncFunction(WrappedFunctionBase):
 
-    def __init__(self, func: TYPE_HINT_FUNC,
+    def __init__(self, func: TYPE_HINT_FUNC_SYNC,
                  warn_too_long=True,
                  name: Optional[str] = None,
                  logger: Optional[logging.Logger] = None,
-                 rule_ctx: Optional['HABApp.rule_ctx.HABAppRuleContext'] = None):
+                 context: Optional[TYPE_CONTEXT_OBJ] = None):
 
-        super(WrappedSyncFunction, self).__init__(name=name, func=func, logger=logger, rule_ctx=rule_ctx)
+        super(WrappedSyncFunction, self).__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)
 
         self.func = func

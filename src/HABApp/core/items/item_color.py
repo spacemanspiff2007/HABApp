@@ -4,10 +4,12 @@ from typing import Optional
 import HABApp
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
-from HABApp.core.base import BaseValueItem
+from HABApp.core.internals import BaseValueItem, uses_item_registry
 
 HUE_FACTOR = 360
 PERCENT_FACTOR = 100
+
+item_registry = uses_item_registry()
 
 
 class ColorItem(BaseValueItem):
@@ -111,9 +113,9 @@ class ColorItem(BaseValueItem):
         assert isinstance(name, str), type(name)
 
         try:
-            item = HABApp.core.Items.get_item(name)
+            item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = HABApp.core.Items.add_item(cls(name, hue=hue, saturation=saturation, brightness=brightness))
+            item = item_registry.add_item(cls(name, hue=hue, saturation=saturation, brightness=brightness))
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item

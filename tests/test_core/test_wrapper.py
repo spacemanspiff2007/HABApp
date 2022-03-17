@@ -7,16 +7,17 @@ import pytest
 
 import HABApp
 from HABApp.core.wrapper import ExceptionToHABApp, ignore_exception
+from HABApp.core.internals import EventBus
 
 log = logging.getLogger('WrapperTest')
 
 
 @pytest.fixture
-def p_mock():
-    post_event = HABApp.core.EventBus.post_event
-    HABApp.core.EventBus.post_event = m = MagicMock()
+def p_mock(eb: EventBus):
+    post_event = eb.post_event
+    eb.post_event = m = MagicMock()
     yield m
-    HABApp.core.EventBus.post_event = post_event
+    eb.post_event = post_event
 
 
 def test_error_catch(p_mock):

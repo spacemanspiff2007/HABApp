@@ -1,15 +1,17 @@
 import logging
 
 import HABApp
-from HABApp.core import Items
 from HABApp.core.wrapper import ignore_exception
 from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
 from HABApp.openhab.item_to_reg import add_to_registry, fresh_item_sync
 from HABApp.core.errors import ItemNotFoundException
+from ...core.internals import uses_item_registry
 
 log = logging.getLogger('HABApp.openhab.items')
+
+Items = uses_item_registry()
 
 
 class LoadAllOpenhabItems(OnConnectPlugin):

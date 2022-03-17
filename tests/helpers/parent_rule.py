@@ -17,6 +17,7 @@ def parent_rule(monkeypatch):
         return rule._habapp_rule_ctx
 
     # patch both imports imports
-    monkeypatch.setattr(HABApp.rule_ctx, 'get_rule_context', ret_dummy_rule_context, raising=True)
+    monkeypatch.setattr(HABApp.core.internals, 'get_current_context', ret_dummy_rule_context)
+    monkeypatch.setattr(HABApp.core.internals.context.get_context, 'get_current_context', ret_dummy_rule_context)
 
     yield rule

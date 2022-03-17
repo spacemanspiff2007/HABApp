@@ -1,7 +1,7 @@
 import pytest
 
 import HABApp
-from HABApp.core.base import TYPE_ITEM_REGISTRY
+from HABApp.core.internals import TYPE_ITEM_REGISTRY
 from HABApp.openhab.events import ThingStatusInfoEvent
 from HABApp.openhab.items import Thing
 from HABApp.openhab.map_events import get_event

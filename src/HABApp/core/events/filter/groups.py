@@ -1,11 +1,11 @@
 from typing import Any, Tuple
 
-from HABApp.core.base import EventFilterBase, TYPE_FILTER_OBJ
+from HABApp.core.internals import EventFilterBase, TYPE_EVENT_FILTER_OBJ
 
 
 class EventFilterBaseGroup(EventFilterBase):
-    def __init__(self, *args: TYPE_FILTER_OBJ):
-        self.filters: Tuple[TYPE_FILTER_OBJ, ...] = args
+    def __init__(self, *args: TYPE_EVENT_FILTER_OBJ):
+        self.filters: Tuple[TYPE_EVENT_FILTER_OBJ, ...] = args
 
     def trigger(self, event) -> bool:
         raise NotImplementedError()
