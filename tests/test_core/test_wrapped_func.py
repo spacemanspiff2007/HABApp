@@ -1,5 +1,5 @@
 import asyncio
-import sys
+from unittest.mock import AsyncMock
 from unittest.mock import Mock
 
 import pytest
@@ -10,11 +10,6 @@ from HABApp.core.events import NoEventFilter
 from HABApp.core.internals import EventBusListener
 from HABApp.core.internals import wrap_func
 from tests.helpers import TestEventBus
-
-if sys.version_info < (3, 8):
-    from mock import AsyncMock
-else:
-    from unittest.mock import AsyncMock
 
 
 def test_sync_run(sync_worker):

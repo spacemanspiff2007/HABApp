@@ -1,12 +1,8 @@
 import asyncio
-import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-if sys.version_info < (3, 8):
-    from mock import AsyncMock
-else:
-    from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock
 
 import pytest
 from watchdog.events import FileSystemEvent
