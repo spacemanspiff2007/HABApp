@@ -73,6 +73,28 @@ class BaseValueItem(BaseItem):
             return default_value
         return self.value
 
+    @property
+    def is_empty(self) -> bool:
+        """Check if a value is set.
+
+        :return: True if value is None
+        """
+        return self.value is None
+
+    def set_default(self, default_value) -> bool:
+        """Set default value if value is empty
+
+        :param default_value: Set this as new value if empty 
+        :return: True if default value was set
+        """
+        is_changed = False
+
+        if self.is_empty:
+            self.set_value(default_value)
+            is_changed = True
+
+        return is_changed
+
     def __repr__(self):
         ret = ''
         for k in ['name', 'value', 'last_change', 'last_update']:

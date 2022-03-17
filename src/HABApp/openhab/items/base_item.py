@@ -39,6 +39,14 @@ class OpenhabItem(BaseValueItem):
         """
         post_update(self.name, self.value if value is MISSING else value)
 
+    def oh_post_default(self, default_value: Any):
+        """Post update with default value if value is empty
+
+        :param default_value: The new default_value
+        """
+        if self.set_value(default_value):
+            self.oh_post_update(default_value)
+
     def get_persistence_data(self, persistence: Optional[str] = None,
                              start_time: Optional[datetime.datetime] = None,
                              end_time: Optional[datetime.datetime] = None):

@@ -22,6 +22,14 @@ class SwitchItem(OpenhabItem, OnOffCommand):
         """Test value against off-value"""
         return True if self.value == OnOffValue.OFF else False
 
+    def post_default_on(self) -> None:
+        """Post update to on if value is empty"""
+        return oh_post_default(OnOffValue.ON)
+
+    def post_default_off(self) -> None:
+        """Post update to off if value is empty"""
+        return oh_post_default(OnOffValue.OFF)
+
     def __str__(self):
         return self.value
 
