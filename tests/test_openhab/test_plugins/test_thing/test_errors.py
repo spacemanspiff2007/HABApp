@@ -3,11 +3,12 @@ import time
 import pytest
 
 from HABApp.openhab.connection_logic.plugin_things.plugin_things import ManualThingConfig
-from tests.helpers import MockFile
+from tests.helpers import MockFile, TestEventBus
 
 
 @pytest.mark.asyncio
-async def test_errors(caplog):
+async def test_errors(caplog, eb: TestEventBus):
+    eb.allow_errors = True
 
     cfg = ManualThingConfig()
 
@@ -70,3 +71,5 @@ channels:
     assert errors[0] == '"â_ß_{_)" is not a valid name for an item!'
 
     cfg.do_cleanup.cancel()
+
+    caplog.clear()

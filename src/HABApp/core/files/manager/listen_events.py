@@ -2,7 +2,7 @@ import logging
 from typing import Union
 
 import HABApp
-from HABApp.core.const.topics import FILES as T_FILES
+from HABApp.core.const.topics import TOPIC_FILES as T_FILES
 from HABApp.core.events.habapp_events import RequestFileUnloadEvent, RequestFileLoadEvent
 from HABApp.core.events import EventFilter
 from HABApp.core.internals import wrap_func, EventBusListener, uses_event_bus

@@ -4,7 +4,7 @@ from typing import Any, FrozenSet, Mapping, NamedTuple, Optional
 from immutables import Map
 
 from HABApp.core.const import MISSING
-from HABApp.core.internals import BaseValueItem
+from HABApp.core.items import BaseValueItem
 from HABApp.openhab.interface import get_persistence_data, post_update, send_command
 
 

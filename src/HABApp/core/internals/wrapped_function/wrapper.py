@@ -1,14 +1,11 @@
 import logging
 from asyncio import iscoroutinefunction
-from typing import Union, Optional, TYPE_CHECKING
+from typing import Union, Optional
 
+from HABApp.core.internals import TYPE_CONTEXT_OBJ
 from HABApp.core.internals.wrapped_function.base import TYPE_WRAPPED_FUNC_OBJ
 from HABApp.core.internals.wrapped_function.wrapped_async import TYPE_HINT_FUNC_ASYNC, WrappedAsyncFunction
 from HABApp.core.internals.wrapped_function.wrapped_sync import TYPE_HINT_FUNC_SYNC, WrappedSyncFunction
-from HABApp.core.internals import TYPE_CONTEXT_OBJ
-
-if TYPE_CHECKING:
-    import HABApp
 
 
 def wrap_func(func: Union[TYPE_HINT_FUNC_SYNC, TYPE_HINT_FUNC_ASYNC],

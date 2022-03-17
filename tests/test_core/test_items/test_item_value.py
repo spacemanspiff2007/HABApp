@@ -1,6 +1,6 @@
 from math import ceil, floor
 
-from HABApp.core.internals import BaseValueItem
+from HABApp.core.items import BaseValueItem
 
 
 def test_numeric():

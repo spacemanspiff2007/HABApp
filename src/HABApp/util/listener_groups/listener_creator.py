@@ -1,7 +1,8 @@
 from typing import Any, Callable, Optional, Union
 
 from HABApp.core.events import EventFilter
-from HABApp.core.internals import EventBusListener, TYPE_ITEM_OBJ
+from HABApp.core.internals import EventBusListener
+from HABApp.core.items import TYPE_ITEM_OBJ
 
 
 class ListenerCreatorBase:

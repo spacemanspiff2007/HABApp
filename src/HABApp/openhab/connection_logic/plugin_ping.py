@@ -7,8 +7,12 @@ import time
 from HABApp.core.wrapper import log_exception
 from ._plugin import PluginBase
 from HABApp.openhab.errors import OpenhabNotReadyYet, OpenhabDisconnectedError
+from HABApp.core.internals import uses_event_bus
 
 log = logging.getLogger('HABApp.openhab.ping')
+
+
+event_bus = uses_event_bus()
 
 
 class PingOpenhab(PluginBase):
@@ -17,7 +21,7 @@ class PingOpenhab(PluginBase):
         self.ping_sent: Optional[float] = None
         self.ping_new: Optional[float] = None
 
-        self.listener: Optional[HABApp.core.EventBusListener] = None
+        self.listener: Optional[HABApp.core.internals.EventBusListener] = None
 
         self.fut_ping: Optional[asyncio.Future] = None
 
@@ -56,12 +60,12 @@ class PingOpenhab(PluginBase):
         if not HABApp.config.CONFIG.openhab.ping.enabled:
             return None
 
-        self.listener = HABApp.core.impl.EventBusListener(
+        self.listener = HABApp.core.internals.EventBusListener(
             HABApp.config.CONFIG.openhab.ping.item,
-            HABApp.core.impl.wrap_func(self.ping_received),
+            HABApp.core.internals.wrap_func(self.ping_received),
             HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateEvent)
         )
-        HABApp.core.EventBus.add_listener(self.listener)
+        event_bus.add_listener(self.listener)
 
         self.on_connect()
 

@@ -1,12 +1,10 @@
 import logging
-from typing import Optional
+from typing import Optional, TypeVar
 
-import HABApp
+from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
+from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import TYPE_CONTEXT_OBJ, ContextMixin, uses_event_bus
 from HABApp.core.lib import format_exception
-from typing import TypeVar
-from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.const.topics import ERRORS as TOPIC_ERRORS
 
 default_logger = logging.getLogger('HABApp.Worker')
 

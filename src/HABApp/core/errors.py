@@ -33,6 +33,3 @@ class ContextBoundObjectIsAlreadyLinkedError(HABAppException):
 
 class ContextBoundObjectIsAlreadyUnlinkedError(HABAppException):
     pass
-
-
-

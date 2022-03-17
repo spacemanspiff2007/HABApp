@@ -1,8 +1,12 @@
 import asyncio
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from unittest.mock import Mock
+if sys.version_info < (3, 8):
+    from mock import AsyncMock
+else:
+    from unittest.mock import AsyncMock
 
 import pytest
 from watchdog.events import FileSystemEvent
@@ -18,7 +22,7 @@ async def test_file_events(monkeypatch, sync_worker):
     wait_time = 0.1
     monkeypatch.setattr(HABApp.core.files.watcher.file_watcher, 'DEBOUNCE_TIME', wait_time)
 
-    m = Mock()
+    m = AsyncMock()
     handler = AggregatingAsyncEventHandler(Path('folder'), m, FileEndingFilter('.tmp'), False)
 
     loop = asyncio.get_event_loop()

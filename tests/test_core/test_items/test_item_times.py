@@ -6,9 +6,9 @@ from pendulum import UTC
 from pendulum import now as pd_now
 
 import HABApp
-import HABApp.core.internals.item.tmp_data
+import HABApp.core.items.tmp_data
 from HABApp.core.events import NoEventFilter
-from HABApp.core.internals.item.base_item import ChangedTime, UpdatedTime
+from HABApp.core.items.base_item import ChangedTime, UpdatedTime
 from tests.helpers import TestEventBus
 from HABApp.core.internals import wrap_func, TYPE_ITEM_REGISTRY, TYPE_EVENT_BUS
 from HABApp.core.items import Item
@@ -153,9 +153,9 @@ async def test_watcher_change_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
     watcher = item_a.watch_change(1)
 
     # remove item
-    assert name not in HABApp.core.internals.item.tmp_data.TMP_DATA
+    assert name not in HABApp.core.items.tmp_data.TMP_DATA
     ir.pop_item(name)
-    assert name in HABApp.core.internals.item.tmp_data.TMP_DATA
+    assert name in HABApp.core.items.tmp_data.TMP_DATA
 
     item_b = Item(name)
     ir.add_item(item_b)
@@ -173,9 +173,9 @@ async def test_watcher_update_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
     watcher = item_a.watch_update(1)
 
     # remove item
-    assert name not in HABApp.core.internals.item.tmp_data.TMP_DATA
+    assert name not in HABApp.core.items.tmp_data.TMP_DATA
     ir.pop_item(name)
-    assert name in HABApp.core.internals.item.tmp_data.TMP_DATA
+    assert name in HABApp.core.items.tmp_data.TMP_DATA
 
     item_b = Item(name)
     ir.add_item(item_b)
@@ -187,7 +187,7 @@ async def test_watcher_update_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
 @pytest.mark.asyncio
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
                                       sync_worker, eb: TestEventBus, ir: TYPE_ITEM_REGISTRY):
-    monkeypatch.setattr(HABApp.core.internals.item.tmp_data.CLEANUP, 'secs', 0.7)
+    monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''
 
@@ -195,7 +195,7 @@ async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
         nonlocal text_warning
         text_warning = event
 
-    eb.listen_events(HABApp.core.const.topics.WARNINGS, get_log, NoEventFilter())
+    eb.listen_events(HABApp.core.const.topics.TOPIC_WARNINGS, get_log, NoEventFilter())
 
     name = 'test_save_restore'
     item_a = HABApp.core.items.Item(name)
@@ -203,13 +203,13 @@ async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
     item_a.watch_update(1)
 
     # remove item
-    assert name not in HABApp.core.internals.item.tmp_data.TMP_DATA
+    assert name not in HABApp.core.items.tmp_data.TMP_DATA
     ir.pop_item(name)
-    assert name in HABApp.core.internals.item.tmp_data.TMP_DATA
+    assert name in HABApp.core.items.tmp_data.TMP_DATA
 
     # ensure that the tmp data gets deleted
     await asyncio.sleep(0.8)
-    assert name not in HABApp.core.internals.item.tmp_data.TMP_DATA
+    assert name not in HABApp.core.items.tmp_data.TMP_DATA
 
     assert text_warning == 'Item test_save_restore has been deleted 0.7s ago even though it has item watchers.' \
                            ' If it will be added again the watchers have to be created again, too!'

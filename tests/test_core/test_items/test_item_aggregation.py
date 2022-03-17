@@ -2,13 +2,13 @@ import asyncio
 
 import pytest
 
-import HABApp
+from HABApp.core.items import AggregationItem, Item
 
 
 @pytest.mark.asyncio
 async def test_aggregation_item():
-    agg = HABApp.core.items.AggregationItem.get_create_item('MyAggregation')
-    src = HABApp.core.items.Item.get_create_item('MySource')
+    agg = AggregationItem.get_create_item('MyAggregation')
+    src = Item.get_create_item('MySource')
 
     INTERVAL = 0.2
 
@@ -53,8 +53,8 @@ async def test_aggregation_item():
 
 @pytest.mark.asyncio
 async def test_aggregation_item_cleanup():
-    agg = HABApp.core.items.AggregationItem.get_create_item('MyTestAggregation')
-    src = HABApp.core.items.Item.get_create_item('MyTestSource')
+    agg = AggregationItem.get_create_item('MyTestAggregation')
+    src = Item.get_create_item('MyTestSource')
 
     INTERVAL = 0.2
 

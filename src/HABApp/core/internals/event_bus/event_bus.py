@@ -48,6 +48,7 @@ class EventBus:
 
     def add_listener(self, listener: _TYPE_LISTENER):
         assert isinstance(listener, EventBusBaseListener)
+        assert isinstance(listener.topic, str) and listener.topic
 
         with self._lock:
             item_listeners = self._listeners.setdefault(listener.topic, [])
@@ -64,6 +65,7 @@ class EventBus:
 
     def remove_listener(self, listener: _TYPE_LISTENER):
         assert isinstance(listener, EventBusBaseListener)
+        assert isinstance(listener.topic, str) and listener.topic
 
         with self._lock:
             item_listeners = self._listeners.get(listener.topic, [])

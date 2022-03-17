@@ -1,23 +1,21 @@
 import asyncio
 import logging
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 import aiohttp
 import pytest
 
 import HABApp
 from HABApp.core.wrapper import ExceptionToHABApp, ignore_exception
-from HABApp.core.internals import EventBus
 
 log = logging.getLogger('WrapperTest')
 
 
 @pytest.fixture
-def p_mock(eb: EventBus):
-    post_event = eb.post_event
-    eb.post_event = m = MagicMock()
+def p_mock(monkeypatch):
+    m = Mock()
+    monkeypatch.setattr(HABApp.core.wrapper, 'post_event', m)
     yield m
-    eb.post_event = post_event
 
 
 def test_error_catch(p_mock):
@@ -31,21 +29,21 @@ def test_error_catch(p_mock):
     with ExceptionToHABApp(log, logging.WARNING):
         1 / 0
     p_mock.assert_called_once()
-    assert p_mock.call_args[0][0] == HABApp.core.const.topics.WARNINGS
+    assert p_mock.call_args[0][0] == HABApp.core.const.topics.TOPIC_WARNINGS
 
 
 def test_error_level(p_mock):
     with ExceptionToHABApp(log, logging.WARNING):
         1 / 0
     p_mock.assert_called_once()
-    assert p_mock.call_args[0][0] == HABApp.core.const.topics.WARNINGS
+    assert p_mock.call_args[0][0] == HABApp.core.const.topics.TOPIC_WARNINGS
 
     p_mock.reset_mock()
 
     with ExceptionToHABApp(log):
         1 / 0
     p_mock.assert_called_once()
-    assert p_mock.call_args[0][0] == HABApp.core.const.topics.ERRORS
+    assert p_mock.call_args[0][0] == HABApp.core.const.topics.TOPIC_ERRORS
 
 
 @ignore_exception

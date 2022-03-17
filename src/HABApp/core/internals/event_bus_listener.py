@@ -1,42 +1,57 @@
-from typing import Optional, TYPE_CHECKING, TypeVar
-
-if TYPE_CHECKING:
-    import HABApp
+from typing import Optional, TypeVar
 
 from HABApp.core.internals.event_bus import EventBusBaseListener
 from HABApp.core.internals.wrapped_function import TYPE_WRAPPED_FUNC_OBJ, WrappedFunctionBase
-from HABApp.core.internals import uses_event_bus
-from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ
+from HABApp.core.internals import uses_event_bus, TYPE_CONTEXT_OBJ
+from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, AutoContextBoundObj
 
 
-EventBus = uses_event_bus()
+event_bus = uses_event_bus()
 
 
 class EventBusListener(EventBusBaseListener):
-    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: TYPE_EVENT_FILTER_OBJ):
-        super().__init__(topic)
+    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: TYPE_EVENT_FILTER_OBJ, **kwargs):
+        super().__init__(topic, **kwargs)
+
         assert isinstance(callback, WrappedFunctionBase)
         self.func: TYPE_WRAPPED_FUNC_OBJ = callback
         self.filter: TYPE_EVENT_FILTER_OBJ = event_filter
-
-        # Optional rule context if the listener was created in a Rule
-        self._habapp_rule_ctx: Optional['HABApp.rule_ctx.HABAppRuleContext'] = None
 
     def notify_listeners(self, event):
         if self.filter.trigger(event):
             self.func.run(event)
 
-    def describe(self):
+    def describe(self) -> str:
         return f'"{self.topic}" (filter={self.filter.describe()})'
 
     def cancel(self):
         """Stop listening on the event bus"""
-        EventBus.remove_listener(self)
-
-        # If we have a context remove the listener from there, too
-        if self._habapp_rule_ctx is not None:
-            self._habapp_rule_ctx.remove_event_listener(self)
-            self._habapp_rule_ctx = None
+        event_bus.remove_listener(self)
 
 
 TYPE_EVENT_BUS_LISTENER = TypeVar('TYPE_EVENT_BUS_LISTENER', bound=EventBusListener)
+
+
+class ContextBoundEventBusListener(EventBusListener, AutoContextBoundObj):
+    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: TYPE_EVENT_FILTER_OBJ,
+                 parent_ctx: Optional[TYPE_CONTEXT_OBJ] = None):
+        super().__init__(topic=topic, callback=callback, event_filter=event_filter, parent_ctx=parent_ctx)
+
+        assert isinstance(callback, WrappedFunctionBase)
+        self.func: TYPE_WRAPPED_FUNC_OBJ = callback
+        self.filter: TYPE_EVENT_FILTER_OBJ = event_filter
+
+    def notify_listeners(self, event):
+        if self.filter.trigger(event):
+            self.func.run(event)
+
+    def describe(self) -> str:
+        return f'"{self.topic}" (filter={self.filter.describe()})'
+
+    def _ctx_unlink(self):
+        event_bus.remove_listener(self)
+        return super()._ctx_unlink()
+
+    def cancel(self):
+        """Stop listening on the event bus"""
+        self._ctx_unlink()

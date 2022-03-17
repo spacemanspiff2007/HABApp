@@ -3,10 +3,10 @@ import time
 from typing import TypeVar, Dict, Any
 from typing import Union
 
-import HABApp
-from HABApp.core.base import TYPE_FILTER_OBJ, EventFilterBase, BaseValueItem
-from HABApp.core.impl import EventBusListener
 from HABApp.core.events.filter import EventFilter
+from HABApp.core.internals import EventBusListener, wrap_func, EventFilterBase, TYPE_EVENT_FILTER_OBJ, \
+    get_current_context
+from HABApp.core.items import BaseValueItem
 from HABAppTests.errors import TestCaseFailed
 from .compare_values import get_equal_text, get_value_text
 
@@ -17,7 +17,7 @@ EVENT_TYPE = TypeVar('EVENT_TYPE')
 
 class EventWaiter:
     def __init__(self, name: Union[BaseValueItem, str],
-                 event_filter: TYPE_FILTER_OBJ, timeout=1):
+                 event_filter: TYPE_EVENT_FILTER_OBJ, timeout=1):
         if isinstance(name, BaseValueItem):
             name = name.name
         assert isinstance(name, str)
@@ -29,7 +29,7 @@ class EventWaiter:
 
         self.event_listener = EventBusListener(
             self.name,
-            HABApp.core.impl.wrap_func(self.__process_event),
+            wrap_func(self.__process_event),
             self.event_filter
         )
 
@@ -70,11 +70,11 @@ class EventWaiter:
         raise ValueError()
 
     def __enter__(self) -> 'EventWaiter':
-        HABApp.core.EventBus.add_listener(self.event_listener)
+        get_current_context().add_event_listener(self.event_listener)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        HABApp.core.EventBus.remove_listener(self.event_listener)
+        get_current_context().remove_event_listener(self.event_listener)
 
     @staticmethod
     def compare_event_value(event, kwargs: Dict[str, Any]):

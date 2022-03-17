@@ -7,7 +7,7 @@ from pendulum import now as pd_now
 
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import uses_post_event
-from HABApp.core.internals.item.base_item import BaseItem
+from HABApp.core.items.base_item import BaseItem
 
 log = logging.getLogger('HABApp')
 

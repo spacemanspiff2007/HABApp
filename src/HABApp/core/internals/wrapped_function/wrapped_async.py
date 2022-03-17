@@ -1,13 +1,9 @@
 import logging
-from typing import Optional, Callable, Awaitable, Any, TYPE_CHECKING
+from typing import Optional, Callable, Awaitable, Any
 
 from HABApp.core.asyncio import async_context, create_task
-from .base import WrappedFunctionBase
 from HABApp.core.internals import TYPE_CONTEXT_OBJ
-
-if TYPE_CHECKING:
-    import HABApp
-
+from .base import WrappedFunctionBase
 
 TYPE_HINT_FUNC_ASYNC = Callable[..., Awaitable[Any]]
 

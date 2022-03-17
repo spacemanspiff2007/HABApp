@@ -3,21 +3,18 @@ from typing import Any, Callable, Type, TypeVar, Optional
 from pendulum import UTC, DateTime
 from pendulum import now as pd_now
 
+import HABApp
+from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, TYPE_EVENT_BUS_LISTENER
+from HABApp.core.internals import uses_get_item, uses_item_registry
+from HABApp.core.internals.item_registry import ItemRegistryItem
+from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
+from eascheduler.const import local_tz
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
 from .tmp_data import add_tmp_data as _add_tmp_data
 from .tmp_data import restore_tmp_data as _restore_tmp_data
 
-import HABApp
-from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
-from HABApp.core.internals import uses_get_item
-from eascheduler.const import local_tz
-
-
-from HABApp.core.internals.item_registry import ItemRegistryItem
-from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, TYPE_EVENT_BUS_LISTENER
-
-
 get_item = uses_get_item()
+item_registry = uses_item_registry()
 
 
 class BaseItem(ItemRegistryItem):

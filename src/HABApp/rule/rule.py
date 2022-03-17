@@ -10,8 +10,9 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core.internals import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, TYPE_EVENT_FILTER_OBJ, BaseValueItem, \
-    TYPE_EVENT_BUS_LISTENER
+from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, TYPE_EVENT_BUS_LISTENER, ContextMixin, uses_post_event, \
+    EventFilterBase, uses_item_registry, ContextBoundEventBusListener
+from HABApp.core.items import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, BaseValueItem
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
@@ -32,8 +33,13 @@ warnings.simplefilter('default')
 warnings.showwarning = send_warnings_to_log
 
 
-class Rule:
+post_event = uses_post_event()
+item_registry = uses_item_registry()
+
+
+class Rule(ContextMixin):
     def __init__(self):
+        super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
 
         # get the variables from the caller
         depth = 1
@@ -63,11 +69,8 @@ class Rule:
             assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
         self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
 
-        # context
-        self._habapp_rule_ctx = HABApp.rule_ctx.HABAppRuleContext(self)
-
         # scheduler
-        self.run: _HABAppSchedulerView = _HABAppSchedulerView(self._habapp_rule_ctx)
+        self.run: _HABAppSchedulerView = _HABAppSchedulerView(self._habapp_ctx)
 
         # suggest a rule name
         self.rule_name: str = self.__rule_file.suggest_rule_name(self)
@@ -95,7 +98,7 @@ class Rule:
         :return:
         """
         assert isinstance(name, (str, BaseValueItem)), type(name)
-        return HABApp.core.EventBus.post_event(
+        return post_event(
             name.name if isinstance(name, BaseValueItem) else name,
             event
         )
@@ -115,16 +118,16 @@ class Rule:
             filters on the values of the event. It is also possible to group filters logically with, e.g.
             :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
-        cb = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        cb = wrap_func(callback, context=self._habapp_ctx)
         name = name.name if isinstance(name, BaseItem) else name
 
         if event_filter is None:
             event_filter = HABApp.core.events.NoEventFilter()
-        if not isinstance(event_filter, HABApp.core.base.EventFilterBase):
+        if not isinstance(event_filter, EventFilterBase):
             raise ValueError(f'Argument event_filter must be an event filter (is {event_filter})')
 
-        listener = HABApp.core.impl.EventBusListener(name, cb, event_filter)
-        return self._habapp_rule_ctx.add_event_listener(listener)
+        listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
+        return self._habapp_ctx.add_event_listener(listener)
 
     def execute_subprocess(self, callback: TYPE_EVENT_CALLBACK, program, *args, capture_output=True):
         """Run another program
@@ -138,7 +141,7 @@ class Rule:
         """
 
         assert isinstance(program, str), type(program)
-        cb = wrap_func(callback, rule_ctx=self._habapp_rule_ctx)
+        cb = wrap_func(callback, context=self._habapp_ctx)
 
         asyncio.run_coroutine_threadsafe(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
@@ -190,7 +193,7 @@ class Rule:
                 raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its Subclasses')
 
         ret = []
-        for item in HABApp.core.Items.get_items():  # type: HABApp.core.base.BaseItem
+        for item in item_registry.get_items():  # type: HABApp.core.items.BaseItem
             if type is not None and not isinstance(item, type):
                 continue
 

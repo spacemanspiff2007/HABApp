@@ -55,6 +55,6 @@ TYPE_CONTEXT_OBJ = TypeVar('TYPE_CONTEXT_OBJ', bound=Context)
 
 
 class ContextMixin:
-    def __init__(self, context: Optional[Context] = None, **kwargs):
+    def __init__(self, context: Optional[TYPE_CONTEXT_OBJ] = None, **kwargs):
         super().__init__(**kwargs)
-        self._habapp_ctx = context
+        self._habapp_ctx: TYPE_CONTEXT_OBJ = context

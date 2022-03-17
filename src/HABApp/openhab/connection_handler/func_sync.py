@@ -5,7 +5,7 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.asyncio import run_coro_from_thread, create_task
-from HABApp.core.internals import BaseValueItem, BaseItem
+from HABApp.core.items import BaseValueItem
 from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \
     async_set_metadata, async_remove_metadata, async_get_channel_link, async_create_channel_link, \
@@ -109,7 +109,7 @@ def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False)
     :param all_metadata: if true the result will include all item metadata
     :return: openHAB item
     """
-    if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
+    if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
     assert isinstance(item_name, str), type(item_name)
     assert metadata is None or isinstance(metadata, str), type(metadata)
@@ -125,7 +125,7 @@ def get_thing(thing_name: str) -> OpenhabThingDefinition:
     :param thing_name: name of the thing or the item
     :return: openHAB thing
     """
-    if isinstance(thing_name, BaseItem):
+    if isinstance(thing_name, HABApp.core.items.BaseItem):
         thing_name = thing_name.name
     assert isinstance(thing_name, str), type(thing_name)
 
@@ -165,7 +165,7 @@ def set_metadata(item_name: str, namespace: str, value: str, config: dict):
     :param config: configuration
     :return: True if metadata was successfully created/updated
     """
-    if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
+    if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
     assert isinstance(item_name, str), type(item_name)
     assert isinstance(namespace, str), type(namespace)
@@ -185,7 +185,7 @@ def remove_metadata(item_name: str, namespace: str):
     :param namespace: namespace
     :return: True if metadata was successfully removed
     """
-    if isinstance(item_name, HABApp.openhab.items.base_item.BaseValueItem):
+    if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
     assert isinstance(item_name, str), type(item_name)
     assert isinstance(namespace, str), type(namespace)

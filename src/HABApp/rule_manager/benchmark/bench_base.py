@@ -1,7 +1,7 @@
 from typing import Optional
 
 import HABApp
-from HABApp.core.const.topics import ERRORS
+from HABApp.core.const.topics import TOPIC_ERRORS
 
 
 class BenchBaseRule(HABApp.Rule):
@@ -29,7 +29,7 @@ class BenchBaseRule(HABApp.Rule):
 
     def do_bench_start(self):
         self.errors.clear()
-        self.err_watcher = self.listen_event(ERRORS, self._err_event)
+        self.err_watcher = self.listen_event(TOPIC_ERRORS, self._err_event)
 
         self.run.at(1, self.do_bench_run)
 

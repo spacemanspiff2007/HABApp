@@ -85,7 +85,7 @@ class SimpleRuleRunner:
         self.vars.pop('__HABAPP__RULE_FILE__')
         loaded_rules = self.vars.pop('__HABAPP__RULES')
         for rule in loaded_rules:
-            rule._habapp_rule_ctx.unload_rule()
+            rule._habapp_ctx.unload_rule()
         loaded_rules.clear()
 
         # restore patched

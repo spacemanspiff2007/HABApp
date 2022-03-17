@@ -5,9 +5,11 @@ from immutables import Map
 
 from HABApp.openhab.items import DatetimeItem, NumberItem
 from HABApp.openhab.map_items import map_item
+from tests.helpers import TestEventBus
 
 
-def test_exception():
+def test_exception(eb: TestEventBus):
+    eb.allow_errors = True
     assert map_item('test', 'Number', 'asdf', frozenset(), frozenset(), {}) is None
 
 

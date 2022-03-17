@@ -1,6 +1,6 @@
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_get_item, uses_item_registry
-from HABApp.core.internals.item import BaseValueItem
+from HABApp.core.items import BaseValueItem
 from HABApp.mqtt.mqtt_interface import publish
 
 get_item = uses_get_item()

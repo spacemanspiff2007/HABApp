@@ -1,6 +1,8 @@
 from HABApp.core.logger import HABAppLogger, HABAppError, HABAppInfo, HABAppWarning
 from logging import getLogger
 
+from tests.helpers import TestEventBus
+
 
 def test_exception():
     e = Exception('Exception test')
@@ -17,7 +19,9 @@ def test_exception_traceback():
     assert HABAppLogger(None).add_exception(e, add_traceback=True).lines == ['Exception: Line1', 'Line2', 'Line3']
 
 
-def test_bool():
+def test_bool(eb: TestEventBus):
+    eb.allow_errors = True
+
     for cls in (HABAppError, HABAppInfo, HABAppWarning):
         i = cls(getLogger('test')).add('')
         assert i

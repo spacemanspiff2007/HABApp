@@ -6,7 +6,8 @@ from HABApp.core.asyncio import create_task
 from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent, EventFilter
 from HABApp.core.lib import PendingFuture
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
-from HABApp.core.internals import uses_post_event, get_current_context, AutoContextBoundObj
+from HABApp.core.internals import uses_post_event, get_current_context, AutoContextBoundObj, wrap_func
+from HABApp.core.internals import ContextBoundEventBusListener
 
 log = logging.getLogger('HABApp')
 
@@ -36,9 +37,14 @@ class BaseWatch(AutoContextBoundObj):
     def listen_event(self, callback: TYPE_EVENT_CALLBACK) -> 'HABApp.core.base.TYPE_EVENT_BUS_LISTENER':
         """Listen to (only) the event that is emitted by this watcher"""
         context = get_current_context()
-        cb = HABApp.core.internals.wrap_func(callback, context=context)
-        listener = HABApp.core.internals.EventBusListener(self.name, cb, EventFilter(self.EVENT, seconds=self.fut.secs))
-        return context.add_event_listener(listener)
+        return context.add_event_listener(
+            ContextBoundEventBusListener(
+                self.name,
+                wrap_func(callback, context=context),
+                EventFilter(self.EVENT, seconds=self.fut.secs),
+                parent_ctx=context
+            )
+        )
 
 
 class ItemNoUpdateWatch(BaseWatch):

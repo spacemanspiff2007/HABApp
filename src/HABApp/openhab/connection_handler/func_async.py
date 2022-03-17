@@ -6,7 +6,7 @@ from typing import Any, Optional, Dict, List
 from urllib.parse import quote as quote_url
 
 from HABApp.core.const.json import load_json
-from HABApp.core.internals import BaseValueItem
+from HABApp.core.items import BaseValueItem
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
 from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from HABApp.openhab.errors import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \

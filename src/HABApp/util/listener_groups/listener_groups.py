@@ -1,6 +1,8 @@
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
-from HABApp.core.internals import BaseItem, TYPE_EVENT_FILTER_OBJ, TYPE_ITEM_OBJ
+from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ
+from HABApp.core.items import BaseItem, TYPE_ITEM_OBJ
+
 from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF
 from .listener_creator import ListenerCreatorBase, EventListenerCreator, \
     NoChangeEventListenerCreator, NoUpdateEventListenerCreator

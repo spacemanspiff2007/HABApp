@@ -2,8 +2,8 @@ class ItemRegistryItem:
     """ItemRegistryItem, all items that will be stored in the Item Registry must inherit from this
     """
 
-    def __init__(self, name: str):
-        super().__init__()
+    def __init__(self, name: str, **kwargs):
+        super().__init__(**kwargs)
         assert isinstance(name, str), type(name)
         self._name: str = name
 

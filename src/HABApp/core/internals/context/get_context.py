@@ -1,8 +1,11 @@
 import sys
-from typing import Optional, Union
+from typing import Optional, Union, TYPE_CHECKING
 
 from HABApp.core.errors import ContextNotSetError, ContextNotFoundError
 from HABApp.core.internals.context import ContextMixin, ContextBoundObj, TYPE_CONTEXT_OBJ
+
+if TYPE_CHECKING:
+    import HABApp
 
 
 def get_current_context(obj: Optional[ContextMixin] = None) -> 'HABApp.rule_ctx.HABAppRuleContext':

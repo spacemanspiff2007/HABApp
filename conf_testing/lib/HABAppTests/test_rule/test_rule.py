@@ -109,8 +109,8 @@ class TestBaseRule(HABApp.Rule):
     def _worker_events_sub(self):
         assert self.__sub_warning is None
         assert self.__sub_errors is None
-        self.__sub_warning = self.listen_event(HABApp.core.const.topics.WARNINGS, self.__event_warning)
-        self.__sub_errors = self.listen_event(HABApp.core.const.topics.ERRORS, self.__event_error)
+        self.__sub_warning = self.listen_event(HABApp.core.const.topics.TOPIC_WARNINGS, self.__event_warning)
+        self.__sub_errors = self.listen_event(HABApp.core.const.topics.TOPIC_ERRORS, self.__event_error)
 
     def _worker_events_cancel(self):
         if self.__sub_warning is not None:

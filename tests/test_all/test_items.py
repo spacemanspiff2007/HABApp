@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.internals import BaseValueItem, TYPE_ITEM_CLS
+from HABApp.core.items import BaseValueItem, TYPE_ITEM_CLS
 from HABApp.mqtt.items import MqttBaseItem
 from tests.helpers import get_module_classes
 
