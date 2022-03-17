@@ -1,12 +1,12 @@
 from HABApp.openhab.events import ItemStateChangedEvent, ItemStateChangedEventFilter, ItemStateEvent, \
-    ItemStateEventFilter
+    ItemStateEventFilter, ItemCommandEventFilter, ItemCommandEvent
 from tests.helpers import check_class_annotations
 
 
 def test_class_annotations():
     """EventFilter relies on the class annotations so we test that every event has those"""
 
-    exclude = ['OpenhabEvent', 'ItemStateChangedEventFilter', 'ItemStateEventFilter']
+    exclude = ['OpenhabEvent', 'ItemStateChangedEventFilter', 'ItemStateEventFilter', 'ItemCommandEventFilter']
     check_class_annotations('HABApp.openhab.events', exclude=exclude, skip_imports=False)
 
 
@@ -14,6 +14,11 @@ def test_oh_filters():
 
     f = ItemStateEventFilter(value=1)
     assert f.event_class is ItemStateEvent
+    assert f.attr_name1 == 'value'
+    assert f.attr_value1 == 1
+
+    f = ItemCommandEventFilter(value=1)
+    assert f.event_class is ItemCommandEvent
     assert f.attr_name1 == 'value'
     assert f.attr_value1 == 1
 
