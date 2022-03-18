@@ -84,7 +84,7 @@ class BaseValueItem(BaseItem):
     def set_default(self, default_value) -> bool:
         """Set default value if value is empty
 
-        :param default_value: Set this as new value if empty 
+        :param default_value: Set this as new value if empty
         :return: True if default value was set
         """
         is_changed = False
