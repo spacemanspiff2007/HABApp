@@ -1,17 +1,17 @@
-from typing import Any, Callable, Type, TypeVar, Optional
+from typing import Type, TypeVar, Optional
 
 from pendulum import UTC, DateTime
 from pendulum import now as pd_now
 
-import HABApp
 from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, TYPE_EVENT_BUS_LISTENER
-from HABApp.core.internals import uses_get_item, uses_item_registry
+from HABApp.core.internals import uses_get_item, uses_item_registry, get_current_context
 from HABApp.core.internals.item_registry import ItemRegistryItem
 from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
 from eascheduler.const import local_tz
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
 from .tmp_data import add_tmp_data as _add_tmp_data
 from .tmp_data import restore_tmp_data as _restore_tmp_data
+from ..const.hints import TYPE_EVENT_CALLBACK
 
 get_item = uses_get_item()
 item_registry = uses_item_registry()
@@ -79,9 +79,8 @@ class BaseItem(ItemRegistryItem):
         secs = get_positive_time_diff(secs, round_digits=1)
         return self._last_update.add_watch(secs)
 
-    def listen_event(self, callback: Callable[[Any], Any],
-                     event_filter: Optional[TYPE_EVENT_FILTER_OBJ] = None
-                     ) -> TYPE_EVENT_BUS_LISTENER:
+    def listen_event(self, callback: TYPE_EVENT_CALLBACK,
+                     event_filter: Optional[TYPE_EVENT_FILTER_OBJ] = None) -> TYPE_EVENT_BUS_LISTENER:
         """
         Register an event listener which listens to all event that the item receives
 
@@ -92,8 +91,7 @@ class BaseItem(ItemRegistryItem):
             filters on the values of the event. It is also possible to group filters logically with, e.g.
             :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
-        rule_ctx = HABApp.rule_ctx.get_rule_context()
-        return rule_ctx.rule.listen_event(self._name, callback=callback, event_filter=event_filter)
+        return get_current_context().rule.listen_event(self._name, callback=callback, event_filter=event_filter)
 
     def _on_item_added(self):
         """This function gets automatically called when the item is added to the item registry

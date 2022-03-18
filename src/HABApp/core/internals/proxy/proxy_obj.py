@@ -1,34 +1,15 @@
 import sys
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Final
 
 from HABApp.core.errors import ProxyObjHasNotBeenReplacedError
 
-PROXIES: List['ProxyObj'] = []
+PROXIES: List['StartUpProxyObj'] = []
 
 
-class RestoreableObj:
-    def __init__(self, key: str, globals: dict, proxy: 'ProxyObj'):
-        self.key = key
-        self.globals = globals
-        self.proxy = proxy
-
-    def restore(self):
-        self.globals[self.key] = self.proxy
-        self.globals = None
-        self.key = None
-        self.proxy = None
-
-
-class ProxyObj:
-    def __init__(self, to_replace: callable, globals: dict):
-        self.to_replace: Optional[callable] = to_replace
-        self.globals: Optional[dict] = globals
-
-        PROXIES.append(self)
-
+class ProxyObjBase:
     @property
     def to_replace_name(self) -> str:
-        return str(getattr(self.to_replace, "__name__", self.to_replace))
+        raise NotImplementedError()
 
     def __getattr__(self, item):
         raise ProxyObjHasNotBeenReplacedError(self)
@@ -38,6 +19,27 @@ class ProxyObj:
 
     def __str__(self):
         return f'<{self.__class__.__name__} {self.to_replace_name}>'
+
+
+class ConstProxyObj(ProxyObjBase):
+    def __init__(self, name: str):
+        self.name: Final = name
+
+    @property
+    def to_replace_name(self) -> str:
+        return self.name
+
+
+class StartUpProxyObj(ProxyObjBase):
+    def __init__(self, to_replace: callable, globals: dict):
+        self.to_replace: Optional[callable] = to_replace
+        self.globals: Optional[dict] = globals
+
+        PROXIES.append(self)
+
+    @property
+    def to_replace_name(self) -> str:
+        return str(getattr(self.to_replace, "__name__", self.to_replace))
 
     def replace(self, replacements: Dict[object, object], final: bool):
         assert self.globals is not None
@@ -57,9 +59,22 @@ class ProxyObj:
         self.to_replace = None
 
 
-def create_proxy(to_replace: callable) -> ProxyObj:
+def create_proxy(to_replace: callable) -> StartUpProxyObj:
     frm = sys._getframe(2)
-    return ProxyObj(to_replace, frm.f_globals)
+    return StartUpProxyObj(to_replace, frm.f_globals)
+
+
+class RestoreableObj:
+    def __init__(self, key: str, globals: dict, proxy: 'StartUpProxyObj'):
+        self.key = key
+        self.globals = globals
+        self.proxy = proxy
+
+    def restore(self):
+        self.globals[self.key] = self.proxy
+        self.globals = None
+        self.key = None
+        self.proxy = None
 
 
 def replace_proxies(replacements: Dict[object, object], final: bool) -> List[RestoreableObj]:

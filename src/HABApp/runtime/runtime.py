@@ -12,6 +12,7 @@ import HABApp.util
 import eascheduler
 from HABApp.core.asyncio import async_context
 from HABApp.core.internals import setup_internals
+from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
@@ -46,7 +47,13 @@ class Runtime:
             HABApp.core.internals.wrapped_function.create_thread_pool(10)
 
             # replace proxy objects
-            setup_internals(HABApp.core.internals.ItemRegistry(), HABApp.core.internals.EventBus())
+            ir = HABApp.core.internals.ItemRegistry()
+            eb = HABApp.core.internals.EventBus()
+            setup_internals(ir, eb)
+            assert isinstance(HABApp.core.Items, ConstProxyObj)
+            HABApp.core.Items = ir
+            assert isinstance(HABApp.core.EventBus, ConstProxyObj)
+            HABApp.core.EventBus = eb
 
             await HABApp.core.files.setup()
 

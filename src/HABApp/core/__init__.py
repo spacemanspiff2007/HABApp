@@ -7,7 +7,7 @@ from HABApp.core import errors
 from HABApp.core import asyncio
 
 # isort: split
-import HABApp.core.internals
+from HABApp.core import internals
 
 from HABApp.core import wrapper
 from HABApp.core import logger
@@ -19,3 +19,6 @@ import HABApp.core.files
 import HABApp.core.items
 
 # isort: split
+
+Items = internals.proxy.ConstProxyObj('ItemRegistry')
+EventBus = internals.proxy.ConstProxyObj('EventBus')

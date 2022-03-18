@@ -10,7 +10,7 @@ log = logging.getLogger('HABApp.Tests.MultiMode')
 
 
 class TestNoWarningOnRuleUnload(TestBaseRule):
-    """This rule is testing the Parameter implementation"""
+    """This rule tests that multiple listen/cancel commands don't create warnings on unload"""
 
     def __init__(self):
         super().__init__()
@@ -26,17 +26,17 @@ class TestNoWarningOnRuleUnload(TestBaseRule):
             grp.listen()
             grp.cancel()
 
-        self._habapp_rule_ctx.unload_rule()
+        self._habapp_ctx.unload_rule()
 
         # workaround so we don't get Errors
         for k in ['_TestBaseRule__sub_warning', '_TestBaseRule__sub_errors']:
             obj = self.__dict__[k]
             self.__dict__[k] = None
-            assert obj._habapp_rule_ctx is None
+            assert obj._parent_ctx is None
 
         # Workaround to so we don't crash
         self.on_rule_unload = lambda: None
-        self._habapp_rule_ctx = HABAppRuleContext(self)
+        self._habapp_ctx = HABAppRuleContext(self)
 
     def cb(self, event):
         pass

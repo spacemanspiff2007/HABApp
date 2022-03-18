@@ -1,10 +1,9 @@
 import logging
 import time
 
-import HABApp
+from HABApp.core.items import BaseValueItem
 from HABAppTests.compare_values import get_equal_text
 from HABAppTests.errors import TestCaseFailed
-
 
 log = logging.getLogger('HABApp.Tests')
 
@@ -12,7 +11,7 @@ log = logging.getLogger('HABApp.Tests')
 class ItemWaiter:
     def __init__(self, item, timeout=1, item_compare: bool = True):
         self.item = item
-        assert isinstance(item, HABApp.core.base.BaseValueItem), f'{item} is not an Item'
+        assert isinstance(item, BaseValueItem), f'{item} is not an Item'
 
         self.timeout = timeout
         self.item_compare = item_compare

@@ -1,4 +1,4 @@
-from .proxy_obj import create_proxy
+from .proxy_obj import create_proxy, ConstProxyObj
 
 # isort: split
 

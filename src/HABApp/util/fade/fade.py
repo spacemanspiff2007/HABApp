@@ -13,7 +13,7 @@ class FadeWorker(AutoContextBoundObj):
     def __init__(self, parent: 'Fade', interval: float):
         super().__init__()
         self.parent: 'Fade' = parent
-        self.scheduler = self._habapp_rule_ctx.rule.run.every(None, interval, self.parent._scheduled_worker)
+        self.scheduler = self._parent_ctx.rule.run.every(None, interval, self.parent._scheduled_worker)
 
     def cancel(self):
         self._ctx_unlink()

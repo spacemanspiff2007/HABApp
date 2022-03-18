@@ -77,7 +77,7 @@ class TestItemListener(TestBaseRule):
 
     def trigger_event(self):
         self.run.at(
-            1, HABApp.core.EventBus.post_event, self.watch_item.name, ValueUpdateEvent(self.watch_item.name, 123)
+            1, self.post_event, self.watch_item.name, ValueUpdateEvent(self.watch_item.name, 123)
         )
 
         with EventWaiter(self.watch_item.name, ValueUpdateEventFilter(), 2) as w:

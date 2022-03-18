@@ -73,7 +73,7 @@ class HABAppBenchRule(BenchBaseRule):
         self.bench_times = self.bench_times_container.create(test_name)
 
         self.time_sent = time.time()
-        HABApp.core.EventBus.post_event(self.name, self.values[0])
+        self.post_event(self.name, self.values[0])
 
         self.run.soon(LOCK.acquire)
         time.sleep(1)
@@ -103,7 +103,7 @@ class HABAppBenchRule(BenchBaseRule):
             return None
 
         self.time_sent = time.time()
-        HABApp.core.EventBus.post_event(self.name, self.values[0])
+        self.post_event(self.name, self.values[0])
 
     async def a_post_next_event_val(self, event: ValueUpdateEvent):
         self.post_next_event_val(event)
