@@ -5,17 +5,17 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.events import ValueUpdateEvent
-from HABApp.core.internals import uses_post_event, uses_get_item
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.internals import uses_get_item, uses_post_event
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.connection_handler import http_connection
-from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
-    ThingStatusInfoEvent
+from HABApp.openhab.definitions.topics import ITEMS as ITEMS_TOPIC
+from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, \
+    ItemCommandEvent, ItemRemovedEvent, ItemUpdatedEvent, ThingStatusInfoEvent
 from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
 from HABApp.openhab.map_events import get_event
 from HABApp.openhab.map_items import map_item
-from HABApp.openhab.definitions.topics import ITEMS as ITEMS_TOPIC
 
 log = http_connection.log
 
@@ -32,7 +32,9 @@ def on_sse_event(event_dict: dict):
         # Update item in registry BEFORE posting to the event bus
         # so the items have the correct state when we process the event in a rule
         try:
-            if isinstance(event, ValueUpdateEvent):
+            if isinstance(event, ItemCommandEvent) or \
+               isinstance(event, ValueChangeEvent) or \
+               isinstance(event, ValueUpdateEvent):
                 __item = get_item(event.name)  # type: HABApp.core.items.base_item.BaseValueItem
                 __item.set_value(event.value)
                 post_event(event.name, event)
