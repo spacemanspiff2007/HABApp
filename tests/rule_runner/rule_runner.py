@@ -1,26 +1,15 @@
-import sys
+from pytest import MonkeyPatch
 
+import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.habappschedulerview as ha_sched
-from HABApp.core.internals.wrapped_function import wrapped_sync
-from HABApp.runtime import Runtime
 from HABApp.core.asyncio import async_context
+from HABApp.core.internals.wrapped_function import wrapped_sync
+from HABApp.rule.rule_hook import HABAppRuleHook
+from HABApp.runtime import Runtime
 
 
-def _get_topmost_globals() -> dict:
-    depth = 1
-    while True:
-        try:
-            var = sys._getframe(depth).f_globals    # noqa: F841
-            depth += 1
-        except ValueError:
-            break
-    return sys._getframe(depth - 1).f_globals
-
-
-class TestRuleFile:
-    def suggest_rule_name(self, obj):
-        parts = str(type(obj)).split('.')
-        return parts[-1][:-2]
+def suggest_rule_name(obj: object) -> str:
+    return f'TestRule.{obj.__class__.__name__}'
 
 
 class SyncScheduler:
@@ -40,18 +29,17 @@ class SyncScheduler:
         self.jobs.clear()
 
 
+class DummyRuntime(Runtime):
+    def __init__(self):
+        pass
+
+
 class SimpleRuleRunner:
     def __init__(self):
-        self.vars: dict = _get_topmost_globals()
         self.loaded_rules = []
         self.original_scheduler = None
 
-        self._patched_objs = []
-
-    def patch_obj(self, obj, name, new_value):
-        assert hasattr(obj, name)
-        self._patched_objs.append((obj, name, getattr(obj, name)))
-        setattr(obj, name, new_value)
+        self.monkeypatch = MonkeyPatch()
 
     def restore(self):
         for obj, name, original in self._patched_objs:
@@ -66,30 +54,27 @@ class SimpleRuleRunner:
             pass
 
     def set_up(self):
-        self.vars['__UNITTEST__'] = True
-        self.vars['__HABAPP__RUNTIME__'] = Runtime()
-        self.vars['__HABAPP__RULE_FILE__'] = TestRuleFile()
-        self.vars['__HABAPP__RULES'] = self.loaded_rules = []
+
+        # Patch the hook so we can instantiate the rules
+        hook = HABAppRuleHook(self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None)
+        self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 
         # patch worker with a synchronous worker
-        self.patch_obj(wrapped_sync, 'WORKERS', self)
+        self.monkeypatch.setattr(wrapped_sync, 'WORKERS', self)
 
         # patch scheduler, so we run synchronous
-        self.patch_obj(ha_sched, '_HABAppScheduler', SyncScheduler)
+        self.monkeypatch.setattr(ha_sched, '_HABAppScheduler', SyncScheduler)
 
     def tear_down(self):
-        async_context.set('Tear down test')
+        ctx = async_context.set('Tear down test')
 
-        self.vars.pop('__UNITTEST__')
-        self.vars.pop('__HABAPP__RUNTIME__')
-        self.vars.pop('__HABAPP__RULE_FILE__')
-        loaded_rules = self.vars.pop('__HABAPP__RULES')
-        for rule in loaded_rules:
+        for rule in self.loaded_rules:
             rule._habapp_ctx.unload_rule()
-        loaded_rules.clear()
+        self.loaded_rules.clear()
 
         # restore patched
-        self.restore()
+        self.monkeypatch.undo()
+        async_context.reset(ctx)
 
     def process_events(self):
         for s in SyncScheduler.ALL:

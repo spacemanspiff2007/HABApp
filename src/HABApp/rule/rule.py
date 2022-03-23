@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import re
-import sys
 import warnings
 from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List
 
@@ -10,14 +9,15 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
+from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, TYPE_EVENT_BUS_LISTENER, ContextMixin, uses_post_event, \
     EventFilterBase, uses_item_registry, ContextBoundEventBusListener
+from HABApp.core.internals import wrap_func
 from HABApp.core.items import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, BaseValueItem
-from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
-from HABApp.core.internals import wrap_func
 from .interfaces import async_subprocess_exec
+from .rule_hook import get_rule_hook as _get_rule_hook
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -41,39 +41,17 @@ class Rule(ContextMixin):
     def __init__(self):
         super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
 
-        # get the variables from the caller
-        depth = 1
-        while True:
-            try:
-                __vars = sys._getframe(depth).f_globals
-            except ValueError:
-                raise RuntimeError('Rule files are not meant to be executed directly! '
-                                   'Put the file in the HABApp "rule" folder and HABApp will load it automatically.')
+        hook = _get_rule_hook()
+        hook.register_rule(self)
 
-            depth += 1
-            if '__HABAPP__RUNTIME__' in __vars:
-                __runtime__ = __vars['__HABAPP__RUNTIME__']
-                __rule_file__ = __vars['__HABAPP__RULE_FILE__']
-                break
-
-        # variable vor unittests
-        test = __vars.get('__UNITTEST__', False)
-
-        # this is a list which contains all rules of this file
-        __vars['__HABAPP__RULES'].append(self)
-
-        assert isinstance(__runtime__, HABApp.runtime.Runtime)
-        self.__runtime: HABApp.runtime.Runtime = __runtime__
-
-        if not test:
-            assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
-        self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
+        self.__runtime: HABApp.runtime.Runtime = hook.runtime
+        assert isinstance(self.__runtime, HABApp.runtime.Runtime)
 
         # scheduler
         self.run: _HABAppSchedulerView = _HABAppSchedulerView(self._habapp_ctx)
 
         # suggest a rule name
-        self.rule_name: str = self.__rule_file.suggest_rule_name(self)
+        self.rule_name: str = hook.suggest_rule_name(self)
 
         # interfaces
         self.async_http = interfaces.http
@@ -124,7 +102,7 @@ class Rule(ContextMixin):
         if event_filter is None:
             event_filter = HABApp.core.events.NoEventFilter()
         if not isinstance(event_filter, EventFilterBase):
-            raise ValueError(f'Argument event_filter must be an event filter (is {event_filter})')
+            raise ValueError(f'Argument event_filter must be an instance of event filter (is {event_filter})')
 
         listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
         return self._habapp_ctx.add_event_listener(listener)

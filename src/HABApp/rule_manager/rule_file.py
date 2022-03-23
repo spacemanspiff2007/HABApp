@@ -5,10 +5,10 @@ import typing
 from pathlib import Path
 
 import HABApp
+from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.core.internals import get_current_context
 
 log = logging.getLogger('HABApp.Rules')
-
 
 
 class RuleFile:
@@ -25,16 +25,13 @@ class RuleFile:
 
         self.class_ctr: typing.Dict[str, int] = collections.defaultdict(lambda: 1)
 
-    def suggest_rule_name(self, obj) -> str:
+    def suggest_rule_name(self, obj: 'HABApp.Rule') -> str:
 
         # if there is already a name set we make no suggestion
         if getattr(obj, 'rule_name', '') != '':
             return obj.rule_name.replace('ü', 'ue').replace('ö', 'oe').replace('ä', 'ae')
 
-        # create unique name
-        # <class '__main__.MyRule'>
-        parts = str(type(obj)).split('.')
-        name = parts[-1][:-2]
+        name = obj.__class__.__name__
         found = self.class_ctr[name]
         self.class_ctr[name] += 1
 
@@ -62,13 +59,12 @@ class RuleFile:
         return [line.replace('<module>', self.path.name) for line in tb]
 
     def create_rules(self, created_rules: list):
+        init_globals = HABAppRuleHook.in_dict(
+            {}, created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
+
         # It seems like python 3.8 doesn't allow path like objects any more:
         # https://github.com/spacemanspiff2007/HABApp/issues/111
-        runpy.run_path(str(self.path), run_name=str(self.path), init_globals={
-            '__HABAPP__RUNTIME__': self.rule_manager.runtime,
-            '__HABAPP__RULE_FILE__': self,
-            '__HABAPP__RULES': created_rules,
-        })
+        runpy.run_path(str(self.path), run_name=str(self.path), init_globals=init_globals)
 
     def load(self) -> bool:
 

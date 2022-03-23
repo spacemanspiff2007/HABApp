@@ -6,6 +6,7 @@ from HABApp.core.internals.context import ContextMixin, ContextBoundObj, TYPE_CO
 
 if TYPE_CHECKING:
     import HABApp
+    import types
 
 
 def get_current_context(obj: Optional[ContextMixin] = None) -> 'HABApp.rule_ctx.HABAppRuleContext':
@@ -16,7 +17,7 @@ def get_current_context(obj: Optional[ContextMixin] = None) -> 'HABApp.rule_ctx.
     while True:
         depth += 1
         try:
-            frm = sys._getframe(depth)
+            frm = sys._getframe(depth)  # type: types.FrameType
         except ValueError:
             raise ContextNotFoundError() from None
 
