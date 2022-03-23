@@ -69,6 +69,9 @@ Example:
 .. exec_code::
 
     # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().set_up()
+
     import HABApp
     from HABApp.openhab.items import ContactItem, SwitchItem
     HABApp.core.Items.add_item(ContactItem('MyContact', initial_value='OPEN'))

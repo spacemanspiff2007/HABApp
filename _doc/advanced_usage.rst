@@ -194,6 +194,11 @@ Add an openHAB mock item to the item registry
 .. exec_code::
    :hide_output:
 
+   # ------------ hide: start ------------
+   from rule_runner import SimpleRuleRunner
+   SimpleRuleRunner().set_up()
+   # ------------ hide: stop -------------
+
    import HABApp
    from HABApp.openhab.items import SwitchItem
 
@@ -205,7 +210,10 @@ Remove the mock item from the registry
 .. exec_code::
    :hide_output:
 
-    # ------------ hide: start ------------
+   # ------------ hide: start ------------
+   from rule_runner import SimpleRuleRunner
+   SimpleRuleRunner().set_up()
+
    import HABApp
    from HABApp.openhab.items import SwitchItem
    HABApp.core.Items.add_item(SwitchItem('my_switch', 'ON'))
@@ -220,6 +228,11 @@ any internal item.
 
 .. exec_code::
    :hide_output:
+
+   # ------------ hide: start ------------
+   from rule_runner import SimpleRuleRunner
+   SimpleRuleRunner().set_up()
+   # ------------ hide: stop -------------
 
    import HABApp
    from HABApp.openhab.items import SwitchItem

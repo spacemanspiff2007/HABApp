@@ -14,10 +14,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import re
 import sys
-from sphinx.util import logging
-
 
 # required for autodoc
 sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
@@ -208,42 +205,3 @@ exec_code_folders = ['../src', '../tests']
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
-
-
-# -- Extension configuration -------------------------------------------------
-
-def setup(app):
-    app.connect('autodoc-process-docstring', autodoc_process_docstring)
-    app.connect('build-finished', check_used)
-
-
-name_replacements = {
-    'self.oh': re.compile(r'HABApp\.openhab\.interface\.(\w+\()'),
-    'self.mqtt': re.compile(r'HABApp\.mqtt\.interface\.(\w+\()')
-}
-replacement_not_used = set(name_replacements.keys())
-
-
-def autodoc_process_docstring(app, what, name, obj, options, lines):
-
-    for i, line in enumerate(lines):
-        if 'HABApp.' not in lines:
-            continue
-        for _val, _reg in name_replacements.items():
-            rep = _reg.sub(f'{_val}\\g<1>', line)
-            print('')
-            print(f'Old: {line}')
-            print(f'New: {rep}')
-            if rep != line:
-                replacement_not_used.discard(_val)
-                lines[i] = rep
-
-
-def check_used(app, exception):
-    if exception is not None:
-        return None
-
-    if not replacement_not_used:
-        return None
-    log = logging.getLogger('HABApp.reprocess')
-    log.warning(f'Replacements not used: {", ".join(replacement_not_used)}')

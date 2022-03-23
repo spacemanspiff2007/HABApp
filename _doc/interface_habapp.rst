@@ -43,6 +43,11 @@ And since it is just like a normal item triggering on changes etc. is possible, 
 .. exec_code::
     :hide_output:
 
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().set_up()
+    # ------------ hide: stop -------------
+
     from HABApp.core.items import AggregationItem
     my_agg = AggregationItem.get_create_item('MyAggregationItem')
 
@@ -72,13 +77,13 @@ It will automatically update and always reflect the latest changes of ``MyInputI
 
 BaseValueItem
 ======================================
-Base class for items with values. All items that have a value must inherit from :class:`~HABApp.core.base.BaseValueItem`
+Base class for items with values. All items that have a value must inherit from :class:`~HABApp.core.items.BaseValueItem`
 May not be instantiated directly.
 
-.. inheritance-diagram:: HABApp.core.base.BaseValueItem
+.. inheritance-diagram:: HABApp.core.items.BaseValueItem
    :parts: 1
 
-.. autoclass:: HABApp.core.base.BaseValueItem
+.. autoclass:: HABApp.core.items.BaseValueItem
    :members:
    :inherited-members:
    :member-order: groupwise

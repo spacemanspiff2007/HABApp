@@ -29,6 +29,11 @@ using an IDE!
     :caption: Example:
     :hide_output:
 
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().set_up()
+    # ------------ hide: stop ------------
+
     from HABApp.core.items import Item
     my_item = Item.get_create_item('MyItem', initial_value=5)   # This will create the item if it does not exist
     my_item = Item.get_item('MyItem')                           # This will raise an exception if the item is not found
@@ -44,6 +49,9 @@ It is possible to check the item value by comparing it
     :hide_output:
 
     # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().set_up()
+
     from HABApp.core.items import Item
     Item.get_create_item('MyItem', initial_value=5)
     # ------------ hide: stop -------------
@@ -80,10 +88,11 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
     :caption: Example
 
     # ------------ hide: start ------------
-    import time, HABApp
     from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
+
+    import time, HABApp
     HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
     # ------------ hide: stop -------------
     from HABApp import Rule
@@ -151,10 +160,11 @@ OrFilterGroup
     :caption: Example
 
     # ------------ hide: start ------------
-    import time, HABApp
     from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
+
+    import time, HABApp
     HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
     # ------------ hide: stop -------------
     from HABApp import Rule

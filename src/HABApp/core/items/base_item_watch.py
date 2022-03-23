@@ -26,12 +26,12 @@ class BaseWatch(AutoContextBoundObj):
         post_event(self.name, self.EVENT(self.name, self.fut.secs))
 
     async def __cancel_watch(self):
-        self._ctx_unlink()
         self.fut.cancel()
         log.debug(f'Canceled {self.__class__.__name__} ({self.fut.secs}s) for {self.name}')
 
     def cancel(self):
         """Cancel the item watch"""
+        self._ctx_unlink()
         create_task(self.__cancel_watch())
 
     def listen_event(self, callback: TYPE_EVENT_CALLBACK) -> 'HABApp.core.base.TYPE_EVENT_BUS_LISTENER':

@@ -58,10 +58,14 @@ Mqtt items have an additional publish method which make interaction with the mqt
     :hide_output:
 
     # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().set_up()
+
     import HABApp
     from unittest.mock import MagicMock
     HABApp.mqtt.items.mqtt_item.publish = MagicMock()
     # ------------ hide: stop -------------
+
 
     from HABApp.mqtt.items import MqttItem
     from HABApp.core.events import ValueChangeEvent
@@ -98,6 +102,9 @@ It is created on the topic that reports the state from the device.
     :hide_output:
 
     # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().set_up()
+
     import HABApp
     from unittest.mock import MagicMock
     HABApp.mqtt.items.mqtt_pair_item.publish = MagicMock()

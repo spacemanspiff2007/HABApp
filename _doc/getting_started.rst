@@ -94,6 +94,11 @@ An item is created and added to the item registry through the corresponding clas
 .. exec_code::
    :hide_output:
 
+   # ------------ hide: start ------------
+   from rule_runner import SimpleRuleRunner
+   SimpleRuleRunner().set_up()
+   # ------------ hide: stop -------------
+
    from HABApp.core.items import Item
 
    # This will create an item in the local (HABApp) item registry
@@ -161,12 +166,12 @@ It is possible to watch items for changes or updates.
 .. exec_code::
 
     # ------------ hide: start ------------
-    from HABApp.core.items import Item
-    Item.get_create_item('Item_Name', initial_value='Some value')
-
     from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
+
+    from HABApp.core.items import Item
+    Item.get_create_item('Item_Name', initial_value='Some value')
     # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item

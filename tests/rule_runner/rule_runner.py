@@ -1,8 +1,11 @@
 from pytest import MonkeyPatch
 
+import HABApp
 import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.habappschedulerview as ha_sched
 from HABApp.core.asyncio import async_context
+from HABApp.core.internals import setup_internals, ItemRegistry, EventBus
+from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.internals.wrapped_function import wrapped_sync
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
@@ -40,6 +43,8 @@ class SimpleRuleRunner:
         self.original_scheduler = None
 
         self.monkeypatch = MonkeyPatch()
+        self.restore = []
+        self.__is_setup = False
 
     def restore(self):
         for obj, name, original in self._patched_objs:
@@ -54,6 +59,15 @@ class SimpleRuleRunner:
             pass
 
     def set_up(self):
+        # ensure that we call setup only once!
+        assert isinstance(HABApp.core.Items, ConstProxyObj)
+        assert isinstance(HABApp.core.EventBus, ConstProxyObj)
+
+        ir = ItemRegistry()
+        eb = EventBus()
+        self.restore = setup_internals(ir, eb, final=False)
+        HABApp.core.EventBus = eb
+        HABApp.core.Items = ir
 
         # Patch the hook so we can instantiate the rules
         hook = HABAppRuleHook(self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None)
@@ -75,6 +89,11 @@ class SimpleRuleRunner:
         # restore patched
         self.monkeypatch.undo()
         async_context.reset(ctx)
+
+        delattr(HABApp.core, 'EventBus')
+        delattr(HABApp.core, 'Items')
+        for r in self.restore:
+            r.restore()
 
     def process_events(self):
         for s in SyncScheduler.ALL:
