@@ -86,4 +86,3 @@ Complete configuration
 
 .. autopydantic_model:: HABApp.config.models.directories.DirectoriesConfig
    :exclude-members: create_folders
-

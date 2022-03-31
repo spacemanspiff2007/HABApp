@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Dict, List
 from unittest.mock import Mock
 
-import pytest
-
 from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.connection_logic.plugin_load_items import LoadAllOpenhabItems
 

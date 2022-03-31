@@ -146,5 +146,3 @@ class MultiModeItem(Item):
             mode.cancel()
 
         super()._on_item_removed()
-
-

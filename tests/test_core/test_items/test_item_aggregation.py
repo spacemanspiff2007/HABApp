@@ -1,7 +1,5 @@
 import asyncio
 
-import pytest
-
 from HABApp.core.items import AggregationItem, Item
 
 

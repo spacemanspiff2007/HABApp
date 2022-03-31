@@ -1,7 +1,5 @@
 import asyncio
 
-import pytest
-
 from HABApp.openhab.connection_handler.http_connection_waiter import WaitBetweenConnects
 
 waited = -1

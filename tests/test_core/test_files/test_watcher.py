@@ -4,7 +4,6 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import AsyncMock
 
-import pytest
 from watchdog.events import FileSystemEvent
 
 import HABApp.core.files.watcher.file_watcher

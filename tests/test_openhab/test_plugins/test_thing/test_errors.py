@@ -1,7 +1,5 @@
 import time
 
-import pytest
-
 from HABApp.openhab.connection_logic.plugin_things.plugin_things import ManualThingConfig
 from tests.helpers import MockFile, TestEventBus
 
