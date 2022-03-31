@@ -12,7 +12,7 @@ If nothing is specified the file ``config.yml`` is searched in the subdirectory 
 If the config does not yet exist in the folder a blank configuration will be created
 
 
-Configuration contents
+Example configuration
 ------------------------------
 .. code-block:: yaml
 
@@ -76,13 +76,7 @@ Configuration contents
                                # Useful for testing rules from another machine.
 
 
-Complete configuration
-------------------------------
-.. py:currentmodule:: HABApp.config.models.habapp
 
-.. autopydantic_model:: HABApp.config.models.habapp.HABAppConfig
-
-.. py:currentmodule:: HABApp.config.models.directories
-
-.. autopydantic_model:: HABApp.config.models.directories.DirectoriesConfig
-   :exclude-members: create_folders
+Reference
+------------
+All possible configuration options are described in :ref:`the configuration reference <ref_configuration_reference>`.

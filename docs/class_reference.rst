@@ -93,3 +93,46 @@ DuskJob
    :members:
    :inherited-members:
    :member-order: groupwise
+
+
+
+.. _ref_configuration_reference:
+
+Configuration
+======================================
+
+.. autopydantic_model:: HABApp.config.models.habapp.HABAppConfig
+
+Directories
+""""""""""""""""""""""""""""""""""""""
+
+.. autopydantic_model:: HABApp.config.models.directories.DirectoriesConfig
+   :exclude-members: create_folders
+
+Location
+""""""""""""""""""""""""""""""""""""""
+
+.. autopydantic_model:: HABApp.config.models.location.LocationConfig
+
+MQTT
+""""""""""""""""""""""""""""""""""""""
+
+.. py:currentmodule:: HABApp.config.models.mqtt
+
+.. autopydantic_model:: MqttConfig
+
+.. autopydantic_model:: Connection
+.. autopydantic_model:: Subscribe
+.. autopydantic_model:: Publish
+.. autopydantic_model:: General
+
+Openhab
+""""""""""""""""""""""""""""""""""""""
+
+.. py:currentmodule:: HABApp.config.models.openhab
+
+.. autopydantic_model:: OpenhabConfig
+
+.. autopydantic_model:: Connection
+.. autopydantic_model:: Ping
+.. autopydantic_model:: General
