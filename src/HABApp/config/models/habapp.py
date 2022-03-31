@@ -7,6 +7,8 @@ from pydantic import Field
 
 
 class HABAppConfig(AppBaseModel):
+    """Structure that contains the complete configuration"""
+
     directories: DirectoriesConfig = Field(default_factory=DirectoriesConfig)
     location: LocationConfig = Field(default_factory=LocationConfig)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)

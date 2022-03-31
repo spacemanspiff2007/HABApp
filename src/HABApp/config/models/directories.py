@@ -12,6 +12,8 @@ log = logging.getLogger('HABApp.Config')
 
 
 class DirectoriesConfig(BaseModel):
+    """Configuration of directories that are used"""
+
     logging: Path = Field(get_log_folder(Path('log')), description='Folder where the logs will be written to')
     rules: Path = Field(Path('rules'), description='Folder from which the rule files will be loaded')
 

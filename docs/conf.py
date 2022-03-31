@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
 # -- Project information -----------------------------------------------------
 
 project = 'HABApp'
-copyright = '2021, spacemanspiff2007'
+copyright = '2022, spacemanspiff2007'
 author = 'spacemanspiff2007'
 
 # The short X.Y version
@@ -114,11 +114,8 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-    ],
-}
+html_css_files = ['theme_changes.css']
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #
@@ -200,12 +197,15 @@ epub_title = project
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
+add_module_names = False
+python_use_unqualified_type_names = True
+
 # -- Extension configuration -------------------------------------------------
 exec_code_working_dir = '../src'
 exec_code_folders = ['../src', '../tests']
 
 autodoc_member_order = 'bysource'
-autoclass_content = 'both'
+autoclass_content = 'class'
 
 
 # No config on member
