@@ -38,8 +38,7 @@ class ManualThingConfig(OnConnectPlugin):
 
     def setup(self):
         path = HABApp.CONFIG.directories.config
-        if not path.is_dir():
-            log.info('Config folder does not exist - textual thing config disabled!')
+        if path is None:
             return None
 
         class HABAppThingConfigFile(HABAppFile):

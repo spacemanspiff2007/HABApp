@@ -59,13 +59,11 @@ def test_sec_timedelta(parent_rule):
     w2.cancel()
 
 
-@pytest.mark.asyncio
 async def test_rem(parent_rule, u: UpdatedTime):
     for t in u.tasks:
         t.cancel()
 
 
-@pytest.mark.asyncio
 async def test_cancel_running(parent_rule, u: UpdatedTime):
     u.set(pd_now(UTC))
 
@@ -84,7 +82,6 @@ async def test_cancel_running(parent_rule, u: UpdatedTime):
     assert w2 not in u.tasks
 
 
-@pytest.mark.asyncio
 async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: TYPE_EVENT_BUS):
     m = MagicMock()
     u.set(pd_now(UTC))
@@ -114,7 +111,6 @@ async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: TYPE_E
     list.cancel()
 
 
-@pytest.mark.asyncio
 async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: TYPE_EVENT_BUS):
     m = MagicMock()
     c.set(pd_now(UTC))
@@ -144,7 +140,6 @@ async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: TYPE_E
     list.cancel()
 
 
-@pytest.mark.asyncio
 async def test_watcher_change_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
     name = 'test_save_restore'
 
@@ -164,7 +159,6 @@ async def test_watcher_change_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
     ir.pop_item(name)
 
 
-@pytest.mark.asyncio
 async def test_watcher_update_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
     name = 'test_save_restore'
 
@@ -184,7 +178,6 @@ async def test_watcher_update_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
     ir.pop_item(name)
 
 
-@pytest.mark.asyncio
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
                                       sync_worker, eb: TestEventBus, ir: TYPE_ITEM_REGISTRY):
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)

@@ -5,7 +5,7 @@ import pytest
 from HABApp.core.lib import PendingFuture
 
 
-@pytest.mark.asyncio
+@pytest.mark.uses_rule_runner
 async def test_pending_future():
     a = 0
 
@@ -31,7 +31,6 @@ async def test_pending_future():
     assert a == 1
 
 
-@pytest.mark.asyncio
 async def test_pending_future_cancel():
     exception = None
 

@@ -16,9 +16,6 @@ def test_installation_check():
             continue
         found.add(re_name.search(line).group(1))
 
-    # Only backwards compatibility
-    found.remove('typing-extensions')
-
     coded = set(HABApp.__check_dependency_packages__.get_dependencies())
 
     assert coded == found

@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.no_internals
 def test_doc_run():
     calls = []
 

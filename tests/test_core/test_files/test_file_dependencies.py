@@ -106,7 +106,6 @@ def cfg(monkeypatch):
 #     order.clear()
 
 
-@pytest.mark.asyncio
 async def test_reload_dep(cfg: CfgObj, caplog):
     cfg.properties['params/param1'] = FileProperties(depends_on=['params/param2'], reloads_on=['params/param2'])
     cfg.properties['params/param2'] = FileProperties()
@@ -134,7 +133,6 @@ async def test_reload_dep(cfg: CfgObj, caplog):
     cfg.operation.clear()
 
 
-@pytest.mark.asyncio
 async def test_missing_dependencies(cfg: CfgObj, caplog):
     cfg.properties['params/param1'] = FileProperties(depends_on=['params/param4', 'params/param5'])
     cfg.properties['params/param2'] = FileProperties(depends_on=['params/param4'])

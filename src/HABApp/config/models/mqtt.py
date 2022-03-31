@@ -2,7 +2,7 @@ import sys
 from typing import Tuple, Optional
 
 import pydantic
-from easyconfig import ConfigModel
+from easyconfig import BaseModel
 from pydantic import Field
 
 if sys.version_info < (3, 8):
@@ -14,7 +14,7 @@ else:
 QOS = Literal[0, 1, 2]
 
 
-class Connection(ConfigModel):
+class Connection(BaseModel):
     client_id: str = 'HABApp'
     host: str = ''
     port: int = 8883
@@ -25,7 +25,7 @@ class Connection(ConfigModel):
     tls_insecure: bool = False
 
 
-class Subscribe(ConfigModel):
+class Subscribe(BaseModel):
     qos: QOS = Field(default=0, description='Default QoS for subscribing')
     topics: Tuple[Tuple[str, Optional[QOS]], ...] = Field(default=('#', ))
 
@@ -41,16 +41,16 @@ class Subscribe(ConfigModel):
         return tuple(ret)
 
 
-class Publish(ConfigModel):
+class Publish(BaseModel):
     qos: QOS = Field(default=0, description='Default QoS when publishing values')
     retain: bool = Field(default=False, description='Default retain flag when publishing values')
 
 
-class General(ConfigModel):
+class General(BaseModel):
     listen_only: bool = Field(False, description='If True HABApp will not publish any value to the broker')
 
 
-class MqttConfig(ConfigModel):
+class MqttConfig(BaseModel):
     connection: Connection = Connection()
     subscribe: Subscribe = Subscribe()
     publish: Publish = Publish()

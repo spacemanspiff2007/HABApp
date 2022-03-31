@@ -1,10 +1,13 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 from HABApp import Rule
 from tests.helpers import TestEventBus
 from ..rule_runner import SimpleRuleRunner
 
 
+@pytest.mark.no_internals
 def test_unload_function():
 
     with SimpleRuleRunner():
@@ -15,6 +18,7 @@ def test_unload_function():
     assert m.called
 
 
+@pytest.mark.no_internals
 def test_unload_function_exception(eb: TestEventBus):
     eb.allow_errors = True
 

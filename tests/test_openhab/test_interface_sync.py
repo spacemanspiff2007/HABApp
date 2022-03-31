@@ -35,7 +35,6 @@ def test_all_imported(func: Callable):
     (remove_channel_link,   ('channel', 'item')),
     (create_channel_link,   ('channel', 'item', {})),
 ))
-@pytest.mark.asyncio
 async def test_item_has_name(func, args):
     async_context.set('Test')
 

@@ -66,7 +66,13 @@ def ir():
 
 
 @pytest.fixture(autouse=True, scope='function')
-def clean_objs(ir: ItemRegistry, eb: EventBus):
+def clean_objs(ir: ItemRegistry, eb: EventBus, request):
+    markers = request.node.own_markers
+    for marker in markers:
+        if marker.name == 'no_internals':
+            yield None
+            return None
+
     restore = setup_internals(ir, eb, final=False)
 
     yield

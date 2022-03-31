@@ -37,7 +37,7 @@ def get_logging_dict(path: Path, log_msgs: List[Tuple[int, str]]) -> Optional[di
         p = Path(handler_cfg['filename'])
         if not p.is_absolute():
             # Our log folder ist not yet converted to path -> it is not loaded
-            if not isinstance(CONFIG.directories.logging, Path):
+            if not CONFIG.directories.logging.is_absolute():
                 raise AbsolutePathExpected()
 
             # Use defined parent folder

@@ -28,7 +28,7 @@ def rule():
     runner.tear_down()
 
 
-@pytest.mark.asyncio
+@pytest.mark.no_internals
 async def test_run_func(rule):
     rule.execute_subprocess(
         rule.set_ret, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=True
@@ -40,7 +40,7 @@ async def test_run_func(rule):
     assert rule.ret.stderr == ''
 
 
-@pytest.mark.asyncio
+@pytest.mark.no_internals
 async def test_run_func_no_cap(rule):
     rule.execute_subprocess(
         rule.set_ret, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False
@@ -52,7 +52,7 @@ async def test_run_func_no_cap(rule):
     assert rule.ret.stderr is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.no_internals
 async def test_invalid_program(rule):
     rule.execute_subprocess(rule.set_ret, 'ProgramThatDoesNotExist', capture_output=True)
 

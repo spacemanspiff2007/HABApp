@@ -3,7 +3,6 @@ import pytest
 from HABApp.core.asyncio import async_context, AsyncContextError
 
 
-@pytest.mark.asyncio
 async def test_error_msg():
 
     def my_sync_func():

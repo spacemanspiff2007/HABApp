@@ -6,7 +6,6 @@ from HABApp.openhab.connection_logic.plugin_things.plugin_things import ManualTh
 from tests.helpers import MockFile, TestEventBus
 
 
-@pytest.mark.asyncio
 async def test_errors(caplog, eb: TestEventBus):
     eb.allow_errors = True
 

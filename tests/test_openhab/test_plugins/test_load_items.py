@@ -52,7 +52,6 @@ class MySession:
         RESPONSES.setdefault(obj.url, []).append(obj)
 
 
-@pytest.mark.asyncio
 async def test_disconnect(monkeypatch, caplog):
     disconnect_cb = Mock()
 

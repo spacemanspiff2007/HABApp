@@ -3,6 +3,7 @@ import logging.config
 from pathlib import Path
 from typing import List
 
+import eascheduler
 import pydantic
 
 import HABApp
@@ -21,25 +22,33 @@ def load_config(config_folder: Path):
     logging_cfg_path = config_folder / 'logging.yml'
     create_default_logfile(logging_cfg_path)
 
-    try:
-        load_habapp_cfg()
-        loaded_cfg = True
-    except Exception:
-        loaded_cfg = False
+    loaded_logging = False
+    loaded_config = False
 
     try:
         load_logging_cfg(logging_cfg_path)
         rotate_files()
+        loaded_logging = True
     except AbsolutePathExpected:
         # This error only occurs when the config was not loaded because of an exception.
         # Since we crash in load_cfg again we'll show that error because it's the root cause.
         pass
 
-    # If there was an error reload the config again so we hopefully can log the error message
-    if not loaded_cfg:
+    try:
+        load_habapp_cfg()
+        loaded_config = True
+    except Exception:
+        pass
+
+    if not loaded_logging:
+        load_logging_cfg(logging_cfg_path)
+        rotate_files()
+
+    # If there was an error reload the config again, so we hopefully can log the error message
+    if not loaded_config:
         load_habapp_cfg()
 
-    # Watch folders so we can reload the config on the fly
+    # Watch folders, so we can reload the config on the fly
     filter = HABApp.core.files.watcher.FileEndingFilter('.yml')
     watcher = HABApp.core.files.watcher.AggregatingAsyncEventHandler(
         config_folder, config_files_changed, filter, watch_subfolders=False
@@ -47,17 +56,17 @@ def load_config(config_folder: Path):
     HABApp.core.files.watcher.add_folder_watch(watcher)
 
 
-async def config_files_changed(self, paths: List[Path]):
+async def config_files_changed(paths: List[Path]):
     for path in paths:
         if path.name == 'config.yml':
             load_habapp_cfg()
         if path.name == 'logging.yml':
-            self.load_log()
+            load_logging_cfg(path)
 
 
 def load_habapp_cfg():
     try:
-        CONFIG.load_file()
+        CONFIG.load_config_file()
     except pydantic.ValidationError as e:
         for line in str(e).splitlines():
             log.error(line)
@@ -66,6 +75,12 @@ def load_habapp_cfg():
     # check if folders exist and print warnings, maybe because of missing permissions
     if not CONFIG.directories.rules.is_dir():
         log.warning(f'Folder for rules files does not exist: {CONFIG.directories.rules}')
+
+    CONFIG.directories.create_folders()
+
+    log.debug(f'Local Timezone: {eascheduler.const.local_tz}')
+    location = CONFIG.location
+    eascheduler.set_location(location.latitude, location.longitude, location.elevation)
 
     log.debug('Loaded HABApp config')
 

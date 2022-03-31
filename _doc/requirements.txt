@@ -1,6 +1,0 @@
-# Packages required to build the documentation
-sphinx
-pytest
-sphinx-autodoc-typehints
-sphinx_rtd_theme
-sphinx-exec-code

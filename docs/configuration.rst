@@ -34,12 +34,11 @@ Configuration contents
         ping:
             enabled: true        # If enabled the configured item will show how long it takes to send an update from HABApp
                                  # and get the updated value back in milliseconds
-            item: 'HABApp_Ping'  # Name of the Numberitem that will show the ping
+            item: 'HABApp_Ping'  # Name of the NumberItem that will show the ping
             interval: 10         # Seconds between two pings
 
         connection:
-            host: localhost
-            port: 8080
+            url: http://localhost:8080
             user: ''
             password: ''
 
@@ -65,8 +64,8 @@ Configuration contents
         subscribe:         # Changes to Subscribe get picked up without restarting HABApp
             qos: 0         # Default QoS for subscribing
             topics:
-            - '#'          # Subscribe to this topic
-            - 0            # QoS for previous topic, can be omitted
+            - '#'               # Subscribe to this topic, qos is default QoS
+            - ['my/topic', 1]   # Subscribe to this topic with explicit QoS
 
         publish:
             qos: 0          # Default QoS when publishing values
@@ -75,3 +74,16 @@ Configuration contents
         general:
             listen_only: False # If True  HABApp will not publish any value to the broker.
                                # Useful for testing rules from another machine.
+
+
+Complete configuration
+------------------------------
+.. py:currentmodule:: HABApp.config.models.habapp
+
+.. autopydantic_model:: HABApp.config.models.habapp.HABAppConfig
+
+.. py:currentmodule:: HABApp.config.models.directories
+
+.. autopydantic_model:: HABApp.config.models.directories.DirectoriesConfig
+   :exclude-members: create_folders
+

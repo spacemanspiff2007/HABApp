@@ -12,7 +12,6 @@ from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.files.watcher.base_watcher import FileEndingFilter
 
 
-@pytest.mark.asyncio
 async def test_file_events(monkeypatch, sync_worker):
 
     wait_time = 0.1

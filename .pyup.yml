@@ -10,7 +10,7 @@ pr_prefix: "PyUp"
 # default: empty
 # allowed: list
 requirements:
-  - _doc/requirements.txt:
+  - docs/requirements.txt:
       update: False
   - requirements.txt:
       update: True

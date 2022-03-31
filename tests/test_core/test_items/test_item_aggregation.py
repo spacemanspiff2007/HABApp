@@ -5,7 +5,6 @@ import pytest
 from HABApp.core.items import AggregationItem, Item
 
 
-@pytest.mark.asyncio
 async def test_aggregation_item():
     agg = AggregationItem.get_create_item('MyAggregation')
     src = Item.get_create_item('MySource')
@@ -51,7 +50,6 @@ async def test_aggregation_item():
     assert agg.value == (2, [2])
 
 
-@pytest.mark.asyncio
 async def test_aggregation_item_cleanup():
     agg = AggregationItem.get_create_item('MyTestAggregation')
     src = Item.get_create_item('MyTestSource')

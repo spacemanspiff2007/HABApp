@@ -9,6 +9,7 @@ from pathlib import Path
 # Global var if we want to run the benchmark
 DO_BENCH = False
 DO_DEBUG = False
+CONFIG_FILE = Path()
 
 
 def get_uptime() -> float:
@@ -72,6 +73,7 @@ def parse_args(passed_args=None) -> argparse.Namespace:
 
 
 def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
+    global CONFIG_FILE
 
     if arg_config_path is None:
         # Nothing is specified, we try to find the config automatically
@@ -108,6 +110,7 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
 
         config_file = config_folder / 'config.yml'
         if config_file.is_file():
+            CONFIG_FILE = config_file
             return config_folder
 
     # we have specified a folder, but the config does not exist so we will create it

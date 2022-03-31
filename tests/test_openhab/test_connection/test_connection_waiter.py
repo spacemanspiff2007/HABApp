@@ -12,7 +12,6 @@ async def sleep(time):
     waited = time
 
 
-@pytest.mark.asyncio
 async def test_aggregation_item(monkeypatch):
     monkeypatch.setattr(asyncio, "sleep", sleep)
 

@@ -20,6 +20,8 @@ def get_dependencies() -> List[str]:
         'ujson',
         'immutables',
         'pendulum',
+
+        'typing-extensions',
     ]
 
 
@@ -32,6 +34,7 @@ def check_dependency_packages():
     alias = {
         'aiohttp-sse-client': 'aiohttp_sse_client',
         'paho-mqtt': 'paho.mqtt',
+        'typing-extensions': 'typing_extensions',
     }
 
     for name in get_dependencies():

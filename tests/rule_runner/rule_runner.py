@@ -66,8 +66,10 @@ class SimpleRuleRunner:
         ir = ItemRegistry()
         eb = EventBus()
         self.restore = setup_internals(ir, eb, final=False)
-        HABApp.core.EventBus = eb
-        HABApp.core.Items = ir
+
+        # Overwrite
+        self.monkeypatch.setattr(HABApp.core, 'EventBus', eb)
+        self.monkeypatch.setattr(HABApp.core, 'Items', ir)
 
         # Patch the hook so we can instantiate the rules
         hook = HABAppRuleHook(self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None)
@@ -90,8 +92,6 @@ class SimpleRuleRunner:
         self.monkeypatch.undo()
         async_context.reset(ctx)
 
-        delattr(HABApp.core, 'EventBus')
-        delattr(HABApp.core, 'Items')
         for r in self.restore:
             r.restore()
 

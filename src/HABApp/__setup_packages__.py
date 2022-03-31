@@ -14,7 +14,7 @@ except ModuleNotFoundError:
 
 # -----------------------------------------------------------------------------
 # Check that all dependencies are installed
-# We do this here so we can print a nice error message. Otherwise the corresponding
+# We do this here, so we can print a nice error message. Otherwise the corresponding
 # module import will fail somewhere in the middle of the startup process
 # -----------------------------------------------------------------------------
 check_dependency_packages()

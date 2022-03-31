@@ -140,3 +140,11 @@ class MultiModeItem(Item):
 
         self.add_mode(priority, m)
         return m
+
+    def _on_item_removed(self):
+        for name, mode in self.all_modes():
+            mode.cancel()
+
+        super()._on_item_removed()
+
+
