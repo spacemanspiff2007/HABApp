@@ -26,10 +26,6 @@ class Runtime:
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
-        # Async Workers & shutdown callback
-        shutdown.register_func(
-            HABApp.core.internals.wrapped_function.wrapped_sync.stop_thread_pool, msg='Stopping thread pool')
-
     async def start(self, config_folder: Path):
         try:
             token = async_context.set('HABApp startup')
@@ -42,9 +38,6 @@ class Runtime:
 
             # Load config
             HABApp.config.load_config(config_folder)
-
-            # Todo: load this from config
-            HABApp.core.internals.wrapped_function.create_thread_pool(10)
 
             # replace proxy objects
             ir = HABApp.core.internals.ItemRegistry()

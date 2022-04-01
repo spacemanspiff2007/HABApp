@@ -6,7 +6,8 @@ import HABApp.rule.scheduler.habappschedulerview as ha_sched
 from HABApp.core.asyncio import async_context
 from HABApp.core.internals import setup_internals, ItemRegistry, EventBus
 from HABApp.core.internals.proxy import ConstProxyObj
-from HABApp.core.internals.wrapped_function import wrapped_sync
+from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
+from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
 
@@ -46,11 +47,6 @@ class SimpleRuleRunner:
         self.restore = []
         self.__is_setup = False
 
-    def restore(self):
-        for obj, name, original in self._patched_objs:
-            assert hasattr(obj, name)
-            setattr(obj, name, original)
-
     def submit(self, callback, *args, **kwargs):
         # submit never raises and exception, so we don't do it here, too
         try:
@@ -76,7 +72,8 @@ class SimpleRuleRunner:
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 
         # patch worker with a synchronous worker
-        self.monkeypatch.setattr(wrapped_sync, 'WORKERS', self)
+        self.monkeypatch.setattr(wrapped_thread, 'WORKERS', self)
+        self.monkeypatch.setattr(wrapper, 'SYNC_CLS', WrappedThreadFunction, raising=False)
 
         # patch scheduler, so we run synchronous
         self.monkeypatch.setattr(ha_sched, '_HABAppScheduler', SyncScheduler)

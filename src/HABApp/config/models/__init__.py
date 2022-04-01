@@ -1,1 +1,1 @@
-from .habapp import HABAppConfig
+from .application import ApplicationConfig

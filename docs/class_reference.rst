@@ -101,7 +101,7 @@ DuskJob
 Configuration
 ======================================
 
-.. autopydantic_model:: HABApp.config.models.habapp.HABAppConfig
+.. autopydantic_model:: HABApp.config.models.ApplicationConfig
 
 Directories
 """"""""""""""""""""""""""""""""""""""
@@ -136,3 +136,12 @@ Openhab
 .. autopydantic_model:: Connection
 .. autopydantic_model:: Ping
 .. autopydantic_model:: General
+
+HABApp
+""""""""""""""""""""""""""""""""""""""
+
+.. py:currentmodule:: HABApp.config.models.habapp
+
+.. autopydantic_model:: HABAppConfig
+
+.. autopydantic_model:: ThreadPoolConfig

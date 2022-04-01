@@ -15,6 +15,7 @@ from HABApp.core.wrapper import log_exception
 from HABApp.runtime import shutdown
 from .rule_file import RuleFile
 from ..core.internals import uses_item_registry
+from HABApp.core.internals.wrapped_function import run_function
 
 log = logging.getLogger('HABApp.Rules')
 
@@ -46,8 +47,7 @@ class RuleManager:
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
             self.files['bench'] = file = BenchFile(self)
-            ok = await HABApp.core.const.loop.run_in_executor(
-                HABApp.core.internals.wrapped_function.wrapped_sync.WORKERS, file.load)
+            ok = await run_function(file.load)
             if not ok:
                 log.error('Failed to load Benchmark!')
                 HABApp.runtime.shutdown.request_shutdown()
@@ -128,8 +128,7 @@ class RuleManager:
             with self.__files_lock:
                 rule = self.files.pop(path_str)
 
-            await HABApp.core.const.loop.run_in_executor(
-                HABApp.core.internals.wrapped_function.wrapped_sync.WORKERS, rule.unload)
+            await run_function(rule.unload)
         finally:
             if request_lock:
                 self.__load_lock.release()
@@ -153,8 +152,7 @@ class RuleManager:
             with self.__files_lock:
                 self.files[path_str] = file = RuleFile(self, name, path)
 
-            ok = await HABApp.core.const.loop.run_in_executor(
-                HABApp.core.internals.wrapped_function.wrapped_sync.WORKERS, file.load)
+            ok = await run_function(file.load)
             if not ok:
                 self.files.pop(path_str)
                 log.warning(f'Failed to load {path_str}!')

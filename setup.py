@@ -14,8 +14,7 @@ def load_version() -> str:
 
 
 def load_req() -> typing.List[str]:
-    req_file = Path('requirements_setup.txt')
-    with req_file.open() as f:
+    with open('requirements_setup.txt') as f:
         return f.readlines()
 
 
@@ -24,7 +23,7 @@ __version__ = load_version()
 print(f'Version: {__version__}')
 print('')
 
-# When we run tox tests we don't have these files available so we skip them
+# When we run tox tests we don't have these files available, so we skip them
 readme = Path(__file__).with_name('readme.md')
 long_description = ''
 if readme.is_file():

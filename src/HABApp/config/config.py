@@ -1,4 +1,4 @@
 from easyconfig import create_app_config
-from .models import HABAppConfig
+from .models import ApplicationConfig
 
-CONFIG: HABAppConfig = create_app_config(HABAppConfig())
+CONFIG: ApplicationConfig = create_app_config(ApplicationConfig())

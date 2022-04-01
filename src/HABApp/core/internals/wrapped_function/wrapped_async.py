@@ -31,6 +31,5 @@ class WrappedAsyncFunction(WrappedFunctionBase):
             await self.func(*args, **kwargs)
         except Exception as e:
             self.process_exception(e, *args, **kwargs)
-
-        async_context.reset(token)
-        return None
+        finally:
+            async_context.reset(token)
