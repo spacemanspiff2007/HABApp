@@ -11,7 +11,7 @@ eascheduler == 0.1.5
 easyconfig  == 0.2.2
 
 
-stackprinter    == 0.2.5
+stackprinter==0.2.6
 voluptuous      == 0.13.0
 
 typing-extensions   >= 4.1,   < 5
