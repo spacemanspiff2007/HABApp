@@ -2,11 +2,6 @@ import typing
 
 from .base_event import OpenhabEvent
 
-# smarthome/things/NAME/state -> 17
-# openhab/things/NAME/state   -> 15
-# todo: revert this once we go OH3 only
-NAME_START: int = 15
-
 
 class ThingStatusInfoEvent(OpenhabEvent):
     """
@@ -28,7 +23,7 @@ class ThingStatusInfoEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
-        return cls(name=topic[NAME_START:-7], status=payload['status'], detail=payload['statusDetail'])
+        return cls(name=topic[15:-7], status=payload['status'], detail=payload['statusDetail'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, status: {self.status}, detail: {self.detail}>'
@@ -60,7 +55,7 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/statuschanged
-        name = topic[NAME_START:-14]
+        name = topic[15:-14]
         new, old = payload
         return cls(
             name=name, status=new['status'], detail=new['statusDetail'],
@@ -90,7 +85,7 @@ class ThingConfigStatusInfoEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # 'smarthome/things/zwave:device:controller:my_node/config/status'
-        return cls(name=topic[NAME_START:-14], messages=payload['configStatusMessages'])
+        return cls(name=topic[15:-14], messages=payload['configStatusMessages'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, messages: {self.messages}>'
@@ -112,7 +107,7 @@ class ThingFirmwareStatusInfoEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # 'smarthome/things/zwave:device:controller:my_node/firmware/status'
-        return cls(name=topic[NAME_START:-16], status=payload['firmwareStatus'])
+        return cls(name=topic[15:-16], status=payload['firmwareStatus'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} status: {self.status}>'

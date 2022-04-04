@@ -37,7 +37,7 @@ CONNECT_WAIT: WaitBetweenConnects = WaitBetweenConnects()
 
 FUT_UUID: Optional[asyncio.Future] = None
 FUT_SSE: Optional[asyncio.Future] = None
-
+FUT_START_CONNECTION: Optional[asyncio.Future] = None
 
 ON_CONNECTED: typing.Callable = None
 ON_DISCONNECTED: typing.Callable = None
@@ -60,15 +60,10 @@ async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> O
     if IS_READ_ONLY or not IS_ONLINE:
         return None
 
-    # todo: remove this workaround once there is a fix in aiohttp
-    headers = None
-    if data is not None:
-        headers = {'Content-Type': 'text/plain; charset=utf-8'}
-
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
             METH_POST, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_VERIFY_SSL,
-            headers=headers, data=data, json=json, **kwargs
+            data=data, json=json, **kwargs
         )
     )
 
@@ -84,15 +79,10 @@ async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Op
     if IS_READ_ONLY or not IS_ONLINE:
         return None
 
-    # todo: remove this workaround once there is a fix in aiohttp
-    headers = None
-    if data is not None:
-        headers = {'Content-Type': 'text/plain; charset=utf-8'}
-
     mgr = _RequestContextManager(
         HTTP_SESSION._request(
             METH_PUT, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_VERIFY_SSL,
-            headers=headers, data=data, json=json, **kwargs
+            data=data, json=json, **kwargs
         )
     )
 
@@ -259,14 +249,12 @@ async def start_sse_event_listener():
         _load_json = load_json
         _see_handler = on_sse_event
 
-        event_prefix = 'openhab' if not IS_OH2 else 'smarthome'
-
         async with sse_client.EventSource(
-                url=f'/rest/events?topics='
-                    f'{event_prefix}/items/,'                   # Item updates
-                    f'{event_prefix}/channels/,'                # Channel update
-                    f'{event_prefix}/things/*/status,'          # Thing status updates
-                    f'{event_prefix}/things/*/statuschanged'    # Thing status changes
+                url='/rest/events?topics='
+                    'openhab/items/,'                   # Item updates
+                    'openhab/channels/,'                # Channel update
+                    'openhab/things/*/status,'          # Thing status updates
+                    'openhab/things/*/statuschanged'    # Thing status changes
                 ,
                 session=HTTP_SESSION,
                 ssl=None if HABApp.CONFIG.openhab.connection.verify_ssl else False
@@ -321,15 +309,11 @@ async def async_get_root() -> dict:
     return await resp.json(loads=load_json, encoding='utf-8')
 
 
-def patch_for_oh2(reverse=False):
-    global IS_OH2
-
-    IS_OH2 = True
-
-    # events are named different
-    HABApp.openhab.events.item_events.NAME_START = 16 if not reverse else 14
-    HABApp.openhab.events.thing_events.NAME_START = 17 if not reverse else 15
-    HABApp.openhab.events.channel_events.NAME_START = 19 if not reverse else 17
+async def async_get_system_info() -> dict:
+    resp = await get('/rest/systeminfo', log_404=False)
+    if resp.status == 404:
+        return {}
+    return await resp.json(loads=load_json, encoding='utf-8')
 
 
 async def try_uuid():
@@ -353,16 +337,10 @@ async def try_uuid():
         FUT_UUID = asyncio.create_task(try_uuid())
         return None
 
-    if IS_READ_ONLY:
-        log.info(f'Connected read only to OpenHAB instance {uuid}')
-    else:
-        log.info(f'Connected to OpenHAB instance {uuid}')
+    log.info(f'Connected {"read only " if IS_READ_ONLY else ""}to OpenHAB')
 
     info = root.get('runtimeInfo')
-    if info is None:
-        patch_for_oh2()
-    else:
-        log.info(f'OpenHAB version {info["version"]} ({info["buildString"]})')
+    log.info(f'OpenHAB version {info["version"]} ({info["buildString"]})')
 
     IS_ONLINE = True
 
