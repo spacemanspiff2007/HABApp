@@ -1,5 +1,5 @@
+from asyncio import create_task, Task
 from typing import Callable, Awaitable, Any, Final, Optional
-from asyncio import create_task, Task, CancelledError
 
 
 class SingleTask:

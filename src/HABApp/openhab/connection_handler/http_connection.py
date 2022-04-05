@@ -182,26 +182,28 @@ async def setup_connection():
 
     await shutdown_connection()
 
-    url: str = HABApp.CONFIG.openhab.connection.url
+    config = HABApp.CONFIG.openhab
+
+
+    url: str = config.connection.url
 
     # do not run without an url
     if url == '':
         log_error(log, 'No URL configured for openHAB!')
         return None
 
-    if not HABApp.CONFIG.openhab.connection.verify_ssl:
+    if not config.connection.verify_ssl:
         HTTP_VERIFY_SSL = False
         log.info('Verify ssl set to False!')
     else:
         HTTP_VERIFY_SSL = None
 
-    # todo: add possibility to configure line size with read_bufsize
     HTTP_SESSION = aiohttp.ClientSession(
         base_url=url,
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
-        auth=aiohttp.BasicAuth(HABApp.CONFIG.openhab.connection.user, HABApp.CONFIG.openhab.connection.password),
-        read_bufsize=2**19  # 512k buffer,
+        auth=aiohttp.BasicAuth(config.connection.user, config.connection.password),
+        read_bufsize=config.connection.buffer,
     )
 
     TASK_TRY_CONNECT.start()

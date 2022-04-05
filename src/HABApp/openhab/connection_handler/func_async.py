@@ -1,5 +1,4 @@
 import datetime
-import traceback
 import typing
 import warnings
 from typing import Any, Optional, Dict, List
@@ -9,9 +8,9 @@ from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
 from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
 from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
-from HABApp.openhab.errors import OpenhabDisconnectedError, OpenhabNotReadyYet, ThingNotEditableError, \
-    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError, ExpectedSuccessFromOpenhab
-from .http_connection import delete, get, post, put, log, async_get_root, async_get_uuid
+from HABApp.openhab.errors import ThingNotEditableError, \
+    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError
+from .http_connection import delete, get, post, put, async_get_root, async_get_uuid
 
 if typing.TYPE_CHECKING:
     async_get_root = async_get_root
