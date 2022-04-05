@@ -1,13 +1,13 @@
-from typing import Optional
-
-import HABApp
 import asyncio
 import logging
 import time
-from HABApp.core.wrapper import log_exception
-from ._plugin import PluginBase
-from HABApp.openhab.errors import OpenhabNotReadyYet, OpenhabDisconnectedError
+from typing import Optional
+
+import HABApp
 from HABApp.core.internals import uses_event_bus
+from HABApp.core.wrapper import log_exception
+from HABApp.openhab.errors import OpenhabDisconnectedError
+from ._plugin import PluginBase
 
 log = logging.getLogger('HABApp.openhab.ping')
 
@@ -100,7 +100,7 @@ class PingOpenhab(PluginBase):
 
                 await asyncio.sleep(HABApp.config.CONFIG.openhab.ping.interval)
 
-        except (OpenhabNotReadyYet, OpenhabDisconnectedError):
+        except OpenhabDisconnectedError:
             pass
 
 

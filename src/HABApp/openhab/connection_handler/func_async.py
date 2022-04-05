@@ -51,8 +51,8 @@ async def async_item_exists(item) -> bool:
     return ret.status == 200
 
 
-async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = None, all_metadata=False,
-                          disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
+async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = None,
+                          all_metadata=False) -> Optional[List[Dict[str, Any]]]:
     params = None
     if include_habapp_meta:
         params = {'metadata': 'HABApp'}
@@ -63,15 +63,8 @@ async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = N
     if all_metadata:
         params = {'metadata': '.+'}
 
-    try:
-        resp = await get('/rest/items', disconnect_on_error=disconnect_on_error, params=params)
-        return await resp.json(loads=load_json, encoding='utf-8')
-    except Exception as e:
-        # sometimes uuid already works but items not - so we ignore these errors here, too
-        if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet, ExpectedSuccessFromOpenhab)):
-            for line in traceback.format_exc().splitlines():
-                log.error(line)
-        return None
+    resp = await get('/rest/items', params=params)
+    return await resp.json(loads=load_json, encoding='utf-8')
 
 
 async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata=False) -> dict:
@@ -89,17 +82,9 @@ async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata
         return data
 
 
-async def async_get_things(disconnect_on_error=False) -> Optional[List[Dict[str, Any]]]:
-
-    try:
-        resp = await get('/rest/things', disconnect_on_error=disconnect_on_error)
-        return await resp.json(loads=load_json, encoding='utf-8')
-    except Exception as e:
-        # sometimes uuid and items already works but things not - so we ignore these errors here, too
-        if not isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet, ExpectedSuccessFromOpenhab)):
-            for line in traceback.format_exc().splitlines():
-                log.error(line)
-        return None
+async def async_get_things() -> Optional[List[Dict[str, Any]]]:
+    resp = await get('/rest/things')
+    return await resp.json(loads=load_json, encoding='utf-8')
 
 
 async def async_get_thing(uid: str) -> OpenhabThingDefinition:

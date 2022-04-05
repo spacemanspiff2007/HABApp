@@ -2,7 +2,7 @@ import asyncio
 import logging
 import traceback
 import typing
-from typing import Any, Optional
+from typing import Any, Optional, Final
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -13,9 +13,10 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.const.json import dump_json, load_json
-from HABApp.openhab.errors import OpenhabConnectionNotSetUpError, OpenhabNotReadyYet, \
-    OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
+from HABApp.core.logger import log_error
+from HABApp.openhab.errors import OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
 from .http_connection_waiter import WaitBetweenConnects
+from ...core.lib import SingleTask
 
 log = logging.getLogger('HABApp.openhab.connection')
 log_events = logging.getLogger('HABApp.EventBus.openhab')
@@ -23,9 +24,7 @@ log_events = logging.getLogger('HABApp.EventBus.openhab')
 
 IS_ONLINE: bool = False
 IS_READ_ONLY: bool = False
-IS_NOT_SET_UP: bool = True
 
-IS_OH2 = False
 
 # HTTP options
 HTTP_ALLOW_REDIRECTS: bool = True
@@ -34,28 +33,19 @@ HTTP_SESSION: aiohttp.ClientSession = None
 
 CONNECT_WAIT: WaitBetweenConnects = WaitBetweenConnects()
 
-
-FUT_UUID: Optional[asyncio.Future] = None
-FUT_SSE: Optional[asyncio.Future] = None
-FUT_START_CONNECTION: Optional[asyncio.Future] = None
-
 ON_CONNECTED: typing.Callable = None
 ON_DISCONNECTED: typing.Callable = None
 
 
-async def get(url: str, log_404=True, disconnect_on_error=False, **kwargs: Any) -> ClientResponse:
-    if IS_NOT_SET_UP:
-        raise OpenhabConnectionNotSetUpError()
+async def get(url: str, log_404=True, **kwargs: Any) -> ClientResponse:
 
     mgr = _RequestContextManager(
         HTTP_SESSION._request(METH_GET, url, allow_redirects=HTTP_ALLOW_REDIRECTS, ssl=HTTP_VERIFY_SSL, **kwargs)
     )
-    return await check_response(mgr, log_404=log_404, disconnect_on_error=disconnect_on_error)
+    return await check_response(mgr, log_404=log_404)
 
 
 async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Optional[ClientResponse]:
-    if IS_NOT_SET_UP:
-        raise OpenhabConnectionNotSetUpError()
 
     if IS_READ_ONLY or not IS_ONLINE:
         return None
@@ -73,8 +63,6 @@ async def post(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> O
 
 
 async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Optional[ClientResponse]:
-    if IS_NOT_SET_UP:
-        raise OpenhabConnectionNotSetUpError()
 
     if IS_READ_ONLY or not IS_ONLINE:
         return None
@@ -92,8 +80,6 @@ async def put(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Op
 
 
 async def delete(url: str, log_404=True, json=None, data=None, **kwargs: Any) -> Optional[ClientResponse]:
-    if IS_NOT_SET_UP:
-        raise OpenhabConnectionNotSetUpError()
 
     if IS_READ_ONLY or not IS_ONLINE:
         return None
@@ -109,7 +95,7 @@ async def delete(url: str, log_404=True, json=None, data=None, **kwargs: Any) ->
 
 
 def set_offline(log_msg=''):
-    global IS_ONLINE, FUT_UUID, FUT_SSE
+    global IS_ONLINE
 
     if not IS_ONLINE:
         return None
@@ -118,17 +104,12 @@ def set_offline(log_msg=''):
     log.warning(f'Disconnected! {log_msg}')
 
     # cancel SSE listener
-    if FUT_SSE is not None:
-        if not FUT_SSE.done():
-            FUT_SSE.cancel()
-        FUT_SSE = None
+    TASK_SSE_LISTENER.cancel()
+    TASK_TRY_CONNECT.cancel()
 
     ON_DISCONNECTED()
 
-    # Try reconnect
-    if not FUT_UUID.done():
-        FUT_UUID.cancel()
-    FUT_UUID = asyncio.run_coroutine_threadsafe(try_uuid(), HABApp.core.const.loop)
+    TASK_TRY_CONNECT.start()
 
 
 def is_disconnect_exception(e) -> bool:
@@ -157,11 +138,6 @@ async def check_response(future: aiohttp.client._RequestContextManager, sent_dat
 
     status = resp.status
 
-    # Server Errors if openHAB is not ready yet
-    if status >= 500:
-        set_offline(f'Status {status} for {resp.request_info.method} {resp.request_info.url}')
-        raise OpenhabNotReadyYet()
-
     # Sometimes openHAB issues 404 instead of 500 during startup
     if disconnect_on_error and status >= 400:
         set_offline(f'Expected success but got status {status} for '
@@ -187,15 +163,11 @@ async def check_response(future: aiohttp.client._RequestContextManager, sent_dat
     return resp
 
 
-async def stop_connection():
-    global FUT_UUID, FUT_SSE, HTTP_SESSION
-    if FUT_UUID is not None and not FUT_UUID.done():
-        FUT_UUID.cancel()
-        FUT_UUID = None
+async def shutdown_connection():
+    global HTTP_SESSION
 
-    if FUT_SSE is not None and not FUT_SSE.done():
-        FUT_SSE.cancel()
-        FUT_SSE = None
+    TASK_TRY_CONNECT.cancel()
+    TASK_SSE_LISTENER.cancel()
 
     await asyncio.sleep(0)
 
@@ -205,25 +177,17 @@ async def stop_connection():
         HTTP_SESSION = None
 
 
-async def start_connection():
-    global HTTP_SESSION, FUT_UUID, IS_NOT_SET_UP, HTTP_VERIFY_SSL
+async def setup_connection():
+    global HTTP_SESSION, FUT_UUID, HTTP_VERIFY_SSL
 
-    await stop_connection()
+    await shutdown_connection()
 
     url: str = HABApp.CONFIG.openhab.connection.url
 
     # do not run without an url
     if url == '':
-        IS_NOT_SET_UP = True
+        log_error(log, 'No URL configured for openHAB!')
         return None
-    IS_NOT_SET_UP = False
-
-    auth = None
-    if HABApp.CONFIG.openhab.connection.user or HABApp.CONFIG.openhab.connection.password:
-        auth = aiohttp.BasicAuth(
-            HABApp.CONFIG.openhab.connection.user,
-            HABApp.CONFIG.openhab.connection.password
-        )
 
     if not HABApp.CONFIG.openhab.connection.verify_ssl:
         HTTP_VERIFY_SSL = False
@@ -236,11 +200,11 @@ async def start_connection():
         base_url=url,
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
-        auth=auth,
+        auth=aiohttp.BasicAuth(HABApp.CONFIG.openhab.connection.user, HABApp.CONFIG.openhab.connection.password),
         read_bufsize=2**19  # 512k buffer,
     )
 
-    FUT_UUID = asyncio.create_task(try_uuid())
+    TASK_TRY_CONNECT.start()
 
 
 async def start_sse_event_listener():
@@ -251,11 +215,9 @@ async def start_sse_event_listener():
 
         async with sse_client.EventSource(
                 url='/rest/events?topics='
-                    'openhab/items/,'                   # Item updates
-                    'openhab/channels/,'                # Channel update
-                    'openhab/things/*/status,'          # Thing status updates
-                    'openhab/things/*/statuschanged'    # Thing status changes
-                ,
+                    'openhab/items/,'       # Item updates
+                    'openhab/channels/,'    # Channel update
+                    'openhab/things/',      # Thing updates
                 session=HTTP_SESSION,
                 ssl=None if HABApp.CONFIG.openhab.connection.verify_ssl else False
         ) as event_source:
@@ -297,8 +259,6 @@ async def start_sse_event_listener():
 
 async def async_get_uuid() -> str:
     resp = await get('/rest/uuid', log_404=False)
-    if resp.status >= 300:
-        raise OpenhabNotReadyYet()
     return await resp.text(encoding='utf-8')
 
 
@@ -316,41 +276,73 @@ async def async_get_system_info() -> dict:
     return await resp.json(loads=load_json, encoding='utf-8')
 
 
-async def try_uuid():
-    global FUT_UUID, FUT_SSE, IS_ONLINE
+async def try_connect():
+    global IS_ONLINE
 
-    # sleep before reconnect
-    await CONNECT_WAIT.wait()
+    while True:
+        try:
+            # sleep before reconnect
+            await CONNECT_WAIT.wait()
 
-    log.debug('Trying to connect to OpenHAB ...')
-    try:
-        uuid = await async_get_uuid()
-        root = await async_get_root()      # this will only work on OH3
-    except Exception as e:
-        if isinstance(e, (OpenhabDisconnectedError, OpenhabNotReadyYet, ExpectedSuccessFromOpenhab)):
-            log.info('... offline!')
-        else:
-            for line in traceback.format_exc().splitlines():
-                log.error(line)
+            log.debug('Trying to connect to OpenHAB ...')
+            root = await async_get_root()
 
-        # Keep trying to connect
-        FUT_UUID = asyncio.create_task(try_uuid())
-        return None
+            # It's possible that we get status 4XX during startup and then the response is empty
+            runtime_info = root.get('runtimeInfo')
+            if runtime_info is None:
+                log.info('... offline!')
+                continue
 
-    log.info(f'Connected {"read only " if IS_READ_ONLY else ""}to OpenHAB')
+            log.info(f'Connected {"read only " if IS_READ_ONLY else ""}to OpenHAB '
+                     f'version {runtime_info["version"]} ({runtime_info["buildString"]})')
 
-    info = root.get('runtimeInfo')
-    log.info(f'OpenHAB version {info["version"]} ({info["buildString"]})')
+            # todo: remove this 2023
+            # Show warning (convenience)
+            vers = tuple(map(int, runtime_info["version"].split('.')[:2]))
+            if vers < (3, 3):
+                log.warning('HABApp requires at least openHAB version 3.3!')
+
+            # wait for openhab startup to be complete
+            last_level = -100
+            while True:
+                system_info = await async_get_system_info()
+                start_lvl = system_info.get('systemInfo', {}).get('startLevel', -1)
+                if start_lvl >= 100:
+                    break
+
+                # initial msg
+                if last_level == -100:
+                    log.info('Waiting for openHAB startup to be complete')
+
+                # show current status
+                if last_level != start_lvl:
+                    log.debug(f'Startlevel: {start_lvl}')
+                last_level = start_lvl
+
+                await asyncio.sleep(1)
+
+            # Startup complete
+            if last_level != -100:
+                log.info('openHAB startup complete')
+            break
+        except Exception as e:
+            if isinstance(e, (OpenhabDisconnectedError, ExpectedSuccessFromOpenhab)):
+                log.info('... offline!')
+            else:
+                for line in traceback.format_exc().splitlines():
+                    log.error(line)
 
     IS_ONLINE = True
 
     # start sse processing
-    if FUT_SSE is not None:
-        FUT_SSE.cancel()
-    FUT_SSE = asyncio.create_task(start_sse_event_listener())
+    TASK_SSE_LISTENER.start()
 
     ON_CONNECTED()
     return None
+
+
+TASK_SSE_LISTENER: Final = SingleTask(start_sse_event_listener, 'SSE event listener')
+TASK_TRY_CONNECT: Final = SingleTask(try_connect, 'Try OH connect')
 
 
 def __load_cfg():
