@@ -4,4 +4,5 @@ except ImportError:
     _Final = str
 
 
-ITEMS: _Final = 'openHAB.Items'
+TOPIC_ITEMS: _Final = 'openHAB.Items'
+TOPIC_THINGS: _Final = 'openHAB.Things'

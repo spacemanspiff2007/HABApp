@@ -3,5 +3,5 @@ from .item_events import ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent
 from .channel_events import ChannelTriggeredEvent, ChannelDescriptionChangedEvent
 from .thing_events import ThingStatusInfoChangedEvent, ThingStatusInfoEvent, \
-    ThingConfigStatusInfoEvent, ThingFirmwareStatusInfoEvent
+    ThingConfigStatusInfoEvent, ThingFirmwareStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent
 from .event_filters import ItemStateEventFilter, ItemStateChangedEventFilter, ItemCommandEventFilter

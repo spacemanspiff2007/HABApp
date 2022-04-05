@@ -178,13 +178,11 @@ async def shutdown_connection():
 
 
 async def setup_connection():
-    global HTTP_SESSION, FUT_UUID, HTTP_VERIFY_SSL
+    global HTTP_SESSION, HTTP_VERIFY_SSL
 
     await shutdown_connection()
 
     config = HABApp.CONFIG.openhab
-
-
     url: str = config.connection.url
 
     # do not run without an url
@@ -219,9 +217,14 @@ async def start_sse_event_listener():
                 url='/rest/events?topics='
                     'openhab/items/,'       # Item updates
                     'openhab/channels/,'    # Channel update
-                    'openhab/things/',      # Thing updates
+
+                    # Thing events - don't listen to updated events
+                    'openhab/things/*/added,'
+                    'openhab/things/*/removed,'
+                    'openhab/things/*/status,'
+                    'openhab/things/*/statuschanged',
                 session=HTTP_SESSION,
-                ssl=None if HABApp.CONFIG.openhab.connection.verify_ssl else False
+                ssl=HTTP_VERIFY_SSL
         ) as event_source:
             async for event in event_source:
 

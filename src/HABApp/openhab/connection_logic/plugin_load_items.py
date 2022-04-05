@@ -2,11 +2,11 @@ import logging
 
 import HABApp
 from HABApp.core.wrapper import ignore_exception
+from HABApp.openhab.item_to_reg import add_to_registry, fresh_item_sync, remove_from_registry, \
+    remove_thing_from_registry, add_thing_to_registry
 from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
 from ..interface_async import async_get_items, async_get_things
-from HABApp.openhab.item_to_reg import add_to_registry, fresh_item_sync
-from HABApp.core.errors import ItemNotFoundException
 from ...core.internals import uses_item_registry
 
 log = logging.getLogger('HABApp.openhab.items')
@@ -39,7 +39,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         soll = {k['name'] for k in data}
         for k in ist - soll:
             if isinstance(Items.get_item(k), HABApp.openhab.items.OpenhabItem):
-                Items.pop_item(k)
+                remove_from_registry(k)
 
         log.info(f'Updated {found_items:d} Items')
 
@@ -50,24 +50,16 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
         Thing = HABApp.openhab.items.Thing
         for t_dict in data:
-            name = t_dict['UID']
-            try:
-                thing = Items.get_item(name)
-                if not isinstance(thing, Thing):
-                    log.warning(f'Item {name} has the wrong type ({type(thing)}), expected Thing')
-                    thing = Thing(name)
-            except ItemNotFoundException:
-                thing = Thing(name)
-
+            thing = Thing(t_dict['UID'])
             thing.status = t_dict['statusInfo']['status']
-            Items.add_item(thing)
+            add_thing_to_registry(thing)
 
         # remove things which were deleted
         ist = set(Items.get_item_names())
         soll = {k['UID'] for k in data}
         for k in ist - soll:
             if isinstance(Items.get_item(k), Thing):
-                Items.pop_item(k)
+                remove_thing_from_registry(k)
 
         log.info(f'Updated {len(data):d} Things')
         return None

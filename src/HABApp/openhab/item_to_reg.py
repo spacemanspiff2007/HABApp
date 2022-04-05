@@ -68,3 +68,29 @@ def get_members(group_name: str) -> Tuple['HABApp.openhab.items.OpenhabItem', ..
         item = Items.get_item(name)  # type: HABApp.openhab.items.OpenhabItem
         ret.append(item)
     return tuple(sorted(ret, key=lambda x: x.name))
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Thing handling
+# ----------------------------------------------------------------------------------------------------------------------
+def add_thing_to_registry(thing: 'HABApp.openhab.items.Thing'):
+    name = thing.name
+    if not Items.item_exists(name):
+        Items.add_item(thing)
+        return None
+
+    existing = Items.get_item(name)   # type: HABApp.openhab.items.Thing
+    if isinstance(existing, HABApp.openhab.items.Thing):
+        existing.status = thing.status
+        return None
+
+    # Replace existing item with the updated definition
+    log_warning(log, f'Item type changed from {existing.__class__} to {thing.__class__}')
+    Items.pop_item(name)
+    Items.add_item(thing)
+
+
+def remove_thing_from_registry(name: str):
+    if not Items.item_exists(name):
+        return None
+    return Items.pop_item(name)

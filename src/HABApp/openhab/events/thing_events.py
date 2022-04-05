@@ -1,4 +1,4 @@
-import typing
+from typing import Optional, List, Dict, Any
 
 from .base_event import OpenhabEvent
 
@@ -22,7 +22,7 @@ class ThingStatusInfoEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
+        # openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
         return cls(name=topic[15:-7], status=payload['status'], detail=payload['statusDetail'])
 
     def __repr__(self):
@@ -54,7 +54,7 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/statuschanged
+        # openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/statuschanged
         name = topic[15:-14]
         new, old = payload
         return cls(
@@ -74,17 +74,17 @@ class ThingConfigStatusInfoEvent(OpenhabEvent):
     :ivar list ~.messages:
     """
     name: str
-    messages: typing.List[typing.Dict[str, str]]
+    messages: List[Dict[str, str]]
 
-    def __init__(self, name: str = '', messages: typing.List[typing.Dict[str, str]] = [{}]):
+    def __init__(self, name: str = '', messages: List[Dict[str, str]] = [{}]):
         super().__init__()
 
         self.name: str = name
-        self.messages: typing.List[typing.Dict[str, str]] = messages
+        self.messages: List[Dict[str, str]] = messages
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # 'smarthome/things/zwave:device:controller:my_node/config/status'
+        # 'openhab/things/zwave:device:controller:my_node/config/status'
         return cls(name=topic[15:-14], messages=payload['configStatusMessages'])
 
     def __repr__(self):
@@ -106,8 +106,60 @@ class ThingFirmwareStatusInfoEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # 'smarthome/things/zwave:device:controller:my_node/firmware/status'
+        # 'openhab/things/zwave:device:controller:my_node/firmware/status'
         return cls(name=topic[15:-16], status=payload['firmwareStatus'])
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} status: {self.status}>'
+        return f'<{self.__class__.__name__} name: {self.name} status: {self.status}>'
+
+
+class ThingRegistryBaseEvent(OpenhabEvent):
+    """
+    :ivar str ~.name:
+    :ivar str ~.type:
+    :ivar str ~.label:
+    :ivar List[Dict[str, Any]] ~.channels:
+    :ivar Dict[str, Any] ~.configuration:
+    :ivar Dict[str, str] ~.properties:
+    """
+    name: str
+    type: str
+    label: str
+    channels: List[Dict[str, Any]]
+    configuration: Dict[str, Any]
+    properties: Dict[str, str]
+
+    def __init__(self, name: str = '', thing_type: str = '', label: str = '',
+                 channels: Optional[List[Dict[str, Any]]] = None, configuration: Optional[Dict[str, Any]] = None,
+                 properties: Optional[Dict[str, str]] = None):
+        super().__init__()
+
+        # use name instead of uuid
+        self.name: str = name
+        self.type: str = thing_type
+
+        # optional entries
+        self.label: str = label
+        self.channels: List[Dict[str, Any]] = channels if channels is not None else []
+        self.configuration: Dict[str, Any] = configuration if configuration is not None else {}
+        self.properties: Dict[str, str] = properties if properties is not None else {}
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        # 'openhab/things/astro:sun:0a94363608/added'
+        return cls(
+            name=payload['UID'], thing_type=payload['thingTypeUID'], label=payload['label'],
+            channels=payload.get('channels'), configuration=payload.get('configuration'),
+            properties=payload.get('properties'),
+        )
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}>'
+
+
+class ThingAddedEvent(ThingRegistryBaseEvent):
+    pass
+
+
+class ThingRemovedEvent(ThingRegistryBaseEvent):
+    pass

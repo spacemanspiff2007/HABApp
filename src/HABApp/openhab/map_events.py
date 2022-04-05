@@ -5,7 +5,9 @@ from .events import OpenhabEvent, \
     ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent, \
     ChannelTriggeredEvent, ChannelDescriptionChangedEvent, \
+    ThingAddedEvent, ThingRemovedEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingConfigStatusInfoEvent, ThingFirmwareStatusInfoEvent
+
 
 EVENT_LIST = [
     # item events
@@ -16,6 +18,7 @@ EVENT_LIST = [
     ChannelTriggeredEvent, ChannelDescriptionChangedEvent,
 
     # thing events
+    ThingAddedEvent, ThingRemovedEvent,
     ThingStatusInfoEvent, ThingStatusInfoChangedEvent, ThingFirmwareStatusInfoEvent
 ]
 

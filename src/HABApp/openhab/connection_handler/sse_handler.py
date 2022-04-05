@@ -11,11 +11,12 @@ from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
-    ThingStatusInfoEvent
-from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry
+    ThingStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent
+from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry, remove_thing_from_registry, \
+    add_thing_to_registry
 from HABApp.openhab.map_events import get_event
 from HABApp.openhab.map_items import map_item
-from HABApp.openhab.definitions.topics import ITEMS as ITEMS_TOPIC
+from HABApp.openhab.definitions.topics import TOPIC_THINGS, TOPIC_ITEMS
 
 log = http_connection.log
 
@@ -57,16 +58,27 @@ def on_sse_event(event_dict: dict):
             post_event(event.name, event)
             return None
 
-        # Events that remove items from the item registry
-        if isinstance(event, ItemRemovedEvent):
-            remove_from_registry(event.name)
-            post_event(ITEMS_TOPIC, event)
-            return None
-
         # Events that add items to the item registry
         # These events require that we query openHAB because of the metadata so we have to do it in a task
         if isinstance(event, (ItemAddedEvent, ItemUpdatedEvent)):
             create_task(item_event(event))
+            return None
+
+        # Events that remove items from the item registry
+        if isinstance(event, ItemRemovedEvent):
+            remove_from_registry(event.name)
+            post_event(TOPIC_ITEMS, event)
+            return None
+
+        # Events that add things to the item registry
+        if isinstance(event, ThingAddedEvent):
+            create_task(thing_event(event))
+            return None
+
+        # Events that remove things to the item registry
+        if isinstance(event, ThingRemovedEvent):
+            remove_thing_from_registry(event.name)
+            post_event(TOPIC_THINGS, event)
             return None
 
         # Unknown Event -> just forward it to the event bus
@@ -88,5 +100,20 @@ async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
 
     add_to_registry(new_item)
     # Send Event to Event Bus
-    post_event(ITEMS_TOPIC, event)
+    post_event(TOPIC_ITEMS, event)
+    return None
+
+
+async def thing_event(event: ThingAddedEvent):
+    name = event.name
+
+    # Since metadata is not part of the event we have to request it
+    cfg = await HABApp.openhab.interface_async.async_get_thing(name)
+
+    thing = HABApp.openhab.items.Thing(cfg.UID)
+    thing.status = cfg.statusInfo['status']
+
+    add_thing_to_registry(thing)
+    # Send Event to Event Bus
+    post_event(TOPIC_THINGS, event)
     return None
