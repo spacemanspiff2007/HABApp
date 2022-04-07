@@ -43,8 +43,6 @@ def main() -> typing.Union[int, str]:
 
         HABApp.core.const.loop.create_task(app.start(cfg_folder))
         HABApp.core.const.loop.run_forever()
-    except asyncio.CancelledError:
-        pass
     except Exception as e:
         for line in traceback.format_exc().splitlines():
             log.error(line)

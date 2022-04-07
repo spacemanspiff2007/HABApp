@@ -16,13 +16,11 @@ class TestMaxImageSize(TestBaseRule):
 
     def test_img_size(self):
 
-        # start with 200k
-        _b1 = b'0x00' * 200 * 1024
-        _b2 = b'0xFF' * 200 * 1024
-
         with OpenhabTmpItem('Image') as item, ItemWaiter(OpenhabItem.get_item(item.name)) as item_waiter, \
                 EventWaiter(item.name, ItemStateChangedEventFilter()) as event_waiter:
-            k = 383
+
+            k = 95  # test data size in kib
+
             _b1 = b'\xFF\xD8\xFF' + b'\x00' * (1024 - 3) + b'\x00' * (k - 1) * 1024
             _b2 = b'\xFF\xD8\xFF' + b'\xFF' * (1024 - 3) + b'\x00' * (k - 1) * 1024
 

@@ -57,15 +57,12 @@ class ManualThingConfig(OnConnectPlugin):
         if self.watcher is None:
             return None
 
-        try:
-            await asyncio.sleep(0.3)
+        await asyncio.sleep(0.3)
 
-            self.cache_cfg = await async_get_things()
-            self.cache_ts = time.time()
+        self.cache_cfg = await async_get_things()
+        self.cache_ts = time.time()
 
-            await self.watcher.trigger_all()
-        except asyncio.CancelledError:
-            pass
+        await self.watcher.trigger_all()
 
     @HABApp.core.wrapper.ignore_exception
     async def clean_items(self):

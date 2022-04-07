@@ -20,5 +20,5 @@ import HABApp.core.items
 
 # isort: split
 
-Items = internals.proxy.ConstProxyObj('ItemRegistry')
-EventBus = internals.proxy.ConstProxyObj('EventBus')
+Items: 'HABApp.core.internals.ItemRegistry' = internals.proxy.ConstProxyObj('ItemRegistry')
+EventBus: 'HABApp.core.internals.EventBus' = internals.proxy.ConstProxyObj('EventBus')

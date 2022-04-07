@@ -245,11 +245,6 @@ async def start_sse_event_listener():
 
                 # process
                 _see_handler(e_json)
-
-    except asyncio.CancelledError:
-        # This exception gets raised if we cancel the coroutine
-        # since this is normal behaviour we ignore this exception
-        pass
     except Exception as e:
         disconnect = is_disconnect_exception(e)
         lvl = logging.WARNING if disconnect else logging.ERROR

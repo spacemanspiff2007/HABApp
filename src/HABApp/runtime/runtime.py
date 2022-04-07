@@ -75,8 +75,6 @@ class Runtime:
 
         except HABApp.config.InvalidConfigError:
             shutdown.request_shutdown()
-        except asyncio.CancelledError:
-            pass
         except Exception as e:
             process_exception('Runtime.start', e)
             await asyncio.sleep(1)  # Sleep so we can do a graceful shutdown

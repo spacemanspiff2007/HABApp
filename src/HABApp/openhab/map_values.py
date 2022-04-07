@@ -26,15 +26,8 @@ def map_openhab_values(openhab_type: str, openhab_value: str):
             return float(openhab_value)
 
     if openhab_type == "DateTime":
-        # Todo: remove this once we go >= OH3.1
-        # Previous OH versions used a datetime string like this:
-        # 2018-11-19T09:47:38.284+0100
-        # OH 3.1 uses
-        # 2021-04-10T22:00:43.043996+0200
-        if len(openhab_value) == 28:
-            openhab_value = openhab_value.replace('+', '000+')
         dt = datetime.datetime.strptime(openhab_value, '%Y-%m-%dT%H:%M:%S.%f%z')
-        # all datetimes from openHAB have a timezone set so we can't easily compare them
+        # all datetimes from openHAB have a timezone set, so we can't easily compare them
         # --> TypeError: can't compare offset-naive and offset-aware datetimes
         dt = dt.astimezone(tz=None)   # Changes datetime object so it uses system timezone
         dt = dt.replace(tzinfo=None)  # Removes timezone awareness

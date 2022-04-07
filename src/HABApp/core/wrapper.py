@@ -44,8 +44,6 @@ def log_exception(func):
         async def a(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
-            except asyncio.CancelledError:
-                pass
             except Exception as e:
                 process_exception(func, e, do_print=True)
                 # re raise exception, since this is something we didn't anticipate
@@ -72,8 +70,6 @@ def ignore_exception(func):
         async def a(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
-            except asyncio.CancelledError:
-                pass
             except Exception as e:
                 process_exception(func, e)
                 return None

@@ -58,6 +58,38 @@ class TestItemEvents(TestBaseRule):
 TestItemEvents()
 
 
+class TestItemEventRestore(TestBaseRule):
+    """Test that item listeners are properly restored when an item is removed and added again"""
+
+    def __init__(self):
+        super().__init__()
+
+        self.add_test('const change', self.test_restore, change=True)
+        self.add_test('const update', self.test_restore, change=False)
+
+    def test_restore(self, change=False):
+        item = HABApp.core.items.Item.get_create_item(get_random_name('HABApp'))
+        timeout = 0.2
+        (item.watch_change if change else item.watch_update)(timeout)
+        filter = EventFilter(ItemNoUpdateEvent) if not change else EventFilter(ItemNoChangeEvent)
+
+        HABApp.core.Items.pop_item(item.name)
+        time.sleep(0.1)
+
+        new_item = HABApp.core.items.Item.get_create_item(item.name)
+
+        # item has to be a new one
+        assert item is not new_item
+
+        # ensure that the event still gets created properly
+        new_item.post_value(5)
+        with EventWaiter(new_item.name, filter, timeout + timeout * 0.5) as w:
+            w.wait_for_event(seconds=timeout)
+
+
+TestItemEventRestore()
+
+
 class TestItemListener(TestBaseRule):
 
     def __init__(self):
