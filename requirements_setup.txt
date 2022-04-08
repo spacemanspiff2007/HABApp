@@ -8,7 +8,7 @@ paho-mqtt   >= 1.6,     < 1.7
 
 immutables  == 0.17
 eascheduler == 0.1.5
-easyconfig  == 0.2.2
+easyconfig==0.2.3
 
 
 stackprinter    == 0.2.5
