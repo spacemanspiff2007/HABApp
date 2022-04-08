@@ -4,7 +4,7 @@ from collections import deque
 from threading import Lock
 
 import HABApp
-from HABApp.core.events import ValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 from .bench_base import BenchBaseRule
 from .bench_times import BenchContainer, BenchTime
 from HABApp.mqtt.interface import publish
@@ -68,7 +68,9 @@ class MqttBenchRule(BenchBaseRule):
             self.values.append(random.randint(0, 99999999))
 
         listener = self.listen_event(
-            self.name, self.post_next_event_val if not do_async else self.a_post_next_event_val, ValueUpdateEvent
+            self.name,
+            self.post_next_event_val if not do_async else self.a_post_next_event_val,
+            ValueUpdateEventFilter()
         )
 
         self.bench_times = self.bench_times_container.create(test_name)

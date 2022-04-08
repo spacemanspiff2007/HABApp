@@ -33,7 +33,7 @@ def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
             print(line)
         logger.error(line)
 
-    # send Error to internal event bus so we can reprocess it and notify the user
+    # send Error to internal event bus, so we can reprocess it and notify the user
     post_event(TOPIC_ERRORS, HABAppException(func_name=func_name, exception=e, traceback='\n'.join(lines)))
 
 

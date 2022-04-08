@@ -1,10 +1,11 @@
 from pathlib import Path
 
 import HABApp
+from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.rule_manager import RuleFile
 from .bench_habapp import HABAppBenchRule
-from .bench_oh import OpenhabBenchRule
 from .bench_mqtt import MqttBenchRule
+from .bench_oh import OpenhabBenchRule
 
 
 class BenchFile(RuleFile):
@@ -12,10 +13,7 @@ class BenchFile(RuleFile):
         super().__init__(rule_manager, 'BenchmarkFile', path=Path('BenchmarkFile'))
 
     def create_rules(self, created_rules: list):
-        glob = globals()
-        glob['__HABAPP__RUNTIME__'] = self.rule_manager.runtime
-        glob['__HABAPP__RULE_FILE__'] = self
-        glob['__HABAPP__RULES'] = created_rules
+        HABAppRuleHook.in_dict(globals(), created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
 
         rule_ha = rule = HABAppBenchRule()
         if HABApp.CONFIG.mqtt.connection.host:
@@ -24,7 +22,3 @@ class BenchFile(RuleFile):
             rule = rule.link_rule(OpenhabBenchRule())
 
         rule_ha.run.at(5, rule_ha.do_bench_start)
-
-        glob.pop('__HABAPP__RUNTIME__')
-        glob.pop('__HABAPP__RULE_FILE__')
-        glob.pop('__HABAPP__RULES')

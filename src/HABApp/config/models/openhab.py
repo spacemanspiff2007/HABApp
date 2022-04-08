@@ -6,7 +6,7 @@ from pydantic import Field, AnyHttpUrl, constr, ByteSize, validator
 
 class Ping(BaseModel):
     enabled: bool = Field(True, description='If enabled the configured item will show how long it takes to send '
-                                            'an update from HABApp and get the updated value back from openHAB'
+                                            'an update from HABApp and get the updated value back from openHAB '
                                             'in milliseconds')
     item: str = Field('HABApp_Ping', description='Name of the Numberitem')
     interval: int = Field(10, description='Seconds between two pings')
@@ -32,7 +32,7 @@ class Connection(BaseModel):
     buffer: ByteSize = Field(
         '128kib', in_file=False, description=
         'Buffer for reading lines in the SSE event handler. This is the buffer'
-        'that gets allocated for every(!) request and SSE message that the client processes.'
+        'that gets allocated for every(!) request and SSE message that the client processes. '
         'Increase only if you get error messages or disconnects e.g. if you use large images.'
     )
 
