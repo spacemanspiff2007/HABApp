@@ -5,13 +5,13 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.events import ValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
 from HABApp.core.internals import uses_post_event, uses_get_item
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
-    ThingStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent
+    ThingStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent
 from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry, remove_thing_from_registry, \
     add_thing_to_registry
 from HABApp.openhab.map_events import get_event
@@ -34,12 +34,16 @@ def on_sse_event(event_dict: dict):
         # so the items have the correct state when we process the event in a rule
         try:
             if isinstance(event, ValueUpdateEvent):
-                __item = get_item(event.name)  # type: HABApp.core.items.base_item.BaseValueItem
+                __item = get_item(event.name)  # type: HABApp.core.items.base_valueitem.BaseValueItem
                 __item.set_value(event.value)
                 post_event(event.name, event)
                 return None
 
-            if isinstance(event, ThingStatusInfoEvent):
+            if isinstance(event, ValueChangeEvent):
+                post_event(event.name, event)
+                return None
+
+            if isinstance(event, (ThingStatusInfoEvent, ThingUpdatedEvent)):
                 __thing = get_item(event.name)   # type: HABApp.openhab.items.Thing
                 __thing.process_event(event)
                 post_event(event.name, event)
@@ -59,7 +63,7 @@ def on_sse_event(event_dict: dict):
             return None
 
         # Events that add items to the item registry
-        # These events require that we query openHAB because of the metadata so we have to do it in a task
+        # These events require that we query openHAB because of the metadata, so we have to do it in a task
         if isinstance(event, (ItemAddedEvent, ItemUpdatedEvent)):
             create_task(item_event(event))
             return None
@@ -75,7 +79,7 @@ def on_sse_event(event_dict: dict):
             create_task(thing_event(event))
             return None
 
-        # Events that remove things to the item registry
+        # Events that remove things from the item registry
         if isinstance(event, ThingRemovedEvent):
             remove_thing_from_registry(event.name)
             post_event(TOPIC_THINGS, event)
@@ -105,15 +109,9 @@ async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
 
 
 async def thing_event(event: ThingAddedEvent):
-    name = event.name
+    # Since the thing status is not part of the event we have to request ist
+    add_thing_to_registry(await HABApp.openhab.interface_async.async_get_thing(event.name))
 
-    # Since metadata is not part of the event we have to request it
-    cfg = await HABApp.openhab.interface_async.async_get_thing(name)
-
-    thing = HABApp.openhab.items.Thing(cfg.UID)
-    thing.status = cfg.statusInfo['status']
-
-    add_thing_to_registry(thing)
     # Send Event to Event Bus
     post_event(TOPIC_THINGS, event)
     return None

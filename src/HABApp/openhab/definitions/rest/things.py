@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class OpenhabThingChannelDefinition(BaseModel):
@@ -17,15 +17,24 @@ class OpenhabThingChannelDefinition(BaseModel):
     configuration: Optional[Dict[str, Any]]
 
 
+class OpenhabThingStatus(BaseModel):
+    status: str
+    detail: str = Field(..., alias='statusDetail')
+    description: Optional[str] = None
+
+
 class OpenhabThingDefinition(BaseModel):
-    label: Optional[str]
-    bridgeUID: Optional[str]
-    configuration: Dict[str, Any]
-    properties: Dict[str, Any]
-    UID: Optional[str]
-    thingTypeUID: Optional[str]
     channels: Optional[List[OpenhabThingChannelDefinition]]
     location: Optional[str]
-    statusInfo: Optional[Dict[str, str]]
     firmwareStatus: Optional[Dict[str, str]]
     editable: Optional[bool]
+
+    # These are mandatory fields
+    label: str
+    status: OpenhabThingStatus = Field(..., alias='statusInfo')
+    uid: str = Field(..., alias='UID')
+    thing_type: str = Field(..., alias='thingTypeUID')
+    bridge_uid: Optional[str] = Field(None, alias='bridgeUID')
+
+    configuration: Dict[str, Any]
+    properties: Dict[str, Any]

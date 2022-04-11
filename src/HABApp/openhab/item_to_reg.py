@@ -1,9 +1,13 @@
 import logging
-from typing import Dict, Set, Tuple
+from typing import Dict, Set, Tuple, TYPE_CHECKING
 
 import HABApp
+
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.logger import log_warning
+
+if TYPE_CHECKING:
+    import HABApp.openhab.definitions.rest
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -73,21 +77,31 @@ def get_members(group_name: str) -> Tuple['HABApp.openhab.items.OpenhabItem', ..
 # ----------------------------------------------------------------------------------------------------------------------
 # Thing handling
 # ----------------------------------------------------------------------------------------------------------------------
-def add_thing_to_registry(thing: 'HABApp.openhab.items.Thing'):
-    name = thing.name
-    if not Items.item_exists(name):
-        Items.add_item(thing)
-        return None
+def add_thing_to_registry(thing: 'HABApp.openhab.definitions.rest.OpenhabThingDefinition'):
+    name = thing.uid
+    does_exist = Items.item_exists(name)
 
-    existing = Items.get_item(name)   # type: HABApp.openhab.items.Thing
-    if isinstance(existing, HABApp.openhab.items.Thing):
-        existing.status = thing.status
+    # update existing
+    if does_exist:
+        existing = Items.get_item(name)  # type: HABApp.openhab.items.Thing
+        if isinstance(existing, HABApp.openhab.items.Thing):
+            existing.status = thing.status.status
+            existing.status_detail = thing.status.detail
+            return None
+
+    # create new Thing
+    new_thing = HABApp.openhab.items.Thing(name=name)
+    new_thing.status        = thing.status.status
+    new_thing.status_detail = thing.status.detail
+
+    if not does_exist:
+        Items.add_item(new_thing)
         return None
 
     # Replace existing item with the updated definition
     log_warning(log, f'Item type changed from {existing.__class__} to {thing.__class__}')
     Items.pop_item(name)
-    Items.add_item(thing)
+    Items.add_item(new_thing)
 
 
 def remove_thing_from_registry(name: str):

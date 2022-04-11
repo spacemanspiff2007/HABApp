@@ -45,18 +45,14 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
         # try to update things, too
         data = await async_get_things()
-        if data is None:
-            return None
 
         Thing = HABApp.openhab.items.Thing
-        for t_dict in data:
-            thing = Thing(t_dict['UID'])
-            thing.status = t_dict['statusInfo']['status']
-            add_thing_to_registry(thing)
+        for thing_cfg in data:
+            add_thing_to_registry(thing_cfg)
 
         # remove things which were deleted
         ist = set(Items.get_item_names())
-        soll = {k['UID'] for k in data}
+        soll = {k.uid for k in data}
         for k in ist - soll:
             if isinstance(Items.get_item(k), Thing):
                 remove_thing_from_registry(k)

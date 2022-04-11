@@ -3,6 +3,7 @@ import typing
 import warnings
 from typing import Any, Optional, Dict, List
 from urllib.parse import quote as quote_url
+from pydantic import parse_obj_as
 
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
@@ -81,9 +82,11 @@ async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata
         return data
 
 
-async def async_get_things() -> Optional[List[Dict[str, Any]]]:
+async def async_get_things() -> List[OpenhabThingDefinition]:
     resp = await get('/rest/things')
-    return await resp.json(loads=load_json, encoding='utf-8')
+    data = await resp.json(loads=load_json, encoding='utf-8')
+
+    return parse_obj_as(List[OpenhabThingDefinition], data)
 
 
 async def async_get_thing(uid: str) -> OpenhabThingDefinition:

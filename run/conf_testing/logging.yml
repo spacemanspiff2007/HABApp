@@ -44,7 +44,7 @@ handlers:
 
   BufferEventFile:
     class: logging.handlers.MemoryHandler
-    capacity: 0
+    capacity: 10
     formatter: HABApp_format
     target: EventFile
     level: DEBUG

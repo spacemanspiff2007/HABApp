@@ -15,6 +15,7 @@ def get_dependencies() -> List[str]:
         'paho-mqtt',
         'pydantic',
         'stackprinter',
+        'stack_data',
         'voluptuous',
         'watchdog',
         'ujson',

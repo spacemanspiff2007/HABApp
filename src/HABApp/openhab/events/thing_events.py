@@ -68,29 +68,6 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
                f'old_status: {self.old_status}, old_detail: {self.old_detail}>'
 
 
-class ThingConfigStatusInfoEvent(OpenhabEvent):
-    """
-    :ivar str ~.name:
-    :ivar list ~.messages:
-    """
-    name: str
-    messages: List[Dict[str, str]]
-
-    def __init__(self, name: str = '', messages: List[Dict[str, str]] = [{}]):
-        super().__init__()
-
-        self.name: str = name
-        self.messages: List[Dict[str, str]] = messages
-
-    @classmethod
-    def from_dict(cls, topic: str, payload: dict):
-        # 'openhab/things/zwave:device:controller:my_node/config/status'
-        return cls(name=topic[15:-14], messages=payload['configStatusMessages'])
-
-    def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, messages: {self.messages}>'
-
-
 class ThingFirmwareStatusInfoEvent(OpenhabEvent):
     """
     :ivar str ~.name:
@@ -163,3 +140,15 @@ class ThingAddedEvent(ThingRegistryBaseEvent):
 
 class ThingRemovedEvent(ThingRegistryBaseEvent):
     pass
+
+
+class ThingUpdatedEvent(ThingRegistryBaseEvent):
+    @classmethod
+    def from_dict(cls, topic: str, payload: List[Dict[str, Any]]):
+
+        payload = payload[0]
+        return cls(
+            name=payload['UID'], thing_type=payload['thingTypeUID'], label=payload['label'],
+            channels=payload.get('channels'), configuration=payload.get('configuration'),
+            properties=payload.get('properties'),
+        )

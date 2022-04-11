@@ -1,0 +1,45 @@
+directories:
+  logging: log
+  rules: rules
+  lib: lib
+  param: parameters
+  config: config
+
+location:
+  latitude: 52.5185537
+  longitude: 13.3758636
+  elevation: 43
+
+mqtt:
+  connection:
+    client_id: HABAppTesting
+    host: localhost
+    user: ''
+    password: ''
+    port: 1883
+    tls: false
+    tls_insecure: false
+    tls_ca_cert: ''  # Path to a CA certificate that will be treated as trusted
+  publish:
+    qos: 0
+    retain: false
+  subscribe:
+    qos: 0
+    topics:
+    - '#'
+  general:
+    listen_only: false
+
+openhab:
+  connection:
+    user: asdf
+    password: asdf
+    url: http://localhost:8080  # Connect to this url
+    verify_ssl: true            # Check certificates when using https
+  general:
+    listen_only: false
+    wait_for_openhab: true
+  ping:
+    enabled: false
+    interval: 30
+    item: Ping
