@@ -25,7 +25,7 @@ Usage
 The logging library is the standard python library and an extensive description can be found
 `in the official documentation <https://docs.python.org/3/library/logging.html>`_.
 
-.. literalinclude:: ../conf/rules/logging_rule.py
+.. literalinclude:: ../run/conf/rules/logging_rule.py
 
 
 To make the logging output work properly an output file and an output format has to be configured for the logger.

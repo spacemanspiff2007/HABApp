@@ -356,18 +356,6 @@ ChannelTriggeredEvent
 Thing events
 ======================================
 
-
-ThingStatusInfoChangedEvent
---------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoChangedEvent
-   :parts: 1
-
-.. autoclass:: HABApp.openhab.events.ThingStatusInfoChangedEvent
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-
 ThingStatusInfoEvent
 --------------------------------------
 .. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoEvent
@@ -379,12 +367,42 @@ ThingStatusInfoEvent
    :member-order: groupwise
 
 
-ThingConfigStatusInfoEvent
+ThingStatusInfoChangedEvent
 --------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.ThingConfigStatusInfoEvent
+.. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoChangedEvent
    :parts: 1
 
-.. autoclass:: HABApp.openhab.events.ThingConfigStatusInfoEvent
+.. autoclass:: HABApp.openhab.events.ThingStatusInfoChangedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+ThingAddedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingAddedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingAddedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+ThingUpdatedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingUpdatedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingUpdatedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+ThingRemovedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingRemovedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingRemovedEvent
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -856,14 +874,14 @@ Example openHAB rules
 
 Example 1
 ======================================
-.. literalinclude:: ../conf/rules/openhab_rule.py
+.. literalinclude:: ../run/conf/rules/openhab_rule.py
 
 
 Check status of things
 ======================================
 This rule prints the status of all ``Things`` and shows how to subscribe to events of the ``Thing`` status
 
-.. literalinclude:: ../conf/rules/openhab_things.py
+.. literalinclude:: ../run/conf/rules/openhab_things.py
 
 Check status if thing is constant
 ======================================

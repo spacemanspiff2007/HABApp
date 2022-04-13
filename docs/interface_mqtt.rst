@@ -165,4 +165,4 @@ and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueUpdateEvent`.
 
 Example MQTT rule
 --------------------------------------
-.. literalinclude:: ../conf/rules/mqtt_rule.py
+.. literalinclude:: ../run/conf/rules/mqtt_rule.py

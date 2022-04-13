@@ -4,12 +4,12 @@ Additional rule examples
 
 Using the scheduler
 --------------------
-.. literalinclude:: ../conf/rules/time_rule.py
+.. literalinclude:: ../run/conf/rules/time_rule.py
 
 
 Mirror openHAB events to a MQTT Broker
 ---------------------------------------
-.. literalinclude:: ../conf/rules/openhab_to_mqtt_rule.py
+.. literalinclude:: ../run/conf/rules/openhab_to_mqtt_rule.py
 
 .. _item_const_example:
 

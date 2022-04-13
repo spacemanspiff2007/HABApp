@@ -24,4 +24,4 @@ Functions
 Examples
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. literalinclude:: ../conf/rules/async_rule.py
+.. literalinclude:: ../run/conf/rules/async_rule.py
