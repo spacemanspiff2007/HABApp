@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, FrozenSet, Mapping, NamedTuple, Optional
+from typing import Any, FrozenSet, Mapping, NamedTuple, Optional, TypeVar, Type
 
 from immutables import Map
 
@@ -18,12 +18,19 @@ class OpenhabItem(BaseValueItem):
     """
 
     def __init__(self, name: str, initial_value=None,
-                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
         super().__init__(name, initial_value)
+        self.label: Optional[str] = label
         self.tags: FrozenSet[str] = tags
         self.groups: FrozenSet[str] = groups
         self.metadata: Mapping[str, MetaData] = metadata
+
+    @classmethod
+    def from_oh(cls, name: str, value=None,
+                label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                metadata: Mapping[str, MetaData] = Map()):
+        return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
 
     def oh_send_command(self, value: Any = MISSING):
         """Send a command to the openHAB item
@@ -52,3 +59,7 @@ class OpenhabItem(BaseValueItem):
         return get_persistence_data(
             self.name, persistence, start_time, end_time
         )
+
+
+HINT_OPENHAB_ITEM = TypeVar('HINT_OPENHAB_ITEM', bound=OpenhabItem)
+HINT_TYPE_OPENHAB_ITEM = Type[HINT_OPENHAB_ITEM]

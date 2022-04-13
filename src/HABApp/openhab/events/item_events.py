@@ -1,4 +1,4 @@
-from typing import Any, FrozenSet
+from typing import Any, FrozenSet, Optional
 
 import HABApp.core
 from .base_event import OpenhabEvent
@@ -86,20 +86,23 @@ class ItemAddedEvent(OpenhabEvent):
     """
     :ivar str ~.name:
     :ivar str ~.type:
+    :ivar Optional[str] ~.label:
     :ivar Tuple[str,...] ~.tags:
     :ivar Tuple[str,...] ~.group_names:
     """
     name: str
     type: str
+    label: Optional[str]
     tags: FrozenSet[str]
     groups: FrozenSet[str]
 
-    def __init__(self, name: str = '', type: str = '',
+    def __init__(self, name: str = '', type: str = '', label: Optional[str] = None,
                  tags: FrozenSet[str] = frozenset(), group_names: FrozenSet[str] = frozenset()):
         super().__init__()
 
         self.name: str = name
         self.type: str = type
+        self.label: Optional[str] = label
         self.tags: FrozenSet[str] = tags
         self.groups: FrozenSet[str] = group_names
 
@@ -108,7 +111,10 @@ class ItemAddedEvent(OpenhabEvent):
         # {'topic': 'smarthome/items/NAME/added'
         # 'payload': '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}'
         # 'type': 'ItemAddedEvent'}
-        return cls(payload['name'], payload['type'], frozenset(payload['tags']), frozenset(payload['groupNames']))
+        return cls(
+            payload['name'], payload['type'], label=payload.get('label'),
+            tags=frozenset(payload['tags']), group_names=frozenset(payload['groupNames'])
+        )
 
     def __repr__(self):
         tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""
@@ -125,15 +131,17 @@ class ItemUpdatedEvent(OpenhabEvent):
     """
     name: str
     type: str
+    label: Optional[str]
     tags: FrozenSet[str]
     groups: FrozenSet[str]
 
-    def __init__(self, name: str = '', type: str = '',
-                 tags: FrozenSet[str] = tuple(), group_names: FrozenSet[str] = tuple()):
+    def __init__(self, name: str = '', type: str = '', label: Optional[str] = None,
+                 tags: FrozenSet[str] = frozenset(), group_names: FrozenSet[str] = frozenset()):
         super().__init__()
 
         self.name: str = name
         self.type: str = type
+        self.label: Optional[str] = label
         self.tags: FrozenSet[str] = tags
         self.groups: FrozenSet[str] = group_names
 
@@ -144,7 +152,10 @@ class ItemUpdatedEvent(OpenhabEvent):
         #              {"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
         # 'type': 'ItemUpdatedEvent'
         new = payload[0]
-        return cls(topic[14:-8], new['type'], frozenset(new['tags']), frozenset(new['groupNames']))
+        return cls(
+            topic[14:-8], new['type'], label=new.get('label'),
+            tags=frozenset(new['tags']), group_names=frozenset(new['groupNames'])
+        )
 
     def __repr__(self):
         tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""

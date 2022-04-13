@@ -10,11 +10,11 @@ from tests.helpers import TestEventBus
 
 def test_exception(eb: TestEventBus):
     eb.allow_errors = True
-    assert map_item('test', 'Number', 'asdf', frozenset(), frozenset(), {}) is None
+    assert map_item('test', 'Number', 'asdf', 'my_label', frozenset(), frozenset(), {}) is None
 
 
 def test_metadata():
-    make_number = partial(map_item, 'test', 'Number', None, frozenset(), frozenset())
+    make_number = partial(map_item, 'test', 'Number', None, 'my_label', frozenset(), frozenset())
 
     item = make_number({'ns1': {'value': 'v1'}})
     assert isinstance(item.metadata, Map)
@@ -35,7 +35,7 @@ def test_metadata():
 
 
 def test_number_unit_of_measurement():
-    make_item = partial(map_item, tags=frozenset(), groups=frozenset(), metadata={})
+    make_item = partial(map_item, label='l', tags=frozenset(), groups=frozenset(), metadata={})
     assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1)
     assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2)
     assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3)
@@ -48,11 +48,11 @@ def test_number_unit_of_measurement():
 def test_datetime():
     # Todo: remove this test once we go >= OH3.1
     # Old format
-    assert map_item('test1', 'DateTime', '2018-11-19T09:47:38.284+0000', frozenset(), frozenset(), {}) == \
+    assert map_item('test1', 'DateTime', '2018-11-19T09:47:38.284+0000', '', frozenset(), frozenset(), {}) == \
            DatetimeItem('test', datetime(2018, 11, 19,  9, 47, 38, 284000)) or \
            DatetimeItem('test', datetime(2018, 11, 19, 10, 47, 38, 284000))
 
     # From >= OH3.1
-    assert map_item('test1', 'DateTime', '2021-04-10T21:00:43.043996+0000', frozenset(), frozenset(), {}) == \
+    assert map_item('test1', 'DateTime', '2021-04-10T21:00:43.043996+0000', '', frozenset(), frozenset(), {}) == \
            DatetimeItem('test', datetime(2021, 4, 10, 21, 0, 43, 43996)) or \
            DatetimeItem('test', datetime(2021, 4, 10, 23, 0, 43, 43996))

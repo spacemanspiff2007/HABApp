@@ -1,9 +1,19 @@
-from HABApp.openhab.items.base_item import OpenhabItem
+from typing import Optional, FrozenSet, Mapping
+
+from immutables import Map
+
+from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from HABApp.openhab.items.commands import UpDownCommand, PercentCommand
 from ..definitions import UpDownValue, PercentValue
 
 
 class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
+
+    def __init__(self, name: str, initial_value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
+                 groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
+        if initial_value is not None:
+            initial_value = float(initial_value)
+        super().__init__(name, initial_value, label, tags, groups, metadata)
 
     def set_value(self, new_value) -> bool:
 

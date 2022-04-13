@@ -14,13 +14,21 @@ PERCENT_FACTOR = 100
 class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
 
     def __init__(self, name: str, h=0.0, s=0.0, b=0.0,
-                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
-        super().__init__(name=name, initial_value=(h, s, b), tags=tags, groups=groups, metadata=metadata)
+        super().__init__(name=name, initial_value=(h, s, b), label=label, tags=tags, groups=groups, metadata=metadata)
 
         self.hue: float = min(max(0.0, h), HUE_FACTOR)
         self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)
         self.brightness: float = min(max(0.0, b), PERCENT_FACTOR)
+
+    @classmethod
+    def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
+                groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
+        if value is None:
+            return cls(name, label=label, tags=tags, groups=groups, metadata=metadata)
+        return cls(
+            name, *[float(k) for k in value.split(',')], label=label, tags=tags, groups=groups, metadata=metadata)
 
     def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
         """Set the color value

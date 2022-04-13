@@ -1,7 +1,8 @@
 .mypy_cache
 .idea
-/conf
-/conf_testing
+
+# HABApp configurations
+run/*/log/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

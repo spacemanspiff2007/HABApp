@@ -27,7 +27,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         found_items = len(data)
         for _dict in data:
             item_name = _dict['name']
-            new_item = map_item(item_name, _dict['type'], _dict['state'],
+            new_item = map_item(item_name, _dict['type'], _dict['state'], _dict.get('label'),
                                 frozenset(_dict['tags']), frozenset(_dict['groupNames']),
                                 _dict.get('metadata', {}))   # type: HABApp.openhab.items.OpenhabItem
             if new_item is None:

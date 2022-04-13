@@ -22,8 +22,8 @@ EVENT_LIST = [
     ThingStatusInfoEvent, ThingStatusInfoChangedEvent, ThingFirmwareStatusInfoEvent
 ]
 
-__event_lookup: Dict[str, Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
-__event_lookup['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openHAB is inconsistent here
+_events: Dict[str, Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
+_events['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openHAB is inconsistent here
 
 
 def get_event(_in_dict: dict) -> OpenhabEvent:
@@ -38,6 +38,6 @@ def get_event(_in_dict: dict) -> OpenhabEvent:
 
     # Find event from implemented events
     try:
-        return __event_lookup[event_type].from_dict(topic, payload)
+        return _events[event_type].from_dict(topic, payload)
     except KeyError:
         raise ValueError(f'Unknown Event: {event_type:s} for {_in_dict}')

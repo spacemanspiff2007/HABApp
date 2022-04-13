@@ -1,4 +1,4 @@
-from typing import FrozenSet, Mapping
+from typing import FrozenSet, Mapping, Optional
 
 from immutables import Map
 
@@ -8,12 +8,12 @@ from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 class CallItem(OpenhabItem):
     """CallItem which accepts and converts the data types from OpenHAB"""
 
-    def __init__(self, name: str, initial_value=None, tags: FrozenSet[str] = frozenset(),
-                 groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
-
-        if isinstance(initial_value, str):
-            initial_value = tuple(initial_value.split(','))
-        super().__init__(name, initial_value, tags, groups, metadata)
+    @classmethod
+    def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
+                groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
+        if value is not None:
+            value = tuple(value.split(','))
+        return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
 
     def set_value(self, new_value) -> bool:
         if isinstance(new_value, str):

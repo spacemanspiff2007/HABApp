@@ -1,6 +1,7 @@
 from HABApp import Rule
 from HABApp.openhab.events import ThingStatusInfoChangedEvent
 from HABApp.openhab.items import Thing
+from HABApp.core.events import EventFilter
 
 
 class CheckAllThings(Rule):
@@ -8,7 +9,7 @@ class CheckAllThings(Rule):
         super().__init__()
 
         for thing in self.get_items(Thing):
-            thing.listen_event(self.thing_status_changed, ThingStatusInfoChangedEvent)
+            thing.listen_event(self.thing_status_changed, EventFilter(ThingStatusInfoChangedEvent))
             print(f'{thing.name}: {thing.status}')
 
     def thing_status_changed(self, event: ThingStatusInfoChangedEvent):

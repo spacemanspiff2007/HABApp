@@ -25,12 +25,21 @@ class ImageItem(OpenhabItem):
     """ImageItem which accepts and converts the data types from OpenHAB"""
 
     def __init__(self, name: str, initial_value=None,
-                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
-        super().__init__(name, initial_value, tags, groups, metadata)
+        super().__init__(name, initial_value, label, tags, groups, metadata)
 
         # this item is unique because we also save the image type and thus have two states
         self.image_type: Optional[str] = None
+
+    @classmethod
+    def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
+                groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
+
+        c = cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
+        if value is not None:
+            c.set_value(RawValue(value))
+        return c
 
     def set_value(self, new_value) -> bool:
         assert isinstance(new_value, RawValue) or new_value is None, type(new_value)

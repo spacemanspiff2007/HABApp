@@ -5,7 +5,7 @@ import HABApp.__check_dependency_packages__
 
 
 def test_installation_check():
-    re_name = re.compile(r'^([A-Za-z-]{3,})')
+    re_name = re.compile(r'^([A-Za-z_-]{3,})')
     requirements = Path(__file__).parent.parent / 'requirements_setup.txt'
     assert requirements.is_file()
 

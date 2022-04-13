@@ -98,7 +98,7 @@ async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
     # Since metadata is not part of the event we have to request it
     cfg = await HABApp.openhab.interface_async.async_get_item(name, metadata='.+')
 
-    new_item = map_item(name, event.type, None, event.tags, event.groups, metadata=cfg.get('metadata'))
+    new_item = map_item(name, event.type, None, event.label, event.tags, event.groups, metadata=cfg.get('metadata'))
     if new_item is None:
         return None
 

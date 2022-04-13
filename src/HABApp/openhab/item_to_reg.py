@@ -1,6 +1,8 @@
 import logging
 from typing import Dict, Set, Tuple, TYPE_CHECKING
 
+from immutables import Map
+
 import HABApp
 
 from HABApp.core.internals import uses_item_registry
@@ -33,8 +35,10 @@ def add_to_registry(item: 'HABApp.openhab.items.OpenhabItem', set_value=False):
             MEMBERS.get(grp, set()).discard(name)
 
         # same type - it was only an item update (e.g. label)!
-        existing.tags = item.tags
-        existing.groups = item.groups
+        existing.label    = item.label
+        existing.tags     = item.tags
+        existing.groups   = item.groups
+        existing.metadata = item.metadata
         return None
 
     log_warning(log, f'Item type changed from {existing.__class__} to {item.__class__}')
@@ -93,6 +97,9 @@ def add_thing_to_registry(thing: 'HABApp.openhab.definitions.rest.OpenhabThingDe
     new_thing = HABApp.openhab.items.Thing(name=name)
     new_thing.status        = thing.status.status
     new_thing.status_detail = thing.status.detail
+    new_thing.label         = thing.label
+    new_thing.configuration = Map(thing.configuration)
+    new_thing.properties    = Map(thing.properties)
 
     if not does_exist:
         Items.add_item(new_thing)
