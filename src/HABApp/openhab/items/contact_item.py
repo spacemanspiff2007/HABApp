@@ -3,6 +3,16 @@ from ..definitions import OpenClosedValue
 
 
 class ContactItem(OpenhabItem):
+    """ContactItem
+
+    :ivar str name:
+    :ivar str value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     def set_value(self, new_value) -> bool:
 

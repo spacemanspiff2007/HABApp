@@ -5,9 +5,9 @@ from .base_event import OpenhabEvent
 
 class ThingStatusInfoEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.status:
-    :ivar str ~.detail:
+    :ivar str name:
+    :ivar str status:
+    :ivar str detail:
     """
     name: str
     status: str
@@ -31,11 +31,11 @@ class ThingStatusInfoEvent(OpenhabEvent):
 
 class ThingStatusInfoChangedEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.status:
-    :ivar str ~.detail:
-    :ivar str ~.old_status:
-    :ivar str ~.old_detail:
+    :ivar str name:
+    :ivar str status:
+    :ivar str detail:
+    :ivar str old_status:
+    :ivar str old_detail:
     """
     name: str
     status: str
@@ -70,8 +70,8 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
 
 class ThingFirmwareStatusInfoEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.status:
+    :ivar str name:
+    :ivar str status:
     """
     name: str
     status: str
@@ -92,12 +92,12 @@ class ThingFirmwareStatusInfoEvent(OpenhabEvent):
 
 class ThingRegistryBaseEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.type:
-    :ivar str ~.label:
-    :ivar List[Dict[str, Any]] ~.channels:
-    :ivar Dict[str, Any] ~.configuration:
-    :ivar Dict[str, str] ~.properties:
+    :ivar str name:
+    :ivar str type:
+    :ivar str label:
+    :ivar List[Dict[str, Any]] channels:
+    :ivar Dict[str, Any] configuration:
+    :ivar Dict[str, str] properties:
     """
     name: str
     type: str

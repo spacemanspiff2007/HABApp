@@ -220,6 +220,17 @@ ImageItem
    :member-order: groupwise
 
 
+CallItem
+======================================
+.. inheritance-diagram:: HABApp.openhab.items.CallItem
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.items.CallItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
 Thing
 ======================================
 .. inheritance-diagram:: HABApp.openhab.items.Thing
@@ -356,6 +367,40 @@ ChannelTriggeredEvent
 Thing events
 ======================================
 
+
+ThingAddedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingAddedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingAddedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingUpdatedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingUpdatedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingUpdatedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ThingRemovedEvent
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ThingRemovedEvent
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ThingRemovedEvent
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
 ThingStatusInfoEvent
 --------------------------------------
 .. inheritance-diagram:: HABApp.openhab.events.ThingStatusInfoEvent
@@ -373,36 +418,6 @@ ThingStatusInfoChangedEvent
    :parts: 1
 
 .. autoclass:: HABApp.openhab.events.ThingStatusInfoChangedEvent
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-ThingAddedEvent
---------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.ThingAddedEvent
-   :parts: 1
-
-.. autoclass:: HABApp.openhab.events.ThingAddedEvent
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-ThingUpdatedEvent
---------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.ThingUpdatedEvent
-   :parts: 1
-
-.. autoclass:: HABApp.openhab.events.ThingUpdatedEvent
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-ThingRemovedEvent
---------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.ThingRemovedEvent
-   :parts: 1
-
-.. autoclass:: HABApp.openhab.events.ThingRemovedEvent
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -440,6 +455,17 @@ ItemStateChangedEventFilter
    :parts: 1
 
 .. autoclass:: HABApp.openhab.events.ItemStateChangedEventFilter
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+ItemCommandEventFilter
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.ItemCommandEventFilter
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.ItemCommandEventFilter
    :members:
    :inherited-members:
    :member-order: groupwise

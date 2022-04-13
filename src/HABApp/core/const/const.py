@@ -1,5 +1,6 @@
 import time
 from enum import Enum
+from typing import Final
 
 
 class _MissingType(Enum):
@@ -9,6 +10,5 @@ class _MissingType(Enum):
         return '<Missing>'
 
 
-# todo: add type final if we go >= python 3.8
-MISSING = _MissingType.MISSING
+MISSING: Final = _MissingType.MISSING
 STARTUP = time.time()

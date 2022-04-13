@@ -8,8 +8,8 @@ class ComplexEventValue:
 
 class ValueUpdateEvent:
     """
-    :ivar str ~.name:
-    :ivar     ~.value:
+    :ivar str name:
+    :ivar     value:
     """
 
     name: str
@@ -25,9 +25,9 @@ class ValueUpdateEvent:
 
 class ValueChangeEvent:
     """
-    :ivar str ~.name:
-    :ivar     ~.value:
-    :ivar     ~.old_value:
+    :ivar str name:
+    :ivar     value:
+    :ivar     old_value:
     """
 
     name: str
@@ -45,8 +45,8 @@ class ValueChangeEvent:
 
 class ItemNoChangeEvent:
     """
-    :ivar str               ~.name:
-    :ivar Union[int, float] ~.seconds:
+    :ivar str               name:
+    :ivar Union[int, float] seconds:
     """
 
     name: str
@@ -62,8 +62,8 @@ class ItemNoChangeEvent:
 
 class ItemNoUpdateEvent:
     """
-    :ivar str               ~.name:
-    :ivar Union[int, float] ~.seconds:
+    :ivar str               name:
+    :ivar Union[int, float] seconds:
     """
     name: str
     seconds: Union[int, float]

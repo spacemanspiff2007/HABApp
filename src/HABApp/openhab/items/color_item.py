@@ -12,6 +12,19 @@ PERCENT_FACTOR = 100
 
 
 class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
+    """ColorItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar Tuple[float, float, float] value:
+    :ivar float hue:
+    :ivar float saturation:
+    :ivar float brightness:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     def __init__(self, name: str, h=0.0, s=0.0, b=0.0,
                  label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),

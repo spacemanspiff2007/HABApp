@@ -22,7 +22,17 @@ def _convert_bytes(data: bytes, img_type: Optional[str]) -> str:
 
 
 class ImageItem(OpenhabItem):
-    """ImageItem which accepts and converts the data types from OpenHAB"""
+    """ImageItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar bytes value:
+    :ivar Optional[str] image_type:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     def __init__(self, name: str, initial_value=None,
                  label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),

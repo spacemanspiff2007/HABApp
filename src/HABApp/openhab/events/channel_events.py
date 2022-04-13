@@ -3,9 +3,9 @@ from .base_event import OpenhabEvent
 
 class ChannelTriggeredEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.event:
-    :ivar str ~.channel:
+    :ivar str name:
+    :ivar str event:
+    :ivar str channel:
     """
     name: str
     event: str
@@ -28,9 +28,9 @@ class ChannelTriggeredEvent(OpenhabEvent):
 
 class ChannelDescriptionChangedEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.field:
-    :ivar str ~.value:
+    :ivar str name:
+    :ivar str field:
+    :ivar str value:
     """
     name: str
     field: str

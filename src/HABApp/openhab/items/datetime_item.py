@@ -7,7 +7,16 @@ from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 
 
 class DatetimeItem(OpenhabItem):
-    """DateTimeItem which accepts and converts the data types from OpenHAB"""
+    """DateTimeItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar datetime value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     @classmethod
     def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),

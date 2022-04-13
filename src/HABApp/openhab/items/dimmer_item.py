@@ -8,6 +8,16 @@ from ..definitions import OnOffValue, PercentValue
 
 
 class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
+    """DimmerItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar Union[int, float] value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     @classmethod
     def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),

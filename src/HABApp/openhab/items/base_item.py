@@ -15,6 +15,14 @@ class MetaData(NamedTuple):
 
 class OpenhabItem(BaseValueItem):
     """Base class for items which exists in OpenHAB.
+
+    :ivar str name:
+    :ivar Any value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
     """
 
     def __init__(self, name: str, initial_value=None,

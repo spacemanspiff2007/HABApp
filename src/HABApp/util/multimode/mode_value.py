@@ -8,15 +8,15 @@ from .mode_base import BaseMode
 class ValueMode(BaseMode):
     """ValueMode
 
-    :ivar datetime.datetime ~.last_update: Timestamp of the last update/enable of this value
-    :ivar typing.Optional[datetime.timedelta] ~.auto_disable_after: Automatically disable this mode after
+    :ivar datetime.datetime last_update: Timestamp of the last update/enable of this value
+    :ivar typing.Optional[datetime.timedelta] auto_disable_after: Automatically disable this mode after
                                                                     a given timedelta on the next recalculation
-    :vartype ~.auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]]
-    :ivar    ~.auto_disable_func: Function which can be used to disable this mode. Any function that accepts two
+    :vartype auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]]
+    :ivar    auto_disable_func: Function which can be used to disable this mode. Any function that accepts two
                                   Arguments can be used. First arg is value with lower priority,
                                   second argument is own value. Return ``True`` to disable this mode.
-    :vartype ~.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]]
-    :ivar    ~.calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts
+    :vartype calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]]
+    :ivar    calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts
                                 two Arguments can be used. First arg is value with lower priority,
                                 second argument is own value.
     """
