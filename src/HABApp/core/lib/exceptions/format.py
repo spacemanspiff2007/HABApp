@@ -8,7 +8,7 @@ from .format_frame import format_frame_info
 
 
 def append_short_traceback(tb: List[str], e: Union[Exception, Tuple[Any, Any, Any]]):
-    for line in _format_exception(*e) if isinstance(e, tuple) else _format_exception(e):
+    for line in _format_exception(*e) if isinstance(e, tuple) else _format_exception(type(e), e, e.__traceback__):
         for sub_lines in line.splitlines():
             tb.append(sub_lines.rstrip())
 
@@ -20,10 +20,13 @@ def format_exception(e: Union[Exception, Tuple[Any, Any, Any]]) -> List[str]:
     tb = []
 
     try:
+        all_frames = tuple(FrameInfo.stack_data(e[2] if isinstance(e, tuple) else e.__traceback__, DEFAULT_OPTIONS))
+        last_frame = len(all_frames) - 1
+
         added = True
-        for frame_info in FrameInfo.stack_data(e[2] if isinstance(e, tuple) else e.__traceback__, DEFAULT_OPTIONS):
+        for i, frame_info in enumerate(all_frames):
             if isinstance(frame_info, FrameInfo):
-                added = format_frame_info(tb, frame_info)
+                added = format_frame_info(tb, frame_info, is_last=i == last_frame)
             else:
                 # repeated frames in case of recursion
                 if added:

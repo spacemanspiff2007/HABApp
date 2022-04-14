@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 from typing import List
 
 from stack_data import FrameInfo, LINE_GAP
@@ -8,17 +7,17 @@ from .const import SEPARATOR_NEW_FRAME, PRE_INDENT
 from .format_frame_vars import format_frame_variables
 
 SUPPRESSED_PATHS = (
-    re.compile(f'[/\\\\]{Path(__file__).name}$'),   # this file
+    # This exception formatter
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]lib[/\\]exceptions[/\\]'),
 
-    # rule file loader
-    re.compile(r'[/\\]rule_file.py$'),
-    re.compile(r'[/\\]runpy.py$'),
+    # Rule file loader
+    re.compile(r'[/\\]HABApp[/\\]rule_manager[/\\]'),
 
     # Worker functions
-    re.compile(r'[/\\]wrappedfunction.py$'),
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]wrapped_function[/\\]'),
 
     # Don't print stack traces for used libraries/python functions except for HABApp
-    re.compile(r'[/\\](site-packages|lib|python\d\.\d+)[/\\](?!habapp)[^/\\]+[/\\]'),
+    re.compile(r'[/\\](?!core)[^/\\]+[/\\](site-packages|lib|python\d\.\d+)[/\\](?!HABApp)[^/\\]+[/\\]', re.IGNORECASE),
 )
 
 
@@ -29,10 +28,10 @@ def skip_file(name: str) -> bool:
     return False
 
 
-def format_frame_info(tb: List[str], frame_info: FrameInfo) -> bool:
+def format_frame_info(tb: List[str], frame_info: FrameInfo, is_last=False) -> bool:
     filename = frame_info.filename
 
-    if skip_file(filename):
+    if not is_last and skip_file(filename):
         return False
 
     # get indentation based on max lineno
