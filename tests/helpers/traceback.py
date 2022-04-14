@@ -5,7 +5,7 @@ from pathlib import Path
 def process_traceback(traceback: str) -> str:
 
     # object ids
-    traceback = re.sub(r' at 0x[0-9A-F]+', ' at 0x' + 'A' * 16, traceback)
+    traceback = re.sub(r' at 0x[0-9A-Fa-f]+', ' at 0x' + 'A' * 16, traceback)
 
     # File path
     for m in re.finditer(r'File\s+"([^"]+)"', traceback):
