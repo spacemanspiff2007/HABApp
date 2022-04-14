@@ -56,11 +56,12 @@ def test_func_wrapper(p_mock):
 
 
 @pytest.mark.skip(reason="Behavior still unclear")
-def test_exception_format(p_mock):
+def test_exception_format_included_files(p_mock):
     async def test():
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(0.01)) as session:
             async with session.get('http://localhost:12345'):
                 pass
+        await asyncio.sleep(0)
 
     with ExceptionToHABApp(log):
         asyncio.get_event_loop().run_until_complete(test())

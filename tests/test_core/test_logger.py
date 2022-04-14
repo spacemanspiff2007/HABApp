@@ -15,8 +15,11 @@ def test_exception_multiline():
 
 
 def test_exception_traceback():
-    e = Exception('Line1\nLine2\nLine3')
-    assert HABAppLogger(None).add_exception(e, add_traceback=True).lines == ['Exception: Line1', 'Line2', 'Line3']
+    try:
+        raise Exception('Line1\nLine2\nLine3')
+    except Exception as e:
+        e = HABAppLogger(None).add_exception(e, add_traceback=True)
+        assert e.lines
 
 
 def test_bool(eb: TestEventBus):

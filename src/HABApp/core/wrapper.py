@@ -107,11 +107,6 @@ class ExceptionToHABApp:
 
         self.raised_exception = True
 
-        # tb = traceback.format_exception(exc_type, exc_val, exc_tb)
-        # # there is an inconsistent use of newlines and array entries so we normalize it
-        # tb = '\n'.join(map(lambda x: x.strip(' \n'), tb))
-        # tb = tb.splitlines()
-
         tb = format_exception((exc_type, exc_val, exc_tb))
 
         # possibility to reprocess tb

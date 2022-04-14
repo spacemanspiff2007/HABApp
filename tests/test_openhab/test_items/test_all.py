@@ -51,4 +51,3 @@ def test_doc_ivar(cls):
     target_vars = get_ivars(OpenhabItem)
     target_vars.pop('value')
     assert target_vars == class_vars
-
