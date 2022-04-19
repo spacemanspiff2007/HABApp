@@ -11,9 +11,9 @@ class ThreadPoolConfig(BaseModel):
     enabled: bool = True
     """When the thread pool is disabled HABApp will become an asyncio application.
     Use only if you have experience developing asyncio applications!
-    If active using blocking calls in functions can and will break HABApp"""
+    If the thread pool is disabled using blocking calls in functions can and will break HABApp"""
 
-    threads: conint(ge=0, le=16) = 10
+    threads: conint(ge=1, le=16) = 10
     """Amount of threads to use for the executor"""
 
 

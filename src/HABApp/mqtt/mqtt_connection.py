@@ -1,17 +1,15 @@
 import logging
 import typing
-from pathlib import Path
 
 import paho.mqtt.client as mqtt
 
 import HABApp
-
+from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
 from HABApp.core.wrapper import log_exception
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 from HABApp.mqtt.mqtt_payload import get_msg_payload
 from HABApp.runtime import shutdown
-from HABApp.core.errors import ItemNotFoundException
 
 log = logging.getLogger('HABApp.mqtt.connection')
 log_msg = logging.getLogger('HABApp.EventBus.mqtt')
@@ -62,11 +60,11 @@ def connect():
         clean_session=False
     )
 
-    if config.connection.tls:
+    if config.connection.tls.enabled:
         # add option to specify tls certificate
-        ca_cert = config.connection.tls_ca_cert
-        if ca_cert != "":
-            if not Path(ca_cert).is_file():
+        ca_cert = config.connection.tls.ca_cert
+        if ca_cert is not None and ca_cert.name:
+            if not ca_cert.is_file():
                 log.error(f'Ca cert file does not exist: {ca_cert}')
                 # don't connect without the properly set certificate
                 disconnect()
@@ -78,7 +76,7 @@ def connect():
             mqtt_client.tls_set()
 
         # we can only set tls_insecure if we have a tls connection
-        if config.connection.tls_insecure:
+        if config.connection.tls.insecure:
             log.warning('Verification of server hostname in server certificate disabled!')
             log.warning('Use this only for testing, not for a real system!')
             mqtt_client.tls_insecure_set(True)

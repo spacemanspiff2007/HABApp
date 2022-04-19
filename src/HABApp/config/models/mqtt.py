@@ -3,6 +3,7 @@ from typing import Tuple, Optional
 
 import pydantic
 from easyconfig import BaseModel
+from pathlib import Path
 from pydantic import Field
 
 if sys.version_info < (3, 8):
@@ -14,15 +15,21 @@ else:
 QOS = Literal[0, 1, 2]
 
 
+class TLSSettings(BaseModel):
+    enabled: bool = Field(default=False, description='Enable TLS for the connection')
+    ca_cert: Path = Field(
+        default='', description='Path to a CA certificate that will be treated as trusted', alias='ca cert')
+    insecure: bool = Field(
+        default=False, description='Validate server hostname in server certificate')
+
+
 class Connection(BaseModel):
     client_id: str = 'HABApp'
     host: str = ''
     port: int = 8883
     user: str = ''
     password: str = ''
-    tls: bool = True
-    tls_ca_cert: str = Field(default='', description='Path to a CA certificate that will be treated as trusted')
-    tls_insecure: bool = False
+    tls: TLSSettings = Field(default_factory=TLSSettings)
 
 
 class Subscribe(BaseModel):
@@ -49,13 +56,13 @@ class Publish(BaseModel):
 
 
 class General(BaseModel):
-    listen_only: bool = Field(False, description='If True HABApp will not publish any value to the broker')
+    listen_only: bool = Field(False, description='If True HABApp does not publish any value to the broker')
 
 
 class MqttConfig(BaseModel):
     """MQTT configuration"""
 
-    connection: Connection = Connection()
-    subscribe: Subscribe = Subscribe()
-    publish: Publish = Publish()
-    general: General = General()
+    connection: Connection = Field(default_factory=Connection)
+    subscribe: Subscribe = Field(default_factory=Subscribe)
+    publish: Publish = Field(default_factory=Publish)
+    general: General = Field(default_factory=General)

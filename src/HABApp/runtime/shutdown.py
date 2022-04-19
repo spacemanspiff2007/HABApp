@@ -9,6 +9,7 @@ from types import FunctionType, MethodType
 from typing import Callable, Coroutine, Union
 
 from HABApp.core.asyncio import async_context, create_task
+from HABApp.core.const import loop
 
 
 @dataclass(frozen=True)
@@ -47,7 +48,10 @@ async def _shutdown():
     requested = True
 
     for obj in itertools.chain(filter(lambda x: not x.last, _FUNCS),
-                               filter(lambda x: x.last, _FUNCS)):
+                               filter(lambda x: x.last, _FUNCS),
+                               # shutdown of the event loop has to be the last thing that is done
+                               # since stopping of the loop exits the program
+                               [ShutdownInfo(loop.stop, 'Stopping asyncio loop', last=True)]):
         try:
             log.debug(f'{obj.msg}')
             if iscoroutinefunction(obj.func):

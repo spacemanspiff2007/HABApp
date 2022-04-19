@@ -17,9 +17,10 @@ mqtt:
     user: ''
     password: ''
     port: 1883
-    tls: false
-    tls_insecure: false
-    tls_ca_cert: ''  # Path to a CA certificate that will be treated as trusted
+    tls:
+      enabled: false
+      insecure: false
+      ca cert: ''
   publish:
     qos: 0
     retain: false

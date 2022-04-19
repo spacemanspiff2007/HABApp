@@ -14,7 +14,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import sys
+
+from docutils.nodes import Text, Node
 
 # required for autodoc
 sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
@@ -220,5 +223,64 @@ autodoc_pydantic_model_signature_prefix = 'settings'
 autodoc_pydantic_model_show_json = False
 autodoc_pydantic_model_show_field_summary = False
 
+# Field config
 autodoc_pydantic_field_show_alias = True
 autodoc_pydantic_field_list_validators = False
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Post processing of default value
+
+regex_path = re.compile(r"^\w+Path\('([^']+)'\)")
+assert regex_path.search('WindowsPath(\'lib\')').group(1) == 'lib'
+
+
+def replace_node_contents(node: Node):
+    """Find nodes with given `tag_matches` and `text_matches`. Recursively
+    iterate children nodes.
+
+    """
+
+    matched_nodes = []
+
+    # iterate children
+    for child in node.children:
+        child_matches = replace_node_contents(node=child)
+        matched_nodes.extend(child_matches)
+
+    # handle node itself
+    parent: Node = node.parent
+    node_text: str = node.astext()
+
+    replacement = None
+
+    # Replace default value
+    # WindowsPath('config') -> 'config'
+    if node_text.endswith(')') and (m := regex_path.search(node_text)) is not None:
+        replacement = Text(f"'{m.group(1)}'")
+
+    # # Type hints
+    # tag_matches = {"pending_xref", "pending_xref_condition"}
+    # text_matches = {'Path', 'pathlib.Path'}
+    # is_pending_xref = node.tagname in tag_matches
+    # if is_pending_xref and child_text and node_text in text_matches:
+    #     matched_nodes.append(node)
+
+    # put replacement in place
+    if replacement is not None:
+        replacement.parent = parent
+        pos = parent.children.index(node)
+        parent.children[pos] = replacement
+
+    return matched_nodes
+
+
+def transform_desc(app, domain, objtype: str, contentnode):
+    if objtype != 'pydantic_field':
+        return None
+
+    replace_node_contents(node=contentnode.parent)
+
+
+def setup(app):
+    app.connect('object-description-transform', transform_desc)

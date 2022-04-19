@@ -23,30 +23,20 @@ def load_config(config_folder: Path):
     create_default_logfile(logging_cfg_path)
 
     loaded_logging = False
-    loaded_config = False
 
+    # Try load the logging config
     try:
         load_logging_cfg(logging_cfg_path)
         rotate_files()
         loaded_logging = True
     except AbsolutePathExpected:
-        # This error only occurs when the config was not loaded because of an exception.
-        # Since we crash in load_cfg again we'll show that error because it's the root cause.
         pass
 
-    try:
-        load_habapp_cfg()
-        loaded_config = True
-    except Exception:
-        pass
+    load_habapp_cfg(do_print=not loaded_logging)
 
     if not loaded_logging:
         load_logging_cfg(logging_cfg_path)
         rotate_files()
-
-    # If there was an error reload the config again, so we hopefully can log the error message
-    if not loaded_config:
-        load_habapp_cfg()
 
     # Watch folders, so we can reload the config on the fly
     filter = HABApp.core.files.watcher.FileEndingFilter('.yml')
@@ -64,12 +54,15 @@ async def config_files_changed(paths: List[Path]):
             load_logging_cfg(path)
 
 
-def load_habapp_cfg():
+def load_habapp_cfg(do_print=False):
     try:
         CONFIG.load_config_file()
     except pydantic.ValidationError as e:
         for line in str(e).splitlines():
-            log.error(line)
+            if do_print:
+                print(line)
+            else:
+                log.error(line)
         raise InvalidConfigError from None
 
     # check if folders exist and print warnings, maybe because of missing permissions

@@ -69,8 +69,6 @@ class Runtime:
 
             await openhab_connection.start()
 
-            shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')
-
             async_context.reset(token)
 
         except HABApp.config.InvalidConfigError:

@@ -1,7 +1,8 @@
 from typing import Union
 
+from pydantic import Field, AnyHttpUrl, ByteSize, validator
+
 from easyconfig.models import BaseModel
-from pydantic import Field, AnyHttpUrl, constr, ByteSize, validator
 
 
 class Ping(BaseModel):
@@ -9,12 +10,12 @@ class Ping(BaseModel):
                                             'an update from HABApp and get the updated value back from openHAB '
                                             'in milliseconds')
     item: str = Field('HABApp_Ping', description='Name of the Numberitem')
-    interval: int = Field(10, description='Seconds between two pings')
+    interval: int = Field(10, description='Seconds between two pings', ge=0.1)
 
 
 class General(BaseModel):
     listen_only: bool = Field(
-        False, description='If True HABApp will not change anything on the openHAB instance.'
+        False, description='If True HABApp does not change anything on the openHAB instance.'
     )
     wait_for_openhab: bool = Field(
         True,
@@ -23,15 +24,14 @@ class General(BaseModel):
 
 
 class Connection(BaseModel):
-    url: Union[AnyHttpUrl, constr(max_length=0, strict=True)] = \
-        Field('http://localhost:8080', description='Connect to this url')
+    url: Union[AnyHttpUrl] = Field('http://localhost:8080', description='Connect to this url')
     user: str = ''
     password: str = ''
     verify_ssl: bool = Field(True, description='Check certificates when using https')
 
     buffer: ByteSize = Field(
         '128kib', in_file=False, description=
-        'Buffer for reading lines in the SSE event handler. This is the buffer'
+        'Buffer for reading lines in the SSE event handler. This is the buffer '
         'that gets allocated for every(!) request and SSE message that the client processes. '
         'Increase only if you get error messages or disconnects e.g. if you use large images.'
     )
@@ -39,7 +39,9 @@ class Connection(BaseModel):
     @validator('buffer', always=True)
     def validate_see_buffer(cls, value: ByteSize):
         valid_values = (
-            '128kib', '256kib', '512kib', '1Mib', '2Mib', '4Mib', '8Mib', '16Mib', '32Mib', '64Mib', '128Mib')
+            '64kib', '128kib', '256kib', '512kib',
+            '1Mib', '2Mib', '4Mib', '8Mib', '16Mib', '32Mib', '64Mib', '128Mib'
+        )
 
         for _v in valid_values:
             if value == ByteSize.validate(_v):
@@ -49,6 +51,6 @@ class Connection(BaseModel):
 
 
 class OpenhabConfig(BaseModel):
-    ping: Ping = Ping()
-    connection: Connection = Connection()
-    general: General = General()
+    connection: Connection = Field(default_factory=Connection)
+    general: General = Field(default_factory=General)
+    ping: Ping = Field(default_factory=Ping)

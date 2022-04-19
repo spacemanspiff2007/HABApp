@@ -122,6 +122,7 @@ MQTT
 .. autopydantic_model:: MqttConfig
 
 .. autopydantic_model:: Connection
+.. autopydantic_model:: TLSSettings
 .. autopydantic_model:: Subscribe
 .. autopydantic_model:: Publish
 .. autopydantic_model:: General
