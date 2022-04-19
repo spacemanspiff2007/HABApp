@@ -36,7 +36,7 @@ class Connection(BaseModel):
         'Increase only if you get error messages or disconnects e.g. if you use large images.'
     )
 
-    @validator('buffer', always=True)
+    @validator('buffer')
     def validate_see_buffer(cls, value: ByteSize):
         valid_values = (
             '64kib', '128kib', '256kib', '512kib',

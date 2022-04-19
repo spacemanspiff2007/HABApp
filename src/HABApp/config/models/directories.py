@@ -30,7 +30,8 @@ class DirectoriesConfig(BaseModel):
         if value is None:
             return value
 
-        if not value.is_absolute():
+        # only resolve if we have a path set
+        if not value.is_absolute() and HABApp.__cmd_args__.CONFIG_FILE.name:
             value = HABApp.__cmd_args__.CONFIG_FILE.parent / value
             value = value.resolve()
 

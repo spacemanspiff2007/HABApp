@@ -1,32 +1,20 @@
 import asyncio
 import logging
-import signal
 import sys
 import traceback
 import typing
 
-
 import HABApp
 from HABApp.__cmd_args__ import parse_args, find_config_folder
-from HABApp.__splash_screen__ import show_screen
 from HABApp.__debug_info__ import print_debug_info
-
-
-def register_signal_handler():
-    def shutdown_handler(sig, frame):
-        print('Shutting down ...')
-        HABApp.runtime.shutdown.request_shutdown()
-
-    # register shutdown helper
-    signal.signal(signal.SIGINT, shutdown_handler)
-    signal.signal(signal.SIGTERM, shutdown_handler)
+from HABApp.__splash_screen__ import show_screen
 
 
 def main() -> typing.Union[int, str]:
 
     show_screen()
 
-    # This has do be done before we create HABApp because of the possible sleep time
+    # This has to be done before we create HABApp because of the possible sleep time
     args = parse_args()
 
     if HABApp.__cmd_args__.DO_DEBUG:
@@ -38,9 +26,10 @@ def main() -> typing.Union[int, str]:
     cfg_folder = find_config_folder(args.config)
 
     try:
-        app = HABApp.runtime.Runtime()
-        register_signal_handler()
+        # Shutdown handler for graceful shutdown
+        HABApp.runtime.shutdown.register_signal_handler()
 
+        app = HABApp.runtime.Runtime()
         HABApp.core.const.loop.create_task(app.start(cfg_folder))
         HABApp.core.const.loop.run_forever()
     except Exception as e:

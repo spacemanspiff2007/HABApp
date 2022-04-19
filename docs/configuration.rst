@@ -56,10 +56,11 @@ Example configuration
             port: 8883
             user: ''
             password: ''
-            tls: true
-            tls_insecure: false  # do not check certificate
-            tls_ca_cert: ''      # Path to a CA certificate that will be treated as trusted
-                                 # (e.g. when using a self signed certificate)
+            tls:
+              enabled: false   # Enable TLS for the connection
+              insecure: false  # Validate server hostname in server certificate
+              ca cert: ''      # Path to a CA certificate that will be treated as trusted
+                               # (e.g. when using a self signed certificate)
 
         subscribe:         # Changes to Subscribe get picked up without restarting HABApp
             qos: 0         # Default QoS for subscribing

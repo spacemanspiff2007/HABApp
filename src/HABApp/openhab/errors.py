@@ -1,49 +1,54 @@
+from HABApp.core.errors import HABAppException
+
+
+class HABAppOpenhabError(HABAppException):
+    pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Connection errors
 # ----------------------------------------------------------------------------------------------------------------------
-class OpenhabConnectionNotSetUpError(Exception):
+class OpenhabConnectionNotSetUpError(HABAppOpenhabError):
     pass
 
 
-class OpenhabDisconnectedError(Exception):
+class OpenhabDisconnectedError(HABAppOpenhabError):
     pass
 
 
-class OpenhabNotReadyYet(Exception):
-    pass
-
-
-class ExpectedSuccessFromOpenhab(Exception):
+class ExpectedSuccessFromOpenhab(HABAppOpenhabError):
     pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # OpenHAB errors
 # ----------------------------------------------------------------------------------------------------------------------
-class ItemNotFoundError(Exception):
+class SendCommandNotSupported(HABAppOpenhabError):
+    pass
+
+
+class ItemNotFoundError(HABAppOpenhabError):
 
     @classmethod
     def from_name(cls, name: str):
         return cls(f'Item "{name}" not found!')
 
 
-class ItemNotEditableError(Exception):
+class ItemNotEditableError(HABAppOpenhabError):
 
     @classmethod
     def from_name(cls, name: str):
         return cls(f'Item "{name}" is not editable!')
 
 
-class ThingNotFoundError(Exception):
+class ThingNotFoundError(HABAppOpenhabError):
 
     @classmethod
     def from_uid(cls, uid: str):
         return cls(f'Thing "{uid}" not found!')
 
 
-class ThingNotEditableError(Exception):
+class ThingNotEditableError(HABAppOpenhabError):
 
     @classmethod
     def from_uid(cls, uid: str):
@@ -53,7 +58,7 @@ class ThingNotEditableError(Exception):
 # ----------------------------------------------------------------------------------------------------------------------
 # RestAPI Errors
 # ----------------------------------------------------------------------------------------------------------------------
-class MetadataNotEditableError(Exception):
+class MetadataNotEditableError(HABAppOpenhabError):
 
     @classmethod
     def create_text(cls, item: str, namespace: str):

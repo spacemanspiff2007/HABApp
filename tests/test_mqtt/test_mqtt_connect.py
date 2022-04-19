@@ -2,11 +2,12 @@ import logging
 
 import HABApp
 from HABApp.mqtt.mqtt_connection import connect, STATUS
+from pathlib import Path
 
 
 def test_connect(caplog):
     HABApp.CONFIG.mqtt.connection.host = 'localhost'
-    HABApp.CONFIG.mqtt.connection.tls_ca_cert = 'invalid_file_path'
+    HABApp.CONFIG.mqtt.connection.tls.ca_cert = Path('invalid_file_path')
 
     connect()
 

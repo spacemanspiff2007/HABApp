@@ -16,7 +16,7 @@ QOS = Literal[0, 1, 2]
 
 
 class TLSSettings(BaseModel):
-    enabled: bool = Field(default=False, description='Enable TLS for the connection')
+    enabled: bool = Field(default=True, description='Enable TLS for the connection')
     ca_cert: Path = Field(
         default='', description='Path to a CA certificate that will be treated as trusted', alias='ca cert')
     insecure: bool = Field(

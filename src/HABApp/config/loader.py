@@ -29,7 +29,7 @@ def load_config(config_folder: Path):
         load_logging_cfg(logging_cfg_path)
         rotate_files()
         loaded_logging = True
-    except AbsolutePathExpected:
+    except (AbsolutePathExpected, InvalidConfigError):
         pass
 
     load_habapp_cfg(do_print=not loaded_logging)
@@ -88,7 +88,7 @@ def load_logging_cfg(path: Path):
     except Exception as e:
         print(f'Error loading logging config: {e}')
         log.error(f'Error loading logging config: {e}')
-        return None
+        raise InvalidConfigError from None
 
     logging.getLogger('HABApp').info(f'HABApp Version {__version__}')
 

@@ -43,14 +43,14 @@ class OpenhabItem(BaseValueItem):
     def oh_send_command(self, value: Any = MISSING):
         """Send a command to the openHAB item
 
-        :param value: (optional) value to be sent. If not specified the item value will be used.
+        :param value: (optional) value to be sent. If not specified the current item value will be used.
         """
         send_command(self.name, self.value if value is MISSING else value)
 
     def oh_post_update(self, value: Any = MISSING):
         """Post an update to the openHAB item
 
-        :param value: (optional) value to be posted. If not specified the item value will be used.
+        :param value: (optional) value to be posted. If not specified the current item value will be used.
         """
         post_update(self.name, self.value if value is MISSING else value)
 

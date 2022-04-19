@@ -3,6 +3,7 @@ import logging
 import logging.handlers
 import traceback
 import typing
+import signal
 from asyncio import iscoroutinefunction, sleep
 from dataclasses import dataclass
 from types import FunctionType, MethodType
@@ -30,6 +31,16 @@ def register_func(func, last=False, msg: str = ''):
     assert isinstance(msg, str)
 
     _FUNCS.append(ShutdownInfo(func, f'{func.__module__}.{func.__name__}' if not msg else msg, last))
+
+
+def register_signal_handler():
+    def shutdown_handler(sig, frame):
+        print('Shutting down ...')
+        request_shutdown()
+
+    # register shutdown helper
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
 
 
 def request_shutdown():
