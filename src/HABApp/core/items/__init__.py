@@ -1,4 +1,4 @@
-from .base_item import BaseItem, TYPE_ITEM_CLS, TYPE_ITEM_OBJ
+from .base_item import BaseItem, HINT_TYPE_ITEM_OBJ, HINT_ITEM_OBJ
 from .base_valueitem import BaseValueItem
 
 # isort split

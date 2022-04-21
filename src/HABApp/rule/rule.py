@@ -9,11 +9,11 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
-from HABApp.core.internals import TYPE_EVENT_FILTER_OBJ, TYPE_EVENT_BUS_LISTENER, ContextMixin, uses_post_event, \
+from HABApp.core.const.hints import HINT_EVENT_CALLBACK
+from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextMixin, uses_post_event, \
     EventFilterBase, uses_item_registry, ContextBoundEventBusListener
 from HABApp.core.internals import wrap_func
-from HABApp.core.items import BaseItem, TYPE_ITEM_OBJ, TYPE_ITEM_CLS, BaseValueItem
+from HABApp.core.items import BaseItem, HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseValueItem
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
 from .interfaces import async_subprocess_exec
@@ -67,7 +67,22 @@ class Rule(ContextMixin):
         """Override this to implement logic that will be called when the rule has been unloaded.
         """
 
-    def post_event(self, name: Union[TYPE_ITEM_OBJ, str], event: Any):
+    def __repr__(self):
+        parts = ['']
+
+        # rule name if it is different than the class
+        cls_name = self.__class__.__name__
+        rule_name = str(self.rule_name)
+        if cls_name != rule_name:
+            parts.append(rule_name)
+
+        # rule status
+        if self._habapp_ctx is None:
+            parts.append('(unloaded)')
+
+        return f'<{cls_name}{" ".join(parts)}>'
+
+    def post_event(self, name: Union[HINT_ITEM_OBJ, str], event: Any):
         """
         Post an event to the event bus
 
@@ -81,10 +96,10 @@ class Rule(ContextMixin):
             event
         )
 
-    def listen_event(self, name: Union[TYPE_ITEM_OBJ, str],
-                     callback: TYPE_EVENT_CALLBACK,
-                     event_filter: Optional[TYPE_EVENT_FILTER_OBJ] = None
-                     ) -> TYPE_EVENT_BUS_LISTENER:
+    def listen_event(self, name: Union[HINT_ITEM_OBJ, str],
+                     callback: HINT_EVENT_CALLBACK,
+                     event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None
+                     ) -> HINT_EVENT_BUS_LISTENER:
         """
         Register an event listener
 
@@ -107,7 +122,7 @@ class Rule(ContextMixin):
         listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
         return self._habapp_ctx.add_event_listener(listener)
 
-    def execute_subprocess(self, callback: TYPE_EVENT_CALLBACK, program, *args, capture_output=True):
+    def execute_subprocess(self, callback: HINT_EVENT_CALLBACK, program, *args, capture_output=True):
         """Run another program
 
         :param callback: |param_scheduled_cb| after process has finished. First parameter will
@@ -131,13 +146,13 @@ class Rule(ContextMixin):
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     @staticmethod
-    def get_items(type: Union[Tuple[TYPE_ITEM_CLS, ...], TYPE_ITEM_CLS] = None,
+    def get_items(type: Union[Tuple[HINT_TYPE_ITEM_OBJ, ...], HINT_TYPE_ITEM_OBJ] = None,
                   name: Union[str, Pattern[str]] = None,
                   tags: Union[str, Iterable[str]] = None,
                   groups: Union[str, Iterable[str]] = None,
                   metadata: Union[str, Pattern[str]] = None,
                   metadata_value: Union[str, Pattern[str]] = None,
-                  ) -> Union[List[TYPE_ITEM_OBJ], List[BaseItem]]:
+                  ) -> Union[List[HINT_ITEM_OBJ], List[BaseItem]]:
         """Search the HABApp item registry and return the found items.
 
         :param type: item has to be an instance of this class

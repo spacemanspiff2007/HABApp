@@ -85,4 +85,4 @@ class EventBus:
             self._listeners.clear()
 
 
-TYPE_EVENT_BUS = TypeVar('TYPE_EVENT_BUS', bound=EventBus)
+HINT_EVENT_BUS = TypeVar('HINT_EVENT_BUS', bound=EventBus)

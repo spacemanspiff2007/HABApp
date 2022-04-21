@@ -5,13 +5,13 @@ from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBo
 
 
 class ContextBoundObj:
-    def __init__(self, parent_ctx: Optional['TYPE_CONTEXT_OBJ'], **kwargs):
+    def __init__(self, parent_ctx: Optional['HINT_CONTEXT_OBJ'], **kwargs):
         super().__init__(**kwargs)
         self._parent_ctx = parent_ctx
         if parent_ctx is not None:
             parent_ctx.add_obj(self)
 
-    def _ctx_link(self, parent_ctx: 'TYPE_CONTEXT_OBJ'):
+    def _ctx_link(self, parent_ctx: 'HINT_CONTEXT_OBJ'):
         assert isinstance(parent_ctx, Context)
         if self._parent_ctx is not None:
             raise ContextBoundObjectIsAlreadyLinkedError()
@@ -27,22 +27,22 @@ class ContextBoundObj:
         self._parent_ctx = None
 
 
-TYPE_CONTEXT_BOUND_OBJ = TypeVar('TYPE_CONTEXT_BOUND_OBJ', bound=ContextBoundObj)
+HINT_CONTEXT_BOUND_OBJ = TypeVar('HINT_CONTEXT_BOUND_OBJ', bound=ContextBoundObj)
 
 
 class Context:
     def __init__(self):
-        self.objs: Set[TYPE_CONTEXT_BOUND_OBJ] = set()
+        self.objs: Set[HINT_CONTEXT_BOUND_OBJ] = set()
 
-    def add_obj(self, obj: TYPE_CONTEXT_BOUND_OBJ):
+    def add_obj(self, obj: HINT_CONTEXT_BOUND_OBJ):
         assert isinstance(obj, ContextBoundObj)
         self.objs.add(obj)
 
-    def remove_obj(self, obj: TYPE_CONTEXT_BOUND_OBJ):
+    def remove_obj(self, obj: HINT_CONTEXT_BOUND_OBJ):
         assert isinstance(obj, ContextBoundObj)
         self.objs.remove(obj)
 
-    def link(self, obj: TYPE_CONTEXT_BOUND_OBJ) -> TYPE_CONTEXT_BOUND_OBJ:
+    def link(self, obj: HINT_CONTEXT_BOUND_OBJ) -> HINT_CONTEXT_BOUND_OBJ:
         assert isinstance(obj, ContextBoundObj)
         obj._ctx_link(self)
         return obj
@@ -51,10 +51,10 @@ class Context:
         raise NotImplementedError()
 
 
-TYPE_CONTEXT_OBJ = TypeVar('TYPE_CONTEXT_OBJ', bound=Context)
+HINT_CONTEXT_OBJ = TypeVar('HINT_CONTEXT_OBJ', bound=Context)
 
 
 class ContextMixin:
-    def __init__(self, context: Optional[TYPE_CONTEXT_OBJ] = None, **kwargs):
+    def __init__(self, context: Optional[HINT_CONTEXT_OBJ] = None, **kwargs):
         super().__init__(**kwargs)
-        self._habapp_ctx: TYPE_CONTEXT_OBJ = context
+        self._habapp_ctx: HINT_CONTEXT_OBJ = context

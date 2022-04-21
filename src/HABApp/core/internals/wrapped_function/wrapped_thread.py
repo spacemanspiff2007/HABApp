@@ -8,7 +8,7 @@ from time import time
 from typing import Callable, Any
 from typing import Optional
 
-from HABApp.core.internals import TYPE_CONTEXT_OBJ
+from HABApp.core.internals import HINT_CONTEXT_OBJ
 from HABApp.core.const import loop
 from .base import WrappedFunctionBase, default_logger
 
@@ -39,16 +39,16 @@ async def run_in_thread_pool(func: Callable):
     )
 
 
-TYPE_HINT_FUNC_SYNC = Callable[..., Any]
+HINT_FUNC_SYNC = Callable[..., Any]
 
 
 class WrappedThreadFunction(WrappedFunctionBase):
 
-    def __init__(self, func: TYPE_HINT_FUNC_SYNC,
+    def __init__(self, func: HINT_FUNC_SYNC,
                  warn_too_long=True,
                  name: Optional[str] = None,
                  logger: Optional[logging.Logger] = None,
-                 context: Optional[TYPE_CONTEXT_OBJ] = None):
+                 context: Optional[HINT_CONTEXT_OBJ] = None):
 
         super(WrappedThreadFunction, self).__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)

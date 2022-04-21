@@ -4,7 +4,7 @@ from typing import TypeVar, Dict, Any
 from typing import Union
 
 from HABApp.core.events.filter import EventFilter
-from HABApp.core.internals import EventBusListener, wrap_func, EventFilterBase, TYPE_EVENT_FILTER_OBJ, \
+from HABApp.core.internals import EventBusListener, wrap_func, EventFilterBase, HINT_EVENT_FILTER_OBJ, \
     get_current_context
 from HABApp.core.items import BaseValueItem
 from HABAppTests.errors import TestCaseFailed
@@ -17,7 +17,7 @@ EVENT_TYPE = TypeVar('EVENT_TYPE')
 
 class EventWaiter:
     def __init__(self, name: Union[BaseValueItem, str],
-                 event_filter: TYPE_EVENT_FILTER_OBJ, timeout=1):
+                 event_filter: HINT_EVENT_FILTER_OBJ, timeout=1):
         if isinstance(name, BaseValueItem):
             name = name.name
         assert isinstance(name, str)

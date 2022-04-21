@@ -27,11 +27,11 @@ class MyOpenhabRule(HABApp.Rule):
 
     def item_state_update(self, event):
         assert isinstance(event, ValueUpdateEvent)
-        print( f'{event}')
+        print(f'{event}')
 
     def item_state_change(self, event):
         assert isinstance(event, ValueChangeEvent)
-        print( f'{event}')
+        print(f'{event}')
 
         # interaction is available through self.openhab or self.oh
         self.openhab.send_command('TestItemCommand', 'ON')

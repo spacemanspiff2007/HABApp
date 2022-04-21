@@ -8,7 +8,7 @@ from HABApp.core.const.json import load_json, dump_json
 from HABApp.core.lib import format_exception
 from easyconfig import create_app_config
 from tests.helpers.traceback import process_traceback
-from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_PATHS, skip_file
+from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, skip_file
 from pathlib import Path
 
 log = logging.getLogger('TestLogger')
@@ -146,23 +146,24 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero'''
 
 
-def test_regex(pytestconfig):
+def test_habapp_regex(pytestconfig):
 
     files = tuple(str(f) for f in (Path(pytestconfig.rootpath) / 'src' / 'HABApp').glob('**/*'))
 
-    for i, regex in enumerate(SUPPRESSED_PATHS):
-        if i == len(SUPPRESSED_PATHS) - 1:
-            continue
-
+    for regex in SUPPRESSED_HABAPP_PATHS:
         for file in files:
             if regex.search(file):
                 break
         else:
             raise ValueError(f'Nothing matched for {regex}')
 
+
+def test_regex(pytestconfig):
+
     assert not skip_file('/lib/habapp/asdf')
     assert not skip_file('/lib/HABApp/asdf')
     assert not skip_file('/HABApp/core/lib/asdf')
     assert not skip_file('/HABApp/core/lib/asdf/asdf')
 
-    assert skip_file('/folder/lib/asdf/asdf')
+    assert skip_file(r'\Python310\lib\runpy.py')
+    assert skip_file(r'\Python310\lib\asyncio\tasks.py')

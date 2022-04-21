@@ -6,7 +6,7 @@ from stack_data import FrameInfo, LINE_GAP
 from .const import SEPARATOR_NEW_FRAME, PRE_INDENT
 from .format_frame_vars import format_frame_variables
 
-SUPPRESSED_PATHS = (
+SUPPRESSED_HABAPP_PATHS = (
     # This exception formatter
     re.compile(r'[/\\]HABApp[/\\]core[/\\]lib[/\\]exceptions[/\\]'),
 
@@ -15,14 +15,18 @@ SUPPRESSED_PATHS = (
 
     # Worker functions
     re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]wrapped_function[/\\]'),
+)
 
-    # Don't print stack traces for used libraries/python functions except for HABApp
-    re.compile(r'[/\\](?!core)[^/\\]+[/\\](site-packages|lib|python\d\.\d+)[/\\](?!HABApp)[^/\\]+[/\\]', re.IGNORECASE),
+SUPPRESSED_PATHS = (
+    # Libraries of base installation
+    re.compile(r'[/\\](?:python\d\.\d+|python\d{2,3})[/\\]lib[/\\]', re.IGNORECASE),
+    # Libraries in venv
+    re.compile(r'[/\\]lib[/\\]site-packages[/\\]', re.IGNORECASE),
 )
 
 
 def skip_file(name: str) -> bool:
-    for r in SUPPRESSED_PATHS:
+    for r in (SUPPRESSED_HABAPP_PATHS if '/HABApp/' in name or '\\HABApp\\' in name else SUPPRESSED_PATHS):
         if r.search(name):
             return True
     return False

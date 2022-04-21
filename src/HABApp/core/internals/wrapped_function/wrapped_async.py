@@ -1,19 +1,18 @@
 import logging
-from typing import Optional, Callable, Awaitable, Any
+from typing import Optional
 
 from HABApp.core.asyncio import async_context, create_task
-from HABApp.core.internals import TYPE_CONTEXT_OBJ
+from HABApp.core.const.hints import HINT_FUNC_ASYNC
+from HABApp.core.internals import HINT_CONTEXT_OBJ
 from .base import WrappedFunctionBase
-
-TYPE_HINT_FUNC_ASYNC = Callable[..., Awaitable[Any]]
 
 
 class WrappedAsyncFunction(WrappedFunctionBase):
 
-    def __init__(self, func: TYPE_HINT_FUNC_ASYNC,
+    def __init__(self, func: HINT_FUNC_ASYNC,
                  name: Optional[str] = None,
                  logger: Optional[logging.Logger] = None,
-                 context: Optional[TYPE_CONTEXT_OBJ] = None):
+                 context: Optional[HINT_CONTEXT_OBJ] = None):
 
         super(WrappedAsyncFunction, self).__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)

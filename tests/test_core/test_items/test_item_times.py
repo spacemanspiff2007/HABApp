@@ -10,7 +10,7 @@ import HABApp.core.items.tmp_data
 from HABApp.core.events import NoEventFilter
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
 from tests.helpers import TestEventBus
-from HABApp.core.internals import wrap_func, TYPE_ITEM_REGISTRY, TYPE_EVENT_BUS
+from HABApp.core.internals import wrap_func, HINT_ITEM_REGISTRY, HINT_EVENT_BUS
 from HABApp.core.items import Item
 
 
@@ -82,7 +82,7 @@ async def test_cancel_running(parent_rule, u: UpdatedTime):
     assert w2 not in u.tasks
 
 
-async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: TYPE_EVENT_BUS):
+async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: HINT_EVENT_BUS):
     m = MagicMock()
     u.set(pd_now(UTC))
     list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
@@ -111,7 +111,7 @@ async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: TYPE_E
     list.cancel()
 
 
-async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: TYPE_EVENT_BUS):
+async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: HINT_EVENT_BUS):
     m = MagicMock()
     c.set(pd_now(UTC))
     list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
@@ -140,7 +140,7 @@ async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: TYPE_E
     list.cancel()
 
 
-async def test_watcher_change_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
+async def test_watcher_change_restore(parent_rule, ir: HINT_ITEM_REGISTRY):
     name = 'test_save_restore'
 
     item_a = Item(name)
@@ -159,7 +159,7 @@ async def test_watcher_change_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
     ir.pop_item(name)
 
 
-async def test_watcher_update_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
+async def test_watcher_update_restore(parent_rule, ir: HINT_ITEM_REGISTRY):
     name = 'test_save_restore'
 
     item_a = Item(name)
@@ -179,7 +179,7 @@ async def test_watcher_update_restore(parent_rule, ir: TYPE_ITEM_REGISTRY):
 
 
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
-                                      sync_worker, eb: TestEventBus, ir: TYPE_ITEM_REGISTRY):
+                                      sync_worker, eb: TestEventBus, ir: HINT_ITEM_REGISTRY):
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''

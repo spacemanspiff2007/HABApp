@@ -3,19 +3,19 @@ from asyncio import iscoroutinefunction
 from typing import Union, Optional, Callable, Type
 
 from HABApp.config import CONFIG
-from HABApp.core.internals import TYPE_CONTEXT_OBJ
+from HABApp.core.internals import HINT_CONTEXT_OBJ
 from HABApp.core.internals.wrapped_function.base import TYPE_WRAPPED_FUNC_OBJ
-from HABApp.core.internals.wrapped_function.wrapped_async import TYPE_HINT_FUNC_ASYNC, WrappedAsyncFunction
+from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction, HINT_FUNC_ASYNC
 from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunction
-from HABApp.core.internals.wrapped_function.wrapped_thread import TYPE_HINT_FUNC_SYNC, WrappedThreadFunction, \
+from HABApp.core.internals.wrapped_function.wrapped_thread import HINT_FUNC_SYNC, WrappedThreadFunction, \
     create_thread_pool, stop_thread_pool, run_in_thread_pool
 
 
-def wrap_func(func: Union[TYPE_HINT_FUNC_SYNC, TYPE_HINT_FUNC_ASYNC],
+def wrap_func(func: Union[HINT_FUNC_SYNC, HINT_FUNC_ASYNC],
               warn_too_long=True,
               name: Optional[str] = None,
               logger: Optional[logging.Logger] = None,
-              context: Optional[TYPE_CONTEXT_OBJ] = None) -> TYPE_WRAPPED_FUNC_OBJ:
+              context: Optional[HINT_CONTEXT_OBJ] = None) -> TYPE_WRAPPED_FUNC_OBJ:
 
     if iscoroutinefunction(func):
         return WrappedAsyncFunction(func, name=name, logger=logger, context=context)

@@ -3,7 +3,7 @@ from typing import Optional
 
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
-from HABApp.core.internals import Context, uses_item_registry, TYPE_EVENT_BUS_LISTENER
+from HABApp.core.internals import Context, uses_item_registry, HINT_EVENT_BUS_LISTENER
 from HABApp.core.internals import uses_event_bus
 from HABApp.core.internals.event_bus import EventBusBaseListener
 
@@ -16,16 +16,16 @@ log = logging.getLogger('HABApp.Rule')
 class HABAppRuleContext(Context):
     def __init__(self, rule: 'HABApp.rule.Rule'):
         super().__init__()
-        self.rule: 'HABApp.rule.Rule' = rule
+        self.rule: Optional['HABApp.rule.Rule'] = rule
 
     def get_callback_name(self, callback: callable) -> Optional[str]:
         return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None
 
-    def add_event_listener(self, listener: TYPE_EVENT_BUS_LISTENER) -> TYPE_EVENT_BUS_LISTENER:
+    def add_event_listener(self, listener: HINT_EVENT_BUS_LISTENER) -> HINT_EVENT_BUS_LISTENER:
         event_bus.add_listener(listener)
         return listener
 
-    def remove_event_listener(self, listener: TYPE_EVENT_BUS_LISTENER) -> TYPE_EVENT_BUS_LISTENER:
+    def remove_event_listener(self, listener: HINT_EVENT_BUS_LISTENER) -> HINT_EVENT_BUS_LISTENER:
         event_bus.remove_listener(listener)
         return listener
 

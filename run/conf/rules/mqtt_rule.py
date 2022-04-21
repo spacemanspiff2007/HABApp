@@ -2,7 +2,7 @@ import datetime
 import random
 
 import HABApp
-from HABApp.core.events import ValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem
 
 
@@ -18,7 +18,7 @@ class ExampleMqttTestRule(HABApp.Rule):
 
         self.my_mqtt_item = MqttItem.get_create_item('test/test')
 
-        self.listen_event('test/test', self.topic_updated, ValueUpdateEvent)
+        self.listen_event('test/test', self.topic_updated, ValueUpdateEventFilter())
 
     def publish_rand_value(self):
         print('test mqtt_publish')

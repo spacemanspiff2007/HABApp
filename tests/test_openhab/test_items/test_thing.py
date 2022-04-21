@@ -2,7 +2,7 @@ import pytest
 from immutables import Map
 
 import HABApp
-from HABApp.core.internals import TYPE_ITEM_REGISTRY
+from HABApp.core.internals import HINT_ITEM_REGISTRY
 from HABApp.openhab.events import ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.items import Thing
 from HABApp.openhab.map_events import get_event
@@ -10,7 +10,7 @@ from pendulum import set_test_now, DateTime, UTC
 
 
 @pytest.fixture(scope="function")
-def test_thing(ir: TYPE_ITEM_REGISTRY):
+def test_thing(ir: HINT_ITEM_REGISTRY):
     set_test_now(DateTime(2000, 1, 1, tzinfo=UTC))
     thing = HABApp.openhab.items.Thing('test_thing')
 

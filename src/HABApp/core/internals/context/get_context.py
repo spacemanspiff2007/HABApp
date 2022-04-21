@@ -2,7 +2,7 @@ import sys
 from typing import Optional, Union, TYPE_CHECKING
 
 from HABApp.core.errors import ContextNotSetError, ContextNotFoundError
-from HABApp.core.internals.context import ContextMixin, ContextBoundObj, TYPE_CONTEXT_OBJ
+from HABApp.core.internals.context import ContextMixin, ContextBoundObj, HINT_CONTEXT_OBJ
 
 if TYPE_CHECKING:
     import HABApp
@@ -32,7 +32,7 @@ def get_current_context(obj: Optional[ContextMixin] = None) -> 'HABApp.rule_ctx.
 
 
 class AutoContextBoundObj(ContextBoundObj):
-    def __init__(self, parent_ctx: Optional['TYPE_CONTEXT_OBJ'] = None, **kwargs):
+    def __init__(self, parent_ctx: Optional['HINT_CONTEXT_OBJ'] = None, **kwargs):
         if parent_ctx is None:
             parent_ctx = get_current_context()
         super().__init__(parent_ctx=parent_ctx, **kwargs)

@@ -29,3 +29,19 @@ def test_unload_function_exception(eb: TestEventBus):
         assert not m.called
 
     assert m.called
+
+
+@pytest.mark.no_internals
+def test_repr():
+    class Abc(Rule):
+
+        def __init__(self):
+            super().__init__()
+            self.rule_name = 'Abc'
+
+    with SimpleRuleRunner():
+        rule = Abc()
+        assert repr(rule) == '<Abc>'
+
+        rule.rule_name = 'MyName'
+        assert repr(rule) == '<Abc MyName>'

@@ -5,10 +5,9 @@ from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Optional
 
-from easyconfig.yaml import yaml_safe as _yaml_safe
-
 from HABApp.config.config import CONFIG
 from HABApp.config.errors import AbsolutePathExpected
+from easyconfig.yaml import yaml_safe as _yaml_safe
 
 log = logging.getLogger('HABApp.Config')
 

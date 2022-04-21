@@ -1,6 +1,6 @@
 import ast
 from inspect import ismodule, isclass
-from typing import List, Tuple, Callable, Any, Set
+from typing import List, Tuple, Callable, Any, Set, TypeVar
 
 from immutables import Map
 from stack_data import Variable
@@ -36,6 +36,8 @@ SKIP_VARIABLE: Tuple[Callable[[str, Any], bool], ...] = (
 
     # type hints
     lambda name, value: name.startswith('typing.'),
+    # type vars
+    lambda name, value: isinstance(value, TypeVar),
 
     # functions
     lambda name, value: value is dump_json or value is load_json,
@@ -64,8 +66,6 @@ def skip_variable(var: Variable) -> bool:
 def format_frame_variables(tb: List[str], stack_variables: List[Variable]):
     if not stack_variables:
         return None
-
-    tb.append(SEPARATOR_VARIABLES)
 
     # remove variables that shall not be printed
     used_vars: List[Variable] = [v for v in stack_variables if not skip_variable(v)]
@@ -96,6 +96,12 @@ def format_frame_variables(tb: List[str], stack_variables: List[Variable]):
     for var in used_vars:
         if var.name not in variables:
             variables[var.name] = var.value
+
+    if not variables:
+        return None
+
+    # Add variables to traceback
+    tb.append(SEPARATOR_VARIABLES)
 
     for name, value in variables.items():
         tb.append(f'{" " * (PRE_INDENT + 1)}{name} = {repr(value)}')
