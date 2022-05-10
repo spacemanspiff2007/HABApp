@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import re
 import warnings
@@ -9,6 +8,7 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
+from HABApp.core.asyncio import create_task
 from HABApp.core.const.hints import HINT_EVENT_CALLBACK
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextMixin, uses_post_event, \
     EventFilterBase, uses_item_registry, ContextBoundEventBusListener
@@ -136,9 +136,8 @@ class Rule(ContextMixin):
         assert isinstance(program, str), type(program)
         cb = wrap_func(callback, context=self._habapp_ctx)
 
-        asyncio.run_coroutine_threadsafe(
+        create_task(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
-            HABApp.core.const.loop
         )
 
     def get_rule(self, rule_name: str) -> 'Union[Rule, List[Rule]]':

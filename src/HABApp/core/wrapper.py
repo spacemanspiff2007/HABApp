@@ -18,8 +18,6 @@ post_event = uses_post_event()
 
 def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
                       do_print=False, logger: logging.Logger = log):
-    # lines = traceback.format_exc().splitlines()
-    # del lines[0:3]
     lines = format_exception(e)
 
     func_name = func if isinstance(func, str) else func.__name__

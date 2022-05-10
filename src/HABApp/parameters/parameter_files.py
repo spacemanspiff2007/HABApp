@@ -1,6 +1,5 @@
 import logging
 import threading
-import asyncio
 from pathlib import Path
 
 import HABApp
@@ -66,4 +65,4 @@ async def setup_param_files() -> bool:
 def reload_param_file(name: str):
     name = f'{PARAM_PREFIX}{name}.yml'
     path = HABApp.core.files.folders.get_path(name)
-    asyncio.run_coroutine_threadsafe(HABApp.core.files.manager.process_file(name, path), HABApp.core.const.loop)
+    HABApp.core.asyncio.create_task(HABApp.core.files.manager.process_file(name, path))
