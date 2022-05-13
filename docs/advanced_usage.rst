@@ -94,6 +94,16 @@ Example
    ...
 
 
+.. _ref_run_code_on_startup:
+
+Running Python code on startup
+------------------------------
+
+It's possible to run arbitrary code during the startup of HABApp. This can be achieved by creating a module/package
+called ``HABAppUser``. HABApp will try to import it before loading the configuration and thus execute the code.
+The module/package must be importable so it has to be in one of the ``PATH``/``PYTHONPATH`` folders or in the current
+working directory.
+
 
 Invoking openHAB actions
 ------------------------

@@ -149,3 +149,31 @@ The following handler writes to stdout
 
         formatter: HABApp_format
         level: DEBUG
+
+
+Add custom filters to loggers
+======================================
+
+It's possible to filter out certain parts of log files with a
+`filter <https://docs.python.org/3/library/logging.html?highlight=logging%20filter#logging.Filter>`_.
+The recommendation is to create the filter :ref:`during startup<ref_run_code_on_startup>`.
+
+This example ignores all messages for the ``HABApp.EventBus`` logger that contain `MyIgnoredString`.
+
+
+.. exec_code::
+   :hide_output:
+
+   import logging
+
+   # False to skip, True to log record
+   def filter(record: logging.LogRecord) -> bool:
+       return 'MyIgnoredString' not in record.msg
+
+
+   logging.getLogger('HABApp.EventBus').addFilter(filter)
+
+.. note::
+   | Regular expressions for a filter should be compiled outside of the filter function with ``re.compile``
+     for performance reasons.
+   | A simple subtext search however will always have way better performance.

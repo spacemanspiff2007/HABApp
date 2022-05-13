@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import sys
-import traceback
 import typing
 
 import HABApp
@@ -28,7 +27,7 @@ def main() -> typing.Union[int, str]:
 
         # see if we have user code (e.g. for additional logging configuration)
         try:
-            import HABAppUser
+            import HABAppUser   # noqa: F401
         except ModuleNotFoundError:
             pass
 
