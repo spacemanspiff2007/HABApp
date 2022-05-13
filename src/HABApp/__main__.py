@@ -23,9 +23,15 @@ def main() -> typing.Union[int, str]:
 
     log = logging.getLogger('HABApp')
 
-    cfg_folder = find_config_folder(args.config)
-
     try:
+        cfg_folder = find_config_folder(args.config)
+
+        # see if we have user code (e.g. for additional logging configuration)
+        try:
+            import HABAppUser
+        except ModuleNotFoundError:
+            pass
+
         # Shutdown handler for graceful shutdown
         HABApp.runtime.shutdown.register_signal_handler()
 
@@ -33,7 +39,7 @@ def main() -> typing.Union[int, str]:
         HABApp.core.const.loop.create_task(app.start(cfg_folder))
         HABApp.core.const.loop.run_forever()
     except Exception as e:
-        for line in traceback.format_exc().splitlines():
+        for line in HABApp.core.lib.exceptions.format_exception(e):
             log.error(line)
             print(e)
         return str(e)
