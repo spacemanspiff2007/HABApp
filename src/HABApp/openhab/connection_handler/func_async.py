@@ -3,6 +3,7 @@ import typing
 import warnings
 from typing import Any, Optional, Dict, List
 from urllib.parse import quote as quote_url
+
 from pydantic import parse_obj_as
 
 from HABApp.core.const.json import load_json
@@ -11,11 +12,15 @@ from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFo
 from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from HABApp.openhab.errors import ThingNotEditableError, \
     ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError
-from .http_connection import delete, get, post, put, async_get_root, async_get_uuid
+from .http_connection import delete, get, put, post, async_get_root, async_get_uuid, async_send_command, \
+    async_post_update
 
 if typing.TYPE_CHECKING:
+    post = post
     async_get_root = async_get_root
     async_get_uuid = async_get_uuid
+    async_send_command = async_send_command
+    async_post_update = async_post_update
 
 
 def convert_to_oh_type(_in: Any) -> str:
@@ -32,18 +37,6 @@ def convert_to_oh_type(_in: Any) -> str:
         return 'NULL'
 
     return str(_in)
-
-
-async def async_post_update(item, state: Any):
-    if not isinstance(state, str):
-        state = convert_to_oh_type(state)
-    await put(f'/rest/items/{item:s}/state', data=state)
-
-
-async def async_send_command(item, state: Any):
-    if not isinstance(state, str):
-        state = convert_to_oh_type(state)
-    await post(f'/rest/items/{item:s}', data=state)
 
 
 async def async_item_exists(item) -> bool:

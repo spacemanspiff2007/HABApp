@@ -3,6 +3,7 @@ import logging
 import traceback
 import typing
 from typing import Any, Optional, Final
+from asyncio import Queue, sleep, QueueEmpty
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -13,7 +14,8 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.const.json import dump_json, load_json
-from HABApp.core.logger import log_error
+from HABApp.core.logger import log_error, log_info, log_warning
+from HABApp.core.wrapper import process_exception, ignore_exception
 from HABApp.openhab.errors import OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
 from .http_connection_waiter import WaitBetweenConnects
 from ...core.lib import SingleTask
@@ -169,6 +171,9 @@ async def shutdown_connection():
     TASK_TRY_CONNECT.cancel()
     TASK_SSE_LISTENER.cancel()
 
+    TASK_QUEUE_WORKER.cancel()
+    TASK_QUEUE_WATCHER.cancel()
+
     await asyncio.sleep(0)
 
     # If we are already connected properly disconnect
@@ -257,6 +262,69 @@ async def start_sse_event_listener():
             set_offline(f'Uncaught error in process_sse_events: {e}')
 
 
+QUEUE = Queue()
+
+
+async def output_queue_listener():
+    # clear Queue
+    try:
+        while True:
+            await QUEUE.get_nowait()
+    except QueueEmpty:
+        pass
+
+    while True:
+        try:
+            while True:
+                item, state, is_cmd = await QUEUE.get()
+
+                if not isinstance(state, str):
+                    state = convert_to_oh_type(state)
+
+                if is_cmd:
+                    await post(f'/rest/items/{item:s}', data=state)
+                else:
+                    await put(f'/rest/items/{item:s}/state', data=state)
+        except Exception as e:
+            process_exception(output_queue_listener, e, logger=log)
+
+
+@ignore_exception
+async def output_queue_check_size():
+
+    first_msg_at = 150
+
+    upper = first_msg_at
+    lower = -1
+    last_info_at = first_msg_at // 2
+
+    while True:
+        await sleep(5)
+        size = QUEUE.qsize()
+
+        # small log msg
+        if size > upper:
+            upper = size * 2
+            lower = size // 2
+            log_warning(log, f'{size} messages in queue')
+        elif size < lower:
+            upper = max(size / 2, first_msg_at)
+            lower = size // 2
+            if lower <= last_info_at:
+                lower = -1
+                log_info(log, 'queue OK')
+            else:
+                log_info(log, f'{size} messages in queue')
+
+
+async def async_post_update(item, state: Any):
+    QUEUE.put_nowait((item, state, False))
+
+
+async def async_send_command(item, state: Any):
+    QUEUE.put_nowait((item, state, True))
+
+
 async def async_get_uuid() -> str:
     resp = await get('/rest/uuid', log_404=False)
     return await resp.text(encoding='utf-8')
@@ -289,7 +357,7 @@ async def try_connect():
 
             # It's possible that we get status 4XX during startup and then the response is empty
             runtime_info = root.get('runtimeInfo')
-            if runtime_info is None:
+            if not runtime_info:
                 log.info('... offline!')
                 continue
 
@@ -337,12 +405,19 @@ async def try_connect():
     # start sse processing
     TASK_SSE_LISTENER.start()
 
+    # output messages
+    TASK_QUEUE_WORKER.start()
+    TASK_QUEUE_WATCHER.start()
+
     ON_CONNECTED()
     return None
 
 
 TASK_SSE_LISTENER: Final = SingleTask(start_sse_event_listener, 'SSE event listener')
 TASK_TRY_CONNECT: Final = SingleTask(try_connect, 'Try OH connect')
+
+TASK_QUEUE_WORKER: Final = SingleTask(output_queue_listener, 'OhQueue')
+TASK_QUEUE_WATCHER: Final = SingleTask(output_queue_check_size, 'OhQueueSize')
 
 
 def __load_cfg():
@@ -357,3 +432,4 @@ HABApp.config.CONFIG.subscribe_for_changes(__load_cfg)
 
 # import it here otherwise we get cyclic imports
 from HABApp.openhab.connection_handler.sse_handler import on_sse_event  # noqa: E402
+from HABApp.openhab.connection_handler.func_async import convert_to_oh_type  # noqa: E402
