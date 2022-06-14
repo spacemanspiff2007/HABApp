@@ -1,9 +1,12 @@
+import asyncio
 import logging
 import typing
 
 import paho.mqtt.client as mqtt
 
 import HABApp
+from HABApp.core.asyncio import async_context
+from HABApp.core.const.topics import TOPIC_EVENTS
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
 from HABApp.core.wrapper import log_exception
@@ -12,7 +15,7 @@ from HABApp.mqtt.mqtt_payload import get_msg_payload
 from HABApp.runtime import shutdown
 
 log = logging.getLogger('HABApp.mqtt.connection')
-log_msg = logging.getLogger('HABApp.EventBus.mqtt')
+log_msg = logging.getLogger(f'{TOPIC_EVENTS}.mqtt')
 
 
 post_event = uses_post_event()
@@ -160,12 +163,19 @@ def process_msg(client, userdata, message: mqtt.MQTTMessage):
     if topic is None:
         return None
 
+    # Post events
+    asyncio.run_coroutine_threadsafe(send_event_async(topic, payload, message.retain), HABApp.core.const.loop)
+
+
+async def send_event_async(topic, payload, retain: bool):
+    ctx = async_context.set('MQTT')
+
     _item = None    # type: typing.Optional[HABApp.mqtt.items.MqttBaseItem]
     try:
         _item = get_item(topic)   # type: HABApp.mqtt.items.MqttBaseItem
     except ItemNotFoundException:
         # only create items for if the message has the retain flag
-        if message.retain:
+        if retain:
             _item = Items.add_item(HABApp.mqtt.items.MqttItem(topic))
 
     # we don't have an item -> we process only the event
@@ -177,7 +187,6 @@ def process_msg(client, userdata, message: mqtt.MQTTMessage):
     _old_state = _item.value
     _item.set_value(payload)
 
-    # Post events
     post_event(topic, MqttValueUpdateEvent(topic, payload))
-    if _old_state != payload:
+    if payload != _old_state:
         post_event(topic, MqttValueChangeEvent(topic, payload, _old_state))

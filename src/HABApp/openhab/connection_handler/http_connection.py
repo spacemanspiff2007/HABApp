@@ -13,15 +13,17 @@ from aiohttp_sse_client import client as sse_client
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
+from HABApp.core.asyncio import async_context
 from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.logger import log_error, log_info, log_warning
 from HABApp.core.wrapper import process_exception, ignore_exception
 from HABApp.openhab.errors import OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
 from .http_connection_waiter import WaitBetweenConnects
+from ...core.const.topics import TOPIC_EVENTS
 from ...core.lib import SingleTask
 
 log = logging.getLogger('HABApp.openhab.connection')
-log_events = logging.getLogger('HABApp.EventBus.openhab')
+log_events = logging.getLogger(f'{TOPIC_EVENTS}.openhab')
 
 
 IS_ONLINE: bool = False
@@ -213,6 +215,9 @@ async def setup_connection():
 
 
 async def start_sse_event_listener():
+
+    async_context.set('SSE')
+
     try:
         # cache so we don't have to look up every event
         _load_json = load_json
@@ -224,6 +229,7 @@ async def start_sse_event_listener():
                     'openhab/channels/,'    # Channel update
 
                     # Thing events - don't listen to updated events
+                    # 'openhab/things/*',
                     'openhab/things/*/added,'
                     'openhab/things/*/removed,'
                     'openhab/things/*/status,'

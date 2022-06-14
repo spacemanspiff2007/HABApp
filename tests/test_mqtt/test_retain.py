@@ -1,5 +1,5 @@
 from HABApp.core.internals import HINT_ITEM_REGISTRY
-from HABApp.mqtt.mqtt_connection import process_msg
+from HABApp.mqtt.mqtt_connection import send_event_async
 
 
 class MqttDummyMsg:
@@ -11,14 +11,14 @@ class MqttDummyMsg:
         self.qos = 0
 
 
-def test_retain_create(ir: HINT_ITEM_REGISTRY):
+async def test_retain_create(ir: HINT_ITEM_REGISTRY):
     topic = '/test/creation'
 
     assert not ir.item_exists(topic)
-    process_msg(None, None, MqttDummyMsg(topic, 'aaa', retain=False))
+    await send_event_async(topic, 'aaa', retain=False)
     assert not ir.item_exists(topic)
 
     # Retain True will create the item
-    process_msg(None, None, MqttDummyMsg(topic, 'adsf123', retain=True))
+    await send_event_async(topic, 'adsf123', retain=True)
     assert ir.item_exists(topic)
     assert ir.get_item(topic).value == 'adsf123'

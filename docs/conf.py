@@ -224,8 +224,9 @@ autodoc_pydantic_model_show_json = False
 autodoc_pydantic_model_show_field_summary = False
 
 # Field config
-autodoc_pydantic_field_show_alias = True
+autodoc_pydantic_field_show_alias = False
 autodoc_pydantic_field_list_validators = False
+autodoc_pydantic_field_swap_name_and_alias = True
 
 
 # ----------------------------------------------------------------------------------------------------------------------
