@@ -168,7 +168,7 @@ def process_msg(client, userdata, message: mqtt.MQTTMessage):
 
 
 async def send_event_async(topic, payload, retain: bool):
-    ctx = async_context.set('MQTT')
+    async_context.set('MQTT')
 
     _item = None    # type: typing.Optional[HABApp.mqtt.items.MqttBaseItem]
     try:

@@ -1,10 +1,6 @@
-import logging
-
 from pydantic import Field, conint
 
 from easyconfig import BaseModel
-
-log = logging.getLogger('HABApp.Config')
 
 
 class ThreadPoolConfig(BaseModel):
@@ -17,7 +13,16 @@ class ThreadPoolConfig(BaseModel):
     """Amount of threads to use for the executor"""
 
 
+class LoggingConfig(BaseModel):
+    use_buffer: bool = Field(True, alias='use buffer')
+    """Automatically inject a buffer for the event log"""
+
+    flush_every: float = Field(0.5, alias='flush every', ge=0.1)
+    """Wait time in seconds before the buffer gets flushed again when it was empty"""
+
+
 class HABAppConfig(BaseModel):
     """HABApp internal configuration. Only change values if you know what you are doing!"""
 
+    logging: LoggingConfig = Field(default_factory=LoggingConfig)
     thread_pool: ThreadPoolConfig = Field(default_factory=ThreadPoolConfig, alias='thread pool')

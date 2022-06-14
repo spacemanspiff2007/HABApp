@@ -1,7 +1,7 @@
 import logging
 import logging.config
 from pathlib import Path
-from typing import List
+from typing import List, TYPE_CHECKING
 
 import eascheduler
 import pydantic
@@ -10,7 +10,11 @@ import HABApp
 from HABApp import __version__
 from HABApp.config.config import CONFIG
 from .errors import InvalidConfigError, AbsolutePathExpected
-from .logging import create_default_logfile, get_logging_dict, rotate_files
+from .logging import create_default_logfile, get_logging_dict, rotate_files, inject_log_buffer
+from .logging.buffered_logger import BufferedLogger
+
+if TYPE_CHECKING:
+    from HABApp.core.internals.logging import HABAppQueueHandler
 
 log = logging.getLogger('HABApp.Config')
 
@@ -27,7 +31,6 @@ def load_config(config_folder: Path):
     # Try load the logging config
     try:
         load_logging_cfg(logging_cfg_path)
-        rotate_files()
         loaded_logging = True
     except (AbsolutePathExpected, InvalidConfigError):
         pass
@@ -36,7 +39,6 @@ def load_config(config_folder: Path):
 
     if not loaded_logging:
         load_logging_cfg(logging_cfg_path)
-        rotate_files()
 
     # Watch folders, so we can reload the config on the fly
     filter = HABApp.core.files.watcher.FileEndingFilter('.yml')
@@ -44,6 +46,14 @@ def load_config(config_folder: Path):
         config_folder, config_files_changed, filter, watch_subfolders=False
     )
     HABApp.core.files.watcher.add_folder_watch(watcher)
+
+    HABApp.runtime.shutdown.register_func(stop_queue_handlers, last=True, msg='Stopping logging threads')
+    CONFIG.habapp.logging.subscribe_for_changes(set_flush_delay)
+
+
+def set_flush_delay():
+    from HABApp.core.internals.logging import HABAppQueueHandler
+    HABAppQueueHandler.FLUSH_DELAY = CONFIG.habapp.logging.flush_every
 
 
 async def config_files_changed(paths: List[Path]):
@@ -78,9 +88,28 @@ def load_habapp_cfg(do_print=False):
     log.debug('Loaded HABApp config')
 
 
+QUEUE_HANDLER: List['HABAppQueueHandler'] = []
+
+
+def stop_queue_handlers():
+    for qh in QUEUE_HANDLER:
+        qh.signal_stop()
+    while QUEUE_HANDLER:
+        qh = QUEUE_HANDLER.pop()
+        qh.stop()
+
+
 def load_logging_cfg(path: Path):
-    log_msgs = []
-    cfg = get_logging_dict(path, log_msgs)
+    # stop buffered handlers
+    stop_queue_handlers()
+
+    buf_log = BufferedLogger()
+    cfg = get_logging_dict(path, buf_log)
+
+    if CONFIG.habapp.logging.use_buffer:
+        q_handlers = inject_log_buffer(cfg, buf_log)
+    else:
+        q_handlers = []
 
     # load prepared logging
     try:
@@ -90,9 +119,15 @@ def load_logging_cfg(path: Path):
         log.error(f'Error loading logging config: {e}')
         raise InvalidConfigError from None
 
+    rotate_files()
+
+    # start buffered handlers
+    for qh in q_handlers:
+        QUEUE_HANDLER.append(qh)
+        qh.start()
+
     logging.getLogger('HABApp').info(f'HABApp Version {__version__}')
 
-    # log delayed messages
-    for lvl, msg in log_msgs:
-        log.log(lvl, msg)
+    # write buffered messages
+    buf_log.flush(log)
     return None

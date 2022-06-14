@@ -49,8 +49,6 @@ class Subscribe(BaseModel):
 
 
 class Publish(BaseModel):
-    """"""
-
     qos: QOS = Field(default=0, description='Default QoS when publishing values')
     retain: bool = Field(default=False, description='Default retain flag when publishing values')
 
