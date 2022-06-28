@@ -15,7 +15,7 @@ import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.asyncio import async_context
 from HABApp.core.const.json import dump_json, load_json
-from HABApp.core.logger import log_error, log_info, log_warning
+from HABApp.core.logger import log_info, log_warning
 from HABApp.core.wrapper import process_exception, ignore_exception
 from HABApp.openhab.errors import OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
 from .http_connection_waiter import WaitBetweenConnects
@@ -194,7 +194,7 @@ async def setup_connection():
 
     # do not run without an url
     if url == '':
-        log_error(log, 'No URL configured for openHAB!')
+        log_warning(log, 'No URL configured for openHAB!')
         return None
 
     if not config.connection.verify_ssl:
@@ -240,6 +240,11 @@ async def start_sse_event_listener():
             async for event in event_source:
 
                 e_str = event.data
+
+                # Alive event from openhab to detect dropped connections
+                # -> Can be ignored on the HABApp side
+                if e_str == '{"type":"ALIVE"}':
+                    continue
 
                 try:
                     e_json = _load_json(e_str)

@@ -146,3 +146,5 @@ HABApp
 .. autopydantic_model:: HABAppConfig
 
 .. autopydantic_model:: ThreadPoolConfig
+
+.. autopydantic_model:: LoggingConfig
