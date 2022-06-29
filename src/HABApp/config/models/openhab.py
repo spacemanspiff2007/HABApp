@@ -22,6 +22,12 @@ class General(BaseModel):
         description='If True HABApp will wait for items from the openHAB instance before loading any rules on startup'
     )
 
+    # Advanced settings
+    min_start_level: int = Field(
+        100, ge=40, le=100, in_file=False,
+        description='Minimum openHAB start level to load items and listen to events',
+    )
+
 
 class Connection(BaseModel):
     url: Union[AnyHttpUrl, Literal['']] = Field(

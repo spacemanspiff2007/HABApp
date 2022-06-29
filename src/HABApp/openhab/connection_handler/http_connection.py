@@ -382,15 +382,18 @@ async def try_connect():
                 log.warning('HABApp requires at least openHAB version 3.3!')
 
             # wait for openhab startup to be complete
-            last_level = -100
+            initial_level = -100
+            last_level = initial_level
             while True:
+                min_start_level = HABApp.CONFIG.openhab.general.min_start_level
+
                 system_info = await async_get_system_info()
                 start_lvl = system_info.get('systemInfo', {}).get('startLevel', -1)
-                if start_lvl >= 100:
+                if start_lvl >= min_start_level:
                     break
 
                 # initial msg
-                if last_level == -100:
+                if last_level == initial_level:
                     log.info('Waiting for openHAB startup to be complete')
 
                 # show current status
@@ -401,7 +404,7 @@ async def try_connect():
                 await asyncio.sleep(1)
 
             # Startup complete
-            if last_level != -100:
+            if last_level != initial_level:
                 log.info('openHAB startup complete')
             break
         except Exception as e:
