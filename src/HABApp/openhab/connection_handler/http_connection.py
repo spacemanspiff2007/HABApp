@@ -355,6 +355,40 @@ async def async_get_system_info() -> dict:
     return await resp.json(loads=load_json, encoding='utf-8')
 
 
+async def async_get_start_level(default_level: int = -10) -> int:
+    system_info = await async_get_system_info()
+    return system_info.get('systemInfo', {}).get('startLevel', default_level)
+
+
+async def wait_for_min_start_level():
+
+    waited_for_oh = False
+    last_level = -100
+
+    while True:
+        start_level_is = await async_get_start_level()
+        start_level_min = HABApp.CONFIG.openhab.general.min_start_level
+        if start_level_is >= start_level_min:
+            break
+
+        # show msg only once
+        if not waited_for_oh:
+            log.info('Waiting for openHAB startup to be complete')
+
+        # show start level change
+        if last_level != start_level_is:
+            log.debug(f'Startlevel: {start_level_is}')
+        last_level = start_level_is
+
+        # wait for openhab
+        waited_for_oh = True
+        await asyncio.sleep(1)
+
+    # Startup complete
+    if waited_for_oh:
+        log.info('openHAB startup complete')
+
+
 async def try_connect():
     global IS_ONLINE
 
@@ -382,30 +416,7 @@ async def try_connect():
                 log.warning('HABApp requires at least openHAB version 3.3!')
 
             # wait for openhab startup to be complete
-            initial_level = -100
-            last_level = initial_level
-            while True:
-                min_start_level = HABApp.CONFIG.openhab.general.min_start_level
-
-                system_info = await async_get_system_info()
-                start_lvl = system_info.get('systemInfo', {}).get('startLevel', -1)
-                if start_lvl >= min_start_level:
-                    break
-
-                # initial msg
-                if last_level == initial_level:
-                    log.info('Waiting for openHAB startup to be complete')
-
-                # show current status
-                if last_level != start_lvl:
-                    log.debug(f'Startlevel: {start_lvl}')
-                last_level = start_lvl
-
-                await asyncio.sleep(1)
-
-            # Startup complete
-            if last_level != initial_level:
-                log.info('openHAB startup complete')
+            await wait_for_min_start_level()
             break
         except Exception as e:
             if isinstance(e, (OpenhabDisconnectedError, ExpectedSuccessFromOpenhab)):
