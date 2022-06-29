@@ -1,10 +1,11 @@
 import sys
-from typing import Tuple, Optional
+from pathlib import Path
+from typing import Optional, Tuple
 
 import pydantic
-from easyconfig import BaseModel
-from pathlib import Path
 from pydantic import Field
+
+from easyconfig.models import BaseModel
 
 if sys.version_info < (3, 8):
     from typing_extensions import Literal
@@ -25,8 +26,8 @@ class TLSSettings(BaseModel):
 
 class Connection(BaseModel):
     client_id: str = 'HABApp'
-    host: str = ''
-    port: int = 8883
+    host: str = Field('', description='Connect to this host. Empty string ("") disables the connection.')
+    port: int = 1883
     user: str = ''
     password: str = ''
     tls: TLSSettings = Field(default_factory=TLSSettings)

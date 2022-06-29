@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Literal
 
 from pydantic import Field, AnyHttpUrl, ByteSize, validator
 
@@ -24,7 +24,8 @@ class General(BaseModel):
 
 
 class Connection(BaseModel):
-    url: Union[AnyHttpUrl] = Field('http://localhost:8080', description='Connect to this url')
+    url: Union[AnyHttpUrl, Literal['']] = Field(
+        'http://localhost:8080', description='Connect to this url. Empty string ("") disables the connection.')
     user: str = ''
     password: str = ''
     verify_ssl: bool = Field(True, description='Check certificates when using https')

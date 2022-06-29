@@ -193,8 +193,8 @@ async def setup_connection():
     url: str = config.connection.url
 
     # do not run without an url
-    if url == '':
-        log_warning(log, 'No URL configured for openHAB!')
+    if not url:
+        log_info(log, 'openHAB connection disabled!')
         return None
 
     if not config.connection.verify_ssl:
