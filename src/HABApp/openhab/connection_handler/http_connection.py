@@ -225,8 +225,8 @@ async def start_sse_event_listener():
 
         async with sse_client.EventSource(
                 url='/rest/events?topics='
-                    'openhab/items/,'       # Item updates
-                    'openhab/channels/,'    # Channel update
+                    'openhab/items/*,'       # Item updates
+                    'openhab/channels/*,'    # Channel update
 
                     # Thing events - don't listen to updated events
                     # 'openhab/things/*',
