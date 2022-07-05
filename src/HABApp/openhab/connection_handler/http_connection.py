@@ -223,20 +223,8 @@ async def start_sse_event_listener():
         _load_json = load_json
         _see_handler = on_sse_event
 
-        async with sse_client.EventSource(
-                url='/rest/events?topics='
-                    'openhab/items/,'       # Item updates
-                    'openhab/channels/,'    # Channel update
-
-                    # Thing events - don't listen to updated events
-                    # 'openhab/things/*',
-                    'openhab/things/*/added,'
-                    'openhab/things/*/removed,'
-                    'openhab/things/*/status,'
-                    'openhab/things/*/statuschanged',
-                session=HTTP_SESSION,
-                ssl=HTTP_VERIFY_SSL
-        ) as event_source:
+        async with sse_client.EventSource(url=f'/rest/events?topics={HABApp.CONFIG.openhab.connection.topic_filter}',
+                                          session=HTTP_SESSION, ssl=HTTP_VERIFY_SSL) as event_source:
             async for event in event_source:
 
                 e_str = event.data

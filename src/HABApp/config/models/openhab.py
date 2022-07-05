@@ -19,7 +19,7 @@ class General(BaseModel):
     )
     wait_for_openhab: bool = Field(
         True,
-        description='If True HABApp will wait for items from the openHAB instance before loading any rules on startup'
+        description='If True HABApp will wait for a successful openHAB connection before loading any rules on startup'
     )
 
     # Advanced settings
@@ -41,6 +41,17 @@ class Connection(BaseModel):
         'Buffer for reading lines in the SSE event handler. This is the buffer '
         'that gets allocated for every(!) request and SSE message that the client processes. '
         'Increase only if you get error messages or disconnects e.g. if you use large images.'
+    )
+
+    topic_filter: str = Field(
+        'openhab/items/*,'      # Item updates
+        'openhab/channels/*,'   # Channel update
+        # Thing events - don't listen to updated events
+        # todo: check if this might be a good filter: 'openhab/things/*',
+        'openhab/things/*/added,openhab/things/*/removed,openhab/things/*/status,openhab/things/*/statuschanged',
+        alias='topic filter', in_file=False,
+        description='Topic filter for subscribing to openHAB. This filter is processed by openHAB and only events'
+                    'matching this filter will be sent to HABApp.'
     )
 
     @validator('buffer')

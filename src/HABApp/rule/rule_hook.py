@@ -20,7 +20,8 @@ class HABAppRuleHook:
         obj[_NAME] = cls(cb_register_rule, cb_suggest_name, runtime, rule_file)
         return obj
 
-    def __init__(self, cb_register_rule: Callable[['HABApp.rule.Rule'], Any],
+    def __init__(self,
+                 cb_register_rule: Callable[['HABApp.rule.Rule'], Any],
                  cb_suggest_name: Callable[['HABApp.rule.Rule'], str],
                  runtime: 'HABApp.runtime.Runtime', rule_file: 'HABApp.rule_manager.RuleFile'):
         # callbacks
