@@ -1,20 +1,18 @@
 import logging
 import logging.config
 from pathlib import Path
-from typing import List, TYPE_CHECKING
+from typing import List
 
-import eascheduler
 import pydantic
 
 import HABApp
+import eascheduler
 from HABApp import __version__
 from HABApp.config.config import CONFIG
+from HABApp.config.logging import HABAppQueueHandler
 from .errors import InvalidConfigError, AbsolutePathExpected
 from .logging import create_default_logfile, get_logging_dict, rotate_files, inject_log_buffer
 from .logging.buffered_logger import BufferedLogger
-
-if TYPE_CHECKING:
-    from HABApp.core.internals.logging import HABAppQueueHandler
 
 log = logging.getLogger('HABApp.Config')
 
@@ -52,7 +50,6 @@ def load_config(config_folder: Path):
 
 
 def set_flush_delay():
-    from HABApp.core.internals.logging import HABAppQueueHandler
     HABAppQueueHandler.FLUSH_DELAY = CONFIG.habapp.logging.flush_every
 
 

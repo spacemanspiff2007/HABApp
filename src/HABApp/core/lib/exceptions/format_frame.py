@@ -9,6 +9,8 @@ from .format_frame_vars import format_frame_variables
 SUPPRESSED_HABAPP_PATHS = (
     # This exception formatter
     re.compile(r'[/\\]HABApp[/\\]core[/\\]lib[/\\]exceptions[/\\]'),
+    # Wrapper which usually generates this traceback
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]wrapper.py'),
 
     # Rule file loader
     re.compile(r'[/\\]HABApp[/\\]rule_manager[/\\]'),
