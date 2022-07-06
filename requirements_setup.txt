@@ -3,13 +3,13 @@ pydantic    >= 1.9,     < 1.10
 pendulum    >= 2.1.2,   < 2.2
 bidict      >= 0.22,    < 0.23
 watchdog    >= 2.1.7,   < 2.2
-ujson       >= 5.2,     < 5.3
+ujson       >= 5.4,     < 5.5
 paho-mqtt   >= 1.6,     < 1.7
 
-immutables  == 0.17
+immutables  == 0.18
 eascheduler == 0.1.5
 easyconfig  == 0.2.4
-stack_data  == 0.2.0
+stack_data  == 0.3.0
 
 voluptuous      == 0.13.1
 
