@@ -166,4 +166,5 @@ def test_regex(pytestconfig):
     assert not skip_file('/HABApp/core/lib/asdf/asdf')
 
     assert skip_file(r'\Python310\lib\runpy.py')
+    assert skip_file(r'/usr/lib/python3.10/runpy.py')
     assert skip_file(r'\Python310\lib\asyncio\tasks.py')

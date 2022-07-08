@@ -21,7 +21,7 @@ SUPPRESSED_HABAPP_PATHS = (
 
 SUPPRESSED_PATHS = (
     # Libraries of base installation
-    re.compile(r'[/\\](?:python\d\.\d+|python\d{2,3})[/\\]lib[/\\]', re.IGNORECASE),
+    re.compile(r'[/\\](?:python\d\.\d+|python\d{2,3})[/\\](?:lib[/\\]|\w+\.py.*$)', re.IGNORECASE),
     # Libraries in venv
     re.compile(r'[/\\]lib[/\\]site-packages[/\\]', re.IGNORECASE),
 )

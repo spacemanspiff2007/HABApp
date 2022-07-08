@@ -101,7 +101,7 @@ DuskJob
 Configuration
 ======================================
 
-.. autopydantic_model:: HABApp.config.models.ApplicationConfig
+.. autopydantic_model:: HABApp.config.models.application.ApplicationConfig
 
 Directories
 """"""""""""""""""""""""""""""""""""""
