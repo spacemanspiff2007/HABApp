@@ -54,7 +54,7 @@ class Context:
 HINT_CONTEXT_OBJ = TypeVar('HINT_CONTEXT_OBJ', bound=Context)
 
 
-class ContextMixin:
+class ContextProvidingObj:
     def __init__(self, context: Optional[HINT_CONTEXT_OBJ] = None, **kwargs):
         super().__init__(**kwargs)
         self._habapp_ctx: HINT_CONTEXT_OBJ = context

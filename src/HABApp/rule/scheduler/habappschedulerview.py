@@ -12,10 +12,10 @@ from HABApp.core.const.hints import HINT_SCHEDULER_CALLBACK
 from HABApp.core.internals import wrap_func
 from HABApp.rule.scheduler.executor import WrappedFunctionExecutor
 from HABApp.rule.scheduler.scheduler import HABAppScheduler as _HABAppScheduler
-from HABApp.core.internals import ContextMixin, HINT_CONTEXT_OBJ
+from HABApp.core.internals import ContextProvidingObj, HINT_CONTEXT_OBJ
 
 
-class HABAppSchedulerView(SchedulerView, ContextMixin):
+class HABAppSchedulerView(SchedulerView, ContextProvidingObj):
     def __init__(self, context: 'HABApp.rule_ctx.HABAppRuleContext'):
         super().__init__(_HABAppScheduler(), WrappedFunctionExecutor)
         self._habapp_rule_ctx: HINT_CONTEXT_OBJ = context

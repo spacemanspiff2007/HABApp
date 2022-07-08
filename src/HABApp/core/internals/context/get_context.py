@@ -2,14 +2,14 @@ import sys
 from typing import Optional, Union, TYPE_CHECKING
 
 from HABApp.core.errors import ContextNotSetError, ContextNotFoundError
-from HABApp.core.internals.context import ContextMixin, ContextBoundObj, HINT_CONTEXT_OBJ
+from HABApp.core.internals.context import ContextProvidingObj, ContextBoundObj, HINT_CONTEXT_OBJ
 
 if TYPE_CHECKING:
     import HABApp
     import types
 
 
-def get_current_context(obj: Optional[ContextMixin] = None) -> 'HABApp.rule_ctx.HABAppRuleContext':
+def get_current_context(obj: Optional[ContextProvidingObj] = None) -> 'HABApp.rule_ctx.HABAppRuleContext':
     if obj is not None:
         return obj._habapp_ctx
 
@@ -21,8 +21,8 @@ def get_current_context(obj: Optional[ContextMixin] = None) -> 'HABApp.rule_ctx.
         except ValueError:
             raise ContextNotFoundError() from None
 
-        ctx_obj: Union[None, object, ContextMixin] = frm.f_locals.get('self', None)
-        if ctx_obj is None or not isinstance(ctx_obj, ContextMixin):
+        ctx_obj: Union[None, object, ContextProvidingObj] = frm.f_locals.get('self', None)
+        if ctx_obj is None or not isinstance(ctx_obj, ContextProvidingObj):
             continue
 
         ctx = ctx_obj._habapp_ctx

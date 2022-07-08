@@ -42,10 +42,7 @@ def format_frame_info(tb: List[str], frame_info: FrameInfo, is_last=False) -> bo
 
     # get indentation based on max lineno
     max_line = frame_info.lines[-1].lineno
-    indent = 1
-    while 10 ** indent < max_line:
-        indent += 1
-    indent += 1
+    indent = len(str(max_line)) + 1
 
     tb.append(f'File "{filename}", line {frame_info.lineno} in {frame_info.code.co_name}')
     tb.append(SEPARATOR_NEW_FRAME)

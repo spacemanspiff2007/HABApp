@@ -1,5 +1,5 @@
 from .proxy import uses_get_item, uses_item_registry, uses_post_event, uses_event_bus, setup_internals
-from .context import ContextMixin, Context, ContextBoundObj, get_current_context, HINT_CONTEXT_OBJ, AutoContextBoundObj
+from .context import ContextProvidingObj, Context, ContextBoundObj, get_current_context, HINT_CONTEXT_OBJ, AutoContextBoundObj
 
 # isort: split
 

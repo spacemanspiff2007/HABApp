@@ -3,7 +3,7 @@ from typing import Optional, TypeVar
 
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.internals import HINT_CONTEXT_OBJ, ContextMixin, uses_event_bus
+from HABApp.core.internals import HINT_CONTEXT_OBJ, ContextProvidingObj, uses_event_bus
 from HABApp.core.lib import format_exception
 
 default_logger = logging.getLogger('HABApp.Worker')
@@ -11,7 +11,7 @@ default_logger = logging.getLogger('HABApp.Worker')
 event_bus = uses_event_bus()
 
 
-class WrappedFunctionBase(ContextMixin):
+class WrappedFunctionBase(ContextProvidingObj):
 
     def __init__(self, func: callable, name: Optional[str] = None, logger: Optional[logging.Logger] = None,
                  context: Optional[HINT_CONTEXT_OBJ] = None):

@@ -10,7 +10,7 @@ import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.asyncio import create_task
 from HABApp.core.const.hints import HINT_EVENT_CALLBACK
-from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextMixin, uses_post_event, \
+from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextProvidingObj, uses_post_event, \
     EventFilterBase, uses_item_registry, ContextBoundEventBusListener
 from HABApp.core.internals import wrap_func
 from HABApp.core.items import BaseItem, HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseValueItem
@@ -37,7 +37,7 @@ post_event = uses_post_event()
 item_registry = uses_item_registry()
 
 
-class Rule(ContextMixin):
+class Rule(ContextProvidingObj):
     def __init__(self):
         super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
 
@@ -68,9 +68,10 @@ class Rule(ContextMixin):
         """
 
     def __repr__(self):
+        # empty string, so we have a space if we have more than one entry
         parts = ['']
 
-        # rule name if it is different than the class
+        # rule name if it is different from the class
         cls_name = self.__class__.__name__
         rule_name = str(self.rule_name)
         if cls_name != rule_name:
