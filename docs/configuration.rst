@@ -1,7 +1,10 @@
-
-
+**************************************
 Configuration
-==================================
+**************************************
+
+Description
+======================================
+
 Configuration is done through ``config.yml`` The parent folder of the file can be specified with ``-c PATH`` or ``--config PATH``.
 If nothing is specified the file ``config.yml`` is searched in the subdirectory `HABApp` in
 
@@ -12,8 +15,8 @@ If nothing is specified the file ``config.yml`` is searched in the subdirectory 
 If the config does not yet exist in the folder a blank configuration will be created
 
 
-Example configuration
-------------------------------
+Example
+======================================
 .. code-block:: yaml
 
     directories:
@@ -78,6 +81,57 @@ Example configuration
 
 
 
-Reference
-------------
-All possible configuration options are described in :ref:`the configuration reference <ref_configuration_reference>`.
+Configuration Reference
+======================================
+
+All possible configuration options are described here. Not all entries are created by default in the config file
+and one should take extra care when changing those entries.
+
+
+.. autopydantic_model:: HABApp.config.models.application.ApplicationConfig
+
+Directories
+--------------------------------------
+
+.. autopydantic_model:: HABApp.config.models.directories.DirectoriesConfig
+   :exclude-members: create_folders
+
+Location
+--------------------------------------
+
+.. autopydantic_model:: HABApp.config.models.location.LocationConfig
+
+MQTT
+--------------------------------------
+
+.. py:currentmodule:: HABApp.config.models.mqtt
+
+.. autopydantic_model:: MqttConfig
+
+.. autopydantic_model:: Connection
+.. autopydantic_model:: TLSSettings
+.. autopydantic_model:: Subscribe
+.. autopydantic_model:: Publish
+.. autopydantic_model:: General
+
+Openhab
+--------------------------------------
+
+.. py:currentmodule:: HABApp.config.models.openhab
+
+.. autopydantic_model:: OpenhabConfig
+
+.. autopydantic_model:: Connection
+.. autopydantic_model:: Ping
+.. autopydantic_model:: General
+
+HABApp
+--------------------------------------
+
+.. py:currentmodule:: HABApp.config.models.habapp
+
+.. autopydantic_model:: HABAppConfig
+
+.. autopydantic_model:: ThreadPoolConfig
+
+.. autopydantic_model:: LoggingConfig

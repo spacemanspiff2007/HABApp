@@ -48,7 +48,7 @@ def test_sample_yaml(pytestconfig):
 
 
 def test_config_documentation_complete(pytestconfig):
-    cfg_docs: Path = pytestconfig.rootpath / 'docs' / 'class_reference.rst'
+    cfg_docs: Path = pytestconfig.rootpath / 'docs' / 'configuration.rst'
     cfg_model_dir: Path = pytestconfig.rootpath / 'src' / 'HABApp' / 'config' / 'models'
     assert cfg_model_dir.is_dir()
 

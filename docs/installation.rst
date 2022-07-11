@@ -187,6 +187,8 @@ The image supports the following environment variables.
       - User id at which HABApp will run (Optional, default: ``9001``)
     * - ``GROUP_ID``
       - Group id at which HABApp will run (Optional, default: ``USER_ID``)
+    * - ``HABAPP_HOME``
+      -  Directory in which the config resides (in subdirectory "config") default: ``habapp``)
 
 
 Running image from command line
