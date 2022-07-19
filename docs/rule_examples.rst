@@ -139,7 +139,7 @@ to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more inform
             self.listen_event('HABApp.Errors', self.on_error, EventFilter(HABAppException))
 
         def on_error(self, error_event: HABAppException):
-            msg = event.to_str() if isinstance(event, HABAppException) else event
+            msg = error_event.to_str() if isinstance(error_event, HABAppException) else error_event
             print(msg)
 
     NotifyOnError()
@@ -154,6 +154,7 @@ to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more inform
         def faulty_function(self):
             1 / 0
     FaultyRule()
+
     # ------------ hide: start ------------
     runner.process_events()
     runner.tear_down()

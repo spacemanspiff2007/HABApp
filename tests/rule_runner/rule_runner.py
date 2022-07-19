@@ -1,6 +1,9 @@
+from typing import List
+
 from pytest import MonkeyPatch
 
 import HABApp
+import HABApp.core.lib.exceptions.format
 import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.habappschedulerview as ha_sched
 from HABApp.core.asyncio import async_context
@@ -8,6 +11,7 @@ from HABApp.core.internals import setup_internals, ItemRegistry, EventBus
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
 from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
+from HABApp.core.lib.exceptions.format import fallback_format
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
 
@@ -38,21 +42,22 @@ class DummyRuntime(Runtime):
         pass
 
 
+def raising_fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
+    traceback = fallback_format(e, existing_traceback)
+    traceback = traceback
+    raise
+
+
 class SimpleRuleRunner:
     def __init__(self):
         self.loaded_rules = []
-        self.original_scheduler = None
 
         self.monkeypatch = MonkeyPatch()
         self.restore = []
-        self.__is_setup = False
 
     def submit(self, callback, *args, **kwargs):
-        # submit never raises and exception, so we don't do it here, too
-        try:
-            callback(*args, **kwargs)
-        except Exception as e:  # noqa: F841
-            pass
+        # This executes the callback so we can not ignore exceptions
+        callback(*args, **kwargs)
 
     def set_up(self):
         # ensure that we call setup only once!
@@ -74,6 +79,9 @@ class SimpleRuleRunner:
         # patch worker with a synchronous worker
         self.monkeypatch.setattr(wrapped_thread, 'WORKERS', self)
         self.monkeypatch.setattr(wrapper, 'SYNC_CLS', WrappedThreadFunction, raising=False)
+
+        # raise exceptions during error formatting
+        self.monkeypatch.setattr(HABApp.core.lib.exceptions.format, 'fallback_format', raising_fallback_format)
 
         # patch scheduler, so we run synchronous
         self.monkeypatch.setattr(ha_sched, '_HABAppScheduler', SyncScheduler)
@@ -102,6 +110,5 @@ class SimpleRuleRunner:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.tear_down()
-
         # do not supress exception
         return False

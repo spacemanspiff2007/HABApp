@@ -40,8 +40,12 @@ def format_frame_info(tb: List[str], frame_info: FrameInfo, is_last=False) -> bo
     if not is_last and skip_file(filename):
         return False
 
-    # get indentation based on max lineno
-    max_line = frame_info.lines[-1].lineno
+    # calc max line nr for indentation
+    max_line = frame_info.lineno + frame_info.options.after
+    # it's possible that his list is empty (e.g. if we execode in sphinx-exec-code)
+    if frame_info.lines:
+        max_line = frame_info.lines[-1].lineno
+
     indent = len(str(max_line)) + 1
 
     tb.append(f'File "{filename}", line {frame_info.lineno} in {frame_info.code.co_name}')

@@ -16,6 +16,23 @@ def append_short_traceback(tb: List[str], e: Union[Exception, Tuple[Any, Any, An
 DEFAULT_OPTIONS = Options(include_signature=True, max_lines_per_piece=5)
 
 
+def fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
+    # in case something goes wrong while formatting the traceback
+    # we still want to show at least a small error message!
+    new_tb = [f'Error while formatting traceback: {e}']
+    append_short_traceback(new_tb, e)
+    print(new_tb)
+
+    # add traceback so we have some more information
+    if existing_traceback:
+        new_tb.append('')
+        new_tb.append(SEPARATOR_NEW_FRAME)
+        new_tb.append('Partial Traceback:')
+        new_tb.append(SEPARATOR_NEW_FRAME)
+        new_tb.extend(existing_traceback)
+    return new_tb
+
+
 def format_exception(e: Union[Exception, Tuple[Any, Any, Any]]) -> List[str]:
     tb = []
 
@@ -37,18 +54,6 @@ def format_exception(e: Union[Exception, Tuple[Any, Any, Any]]) -> List[str]:
         append_short_traceback(tb, e)
 
     except Exception as e:
-        # in case something goes wrong while formatting the traceback
-        # we still want to show at least a small error message!
-        new_tb = [f'Error while formatting traceback: {e}']
-        append_short_traceback(new_tb, e)
-
-        # add traceback so we have some more information
-        new_tb.append('')
-        new_tb.append(SEPARATOR_NEW_FRAME)
-        new_tb.append('Partial Traceback:')
-        new_tb.append(SEPARATOR_NEW_FRAME)
-        new_tb.append('')
-        new_tb.extend(tb)
-        return new_tb
+        return fallback_format(e, tb)
 
     return tb

@@ -24,7 +24,7 @@ class General(BaseModel):
 
     # Advanced settings
     min_start_level: int = Field(
-        100, ge=20, le=100, in_file=False,
+        70, ge=0, le=100, in_file=False,
         description='Minimum openHAB start level to load items and listen to events',
     )
 

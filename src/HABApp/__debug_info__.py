@@ -1,16 +1,19 @@
 import platform
 import sys
+from HABApp.__version__ import __version__
 
 
 def get_debug_info() -> str:
 
     info = {
+        'HABApp': __version__,
         'Platform': platform.platform(),
         'Machine': platform.machine(),
-        'Python version': sys.version,
+        'Python': sys.version,
     }
 
-    ret = '\n'.join('{:20s}: {:s}'.format(k, str(v).replace('\n', '')) for k, v in info.items())
+    indent = max(map(lambda x: len(x), info))
+    ret = '\n'.join('{:{indent}s}: {:s}'.format(k, str(v).replace('\n', ''), indent=indent) for k, v in info.items())
 
     try:
         import pkg_resources

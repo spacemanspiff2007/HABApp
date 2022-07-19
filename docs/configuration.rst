@@ -101,37 +101,78 @@ Location
 
 .. autopydantic_model:: HABApp.config.models.location.LocationConfig
 
+
+
+
 MQTT
 --------------------------------------
-
 .. py:currentmodule:: HABApp.config.models.mqtt
 
 .. autopydantic_model:: MqttConfig
 
+Connection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autopydantic_model:: Connection
+
+TLS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autopydantic_model:: TLSSettings
+
+Subscribe
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autopydantic_model:: Subscribe
+
+Publish
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autopydantic_model:: Publish
+
+General
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autopydantic_model:: General
+
+
+
 
 Openhab
 --------------------------------------
-
 .. py:currentmodule:: HABApp.config.models.openhab
 
 .. autopydantic_model:: OpenhabConfig
 
+
+.. _CONFIG_OPENHAB_CONNECTION:
+
+Connection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autopydantic_model:: Connection
+
+Ping
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autopydantic_model:: Ping
+
+General
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autopydantic_model:: General
+
+
+
+
 
 HABApp
 --------------------------------------
-
 .. py:currentmodule:: HABApp.config.models.habapp
 
 .. autopydantic_model:: HABAppConfig
 
+ThreadPool
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autopydantic_model:: ThreadPoolConfig
+
+Logging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autopydantic_model:: LoggingConfig

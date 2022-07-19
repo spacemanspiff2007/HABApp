@@ -25,7 +25,7 @@ def main() -> typing.Union[int, str]:
     try:
         cfg_folder = find_config_folder(args.config)
 
-        # see if we have user code (e.g. for additional logging configuration)
+        # see if we have user code (e.g. for additional logging configuration or additional setup)
         try:
             import HABAppUser   # noqa: F401
         except ModuleNotFoundError:

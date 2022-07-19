@@ -22,6 +22,7 @@ Welcome to the HABApp documentation!
    util
    rule_examples
    tips
+   troubleshooting
    class_reference
 
 
