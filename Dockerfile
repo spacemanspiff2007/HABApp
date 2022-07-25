@@ -1,4 +1,4 @@
-FROM python:3.9-slim as buildimage
+FROM python:3.10 as buildimage
 
 COPY . /tmp/app_install
 
@@ -7,7 +7,7 @@ RUN set -eux; \
 	cd /tmp/app_install; \
 	pip wheel --wheel-dir=/root/wheels --use-feature=in-tree-build .
 
-FROM python:3.9-slim
+FROM python:3.10
 
 COPY --from=buildimage /root/wheels /root/wheels
 COPY container/entrypoint.sh /entrypoint.sh
