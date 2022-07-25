@@ -1,17 +1,24 @@
-from . import const
-from . import lib
-from . import context
+from HABApp.core import const
+from HABApp.core import lib
+from HABApp.core import errors
 
-from . import wrapper
-from . import logger
+# isort: split
 
-from .wrappedfunction import WrappedFunction
+from HABApp.core import asyncio
 
-from .event_bus_listener import EventBusListener
+# isort: split
+from HABApp.core import internals
+
+from HABApp.core import wrapper
+from HABApp.core import logger
+
+# isort: split
 
 import HABApp.core.events
 import HABApp.core.files
 import HABApp.core.items
 
-import HABApp.core.EventBus
-import HABApp.core.Items
+# isort: split
+
+Items: 'HABApp.core.internals.ItemRegistry' = internals.proxy.ConstProxyObj('ItemRegistry')
+EventBus: 'HABApp.core.internals.EventBus' = internals.proxy.ConstProxyObj('EventBus')

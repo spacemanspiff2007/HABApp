@@ -1,9 +1,12 @@
 import typing
 
+from HABApp.core.internals import AutoContextBoundObj
 
-class BaseMode:
+
+class BaseMode(AutoContextBoundObj):
 
     def __init__(self, name: str):
+        super(BaseMode, self).__init__()
         self.name: str = name
 
         self.__mode_lower_prio: typing.Optional[BaseMode] = None
@@ -25,6 +28,7 @@ class BaseMode:
     def cancel(self):
         """Remove the mode from the parent ``MultiModeItem`` and stop processing it
         """
+        self._ctx_unlink()
         self.parent.remove_mode(self.name)
         self.parent = None
 

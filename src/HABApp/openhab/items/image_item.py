@@ -22,15 +22,34 @@ def _convert_bytes(data: bytes, img_type: Optional[str]) -> str:
 
 
 class ImageItem(OpenhabItem):
-    """ImageItem which accepts and converts the data types from OpenHAB"""
+    """ImageItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar bytes value:
+    :ivar Optional[str] image_type:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     def __init__(self, name: str, initial_value=None,
-                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
-        super().__init__(name, initial_value, tags, groups, metadata)
+        super().__init__(name, initial_value, label, tags, groups, metadata)
 
         # this item is unique because we also save the image type and thus have two states
         self.image_type: Optional[str] = None
+
+    @classmethod
+    def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
+                groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
+
+        c = cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
+        if value is not None:
+            c.set_value(RawValue(value))
+        return c
 
     def set_value(self, new_value) -> bool:
         assert isinstance(new_value, RawValue) or new_value is None, type(new_value)
@@ -47,7 +66,7 @@ class ImageItem(OpenhabItem):
         return super().set_value(new_value.value)
 
     def oh_post_update(self, data: bytes, img_type: Optional[str] = None):
-        """Post an update to an openhab image with new image data. Image type is automatically detected,
+        """Post an update to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param data: image data
@@ -56,7 +75,7 @@ class ImageItem(OpenhabItem):
         return super().oh_post_update(_convert_bytes(data, img_type))
 
     def oh_send_command(self, data: bytes, img_type: Optional[str] = None):
-        """Send a command to an openhab image with new image data. Image type is automatically detected,
+        """Send a command to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param data: image data

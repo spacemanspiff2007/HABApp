@@ -45,10 +45,11 @@ def add_tmp_data(item: 'BaseItem'):
 
 
 def restore_tmp_data(item: 'BaseItem'):
-    if item.name not in TMP_DATA:
+    data = TMP_DATA.pop(item.name, None)
+    if data is None:
         return None
 
-    data = TMP_DATA.pop(item.name)
+    # delete old watcher
     data.clean()
 
     for t in data.update:
@@ -79,4 +80,4 @@ async def clean_tmp_data():
         TMP_DATA.pop(name)
 
 
-CLEANUP = PendingFuture(clean_tmp_data, 15)
+CLEANUP = PendingFuture(clean_tmp_data, 3600)

@@ -1,23 +1,25 @@
-import asyncio
 import logging
 import typing
-from datetime import timedelta
+from typing import Generic, TypeVar, List
+
 from pendulum import DateTime
 
+from HABApp.core.asyncio import create_task
 from HABApp.core.wrapper import log_exception
 from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
-from ..const import loop
 
 log = logging.getLogger('HABApp')
 
+WATCH_TYPE = TypeVar("WATCH_TYPE", bound=BaseWatch)
 
-class ItemTimes:
+
+class ItemTimes(Generic[WATCH_TYPE]):
     WATCH: typing.Union[typing.Type[ItemNoUpdateWatch], typing.Type[ItemNoChangeWatch]]
 
     def __init__(self, name: str, dt: DateTime):
         self.name: str = name
         self.dt: DateTime = dt
-        self.tasks: typing.List[BaseWatch] = []
+        self.tasks: List[WATCH_TYPE] = []
 
     def set(self, dt: DateTime, events=True):
         self.dt = dt
@@ -25,14 +27,10 @@ class ItemTimes:
             return
 
         if events:
-            asyncio.run_coroutine_threadsafe(self.schedule_events(), loop)
+            create_task(self.schedule_events())
         return None
 
-    def add_watch(self, secs: typing.Union[int, float, timedelta]) -> BaseWatch:
-        if isinstance(secs, timedelta):
-            secs = secs.total_seconds()
-        assert secs > 0, secs
-
+    def add_watch(self, secs: typing.Union[int, float]) -> WATCH_TYPE:
         # don't add the watch two times
         for t in self.tasks:
             if not t.fut.is_canceled and t.fut.secs == secs:
@@ -61,9 +59,9 @@ class ItemTimes:
         return None
 
 
-class UpdatedTime(ItemTimes):
+class UpdatedTime(ItemTimes[ItemNoUpdateWatch]):
     WATCH = ItemNoUpdateWatch
 
 
-class ChangedTime(ItemTimes):
+class ChangedTime(ItemTimes[ItemNoChangeWatch]):
     WATCH = ItemNoChangeWatch

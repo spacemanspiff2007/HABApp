@@ -5,19 +5,22 @@ from math import ceil, floor
 from pendulum import UTC
 from pendulum import now as pd_now
 
-import HABApp
-from .base_item import BaseItem
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.internals import uses_post_event
+from HABApp.core.items.base_item import BaseItem
 
 log = logging.getLogger('HABApp')
+
+post_event = uses_post_event()
 
 
 class BaseValueItem(BaseItem):
     """Simple item
 
-    :ivar str ~.name: Name of the item (read only)
-    :ivar ~.value: Value of the item, can be anything (read only)
-    :ivar datetime.datetime ~.last_change: Timestamp of the last time when the item has changed the value (read only)
-    :ivar datetime.datetime ~.last_update: Timestamp of the last time when the item has updated the value (read only)
+    :ivar str name: Name of the item (read only)
+    :ivar value: Value of the item, can be anything (read only)
+    :ivar datetime.datetime last_change: Timestamp of the last time when the item has changed the value (read only)
+    :ivar datetime.datetime last_update: Timestamp of the last time when the item has updated the value (read only)
     """
 
     def __init__(self, name: str, initial_value=None):
@@ -52,15 +55,16 @@ class BaseValueItem(BaseItem):
         state_changed = self.set_value(new_value)
 
         # create events
-        HABApp.core.EventBus.post_event(self._name, HABApp.core.events.ValueUpdateEvent(self._name, self.value))
-        if old_value != self.value:
-            HABApp.core.EventBus.post_event(
-                self._name, HABApp.core.events.ValueChangeEvent(self._name, value=self.value, old_value=old_value)
+        post_event(self._name, ValueUpdateEvent(self._name, self.value))
+        if state_changed:
+            post_event(
+                self._name, ValueChangeEvent(self._name, value=self.value, old_value=old_value)
             )
         return state_changed
 
     def get_value(self, default_value=None) -> typing.Any:
-        """Return the value of the item.
+        """Return the value of the item. This is a helper function that returns a default
+        in case the item value is None.
 
         :param default_value: Return this value if the item value is None
         :return: value of the item

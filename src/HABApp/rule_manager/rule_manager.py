@@ -14,8 +14,12 @@ from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
 from HABApp.runtime import shutdown
 from .rule_file import RuleFile
+from ..core.internals import uses_item_registry
+from HABApp.core.internals.wrapped_function import run_function
 
 log = logging.getLogger('HABApp.Rules')
+
+item_registry = uses_item_registry()
 
 
 class RuleManager:
@@ -43,7 +47,7 @@ class RuleManager:
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
             self.files['bench'] = file = BenchFile(self)
-            ok = await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, file.load)
+            ok = await run_function(file.load)
             if not ok:
                 log.error('Failed to load Benchmark!')
                 HABApp.runtime.shutdown.request_shutdown()
@@ -62,15 +66,15 @@ class RuleManager:
         self.watcher = folder.add_watch('.py', True)
 
         # Initial loading of rules
-        HABApp.core.WrappedFunction(self.load_rules_on_startup, logger=log).run()
+        HABApp.core.internals.wrap_func(self.load_rules_on_startup, logger=log).run()
 
     async def load_rules_on_startup(self):
 
-        if HABApp.CONFIG.openhab.connection.host and HABApp.CONFIG.openhab.general.wait_for_openhab:
+        if HABApp.CONFIG.openhab.connection.url and HABApp.CONFIG.openhab.general.wait_for_openhab:
             items_found = False
             while not items_found:
                 await sleep(3)
-                for item in HABApp.core.Items.get_all_items():
+                for item in item_registry.get_items():
                     if isinstance(item, HABApp.openhab.items.OpenhabItem):
                         items_found = True
                         break
@@ -124,7 +128,7 @@ class RuleManager:
             with self.__files_lock:
                 rule = self.files.pop(path_str)
 
-            await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, rule.unload)
+            await run_function(rule.unload)
         finally:
             if request_lock:
                 self.__load_lock.release()
@@ -148,7 +152,7 @@ class RuleManager:
             with self.__files_lock:
                 self.files[path_str] = file = RuleFile(self, name, path)
 
-            ok = await HABApp.core.const.loop.run_in_executor(HABApp.core.WrappedFunction._WORKERS, file.load)
+            ok = await run_function(file.load)
             if not ok:
                 self.files.pop(path_str)
                 log.warning(f'Failed to load {path_str}!')
@@ -161,5 +165,4 @@ class RuleManager:
 
     def shutdown(self):
         for f in self.files.values():
-            for rule in f.rules.values():
-                rule._unload()
+            f.unload()

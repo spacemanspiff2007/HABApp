@@ -1,6 +1,8 @@
 from pathlib import Path
 
-from HABApp.config import config_loader, default_logfile
+from HABApp.config.logging.config import _yaml_safe
+from HABApp.config.logging import default_logfile
+
 from HABApp.config.platform_defaults import get_log_folder
 
 
@@ -23,12 +25,12 @@ def test_valid_yml(monkeypatch):
     monkeypatch.setattr(default_logfile, 'get_log_folder', lambda: Path('/platfrom/log/folder'))
 
     default = default_logfile.get_default_logfile()
-    ensure_key('root', config_loader._yaml_param.load(default))
+    ensure_key('root', _yaml_safe.load(default))
 
     monkeypatch.setattr(default_logfile, 'is_openhabian', lambda: False)
     default = default_logfile.get_default_logfile()
-    ensure_key('root', config_loader._yaml_param.load(default))
+    ensure_key('root', _yaml_safe.load(default))
 
     monkeypatch.setattr(default_logfile, 'get_log_folder', lambda: None)
     default = default_logfile.get_default_logfile()
-    ensure_key('root', config_loader._yaml_param.load(default))
+    ensure_key('root', _yaml_safe.load(default))

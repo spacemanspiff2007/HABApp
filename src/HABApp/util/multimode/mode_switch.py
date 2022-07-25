@@ -9,17 +9,17 @@ class SwitchItemValueMode(ValueMode):
     """SwitchItemMode, same as ValueMode but enabled/disabled of the mode is controlled by a OpenHAB
     :class:`~HABApp.openhab.items.SwitchItem`
 
-    :ivar datetime.datetime ~.last_update: Timestamp of the last update/enable of this value
-    :ivar typing.Optional[datetime.timedelta] ~.auto_disable_after: Automatically disable this mode after
+    :ivar datetime.datetime last_update: Timestamp of the last update/enable of this value
+    :ivar typing.Optional[datetime.timedelta] auto_disable_after: Automatically disable this mode after
                                                                     a given timedelta on the next recalculation
-    :vartype ~.auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]]
-    :ivar    ~.auto_disable_func: Function which can be used to disable this mode. Any function that accepts two
-                                  Arguments can be used. First arg is value with lower priority,
-                                  second argument is own value. Return ``True`` to disable this mode.
-    :vartype ~.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]]
-    :ivar    ~.calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts
-                                two Arguments can be used. First arg is value with lower priority,
-                                second argument is own value.
+    :vartype auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]]
+    :ivar    auto_disable_func: Function which can be used to disable this mode. Any function that accepts two
+                                Arguments can be used. First arg is value with lower priority,
+                                second argument is own value. Return ``True`` to disable this mode.
+    :vartype calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]]
+    :ivar    calc_value_func: Function to calculate the new value (e.g. ``min`` or ``max``). Any function that accepts
+                              two Arguments can be used. First arg is value with lower priority,
+                              second argument is own value.
     """
 
     def __init__(self, name: str,
@@ -55,14 +55,14 @@ class SwitchItemValueMode(ValueMode):
                          calc_value_func=calc_value_func)
 
         # setup listener as the last thing
-        switch_item.listen_event(self.__switch_changed, HABApp.core.events.ValueChangeEvent)
+        switch_item.listen_event(self.__switch_changed, HABApp.core.events.ValueChangeEventFilter())
         return
 
     # this is the original enabled method
     __set_enable = ValueMode.set_enabled
 
     # prevent direct calling
-    def set_enabled(self, value: bool):
+    def set_enabled(self, value: bool, only_on_change: bool = False):
         """"""  # so it doesn't show in Sphinx
         raise PermissionError('Enabled is controlled through the switch item!')
 

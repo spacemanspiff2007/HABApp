@@ -1,19 +1,21 @@
 import asyncio
 from pathlib import Path
 
+import HABApp
 import HABApp.config
 import HABApp.core
 import HABApp.mqtt.mqtt_connection
 import HABApp.parameters.parameter_files
+import HABApp.rule.interfaces._http
 import HABApp.rule_manager
 import HABApp.util
 import eascheduler
+from HABApp.core.asyncio import async_context
+from HABApp.core.internals import setup_internals
+from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection_logic as openhab_connection
 from HABApp.runtime import shutdown
-from HABApp.core.context import async_context
-
-import HABApp.rule.interfaces._http
 
 
 class Runtime:
@@ -23,9 +25,6 @@ class Runtime:
 
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
-
-        # Async Workers & shutdown callback
-        shutdown.register_func(HABApp.core.WrappedFunction._WORKERS.shutdown, msg='Stopping workers')
 
     async def start(self, config_folder: Path):
         try:
@@ -37,7 +36,17 @@ class Runtime:
             # Start Folder watcher!
             HABApp.core.files.watcher.start()
 
-            self.config_loader = HABApp.config.HABAppConfigLoader(config_folder)
+            # Load config
+            HABApp.config.load_config(config_folder)
+
+            # replace proxy objects
+            ir = HABApp.core.internals.ItemRegistry()
+            eb = HABApp.core.internals.EventBus()
+            setup_internals(ir, eb)
+            assert isinstance(HABApp.core.Items, ConstProxyObj)
+            HABApp.core.Items = ir
+            assert isinstance(HABApp.core.EventBus, ConstProxyObj)
+            HABApp.core.EventBus = eb
 
             await HABApp.core.files.setup()
 
@@ -60,11 +69,10 @@ class Runtime:
 
             await openhab_connection.start()
 
-            shutdown.register_func(HABApp.core.const.loop.stop, msg='Stopping asyncio loop')
-
             async_context.reset(token)
-        except asyncio.CancelledError:
-            pass
+
+        except HABApp.config.InvalidConfigError:
+            shutdown.request_shutdown()
         except Exception as e:
             process_exception('Runtime.start', e)
             await asyncio.sleep(1)  # Sleep so we can do a graceful shutdown

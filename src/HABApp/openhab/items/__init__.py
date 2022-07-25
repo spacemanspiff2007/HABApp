@@ -7,6 +7,7 @@ from .color_item import ColorItem
 from .number_item import NumberItem
 from .datetime_item import DatetimeItem
 from .string_item import StringItem, LocationItem, PlayerItem
+from .call_item import CallItem
 from .image_item import ImageItem
 from .group_item import GroupItem
 from .thing_item import Thing

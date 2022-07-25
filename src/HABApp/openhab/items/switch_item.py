@@ -4,6 +4,16 @@ from HABApp.openhab.items.commands import OnOffCommand
 
 
 class SwitchItem(OpenhabItem, OnOffCommand):
+    """SwitchItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar Tuple[str, ...] value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     def set_value(self, new_value) -> bool:
 

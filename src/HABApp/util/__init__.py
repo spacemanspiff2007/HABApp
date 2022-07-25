@@ -1,10 +1,7 @@
-from . import functions
-from .counter_item import CounterItem
-from .period_counter import PeriodCounter
 from .threshold import Threshold
 from .statistics import Statistics
-from . import multimode
 from .listener_groups import EventListenerGroup
+from .fade import Fade
 
-# 27.04.2020 - this can be removed in some time
-from .multimode import MultiModeItem
+from . import functions
+from . import multimode

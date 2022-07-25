@@ -1,18 +1,13 @@
-import typing
+from typing import Optional, List, Dict, Any
 
 from .base_event import OpenhabEvent
-
-# smarthome/things/NAME/state -> 17
-# openhab/things/NAME/state   -> 15
-# todo: revert this once we go OH3 only
-NAME_START: int = 15
 
 
 class ThingStatusInfoEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.status:
-    :ivar str ~.detail:
+    :ivar str name:
+    :ivar str status:
+    :ivar str detail:
     """
     name: str
     status: str
@@ -27,8 +22,8 @@ class ThingStatusInfoEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
-        return cls(name=topic[NAME_START:-7], status=payload['status'], detail=payload['statusDetail'])
+        # openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
+        return cls(name=topic[15:-7], status=payload['status'], detail=payload['statusDetail'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, status: {self.status}, detail: {self.detail}>'
@@ -36,11 +31,11 @@ class ThingStatusInfoEvent(OpenhabEvent):
 
 class ThingStatusInfoChangedEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.status:
-    :ivar str ~.detail:
-    :ivar str ~.old_status:
-    :ivar str ~.old_detail:
+    :ivar str name:
+    :ivar str status:
+    :ivar str detail:
+    :ivar str old_status:
+    :ivar str old_detail:
     """
     name: str
     status: str
@@ -59,8 +54,8 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # smarthome/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/statuschanged
-        name = topic[NAME_START:-14]
+        # openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/statuschanged
+        name = topic[15:-14]
         new, old = payload
         return cls(
             name=name, status=new['status'], detail=new['statusDetail'],
@@ -73,33 +68,10 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
                f'old_status: {self.old_status}, old_detail: {self.old_detail}>'
 
 
-class ThingConfigStatusInfoEvent(OpenhabEvent):
-    """
-    :ivar str ~.name:
-    :ivar list ~.messages:
-    """
-    name: str
-    messages: typing.List[typing.Dict[str, str]]
-
-    def __init__(self, name: str = '', messages: typing.List[typing.Dict[str, str]] = [{}]):
-        super().__init__()
-
-        self.name: str = name
-        self.messages: typing.List[typing.Dict[str, str]] = messages
-
-    @classmethod
-    def from_dict(cls, topic: str, payload: dict):
-        # 'smarthome/things/zwave:device:controller:my_node/config/status'
-        return cls(name=topic[NAME_START:-14], messages=payload['configStatusMessages'])
-
-    def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, messages: {self.messages}>'
-
-
 class ThingFirmwareStatusInfoEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.status:
+    :ivar str name:
+    :ivar str status:
     """
     name: str
     status: str
@@ -111,8 +83,72 @@ class ThingFirmwareStatusInfoEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # 'smarthome/things/zwave:device:controller:my_node/firmware/status'
-        return cls(name=topic[NAME_START:-16], status=payload['firmwareStatus'])
+        # 'openhab/things/zwave:device:controller:my_node/firmware/status'
+        return cls(name=topic[15:-16], status=payload['firmwareStatus'])
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} status: {self.status}>'
+        return f'<{self.__class__.__name__} name: {self.name} status: {self.status}>'
+
+
+class ThingRegistryBaseEvent(OpenhabEvent):
+    """
+    :ivar str name:
+    :ivar str type:
+    :ivar str label:
+    :ivar List[Dict[str, Any]] channels:
+    :ivar Dict[str, Any] configuration:
+    :ivar Dict[str, str] properties:
+    """
+    name: str
+    type: str
+    label: str
+    channels: List[Dict[str, Any]]
+    configuration: Dict[str, Any]
+    properties: Dict[str, str]
+
+    def __init__(self, name: str = '', thing_type: str = '', label: str = '',
+                 channels: Optional[List[Dict[str, Any]]] = None, configuration: Optional[Dict[str, Any]] = None,
+                 properties: Optional[Dict[str, str]] = None):
+        super().__init__()
+
+        # use name instead of uuid
+        self.name: str = name
+        self.type: str = thing_type
+
+        # optional entries
+        self.label: str = label
+        self.channels: List[Dict[str, Any]] = channels if channels is not None else []
+        self.configuration: Dict[str, Any] = configuration if configuration is not None else {}
+        self.properties: Dict[str, str] = properties if properties is not None else {}
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        # 'openhab/things/astro:sun:0a94363608/added'
+        return cls(
+            name=payload['UID'], thing_type=payload['thingTypeUID'], label=payload['label'],
+            channels=payload.get('channels'), configuration=payload.get('configuration'),
+            properties=payload.get('properties'),
+        )
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}>'
+
+
+class ThingAddedEvent(ThingRegistryBaseEvent):
+    pass
+
+
+class ThingRemovedEvent(ThingRegistryBaseEvent):
+    pass
+
+
+class ThingUpdatedEvent(ThingRegistryBaseEvent):
+    @classmethod
+    def from_dict(cls, topic: str, payload: List[Dict[str, Any]]):
+
+        payload = payload[0]
+        return cls(
+            name=payload['UID'], thing_type=payload['thingTypeUID'], label=payload['label'],
+            channels=payload.get('channels'), configuration=payload.get('configuration'),
+            properties=payload.get('properties'),
+        )

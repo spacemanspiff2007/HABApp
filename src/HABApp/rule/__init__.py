@@ -1,3 +1,5 @@
-from .rule import Rule, get_parent_rule
-
 from HABApp.rule.interfaces import FinishedProcessInfo
+
+# isort: split
+
+from .rule import Rule

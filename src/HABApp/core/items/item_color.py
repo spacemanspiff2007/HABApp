@@ -1,11 +1,15 @@
 import typing
 from typing import Optional
 
+from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.internals import uses_item_registry
+from HABApp.core.items import BaseValueItem
 from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
-from .base_valueitem import BaseValueItem
 
 HUE_FACTOR = 360
 PERCENT_FACTOR = 100
+
+item_registry = uses_item_registry()
 
 
 class ColorItem(BaseValueItem):
@@ -97,3 +101,21 @@ class ColorItem(BaseValueItem):
 
     def __repr__(self):
         return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.brightness}%>'
+
+    @classmethod
+    def get_create_item(cls, name: str, hue=0.0, saturation=0.0, brightness=0.0):
+        """Creates a new item in HABApp and returns it or returns the already existing one with the given name
+
+        :param name: item name
+        :param initial_value: state the item will have if it gets created
+        :return: item
+        """
+        assert isinstance(name, str), type(name)
+
+        try:
+            item = item_registry.get_item(name)
+        except ItemNotFoundException:
+            item = item_registry.add_item(cls(name, hue=hue, saturation=saturation, brightness=brightness))
+
+        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        return item

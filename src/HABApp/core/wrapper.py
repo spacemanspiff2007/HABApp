@@ -1,65 +1,23 @@
 import asyncio
 import functools
 import logging
-import re
 import sys
 import typing
 from logging import Logger
-from pathlib import Path
 
-import stackprinter
-
-import HABApp
+from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
+from HABApp.core.const.topics import TOPIC_WARNINGS as TOPIC_WARNINGS
+from HABApp.core.events.habapp_events import HABAppException
+from HABApp.core.internals import uses_post_event
+from HABApp.core.lib import format_exception
 
 log = logging.getLogger('HABApp')
 
-
-SUPPRESSED_PATHS = (
-    re.compile(f'[/\\\\]{Path(__file__).name}$'),   # this file
-
-    # rule file loader
-    re.compile(r'[/\\]rule_file.py$'),
-    re.compile(r'[/\\]runpy.py$'),
-
-    # Worker functions
-    re.compile(r'[/\\]wrappedfunction.py$'),
-
-    # Don't print stack for used libraries
-    re.compile(r'[/\\](site-packages|lib|python\d\.\d)[/\\]asyncio[/\\]'),
-    re.compile(r'[/\\]site-packages[/\\]aiohttp[/\\]'),
-    re.compile(r'[/\\]site-packages[/\\]voluptuous[/\\]'),
-    re.compile(r'[/\\]site-packages[/\\]pydantic[/\\]'),
-)
-
-SKIP_TB = tuple(re.compile(k.pattern.replace('$', ', ')) for k in SUPPRESSED_PATHS)
-
-
-def format_exception(e: typing.Union[Exception, typing.Tuple[typing.Any, typing.Any, typing.Any]]) -> typing.List[str]:
-    tb = []
-    skip = 0
-
-    lines = stackprinter.format(e, line_wrap=0, truncate_vals=2000, suppressed_paths=SUPPRESSED_PATHS).splitlines()
-    for i, line in enumerate(lines):
-        if not skip:
-            for s in SKIP_TB:
-                if s.search(line):
-                    # if it's just a two line traceback we skip it
-                    if lines[i + 1].startswith('    ') and lines[i + 2].startswith('File'):
-                        skip = 2
-                        continue
-        if skip:
-            skip -= 1
-            continue
-
-        tb.append(line)
-
-    return tb
+post_event = uses_post_event()
 
 
 def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
                       do_print=False, logger: logging.Logger = log):
-    # lines = traceback.format_exc().splitlines()
-    # del lines[0:3]
     lines = format_exception(e)
 
     func_name = func if isinstance(func, str) else func.__name__
@@ -73,12 +31,8 @@ def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
             print(line)
         logger.error(line)
 
-    # send Error to internal event bus so we can reprocess it and notify the user
-    HABApp.core.EventBus.post_event(
-        HABApp.core.const.topics.ERRORS, HABApp.core.events.habapp_events.HABAppException(
-            func_name=func_name, exception=e, traceback='\n'.join(lines)
-        )
-    )
+    # send Error to internal event bus, so we can reprocess it and notify the user
+    post_event(TOPIC_ERRORS, HABAppException(func_name=func_name, exception=e, traceback='\n'.join(lines)))
 
 
 def log_exception(func):
@@ -88,8 +42,6 @@ def log_exception(func):
         async def a(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
-            except asyncio.CancelledError:
-                pass
             except Exception as e:
                 process_exception(func, e, do_print=True)
                 # re raise exception, since this is something we didn't anticipate
@@ -116,8 +68,6 @@ def ignore_exception(func):
         async def a(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
-            except asyncio.CancelledError:
-                pass
             except Exception as e:
                 process_exception(func, e)
                 return None
@@ -155,11 +105,6 @@ class ExceptionToHABApp:
 
         self.raised_exception = True
 
-        # tb = traceback.format_exception(exc_type, exc_val, exc_tb)
-        # # there is an inconsistent use of newlines and array entries so we normalize it
-        # tb = '\n'.join(map(lambda x: x.strip(' \n'), tb))
-        # tb = tb.splitlines()
-
         tb = format_exception((exc_type, exc_val, exc_tb))
 
         # possibility to reprocess tb
@@ -179,10 +124,8 @@ class ExceptionToHABApp:
                 self.log.log(self.log_level, line)
 
         # send Error to internal event bus so we can reprocess it and notify the user
-        HABApp.core.EventBus.post_event(
-            HABApp.core.const.topics.WARNINGS if self.log_level == logging.WARNING else HABApp.core.const.topics.ERRORS,
-            HABApp.core.events.habapp_events.HABAppException(
-                func_name=f_name, exception=exc_val, traceback='\n'.join(tb)
-            )
+        post_event(
+            TOPIC_WARNINGS if self.log_level == logging.WARNING else TOPIC_ERRORS,
+            HABAppException(func_name=f_name, exception=exc_val, traceback='\n'.join(tb))
         )
         return self.ignore_exception

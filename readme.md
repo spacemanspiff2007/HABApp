@@ -13,7 +13,7 @@
 _Easy automation with MQTT and/or openHAB_
 
 
-HABApp is a asyncio/multithread application that connects to an openhab instance and/or a MQTT broker.
+HABApp is a asyncio/multithread application that connects to an openHAB instance and/or a MQTT broker.
 It is possible to create rules that listen to events from these instances and then react accordingly.
 
 ## Goals
@@ -31,7 +31,7 @@ import datetime
 import random
 
 import HABApp
-from HABApp.core.events import ValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent, ValueChangeEventFilter
 
 
 class ExampleMqttTestRule(HABApp.Rule):
@@ -39,18 +39,18 @@ class ExampleMqttTestRule(HABApp.Rule):
         super().__init__()
 
         self.run.every(
-            time=datetime.timedelta(seconds=60),
+            start_time=datetime.timedelta(seconds=60),
             interval=datetime.timedelta(seconds=30),
             callback=self.publish_rand_value
         )
 
-        self.listen_event('test/test', self.topic_updated, ValueUpdateEvent)
+        self.listen_event('test/test', self.topic_updated, ValueChangeEventFilter())
 
     def publish_rand_value(self):
         print('test mqtt_publish')
         self.mqtt.publish('test/test', str(random.randint(0, 1000)))
 
-    def topic_updated(self, event):
+    def topic_updated(self, event: ValueUpdateEvent):
         assert isinstance(event, ValueUpdateEvent), type(event)
         print( f'mqtt topic "test/test" updated to {event.value}')
 
@@ -58,50 +58,113 @@ class ExampleMqttTestRule(HABApp.Rule):
 ExampleMqttTestRule()
 ```
 
-### Openhab rule example
+### openHAB rule example
+
 ```python
 import HABApp
-from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
-from HABApp.openhab.events import ItemStateEvent, ItemCommandEvent, ItemStateChangedEvent
+from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent, ValueChangeEventFilter, ValueUpdateEventFilter
+from HABApp.openhab.events import ItemCommandEvent, ItemStateEventFilter, ItemCommandEventFilter, \
+  ItemStateChangedEventFilter
+
 
 class MyOpenhabRule(HABApp.Rule):
 
-    def __init__(self):
-        super().__init__()
+  def __init__(self):
+    super().__init__()
 
-        # Trigger on item updates
-        self.listen_event( 'TestContact', self.item_state_update, ItemStateEvent)
-        self.listen_event( 'TestDateTime', self.item_state_update, ValueUpdateEvent)
+    # Trigger on item updates
+    self.listen_event('TestContact', self.item_state_update, ItemStateEventFilter())
+    self.listen_event('TestDateTime', self.item_state_update, ValueUpdateEventFilter())
 
-        # Trigger on item changes
-        self.listen_event( 'TestDateTime', self.item_state_change, ItemStateChangedEvent)
-        self.listen_event( 'TestSwitch', self.item_state_change, ValueChangeEvent)
+    # Trigger on item changes
+    self.listen_event('TestDateTime', self.item_state_change, ItemStateChangedEventFilter())
+    self.listen_event('TestSwitch', self.item_state_change, ValueChangeEventFilter())
 
-        # Trigger on item commands
-        self.listen_event( 'TestSwitch', self.item_command, ItemCommandEvent)
+    # Trigger on item commands
+    self.listen_event('TestSwitch', self.item_command, ItemCommandEventFilter())
 
-    def item_state_update(self, event):
-        assert isinstance(event, ValueUpdateEvent)
-        print( f'{event}')
+  def item_state_update(self, event: ValueUpdateEvent):
+    assert isinstance(event, ValueUpdateEvent)
+    print(f'{event}')
 
-    def item_state_change(self, event):
-        assert isinstance(event, ValueChangeEvent)
-        print( f'{event}')
+  def item_state_change(self, event: ValueChangeEvent):
+    assert isinstance(event, ValueChangeEvent)
+    print(f'{event}')
 
-        # interaction is available through self.openhab or self.oh
-        self.openhab.send_command('TestItemCommand', 'ON')
+    # interaction is available through self.openHAB or self.oh
+    self.openhab.send_command('TestItemCommand', 'ON')
 
-    def item_command(self, event):
-        assert isinstance(event, ItemCommandEvent)
-        print( f'{event}')
+  def item_command(self, event: ItemCommandEvent):
+    assert isinstance(event, ItemCommandEvent)
+    print(f'{event}')
 
-        # interaction is available through self.openhab or self.oh
-        self.oh.post_update('TestItemUpdate', 123)
+    # interaction is available through self.openhab or self.oh
+    self.oh.post_update('TestItemUpdate', 123)
+
 
 MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.0.0 (25.07.2022)
+- OpenHAB >= 3.3 and Python >= 3.8 only!
+- Major internal refactoring
+- Startup issues are gone with a new and improved connection mechanism.
+- New configuration library: More settings can be configured in the configuration file.
+  Config values are also described in the docs. Also better error messages (hopefully)
+- Improved event log performance (``BufferEventFile`` no longer needed and should be removed)
+- Improved openhab performance (added some buffers)
+- Improved mqtt performance
+- Better tracebacks in case of error
+- EventFilters can be logically combined ("and", "or") so rules trigger only once
+- Label, Groups and Metadata is part of the OpenhabItem and can easily be accessed
+- Added possibility to run arbitrary user code before the HABApp configuration is loaded
+- Fixed setup issues
+- Fixed some known bugs and introduced new ones ;-)
+- Docker file changed to a multi stage build. Mount points changed to ``/habapp/config``.
+
+**Migration to new version**
+
+
+``self.listen_event`` now requires an instance of EventFilter.
+
+Old:
+```python
+from HABApp.core.events import ValueUpdateEvent
+...
+self.my_sensor = Item.get_item('my_sensor')
+self.my_sensor.listen_event(self.movement, ValueUpdateEvent)
+```
+
+New:
+```python
+from HABApp.core.events import ValueUpdateEventFilter
+...
+self.my_sensor = Item.get_item('my_sensor')
+self.my_sensor.listen_event(self.movement, ValueUpdateEventFilter())   # <-- Instance of EventFilter
+```
+
+```text
+HABApp:
+  ValueUpdateEvent -> ValueUpdateEventFilter()
+  ValueChangeEvent -> ValueChangeEventFilter()
+
+Openhab:
+  ItemStateEvent        -> ItemStateEventFilter()
+  ItemStateChangedEvent -> ItemStateChangedEventFilter()
+  ItemCommandEvent      -> ItemCommandEventFilter()
+
+MQTT:
+  MqttValueUpdateEvent -> MqttValueUpdateEventFilter()
+  MqttValueChangeEvent -> MqttValueChangeEventFilter()
+```
+
+**Migration to new docker image**
+- change the mount point of the config from ``/config`` to ``/habapp/config``
+- The new image doesn't run as root. You can set `USER_ID` and `GROUP_ID` to the user you want habapp to run with. It's necessary to modify the permissions of the mounted folder accordingly.
+
+---
+
 #### 0.31.2 (17.12.2021)
 - Added command line switch to display debug information
 - Display debug information on missing dependencies
@@ -122,18 +185,18 @@ MyOpenhabRule()
 - Label in commandOption is optional
 - Added message when file is removed
 - Examples in the docs get checked with a newly created sphinx extension
-- Reworked the openhab tests
+- Reworked the openHAB tests
 
 #### 0.30.3 (17.06.2021)
 - add support for custom ca cert for MQTT
 - Scheduler runs only when the rule file has been loaded properly
-- Sync openhab calls raise an error when called from an async context
+- Sync openHAB calls raise an error when called from an async context
 - Replaced thread check for asyncio with a contextvar (internal)
 
 #### 0.30.3 (01.06.2021)
 - Scheduler runs only when the rule file has been loaded properly
 - Replaced thread check for asyncio with a contextvar
-- Sync openhab calls raise an error when called from an async context
+- Sync openHAB calls raise an error when called from an async context
 
 #### 0.30.2 (26.05.2021)
 - Item and Thing loading from openHAB is more robust and disconnects now properly if openHAB is only partly ready
@@ -160,8 +223,8 @@ Changelog
 - Significantly less CPU usage when no functions are running
 - Completely reworked the file handling (loading and dependency resolution)
 - Completely reworked the Scheduler!
-  - Has now subsecond accuracity (finally!)
-  - Has a new .coundown() job which can simplify many rules.
+  - Has now subsecond accuracy (finally!)
+  - Has a new .countdown() job which can simplify many rules.
     It is made for functions that do something after a certain period of time (e.g. switch a light off after movement)
 - Added hsb_to_rgb, rgb_to_hsb functions which can be used in rules
 - Better error message if configured foldes overlap with HABApp folders

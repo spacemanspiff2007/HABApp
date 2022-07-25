@@ -1,3 +1,8 @@
+import pytest
+import HABApp.core.lib.exceptions.format
+
+
+@pytest.mark.no_internals
 def test_doc_run():
     calls = []
 
@@ -24,3 +29,34 @@ def test_doc_run():
     runner.tear_down()
 
     assert len(calls) == 4
+
+
+@pytest.mark.no_internals
+def test_doc_run_exception(monkeypatch):
+    """Check that the RuleRunner propagates exceptions which happen during exception formatting"""
+
+    class MyException(Exception):
+        pass
+
+    def err(*args, **kwargs):
+        raise MyException()
+
+    monkeypatch.setattr(HABApp.core.lib.exceptions.format, 'format_frame_info', err)
+
+    from tests import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+
+    class MyFirstRule(HABApp.Rule):
+        def __init__(self):
+            super().__init__()
+            self.run.soon(self.say_something)
+
+        def say_something(self):
+            1 / 0
+
+    MyFirstRule()
+
+    with pytest.raises(MyException):
+        runner.process_events()
+    runner.tear_down()

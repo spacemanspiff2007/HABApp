@@ -1,20 +1,18 @@
-import typing
-
-try:
-    from typing import Final
-except ImportError:
-    Final = str
+from typing import Final, Tuple
 
 
-INFOS: Final = 'HABApp.Infos'
-WARNINGS: Final = 'HABApp.Warnings'
-ERRORS: Final = 'HABApp.Errors'
+TOPIC_INFOS: Final    = 'HABApp.Infos'
+TOPIC_WARNINGS: Final = 'HABApp.Warnings'
+TOPIC_ERRORS: Final   = 'HABApp.Errors'
 
-FILES: Final = 'HABApp.Files'
+TOPIC_FILES: Final = 'HABApp.Files'
 
 
-ALL: typing.List[str] = [
-    WARNINGS, ERRORS, INFOS,
+ALL_TOPICS: Tuple[str, ...] = (
+    TOPIC_INFOS, TOPIC_WARNINGS, TOPIC_ERRORS,
 
-    FILES
-]
+    TOPIC_FILES
+)
+
+
+TOPIC_EVENTS: Final = 'HABApp.EventBus'

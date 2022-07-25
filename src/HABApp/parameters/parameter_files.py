@@ -1,6 +1,5 @@
 import logging
 import threading
-import asyncio
 from pathlib import Path
 
 import HABApp
@@ -34,7 +33,11 @@ async def unload_file(name: str, path: Path):
 
 def save_file(file: str):
     assert isinstance(file, str), type(file)
-    filename = HABApp.CONFIG.directories.param / (file + '.yml')
+    path = HABApp.CONFIG.directories.param
+    if path is None:
+        raise ValueError('Parameter files are disabled! Configure a folder to use them!')
+
+    filename = path / (file + '.yml')
 
     with LOCK:  # serialize to get proper error messages
         log.info(f'Updated {filename}')
@@ -50,8 +53,7 @@ class HABAppParameterFile(HABAppFile):
 
 async def setup_param_files() -> bool:
     path = HABApp.CONFIG.directories.param
-    if not path.is_dir():
-        log.info(f'Parameter files disabled: Folder {path} does not exist!')
+    if path is None:
         return False
 
     folder = add_habapp_folder(PARAM_PREFIX, path, 100)
@@ -63,4 +65,4 @@ async def setup_param_files() -> bool:
 def reload_param_file(name: str):
     name = f'{PARAM_PREFIX}{name}.yml'
     path = HABApp.core.files.folders.get_path(name)
-    asyncio.run_coroutine_threadsafe(HABApp.core.files.manager.process_file(name, path), HABApp.core.const.loop)
+    HABApp.core.asyncio.create_task(HABApp.core.files.manager.process_file(name, path))

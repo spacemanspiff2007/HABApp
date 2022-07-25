@@ -1,7 +1,7 @@
 import asyncio
 import time
 from pathlib import Path
-from typing import Dict, Set, Optional
+from typing import Dict, Set, Optional, List, Any
 
 import HABApp
 from HABApp.core.files.file import HABAppFile
@@ -34,12 +34,11 @@ class ManualThingConfig(OnConnectPlugin):
         self.watcher: Optional[AggregatingAsyncEventHandler] = None
 
         self.cache_ts: float = 0.0
-        self.cache_cfg: dict = {}
+        self.cache_cfg: List[Dict[str, Any]] = []
 
     def setup(self):
         path = HABApp.CONFIG.directories.config
-        if not path.is_dir():
-            log.info('Config folder does not exist - textual thing config disabled!')
+        if path is None:
             return None
 
         class HABAppThingConfigFile(HABAppFile):
@@ -58,15 +57,9 @@ class ManualThingConfig(OnConnectPlugin):
         if self.watcher is None:
             return None
 
-        try:
-            await asyncio.sleep(0.3)
-
-            self.cache_cfg = await async_get_things()
-            self.cache_ts = time.time()
-
-            await self.watcher.trigger_all()
-        except asyncio.CancelledError:
-            pass
+        await asyncio.sleep(0.3)
+        await self.load_thing_data(always=True)
+        await self.watcher.trigger_all()
 
     @HABApp.core.wrapper.ignore_exception
     async def clean_items(self):
@@ -74,6 +67,12 @@ class ManualThingConfig(OnConnectPlugin):
         for s in self.created_items.values():
             items.update(s)
         await cleanup_items(items)
+
+    async def load_thing_data(self, always: bool) -> List[Dict[str, Any]]:
+        if always or not self.cache_cfg or time.time() - self.cache_ts > 20:
+            self.cache_cfg = [k.dict(by_alias=True) for k in await async_get_things()]
+            self.cache_ts = time.time()
+        return self.cache_cfg
 
     async def file_load(self, name: str, path: Path):
         # we have to check the naming structure because we get file events for the whole folder
@@ -83,11 +82,7 @@ class ManualThingConfig(OnConnectPlugin):
             return None
 
         # only load if we don't supply the data
-        if time.time() - self.cache_ts > 20 or not self.cache_cfg:
-            self.cache_cfg = await async_get_things()
-            self.cache_ts = time.time()
-
-        data = self.cache_cfg
+        data = await self.load_thing_data(always=False)
 
         # remove created items
         self.created_items.pop(path.name, None)
@@ -195,7 +190,7 @@ class ManualThingConfig(OnConnectPlugin):
 
             create_items_file(output_file, create_items)
 
-            self.cache_cfg = {}
+            self.cache_cfg = []
 
 
 PLUGIN_MANUAL_THING_CFG = ManualThingConfig.create_plugin()

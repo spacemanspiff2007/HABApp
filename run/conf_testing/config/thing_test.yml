@@ -1,0 +1,28 @@
+test: False    # Test mode: will not do anything but instead print out information
+filter:       # reduce things with these filters, all filters have to match for further processing
+  thing_type: astro:sun
+
+# Set this configuration for all things
+thing config:
+  4: 99     # Light Threshold
+  5: 8      # Operation Mode
+  6: 4      # MultiSensor Function Switch
+  7: 20     # Customer Function
+
+channels:
+  - filter:
+      - channel_uid: .+rise#start
+    link items:
+      - type: Number
+        name: '{thing_uid, :([^:]+?)$}_Temperature_1'
+        label: '{thing_uid, :([^:]+)$} Temperature [%d %%]'
+        icon: battery
+        metadata:
+          autoupdate: 'false'
+          homekit: 'TemperatureSensor'
+          alexa:
+            'value': 'Fan'
+            'config':
+              'type': 'oscillating'
+              'speedSteps': 3
+          # autoupdate: 'false'

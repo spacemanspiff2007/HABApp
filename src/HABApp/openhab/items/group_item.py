@@ -6,7 +6,16 @@ from HABApp.openhab.item_to_reg import get_members
 
 
 class GroupItem(OpenhabItem):
-    """GroupItem which accepts and converts the data types from OpenHAB"""
+    """GroupItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar str value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     def set_value(self, new_value) -> bool:
 

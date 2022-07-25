@@ -83,7 +83,7 @@ def cfg(monkeypatch):
 #     FILE_PROPS['params/param1'] = FileProperties(depends_on=[], reloads_on=['params/param2'])
 #     FILE_PROPS['params/param2'] = FileProperties()
 #
-#     event_bus.listen_events(HABApp.core.const.topics.FILES, process_event)
+#     event_bus.listen_events(HABApp.core.const.topics.TOPIC_FILES, process_event)
 #
 #     process([MockFile('param2'), MockFile('param1')])
 #
@@ -106,7 +106,6 @@ def cfg(monkeypatch):
 #     order.clear()
 
 
-@pytest.mark.asyncio
 async def test_reload_dep(cfg: CfgObj, caplog):
     cfg.properties['params/param1'] = FileProperties(depends_on=['params/param2'], reloads_on=['params/param2'])
     cfg.properties['params/param2'] = FileProperties()
@@ -134,7 +133,6 @@ async def test_reload_dep(cfg: CfgObj, caplog):
     cfg.operation.clear()
 
 
-@pytest.mark.asyncio
 async def test_missing_dependencies(cfg: CfgObj, caplog):
     cfg.properties['params/param1'] = FileProperties(depends_on=['params/param4', 'params/param5'])
     cfg.properties['params/param2'] = FileProperties(depends_on=['params/param4'])
@@ -169,7 +167,7 @@ async def test_missing_dependencies(cfg: CfgObj, caplog):
 #     FILE_PROPS['params/param1'] = FileProperties(reloads_on=['params/param4', 'params/param5'])
 #     FILE_PROPS['params/param2'] = FileProperties(reloads_on=['params/param4'])
 #
-#     event_bus.listen_events(HABApp.core.const.topics.FILES, process_event)
+#     event_bus.listen_events(HABApp.core.const.topics.TOPIC_FILES, process_event)
 #
 #     process([MockFile('param1'), MockFile('param2')])
 #
@@ -200,7 +198,7 @@ async def test_missing_dependencies(cfg: CfgObj, caplog):
 #     FILE_PROPS['params/p1'] = FileProperties(depends_on=['params/p2'], reloads_on=[])
 #     FILE_PROPS['params/p2'] = FileProperties()
 #
-#     event_bus.listen_events(HABApp.core.const.topics.FILES, process_event)
+#     event_bus.listen_events(HABApp.core.const.topics.TOPIC_FILES, process_event)
 #
 #     process([MockFile('p1')])
 #

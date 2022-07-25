@@ -4,7 +4,7 @@ from collections import deque
 from threading import Lock
 
 import HABApp
-from HABApp.core.events import ValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 from .bench_base import BenchBaseRule
 from .bench_times import BenchContainer, BenchTime
 
@@ -34,7 +34,7 @@ class OpenhabBenchRule(BenchBaseRule):
     def cleanup(self):
         self.stop_load()
 
-        all_items = set(HABApp.core.Items.get_all_item_names())
+        all_items = set(HABApp.core.Items.get_item_names())
         to_rem = set(self.name_list) & all_items
 
         if not to_rem:
@@ -127,7 +127,7 @@ class OpenhabBenchRule(BenchBaseRule):
                 self.openhab.post_update(item, str(random.randint(0, 99999999)))
 
             self.openhab.create_item('String', self.name_list[i], label='MyLabel')
-            listener = self.listen_event(self.name_list[i], load_cb, ValueUpdateEvent)
+            listener = self.listen_event(self.name_list[i], load_cb, ValueUpdateEventFilter())
 
             self.load_listener.append(listener)
             self.openhab.post_update(self.name_list[i], str(random.randint(0, 99999999)))
@@ -145,7 +145,7 @@ class OpenhabBenchRule(BenchBaseRule):
             self.item_values.append(str(random.randint(0, 99999999)))
 
         listener = self.listen_event(
-            self.item_name, self.proceed_item_val if not do_async else self.a_proceed_item_val, ValueUpdateEvent
+            self.item_name, self.proceed_item_val if not do_async else self.a_proceed_item_val, ValueUpdateEventFilter()
         )
 
         self.bench_times = self.bench_times_container.create(test_name)

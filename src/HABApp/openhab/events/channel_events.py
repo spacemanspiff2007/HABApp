@@ -1,16 +1,11 @@
 from .base_event import OpenhabEvent
 
-# smarthome/channels/NAME/triggered -> 19
-# openhab/channels/NAME/triggered   -> 17
-# todo: revert this once we go OH3 only
-NAME_START: int = 17
-
 
 class ChannelTriggeredEvent(OpenhabEvent):
     """
-    :ivar str ~.name:
-    :ivar str ~.event:
-    :ivar str ~.channel:
+    :ivar str name:
+    :ivar str event:
+    :ivar str channel:
     """
     name: str
     event: str
@@ -25,7 +20,32 @@ class ChannelTriggeredEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        return cls(topic[NAME_START:-10], payload['event'], payload['channel'])
+        return cls(topic[17:-10], payload['event'], payload['channel'])
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, event: {self.event}>'
+
+
+class ChannelDescriptionChangedEvent(OpenhabEvent):
+    """
+    :ivar str name:
+    :ivar str field:
+    :ivar str value:
+    """
+    name: str
+    field: str
+    value: str
+
+    def __init__(self, name: str = '', field: str = '', value: str = ''):
+        super().__init__()
+
+        self.name: str = name
+        self.field: str = field
+        self.value: str = value
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        return cls(topic[17:-19], payload['field'], payload['value'])
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, field: {self.field}>'

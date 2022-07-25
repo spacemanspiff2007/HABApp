@@ -1,31 +1,27 @@
 from pytest import fixture
 
 import HABApp
+import HABApp.core.items.base_item_watch
+from HABApp.core.internals import ContextProvidingObj
 
 
-class DummyRule:
+class DummyRule(ContextProvidingObj):
     def __init__(self):
+        super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
         self.rule_name = 'DummyRule'
-
-        self.__dict__['_Rule__event_listener'] = []
-
-    def register_cancel_obj(self, obj):
-        pass
-
-    # copied funcs
-    _get_cb_name = HABApp.Rule._get_cb_name
-    _add_event_listener = HABApp.Rule._add_event_listener
 
 
 @fixture
 def parent_rule(monkeypatch):
     rule = DummyRule()
 
-    # patch both imports imports
-    monkeypatch.setattr(HABApp.rule,      'get_parent_rule', lambda: rule, raising=True)
-    monkeypatch.setattr(HABApp.rule.rule, 'get_parent_rule', lambda: rule, raising=True)
+    def ret_dummy_rule_context():
+        return rule._habapp_ctx
 
-    # util imports
-    monkeypatch.setattr(HABApp.util.multimode.item, 'get_parent_rule', lambda: rule, raising=True)
+    # patch imports
+    monkeypatch.setattr(HABApp.core.internals, 'get_current_context', ret_dummy_rule_context)
+    monkeypatch.setattr(HABApp.core.internals.context.get_context, 'get_current_context', ret_dummy_rule_context)
+
+    monkeypatch.setattr(HABApp.core.items.base_item_watch, 'get_current_context', ret_dummy_rule_context)
 
     yield rule

@@ -2,13 +2,17 @@ import asyncio
 import typing
 from asyncio import Task, sleep, run_coroutine_threadsafe, create_task
 from typing import Any, Awaitable, Callable, Optional
+
 from HABApp.core.const import loop
 
+
+# todo: switch to time.monotonic for measurements instead of fixed sleep time
 
 class PendingFuture:
     def __init__(self, future: Callable[[], Awaitable[Any]], secs: typing.Union[int, float]):
         assert asyncio.iscoroutinefunction(future), type(future)
-        assert isinstance(secs, (int, float)) and secs >= 0, f'{secs} ({type(secs)})'
+        if not isinstance(secs, (int, float)) or secs < 0:
+            raise ValueError(f'Pending time must be int/float and >= 0! Is: {secs} ({type(secs)})')
 
         self.func: Callable[[], Awaitable[Any]] = future
         self.secs = secs
@@ -41,8 +45,5 @@ class PendingFuture:
             self.task = create_task(self.__countdown())
 
     async def __countdown(self):
-        try:
-            await sleep(self.secs)
-            await self.func()
-        except asyncio.CancelledError:
-            pass
+        await sleep(self.secs)
+        await self.func()

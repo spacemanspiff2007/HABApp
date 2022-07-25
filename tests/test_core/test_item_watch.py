@@ -1,16 +1,14 @@
 import asyncio
-from unittest.mock import MagicMock
 from datetime import timedelta
+from unittest.mock import MagicMock
 
 import pytest
 
 from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
 from HABApp.core.items import Item
 from tests.helpers.parent_rule import DummyRule
-from ..helpers import TmpEventBus
 
 
-@pytest.mark.asyncio
 async def test_multiple_add(parent_rule: DummyRule):
 
     i = Item('test')
@@ -24,26 +22,27 @@ async def test_multiple_add(parent_rule: DummyRule):
     assert w1 is not w2
 
 
-@pytest.mark.asyncio
-async def test_watch_update(parent_rule: DummyRule, event_bus: TmpEventBus, sync_worker, caplog):
+@pytest.mark.parametrize('method', ('watch_update', 'watch_change'))
+async def test_watch_update(parent_rule: DummyRule, sync_worker, caplog, method):
+    caplog.set_level(0)
+    cb = MagicMock()
+    cb.__name__ = 'MockName'
 
-    for meth in ('watch_update', 'watch_change'):
+    secs = 0.2
 
-        cb = MagicMock()
-        cb.__name__ = 'MockName'
+    i = Item('test')
+    func = getattr(i, method)
+    func(secs / 2)
+    w = func(timedelta(seconds=secs))
+    w.listen_event(cb)
 
-        secs = 0.2
+    i.post_value(1)
+    await asyncio.sleep(0.3)
 
-        i = Item('test')
-        func = getattr(i, meth)
-        func(secs / 2)
-        w = func(timedelta(seconds=secs))
-        w.listen_event(cb)
+    for c in caplog.records:
+        print(c)
 
-        i.post_value(1)
-        await asyncio.sleep(0.3)
-
-        cb.assert_called_once()
-        assert isinstance(cb.call_args[0][0], ItemNoUpdateEvent if meth == 'watch_update' else ItemNoChangeEvent)
-        assert cb.call_args[0][0].name == 'test'
-        assert cb.call_args[0][0].seconds == secs
+    cb.assert_called_once()
+    assert isinstance(cb.call_args[0][0], ItemNoUpdateEvent if method == 'watch_update' else ItemNoChangeEvent)
+    assert cb.call_args[0][0].name == 'test'
+    assert cb.call_args[0][0].seconds == secs

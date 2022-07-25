@@ -1,0 +1,46 @@
+directories:
+  logging: log      # Folder where the logs will be written to
+  rules: rules      # Folder from which the rule files will be loaded
+  param: parameters # Folder from which the parameter files will be loaded
+  config: config    # Folder from which configuration files (e.g. for textual thing configuration) will be loaded
+  lib: lib          # Folder where additional libraries can be placed
+
+location:
+  latitude: 52.5185537
+  longitude: 13.3758636
+  elevation: 43
+
+mqtt:
+  connection:
+    client_id: HABAppTesting
+    host: localhost
+    port: 1883
+    user: ''
+    password: ''
+    tls:
+      enabled: false   # Enable TLS for the connection
+      ca cert: ''      # Path to a CA certificate that will be treated as trusted
+      insecure: false  # Validate server hostname in server certificate
+  subscribe:
+    qos: 0   # Default QoS for subscribing
+    topics:
+    - '#'
+  publish:
+    qos: 0         # Default QoS when publishing values
+    retain: false  # Default retain flag when publishing values
+  general:
+    listen_only: false   # If True HABApp will not publish any value to the broker
+
+openhab:
+  ping:
+    enabled: true      # If enabled the configured item will show how long it takes to send an update from HABApp and get the updated value back from openHAB in milliseconds
+    item: HABApp_Ping  # Name of the Numberitem
+    interval: 10       # Seconds between two pings
+  connection:
+    url: http://localhost:8080   # Connect to this url
+    user: 'asdf'
+    password: 'asdf'
+    verify_ssl: true             # Check certificates when using https
+  general:
+    listen_only: false      # If True HABApp will not change anything on the openHAB instance.
+    wait_for_openhab: true  # If True HABApp will wait for items from the openHAB instance before loading any rules on startup

@@ -1,4 +1,3 @@
-from HABApp.core.wrappedfunction import WrappedFunction
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueChangeEventFilter, MqttValueUpdateEvent, \
     MqttValueUpdateEventFilter
 from tests.helpers import check_class_annotations
@@ -11,26 +10,20 @@ def test_class_annotations():
     check_class_annotations('HABApp.mqtt.events', exclude=exclude, skip_imports=False)
 
 
-def test_create_listener():
+def test_mqtt_filter():
     f = MqttValueUpdateEventFilter(value=1)
-    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
-
-    assert e.event_filter is MqttValueUpdateEvent
-    assert e.attr_name1 == 'value'
-    assert e.attr_value1 == 1
+    assert f.event_class is MqttValueUpdateEvent
+    assert f.attr_name1 == 'value'
+    assert f.attr_value1 == 1
 
     f = MqttValueChangeEventFilter(old_value='asdf')
-    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
-
-    assert e.event_filter is MqttValueChangeEvent
-    assert e.attr_name1 == 'old_value'
-    assert e.attr_value1 == 'asdf'
+    assert f.event_class is MqttValueChangeEvent
+    assert f.attr_name1 == 'old_value'
+    assert f.attr_value1 == 'asdf'
 
     f = MqttValueChangeEventFilter(old_value='asdf', value=1)
-    e = f.create_event_listener('asdf', WrappedFunction(lambda x: x))
-
-    assert e.event_filter is MqttValueChangeEvent
-    assert e.attr_name1 == 'value'
-    assert e.attr_value1 == 1
-    assert e.attr_name2 == 'old_value'
-    assert e.attr_value2 == 'asdf'
+    assert f.event_class is MqttValueChangeEvent
+    assert f.attr_name1 == 'value'
+    assert f.attr_value1 == 1
+    assert f.attr_name2 == 'old_value'
+    assert f.attr_value2 == 'asdf'

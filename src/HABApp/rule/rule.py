@@ -1,25 +1,23 @@
-import asyncio
-import datetime
 import logging
-import random
 import re
-import sys
-import traceback
-import typing
 import warnings
-import weakref
-from typing import Iterable, Union
+from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List
 
 import HABApp
 import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core.events import AllEvents
-from HABApp.core.items.base_item import BaseItem, TYPE_ITEM, TYPE_ITEM_CLS
+from HABApp.core.asyncio import create_task
+from HABApp.core.const.hints import HINT_EVENT_CALLBACK
+from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextProvidingObj, \
+    uses_post_event, EventFilterBase, uses_item_registry, ContextBoundEventBusListener
+from HABApp.core.internals import wrap_func
+from HABApp.core.items import BaseItem, HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseValueItem
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
 from .interfaces import async_subprocess_exec
+from .rule_hook import get_rule_hook as _get_rule_hook
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -35,50 +33,25 @@ warnings.simplefilter('default')
 warnings.showwarning = send_warnings_to_log
 
 
-class Rule:
+post_event = uses_post_event()
+item_registry = uses_item_registry()
+
+
+class Rule(ContextProvidingObj):
     def __init__(self):
+        super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
 
-        # get the variables from the caller
-        depth = 1
-        while True:
-            try:
-                __vars = sys._getframe(depth).f_globals
-            except ValueError:
-                raise RuntimeError('Rule files are not meant to be executed directly! '
-                                   'Put the file in the HABApp "rule" folder and HABApp will load it automatically.')
+        hook = _get_rule_hook()
+        hook.register_rule(self)
 
-            depth += 1
-            if '__HABAPP__RUNTIME__' in __vars:
-                __runtime__ = __vars['__HABAPP__RUNTIME__']
-                __rule_file__ = __vars['__HABAPP__RULE_FILE__']
-                break
-
-        # variable vor unittests
-        test = __vars.get('__UNITTEST__', False)
-
-        # this is a list which contains all rules of this file
-        __vars['__HABAPP__RULES'].append(self)
-
-        assert isinstance(__runtime__, HABApp.runtime.Runtime)
-        self.__runtime: HABApp.runtime.Runtime = __runtime__
-
-        if not test:
-            assert isinstance(__rule_file__, HABApp.rule_manager.RuleFile)
-        self.__rule_file: HABApp.rule_manager.RuleFile = __rule_file__
-
-        self.__event_listener: typing.List[HABApp.core.EventBusListener] = []
-        self.__unload_functions: typing.List[typing.Callable[[], None]] = []
-        self.__cancel_objs: weakref.WeakSet = weakref.WeakSet()
-
-        # schedule cleanup of this rule
-        self.register_on_unload(self.__cleanup_rule)
-        self.register_on_unload(self.__cleanup_objs)
+        self.__runtime: HABApp.runtime.Runtime = hook.runtime
+        assert isinstance(self.__runtime, HABApp.runtime.Runtime)
 
         # scheduler
-        self.run: _HABAppSchedulerView = _HABAppSchedulerView(self)
+        self.run: _HABAppSchedulerView = _HABAppSchedulerView(self._habapp_ctx)
 
         # suggest a rule name
-        self.rule_name: str = self.__rule_file.suggest_rule_name(self)
+        self.rule_name: str = hook.suggest_rule_name(self)
 
         # interfaces
         self.async_http = interfaces.http
@@ -86,30 +59,31 @@ class Rule:
         self.oh: HABApp.openhab.interface = HABApp.openhab.interface
         self.openhab: HABApp.openhab.interface = self.oh
 
-    @HABApp.core.wrapper.log_exception
-    def __cleanup_objs(self):
-        while self.__cancel_objs:
-            # we log each error as warning
-            with HABApp.core.wrapper.ExceptionToHABApp(log, logging.WARNING):
-                obj = self.__cancel_objs.pop()
-                obj.cancel()
+    def on_rule_loaded(self):
+        """Override this to implement logic that will be called when the rule and the file has been successfully loaded
+        """
 
-    @HABApp.core.wrapper.log_exception
-    def __cleanup_rule(self):
-        # Important: set the dicts to None so we don't schedule a future event during _cleanup.
-        # If dict is set to None we will crash instead but it is no problem because everything gets unloaded anyhow
-        event_listeners = self.__event_listener
-        self.__event_listener = None
+    def on_rule_removed(self):
+        """Override this to implement logic that will be called when the rule has been unloaded.
+        """
 
-        # Actually remove the listeners/events
-        for listener in event_listeners:
-            HABApp.core.EventBus.remove_listener(listener)
+    def __repr__(self):
+        # empty string, so we have a space if we have more than one entry
+        parts = ['']
 
-        # Unload the scheduler
-        self.run._scheduler.cancel_all()
-        return None
+        # rule name if it is different from the class
+        cls_name = self.__class__.__name__
+        rule_name = str(self.rule_name)
+        if cls_name != rule_name:
+            parts.append(rule_name)
 
-    def post_event(self, name, event):
+        # rule status
+        if self._habapp_ctx is None:
+            parts.append('(unloaded)')
+
+        return f'<{cls_name}{" ".join(parts)}>'
+
+    def post_event(self, name: Union[HINT_ITEM_OBJ, str], event: Any):
         """
         Post an event to the event bus
 
@@ -117,41 +91,39 @@ class Rule:
         :param event: Event class to be used (must be class instance)
         :return:
         """
-        assert isinstance(name, (str, HABApp.core.items.BaseValueItem)), type(name)
-        return HABApp.core.EventBus.post_event(
-            name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name,
+        assert isinstance(name, (str, BaseValueItem)), type(name)
+        return post_event(
+            name.name if isinstance(name, BaseValueItem) else name,
             event
         )
 
-    def listen_event(self, name: Union[HABApp.core.items.BaseValueItem, str],
-                     callback: typing.Callable[[typing.Any], typing.Any],
-                     event_type: Union[typing.Type['HABApp.core.events.AllEvents'],
-                                       'HABApp.core.events.EventFilter', typing.Any] = AllEvents
-                     ) -> HABApp.core.EventBusListener:
+    def listen_event(self, name: Union[HINT_ITEM_OBJ, str],
+                     callback: HINT_EVENT_CALLBACK,
+                     event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None
+                     ) -> HINT_EVENT_BUS_LISTENER:
         """
         Register an event listener
 
-        :param name: item or name to listen to. Use None to listen to all events
+        :param name: item or name to listen to
         :param callback: callback that accepts one parameter which will contain the event
-        :param event_type: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEvent` or
-            :class:`~HABApp.core.events.ValueChangeEvent` which will also trigger on changes/update from openhab
+        :param event_filter: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEventFilter` or
+            :class:`~HABApp.core.events.ValueChangeEventFilter` which will also trigger on changes/update from openhab
             or mqtt. Additionally it can be an instance of :class:`~HABApp.core.events.EventFilter` which additionally
-            filters on the values of the event. There are also templates for the most common filters, e.g.
-            :class:`~HABApp.core.events.ValueUpdateEventFilter` and :class:`~HABApp.core.events.ValueChangeEventFilter`
+            filters on the values of the event. It is also possible to group filters logically with, e.g.
+            :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
-        name = name.name if isinstance(name, HABApp.core.items.BaseValueItem) else name
+        cb = wrap_func(callback, context=self._habapp_ctx)
+        name = name.name if isinstance(name, BaseItem) else name
 
-        if isinstance(event_type, HABApp.core.events.EventFilter):
-            listener = event_type.create_event_listener(name, cb)
-        else:
-            listener = HABApp.core.EventBusListener(name, cb, event_type)
+        if event_filter is None:
+            event_filter = HABApp.core.events.NoEventFilter()
+        if not isinstance(event_filter, EventFilterBase):
+            raise ValueError(f'Argument event_filter must be an instance of event filter (is {event_filter})')
 
-        self.__event_listener.append(listener)
-        HABApp.core.EventBus.add_listener(listener)
-        return listener
+        listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
+        return self._habapp_ctx.add_event_listener(listener)
 
-    def execute_subprocess(self, callback, program, *args, capture_output=True):
+    def execute_subprocess(self, callback: HINT_EVENT_CALLBACK, program, *args, capture_output=True):
         """Run another program
 
         :param callback: |param_scheduled_cb| after process has finished. First parameter will
@@ -163,43 +135,24 @@ class Rule:
         """
 
         assert isinstance(program, str), type(program)
-        cb = HABApp.core.WrappedFunction(callback, name=self._get_cb_name(callback))
+        cb = wrap_func(callback, context=self._habapp_ctx)
 
-        asyncio.run_coroutine_threadsafe(
+        create_task(
             async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
-            HABApp.core.const.loop
         )
 
-    def get_rule(self, rule_name: str) -> 'Union[Rule, typing.List[Rule]]':
+    def get_rule(self, rule_name: str) -> 'Union[Rule, List[Rule]]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
-    def register_on_unload(self, func: typing.Callable[[], typing.Any]):
-        """Register a function with no parameters which will be called when the rule is unloaded.
-        Use this for custom cleanup functions.
-
-        :param func: function which will be called
-        """
-        assert callable(func)
-        assert func not in self.__unload_functions, 'Function was already registered!'
-        self.__unload_functions.append(func)
-
-    def register_cancel_obj(self, obj):
-        """Add a ``weakref`` to an obj which has a ``cancel`` function.
-        When the rule gets unloaded the cancel function will be called (if the obj was not already garbage collected)
-
-        :param obj:
-        """
-        self.__cancel_objs.add(obj)
-
     @staticmethod
-    def get_items(type: Union[typing.Tuple[TYPE_ITEM_CLS, ...], TYPE_ITEM_CLS] = None,
-                  name: Union[str, typing.Pattern[str]] = None,
+    def get_items(type: Union[Tuple[HINT_TYPE_ITEM_OBJ, ...], HINT_TYPE_ITEM_OBJ] = None,
+                  name: Union[str, Pattern[str]] = None,
                   tags: Union[str, Iterable[str]] = None,
                   groups: Union[str, Iterable[str]] = None,
-                  metadata: Union[str, typing.Pattern[str]] = None,
-                  metadata_value: Union[str, typing.Pattern[str]] = None,
-                  ) -> Union[typing.List[TYPE_ITEM], typing.List[BaseItem]]:
+                  metadata: Union[str, Pattern[str]] = None,
+                  metadata_value: Union[str, Pattern[str]] = None,
+                  ) -> Union[List[HINT_ITEM_OBJ], List[BaseItem]]:
         """Search the HABApp item registry and return the found items.
 
         :param type: item has to be an instance of this class
@@ -233,7 +186,7 @@ class Rule:
                 raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its Subclasses')
 
         ret = []
-        for item in HABApp.core.Items.get_all_items():  # type: HABApp.core.items.base_valueitem.BaseItem
+        for item in item_registry.get_items():  # type: HABApp.core.items.BaseItem
             if type is not None and not isinstance(item, type):
                 continue
 
@@ -255,130 +208,3 @@ class Rule:
 
             ret.append(item)
         return ret
-
-    # -----------------------------------------------------------------------------------------------------------------
-    # deprecated functions
-    # -----------------------------------------------------------------------------------------------------------------
-    def run_every(self, time, interval: Union[int, datetime.timedelta], callback, *args, **kwargs):
-        warnings.warn('self.run_every is deprecated. Please use self.run.every', DeprecationWarning)
-        return self.run.every(time, interval, callback, *args, **kwargs)
-
-    def run_on_sun(self, sun_event: str, callback, *args, **kwargs):
-        warnings.warn('self.run_on_sun is deprecated. Please use self.run.on_sunrise, self.run.on_sunset, ...',
-                      DeprecationWarning)
-        func = {'sunset': self.run.on_sunset, 'sunrise': self.run.on_sunrise,
-                'dusk': self.run.on_sun_dusk, 'dawn': self.run.on_sun_dawn}
-        return func[sun_event](callback, *args, **kwargs)
-
-    def run_on_day_of_week(self, time: datetime.time, weekdays, callback, *args, **kwargs):
-        warnings.warn('self.run_on_day_of_week is deprecated. Please use self.run.on_day_of_week', DeprecationWarning)
-        return self.run.on_day_of_week(time, weekdays, callback, *args, **kwargs)
-
-    def run_on_every_day(self, time: datetime.time, callback, *args, **kwargs):
-        warnings.warn('self.run_on_every_day is deprecated. Please use self.run.on_every_day', DeprecationWarning)
-        return self.run.on_every_day(time, callback, *args, **kwargs)
-
-    def run_on_workdays(self, time: datetime.time, callback, *args, **kwargs):
-        warnings.warn('self.run_on_workdays is deprecated. Please use self.run.on_workdays', DeprecationWarning)
-        return self.run.on_workdays(time, callback, *args, **kwargs)
-
-    def run_on_weekends(self, time: datetime.time, callback, *args, **kwargs):
-        warnings.warn('self.run_on_weekends is deprecated. Please use self.run.on_weekends', DeprecationWarning)
-        return self.run.on_weekends(time, callback, *args, **kwargs)
-
-    def run_daily(self, callback, *args, **kwargs):
-        warnings.warn('self.run_hourly is deprecated. Please use self.run.every', DeprecationWarning)
-        start = datetime.timedelta(seconds=random.randint(0, 24 * 3600 - 1))
-        return self.run.every(start, datetime.timedelta(days=1), callback, *args, **kwargs)
-
-    def run_hourly(self, callback, *args, **kwargs) :
-        warnings.warn('self.run_hourly is deprecated. Please use self.run.every_hour', DeprecationWarning)
-        return self.run.every_hour(callback, *args, **kwargs)
-
-    def run_minutely(self, callback, *args, **kwargs):
-        warnings.warn('self.run_minutely is deprecated. Please use self.run.every_minute', DeprecationWarning)
-        return self.run.every_minute(callback, *args, **kwargs)
-
-    def run_at(self, date_time, callback, *args, **kwargs):
-        warnings.warn('self.run_at is deprecated. Please use self.run.at', DeprecationWarning)
-        return self.run.at(date_time, callback, *args, **kwargs)
-
-    def run_in(self, seconds: Union[int, datetime.timedelta], callback, *args, **kwargs):
-        warnings.warn('self.run_in is deprecated. Please use self.run.at', DeprecationWarning)
-        return self.run.at(seconds, callback, *args, **kwargs)
-
-    def run_soon(self, callback, *args, **kwargs):
-        warnings.warn('self.run_soon is deprecated. Please use self.run.soon', DeprecationWarning)
-        return self.run.soon(callback, *args, **kwargs)
-
-    # -----------------------------------------------------------------------------------------------------------------
-    # internal functions
-    # -----------------------------------------------------------------------------------------------------------------
-    def _get_cb_name(self, callback):
-        return f'{self.rule_name}.{callback.__name__}' if self.rule_name else None
-
-    def _add_event_listener(self, listener: HABApp.core.EventBusListener) -> HABApp.core.EventBusListener:
-        self.__event_listener.append(listener)
-        HABApp.core.EventBus.add_listener(listener)
-        return listener
-
-    @HABApp.core.wrapper.log_exception
-    def _check_rule(self):
-        # We need items if we want to run the test
-        if HABApp.core.Items.get_all_items():
-
-            # Check if we have a valid item for all listeners
-            for listener in self.__event_listener:
-
-                # Internal topics - don't warn there
-                if listener.topic in HABApp.core.const.topics.ALL:
-                    continue
-
-                # check if specific item exists
-                if not HABApp.core.Items.item_exists(listener.topic):
-                    log.warning(f'Item "{listener.topic}" does not exist (yet)! '
-                                f'self.listen_event in "{self.rule_name}" may not work as intended.')
-
-        # enable the scheduler
-        self.run._scheduler.resume()
-
-
-    @HABApp.core.wrapper.log_exception
-    def _unload(self):
-
-        # unload all functions
-        for func in self.__unload_functions:
-            try:
-                func()
-            except Exception as e:
-
-                # try getting function name
-                try:
-                    name = f' in "{func.__name__}"'
-                except AttributeError:
-                    name = ''
-
-                log.error(f'Error{name} while unloading "{self.rule_name}": {e}')
-
-                # log traceback
-                lines = traceback.format_exc().splitlines()
-                del lines[1:3]  # see implementation in wrappedfunction.py why we do this
-                for line in lines:
-                    log.error(line)
-
-
-@HABApp.core.wrapper.log_exception
-def get_parent_rule() -> Rule:
-    depth = 1
-    while True:
-        try:
-            frm = sys._getframe(depth)
-        except ValueError:
-            raise RuntimeError('Could not find parent rule!') from None
-
-        __vars = frm.f_locals
-        depth += 1
-        if 'self' in __vars:
-            rule = __vars['self']
-            if isinstance(rule, Rule):
-                return rule

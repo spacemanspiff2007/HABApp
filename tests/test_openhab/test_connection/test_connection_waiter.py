@@ -1,7 +1,5 @@
 import asyncio
 
-import pytest
-
 from HABApp.openhab.connection_handler.http_connection_waiter import WaitBetweenConnects
 
 waited = -1
@@ -12,7 +10,6 @@ async def sleep(time):
     waited = time
 
 
-@pytest.mark.asyncio
 async def test_aggregation_item(monkeypatch):
     monkeypatch.setattr(asyncio, "sleep", sleep)
 

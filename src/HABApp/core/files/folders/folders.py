@@ -3,20 +3,20 @@ from typing import Dict
 from typing import List, Type
 
 import HABApp
-from HABApp.core.const.topics import FILES as T_FILES
+from HABApp.core.const.topics import TOPIC_FILES as T_FILES
 from HABApp.core.events.habapp_events import RequestFileUnloadEvent, RequestFileLoadEvent
 from ..watcher import AggregatingAsyncEventHandler
-
+from HABApp.core.internals import uses_post_event
 
 FOLDERS: Dict[str, 'ConfiguredFolder'] = {}
+
+post_event = uses_post_event()
 
 
 async def _generate_file_events(files: List[Path]):
     for file in files:
         name = get_name(file)
-        HABApp.core.EventBus.post_event(
-            T_FILES, RequestFileLoadEvent(name) if file.is_file() else RequestFileUnloadEvent(name)
-        )
+        post_event(T_FILES, RequestFileLoadEvent(name) if file.is_file() else RequestFileUnloadEvent(name))
 
 
 class ConfiguredFolder:

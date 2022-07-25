@@ -1,5 +1,10 @@
-import HABApp
-from . import BaseValueItem
+from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.internals import uses_item_registry, uses_get_item
+from HABApp.core.items import BaseValueItem
+
+
+get_item = uses_get_item()
+item_registry = uses_item_registry()
 
 
 class Item(BaseValueItem):
@@ -16,10 +21,10 @@ class Item(BaseValueItem):
         assert isinstance(name, str), type(name)
 
         try:
-            item = HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
+            item = get_item(name)
+        except ItemNotFoundException:
             item = cls(name, initial_value)
-            HABApp.core.Items.add_item(item)
+            item_registry.add_item(item)
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item

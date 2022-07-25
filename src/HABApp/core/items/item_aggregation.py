@@ -5,8 +5,17 @@ import typing
 from datetime import timedelta
 
 import HABApp
-from . import BaseValueItem
-from ..wrapper import process_exception
+from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.internals import HINT_EVENT_BUS_LISTENER, wrap_func
+from HABApp.core.wrapper import process_exception
+from HABApp.core.internals import uses_item_registry, uses_get_item, uses_event_bus, EventBusListener
+from HABApp.core.items import BaseValueItem
+from HABApp.core.events import EventFilter, ValueChangeEvent, ValueUpdateEvent
+
+
+get_item = uses_get_item()
+item_registry = uses_item_registry()
+event_bus = uses_event_bus()
 
 
 class AggregationItem(BaseValueItem):
@@ -21,10 +30,10 @@ class AggregationItem(BaseValueItem):
         assert isinstance(name, str), type(name)
 
         try:
-            item = HABApp.core.Items.get_item(name)
-        except HABApp.core.Items.ItemNotFoundException:
+            item = get_item(name)
+        except ItemNotFoundException:
             item = cls(name)
-            HABApp.core.Items.add_item(item)
+            item_registry.add_item(item)
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
@@ -37,7 +46,7 @@ class AggregationItem(BaseValueItem):
         self._ts: typing.Deque[float] = collections.deque()
         self._vals: typing.Deque[typing.Any] = collections.deque()
 
-        self.__listener: typing.Optional[HABApp.core.EventBusListener] = None
+        self.__listener: typing.Optional[HINT_EVENT_BUS_LISTENER] = None
 
         self.__task: typing.Optional[asyncio.Future] = None
 
@@ -81,16 +90,16 @@ class AggregationItem(BaseValueItem):
             self.__listener.cancel()
             self.__listener = None
 
-        self.__listener = HABApp.core.EventBusListener(
+        self.__listener = EventBusListener(
             topic=source.name if isinstance(source, HABApp.core.items.BaseValueItem) else source,
-            callback=HABApp.core.WrappedFunction(self._add_value, name=f'{self.name}.add_value'),
-            event_type=HABApp.core.events.ValueChangeEvent if only_changes else HABApp.core.events.ValueUpdateEvent
+            callback=wrap_func(self._add_value, name=f'{self.name}.add_value'),
+            event_filter=EventFilter(ValueChangeEvent if only_changes else ValueUpdateEvent)
         )
-        HABApp.core.EventBus.add_listener(self.__listener)
+        event_bus.add_listener(self.__listener)
         return self
 
-    def _on_item_remove(self):
-        super()._on_item_remove()
+    def _on_item_removed(self):
+        super()._on_item_removed()
 
         if self.__listener is not None:
             self.__listener.cancel()
@@ -130,7 +139,7 @@ class AggregationItem(BaseValueItem):
             self.__task = None
         return None
 
-    async def _add_value(self, event: 'HABApp.core.events.ValueChangeEvent'):
+    async def _add_value(self, event: ValueChangeEvent):
         self._ts.append(time.time())
         self._vals.append(event.value)
 

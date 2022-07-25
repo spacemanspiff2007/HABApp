@@ -1,5 +1,4 @@
 import asyncio
-from datetime import timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -8,8 +7,11 @@ from pendulum import now as pd_now
 
 import HABApp
 import HABApp.core.items.tmp_data
+from HABApp.core.events import NoEventFilter
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
-from ...helpers import TmpEventBus
+from tests.helpers import TestEventBus
+from HABApp.core.internals import wrap_func, HINT_ITEM_REGISTRY, HINT_EVENT_BUS
+from HABApp.core.items import Item
 
 
 @pytest.fixture(scope="function")
@@ -21,8 +23,10 @@ def u():
     yield a
 
     # cancel the rest of the running tasks
-    w1.cancel()
-    w2.cancel()
+    if w1._parent_ctx is not None:
+        w1.cancel()
+    if w2._parent_ctx is not None:
+        w2.cancel()
 
 
 @pytest.fixture(scope="function")
@@ -34,36 +38,33 @@ def c():
     yield a
 
     # cancel the rest of the running tasks
-    w1.cancel()
-    w2.cancel()
+    if w1._parent_ctx is not None:
+        w1.cancel()
+    if w2._parent_ctx is not None:
+        w2.cancel()
 
 
-def test_sec_timedelta():
+def test_sec_timedelta(parent_rule):
     a = UpdatedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
 
     # We return the same object because it is the same time
-    assert w1 is a.add_watch(timedelta(seconds=1))
+    assert w1 is a.add_watch(1)
+    assert w1 is a.add_watch(1.0)
 
-    w2 = a.add_watch(timedelta(seconds=3))
+    w2 = a.add_watch(3)
     assert w2.fut.secs == 3
-
-    w3 = a.add_watch(timedelta(minutes=3))
-    assert w3.fut.secs == 3 * 60
 
     w1.cancel()
     w2.cancel()
-    w3.cancel()
 
 
-@pytest.mark.asyncio
-async def test_rem(u: UpdatedTime):
+async def test_rem(parent_rule, u: UpdatedTime):
     for t in u.tasks:
         t.cancel()
 
 
-@pytest.mark.asyncio
-async def test_cancel_running(u: UpdatedTime):
+async def test_cancel_running(parent_rule, u: UpdatedTime):
     u.set(pd_now(UTC))
 
     w1 = u.tasks[0]
@@ -81,12 +82,11 @@ async def test_cancel_running(u: UpdatedTime):
     assert w2 not in u.tasks
 
 
-@pytest.mark.asyncio
-async def test_event_update(u: UpdatedTime):
+async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: HINT_EVENT_BUS):
     m = MagicMock()
     u.set(pd_now(UTC))
-    list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'))
-    HABApp.core.EventBus.add_listener(list)
+    list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
+    eb.add_listener(list)
 
     u.set(pd_now(UTC))
     await asyncio.sleep(1)
@@ -111,12 +111,11 @@ async def test_event_update(u: UpdatedTime):
     list.cancel()
 
 
-@pytest.mark.asyncio
-async def test_event_change(c: ChangedTime):
+async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: HINT_EVENT_BUS):
     m = MagicMock()
     c.set(pd_now(UTC))
-    list = HABApp.core.EventBusListener('test', HABApp.core.WrappedFunction(m, name='MockFunc'))
-    HABApp.core.EventBus.add_listener(list)
+    list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
+    eb.add_listener(list)
 
     c.set(pd_now(UTC))
     await asyncio.sleep(1)
@@ -141,48 +140,46 @@ async def test_event_change(c: ChangedTime):
     list.cancel()
 
 
-@pytest.mark.asyncio
-async def test_watcher_change_restore(parent_rule):
+async def test_watcher_change_restore(parent_rule, ir: HINT_ITEM_REGISTRY):
     name = 'test_save_restore'
 
-    item_a = HABApp.core.items.Item(name)
-    HABApp.core.Items.add_item(item_a)
+    item_a = Item(name)
+    ir.add_item(item_a)
     watcher = item_a.watch_change(1)
 
     # remove item
     assert name not in HABApp.core.items.tmp_data.TMP_DATA
-    HABApp.core.Items.pop_item(name)
+    ir.pop_item(name)
     assert name in HABApp.core.items.tmp_data.TMP_DATA
 
-    item_b = HABApp.core.items.Item(name)
-    HABApp.core.Items.add_item(item_b)
+    item_b = Item(name)
+    ir.add_item(item_b)
 
     assert item_b._last_change.tasks == [watcher]
-    HABApp.core.Items.pop_item(name)
+    ir.pop_item(name)
 
 
-@pytest.mark.asyncio
-async def test_watcher_update_restore(parent_rule):
+async def test_watcher_update_restore(parent_rule, ir: HINT_ITEM_REGISTRY):
     name = 'test_save_restore'
 
-    item_a = HABApp.core.items.Item(name)
-    HABApp.core.Items.add_item(item_a)
+    item_a = Item(name)
+    ir.add_item(item_a)
     watcher = item_a.watch_update(1)
 
     # remove item
     assert name not in HABApp.core.items.tmp_data.TMP_DATA
-    HABApp.core.Items.pop_item(name)
+    ir.pop_item(name)
     assert name in HABApp.core.items.tmp_data.TMP_DATA
 
-    item_b = HABApp.core.items.Item(name)
-    HABApp.core.Items.add_item(item_b)
+    item_b = Item(name)
+    ir.add_item(item_b)
 
     assert item_b._last_update.tasks == [watcher]
-    HABApp.core.Items.pop_item(name)
+    ir.pop_item(name)
 
 
-@pytest.mark.asyncio
-async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, sync_worker, event_bus: TmpEventBus):
+async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
+                                      sync_worker, eb: TestEventBus, ir: HINT_ITEM_REGISTRY):
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''
@@ -191,16 +188,16 @@ async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime, 
         nonlocal text_warning
         text_warning = event
 
-    event_bus.listen_events(HABApp.core.const.topics.WARNINGS, get_log)
+    eb.listen_events(HABApp.core.const.topics.TOPIC_WARNINGS, get_log, NoEventFilter())
 
     name = 'test_save_restore'
     item_a = HABApp.core.items.Item(name)
-    HABApp.core.Items.add_item(item_a)
+    ir.add_item(item_a)
     item_a.watch_update(1)
 
     # remove item
     assert name not in HABApp.core.items.tmp_data.TMP_DATA
-    HABApp.core.Items.pop_item(name)
+    ir.pop_item(name)
     assert name in HABApp.core.items.tmp_data.TMP_DATA
 
     # ensure that the tmp data gets deleted

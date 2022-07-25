@@ -1,36 +1,32 @@
 import pytest
 
-from HABApp.core import Items
+from HABApp.core.errors import ItemNotFoundException, ItemAlreadyExistsError
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
 
 
-@pytest.fixture
-def clean_reg():
-    Items._ALL_ITEMS.clear()
-    yield
-    Items._ALL_ITEMS.clear()
+def test_pop():
+    ir = ItemRegistry()
+    ir.add_item(Item('test'))
+    assert ir.item_exists('test')
+
+    with pytest.raises(ItemNotFoundException):
+        ir.pop_item('asdfadsf')
+
+    ir.pop_item('test')
+    assert not ir.item_exists('test')
 
 
-def test_pop(clean_reg):
-    Items.add_item(Item('test'))
-    assert Items.item_exists('test')
-
-    with pytest.raises(Items.ItemNotFoundException):
-        Items.pop_item('asdfadsf')
-
-    Items.pop_item('test')
-    assert not Items.item_exists('test')
-
-
-def test_add(clean_reg):
+def test_add():
+    ir = ItemRegistry()
     added = Item('test')
-    Items.add_item(added)
-    assert Items.item_exists('test')
+    ir.add_item(added)
+    assert ir.item_exists('test')
 
     # adding the same item multiple times will not cause an exception
-    Items.add_item(added)
-    Items.add_item(added)
+    ir.add_item(added)
+    ir.add_item(added)
 
     # adding a new item -> exception
-    with pytest.raises(Items.ItemAlreadyExistsError):
-        Items.add_item(Item('test'))
+    with pytest.raises(ItemAlreadyExistsError):
+        ir.add_item(Item('test'))

@@ -1,8 +1,22 @@
+from typing import Any
+
 from HABApp.openhab.items.base_item import OpenhabItem
 from ..definitions import OpenClosedValue
+from ...core.const import MISSING
+from ..errors import SendCommandNotSupported
 
 
 class ContactItem(OpenhabItem):
+    """ContactItem
+
+    :ivar str name:
+    :ivar str value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
     def set_value(self, new_value) -> bool:
 
@@ -20,6 +34,10 @@ class ContactItem(OpenhabItem):
     def is_closed(self) -> bool:
         """Test value against closed-value"""
         return self.value == OpenClosedValue.CLOSED
+
+    def oh_send_command(self, value: Any = MISSING):
+        raise SendCommandNotSupported(f'{self.__class__.__name__} does not support send command! '
+                                      'See openHAB documentation for details.')
 
     def __str__(self):
         return self.value

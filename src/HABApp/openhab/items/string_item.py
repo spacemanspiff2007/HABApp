@@ -1,28 +1,40 @@
 from HABApp.openhab.items.base_item import OpenhabItem
-from ..definitions import QuantityValue
 
 
 class StringItem(OpenhabItem):
-    """StringItem which accepts and converts the data types from OpenHAB"""
+    """StringItem which accepts and converts the data types from OpenHAB
+
+    :ivar str name:
+    :ivar str value:
+
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
 
 class LocationItem(OpenhabItem):
-    """LocationItem which accepts and converts the data types from OpenHAB"""
+    """LocationItem which accepts and converts the data types from OpenHAB
 
-    def set_value(self, new_value) -> bool:
+    :ivar str name:
+    :ivar str value:
 
-        if isinstance(new_value, QuantityValue):
-            return super().set_value(new_value.value)
-
-        return super().set_value(new_value)
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """
 
 
 class PlayerItem(OpenhabItem):
-    """PlayerItem which accepts and converts the data types from OpenHAB"""
+    """PlayerItem which accepts and converts the data types from OpenHAB
 
-    def set_value(self, new_value) -> bool:
+    :ivar str name:
+    :ivar str value:
 
-        if isinstance(new_value, QuantityValue):
-            return super().set_value(new_value.value)
-
-        return super().set_value(new_value)
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
+    :ivar Mapping[str, MetaData] metadata:
+    """

@@ -81,7 +81,7 @@ def test_group_item():
         "category": "my_category",
         "tags": [],
         "groupNames": [
-            "ALL"
+            "ALL_TOPICS"
         ]
     }
     item = OpenhabItemDefinition.parse_obj(_in)   # type: OpenhabItemDefinition

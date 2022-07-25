@@ -1,19 +1,33 @@
+from typing import Any
+from typing import Mapping
+
+from immutables import Map
 from pendulum import UTC
 from pendulum import now as pd_now
 
-from HABApp.core.items.base_item import BaseItem
-from ..events import ThingStatusInfoEvent
+from HABApp.core.items import BaseItem
+from ..events import ThingStatusInfoEvent, ThingUpdatedEvent
 
 
 class Thing(BaseItem):
     """Base class for Things
 
     :ivar str status: Status of the thing (e.g. OFFLINE, ONLINE, ...)
+    :ivar str status_detail: Additional detail for the status
+    :ivar str label: Thing label
+    :ivar Mapping[str, Any] configuration: Thing configuration
+    :ivar Mapping[str, Any] properties: Thing properties
     """
     def __init__(self, name: str):
         super().__init__(name)
 
         self.status: str = ''
+        self.status_detail: str = ''
+
+        self.label: str = ''
+
+        self.configuration: Mapping[str, Any] = Map()
+        self.properties: Mapping[str, Any] = Map()
 
     def __update_timestamps(self, changed: bool):
         _now = pd_now(UTC)
@@ -26,7 +40,21 @@ class Thing(BaseItem):
 
         if isinstance(event, ThingStatusInfoEvent):
             old = self.status
-            self.status = event.status
-            self.__update_timestamps(old == self.status)
+            self.status = new = event.status
+            self.status_detail = event.detail
+
+            self.__update_timestamps(old != new)
+        elif isinstance(event, ThingUpdatedEvent):
+            old_label         = self.label
+            old_configuration = self.configuration
+            old_properties    = self.properties
+
+            self.label         = event.label
+            self.configuration = Map(event.configuration)
+            self.properties    = Map(event.properties)
+
+            self.__update_timestamps(
+                old_label != self.label or old_configuration != self.configuration or old_properties != self.properties
+            )
 
         return None

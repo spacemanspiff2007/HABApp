@@ -2,8 +2,10 @@ import HABApp
 
 
 class MqttValueUpdateEvent(HABApp.core.events.ValueUpdateEvent):
-    pass
+    # Copy the annotations, otherwise the code won't work from py3.10 on
+    __annotations__ = HABApp.core.events.ValueUpdateEvent.__annotations__.copy()
 
 
 class MqttValueChangeEvent(HABApp.core.events.ValueChangeEvent):
-    pass
+    # Copy the annotations, otherwise the code won't work from py3.10 on
+    __annotations__ = HABApp.core.events.ValueChangeEvent.__annotations__.copy()

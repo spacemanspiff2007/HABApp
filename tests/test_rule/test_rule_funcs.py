@@ -1,39 +1,47 @@
-import unittest
 from unittest.mock import MagicMock
 
+import pytest
+
 from HABApp import Rule
+from tests.helpers import TestEventBus
 from ..rule_runner import SimpleRuleRunner
 
 
+@pytest.mark.no_internals
 def test_unload_function():
 
     with SimpleRuleRunner():
         r = Rule()
         m = MagicMock()
+        r.on_rule_removed = m
         assert not m.called
-        r.register_on_unload(m)
     assert m.called
 
 
-def test_unload_function_exception():
+@pytest.mark.no_internals
+def test_unload_function_exception(eb: TestEventBus):
+    eb.allow_errors = True
 
     with SimpleRuleRunner():
         r = Rule()
-        m = MagicMock()
-        m_exception = MagicMock(side_effect=ValueError)
+        m = MagicMock(side_effect=ValueError)
+        r.on_rule_removed = m
         assert not m.called
-        assert not m_exception.called
-        r.register_on_unload(lambda : 1 / 0)
 
-        def asdf():
-            1 / 0
-
-        r.register_on_unload(asdf)
-        r.register_on_unload(m_exception)
-        r.register_on_unload(m)
     assert m.called
-    assert m.m_exception
 
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.mark.no_internals
+def test_repr():
+    class Abc(Rule):
+
+        def __init__(self):
+            super().__init__()
+            self.rule_name = 'Abc'
+
+    with SimpleRuleRunner():
+        rule = Abc()
+        assert repr(rule) == '<Abc>'
+
+        rule.rule_name = 'MyName'
+        assert repr(rule) == '<Abc MyName>'

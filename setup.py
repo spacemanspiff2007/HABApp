@@ -14,12 +14,7 @@ def load_version() -> str:
 
 
 def load_req() -> typing.List[str]:
-    # When we run tox tests we don't have this file available so we skip them
-    req_file = Path(__file__).with_name('requirements_setup.txt')
-    if not req_file.is_file():
-        return ['']
-
-    with req_file.open() as f:
+    with open('requirements_setup.txt') as f:
         return f.readlines()
 
 
@@ -28,7 +23,7 @@ __version__ = load_version()
 print(f'Version: {__version__}')
 print('')
 
-# When we run tox tests we don't have these files available so we skip them
+# When we run tox tests we don't have these files available, so we skip them
 readme = Path(__file__).with_name('readme.md')
 long_description = ''
 if readme.is_file():
@@ -57,15 +52,15 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src', exclude=['tests*']),
     install_requires=load_req(),
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: AsyncIO",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Home Automation"
     ],

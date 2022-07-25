@@ -1,70 +1,20 @@
 import asyncio
 import logging
-import signal
 import sys
-import traceback
 import typing
 
-
-def get_debug_info() -> str:
-    import platform
-    import sys
-
-    info = {
-        'Platform': platform.platform(),
-        'Machine': platform.machine(),
-        'Python version': sys.version,
-    }
-
-    ret = '\n'.join('{:20s}: {:s}'.format(k, str(v).replace('\n', '')) for k, v in info.items())
-
-    try:
-        import pkg_resources
-        installed_packages = {p.key: p.version for p in sorted(pkg_resources.working_set, key=lambda x: x.key)}
-
-        indent = max(map(len, installed_packages.keys()), default=1) + 2
-        table = '\n'.join(f'{k:{indent}s}: {v}' for k, v in installed_packages.items())
-
-        if installed_packages:
-            ret += f'\n\nInstalled Packages\n{"-" * 80}\n{table}'
-
-    except Exception as e:
-        ret += f'\n\nCould not get installed Packages!\nError: {str(e)}'
-
-    return ret
-
-
-def print_debug_info():
-    print(f'Debug information\n{"-" * 80}')
-    print(get_debug_info())
-
-
-try:
-    import HABApp
-    from HABApp.__cmd_args__ import parse_args
-    from HABApp.__splash_screen__ import show_screen
-except (ModuleNotFoundError, ImportError) as dep_err:
-    print(f'Error!\nDependency "{dep_err.name}" is missing!\n\n')
-    print_debug_info()
-    sys.exit(100)
-
-
-def register_signal_handler():
-    def shutdown_handler(sig, frame):
-        print('Shutting down ...')
-        HABApp.runtime.shutdown.request_shutdown()
-
-    # register shutdown helper
-    signal.signal(signal.SIGINT, shutdown_handler)
-    signal.signal(signal.SIGTERM, shutdown_handler)
+import HABApp
+from HABApp.__cmd_args__ import parse_args, find_config_folder
+from HABApp.__debug_info__ import print_debug_info
+from HABApp.__splash_screen__ import show_screen
 
 
 def main() -> typing.Union[int, str]:
 
-    # This has do be done before we create HABApp because of the possible sleep time
-    cfg_folder = parse_args()
-
     show_screen()
+
+    # This has to be done before we create HABApp because of the possible sleep time
+    args = parse_args()
 
     if HABApp.__cmd_args__.DO_DEBUG:
         print_debug_info()
@@ -73,20 +23,22 @@ def main() -> typing.Union[int, str]:
     log = logging.getLogger('HABApp')
 
     try:
-        app = HABApp.runtime.Runtime()
-        register_signal_handler()
+        cfg_folder = find_config_folder(args.config)
 
-        # start workers
+        # see if we have user code (e.g. for additional logging configuration or additional setup)
         try:
-            asyncio.ensure_future(app.start(cfg_folder))
-            HABApp.core.const.loop.run_forever()
-        except asyncio.CancelledError:
+            import HABAppUser   # noqa: F401
+        except ModuleNotFoundError:
             pass
 
-    except HABApp.config.InvalidConfigException:
-        pass
+        # Shutdown handler for graceful shutdown
+        HABApp.runtime.shutdown.register_signal_handler()
+
+        app = HABApp.runtime.Runtime()
+        HABApp.core.const.loop.create_task(app.start(cfg_folder))
+        HABApp.core.const.loop.run_forever()
     except Exception as e:
-        for line in traceback.format_exc().splitlines():
+        for line in HABApp.core.lib.exceptions.format_exception(e):
             log.error(line)
             print(e)
         return str(e)

@@ -1,13 +1,15 @@
 import pytest
 
-from HABApp.core import WrappedFunction
+from HABApp.core.internals.wrapped_function import wrapped_thread
 
 
 class SyncTestWorker:
-    def submit(self, callback, *args, **kwargs):
+    @staticmethod
+    def submit(callback, *args, **kwargs):
         callback(*args, **kwargs)
 
 
 @pytest.fixture(scope="function")
 def sync_worker(monkeypatch):
-    monkeypatch.setattr(WrappedFunction, '_WORKERS', SyncTestWorker())
+    monkeypatch.setattr(wrapped_thread, 'WORKERS', SyncTestWorker())
+    yield

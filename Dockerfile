@@ -1,20 +1,44 @@
-FROM python:3.8-alpine
+FROM python:3.9-slim as buildimage
 
-VOLUME [ "/config"]
+COPY . /tmp/app_install
 
+RUN set -eux; \
+# wheel all packages for habapp
+	cd /tmp/app_install; \
+	pip wheel --wheel-dir=/root/wheels --use-feature=in-tree-build .
+
+FROM python:3.9-slim
+
+COPY --from=buildimage /root/wheels /root/wheels
+COPY container/entrypoint.sh /entrypoint.sh
+
+ENV HABAPP_HOME=/habapp \
+	USER_ID=9001 \
+	GROUP_ID=${USER_ID}
+
+RUN set -eux; \
 # Install required dependencies
-RUN apk add --no-cache \
-# Support for Timezones
-    tzdata \
-# ujson won't compile without these libs
-    g++
+	apt-get update; \
+	DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+		gosu \
+		tini; \
+	ln -s -f $(which gosu) /usr/local/bin/gosu; \
+	apt-get clean; \
+	rm -rf /var/lib/apt/lists/*; \
+	mkdir -p ${HABAPP_HOME}; \
+	mkdir -p ${HABAPP_HOME}/config; \
+# install HABApp
+	pip3 install \
+    	--no-index \
+    	--find-links=/root/wheels \
+		habapp; \
+# prepare entrypoint script
+	chmod +x /entrypoint.sh; \
+# clean up
+	rm -rf /root/wheels
 
-# Always use latest versions
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-COPY . .
+WORKDIR ${HABAPP_HOME}
+VOLUME ["${HABAPP_HOME}/config"]
+ENTRYPOINT ["/entrypoint.sh"]
 
-# Install
-RUN pip3 install .
-
-CMD [ "python", "-m", "HABApp", "--config", "/config" ]
+CMD ["gosu", "habapp", "tini", "--", "python", "-m", "HABApp", "--config", "./config"]

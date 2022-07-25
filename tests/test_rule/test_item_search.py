@@ -1,20 +1,20 @@
 import pytest
 
 from HABApp import Rule
-from HABApp.core import Items
+from HABApp.core.internals import HINT_ITEM_REGISTRY
 from HABApp.core.items import Item, BaseValueItem
 from HABApp.openhab.items import OpenhabItem, SwitchItem
 from HABApp.openhab.items.base_item import MetaData
 
 
-def test_search_type():
+def test_search_type(ir: HINT_ITEM_REGISTRY):
     item1 = BaseValueItem('item_1')
     item2 = Item('item_2')
 
     assert Rule.get_items() == []
 
-    Items.add_item(item1)
-    Items.add_item(item2)
+    ir.add_item(item1)
+    ir.add_item(item2)
 
     assert Rule.get_items() == [item1, item2]
     assert Rule.get_items(type=BaseValueItem) == [item1, item2]
@@ -23,7 +23,7 @@ def test_search_type():
     assert Rule.get_items(type=Item) == [item2]
 
 
-def test_search_oh():
+def test_search_oh(ir: HINT_ITEM_REGISTRY):
     item1 = OpenhabItem('oh_item_1', tags=frozenset(['tag1', 'tag2', 'tag3']),
                         groups=frozenset(['grp1', 'grp2']), metadata={'meta1': MetaData('meta_v1')})
     item2 = SwitchItem('oh_item_2', tags=frozenset(['tag1', 'tag2', 'tag4']),
@@ -32,9 +32,9 @@ def test_search_oh():
 
     assert Rule.get_items() == []
 
-    Items.add_item(item1)
-    Items.add_item(item2)
-    Items.add_item(item3)
+    ir.add_item(item1)
+    ir.add_item(item2)
+    ir.add_item(item3)
 
     assert Rule.get_items() == [item1, item2, item3]
     assert Rule.get_items(tags='tag2') == [item1, item2]
@@ -61,14 +61,14 @@ def test_classcheck():
         Rule.get_items(Item, tags='asdf')
 
 
-def test_search_name():
+def test_search_name(ir: HINT_ITEM_REGISTRY):
     item1 = BaseValueItem('item_1a')
     item2 = Item('item_2a')
 
     assert Rule.get_items() == []
 
-    Items.add_item(item1)
-    Items.add_item(item2)
+    ir.add_item(item1)
+    ir.add_item(item2)
 
     assert Rule.get_items() == [item1, item2]
     assert Rule.get_items(name=r'\da') == [item1, item2]

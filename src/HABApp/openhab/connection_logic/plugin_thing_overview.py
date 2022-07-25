@@ -46,8 +46,8 @@ class ThingOverview(OnConnectPlugin):
         # zw_u_channels = zw_table.add_column('Unlinked channel types')
 
         for node in thing_data:
-            uid = node['UID']
-            type_uid = node['thingTypeUID']
+            uid = node.uid
+            type_uid = node.thing_type
 
             is_zw = type_uid.startswith('zwave:')
 
@@ -57,15 +57,15 @@ class ThingOverview(OnConnectPlugin):
 
             col_uid.add(uid)
             col_type.add(type_uid)
-            col_label.add(node.get('label', ''))
-            col_stat.add(node['statusInfo']['status'])
-            col_location.add(node.get('location', ''))
+            col_label.add(node.label)
+            col_stat.add(node.status.status)
+            col_location.add(node.location if node.location is not None else '')
 
             if not is_zw:
                 continue
 
             # optional properties which can be set
-            props = node['properties']
+            props = node.properties
             # channels = node.get('channels', [])
 
             # Node-ID, e.g. 5

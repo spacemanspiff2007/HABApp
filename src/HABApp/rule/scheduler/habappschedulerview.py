@@ -7,35 +7,42 @@ from eascheduler.jobs import CountdownJob, DawnJob, DayOfWeekJob, DuskJob, OneTi
     SunsetJob
 
 import HABApp
-from HABApp.core import WrappedFunction
+import HABApp.rule_ctx
+from HABApp.core.const.hints import HINT_SCHEDULER_CALLBACK
+from HABApp.core.internals import wrap_func
 from HABApp.rule.scheduler.executor import WrappedFunctionExecutor
 from HABApp.rule.scheduler.scheduler import HABAppScheduler as _HABAppScheduler
+from HABApp.core.internals import ContextProvidingObj, HINT_CONTEXT_OBJ
 
 
-class HABAppSchedulerView(SchedulerView):
-    def __init__(self, rule: 'HABApp.rule.Rule'):
+class HABAppSchedulerView(SchedulerView, ContextProvidingObj):
+    def __init__(self, context: 'HABApp.rule_ctx.HABAppRuleContext'):
         super().__init__(_HABAppScheduler(), WrappedFunctionExecutor)
-        self._rule: 'HABApp.rule.Rule' = rule
+        self._habapp_rule_ctx: HINT_CONTEXT_OBJ = context
 
-    def at(self, time: Union[None, dt_datetime, dt_timedelta, dt_time, int], callback, *args, **kwargs) -> OneTimeJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+    def at(self, time: Union[None, dt_datetime, dt_timedelta, dt_time, int],
+           callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> OneTimeJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().at(time, callback, *args, **kwargs)
 
-    def countdown(self, expire_time: Union[dt_timedelta, float, int], callback, *args, **kwargs) -> CountdownJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+    def countdown(self, expire_time: Union[dt_timedelta, float, int],
+                  callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> CountdownJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().countdown(expire_time, callback, *args, **kwargs)
 
     def every(self, start_time: Union[None, dt_datetime, dt_timedelta, dt_time, int],
-              interval: Union[int, float, dt_timedelta], callback, *args, **kwargs) -> ReoccurringJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+              interval: Union[int, float, dt_timedelta],
+              callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> ReoccurringJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().every(start_time, interval, callback, *args, **kwargs)
 
     def on_day_of_week(self, time: Union[dt_time, dt_datetime], weekdays: Union[str, Iterable[Union[str, int]]],
-                       callback, *args, **kwargs) -> DayOfWeekJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+                       callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> DayOfWeekJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_day_of_week(time, weekdays, callback, *args, **kwargs)
 
-    def on_every_day(self, time: Union[dt_time, dt_datetime], callback, *args, **kwargs) -> DayOfWeekJob:
+    def on_every_day(self, time: Union[dt_time, dt_datetime],
+                     callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> DayOfWeekJob:
         """Create a job that will run at a certain time of day
 
         :param time: Time when the job will run
@@ -43,26 +50,26 @@ class HABAppSchedulerView(SchedulerView):
         :param args: |param_scheduled_cb_args|
         :param kwargs: |param_scheduled_cb_kwargs|
         """
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_day_of_week(time, 'all', callback, *args, **kwargs)
 
-    def on_sunrise(self, callback, *args, **kwargs) -> SunriseJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+    def on_sunrise(self, callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> SunriseJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sunrise(callback, *args, **kwargs)
 
-    def on_sunset(self, callback, *args, **kwargs) -> SunsetJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+    def on_sunset(self, callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> SunsetJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sunset(callback, *args, **kwargs)
 
-    def on_sun_dawn(self, callback, *args, **kwargs) -> DawnJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+    def on_sun_dawn(self, callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> DawnJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sun_dawn(callback, *args, **kwargs)
 
-    def on_sun_dusk(self, callback, *args, **kwargs) -> DuskJob:
-        callback = WrappedFunction(callback, name=self._rule._get_cb_name(callback))
+    def on_sun_dusk(self, callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> DuskJob:
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
         return super().on_sun_dusk(callback, *args, **kwargs)
 
-    def soon(self, callback, *args, **kwargs) -> OneTimeJob:
+    def soon(self, callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> OneTimeJob:
         """
         Run the callback as soon as possible.
 
@@ -72,7 +79,7 @@ class HABAppSchedulerView(SchedulerView):
         """
         return self.at(None, callback, *args, **kwargs)
 
-    def every_minute(self, callback, *args, **kwargs) -> ReoccurringJob:
+    def every_minute(self, callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> ReoccurringJob:
         """Picks a random second and runs the callback every minute
 
         :param callback: |param_scheduled_cb|
@@ -83,7 +90,7 @@ class HABAppSchedulerView(SchedulerView):
         interval = dt_timedelta(seconds=60)
         return self.every(start, interval, callback, *args, **kwargs)
 
-    def every_hour(self, callback, *args, **kwargs) -> ReoccurringJob:
+    def every_hour(self, callback: HINT_SCHEDULER_CALLBACK, *args, **kwargs) -> ReoccurringJob:
         """Picks a random minute and second and run the callback every hour
 
         :param callback: |param_scheduled_cb|

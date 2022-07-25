@@ -1,24 +1,29 @@
-import asyncio
 import logging
 import typing
 
 import HABApp
+from HABApp.core.asyncio import create_task
+from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent, EventFilter
 from HABApp.core.lib import PendingFuture
-from ..const import loop
-from ..events import ItemNoChangeEvent, ItemNoUpdateEvent, EventFilter
+from HABApp.core.const.hints import HINT_EVENT_CALLBACK
+from HABApp.core.internals import uses_post_event, get_current_context, AutoContextBoundObj, wrap_func
+from HABApp.core.internals import ContextBoundEventBusListener
 
 log = logging.getLogger('HABApp')
 
+post_event = uses_post_event()
 
-class BaseWatch:
+
+class BaseWatch(AutoContextBoundObj):
     EVENT: typing.Union[typing.Type[ItemNoUpdateEvent], typing.Type[ItemNoChangeEvent]]
 
     def __init__(self, name: str, secs: typing.Union[int, float]):
+        super(BaseWatch, self).__init__()
         self.fut = PendingFuture(self._post_event, secs)
         self.name: str = name
 
     async def _post_event(self):
-        HABApp.core.EventBus.post_event(self.name, self.EVENT(self.name, self.fut.secs))
+        post_event(self.name, self.EVENT(self.name, self.fut.secs))
 
     async def __cancel_watch(self):
         self.fut.cancel()
@@ -26,14 +31,20 @@ class BaseWatch:
 
     def cancel(self):
         """Cancel the item watch"""
-        asyncio.run_coroutine_threadsafe(self.__cancel_watch(), loop)
+        self._ctx_unlink()
+        create_task(self.__cancel_watch())
 
-    def listen_event(self, callback: typing.Callable[[typing.Any], typing.Any]) -> 'HABApp.core.EventBusListener':
+    def listen_event(self, callback: HINT_EVENT_CALLBACK) -> 'HABApp.core.base.HINT_EVENT_BUS_LISTENER':
         """Listen to (only) the event that is emitted by this watcher"""
-        rule = HABApp.rule.get_parent_rule()
-        cb = HABApp.core.WrappedFunction(callback, name=rule._get_cb_name(callback))
-        listener = EventFilter(self.EVENT, seconds=self.fut.secs).create_event_listener(self.name, cb)
-        return rule._add_event_listener(listener)
+        context = get_current_context()
+        return context.add_event_listener(
+            ContextBoundEventBusListener(
+                self.name,
+                wrap_func(callback, context=context),
+                EventFilter(self.EVENT, seconds=self.fut.secs),
+                parent_ctx=context
+            )
+        )
 
 
 class ItemNoUpdateWatch(BaseWatch):

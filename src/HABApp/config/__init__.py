@@ -1,3 +1,9 @@
-from .config import Openhab, Mqtt
+from .errors import InvalidConfigError
+
+# isort: split
+
 from .config import CONFIG
-from .config_loader import HABAppConfigLoader, InvalidConfigException
+
+# isort: split
+
+from .loader import load_config

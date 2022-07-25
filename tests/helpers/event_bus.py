@@ -1,30 +1,41 @@
+from typing import Any
 
 import pytest
-import typing
 
-from HABApp.core import EventBus, EventBusListener
-from HABApp.core import WrappedFunction
+from HABApp.core.const.topics import TOPIC_ERRORS
+from HABApp.core.events.habapp_events import HABAppException
+from HABApp.core.internals import EventFilterBase, EventBusListener, EventBus, wrap_func
 
 
-class TmpEventBus:
+class TestEventBus(EventBus):
+
     def __init__(self):
-        self.listener: typing.List[EventBusListener] = []
+        super().__init__()
+        self.allow_errors = False
+        self.errors = []
 
-    def listen_events(self, name: str, cb):
-        listener = EventBusListener(name, WrappedFunction(cb, name=f'TestFunc for {name}'))
-        self.listener.append(listener)
-        EventBus.add_listener(listener)
+    def listen_events(self, name: str, cb, filter: EventFilterBase):
+        listener = EventBusListener(name, wrap_func(cb, name=f'TestFunc for {name}'), filter)
+        self.add_listener(listener)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        for listener in self.listener:
-            listener.cancel()
-        return False  # do not suppress exception
+    def post_event(self, topic: str, event: Any):
+        if not self.allow_errors:
+            if topic == TOPIC_ERRORS or isinstance(event, HABAppException):
+                self.errors.append(event)
+        super().post_event(topic, event)
 
 
-@pytest.fixture(scope="function")
-def event_bus():
-    with TmpEventBus() as tb:
-        yield tb
+@pytest.yield_fixture(scope='function')
+def eb():
+    eb = TestEventBus()
+    yield eb
+    eb.remove_all_listeners()
+
+    for event in eb.errors:
+        if isinstance(event, HABAppException):
+            for line in event.to_str().splitlines():
+                print(line)
+        else:
+            print(event)
+
+    assert not eb.errors
