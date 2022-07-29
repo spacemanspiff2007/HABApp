@@ -7,7 +7,7 @@ ujson       >= 5.4,     < 5.5
 paho-mqtt   >= 1.6,     < 1.7
 
 immutables  == 0.18
-eascheduler == 0.1.5
+eascheduler == 0.1.6
 easyconfig  == 0.2.4
 stack_data  == 0.3.0
 

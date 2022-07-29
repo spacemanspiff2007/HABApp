@@ -106,6 +106,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.0.2 (29.07.2022)
+- Fixed setup issues
+- Fixed unnecessary long tracebacks
+
 #### 1.0.1 (25.07.2022)
 - Dockerfile is Python 3.10 and non slim 
 
