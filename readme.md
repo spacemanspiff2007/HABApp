@@ -111,7 +111,7 @@ MyOpenhabRule()
 - Fixed unnecessary long tracebacks
 
 #### 1.0.1 (25.07.2022)
-- Dockerfile is Python 3.10 and non slim 
+- Dockerfile is Python 3.10 and non slim
 
 #### 1.0.0 (25.07.2022)
 - OpenHAB >= 3.3 and Python >= 3.8 only!
