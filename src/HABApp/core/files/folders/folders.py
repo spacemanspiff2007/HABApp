@@ -55,13 +55,13 @@ def add_folder(prefix: str, folder: Path, priority: int) -> ConfiguredFolder:
 
 
 def get_name(path: Path) -> str:
-    path = path.as_posix()
+    path_str = path.as_posix()
     for prefix, cfg in sorted(FOLDERS.items(), key=lambda x: len(x[0]), reverse=True):
         folder = cfg.folder.as_posix()
-        if path.startswith(folder):
-            return prefix + path[len(folder) + 1:]
+        if path_str.startswith(folder):
+            return prefix + path_str[len(folder) + 1:]
 
-    raise ValueError(f'Path "{path}" is not part of the configured folders!')
+    raise ValueError(f'Path "{path_str}" is not part of the configured folders!')
 
 
 def get_path(name: str) -> Path:

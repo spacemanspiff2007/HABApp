@@ -34,7 +34,7 @@ def fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
 
 
 def format_exception(e: Union[Exception, Tuple[Any, Any, Any]]) -> List[str]:
-    tb = []
+    tb: List[str] = []
 
     try:
         all_frames = tuple(FrameInfo.stack_data(e[2] if isinstance(e, tuple) else e.__traceback__, DEFAULT_OPTIONS))

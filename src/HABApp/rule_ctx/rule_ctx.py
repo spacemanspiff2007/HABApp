@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Callable
 
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
@@ -18,7 +18,7 @@ class HABAppRuleContext(Context):
         super().__init__()
         self.rule: Optional['HABApp.rule.Rule'] = rule
 
-    def get_callback_name(self, callback: callable) -> Optional[str]:
+    def get_callback_name(self, callback: Callable) -> Optional[str]:
         return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None
 
     def add_event_listener(self, listener: HINT_EVENT_BUS_LISTENER) -> HINT_EVENT_BUS_LISTENER:

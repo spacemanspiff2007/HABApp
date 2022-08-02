@@ -1,4 +1,4 @@
-from typing import Set, Optional
+from typing import Set, Optional, Callable
 from typing import TypeVar
 
 from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBoundObjectIsAlreadyUnlinkedError
@@ -47,7 +47,7 @@ class Context:
         obj._ctx_link(self)
         return obj
 
-    def get_callback_name(self, callback: callable) -> Optional[str]:
+    def get_callback_name(self, callback: Callable) -> Optional[str]:
         raise NotImplementedError()
 
 

@@ -148,7 +148,7 @@ def inject_log_buffer(cfg: dict, log: BufferedLogger):
     q_handlers: List[HABAppQueueHandler] = []
 
     for handler_name, buffered_handler_name in buffered_handlers.items():
-        q = SimpleQueue()
+        q: SimpleQueue = SimpleQueue()
         handler_cfg[buffered_handler_name] = {'class': 'logging.handlers.QueueHandler', 'queue': q}
 
         qh = HABAppQueueHandler(q, handler_name, f'LogBuffer{handler_name:s}')

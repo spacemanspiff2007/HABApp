@@ -14,14 +14,6 @@ class MultiModeItem(Item):
     """Prioritizer :class:`~HABApp.core.items.Item`
     """
 
-    @classmethod
-    def get_create_item(cls, name: str, logger=None, initial_value=None):
-        # added 20.04.2020, van be removed in some time
-        if logger is not None:
-            warnings.warn("'logger' is deprecated, set logger on the mode instead!", DeprecationWarning, 2)
-
-        return super().get_create_item(name, initial_value)
-
     def __init__(self, name: str, initial_value=None):
         super().__init__(name=name, initial_value=initial_value)
 
