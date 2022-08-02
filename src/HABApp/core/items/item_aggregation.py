@@ -22,7 +22,8 @@ class AggregationItem(BaseValueItem):
 
     @classmethod
     def get_create_item(cls, name: str):
-        """Creates a new AggregationItem in HABApp and returns it or returns the already existing one with the given name
+        """Creates a new AggregationItem in HABApp and returns it or returns the
+        already existing item with the given name
 
         :param name: item name
         :return: item
