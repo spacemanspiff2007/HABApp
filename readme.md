@@ -52,7 +52,7 @@ class ExampleMqttTestRule(HABApp.Rule):
         self.item = MqttItem.get_create_item('test/value_stored')
         # Since the payload is now stored we can trigger only if the value has changed
         self.item.listen_event(self.item_topic_updated, ValueChangeEventFilter())
-        
+
     def publish_rand_value(self):
         print('test mqtt_publish')
         self.mqtt.publish('test/test', str(random.randint(0, 1000)))
@@ -60,12 +60,12 @@ class ExampleMqttTestRule(HABApp.Rule):
     def topic_updated(self, event: ValueUpdateEvent):
         assert isinstance(event, ValueUpdateEvent), type(event)
         print( f'mqtt topic "test/test" updated to {event.value}')
-        
+
     def item_topic_updated(self, event: ValueChangeEvent):
         print(self.item.value)  # will output the current item value
         print( f'mqtt topic "test/value_stored" changed from {event.old_value} to {event.value}')
 
-      
+
 ExampleMqttTestRule()
 ```
 
