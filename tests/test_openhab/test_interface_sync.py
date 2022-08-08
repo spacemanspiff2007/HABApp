@@ -7,7 +7,7 @@ from HABApp.core.asyncio import async_context, AsyncContextError
 from HABApp.openhab.interface import \
     post_update, send_command, \
     get_item, item_exists, remove_item, create_item, \
-    get_thing, get_persistence_data, \
+    get_thing, get_persistence_data, set_thing_enabled, \
     remove_metadata, set_metadata, \
     get_channel_link, remove_channel_link, channel_link_exists, create_channel_link
 
@@ -24,6 +24,7 @@ def test_all_imported(func: Callable):
     (send_command,          ('name', 'value')),
     (get_item,              ('name', )),
     (get_thing,             ('name', )),
+    (set_thing_enabled,     ('name', True)),
     (item_exists,           ('name', )),
     (remove_item,           ('name', )),
     (create_item,           ('String', 'name')),

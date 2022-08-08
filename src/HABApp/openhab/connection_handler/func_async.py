@@ -213,6 +213,21 @@ async def async_set_thing_cfg(uid: str, cfg: typing.Dict[str, typing.Any]):
     return ret.status
 
 
+async def async_set_thing_enabled(uid: str, enabled: bool):
+    ret = await put(f'/rest/things/{uid:s}/enable', data='true' if enabled else 'false')
+    if ret is None:
+        return None
+
+    if ret.status == 404:
+        raise ThingNotFoundError.from_uid(uid)
+    elif ret.status == 409:
+        raise ThingNotEditableError.from_uid(uid)
+    elif ret.status >= 300:
+        raise ValueError('Something went wrong')
+
+    return ret.status
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 # Link handling is experimental
 # ---------------------------------------------------------------------------------------------------------------------
