@@ -89,6 +89,9 @@ a list of openHAB items and adds them to the internal registry.
 Rules and HABApp derived libraries may add additional local items which can be used
 to share states across rules and/or files.
 
+Access
+""""""""""""""""""""""""""""""""""""""
+
 An item is created and added to the item registry through the corresponding class factory method
 
 .. exec_code::
@@ -104,12 +107,14 @@ An item is created and added to the item registry through the corresponding clas
    # This will create an item in the local (HABApp) item registry
    item = Item.get_create_item("an-item-name", "a value")
 
+Values
+""""""""""""""""""""""""""""""""""""""
+
 Posting values from the item will automatically create the events on the event bus.
 This example will create an item in HABApp (locally) and post some updates to it.
 To access items from openHAB use the correct openHAB item type (see :ref:`the openHAB item description <OPENHAB_ITEM_TYPES>`).
 
 .. exec_code::
-    :caption: Output
 
     # ------------ hide: start ------------
     import logging
@@ -158,9 +163,56 @@ To access items from openHAB use the correct openHAB item type (see :ref:`the op
     # ------------ hide: stop -------------
 
 
+Timestamps
+""""""""""""""""""""""""""""""""""""""
+
+All items have two additional timestamps set which can be used to simplify rule logic.
+
+* The time when the item was last updated
+* The time when the item was last changed.
+
+
+.. exec_code::
+
+    # ------------ hide: start ------------
+    from pendulum import DateTime
+    from HABApp.core.items import Item
+    from rule_runner import SimpleRuleRunner
+
+    runner = SimpleRuleRunner()
+    runner.set_up()
+
+    item = Item.get_create_item('Item_Name', initial_value='old_value')
+    item._last_update.dt = DateTime(2022, 8, 20, 12, 16)
+    item._last_change.dt = DateTime(2022, 8, 20, 10, 30)
+
+    # ------------ hide: stop -------------
+    import HABApp
+    from HABApp.core.items import Item
+
+    class TimestampRule(HABApp.Rule):
+        def __init__(self):
+            super().__init__()
+            # This item was created by another rule, that's why "get_item" is used
+            self.my_item = Item.get_item('Item_Name')
+
+            # Access of timestamps
+            print(f'Last update: {self.my_item.last_update}')
+            print(f'Last change: {self.my_item.last_change}')
+
+    TimestampRule()
+
+    # ------------ hide: start ------------
+    runner.tear_down()
+    # ------------ hide: stop -------------
+
+
+
 Watch items for events
 ------------------------------
 It is possible to watch items for changes or updates.
+The ``listen_event`` function takes an instance of ``EventFilter`` which describes the kind of event that will be
+passed to the callback.
 
 
 .. exec_code::
@@ -186,25 +238,26 @@ It is possible to watch items for changes or updates.
             # Run this function whenever the item receives an ValueUpdateEvent
             self.listen_event(self.my_item, self.item_updated, ValueUpdateEventFilter())
 
-            # Run this function whenever the item receives an ValueChangeEvent
-            self.listen_event(self.my_item, self.item_changed, ValueChangeEventFilter())
-
             # If you already have an item you can use the more convenient method of the item
-            # This is the recommended way to use event listener
+            # This is the recommended way to use the event listener
+            self.my_item.listen_event(self.item_updated, ValueUpdateEventFilter())
+
+            # Run this function whenever the item receives an ValueChangeEvent
             self.my_item.listen_event(self.item_changed, ValueChangeEventFilter())
 
         # the function has 1 argument which is the event
-        def item_changed(self, event: ValueChangeEvent):
-            print(f'{event.name} changed from "{event.old_value}" to "{event.value}"')
-            print(f'Last change of {self.my_item.name}: {self.my_item.last_change}')
-
         def item_updated(self, event: ValueUpdateEvent):
             print(f'{event.name} updated value: "{event.value}"')
             print(f'Last update of {self.my_item.name}: {self.my_item.last_update}')
 
+        def item_changed(self, event: ValueChangeEvent):
+            print(f'{event.name} changed from "{event.old_value}" to "{event.value}"')
+            print(f'Last change of {self.my_item.name}: {self.my_item.last_change}')
+
+
     MyFirstRule()
     # ------------ hide: start ------------
-    i = Item.get_create_item('Item_Name')
+    i = Item.get_item('Item_Name')
     i.post_value('Changed value')
     runner.process_events()
     runner.tear_down()

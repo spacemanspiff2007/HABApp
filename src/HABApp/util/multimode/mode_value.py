@@ -124,22 +124,16 @@ class ValueMode(BaseMode):
         return None
 
     def calculate_lower_priority_value(self) -> typing.Any:
-
-        self.__low_prio_value = True
-
         # Trigger recalculation, this way we keep the output of MultiModeValue synchronized
-        # in case some mode gets enabled/disabled/etc
+        # in case some mode get enabled/disabled (e.g. by time)
         self.parent.calculate_value()
 
-        val = self.__low_prio_value
-        self.__low_prio_value = None
-        return val
+        return self.__low_prio_value
 
     def calculate_value(self, value_with_lower_priority: typing.Any) -> typing.Any:
 
         # helper for self.calculate_lower_priority_value
-        if self.__low_prio_value is not None:
-            self.__low_prio_value = value_with_lower_priority
+        self.__low_prio_value = value_with_lower_priority
 
         # so we don't spam the log if we are already disabled
         if not self.__enabled:

@@ -1,11 +1,9 @@
-import datetime
-import typing
-import warnings
 from threading import Lock
+from typing import Optional, Dict, Any, Tuple, List
 
-import HABApp
+from HABApp.core.const import MISSING
 from HABApp.core.items import Item
-from .mode_base import BaseMode
+from .mode_base import HINT_BASE_MODE, BaseMode
 
 LOCK = Lock()
 
@@ -15,48 +13,61 @@ class MultiModeItem(Item):
     """
 
     @classmethod
-    def get_create_item(cls, name: str, logger=None, initial_value=None):
-        # added 20.04.2020, van be removed in some time
-        if logger is not None:
-            warnings.warn("'logger' is deprecated, set logger on the mode instead!", DeprecationWarning, 2)
+    def get_create_item(cls, name: str, initial_value=None, default_value=MISSING) -> 'MultiModeItem':
+        """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 
-        return super().get_create_item(name, initial_value)
+        :param name: item name
+        :param initial_value: state the item will have if it gets created
+        :param default_value: Default value that will be sent if no mode is active
+        :return: The created or existing item
+        """
+        item = super().get_create_item(name, initial_value)  # type: MultiModeItem
+        item._default_value = default_value
+        return item
 
-    def __init__(self, name: str, initial_value=None):
+    def __init__(self, name: str, initial_value=None, default_value=MISSING):
         super().__init__(name=name, initial_value=initial_value)
 
-        self.__values_by_prio: typing.Dict[int, BaseMode] = {}
-        self.__values_by_name: typing.Dict[str, BaseMode] = {}
+        self.__values_by_prio: Dict[int, HINT_BASE_MODE] = {}
+        self.__values_by_name: Dict[str, HINT_BASE_MODE] = {}
+
+        self._default_value = default_value
 
     def __remove_mode(self, name: str) -> bool:
 
         # Check if the mode exists
-        found = self.__values_by_name.pop(name, None)
-        if found is None:
+        mode_remove = self.__values_by_name.pop(name, None)
+        if mode_remove is None:
             return False
 
         # Remove parent mapping, so we at least crash if someone attempts to do something with the mode
-        found.parent = None
+        mode_remove.parent = None
 
-        # remove value entry, too
-        for i, f in self.__values_by_prio.items():
-            if f is found:
-                self.__values_by_prio.pop(i)
+        # remove priority entry, too
+        for prio, mode in self.__values_by_prio.items():
+            if mode is mode_remove:
+                self.__values_by_prio.pop(prio)
                 return True
-        raise RuntimeError()
+
+        raise RuntimeError(f'Mode {name} is missing!')
 
     def __sort_modes(self):
-        # make the lower priority known to the mode
-        low = None
-        for _, child in sorted(self.__values_by_prio.items()):  # type: int, BaseMode
-            child._set_mode_lower_prio(low)
-            low = child
+        # sort by priority and make lower prio known to the mode
+        modes = sorted(self.__values_by_prio.items())
+        self.__values_by_prio.clear()
+
+        lower_mode: Optional[HINT_BASE_MODE] = None
+        for prio, mode in modes:
+            self.__values_by_prio[prio] = mode
+            mode._set_mode_lower_prio(lower_mode)
+            lower_mode = mode
+
         return None
 
     def remove_mode(self, name: str) -> bool:
         """Remove mode if it exists
 
-        :param name: name of the mode (case insensitive)
+        :param name: name of the mode (case-insensitive)
         :return: True if something was removed, False if nothing was found
         """
         assert isinstance(name, str), type(name)
@@ -66,7 +77,7 @@ class MultiModeItem(Item):
             self.__sort_modes()
             return found
 
-    def add_mode(self, priority: int, mode: BaseMode) -> 'MultiModeItem':
+    def add_mode(self, priority: int, mode: HINT_BASE_MODE) -> 'MultiModeItem':
         """Add a new mode to the item, if it already exists it will be overwritten
 
         :param priority: priority of the mode
@@ -82,22 +93,22 @@ class MultiModeItem(Item):
             self.__remove_mode(name)
 
             # add new mode
-            mode.parent = self
             self.__values_by_prio[priority] = mode
             self.__values_by_name[name] = mode
+            mode.parent = self
 
             # resort
             self.__sort_modes()
         return self
 
-    def all_modes(self) -> typing.List[typing.Tuple[int, BaseMode]]:
+    def all_modes(self) -> List[Tuple[int, HINT_BASE_MODE]]:
         """Returns a sorted list containing tuples with the priority and the mode
 
         :return: List with priorities and modes
         """
-        return sorted(self.__values_by_prio.items())
+        return list(self.__values_by_prio.items())
 
-    def get_mode(self, name: str) -> BaseMode:
+    def get_mode(self, name: str) -> HINT_BASE_MODE:
         """Returns a created mode
 
         :param name: name of the mode (case insensitive)
@@ -108,41 +119,29 @@ class MultiModeItem(Item):
         except KeyError:
             raise KeyError(f'Unknown mode "{name}"! Available: {", ".join(self.__values_by_name.keys())}') from None
 
-    def calculate_value(self) -> typing.Any:
-        """Recalculate the output value and post the state to the event bus (if it is not None)
+    def calculate_value(self) -> Any:
+        """Recalculate the value. If the new value is not ``MISSING`` the calculated value will be set as the item
+        state and the corresponding events will be generated.
 
         :return: new value
         """
 
         # recalculate value
-        new_value = None
-        with LOCK:
-            for priority, child in sorted(self.__values_by_prio.items()):
-                new_value = child.calculate_value(new_value)
+        new_value = MISSING
+        for priority, child in self.__values_by_prio.items():
+            new_value = child.calculate_value(new_value)
 
-        if new_value is not None:
+        # if nothing is set try the default
+        if new_value is MISSING:
+            new_value = self._default_value
+
+        if new_value is not MISSING:
             self.post_value(new_value)
+
         return new_value
 
-    def create_mode(
-            self, name: str, priority: int, initial_value: typing.Optional[typing.Any] = None,
-            auto_disable_after: typing.Optional[datetime.timedelta] = None,
-            auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]] = None,
-            calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = None
-    ):
-        warnings.warn("'create_mode' is deprecated, create a mode and pass it to 'add_mode' instead!",
-                      DeprecationWarning, 2)
-
-        m = HABApp.util.multimode.ValueMode(name=name, initial_value=initial_value)
-        m.auto_disable_after = auto_disable_after
-        m.auto_disable_func = auto_disable_func
-        m.calc_value_func = calc_value_func
-
-        self.add_mode(priority, m)
-        return m
-
     def _on_item_removed(self):
-        for name, mode in self.all_modes():
+        for p, mode in self.all_modes():
             mode.cancel()
 
         super()._on_item_removed()

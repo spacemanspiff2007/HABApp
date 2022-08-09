@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 import re
 
 from .cfg_validator import UserItem
@@ -99,7 +99,7 @@ def create_items_file(path: Path, items_dict: Dict[str, UserItem]):
         'bracket_close': '',
     }
 
-    grouped_items = {None: []}
+    grouped_items: Dict[Optional[str], List[Dict[str, str]]] = {None: []}
     for _name, _item in items_dict.items():
         m = RE_GROUP_NAMES.match(_name)
         grp = grouped_items.setdefault(m.group(1) if m is not None else None, [])

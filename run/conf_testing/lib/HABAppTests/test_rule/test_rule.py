@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Callable
 from typing import List
 
 import HABApp
@@ -48,7 +48,7 @@ class TestBaseRule(HABApp.Rule):
     def tear_down(self):
         pass
 
-    def add_test(self, name, func: callable, *args, **kwargs):
+    def add_test(self, name, func: Callable, *args, **kwargs):
         tc = TestCase(name, func, args, kwargs)
         assert tc.name not in self._tests
         self._tests[tc.name] = tc

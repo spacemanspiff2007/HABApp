@@ -1,3 +1,5 @@
+import random
+import string
 import sys
 from pathlib import Path
 from typing import Optional, Tuple
@@ -25,7 +27,8 @@ class TLSSettings(BaseModel):
 
 
 class Connection(BaseModel):
-    client_id: str = 'HABApp'
+    client_id: str = Field('HABApp-' + ''.join(random.choices(string.ascii_letters, k=13)),
+                           description='ClientId that is used to uniquely identify this client on the mqtt broker.')
     host: str = Field('', description='Connect to this host. Empty string ("") disables the connection.')
     port: int = 1883
     user: str = ''

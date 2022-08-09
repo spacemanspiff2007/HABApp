@@ -31,7 +31,8 @@ import datetime
 import random
 
 import HABApp
-from HABApp.core.events import ValueUpdateEvent, ValueChangeEventFilter
+from HABApp.mqtt.items import MqttItem
+from HABApp.core.events import ValueChangeEvent, ValueChangeEventFilter, ValueUpdateEvent, ValueUpdateEventFilter
 
 
 class ExampleMqttTestRule(HABApp.Rule):
@@ -44,7 +45,13 @@ class ExampleMqttTestRule(HABApp.Rule):
             callback=self.publish_rand_value
         )
 
-        self.listen_event('test/test', self.topic_updated, ValueChangeEventFilter())
+        # this will trigger every time a message is received under "test/test"
+        self.listen_event('test/test', self.topic_updated, ValueUpdateEventFilter())
+
+        # This will create an item which will store the payload of the topic so it can be accessed later.
+        self.item = MqttItem.get_create_item('test/value_stored')
+        # Since the payload is now stored we can trigger only if the value has changed
+        self.item.listen_event(self.item_topic_updated, ValueChangeEventFilter())
 
     def publish_rand_value(self):
         print('test mqtt_publish')
@@ -53,6 +60,10 @@ class ExampleMqttTestRule(HABApp.Rule):
     def topic_updated(self, event: ValueUpdateEvent):
         assert isinstance(event, ValueUpdateEvent), type(event)
         print( f'mqtt topic "test/test" updated to {event.value}')
+
+    def item_topic_updated(self, event: ValueChangeEvent):
+        print(self.item.value)  # will output the current item value
+        print( f'mqtt topic "test/value_stored" changed from {event.old_value} to {event.value}')
 
 
 ExampleMqttTestRule()
@@ -106,6 +117,12 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.0.3 (09.08.2022)
+- OpenHAB Thing can now be enabled/disabled with ``thing.set_enabled()``
+- ClientID for MQTT should now be unique for every HABApp installation
+- Reworked MultiModeItem, now a default value is possible when no mode is active
+- Added some type hints and updated documentation
+
 #### 1.0.2 (29.07.2022)
 - Fixed setup issues
 - Fixed unnecessary long tracebacks

@@ -32,7 +32,7 @@ _CORO_RET = _TypeVar('_CORO_RET')
 
 
 def run_coro_from_thread(coro: _Coroutine[_Any, _Any, _CORO_RET], calling: _Callable) -> _CORO_RET:
-    # This function call is blocking so it can't be called in the async context
+    # This function call is blocking, so it can't be called in the async context
     if async_context.get(None) is not None:
         raise AsyncContextError(calling)
 

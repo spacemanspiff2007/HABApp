@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, List, Optional, Final
+from typing import Dict, List, Optional, Final, Callable
 
 from HABApp.core.errors import ProxyObjHasNotBeenReplacedError
 
@@ -31,8 +31,8 @@ class ConstProxyObj(ProxyObjBase):
 
 
 class StartUpProxyObj(ProxyObjBase):
-    def __init__(self, to_replace: callable, globals: dict):
-        self.to_replace: Optional[callable] = to_replace
+    def __init__(self, to_replace: Callable, globals: dict):
+        self.to_replace: Optional[Callable] = to_replace
         self.globals: Optional[dict] = globals
 
         PROXIES.append(self)
@@ -59,7 +59,7 @@ class StartUpProxyObj(ProxyObjBase):
         self.to_replace = None
 
 
-def create_proxy(to_replace: callable) -> StartUpProxyObj:
+def create_proxy(to_replace: Callable) -> StartUpProxyObj:
     frm = sys._getframe(2)
     return StartUpProxyObj(to_replace, frm.f_globals)
 

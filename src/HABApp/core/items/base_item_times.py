@@ -1,6 +1,5 @@
 import logging
-import typing
-from typing import Generic, TypeVar, List
+from typing import Generic, TypeVar, List, Union, Type
 
 from pendulum import DateTime
 
@@ -10,16 +9,16 @@ from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
 
 log = logging.getLogger('HABApp')
 
-WATCH_TYPE = TypeVar("WATCH_TYPE", bound=BaseWatch)
+WATCH_OBJ = TypeVar("WATCH_OBJ", bound=BaseWatch)
 
 
-class ItemTimes(Generic[WATCH_TYPE]):
-    WATCH: typing.Union[typing.Type[ItemNoUpdateWatch], typing.Type[ItemNoChangeWatch]]
+class ItemTimes(Generic[WATCH_OBJ]):
+    WATCH: Union[Type[ItemNoUpdateWatch], Type[ItemNoChangeWatch]]
 
     def __init__(self, name: str, dt: DateTime):
         self.name: str = name
         self.dt: DateTime = dt
-        self.tasks: List[WATCH_TYPE] = []
+        self.tasks: List[WATCH_OBJ] = []
 
     def set(self, dt: DateTime, events=True):
         self.dt = dt
@@ -30,7 +29,7 @@ class ItemTimes(Generic[WATCH_TYPE]):
             create_task(self.schedule_events())
         return None
 
-    def add_watch(self, secs: typing.Union[int, float]) -> WATCH_TYPE:
+    def add_watch(self, secs: Union[int, float]) -> WATCH_OBJ:
         # don't add the watch two times
         for t in self.tasks:
             if not t.fut.is_canceled and t.fut.secs == secs:

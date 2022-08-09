@@ -7,7 +7,8 @@ import HABApp.openhab.events
 from HABApp.core.asyncio import run_coro_from_thread, create_task
 from HABApp.core.items import BaseValueItem
 from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
-from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, async_get_thing, \
+from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, \
+    async_get_thing, async_set_thing_enabled, \
     async_set_metadata, async_remove_metadata, async_get_channel_link, async_create_channel_link, \
     async_remove_channel_link, async_channel_link_exists, \
     async_remove_item, async_item_exists, async_get_persistence_data, async_set_persistence_data
@@ -191,6 +192,19 @@ def remove_metadata(item_name: str, namespace: str):
     assert isinstance(namespace, str), type(namespace)
 
     return run_coro_from_thread(async_remove_metadata(item=item_name, namespace=namespace), calling=remove_metadata)
+
+
+def set_thing_enabled(thing_name: str, enabled: bool = True):
+    """
+    Enable/disable a thing
+
+    :param thing_name: name of the thing or the thing object
+    :param enabled: True to enable thing, False to disable thing
+    """
+    if isinstance(thing_name, BaseValueItem):
+        thing_name = thing_name.name
+
+    return run_coro_from_thread(async_set_thing_enabled(uid=thing_name, enabled=enabled), calling=set_thing_enabled)
 
 
 def get_persistence_data(item_name: str, persistence: Optional[str],

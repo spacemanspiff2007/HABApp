@@ -6,7 +6,8 @@ from pendulum import UTC
 from pendulum import now as pd_now
 
 from HABApp.core.items import BaseItem
-from ..events import ThingStatusInfoEvent, ThingUpdatedEvent
+from HABApp.openhab.events import ThingStatusInfoEvent, ThingUpdatedEvent
+from HABApp.openhab.interface import set_thing_enabled
 
 
 class Thing(BaseItem):
@@ -58,3 +59,11 @@ class Thing(BaseItem):
             )
 
         return None
+
+    def set_enabled(self, enable: bool = True):
+        """Enable/disable the thing
+
+        :param enable: True to enable, False to disable the thing
+        :return:
+        """
+        return set_thing_enabled(self.name, enable)

@@ -43,7 +43,8 @@ class ColorItem(BaseValueItem):
         return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
 
     def post_value(self, hue=0.0, saturation=0.0, brightness=0.0):
-        """Set a new value and post appropriate events on the HABApp event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+        """Set a new value and post appropriate events on the HABApp event bus
+        (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param hue: hue (in °)
         :param saturation: saturation (in %)
@@ -79,7 +80,8 @@ class ColorItem(BaseValueItem):
         return self
 
     def post_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
-        """Set a new rgb value and post appropriate events on the HABApp event bus (``ValueUpdateEvent``, ``ValueChangeEvent``)
+        """Set a new rgb value and post appropriate events on the HABApp event bus
+        (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
         :param r: red value
         :param g: green value

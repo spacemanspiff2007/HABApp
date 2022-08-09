@@ -1,11 +1,12 @@
 import time
+from typing import Callable
 
 from HABAppTests.test_rule._rest_patcher import RestPatcher
 from HABAppTests.test_rule.test_case import TestResult, TestResultStatus
 
 
 class TestCase:
-    def __init__(self, name: str, func: callable, args=[], kwargs={}):
+    def __init__(self, name: str, func: Callable, args=[], kwargs={}):
         self.name = name
         self.func = func
         self.args = args
