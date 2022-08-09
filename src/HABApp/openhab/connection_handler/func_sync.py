@@ -200,7 +200,6 @@ def set_thing_enabled(thing_name: str, enabled: bool = True):
 
     :param thing_name: name of the thing or the thing object
     :param enabled: True to enable thing, False to disable thing
-    :return: True if metadata was successfully removed
     """
     if isinstance(thing_name, BaseValueItem):
         thing_name = thing_name.name
