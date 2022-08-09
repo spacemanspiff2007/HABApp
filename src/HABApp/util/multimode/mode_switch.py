@@ -63,7 +63,7 @@ class SwitchItemValueMode(ValueMode):
 
     # prevent direct calling
     def set_enabled(self, value: bool, only_on_change: bool = False):
-        """"""  # so it doesn't show in Sphinx
+        """"""  # Empty docstring so this function doesn't show up in Sphinx
         raise PermissionError('Enabled is controlled through the switch item!')
 
     def __switch_changed(self, event):

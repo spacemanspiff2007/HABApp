@@ -64,6 +64,7 @@ def connect():
     )
 
     if config.connection.tls.enabled:
+        log.debug("TLS enabled")
         # add option to specify tls certificate
         ca_cert = config.connection.tls.ca_cert
         if ca_cert is not None and ca_cert.name:

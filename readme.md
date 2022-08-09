@@ -117,6 +117,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.0.3 (09.08.2022)
+- ClientID for MQTT should now be unique for every HABApp installation
+- Reworked MultiModeItem, now a default value is possible when no mode is active
+
 #### 1.0.2 (29.07.2022)
 - Fixed setup issues
 - Fixed unnecessary long tracebacks

@@ -1,5 +1,6 @@
 import pytest
 
+from HABApp.core.const import MISSING
 from HABApp.util.multimode import BaseMode, ValueMode, MultiModeItem
 from ..test_core import ItemTests
 from tests.helpers.parent_rule import DummyRule
@@ -31,12 +32,13 @@ def test_diff_prio(parent_rule: DummyRule):
 
 
 def test_calculate_lower_priority_value(parent_rule: DummyRule):
-    p = MultiModeItem('TestItem')
+    p = MultiModeItem('TestItem', default_value=99)
     m1 = ValueMode('modea', '1234')
     m2 = ValueMode('modeb', '4567')
     p.add_mode(1, m1).add_mode(2, m2)
 
-    assert m1.calculate_lower_priority_value() is None
+    assert p.value is None
+    assert m1.calculate_lower_priority_value() is MISSING
     assert m2.calculate_lower_priority_value() == '1234'
 
     m1.set_value('asdf')
@@ -101,3 +103,51 @@ def test_remove(parent_rule: DummyRule):
     p.remove_mode('m1')
 
     assert p.all_modes() == [(1, m2)]
+
+
+def test_overwrite(parent_rule: DummyRule):
+    p = MultiModeItem('asdf')
+    m1 = BaseMode('m1')
+    m2 = BaseMode('m1')
+    m3 = BaseMode('m3')
+
+    p.add_mode(99, m1).add_mode(1, m2).add_mode(5, m3)
+
+    assert p.all_modes() == [(1, m2), (5, m3)]
+
+
+def test_order(parent_rule: DummyRule):
+    p = MultiModeItem('asdf')
+    m1 = BaseMode('m1')
+    m2 = BaseMode('m2')
+    m3 = BaseMode('m3')
+
+    p.add_mode(99, m1)
+    p.add_mode(1, m2)
+    p.add_mode(5, m3)
+
+    assert p.all_modes() == [(1, m2), (5, m3), (99, m1)]
+
+
+def test_disable_no_default(parent_rule: DummyRule):
+
+    # No default_value is set -> we don't send anything if all modes are disabled
+    p1 = ValueMode('modea', '1234')
+    p = MultiModeItem('TestItem').add_mode(1, p1)
+
+    p1.set_enabled(True)
+    assert p.value == '1234'
+    p1.set_enabled(False)
+    assert p.value == '1234'
+
+
+def test_disable_with_default(parent_rule: DummyRule):
+
+    # We have default_value set -> send it when all modes are disabled
+    a1 = ValueMode('modea', '1234')
+    a = MultiModeItem('TestItem', default_value=None).add_mode(1, a1)
+
+    a1.set_enabled(True)
+    assert a.value == '1234'
+    a1.set_enabled(False)
+    assert a.value is None
