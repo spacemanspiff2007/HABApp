@@ -8,7 +8,8 @@ class OpenhabThings(TestBaseRule):
     def __init__(self):
         super().__init__()
         self.add_test('ApiDoc', self.test_api)
-        self.add_test('Enable', self.test_enabled_obj)
+        self.add_test('Enable(API)', self.test_enabled_api)
+        self.add_test('Enable(Obj)', self.test_enabled_obj)
 
     def test_api(self):
         self.openhab.get_thing(find_astro_sun_thing())

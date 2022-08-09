@@ -118,8 +118,10 @@ MyOpenhabRule()
 
 # Changelog
 #### 1.0.3 (09.08.2022)
+- OpenHAB Thing can now be enabled/disabled with ``thing.set_enabled()``
 - ClientID for MQTT should now be unique for every HABApp installation
 - Reworked MultiModeItem, now a default value is possible when no mode is active
+- Added some type hints and updated documentation
 
 #### 1.0.2 (29.07.2022)
 - Fixed setup issues
