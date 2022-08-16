@@ -9,7 +9,9 @@ class FileState(Enum):
 
     DEPENDENCIES_OK = auto()
     DEPENDENCIES_MISSING = auto()
-    PROPERTIES_ERROR = auto()
+
+    PROPERTIES_INVALID = auto()  # Properties could not be parsed
+    PROPERTIES_ERROR = auto()    # Properties specify a file that doesn't exist
 
     PENDING = auto()
     REMOVED = auto()

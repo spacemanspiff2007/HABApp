@@ -5,7 +5,7 @@ COPY . /tmp/app_install
 RUN set -eux; \
 # wheel all packages for habapp
 	cd /tmp/app_install; \
-	pip wheel --wheel-dir=/root/wheels --use-feature=in-tree-build .
+	pip wheel --wheel-dir=/root/wheels .
 
 FROM python:3.10
 
