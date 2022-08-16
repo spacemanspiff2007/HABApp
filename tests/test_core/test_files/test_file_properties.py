@@ -93,8 +93,8 @@ def test_deps():
     f1.check_properties()
     f2.check_properties()
 
-    assert f2.state is FileState.DEPENDENCIES_OK
     assert f1.state is FileState.DEPENDENCIES_MISSING
+    assert f2.state is FileState.DEPENDENCIES_OK
 
     f2.state = FileState.LOADED
     f1.check_dependencies()
