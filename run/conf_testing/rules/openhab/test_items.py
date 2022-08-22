@@ -4,8 +4,8 @@ from immutables import Map
 
 from HABApp.core.const import loop
 from HABApp.openhab.interface_async import async_get_items
-from HABApp.openhab.items import GroupItem, StringItem
-from HABAppTests import OpenhabTmpItem, TestBaseRule
+from HABApp.openhab.items import GroupItem, StringItem, ColorItem
+from HABAppTests import OpenhabTmpItem, TestBaseRule, ItemWaiter
 
 
 class OpenhabItems(TestBaseRule):
@@ -17,6 +17,7 @@ class OpenhabItems(TestBaseRule):
         self.add_test('MemberTags', self.test_tags)
         self.add_test('MemberGroups', self.test_groups)
         self.add_test('TestExisting', self.test_existing)
+        self.add_test('TestColor', self.test_color)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -100,6 +101,15 @@ class OpenhabItems(TestBaseRule):
         assert item.groups == set()
         assert grp1.members == tuple()
         assert grp2.members == tuple()
+
+    @OpenhabTmpItem.create('Color', arg_name='oh_item')
+    def test_color(self, oh_item: OpenhabTmpItem):
+        item = ColorItem.get_item(oh_item.name)
+
+        with ItemWaiter(item) as waiter:
+            for cmd in ((350, 99.3, 1.58), (1, 11.2, 1.72)):
+                item.oh_send_command(cmd)
+                waiter.wait_for_state(cmd)
 
 
 OpenhabItems()

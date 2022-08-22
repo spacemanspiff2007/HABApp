@@ -21,14 +21,17 @@ TASK_DURATION: float = 15
 async def process_file(name: str, file: Path):
     global TASK
 
-    # unload
+    # unload file
     if not file.is_file():
         existing = FILES.pop(name, None)
-        if existing is not None:
-            await existing.unload()
+        if existing is None:
+            return None
+
+        await existing.unload()
         log.debug(f'Removed {existing.name}')
         return None
 
+    # add file
     FILES[name] = HABApp.core.files.file.create_file(name, file)
     if TASK is None:
         TASK = create_task(_process())
