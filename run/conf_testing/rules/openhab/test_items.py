@@ -3,6 +3,7 @@ import asyncio
 from immutables import Map
 
 from HABApp.core.const import loop
+from HABApp.core.types import HSB, RGB
 from HABApp.openhab.interface_async import async_get_items
 from HABApp.openhab.items import GroupItem, StringItem, ColorItem
 from HABAppTests import OpenhabTmpItem, TestBaseRule, ItemWaiter
@@ -110,6 +111,13 @@ class OpenhabItems(TestBaseRule):
             for cmd in ((350, 99.3, 1.58), (1, 11.2, 1.72)):
                 item.oh_send_command(cmd)
                 waiter.wait_for_state(cmd)
+                waiter.wait_for_attribs(hue=cmd[0], saturation=cmd[1], brightness=cmd[2])
+
+            for cmd, target in ((HSB(1, 13.25, 22.33), HSB(1, 13.25, 22.33)),
+                                (RGB(20, 30, 40), HSB(210, 50, 15.69))):
+                item.oh_send_command(cmd)
+                waiter.wait_for_state(tuple(target))
+                waiter.wait_for_attribs(hue=target[0], saturation=target[1], brightness=target[2])
 
 
 OpenhabItems()

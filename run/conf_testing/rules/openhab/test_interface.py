@@ -29,7 +29,7 @@ class TestOpenhabInterface(TestBaseRule):
 
         # test the states
         for oh_type in get_openhab_test_types():
-            self.add_test( f'post_update {oh_type}', self.test_post_update, oh_type, get_openhab_test_states(oh_type))
+            self.add_test(f'post_update {oh_type}', self.test_post_update, oh_type, get_openhab_test_states(oh_type))
 
         # test json post
         self.add_test('post_update (by_json)', self.test_umlaute)
