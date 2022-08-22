@@ -29,7 +29,7 @@ class Column:
                 ret.append(self.width * ' ')
                 continue
             val = objs[i]
-            if isinstance(val, bool):
+            if isinstance(val, bool) or val is None:
                 val = str(val)
             f = f'{{:{""if self.align is None else self.align}{self.width:d}}}'
             ret.append(f.format(val))
