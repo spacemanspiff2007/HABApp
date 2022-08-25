@@ -5,8 +5,72 @@ HABApp
 This page describes the HABApp internals
 
 
-.. _HABAPP_ITEM_TYPES:
 
+.. _HABAPP_DATA_TYPES:
+
+**************************************
+Datatypes
+**************************************
+
+HABApp provides some datatypes that simplify e.g. the color handling.
+
+RGB
+======================================
+Datatype for RGB (red, green, blue) color handling.
+RGB types can be sent directly to openHAB and will be converted accordingly.
+Additionally there are wider RGB types (e.g. ``RGB16``, ``RGB32``) available.
+
+.. exec_code::
+
+   from HABApp.core.types import RGB
+
+   col = RGB(5, 15, 255)
+   print(col)
+
+   print(col.red)   # red value
+   print(col.r)     # short name for red value
+   print(col[0])    # access of red value through numeric index
+
+   new_col = col.replace(red=22)
+   print(new_col)
+   print(new_col.to_hsb())
+
+
+
+.. autoclass:: HABApp.core.types.RGB
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+HSB
+======================================
+Datatype for HSB (hue, saturation, brightness) color handling.
+HSB types can be sent directly to openHAB and will be converted accordingly.
+
+.. exec_code::
+
+   from HABApp.core.types import HSB
+
+   col = HSB(200, 25, 75)
+   print(col)
+
+   print(col.hue)   # hue value
+   print(col.h)     # short name for hue value
+   print(col[0])    # access of hue value through numeric index
+
+   new_col = col.replace(hue=22)
+   print(new_col)
+   print(new_col.to_rgb())
+
+
+
+.. autoclass:: HABApp.core.types.HSB
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+.. _HABAPP_ITEM_TYPES:
 
 **************************************
 Items

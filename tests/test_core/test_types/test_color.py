@@ -20,11 +20,21 @@ def test_rgb():
 
     assert tuple(rgb) == (rgb.r, rgb.g, rgb.b)
 
-    assert str(rgb) == '<RGB 1, 2, 3>'
+    assert str(rgb) == 'RGB(1, 2, 3)'
     assert rgb == RGB(1, 2, 3)
     assert rgb != RGB(9, 2, 3)
     assert rgb != RGB(1, 9, 3)
     assert rgb != RGB(1, 2, 9)
+
+
+def test_rgb_create():
+    for x in (-1, 256):
+        with pytest.raises(ValueError):
+            RGB(x, 2, 3)
+        with pytest.raises(ValueError):
+            RGB(1, x, 3)
+        with pytest.raises(ValueError):
+            RGB(1, 2, x)
 
 
 def test_rgb_replace():
@@ -69,11 +79,28 @@ def test_hsb():
 
     assert tuple(hsb) == (hsb.h, hsb.s, hsb.b)
 
-    assert str(hsb) == '<HSB 1.00, 2.00, 3.00>'
+    assert str(hsb) == 'HSB(1.00, 2.00, 3.00)'
     assert hsb == HSB(1, 2, 3)
     assert hsb != HSB(9, 2, 3)
     assert hsb != HSB(1, 9, 3)
     assert hsb != HSB(1, 2, 9)
+
+
+def test_hsb_create():
+    with pytest.raises(ValueError):
+        HSB(-1, 2, 3)
+    with pytest.raises(ValueError):
+        HSB(360.1, 2, 3)
+
+    with pytest.raises(ValueError):
+        HSB(1, -1, 3)
+    with pytest.raises(ValueError):
+        HSB(1, 100.1, 3)
+
+    with pytest.raises(ValueError):
+        HSB(1, 2, -1)
+    with pytest.raises(ValueError):
+        HSB(1, 2, 100.1)
 
 
 def test_hsb_replace():

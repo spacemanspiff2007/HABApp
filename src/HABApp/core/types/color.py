@@ -22,27 +22,33 @@ class RGB(ColorType):
         self._b: int = b
 
     @property
-    def r(self) -> int:
+    def red(self) -> int:
+        """red value"""
         return self._r
 
     @property
-    def g(self) -> int:
-        return self._g
-
-    @property
-    def b(self) -> int:
-        return self._b
-
-    @property
-    def red(self) -> int:
+    def r(self) -> int:
+        """red value"""
         return self._r
 
     @property
     def green(self) -> int:
+        """green value"""
+        return self._g
+
+    @property
+    def g(self) -> int:
+        """green value"""
         return self._g
 
     @property
     def blue(self) -> int:
+        """blue value"""
+        return self._b
+
+    @property
+    def b(self) -> int:
+        """blue value"""
         return self._b
 
     def replace(self, r: Optional[int] = None, g: Optional[int] = None, b: Optional[int] = None,
@@ -79,7 +85,7 @@ class RGB(ColorType):
         )
 
     def __str__(self):
-        return f'<{self.__class__.__name__} {self._r:d}, {self._g:d}, {self._b}>'
+        return f'{self.__class__.__name__}({self._r:d}, {self._g:d}, {self._b})'
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -142,9 +148,8 @@ PERCENT_FACTOR = 100
 class HSB(ColorType):
 
     def __init__(self, hue: float, saturation: float, brightness: float):
-        assert 0 <= hue <= HUE_FACTOR
-        assert 0 <= saturation <= PERCENT_FACTOR
-        assert 0 <= brightness <= PERCENT_FACTOR
+        if not 0 <= hue <= HUE_FACTOR or not 0 <= saturation <= PERCENT_FACTOR or not 0 <= brightness <= PERCENT_FACTOR:
+            raise ValueError()
 
         self._hue: float = hue
         self._saturation: float = saturation
@@ -152,26 +157,32 @@ class HSB(ColorType):
 
     @property
     def hue(self) -> float:
+        """hue value"""
         return self._hue
 
     @property
     def h(self) -> float:
+        """hue value"""
         return self._hue
 
     @property
     def saturation(self) -> float:
+        """saturation value"""
         return self._saturation
 
     @property
     def s(self) -> float:
+        """saturation value"""
         return self._saturation
 
     @property
     def brightness(self) -> float:
+        """brightness value"""
         return self._brightness
 
     @property
     def b(self) -> float:
+        """brightness value"""
         return self._brightness
 
     def replace(self, h: Optional[float] = None, s: Optional[float] = None, b: Optional[float] = None,
@@ -209,7 +220,7 @@ class HSB(ColorType):
         )
 
     def __str__(self):
-        return f'<{self.__class__.__name__} {self._hue:.2f}, {self._saturation:.2f}, {self._brightness:.2f}>'
+        return f'{self.__class__.__name__}({self._hue:.2f}, {self._saturation:.2f}, {self._brightness:.2f})'
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
