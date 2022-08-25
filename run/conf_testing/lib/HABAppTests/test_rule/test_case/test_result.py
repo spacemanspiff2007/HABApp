@@ -60,23 +60,26 @@ class TestResult:
             log.error(line)
 
     def add_msg(self, msg: str):
-        self.msgs.append(msg)
+        for line in msg.splitlines():
+            self.msgs.append(line)
 
     def log(self, name: Optional[str] = None):
         if name is None:
             name = f'{self.cls_name}.{self.test_name}'
         nr = f' {self.test_nr} ' if self.test_nr else ' '
-        msg = ': ' + ", ".join(self.msgs) if self.msgs else ''
-
         prefix = f'{nr}"{name}"'
 
         if self.state is TestResultStatus.PASSED:
             return log.info(f'{prefix} successful')
         if self.state is TestResultStatus.SKIPPED:
             return log.warning(f'{prefix} skipped')
+
+        log_func = log.error
         if self.state is TestResultStatus.WARNING:
-            return log.warning(f'{prefix} warning{msg}')
-        if self.state is TestResultStatus.FAILED:
-            return log.error(f'{prefix} failed{msg}')
-        if self.state is TestResultStatus.ERROR:
-            return log.error(f'{prefix} error{msg}')
+            log_func = log.warning
+
+        first_msg = self.msgs[0] if self.msgs else ''
+
+        log_func(f'{prefix} {self.state.name.lower()}: {first_msg}')
+        for msg in self.msgs[1:]:
+            log_func(f'{"":8s}{msg}')

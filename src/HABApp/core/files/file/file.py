@@ -67,7 +67,7 @@ class HABAppFile:
                         f'do{"es" if one else ""}n\'t exist: {", ".join(sorted(mis))}')
 
     def check_properties(self, log_msg: bool = False):
-        if self.state is not FileState.PENDING and self.state is not FileState.PROPERTIES_ERROR:
+        if self.state is not FileState.PENDING and self.state is not FileState.DEPENDENCIES_ERROR:
             return None
 
         try:
@@ -75,7 +75,7 @@ class HABAppFile:
         except DependencyDoesNotExistError as e:
             if log_msg:
                 log.error(e.msg)
-            return self.set_state(FileState.PROPERTIES_ERROR)
+            return self.set_state(FileState.DEPENDENCIES_ERROR)
 
         try:
             # check for circular references
@@ -83,7 +83,7 @@ class HABAppFile:
             self._check_circ_refs((self.name, ), 'reloads_on')
         except CircularReferenceError as e:
             log.error(f'Circular reference: {" -> ".join(e.stack)}')
-            return self.set_state(FileState.PROPERTIES_ERROR)
+            return self.set_state(FileState.DEPENDENCIES_ERROR)
 
         # Check if we can already load it
         self.set_state(FileState.DEPENDENCIES_OK if not self.properties.depends_on else FileState.DEPENDENCIES_MISSING)

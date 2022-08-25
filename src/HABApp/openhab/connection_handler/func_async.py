@@ -14,6 +14,7 @@ from HABApp.openhab.errors import ThingNotEditableError, \
     ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError
 from .http_connection import delete, get, put, post, async_get_root, async_get_uuid, async_send_command, \
     async_post_update
+from HABApp.core.types import HSB, RGB
 
 if typing.TYPE_CHECKING:
     post = post
@@ -24,17 +25,26 @@ if typing.TYPE_CHECKING:
 
 
 def convert_to_oh_type(_in: Any) -> str:
+    if isinstance(_in, BaseValueItem):
+        raise ValueError()
+
     if isinstance(_in, datetime.datetime):
         # Add timezone (if not yet defined) to string, then remote anything below ms.
         # 2018-11-19T09:47:38.284000+0100 -> 2018-11-19T09:47:38.284+0100
         out = _in.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
-        return f'{out[:-8]}{out[-5:]}'
-    elif isinstance(_in, BaseValueItem):
-        return str(_in.value)
-    elif isinstance(_in, (set, list, tuple, frozenset)):
-        return ','.join(str(k) for k in _in)
-    elif _in is None:
+        return out
+
+    if isinstance(_in, (set, list, tuple, frozenset)):
+        return ','.join(map(str, _in))
+
+    if _in is None:
         return 'NULL'
+
+    if isinstance(_in, RGB):
+        _in = _in.to_hsb()
+
+    if isinstance(_in, HSB):
+        return f'{_in._hue:.2f},{_in._saturation:.2f},{_in._brightness:.2f}'
 
     return str(_in)
 

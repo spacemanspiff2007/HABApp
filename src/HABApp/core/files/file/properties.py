@@ -32,7 +32,7 @@ def get_properties(_str: str) -> FileProperties:
         if not line:
             continue
 
-        # break on first non empty line that is not a comment
+        # break on first non-empty line that is not a comment
         if line and not line.startswith('#'):
             break
 

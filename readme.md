@@ -117,6 +117,11 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.0.4 (25.08.2022)
+- New RGB & HSB datatype for simpler color handling
+- Fixed Docker build
+- Bugfixes
+
 #### 1.0.3 (09.08.2022)
 - OpenHAB Thing can now be enabled/disabled with ``thing.set_enabled()``
 - ClientID for MQTT should now be unique for every HABApp installation
