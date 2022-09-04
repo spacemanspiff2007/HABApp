@@ -199,7 +199,23 @@ updated which can lead to hard to track down errors.
 
 Examples:
 
-Add an openHAB mock item to the item registry
+By default, without connection to OpenHab, the internal of Habapp is wired to proxy objects that throw exceptions when invoked. We need to do a one time setup as below:
+
+.. exec_code::
+   :hide_output:
+
+   # ------------ hide: start ------------
+   from rule_runner import SimpleRuleRunner
+   SimpleRuleRunner().set_up()
+   # ------------ hide: stop -------------
+   
+   ir = HABApp.core.internals.ItemRegistry()
+   eb = HABApp.core.internals.EventBus()
+   HABApp.core.internals.setup_internals(ir, eb)
+   HABApp.core.Items = ir
+   HABApp.core.EventBus = eb
+
+Now, we can add an openHAB mock item to the item registry:
 
 .. exec_code::
    :hide_output:
@@ -215,7 +231,7 @@ Add an openHAB mock item to the item registry
    item = SwitchItem('my_switch', 'ON')
    HABApp.core.Items.add_item(item)
 
-Remove the mock item from the registry
+Remove the mock item from the registry:
 
 .. exec_code::
    :hide_output:
