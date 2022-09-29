@@ -8,11 +8,7 @@ openHAB
 Additional configuration
 **************************************
 
-openHAB 2
-======================================
-For openHAB2 there is no additional configuration needed.
-
-openHAB 3
+openHAB
 ======================================
 For optimal performance it is recommended to use Basic Auth (available from openHAB 3.1 M3 on).
 It can be enabled through GUI or through textual configuration.

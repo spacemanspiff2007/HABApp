@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import typing
 
-from HABApp.openhab.items import OpenhabItem
+from HABApp.openhab.items import OpenhabItem, NumberItem
 from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem, ImageItem
 from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem, get_openhab_test_states, get_openhab_test_types
 
@@ -55,7 +55,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
 
     def add_func_test(self, cls, params: set):
         # <class 'HABApp.openhab.items.switch_item.SwitchItem'> -> SwitchItem
-        self.add_test(str(cls).split('.')[-1][:-2], self.test_func, cls, params)
+        self.add_test(cls.__name__, self.test_func, cls, params)
 
     def test_func(self, item_type, test_params):
 
@@ -103,6 +103,8 @@ class TestOpenhabItemConvenience(TestBaseRule):
                     continue
                 self.add_test(f'{k}.{name}', self.test_func, k, name, get_openhab_test_states(k))
 
+        self.add_test('post_value_if', self.test_post_update_if)
+
     def test_func(self, item_type, func_name, test_vals):
 
         with OpenhabTmpItem(item_type) as tmpitem, ItemWaiter(OpenhabItem.get_item(tmpitem.name)) as waiter:
@@ -114,6 +116,20 @@ class TestOpenhabItemConvenience(TestBaseRule):
                 tmpitem.set_value(val)
                 getattr(tmpitem, func_name)()
                 waiter.wait_for_state(val)
+
+    @OpenhabTmpItem.create('Number', arg_name='oh_item')
+    def test_post_update_if(self, oh_item: OpenhabTmpItem):
+        item = NumberItem.get_item(oh_item.name)
+
+        with ItemWaiter(OpenhabItem.get_item(item.name)) as waiter:
+            item.post_value_if(0, is_=None)
+            waiter.wait_for_state(0)
+
+            item.post_value_if(1, eq=0)
+            waiter.wait_for_state(1)
+
+            item.post_value_if(5, lower_equal=1)
+            waiter.wait_for_state(5)
 
 
 TestOpenhabItemConvenience()

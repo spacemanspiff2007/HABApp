@@ -59,3 +59,9 @@ class ItemTests:
 
             assert i._last_update.dt > pd_now(UTC) - timedelta(milliseconds=100)
             assert i._last_change.dt > pd_now(UTC) - timedelta(milliseconds=100)
+
+    def test_post_if(self):
+        i = self.CLS('test')
+        assert i.post_value_if(0, is_=None)
+        assert i.post_value_if(1, eq=0)
+        assert not i.post_value_if(1, eq=0)
