@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class OpenhabThingChannelDefinition(BaseModel):
@@ -29,8 +29,10 @@ class OpenhabThingDefinition(BaseModel):
     firmwareStatus: Optional[Dict[str, str]]
     editable: Optional[bool]
 
+    # Field is actually optional but we set this to an empty str
+    label: str = ''
+
     # These are mandatory fields
-    label: str
     status: OpenhabThingStatus = Field(..., alias='statusInfo')
     uid: str = Field(..., alias='UID')
     thing_type: str = Field(..., alias='thingTypeUID')
@@ -38,3 +40,9 @@ class OpenhabThingDefinition(BaseModel):
 
     configuration: Dict[str, Any]
     properties: Dict[str, Any]
+
+    @validator('label')
+    def none_to_empty_str(cls, v):
+        if v is None:
+            return ''
+        return v
