@@ -12,7 +12,7 @@ class _MissingType(Enum):
 
 
 MISSING: Final = _MissingType.MISSING
-STARTUP = time.time()
+STARTUP: Final = time.monotonic()
 
 # Python Versions for feature control
 PYTHON_38: Final = sys.version_info >= (3, 8)

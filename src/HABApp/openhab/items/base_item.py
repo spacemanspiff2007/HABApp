@@ -59,7 +59,8 @@ class OpenhabItem(BaseValueItem):
                           lower_than=MISSING, lt=MISSING, lower_equal=MISSING, le=MISSING,
                           greater_than=MISSING, gt=MISSING, greater_equal=MISSING, ge=MISSING,
                           is_=MISSING, is_not=MISSING) -> bool:
-        """Post a value depending on the current state of the item. If one of the comparisons is true the new state
+        """
+        Post a value depending on the current state of the item. If one of the comparisons is true the new state
         will be posted.
 
         :param new_value: new value to post
@@ -77,7 +78,8 @@ class OpenhabItem(BaseValueItem):
         :param ge: tem state has to be greater equal the passed value
         :param is_: item state has to be the same object as the passt value (e.g. None)
         :param is_not: item state has to be not the same object as the passt value (e.g. None)
-        :return: True if the new value was posted else False
+
+        :return: `True` if the new value was posted else `False`
         """
         value = self.value
         if _compare(value, equal=equal, eq=eq, not_equal=not_equal, ne=ne,
