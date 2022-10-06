@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Extra, validator
 
 
 class RestBase(BaseModel):
@@ -6,4 +6,11 @@ class RestBase(BaseModel):
     # default configuration for RestAPI models
     class Config:
         extra = Extra.forbid
-        allow_population_by_field_name = True
+
+
+def none_is_empty_str(v) -> str:
+    return None if v == 'NONE' else v
+
+
+def make_none_empty_str(*name: str):
+    return validator(*name, allow_reuse=True)(none_is_empty_str)

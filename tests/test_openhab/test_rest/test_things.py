@@ -1,0 +1,112 @@
+from HABApp.openhab.definitions.rest.things import OpenhabThingDefinition
+
+
+def test_thing_summary():
+    _in = {
+        "statusInfo": {
+            "status": "UNINITIALIZED",
+            "statusDetail": "NONE"
+        },
+        "editable": True,
+        "label": "Astronomische Sonnendaten",
+        "UID": "astro:sun:d522ba4b56",
+        "thingTypeUID": "astro:sun"
+    }
+
+    thing = OpenhabThingDefinition.parse_obj(_in)
+
+    assert thing.editable is True
+    assert thing.uid == 'astro:sun:d522ba4b56'
+    assert thing.label == 'Astronomische Sonnendaten'
+    assert thing.thing_type == 'astro:sun'
+
+    assert thing.status.status == 'UNINITIALIZED'
+    assert thing.status.detail == ''
+
+
+def test_thing_full():
+    _in = {
+        "channels": [
+            {
+                "linkedItems": [
+                    "LinkedItem1",
+                    "LinkedItem2"
+                ],
+                "uid": "astro:sun:d522ba4b56:rise#start",
+                "id": "rise#start",
+                "channelTypeUID": "astro:start",
+                "itemType": "DateTime",
+                "kind": "STATE",
+                "label": "Startzeit",
+                "description": "Die Startzeit des Ereignisses",
+                "defaultTags": [],
+                "properties": {},
+                "configuration": {
+                    "offset": 0
+                },
+            },
+            {
+                "linkedItems": [],
+                "uid": "astro:sun:d522ba4b56:eveningNight#duration",
+                "id": "eveningNight#duration",
+                "channelTypeUID": "astro:duration",
+                "itemType": "Number:Time",
+                "kind": "STATE",
+                "label": "Dauer",
+                "description": "Die Dauer des Ereignisses",
+                "defaultTags": [],
+                "properties": {},
+                "configuration": {}
+            },
+            {
+                "linkedItems": [],
+                "uid": "astro:sun:d522ba4b56:eclipse#event",
+                "id": "eclipse#event",
+                "channelTypeUID": "astro:sunEclipseEvent",
+                "kind": "TRIGGER",
+                "label": "Sonnenfinsternisereignis",
+                "description": "Sonnenfinsternisereignis",
+                "defaultTags": [],
+                "properties": {},
+                "configuration": {
+                    "offset": 0
+                }
+            },
+        ],
+        "statusInfo": {
+            "status": "UNINITIALIZED",
+            "statusDetail": "NONE"
+        },
+        "editable": True,
+        "label": "Astronomische Sonnendaten",
+        "configuration": {
+            "useMeteorologicalSeason": False,
+            "interval": 300,
+            "geolocation": "46.123,2.123"
+        },
+        "properties": {},
+        "UID": "astro:sun:d522ba4b56",
+        "thingTypeUID": "astro:sun"
+    }
+
+    thing = OpenhabThingDefinition.parse_obj(_in)
+
+    c0, c1, c2 = thing.channels
+
+    assert c0.linked_items == ("LinkedItem1", "LinkedItem2")
+    assert c0.configuration == {"offset": 0}
+
+    assert c1.linked_items == tuple()
+    assert c1.configuration == {}
+
+    assert thing.status.status == 'UNINITIALIZED'
+    assert thing.status.detail == ''
+
+    assert thing.editable is True
+    assert thing.label == 'Astronomische Sonnendaten'
+
+    assert thing.configuration == {"useMeteorologicalSeason": False, "interval": 300, "geolocation": "46.123,2.123"}
+    assert thing.properties == {}
+
+    assert thing.uid == 'astro:sun:d522ba4b56'
+    assert thing.thing_type == 'astro:sun'

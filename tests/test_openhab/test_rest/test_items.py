@@ -50,7 +50,7 @@ def test_group_item():
                 "label": "Christmas Tree",
                 "category": "christmas_tree",
                 "tags": [],
-                "groupNames": ["Group1", "Group2"]
+                "groupNames": ["Group1", "Group2"],
             },
             {
                 "link": "http://ip:port/rest/items/frontgardenPower",
@@ -61,7 +61,7 @@ def test_group_item():
                 "label": "Outside Power",
                 "category": "poweroutlet",
                 "tags": [],
-                "groupNames": ["Group1", "Group2"]
+                "groupNames": ["Group1", "Group2"],
             }
         ],
         "groupType": "Switch",
