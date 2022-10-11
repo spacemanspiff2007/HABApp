@@ -1,3 +1,6 @@
+from typing import Tuple
+from unittest.mock import Mock
+
 import pytest
 
 from HABApp.core.const import MISSING
@@ -29,6 +32,53 @@ def test_diff_prio(parent_rule: DummyRule):
     p2.set_enabled(False)
     p2.set_value(8888)
     assert p.value == 8888
+
+
+def get_value_mode(enabled: bool, enable_on_value: bool, current_value=0) -> Tuple[Mock, ValueMode]:
+    parent = Mock()
+    parent.calculate_value = Mock()
+
+    mode = ValueMode('mode1', current_value, enable_on_value=enable_on_value, enabled=enabled)
+    mode.parent = parent
+    return parent.calculate_value, mode
+
+
+def test_only_on_change_1(parent_rule: DummyRule):
+    calculate_value, mode = get_value_mode(enabled=False, enable_on_value=False)
+
+    assert not mode.set_value(0, only_on_change=True)
+    calculate_value.assert_not_called()
+
+
+def test_only_on_change_2(parent_rule: DummyRule):
+    calculate_value, mode = get_value_mode(enabled=True, enable_on_value=False)
+
+    assert not mode.set_value(0, only_on_change=True)
+    calculate_value.assert_not_called()
+
+
+def test_only_on_change_3(parent_rule: DummyRule):
+    calculate_value, mode = get_value_mode(enabled=False, enable_on_value=True)
+
+    assert mode.set_value(0, only_on_change=True)
+    calculate_value.assert_called_once()
+
+
+def test_only_on_change_4(parent_rule: DummyRule):
+    calculate_value, mode = get_value_mode(enabled=True, enable_on_value=True)
+
+    assert not mode.set_value(0, only_on_change=True)
+    calculate_value.assert_not_called()
+
+
+@pytest.mark.parametrize('enabled', (True, False))
+@pytest.mark.parametrize('enable_on_value', (True, False))
+def test_only_on_change_diff_value(parent_rule: DummyRule, enabled, enable_on_value):
+
+    calculate_value, mode = get_value_mode(enabled=enabled, enable_on_value=enable_on_value)
+
+    assert mode.set_value(1, only_on_change=True)
+    calculate_value.assert_called_once()
 
 
 def test_calculate_lower_priority_value(parent_rule: DummyRule):

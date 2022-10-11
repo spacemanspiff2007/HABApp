@@ -2,8 +2,8 @@ import asyncio
 import logging
 import traceback
 import typing
-from typing import Any, Optional, Final
 from asyncio import Queue, sleep, QueueEmpty
+from typing import Any, Optional, Final
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -229,18 +229,15 @@ async def start_sse_event_listener():
 
                 e_str = event.data
 
-                # Alive event from openhab to detect dropped connections
-                # -> Can be ignored on the HABApp side
-                if e_str == '{"type":"ALIVE"}':
-                    continue
-
                 try:
                     e_json = _load_json(e_str)
-                except ValueError:
+                except (ValueError, TypeError):
                     log_events.warning(f'Invalid json: {e_str}')
                     continue
-                except TypeError:
-                    log_events.warning(f'Invalid json: {e_str}')
+
+                # Alive event from openhab to detect dropped connections
+                # -> Can be ignored on the HABApp side
+                if e_json.get('type') == 'ALIVE':
                     continue
 
                 # Log sse event
