@@ -81,8 +81,8 @@ class OpenhabItem(BaseValueItem):
 
         :return: `True` if the new value was posted else `False`
         """
-        value = self.value
-        if _compare(value, equal=equal, eq=eq, not_equal=not_equal, ne=ne,
+
+        if _compare(self.value, equal=equal, eq=eq, not_equal=not_equal, ne=ne,
                     lower_than=lower_than, lt=lt, lower_equal=lower_equal, le=le,
                     greater_than=greater_than, gt=gt, greater_equal=greater_equal, ge=ge, is_=is_, is_not=is_not):
             post_update(self.name, new_value)

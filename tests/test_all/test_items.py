@@ -2,7 +2,7 @@ import pytest
 
 from HABApp.core.items import BaseValueItem, HINT_TYPE_ITEM_OBJ
 from HABApp.mqtt.items import MqttBaseItem
-from tests.helpers import get_module_classes
+from tests.helpers.inspect import get_module_classes
 
 
 def get_item_classes(skip=tuple()):

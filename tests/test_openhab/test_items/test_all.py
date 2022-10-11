@@ -2,10 +2,12 @@ import inspect
 
 import pytest
 
+from HABApp.core.items import Item
 from HABApp.openhab.items import Thing, ColorItem, ImageItem
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
 from tests.helpers.docs import get_ivars
+from tests.helpers.inspect import assert_same_signature
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
@@ -25,6 +27,12 @@ def test_set_name(cls):
     # this test ensures that all openHAB items inherit from OpenhabItem
     if cls is not Thing:
         assert isinstance(c, OpenhabItem)
+
+
+@pytest.mark.parametrize('cls', (c for c in item_dict.values()))
+def test_conditional_function_call_signature(cls):
+    assert_same_signature(Item.post_value_if, cls.post_value_if)
+    assert_same_signature(Item.post_value_if, cls.oh_post_update_if)
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
