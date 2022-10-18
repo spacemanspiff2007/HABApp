@@ -14,7 +14,7 @@ channels:
       - channel_uid: .+rise#start
     link items:
       - type: Number
-        name: '{thing_uid, :([^:]+?)$}_Temperature_1'
+        name: 'Item_{thing_uid, :([^:]+?)$}_Temperature_1'
         label: '{thing_uid, :([^:]+)$} Temperature [%d %%]'
         icon: battery
         metadata:

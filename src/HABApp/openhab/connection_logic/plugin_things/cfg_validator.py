@@ -26,6 +26,18 @@ class UserItem:
     link: Optional[str]
     metadata: Dict[str, Dict[str, Union[str, int, float]]]
 
+    def get_oh_cfg(self) -> Dict[str, Union[str, dict, list]]:
+        ret = {}
+        for k in self.__annotations__:
+            if k in ('link', 'metadata'):
+                continue
+
+            v = self.__dict__[k]
+            if k == 'icon':
+                k = 'category'
+            ret[k] = v
+        return ret
+
 
 class InvalidItemNameError(Exception):
     pass
