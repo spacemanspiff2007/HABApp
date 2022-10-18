@@ -15,7 +15,7 @@ from HABApp.openhab.connection_logic.plugin_things.filters import THING_ALIAS, C
 from HABApp.openhab.connection_logic.plugin_things.filters import apply_filters, log_overview
 from ._log import log
 from .item_worker import create_item, cleanup_items
-from .items_file import create_items_file
+from .file_writer import ItemsFileWriter
 from .thing_worker import update_thing_cfg
 from .._plugin import OnConnectPlugin
 
@@ -92,9 +92,8 @@ class ManualThingConfig(OnConnectPlugin):
         self.do_cleanup.reset()
 
         # output file
-        output_file = path.with_suffix('.items')
-        if output_file.is_file():
-            output_file.unlink()
+        items_file_path = path.with_suffix('.items')
+        items_file_writer = ItemsFileWriter()
 
         # we also get events when the file gets deleted
         if not path.is_file():
@@ -188,9 +187,10 @@ class ManualThingConfig(OnConnectPlugin):
 
             self.do_cleanup.reset()
 
-            create_items_file(output_file, create_items)
-
+            items_file_writer.add_items(create_items.values())
             self.cache_cfg = []
+
+        items_file_writer.create_file(items_file_path)
 
 
 PLUGIN_MANUAL_THING_CFG = ManualThingConfig.create_plugin()

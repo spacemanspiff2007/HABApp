@@ -240,7 +240,7 @@ async def start_sse_event_listener():
                 if e_json.get('type') == 'ALIVE':
                     continue
 
-                # Log sse event
+                # Log raw sse event
                 if log_events.isEnabledFor(logging.DEBUG):
                     log_events._log(logging.DEBUG, e_str, [])
 
