@@ -4,7 +4,7 @@ import pytest
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, ChannelDescriptionChangedEvent, \
-    ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent
+    ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
 from HABApp.openhab.map_events import get_event, EVENT_LIST
 
 
@@ -269,6 +269,16 @@ def test_thing_ThingUpdatedEvent():
 
     event = get_event(data)
     assert isinstance(event, ThingUpdatedEvent)
+
+
+def test_thing_ConfigStatusInfoEvent():
+    data = {
+        'topic': 'openhab/things/zwave:device:gehirn:node29/config/status',
+        'payload': '{"configStatusMessages":[{"parameterName":"config_11_2","type":"PENDING"}]}',
+        'type': 'ConfigStatusInfoEvent'
+    }
+    event = get_event(data)
+    assert isinstance(event, ThingConfigStatusInfoEvent)
 
 
 @pytest.mark.parametrize('cls', [*EVENT_LIST])

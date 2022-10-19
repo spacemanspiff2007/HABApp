@@ -11,7 +11,7 @@ from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
-    ThingStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent
+    ThingStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
 from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry, remove_thing_from_registry, \
     add_thing_to_registry
 from HABApp.openhab.map_events import get_event
@@ -43,7 +43,7 @@ def on_sse_event(event_dict: dict):
                 post_event(event.name, event)
                 return None
 
-            if isinstance(event, (ThingStatusInfoEvent, ThingUpdatedEvent)):
+            if isinstance(event, (ThingStatusInfoEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent)):
                 __thing = get_item(event.name)   # type: HABApp.openhab.items.Thing
                 __thing.process_event(event)
                 post_event(event.name, event)
