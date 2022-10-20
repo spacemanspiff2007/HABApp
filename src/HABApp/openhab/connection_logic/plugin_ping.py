@@ -4,7 +4,7 @@ import time
 from typing import Optional
 
 import HABApp
-from HABApp.core.internals import uses_event_bus
+from HABApp.core.internals import uses_event_bus, uses_item_registry
 from HABApp.core.wrapper import log_exception
 from HABApp.openhab.errors import OpenhabDisconnectedError
 from ._plugin import PluginBase
@@ -12,7 +12,8 @@ from ._plugin import PluginBase
 log = logging.getLogger('HABApp.openhab.ping')
 
 
-event_bus = uses_event_bus()
+EVENT_BUS = uses_event_bus()
+ITEM_REGISTRY = uses_item_registry()
 
 
 class PingOpenhab(PluginBase):
@@ -65,7 +66,7 @@ class PingOpenhab(PluginBase):
             HABApp.core.internals.wrap_func(self.ping_received),
             HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateEvent)
         )
-        event_bus.add_listener(self.listener)
+        EVENT_BUS.add_listener(self.listener)
 
         self.on_connect()
 
@@ -80,12 +81,19 @@ class PingOpenhab(PluginBase):
 
         self.ping_new = round((time.time() - self.ping_sent) * 1000, 1)
 
-
     @log_exception
     async def async_ping(self):
-        await asyncio.sleep(3)
+        await asyncio.sleep(5)
 
         log.debug('Ping started')
+
+        item_name = HABApp.config.CONFIG.openhab.ping.item
+
+        send_ping = True
+        if not ITEM_REGISTRY.item_exists(item_name):
+            log.warning(f'Number item "{item_name:s}" does not exist!')
+            send_ping = False
+
         try:
             while True:
 
@@ -93,10 +101,13 @@ class PingOpenhab(PluginBase):
                 self.ping_new = None
                 self.ping_sent = time.time()
 
-                await HABApp.openhab.interface_async.async_post_update(
-                    HABApp.config.CONFIG.openhab.ping.item,
-                    f'{self.ping_value:.1f}' if self.ping_value is not None else None
-                )
+                if send_ping:
+                    await HABApp.openhab.interface_async.async_post_update(
+                        item_name,
+                        f'{self.ping_value:.1f}' if self.ping_value is not None else None
+                    )
+                else:
+                    send_ping = ITEM_REGISTRY.item_exists(item_name)
 
                 await asyncio.sleep(HABApp.config.CONFIG.openhab.ping.interval)
 
