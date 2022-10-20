@@ -1,5 +1,4 @@
 from HABApp.core.events import ValueUpdateEventFilter
-from HABApp.openhab.definitions.definitions import ITEM_DIMENSIONS
 
 from HABAppTests import TestBaseRule, EventWaiter, OpenhabTmpItem, get_openhab_test_events, \
     get_openhab_test_types, get_openhab_test_states, ItemWaiter
@@ -15,8 +14,13 @@ class TestOpenhabEventTypes(TestBaseRule):
         for oh_type in get_openhab_test_types():
             self.add_test(f'{oh_type} events', self.test_events, oh_type, get_openhab_test_events(oh_type))
 
-        for dimension in ITEM_DIMENSIONS:
-            self.add_test(f'Quantity {dimension} events', self.test_quantity_type_events, dimension)
+        dimensions = {
+            'Length': 'm', 'Temperature': '°C', 'Pressure': 'hPa', 'Speed': 'km/h', 'Intensity': 'W/m²', 'Angle': '°',
+            'Dimensionless': '',
+        }
+
+        for name, unit in dimensions.items():
+            self.add_test(f'Quantity {name} events', self.test_quantity_type_events, name, unit)
 
     def test_events(self, item_type, test_values):
         item_name = f'{item_type}_value_test'
@@ -32,21 +36,15 @@ class TestOpenhabEventTypes(TestBaseRule):
                     self.openhab.send_command(item_name, value)
                     waiter.wait_for_event(value=value)
 
-    def test_quantity_type_events(self, dimension):
-
-        unit_of_dimension = {
-            'Length': 'm', 'Temperature': '°C', 'Pressure': 'hPa', 'Speed': 'km/h', 'Intensity': 'W/m²', 'Angle': '°',
-            'Dimensionless': '',
-        }
-
+    def test_quantity_type_events(self, dimension, unit):
         item_name = f'{dimension}_event_test'
         with OpenhabTmpItem(f'Number:{dimension}', item_name) as item, \
-                EventWaiter(item_name, ValueUpdateEventFilter()) as event_watier, \
+                EventWaiter(item_name, ValueUpdateEventFilter()) as event_waiter, \
                 ItemWaiter(item) as item_waiter:
 
             for state in get_openhab_test_states('Number'):
-                self.openhab.post_update(item_name, f'{state} {unit_of_dimension[dimension]}'.strip())
-                event_watier.wait_for_event(value=state)
+                self.openhab.post_update(item_name, f'{state} {unit}'.strip())
+                event_waiter.wait_for_event(value=state)
                 item_waiter.wait_for_state(state)
 
 

@@ -1,5 +1,6 @@
 import logging
+from typing import Final as _Final
 
-log      = logging.getLogger('HABApp.openhab.thing')
-log_cfg  = logging.getLogger('HABApp.openhab.thing.cfg')
-log_item = logging.getLogger('HABApp.openhab.thing.item')
+log: _Final      = logging.getLogger('HABApp.openhab.thing')
+log_cfg: _Final  = log.getChild('cfg')
+log_item: _Final = log.getChild('item')

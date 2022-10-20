@@ -7,7 +7,7 @@ import HABApp
 from HABApp.core.const.json import load_json, dump_json
 from HABApp.core.lib import format_exception
 from easyconfig import create_app_config
-from tests.helpers.traceback import process_traceback
+from tests.helpers.traceback import remove_dyn_parts_from_traceback
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, skip_file
 from pathlib import Path
 
@@ -20,7 +20,7 @@ def exec_func(func) -> str:
     except Exception as e:
         msg = '\n' + '\n'.join(format_exception(e))
 
-    msg = process_traceback(msg)
+    msg = remove_dyn_parts_from_traceback(msg)
     return msg
 
 

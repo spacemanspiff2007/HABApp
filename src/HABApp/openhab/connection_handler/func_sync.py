@@ -89,8 +89,8 @@ def create_item(item_type: str, name: str, label="", category="",
         assert item_type == 'Group', f'Item type must be "Group"! Is: {item_type}'
 
         if group_function:
-            assert group_function in definitions.GROUP_FUNCTIONS, \
-                f'{item_type} is not a group function: {", ".join(definitions.GROUP_FUNCTIONS)}'
+            assert group_function in definitions.GROUP_ITEM_FUNCTIONS, \
+                f'{item_type} is not a group function: {", ".join(definitions.GROUP_ITEM_FUNCTIONS)}'
 
     return run_coro_from_thread(
         async_create_item(

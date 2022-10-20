@@ -269,6 +269,7 @@ Basic Example
             # create two different modes which we will use and add them to the item
             auto = ValueMode('Automatic', initial_value=5)
             manu = ValueMode('Manual', initial_value=0)
+            # Add the auto mode with priority 0 and the manual mode with priority 10
             item.add_mode(0, auto).add_mode(10, manu)
 
             # This shows how to enable/disable a mode and how to get a mode from the item

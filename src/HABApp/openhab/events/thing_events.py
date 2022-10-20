@@ -68,6 +68,33 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
                f'old_status: {self.old_status}, old_detail: {self.old_detail}>'
 
 
+class ThingConfigStatusInfoEvent(OpenhabEvent):
+    """
+    :ivar str name:
+    :ivar Dict[str, str] config_messages:
+    """
+    name: str
+    config_messages: Dict[str, str]
+
+    def __init__(self, name: str = '', config_messages: Optional[Dict[str, str]] = None):
+        super().__init__()
+
+        self.name: str = name
+        self.config_messages: Dict[str, str] = config_messages if config_messages is not None else {}
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        # openhab/things/zwave:device:gehirn:node29/config/status
+        name = topic[15:-14]
+        msgs = payload['configStatusMessages']
+        return cls(
+            name=name, config_messages={param_name: msg_type for d in msgs for param_name, msg_type in d.items()}
+        )
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, config_messages: {self.config_messages}>'
+
+
 class ThingFirmwareStatusInfoEvent(OpenhabEvent):
     """
     :ivar str name:

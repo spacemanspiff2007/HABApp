@@ -4,21 +4,16 @@
 openHAB
 ######################################
 
+
 **************************************
 Additional configuration
 **************************************
 
-openHAB 2
-======================================
-For openHAB2 there is no additional configuration needed.
-
-openHAB 3
-======================================
 For optimal performance it is recommended to use Basic Auth (available from openHAB 3.1 M3 on).
 It can be enabled through GUI or through textual configuration.
 
 Textual configuration
---------------------------------------
+======================================
 The settings are in the ``runtime.cfg``.
 Remove the ``#`` before the entry to activate it.
 
@@ -29,34 +24,17 @@ Remove the ``#`` before the entry to activate it.
 
 
 GUI
---------------------------------------
+======================================
 It can be enabled through the gui in ``settings`` -> ``API Security`` -> ``Allow Basic Authentication``.
 
 .. image:: /images/openhab_api_config.png
 
 
-
-**************************************
-Interaction with a openHAB
-**************************************
-All interaction with the openHAB is done through the ``self.oh`` or ``self.openhab`` object in the rule
-or through an ``OpenhabItem``.
-
-.. image:: /gifs/openhab.gif
-
-
-
-Function parameters
-======================================
-.. automodule:: HABApp.openhab.interface
-   :members:
-   :imported-members:
-
-
 .. _OPENHAB_ITEM_TYPES:
 
+
 **************************************
-openhab item types
+openHAB item types
 **************************************
 
 Description and example
@@ -240,6 +218,24 @@ Thing
    :members:
    :inherited-members:
    :member-order: groupwise
+
+
+
+**************************************
+Interaction with a openHAB
+**************************************
+All interaction with the openHAB is done through the ``self.oh`` or ``self.openhab`` object in the rule
+or through an ``OpenhabItem``.
+
+.. image:: /gifs/openhab.gif
+
+
+
+Function parameters
+======================================
+.. automodule:: HABApp.openhab.interface
+   :members:
+   :imported-members:
 
 
 .. _OPENHAB_EVENT_TYPES:

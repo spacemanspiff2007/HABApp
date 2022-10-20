@@ -344,4 +344,4 @@ All available functions
    :var async_http: :ref:`Async http connections <ref_async_io>`
    :var mqtt: :ref:`MQTT interaction <ref_mqtt>`
    :var openhab: :ref:`openhab interaction <ref_openhab>`
-   :var oh: short alias for :py:class:`openhab` openhab
+   :var oh: short alias for :ref:`openhab <ref_openhab>`

@@ -6,7 +6,7 @@ from pendulum import UTC
 from pendulum import now as pd_now
 
 from HABApp.core.items import BaseItem
-from HABApp.openhab.events import ThingStatusInfoEvent, ThingUpdatedEvent
+from HABApp.openhab.events import ThingStatusInfoEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
 from HABApp.openhab.interface import set_thing_enabled
 
 
@@ -57,6 +57,8 @@ class Thing(BaseItem):
             self.__update_timestamps(
                 old_label != self.label or old_configuration != self.configuration or old_properties != self.properties
             )
+        elif isinstance(event, ThingConfigStatusInfoEvent):
+            pass
 
         return None
 

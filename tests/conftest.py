@@ -10,7 +10,7 @@ import tests
 from HABApp.core.asyncio import async_context
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.internals import setup_internals, EventBus, ItemRegistry
-from .helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg
+from tests.helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg
 
 if typing.TYPE_CHECKING:
     parent_rule = parent_rule

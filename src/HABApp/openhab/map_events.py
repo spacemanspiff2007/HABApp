@@ -6,7 +6,8 @@ from .events import OpenhabEvent, \
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent, \
     ChannelTriggeredEvent, ChannelDescriptionChangedEvent, \
     ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, \
-    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent
+    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, \
+    ThingConfigStatusInfoEvent
 
 
 EVENT_LIST = [
@@ -19,11 +20,14 @@ EVENT_LIST = [
 
     # thing events
     ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent,
-    ThingStatusInfoEvent, ThingStatusInfoChangedEvent, ThingFirmwareStatusInfoEvent
+    ThingStatusInfoEvent, ThingStatusInfoChangedEvent,
+    ThingFirmwareStatusInfoEvent,
+    ThingConfigStatusInfoEvent,
 ]
 
 _events: Dict[str, Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
 _events['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openHAB is inconsistent here
+_events['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming from openHAB is inconsistent here
 
 
 def get_event(_in_dict: dict) -> OpenhabEvent:

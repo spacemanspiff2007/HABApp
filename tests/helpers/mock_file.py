@@ -64,3 +64,6 @@ class MockFile:
     @property
     def name(self):
         return self.path.name
+
+    def read_text(self, encoding: str) -> str:
+        return self.data

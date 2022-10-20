@@ -329,7 +329,7 @@ Command line arguments
     # ------------ hide: stop -------------
 
 
-PyCharm
+Usage with PyCharm
 ----------------------------------
 It's recommended to use PyCharm as an IDE for writing rules. The IDE can provide auto complete and static checks
 which will help write error free rules and vastly speed up development.
@@ -365,3 +365,41 @@ It's still necessary to supply a configuration file which can be done in the ``P
 
 | After a click on "OK" HABApp can be run/debugged directly from pycharm.
 | It's even possible to create breakpoints in rules and inspect all objects.
+
+
+Install a development version of HABApp
+---------------------------------------
+
+To try out new features or test some functionality it's possible to install a branch directly from github.
+Installation works only in a virtual environment.
+
+New features are typically first available in the ``Develop`` branch.
+
+#. Navigate to the folder where the virtual environment was created::
+
+    cd /opt/habapp
+
+
+#. Activate the virtual environment
+
+   Linux::
+
+    source bin/activate
+
+   Windows::
+
+    Scripts\activate
+
+
+#. Remove existing HABApp installation::
+
+    python3 -m pip uninstall habapp
+
+#. Install HABApp from the github branch (here ``Develop``)::
+
+    python3 -m pip install git+https://github.com/spacemanspiff2007/HABApp.git@Develop
+
+
+#. Run HABApp as usual (e.g. through ``systemctl``) or manually with::
+
+    habapp --config PATH_TO_CONFIGURATION_FOLDER

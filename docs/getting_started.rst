@@ -303,3 +303,54 @@ Trigger an event when an item is constant
     HABApp.core.EventBus.post_event('Item_Name', ItemNoChangeEvent('Item_Name', 10))
     runner.tear_down()
     # ------------ hide: stop -------------
+
+
+Convenience functions
+------------------------------------------
+
+HABApp provides some convenience functions which make the rule creation easier and reduce boiler plate code.
+
+post_value_if
+""""""""""""""""""""""""""""""""""""""
+
+``post_value_if`` will post a value to the item depending on its current state.
+There are various comparisons available (see :meth:`documentation <HABApp.core.items.Item.post_value_if>`)
+Something similar is available for openHAB items (``oh_post_update_if``)
+
+.. exec_code::
+
+    # ------------ hide: start ------------
+    import time, HABApp
+    from rule_runner import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    HABApp.core.Items.add_item(HABApp.core.items.Item('Item_Name'))
+    # ------------ hide: stop -------------
+
+    import HABApp
+    from HABApp.core.items import Item
+
+    class MyFirstRule(HABApp.Rule):
+        def __init__(self):
+            super().__init__()
+            # Get the item or create it if it does not exist
+            self.my_item = Item.get_create_item('Item_Name')
+
+            self.run.soon(self.say_something)
+
+        def say_something(self):
+
+            # This construct
+            if self.my_item != 'overwrite value':
+               self.my_item.post_value('Test')
+
+            # ... is equivalent to
+            self.my_item.pos_value_if('Test', equal='overwrite value')
+
+
+
+    MyFirstRule()
+    # ------------ hide: start ------------
+    runner.process_events()
+    runner.tear_down()
+    # ------------ hide: stop -------------

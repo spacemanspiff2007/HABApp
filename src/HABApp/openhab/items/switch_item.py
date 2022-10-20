@@ -26,11 +26,11 @@ class SwitchItem(OpenhabItem, OnOffCommand):
 
     def is_on(self) -> bool:
         """Test value against on-value"""
-        return True if self.value == OnOffValue.ON else False
+        return self.value == OnOffValue.ON
 
     def is_off(self) -> bool:
         """Test value against off-value"""
-        return True if self.value == OnOffValue.OFF else False
+        return self.value == OnOffValue.OFF
 
     def __str__(self):
         return self.value

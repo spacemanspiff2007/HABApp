@@ -83,36 +83,44 @@ class ValueMode(BaseMode):
 
         :param value: new value
         :param only_on_change: will set/enable the mode only if value differs or the mode is disabled
+        :returns: False if the value was not set, True otherwise
         """
 
         # Possibility to set the mode only on change
-        if only_on_change and self.__enabled and self.__value == value:
-            return None
+        if only_on_change:
+            change = value != self.__value
+
+            # If we set the same value and the mode is disabled we enable it which counts as a change
+            if not change and self.__enable_on_value and not self.__enabled:
+                change = True
+
+            if not change:
+                return False
 
         self.__value = value
         self.last_update = datetime.now()
 
-        if self.__enable_on_value is True and self.__value is not None:
+        if self.__enable_on_value and self.__value is not None:
             self.__enabled = True
 
         if self.logger is not None:
             self.logger.info(f'[{"x" if self.__enabled else " "}] {self.name}: {self.__value}')
 
         self.parent.calculate_value()
-        return None
+        return True
 
-    def set_enabled(self, value: bool, only_on_change: bool = False):
+    def set_enabled(self, value: bool, only_on_change: bool = False) -> bool:
         """Enable or disable this value and recalculate overall value
 
         :param value: True/False
         :param only_on_change: enable only on change
-        :return:
+        :return: True if the value was set else False
         """
         assert isinstance(value, bool), value
 
         # Possibility to enable/disable only on change
-        if only_on_change and value == self.__enabled:
-            return None
+        if only_on_change and (value == self.__value or not self.__enabled):
+            return False
 
         self.__enabled = value
         self.last_update = datetime.now()
@@ -121,7 +129,7 @@ class ValueMode(BaseMode):
             self.logger.info(f'[{"x" if self.__enabled else " "}] {self.name}')
 
         self.parent.calculate_value()
-        return None
+        return True
 
     def calculate_lower_priority_value(self) -> typing.Any:
         # Trigger recalculation, this way we keep the output of MultiModeValue synchronized

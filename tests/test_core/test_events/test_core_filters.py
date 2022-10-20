@@ -3,7 +3,7 @@ import pytest
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.events.filter import EventFilter, ValueChangeEventFilter, ValueUpdateEventFilter, NoEventFilter, \
     OrFilterGroup, AndFilterGroup
-from tests.helpers import check_class_annotations
+from tests.helpers.inspect import check_class_annotations
 
 
 def test_class_annotations():
