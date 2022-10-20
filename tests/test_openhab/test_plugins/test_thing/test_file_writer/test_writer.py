@@ -81,9 +81,7 @@ def test_write_no_exist():
     assert writer.create_file(file)
 
 
-def test_write_content_different():
-    file = MyStringIO(get_result() + 'asdf')
-    file.exists = True
+def test_write_no_empty_file():
 
-    writer = ItemsFileWriter().add_items(get_test_objs())
-    assert writer.create_file(file)
+    writer = ItemsFileWriter().add_items([])
+    assert not writer.create_file(None)

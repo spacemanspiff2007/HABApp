@@ -345,7 +345,7 @@ Something similar is available for openHAB items (``oh_post_update_if``)
                self.my_item.post_value('Test')
 
             # ... is equivalent to
-            self.my_item.pos_value_if('Test', not_equal='overwrite value')
+            self.my_item.post_value_if('Test', not_equal='overwrite value')
 
 
             # This construct
@@ -353,7 +353,7 @@ Something similar is available for openHAB items (``oh_post_update_if``)
                self.my_item.post_value('Test')
 
             # ... is equivalent to
-            self.my_item.pos_value_if('Test', equal='overwrite value')
+            self.my_item.post_value_if('Test', equal='overwrite value')
 
 
     MyFirstRule()
