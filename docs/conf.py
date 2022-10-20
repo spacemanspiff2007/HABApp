@@ -203,6 +203,17 @@ epub_exclude_files = ['search.html']
 add_module_names = False
 python_use_unqualified_type_names = True
 
+# -- nitpick configuration -------------------------------------------------
+nitpick_ignore = [
+    ('py:data', 'Ellipsis')
+]
+
+nitpick_ignore_regex = [
+    (re.compile(r'py:data|py:class'), re.compile(r'typing\..+')),
+    (re.compile(r'py:class'), re.compile(r'(?:datetime|pendulum|aiohttp|pathlib)\..+'))
+]
+
+
 # -- Extension configuration -------------------------------------------------
 exec_code_working_dir = '../src'
 exec_code_source_folders = ['../src', '../tests']
@@ -227,6 +238,8 @@ autodoc_pydantic_model_show_field_summary = False
 autodoc_pydantic_field_show_alias = False
 autodoc_pydantic_field_list_validators = False
 autodoc_pydantic_field_swap_name_and_alias = True
+
+
 
 
 # ----------------------------------------------------------------------------------------------------------------------
