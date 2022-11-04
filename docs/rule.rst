@@ -262,10 +262,15 @@ All functions return an instance of ScheduledCallbackBase
    :inherited-members:
 
 
-Running external tools
+
+
+Other tools and scripts
 ------------------------------
+
+Running tools
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 External tools can be run with the :meth:`~HABApp.Rule.execute_subprocess` function.
-Once the process has finished the callback will be called with an :class:`~HABApp.rule.FinishedProcessInfo` instance as first argument.
+Once the process has finished the callback will be called with the captured output of the process.
 Example::
 
     import HABApp
@@ -275,20 +280,42 @@ Example::
         def __init__(self):
             super().__init__()
 
-            self.execute_subprocess( self.func_when_finished, 'path_to_program', 'arg1', capture_output=True)
+            self.execute_subprocess( self.func_when_finished, 'path_to_program', 'arg1_for_program')
 
-        def func_when_finished(self, process_info):
-            assert isinstance(process_info, HABApp.rule.FinishedProcessInfo)
-            print(process_info)
+        def func_when_finished(self, process_output: str):
+            print(process_output)
 
     MyExecutionRule()
 
 
+Running python scripts or modules
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Python scripts can be run with the :meth:`~HABApp.Rule.execute_python` function.
+Once the script or module has finished the callback will be called with the captured output of the module/script.
+Example::
+
+    import HABApp
+
+    class MyExecutionRule(HABApp.Rule):
+
+        def __init__(self):
+            super().__init__()
+
+            self.execute_python( self.func_when_finished, '/path/to/python/script.py', 'arg1_for_script')
+
+        def func_when_finished(self, module_output: str):
+            print(module_output)
+
+    MyExecutionRule()
+
+
+FinishedProcessInfo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+It's possible to get the raw process output instead of just the captured string. See
+:meth:`~HABApp.Rule.execute_subprocess` or :meth:`~HABApp.Rule.execute_python` on how to enable it.
+
 .. autoclass:: HABApp.rule.FinishedProcessInfo
 
-   :var int returncode: Return code of the process (0: IO, -1: Exception while starting process)
-   :var str stdout: Standard output of the process or None
-   :var str stderr: Error output of the process or None
 
 How to properly use rules from other rule files
 -------------------------------------------------
