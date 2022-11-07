@@ -55,6 +55,9 @@ class Column:
             self.width = max(self.width, len(str(k)))
         self.entries.append(tuple(_res))
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}'
+
 
 class Table:
     def __init__(self, heading: str = ''):
