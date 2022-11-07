@@ -3,6 +3,9 @@
 from json import loads, dumps
 
 
+INCLUDE_CHANNELS = False
+
+
 to_prettify = ''
 
 
@@ -26,7 +29,7 @@ def load_obj(obj):
             new_obj[key] = load_obj(obj)
 
         # replace channel with an empty list
-        if (channels := new_obj.get('channels')) is not None:
+        if not INCLUDE_CHANNELS and (channels := new_obj.get('channels')) is not None:
             channels.clear()
             channels.append('...')
 

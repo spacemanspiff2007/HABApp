@@ -277,7 +277,7 @@ class Rule(ContextProvidingObj):
             if type is None:
                 type = OpenhabItem
             if not issubclass(type, OpenhabItem):
-                raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its Subclasses')
+                raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its subclasses')
 
         ret = []
         for item in item_registry.get_items():  # type: HABApp.core.items.BaseItem
