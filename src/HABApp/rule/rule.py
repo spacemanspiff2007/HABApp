@@ -214,7 +214,7 @@ class Rule(ContextProvidingObj):
             if not p.is_absolute():
                 p = (CONFIG._file_path.parent / p).resolve()
 
-            new_args.insert(0, module_or_package)
+            new_args.insert(0, p)
 
             # set parent folder as working directory for python script
             if 'cwd' not in kwargs:
