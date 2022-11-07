@@ -13,8 +13,7 @@ def load_str(in_str):
     if not isinstance(in_str, str):
         return in_str
 
-    if in_str.startswith('[') and in_str.endswith(']') or \
-        in_str.startswith('{') and in_str.endswith('}'):
+    if in_str.startswith('[') and in_str.endswith(']') or in_str.startswith('{') and in_str.endswith('}'):
         return loads(in_str)
     return in_str
 
