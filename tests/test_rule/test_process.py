@@ -7,6 +7,7 @@ from unittest.mock import Mock
 
 import pytest
 
+import HABApp.rule
 from HABApp.rule import Rule, FinishedProcessInfo
 from HABApp.rule.interfaces import rule_subprocess
 from ..rule_runner import SimpleRuleRunner
@@ -31,6 +32,9 @@ def rule():
     runner.tear_down()
 
 
+SLEEP_PROCESS_START = 0.3
+
+
 @pytest.mark.no_internals
 async def test_run_func_arg_errors(rule):
     with pytest.raises(ValueError) as e:
@@ -52,7 +56,7 @@ async def test_run_func(rule, flag, result):
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=True, raw_info=flag
     )
 
-    await asyncio.sleep(1)
+    await asyncio.sleep(SLEEP_PROCESS_START)
     rule.cb.assert_called_once_with(result)
 
 
@@ -63,7 +67,7 @@ async def test_run_func_no_cap(rule, flag: bool, result):
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False, raw_info=flag
     )
 
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(SLEEP_PROCESS_START)
     rule.cb.assert_called_once_with(FinishedProcessInfo(0, None, None))
 
 
@@ -74,10 +78,11 @@ async def test_run_func_cancel(rule, flag, result):
     task = rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import time; time.sleep(5)', capture_output=False, raw_info=flag
     )
+    await asyncio.sleep(SLEEP_PROCESS_START)
 
-    await asyncio.sleep(0.2)
     task.cancel()
 
+    await asyncio.sleep(SLEEP_PROCESS_START)
     rule.cb.assert_not_called()
 
 
@@ -85,7 +90,7 @@ async def test_run_func_cancel(rule, flag, result):
 @pytest.mark.no_internals
 async def test_invalid_program(rule, caplog, flag):
     rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(SLEEP_PROCESS_START)
 
     err_count = 0
     for c in caplog.records:
@@ -102,9 +107,10 @@ async def test_invalid_program(rule, caplog, flag):
 @pytest.mark.no_internals
 async def test_exec_python_file(rule, caplog, raw_info):
     parent_dir = Path(__file__).parent
-    rule.execute_python(rule.cb, parent_dir / '__exec_python_file.py', capture_output=True, raw_info=raw_info)
 
-    await asyncio.sleep(0.5)
+    rule.execute_python(rule.cb, parent_dir / '__exec_python_file.py', capture_output=True, raw_info=raw_info)
+    await asyncio.sleep(SLEEP_PROCESS_START)
+
     rule.cb.assert_called_once()
     ret = rule.cb.call_args[0][0]
 
@@ -119,13 +125,26 @@ async def test_exec_python_file(rule, caplog, raw_info):
 
 
 @pytest.mark.no_internals
+async def test_exec_python_file_relative(rule, monkeypatch):
+    parent_dir = Path(__file__).parent
+
+    monkeypatch.setattr(HABApp.rule.rule.CONFIG, '_file_path', parent_dir / 'config.yml')
+
+    rule.execute_python(rule.cb, '__exec_python_file.py', capture_output=True)
+    await asyncio.sleep(SLEEP_PROCESS_START)
+
+    rule.cb.assert_called_once()
+    _json = loads(rule.cb.call_args[0][0])
+    assert _json['cwd'] == str(parent_dir)
+
+
+@pytest.mark.no_internals
 async def test_exec_python_file_error(rule, caplog):
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
 
     rule.execute_python(rule.cb, file, 'show_err', capture_output=True, additional_python_path=[folder])
-
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(SLEEP_PROCESS_START)
 
     assert list(caplog.messages)[-4] == 'Process returned 1!'
     assert list(caplog.messages)[-2:] == [
@@ -135,7 +154,7 @@ async def test_exec_python_file_error(rule, caplog):
     rule.cb.assert_not_called()
 
     rule.execute_python(rule.cb, file, 'exit_3', capture_output=True, additional_python_path=[folder])
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(SLEEP_PROCESS_START)
 
     assert list(caplog.messages)[-4] == 'Process returned 3!'
     assert list(caplog.messages)[-2:] == [
@@ -151,8 +170,8 @@ async def test_exec_python_module(rule, raw_info, result):
     folder = Path(__file__).parent
     rule.execute_python(
         rule.cb, '__exec_python_module', capture_output=True, additional_python_path=[folder], raw_info=raw_info)
+    await asyncio.sleep(SLEEP_PROCESS_START)
 
-    await asyncio.sleep(0.5)
     rule.cb.assert_called_once_with(result)
 
 

@@ -6,7 +6,7 @@ from typing import Optional, Union, Iterable, Any, Tuple, Dict, List, Callable
 
 from typing_extensions import TypeAlias
 
-from HABApp.core.logger import HABAppError
+from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.core.wrapper import process_exception
 
 log = logging.getLogger('HABApp.execute')
@@ -124,9 +124,8 @@ async def async_subprocess_exec(callback, *args, calling_func, raw_info: bool, *
             if proc is not None:
                 proc.terminate()
 
-            # Maybe it makes sense to just log this instead of passing it to the callback?
-            ret_code = -2
-            stdout = 'Task cancelled'
+            HABAppWarning(log=log).add(f'Subprocess canceled! Call: {call_str}').dump()
+            return None
 
     except Exception as e:
         HABAppError(log=log).add(f'Creating subprocess failed! Call: {call_str}').dump()
