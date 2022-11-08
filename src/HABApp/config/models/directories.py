@@ -51,7 +51,7 @@ class DirectoriesConfig(BaseModel):
             self.logging.mkdir()
 
         if not self.param.is_dir():
-            log.info(f'Textual thing config disabled! Folder {self.param} does not exist!')
+            log.info(f'Parameters disabled! Folder {self.param} does not exist!')
             self.param = None
 
         if not self.config.is_dir():

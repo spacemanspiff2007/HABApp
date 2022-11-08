@@ -317,5 +317,6 @@ async def async_set_habapp_metadata(item: str, obj):
 
 
 async def async_get_item_with_habapp_meta(item: str) -> dict:
-    data = await async_get_item(item, metadata='HABApp')
+    data = await async_get_item(item, all_metadata=True)
+    data['groups'] = data.pop('groupNames')
     return load_habapp_meta(data)

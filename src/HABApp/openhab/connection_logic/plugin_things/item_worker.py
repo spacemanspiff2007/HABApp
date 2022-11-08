@@ -40,7 +40,7 @@ async def cleanup_items(keep_items: Set[str]):
 
 
 async def _remove_item(item: str, data: HABAppThingPluginData):
-    # remove created link
+    # remove created links
     if data.created_link is not None:
         log.debug(f'Removing link from {data.created_link} to {item}')
         await async_remove_channel_link(data.created_link, item)
@@ -127,6 +127,13 @@ async def create_item(item: UserItem, test: bool) -> bool:
 
         # create new
         for ns, meta_cfg in item.metadata.items():
+            existing_cfg = existing_item.get('metadata', {}).get(ns, {})
+            if 'config' not in existing_cfg:
+                existing_cfg['config'] = {}
+            if existing_cfg == meta_cfg:
+                log.debug(f'Metadata for {name} is already correct')
+                continue
+
             m_val = meta_cfg['value']
             m_config = meta_cfg['config']
             log.debug(f'Adding metadata {ns} to {name}: {m_val} {m_config}')

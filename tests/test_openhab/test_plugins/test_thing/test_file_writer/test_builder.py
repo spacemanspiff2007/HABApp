@@ -56,6 +56,13 @@ def test_link_formatter():
     f = b.create_formatter(TestData)
     assert f.value == 'channel = "my:link",'
 
+    class TestData:
+        link = None
+        metadata = {'key': 'value'}
+
+    f = b.create_formatter(TestData)
+    assert f.value == ''
+
 
 def test_metadata_formatter():
     b = MetadataFormatter()
