@@ -117,8 +117,19 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.0.6 (08.11.2022)
+- Added log message if item for ping does not exist
+- Added ``execute_python`` and reworked ``execute_subprocess``:
+  HABApp will now by default pass only the captured output as a str into the callback.
+- Reworked ``Thing`` handling
+
 #### 1.0.5 (20.10.2022)
 - Added new item function ``post_value_if`` and ``oh_post_update_if`` to conditionally update an item
+- Added support for new alive event with openHAB 3.4
+- Reworked file writer for textual thing config
+- Added support for ThingConfigStatusInfoEvent
+- MultiModeValue returns True/False if item value was changed
+- Updated dependencies
 
 #### 1.0.4 (25.08.2022)
 - New RGB & HSB datatype for simpler color handling

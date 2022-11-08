@@ -72,6 +72,13 @@ def log_overview(data: List[dict], aliases: Dict[str, str], heading=''):
     for k in aliases:
         table.add_column(k, align='<')
     for _item in data:
-        table.add_dict({k: _item.get(alias, '') for k, alias in aliases.items()})
+        add = {}
+        for k, alias in aliases.items():
+            v = _item.get(alias, '')
+            # sometimes the key is there but the value is None
+            if v is None:
+                v = ''
+            add[k] = v
+        table.add_dict(add)
     for line in table.get_lines(sort_columns=['thing_type'] if 'thing_type' in table.columns else None):
         log.info(line)

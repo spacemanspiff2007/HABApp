@@ -47,7 +47,7 @@ def use_dummy_cfg(monkeypatch):
     monkeypatch.setattr(HABApp, 'CONFIG', cfg)
     monkeypatch.setattr(HABApp.config, 'CONFIG', cfg)
     monkeypatch.setattr(HABApp.config.config, 'CONFIG', cfg)
-    yield
+    yield cfg
 
 
 @pytest.fixture(autouse=True, scope='session')

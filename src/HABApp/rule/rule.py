@@ -1,7 +1,9 @@
 import logging
 import re
+import sys
 import warnings
-from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List
+from pathlib import Path
+from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal
 
 import HABApp
 import HABApp.core
@@ -17,6 +19,8 @@ from HABApp.core.items import BaseItem, HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseV
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
 from .interfaces import async_subprocess_exec
+from .interfaces.rule_subprocess import build_exec_params, HINT_PYTHON_PATH, HINT_EXEC_ARGS, HINT_PROCESS_CB_SIMPLE, \
+    HINT_PROCESS_CB_FULL
 from .rule_hook import get_rule_hook as _get_rule_hook
 
 log = logging.getLogger('HABApp.Rule')
@@ -123,22 +127,110 @@ class Rule(ContextProvidingObj):
         listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
         return self._habapp_ctx.add_event_listener(listener)
 
-    def execute_subprocess(self, callback: HINT_EVENT_CALLBACK, program, *args, capture_output=True):
+    @overload
+    def execute_subprocess(self, callback: HINT_PROCESS_CB_SIMPLE, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
+                           additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
+                           raw_info: Literal[False], **kwargs):
+        ...
+
+    @overload
+    def execute_subprocess(self, callback: HINT_PROCESS_CB_FULL, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
+                           additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
+                           raw_info: Literal[True], **kwargs):
+        ...
+
+    def execute_subprocess(self, callback, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
+                           additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
+                           raw_info: bool = False, **kwargs):
         """Run another program
 
-        :param callback: |param_scheduled_cb| after process has finished. First parameter will
-                         be an instance of :class:`~HABApp.rule.FinishedProcessInfo`
-        :param program: program or path to program to run
-        :param args: |param_scheduled_cb_args|
-        :param capture_output: Capture program output, set to `False` to only capture return code
+        :param callback: Function that will be called when the process has finished.
+                         First parameter takes a :class:`str` when :attr:`raw_info` is ``False`` (default) else
+                         an instance of :class:`~HABApp.rule.FinishedProcessInfo`
+        :param program: python module (path to file) or python package
+        :param args: arguments passed to the module or to package
+        :param raw_info: ``False``: Return only the textual process output.
+                         In case of failure (return code != 0) a log entry and an error event will be created.
+                         This is the default and should be fine for almost all use cases.
+
+                         ``True``: The callback will always be called with an
+                         instance of :class:`~HABApp.rule.FinishedProcessInfo`.
+        :param capture_output: Capture program output, set to ``False`` to only capture the return code
+        :param additional_python_path: additional folders which will be added to the env variable ``PYTHONPATH``
         :return:
         """
 
-        assert isinstance(program, str), type(program)
         cb = wrap_func(callback, context=self._habapp_ctx)
 
-        create_task(
-            async_subprocess_exec(cb.run, program, *args, capture_output=capture_output),
+        call_args, call_kwargs = build_exec_params(
+            program, *args, _capture_output=capture_output, _additional_python_path=additional_python_path, **kwargs
+        )
+        return create_task(
+            async_subprocess_exec(
+                cb.run, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
+        )
+
+    @overload
+    def execute_python(self, callback: HINT_PROCESS_CB_SIMPLE, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
+                       additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
+                       raw_info: Literal[False], **kwargs):
+        ...
+
+    @overload
+    def execute_python(self, callback: HINT_PROCESS_CB_FULL, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
+                       additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
+                       raw_info: Literal[True], **kwargs):
+        ...
+
+    def execute_python(self, callback, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
+                       additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
+                       raw_info: bool = False, **kwargs):
+        """Run a python module or package as a new process. The python environment that is used to run HABApp will be
+        to run the module or package.
+
+        :param callback: Function that will be called when the process has finished.
+                         First parameter takes a :class:`str` when :attr:`raw_info` is ``False`` (default) else
+                         an instance of :class:`~HABApp.rule.FinishedProcessInfo`
+        :param module_or_package: python module (path to file) or python package (just the name)
+        :param args: arguments passed to the module or to package
+        :param raw_info: ``False``: Return only the textual process output.
+                         In case of failure (return code != 0) a log entry and an error event will be created.
+                         This is the default and should be fine for almost all use cases.
+
+                         ``True``: The callback will always be called with an
+                         instance of :class:`~HABApp.rule.FinishedProcessInfo`.
+        :param capture_output: Capture program output, set to ``False`` to only capture the return code
+        :param additional_python_path: additional folders which will be added to the env variable ``PYTHONPATH``
+        :return:
+        """
+
+        new_args = list(args)
+
+        p = Path(module_or_package)
+        if p.suffix.lower() == '.py':
+            # if it's a relative path make it relative to the config
+            if not p.is_absolute():
+                p = (HABApp.CONFIG._file_path.parent / p).resolve()
+
+            new_args.insert(0, p)
+
+            # set parent folder as working directory for python script
+            if 'cwd' not in kwargs:
+                kwargs['cwd'] = p.parent
+        else:
+            new_args.insert(0, module_or_package)
+            new_args.insert(0, '-m')
+
+        cb = wrap_func(callback, context=self._habapp_ctx)
+        call_args, call_kwargs = build_exec_params(
+            sys.executable, *new_args,
+            _capture_output=capture_output, _additional_python_path=additional_python_path,
+            **kwargs
+        )
+
+        return create_task(
+            async_subprocess_exec(
+                cb.run, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
         )
 
     def get_rule(self, rule_name: str) -> 'Union[Rule, List[Rule]]':
@@ -183,7 +275,7 @@ class Rule(ContextProvidingObj):
             if type is None:
                 type = OpenhabItem
             if not issubclass(type, OpenhabItem):
-                raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its Subclasses')
+                raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its subclasses')
 
         ret = []
         for item in item_registry.get_items():  # type: HABApp.core.items.BaseItem

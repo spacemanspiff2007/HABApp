@@ -8,7 +8,7 @@ from HABApp.core.const.json import load_json, dump_json
 from HABApp.core.lib import format_exception
 from easyconfig import create_app_config
 from tests.helpers.traceback import remove_dyn_parts_from_traceback
-from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, skip_file
+from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_lib_file, is_habapp_file
 from pathlib import Path
 
 log = logging.getLogger('TestLogger')
@@ -160,12 +160,13 @@ def test_habapp_regex(pytestconfig):
 
 def test_regex(pytestconfig):
 
-    assert not skip_file('/lib/habapp/asdf')
-    assert not skip_file('/lib/HABApp/asdf')
-    assert not skip_file('/HABApp/core/lib/asdf')
-    assert not skip_file('/HABApp/core/lib/asdf/asdf')
+    assert not is_habapp_file('/lib/habapp/asdf')
+    assert not is_habapp_file('/lib/HABApp/asdf')
+    assert not is_habapp_file('/HABApp/core/lib/asdf')
+    assert not is_habapp_file('/HABApp/core/lib/asdf/asdf')
 
-    assert skip_file(r'\Python310\lib\runpy.py')
-    assert skip_file(r'/usr/lib/python3.10/runpy.py')
-    assert skip_file(r'/opt/habapp/lib/python3.8/site-packages/aiohttp/client.py')
-    assert skip_file(r'\Python310\lib\asyncio\tasks.py')
+    assert is_lib_file(r'\Python310\lib\runpy.py')
+    assert is_lib_file(r'/usr/lib/python3.10/runpy.py')
+    assert is_lib_file(r'/opt/habapp/lib/python3.8/site-packages/aiohttp/client.py')
+    assert is_lib_file(r'\Python310\lib\asyncio\tasks.py')
+    assert is_lib_file(r'\Python310\lib\subprocess.py')

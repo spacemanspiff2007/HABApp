@@ -76,7 +76,8 @@ def on_sse_event(event_dict: dict):
 
         # Events that add things to the item registry
         if isinstance(event, ThingAddedEvent):
-            create_task(thing_event(event))
+            add_thing_to_registry(event)
+            post_event(TOPIC_THINGS, event)
             return None
 
         # Events that remove things from the item registry
@@ -105,13 +106,4 @@ async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
     add_to_registry(new_item)
     # Send Event to Event Bus
     post_event(TOPIC_ITEMS, event)
-    return None
-
-
-async def thing_event(event: ThingAddedEvent):
-    # Since the thing status is not part of the event we have to request ist
-    add_thing_to_registry(await HABApp.openhab.interface_async.async_get_thing(event.name))
-
-    # Send Event to Event Bus
-    post_event(TOPIC_THINGS, event)
     return None

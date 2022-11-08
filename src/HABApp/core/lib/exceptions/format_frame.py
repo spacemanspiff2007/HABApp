@@ -17,6 +17,9 @@ SUPPRESSED_HABAPP_PATHS = (
 
     # Worker functions
     re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]wrapped_function[/\\]'),
+
+    # Item registry
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]item_registry[/\\]'),
 )
 
 SUPPRESSED_PATHS = (
@@ -27,8 +30,15 @@ SUPPRESSED_PATHS = (
 )
 
 
-def skip_file(name: str) -> bool:
-    for r in (SUPPRESSED_HABAPP_PATHS if '/HABApp/' in name or '\\HABApp\\' in name else SUPPRESSED_PATHS):
+def is_habapp_file(name: str) -> bool:
+    for r in SUPPRESSED_HABAPP_PATHS:
+        if r.search(name):
+            return True
+    return False
+
+
+def is_lib_file(name: str) -> bool:
+    for r in SUPPRESSED_PATHS:
         if r.search(name):
             return True
     return False
@@ -37,7 +47,11 @@ def skip_file(name: str) -> bool:
 def format_frame_info(tb: List[str], frame_info: FrameInfo, is_last=False) -> bool:
     filename = frame_info.filename
 
-    if not is_last and skip_file(filename):
+    # always skip system and python libraries
+    if is_lib_file(filename):
+        return False
+
+    if not is_last and is_habapp_file(filename):
         return False
 
     # calc max line nr for indentation

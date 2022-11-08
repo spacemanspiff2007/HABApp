@@ -1,6 +1,7 @@
 import ast
 from inspect import ismodule, isclass
 from typing import List, Tuple, Callable, Any, Set, TypeVar
+from pathlib import Path
 
 from immutables import Map
 from stack_data import Variable
@@ -16,15 +17,15 @@ def _filter_expressions(name: str, value: Any) -> bool:
         return True
 
     # These types show no explicit types
-    skipped_types = (type(None), str, float, int, list, dict, set, frozenset, Map)
+    skipped_types = (type(None), str, float, int, list, dict, set, frozenset, Map, Path, bytes)
 
     # type(b) = <class 'NoneType'>
     if name.startswith('type(') and value in skipped_types:
         return True
 
-    # (str, int) = (<class 'str'>, <class 'int'>)
-    if name.startswith('(') and name.endswith(')') and isinstance(value, tuple) and all(
-            map(lambda x: x in skipped_types, value)):
+    # (str, int, bytes) = (<class 'str'>, <class 'int'>)
+    # str, int = (<class 'str'>, <class 'int'>)
+    if isinstance(value, tuple) and all(map(lambda x: x in skipped_types, value)):
         return True
 
     return False

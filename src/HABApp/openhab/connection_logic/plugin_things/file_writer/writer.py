@@ -94,6 +94,10 @@ class ItemsFileWriter:
 
         output = self.generate()
 
+        # don't create empty files
+        if not output:
+            return False
+
         # only write changes
         if file.is_file():
             existing = file.read_text('utf-8')
