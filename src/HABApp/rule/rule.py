@@ -10,7 +10,6 @@ import HABApp.core
 import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.config import CONFIG
 from HABApp.core.asyncio import create_task
 from HABApp.core.const.hints import HINT_EVENT_CALLBACK
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextProvidingObj, \
@@ -161,7 +160,6 @@ class Rule(ContextProvidingObj):
         :return:
         """
 
-        assert isinstance(program, str), type(program)
         cb = wrap_func(callback, context=self._habapp_ctx)
 
         call_args, call_kwargs = build_exec_params(
@@ -212,7 +210,7 @@ class Rule(ContextProvidingObj):
         if p.suffix.lower() == '.py':
             # if it's a relative path make it relative to the config
             if not p.is_absolute():
-                p = (CONFIG._file_path.parent / p).resolve()
+                p = (HABApp.CONFIG._file_path.parent / p).resolve()
 
             new_args.insert(0, p)
 

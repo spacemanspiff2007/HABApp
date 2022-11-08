@@ -21,7 +21,9 @@ class ProcRule(Rule):
 
 
 @pytest.fixture(scope="function")
-def rule():
+def rule(monkeypatch):
+    monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__).with_name('config.yml'))
+
     runner = SimpleRuleRunner()
     runner.set_up()
 
@@ -89,6 +91,7 @@ async def test_run_func_cancel(rule, flag, result):
 @pytest.mark.parametrize('flag', [True, False])
 @pytest.mark.no_internals
 async def test_invalid_program(rule, caplog, flag):
+    parent_dir = Path(__file__).parent
     rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
     await asyncio.sleep(SLEEP_PROCESS_START)
 
@@ -97,7 +100,9 @@ async def test_invalid_program(rule, caplog, flag):
         if c.levelno >= logging.ERROR:
             err_count += 1
 
-    assert caplog.records[0].getMessage() == 'Creating subprocess failed! Call: "ProgramThatDoesNotExist"'
+    assert caplog.records[0].getMessage() == 'Creating subprocess failed!'
+    assert caplog.records[1].getMessage() == '  Call: "ProgramThatDoesNotExist"'
+    assert caplog.records[2].getMessage() == f'  Working dir: {parent_dir}'
 
     assert err_count > 7
     rule.cb.assert_not_called()
@@ -125,10 +130,8 @@ async def test_exec_python_file(rule, caplog, raw_info):
 
 
 @pytest.mark.no_internals
-async def test_exec_python_file_relative(rule, monkeypatch):
+async def test_exec_python_file_relative(rule):
     parent_dir = Path(__file__).parent
-
-    monkeypatch.setattr(HABApp.rule.rule.CONFIG, '_file_path', parent_dir / 'config.yml')
 
     rule.execute_python(rule.cb, '__exec_python_file.py', capture_output=True)
     await asyncio.sleep(SLEEP_PROCESS_START)
@@ -177,6 +180,7 @@ async def test_exec_python_module(rule, raw_info, result):
 
 @pytest.mark.no_internals
 def test_param_pythonpath(monkeypatch):
+    monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__))
     folder = str(Path(__file__).parent)
 
     env = {}

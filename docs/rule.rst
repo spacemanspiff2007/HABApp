@@ -266,6 +266,8 @@ All functions return an instance of ScheduledCallbackBase
 
 Other tools and scripts
 ------------------------------
+HABApp provides convenience functions to run other tools and scripts. The working directory for the
+new process is by default the folder of the HABApp configuration file.
 
 Running tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -291,6 +293,7 @@ Example::
 Running python scripts or modules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Python scripts can be run with the :meth:`~HABApp.Rule.execute_python` function.
+The working directory for a script is by default the folder of the script.
 Once the script or module has finished the callback will be called with the captured output of the module/script.
 Example::
 

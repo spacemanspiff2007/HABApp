@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Set, Tuple, TYPE_CHECKING
+from typing import Dict, Set, Tuple, TYPE_CHECKING, Union
 
 from immutables import Map
 
@@ -81,34 +81,39 @@ def get_members(group_name: str) -> Tuple['HABApp.openhab.items.OpenhabItem', ..
 # ----------------------------------------------------------------------------------------------------------------------
 # Thing handling
 # ----------------------------------------------------------------------------------------------------------------------
-def add_thing_to_registry(thing: 'HABApp.openhab.definitions.rest.OpenhabThingDefinition'):
-    name = thing.uid
-    does_exist = Items.item_exists(name)
+def add_thing_to_registry(data: Union['HABApp.openhab.definitions.rest.OpenhabThingDefinition',
+                                      'HABApp.openhab.events.thing_events.ThingAddedEvent']):
 
-    # update existing
-    if does_exist:
-        existing = Items.get_item(name)  # type: HABApp.openhab.items.Thing
+    if isinstance(data, HABApp.openhab.events.thing_events.ThingAddedEvent):
+        name = data.name
+        status: str = 'UNINITIALIZED'
+        status_detail: str = 'NONE'
+    elif isinstance(data, HABApp.openhab.definitions.rest.OpenhabThingDefinition):
+        name = data.uid
+        status = data.status.status
+        status_detail = data.status.detail
+    else:
+        raise ValueError()
+
+    if Items.item_exists(name):
+        existing = Items.get_item(name)
         if isinstance(existing, HABApp.openhab.items.Thing):
-            existing.status = thing.status.status
-            existing.status_detail = thing.status.detail
-            return None
+            new_thing = existing
+        else:
+            # Replace existing item with the correct type
+            new_thing = HABApp.openhab.items.Thing(name=name)
+            log_warning(log, f'Item type changed from {existing.__class__} to {new_thing.__class__}')
+            Items.pop_item(name)
+    else:
+        new_thing = HABApp.openhab.items.Thing(name=name)
 
-    # create new Thing
-    new_thing = HABApp.openhab.items.Thing(name=name)
-    new_thing.status        = thing.status.status
-    new_thing.status_detail = thing.status.detail
-    new_thing.label         = thing.label
-    new_thing.configuration = Map(thing.configuration)
-    new_thing.properties    = Map(thing.properties)
-
-    if not does_exist:
-        Items.add_item(new_thing)
-        return None
-
-    # Replace existing item with the updated definition
-    log_warning(log, f'Item type changed from {existing.__class__} to {thing.__class__}')
-    Items.pop_item(name)
+    new_thing.status = status
+    new_thing.status_detail = status_detail
+    new_thing.label = data.label
+    new_thing.configuration = Map(data.configuration)
+    new_thing.properties = Map(data.properties)
     Items.add_item(new_thing)
+    return None
 
 
 def remove_thing_from_registry(name: str):

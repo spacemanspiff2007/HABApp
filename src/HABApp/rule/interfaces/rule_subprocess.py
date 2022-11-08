@@ -6,6 +6,7 @@ from typing import Optional, Union, Iterable, Any, Tuple, Dict, List, Callable
 
 from typing_extensions import TypeAlias
 
+import HABApp
 from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.core.wrapper import process_exception
 
@@ -68,6 +69,10 @@ def build_exec_params(*args: HINT_EXEC_ARGS,
         env['PYTHONPATH'] = os.pathsep.join(ppath)
         kwargs['env'] = env
 
+    # set config folder as working directory
+    if 'cwd' not in kwargs:
+        kwargs['cwd'] = HABApp.CONFIG._file_path.parent
+
     return _ensure_str_objs(args, 'args'), kwargs
 
 
@@ -128,7 +133,8 @@ async def async_subprocess_exec(callback, *args, calling_func, raw_info: bool, *
             return None
 
     except Exception as e:
-        HABAppError(log=log).add(f'Creating subprocess failed! Call: {call_str}').dump()
+        HABAppError(log=log).add('Creating subprocess failed!').add(f'  Call: {call_str}').add(
+            f'  Working dir: {kwargs.get("cwd")}').dump()
         process_exception(calling_func, e, logger=log)
         return None
 
