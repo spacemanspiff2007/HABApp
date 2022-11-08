@@ -17,6 +17,9 @@ SUPPRESSED_HABAPP_PATHS = (
 
     # Worker functions
     re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]wrapped_function[/\\]'),
+
+    # Item registry
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]item_registry[/\\]'),
 )
 
 SUPPRESSED_PATHS = (
