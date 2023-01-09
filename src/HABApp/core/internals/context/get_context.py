@@ -1,4 +1,5 @@
 import sys
+from types import FrameType
 from typing import Optional, Union, TYPE_CHECKING
 
 from HABApp.core.errors import ContextNotSetError, ContextNotFoundError
@@ -6,7 +7,6 @@ from HABApp.core.internals.context import ContextProvidingObj, ContextBoundObj, 
 
 if TYPE_CHECKING:
     import HABApp
-    import types
 
 
 def get_current_context(obj: Optional[ContextProvidingObj] = None) -> 'HABApp.rule_ctx.HABAppRuleContext':
@@ -17,7 +17,7 @@ def get_current_context(obj: Optional[ContextProvidingObj] = None) -> 'HABApp.ru
     while True:
         depth += 1
         try:
-            frm = sys._getframe(depth)  # type: types.FrameType
+            frm: FrameType = sys._getframe(depth)
         except ValueError:
             raise ContextNotFoundError() from None
 

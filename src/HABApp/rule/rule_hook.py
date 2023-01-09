@@ -1,10 +1,9 @@
 import sys
+from types import FrameType
 from typing import TYPE_CHECKING, Any, Callable, Final
-
 
 if TYPE_CHECKING:
     import HABApp
-    import types
     import HABApp.rule_manager
 
 _NAME: Final = '__HABAPP__HOOK__'
@@ -45,7 +44,7 @@ def get_rule_hook() -> HABAppRuleHook:
     while True:
         depth += 1
         try:
-            frame = sys._getframe(depth)    # type: types.FrameType
+            frame: FrameType = sys._getframe(depth)
         except ValueError:
             raise RuntimeError('Rule files are not meant to be executed directly! '
                                'Put the file in the HABApp "rule" folder and HABApp will load it automatically.')

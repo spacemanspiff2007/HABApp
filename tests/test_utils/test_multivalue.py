@@ -98,7 +98,7 @@ def test_calculate_lower_priority_value(parent_rule: DummyRule):
 def test_auto_disable_1(parent_rule: DummyRule):
     p = MultiModeItem('TestItem')
     m1 = ValueMode('modea', 50)
-    m2 = ValueMode('modeb', 60, auto_disable_func= lambda l, o: l > o)
+    m2 = ValueMode('modeb', 60, auto_disable_func= lambda lower, o: lower > o)
     p.add_mode(1, m1).add_mode(2, m2)
 
     m1.set_value(50)
