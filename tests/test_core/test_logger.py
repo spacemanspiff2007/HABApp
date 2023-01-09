@@ -1,6 +1,7 @@
-from HABApp.core.logger import HABAppLogger, HABAppError, HABAppInfo, HABAppWarning
 from logging import getLogger
+from unittest.mock import Mock
 
+from HABApp.core.logger import HABAppLogger, HABAppError, HABAppInfo, HABAppWarning
 from tests.helpers import TestEventBus
 
 
@@ -27,6 +28,7 @@ def test_bool(eb: TestEventBus):
 
     for cls in (HABAppError, HABAppInfo, HABAppWarning):
         i = cls(getLogger('test')).add('')
+        i.logger = Mock()
         assert i
         i.dump()
         assert not i

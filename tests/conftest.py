@@ -10,7 +10,8 @@ import tests
 from HABApp.core.asyncio import async_context
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.internals import setup_internals, EventBus, ItemRegistry
-from tests.helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg
+from tests.helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg, LogCollector
+from tests.helpers.log.log_matcher import LogLevelMatcher, AsyncSubprocessExecMatcher
 
 if typing.TYPE_CHECKING:
     parent_rule = parent_rule
@@ -84,17 +85,27 @@ def clean_objs(ir: ItemRegistry, eb: EventBus, request):
         r.restore()
 
 
-@pytest.fixture(scope='function')
-def ensure_no_errors_in_log(caplog):
-    yield
+@pytest.fixture(autouse=True, scope='function')
+def test_logs(caplog, request):
+    caplog.set_level(logging.DEBUG)
 
-    # Check if we have an error
-    for entry in caplog.records:
-        if entry.levelno >= logging.ERROR:
-            break
-    else:
-        return
+    c = LogCollector(caplog)
 
-    for entry in caplog.records:
-        print(entry)
-    assert False
+    # This seems to be an asyncio issue (that a subprocess can block)
+    c.rec_ignored.append(AsyncSubprocessExecMatcher())
+
+    yield c
+
+    additional_ignores: typing.List[LogLevelMatcher] = []
+
+    markers = request.node.own_markers
+    for marker in markers:
+        if marker.name == 'ignore_log_errors':
+            additional_ignores.append(LogLevelMatcher(logging.ERROR))
+        elif marker.name == 'ignore_log_warnings':
+            additional_ignores.append(LogLevelMatcher(logging.WARNING))
+
+    if additional_ignores:
+        c.rec_expected.extend(additional_ignores)
+
+    c.assert_ok()

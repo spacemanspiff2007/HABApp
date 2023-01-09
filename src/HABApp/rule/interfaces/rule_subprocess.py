@@ -132,6 +132,10 @@ async def async_subprocess_exec(callback, *args, calling_func, raw_info: bool, *
             HABAppWarning(log=log).add(f'Subprocess canceled! Call: {call_str}').dump()
             return None
 
+    except FileNotFoundError as e:
+        HABAppError(log=log).add('Creating subprocess failed!').add(f'  Call: {call_str}').add(
+            f'  Working dir: {kwargs.get("cwd")}').add(str(e)).dump()
+        return None
     except Exception as e:
         HABAppError(log=log).add('Creating subprocess failed!').add(f'  Call: {call_str}').add(
             f'  Working dir: {kwargs.get("cwd")}').dump()

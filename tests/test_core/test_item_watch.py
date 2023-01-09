@@ -6,20 +6,24 @@ import pytest
 
 from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
 from HABApp.core.items import Item
+from tests.helpers import LogCollector
 from tests.helpers.parent_rule import DummyRule
 
 
-async def test_multiple_add(parent_rule: DummyRule):
+async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector):
 
     i = Item('test')
     w1 = i.watch_change(5)
     w2 = i.watch_change(5)
 
     assert w1 is w2
-
     w1.fut.cancel()
+
     w2 = i.watch_change(5)
     assert w1 is not w2
+    w2.fut.cancel()
+
+    test_logs.add_ignored('HABApp', 'WARNING', 'Watcher ItemNoChangeWatch (5s) for test has already been created')
 
 
 @pytest.mark.parametrize('method', ('watch_update', 'watch_change'))

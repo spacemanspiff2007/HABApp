@@ -10,6 +10,7 @@ from HABApp.core.files.file.file import FileProperties, HABAppFile
 from HABApp.core.files.folders import add_folder
 from HABApp.core.files.folders.folders import FOLDERS
 from HABApp.core.files.manager import process_file
+from tests.helpers import LogCollector
 
 
 class MockFile:
@@ -133,7 +134,7 @@ async def test_reload_dep(cfg: CfgObj, caplog):
     cfg.operation.clear()
 
 
-async def test_missing_dependencies(cfg: CfgObj, caplog):
+async def test_missing_dependencies(cfg: CfgObj, test_logs: LogCollector):
     cfg.properties['params/param1'] = FileProperties(depends_on=['params/param4', 'params/param5'])
     cfg.properties['params/param2'] = FileProperties(depends_on=['params/param4'])
     cfg.properties['params/param3'] = FileProperties()
@@ -153,8 +154,8 @@ async def test_missing_dependencies(cfg: CfgObj, caplog):
         "File <MockFile param1> depends on files that don't exist: params/param4, params/param5"
     )
 
-    assert msg1 in caplog.record_tuples
-    assert msg2 in caplog.record_tuples
+    test_logs.add_expected(*msg1)
+    test_logs.add_expected(*msg2)
 
 
 # def test_missing_loads(cfg, sync_worker, event_bus: TmpEventBus, caplog):
