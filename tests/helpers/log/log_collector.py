@@ -130,7 +130,7 @@ class LogCollector:
 
         for rec in self.res_records:
             if not self.is_expected_record(rec):
-                pytest.fail(msg='Error in log:\n' + '\n'.join(self.get_messages()))
+                pytest.fail(reason='Error in log:\n' + '\n'.join(self.get_messages()))
 
 
 

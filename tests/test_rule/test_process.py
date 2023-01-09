@@ -89,7 +89,7 @@ async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector):
 
     test_logs.add_expected(
         None, 'WARNING',
-        r'Subprocess canceled! Call: "Z:\Python\HABApp\venv310\Scripts\python.exe" "-c" "import time; time.sleep(5)"'
+        f'Subprocess canceled! Call: "{sys.executable:s}" "-c" "import time; time.sleep(5)"'
     )
 
 
