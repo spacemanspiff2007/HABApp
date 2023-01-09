@@ -1,5 +1,6 @@
 
 import logging
+import re
 from typing import List, Final, Iterable, Union, Optional
 
 from .log_utils import SimpleLogRecord, get_log_level_no, get_log_level_name
@@ -28,10 +29,24 @@ class LogLevelMatcher(LogEntryMatcherBase):
         return f'<{self.__class__.__name__} level={self.level_name}>'
 
 
-class AsyncSubprocessExecMatcher(LogEntryMatcherBase):
+class AsyncDebugWarningMatcher(LogEntryMatcherBase):
+    def __init__(self):
+        self.duration = re.compile(r' took (\d+.\d+) seconds$')
+        self.coro = re.compile(r' coro=<(\w+)\(')
+
     def matches(self, r: SimpleLogRecord):
-        return r.name == 'asyncio' and r.level == logging.WARNING and \
-            'Executing <Task ' in r.msg and ' coro=<async_subprocess_exec() ' in r.msg
+        if r.name != 'asyncio' or r.level != logging.WARNING or 'Executing <' not in r.msg:
+            return False
+
+        if not (m_dur := self.duration.search(r.msg)) or not (m_coro := self.coro.search(r.msg)):
+            return False
+
+        coro = m_coro.group(1)
+        secs = float(m_dur.group(1))
+        if secs < 0.05 or coro == 'async_subprocess_exec' and secs < 0.15:
+            return True
+
+        return False
 
     def __repr__(self):
         return f'<{self.__class__.__name__}>'

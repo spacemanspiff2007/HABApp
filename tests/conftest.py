@@ -11,7 +11,7 @@ from HABApp.core.asyncio import async_context
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.internals import setup_internals, EventBus, ItemRegistry
 from tests.helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg, LogCollector
-from tests.helpers.log.log_matcher import LogLevelMatcher, AsyncSubprocessExecMatcher
+from tests.helpers.log.log_matcher import LogLevelMatcher, AsyncDebugWarningMatcher
 
 if typing.TYPE_CHECKING:
     parent_rule = parent_rule
@@ -92,7 +92,7 @@ def test_logs(caplog, request):
     c = LogCollector(caplog)
 
     # This seems to be an asyncio issue (that a subprocess can block)
-    c.rec_ignored.append(AsyncSubprocessExecMatcher())
+    c.rec_ignored.append(AsyncDebugWarningMatcher())
 
     yield c
 
