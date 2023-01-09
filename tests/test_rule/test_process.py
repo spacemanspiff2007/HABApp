@@ -144,7 +144,7 @@ async def test_exec_python_file_relative(rule):
 
 
 @pytest.mark.no_internals
-async def test_exec_python_file_error(rule, test_logs: LogCollector):
+async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector):
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
 
@@ -160,9 +160,13 @@ async def test_exec_python_file_error(rule, test_logs: LogCollector):
 
     rule.cb.assert_not_called()
 
+
+@pytest.mark.no_internals
+async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector):
+    folder = Path(__file__).parent
+    file = folder / '__exec_python_file.py'
     rule.execute_python(rule.cb, file, 'exit_3', capture_output=True, additional_python_path=[folder])
     await asyncio.sleep(SLEEP_PROCESS_START)
-
 
     test_logs.add_expected(None, 'ERROR', [
         'Process returned 3!',

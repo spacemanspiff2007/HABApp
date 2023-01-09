@@ -1,6 +1,7 @@
 import importlib
 import inspect
 import sys
+import typing
 from typing import Iterable, Optional, Union, Tuple, List, Callable
 
 
@@ -8,7 +9,8 @@ def get_module_classes(module_name: str, /, exclude: Optional[Iterable[Union[str
                        subclass: Union[None, type, Tuple[type, ...]] = None, include_subclass=True):
 
     filters: List[Callable[[type], bool]] = [
-        lambda x: inspect.isclass(x)
+        lambda x: inspect.isclass(x),
+        lambda x: x not in [getattr(typing, name) for name in typing.__all__],
     ]
 
     if not include_imported:
