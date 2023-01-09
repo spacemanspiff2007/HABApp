@@ -1,5 +1,6 @@
 
 import logging
+import os
 import re
 from typing import List, Final, Iterable, Union, Optional
 
@@ -29,6 +30,9 @@ class LogLevelMatcher(LogEntryMatcherBase):
         return f'<{self.__class__.__name__} level={self.level_name}>'
 
 
+IS_CI = os.getenv('CI', 'false') == 'true'  # "true" if we run GitHUB actions
+
+
 class AsyncDebugWarningMatcher(LogEntryMatcherBase):
     def __init__(self):
         self.duration = re.compile(r' took (\d+.\d+) seconds$')
@@ -41,13 +45,18 @@ class AsyncDebugWarningMatcher(LogEntryMatcherBase):
         if not (m_dur := self.duration.search(r.msg)):
             return False
 
+        # GitHub takes longer, we don't want to fail the tests there
+        if IS_CI:
+            return True
+
+        # Coro based timeout
         if m_coro := self.coro.search(r.msg):
             coro = m_coro.group(1)
         else:
             coro = 'NO_CORO'
 
         secs = float(m_dur.group(1))
-        if secs < 0.07 or coro == 'async_subprocess_exec' and secs < 0.15:
+        if secs < 0.03 or coro == 'async_subprocess_exec' and secs < 0.15:
             return True
 
         return False
@@ -64,9 +73,9 @@ class LogEntryMatcher(LogEntryMatcherBase):
         self.msg: Final = msg
 
     def matches(self, r: SimpleLogRecord):
-        return (self.name is None or r.name == self.name) and \
-            (self.level is None or r.level == self.level) and \
-            (self.msg is None or r.msg == self.msg)
+        return (self.name is None or self.name == r.name) and \
+            (self.level is None or self.level == r.level) and \
+            (self.msg is None or self.msg == r.msg)
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name={self.name} level={self.level_name} msg={self.msg}>'
