@@ -2,6 +2,7 @@ import asyncio
 import sys
 from json import loads
 from pathlib import Path
+from time import monotonic
 from unittest.mock import Mock
 
 import pytest
@@ -18,6 +19,15 @@ class ProcRule(Rule):
         super().__init__()
         self.cb = Mock()
         self.cb.__name__ = 'mock_callback'
+
+
+    async def wait(self):
+        start = monotonic()
+        while not self.cb.call_count:
+            if monotonic() - start > 5:
+                raise TimeoutError()
+            await asyncio.sleep(0.5)
+
 
 
 @pytest.fixture(scope="function")
@@ -58,7 +68,7 @@ async def test_run_func(rule, flag, result):
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=True, raw_info=flag
     )
 
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.wait()
     rule.cb.assert_called_once_with(result)
 
 
@@ -69,7 +79,7 @@ async def test_run_func_no_cap(rule, flag: bool, result):
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False, raw_info=flag
     )
 
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.wait()
     rule.cb.assert_called_once_with(FinishedProcessInfo(0, None, None))
 
 
@@ -116,7 +126,7 @@ async def test_exec_python_file(rule, caplog, raw_info):
     parent_dir = Path(__file__).parent
 
     rule.execute_python(rule.cb, parent_dir / '__exec_python_file.py', capture_output=True, raw_info=raw_info)
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.wait()
 
     rule.cb.assert_called_once()
     ret = rule.cb.call_args[0][0]
@@ -136,7 +146,7 @@ async def test_exec_python_file_relative(rule):
     parent_dir = Path(__file__).parent
 
     rule.execute_python(rule.cb, '__exec_python_file.py', capture_output=True)
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.wait()
 
     rule.cb.assert_called_once()
     _json = loads(rule.cb.call_args[0][0])
@@ -183,7 +193,7 @@ async def test_exec_python_module(rule, raw_info, result):
     folder = Path(__file__).parent
     rule.execute_python(
         rule.cb, '__exec_python_module', capture_output=True, additional_python_path=[folder], raw_info=raw_info)
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.wait()
 
     rule.cb.assert_called_once_with(result)
 

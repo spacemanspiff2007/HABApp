@@ -10,6 +10,8 @@ def get_module_classes(module_name: str, /, exclude: Optional[Iterable[Union[str
 
     filters: List[Callable[[type], bool]] = [
         lambda x: inspect.isclass(x),
+
+        # exclude typing classes by default (e.g. Any, Union)
         lambda x: x not in [getattr(typing, name) for name in typing.__all__],
     ]
 
