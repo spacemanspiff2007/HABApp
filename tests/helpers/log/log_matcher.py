@@ -38,12 +38,16 @@ class AsyncDebugWarningMatcher(LogEntryMatcherBase):
         if r.name != 'asyncio' or r.level != logging.WARNING or 'Executing <' not in r.msg:
             return False
 
-        if not (m_dur := self.duration.search(r.msg)) or not (m_coro := self.coro.search(r.msg)):
+        if not (m_dur := self.duration.search(r.msg)):
             return False
 
-        coro = m_coro.group(1)
+        if m_coro := self.coro.search(r.msg):
+            coro = m_coro.group(1)
+        else:
+            coro = 'NO_CORO'
+
         secs = float(m_dur.group(1))
-        if secs < 0.05 or coro == 'async_subprocess_exec' and secs < 0.15:
+        if secs < 0.07 or coro == 'async_subprocess_exec' and secs < 0.15:
             return True
 
         return False
