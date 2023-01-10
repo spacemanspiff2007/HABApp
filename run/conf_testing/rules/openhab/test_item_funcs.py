@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import typing
 
-from HABApp.openhab.items import OpenhabItem, NumberItem
+from HABApp.openhab.items import OpenhabItem, NumberItem, ContactItem
 from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem, ImageItem
 from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem, get_openhab_test_states, get_openhab_test_types
 
@@ -22,6 +22,8 @@ class TestOpenhabItemFuncs(TestBaseRule):
     def __init__(self):
         super().__init__()
 
+        self.add_func_test(ContactItem, [TestParam('open', 'OPEN'), TestParam('closed', 'CLOSED')])
+
         p_on = {TestParam('on', 'ON'), TestParam('off', 'OFF')}
         p_int = {TestParam('percent', 50, 50), TestParam('percent', 100, 100), TestParam('percent', 0, 0)}
         p_float = {
@@ -37,6 +39,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
         self.add_func_test(
             DimmerItem, {TestParam('on', 100), TestParam('off', 0)} | p_int | p_float
         )
+
 
         self.add_func_test(
             ColorItem, {

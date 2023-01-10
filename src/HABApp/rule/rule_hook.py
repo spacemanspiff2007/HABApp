@@ -38,6 +38,7 @@ class HABAppRuleHook:
         return self._cb_suggest_name(rule)
 
 
+# todo: use inspect.currentframe
 def get_rule_hook() -> HABAppRuleHook:
 
     depth = 0

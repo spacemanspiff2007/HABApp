@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     import HABApp
 
 
+# todo: use inspect.currentframe
 def get_current_context(obj: Optional[ContextProvidingObj] = None) -> 'HABApp.rule_ctx.HABAppRuleContext':
     if obj is not None:
         return obj._habapp_ctx

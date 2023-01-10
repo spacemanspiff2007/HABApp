@@ -3,7 +3,7 @@ pydantic    >= 1.10,    < 1.11
 pendulum    >= 2.1.2,   < 2.2
 bidict      >= 0.22,    < 0.23
 watchdog    >= 2.2,     < 2.3
-ujson       >= 5.6,     < 5.7
+ujson       >= 5.7,     < 5.8
 paho-mqtt   >= 1.6,     < 1.7
 
 immutables  == 0.19
