@@ -38,8 +38,8 @@ openhab:
     interval: 10       # Seconds between two pings
   connection:
     url: http://localhost:8080   # Connect to this url
-    user: 'asdf'
-    password: 'asdf'
+    user: 'asdf'                 # Your username instead of asdf here,
+    password: 'asdf'             # and your password (as for logging in to the MainUI) or suffer a 401 connection error
     verify_ssl: true             # Check certificates when using https
   general:
     listen_only: false      # If True HABApp does not change anything on the openHAB instance.
