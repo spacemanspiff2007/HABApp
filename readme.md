@@ -117,6 +117,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.0.7 (10.01.2023)
+- ``ContactItem`` has ``open()``/``closed()`` methods
+- Setting persistence values now works for some persistence services
+
 #### 1.0.6 (08.11.2022)
 - Added log message if item for ping does not exist
 - Added ``execute_python`` and reworked ``execute_subprocess``:

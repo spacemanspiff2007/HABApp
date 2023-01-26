@@ -124,12 +124,11 @@ async def async_get_persistence_data(item_name: str, persistence: typing.Optiona
 async def async_set_persistence_data(item_name: str, persistence: typing.Optional[str],
                                      time: datetime.datetime, state: typing.Any):
 
-    # This does not work as of OH 3.2
+    # This does only work for some persistence services (as of OH 3.4)
     warnings.warn(f'{async_set_persistence_data.__name__} calls a part of the openHAB API which is buggy!',
                   category=ResourceWarning)
 
     params = {
-        'itemname': item_name,
         'time': convert_to_oh_type(time),
         'state': convert_to_oh_type(state),
     }
@@ -138,9 +137,11 @@ async def async_set_persistence_data(item_name: str, persistence: typing.Optiona
 
     ret = await put(f'/rest/persistence/items/{item_name:s}', params=params)
     if ret.status >= 300:
-        return {}
+        return None
     else:
-        return await ret.json(loads=load_json, encoding='utf-8')
+        # I would have expected the endpoint to return a valid json but instead it returns nothing
+        # return await ret.json(loads=load_json, encoding='utf-8')
+        return None
 
 
 async def async_create_item(item_type, name, label="", category="", tags=[], groups=[],
