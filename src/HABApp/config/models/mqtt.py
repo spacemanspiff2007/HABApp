@@ -1,19 +1,13 @@
 import random
 import string
-import sys
 from pathlib import Path
+from typing import Literal
 from typing import Optional, Tuple
 
 import pydantic
 from pydantic import Field
 
 from easyconfig.models import BaseModel
-
-if sys.version_info < (3, 8):
-    from typing_extensions import Literal
-else:
-    from typing import Literal
-
 
 QOS = Literal[0, 1, 2]
 

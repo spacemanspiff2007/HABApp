@@ -21,7 +21,7 @@ class ValueFormatter:
 
 class EmptyFormatter(ValueFormatter):
     def __init__(self):
-        super(EmptyFormatter, self).__init__('')
+        super().__init__('')
 
 
 TYPE_FORMATTER = TypeVar('TYPE_FORMATTER', bound=ValueFormatter)
@@ -29,7 +29,7 @@ TYPE_FORMATTER = TypeVar('TYPE_FORMATTER', bound=ValueFormatter)
 
 class FormatterScope:
     def __init__(self, field_names: Iterable[str],
-                 skip_alignment: Iterable[str] = tuple(), min_width: Dict[str, int] = {}):
+                 skip_alignment: Iterable[str] = (), min_width: Dict[str, int] = {}):
         self.lines: List[Dict[str, TYPE_FORMATTER]] = []
         self.keys: Final = tuple(field_names)
 

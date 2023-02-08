@@ -158,7 +158,7 @@ It's possible to filter out certain parts of log files with a
 `filter <https://docs.python.org/3/library/logging.html?highlight=logging%20filter#logging.Filter>`_.
 The recommendation is to create the filter :ref:`during startup<ref_run_code_on_startup>`.
 
-This example ignores all messages for the ``HABApp.EventBus`` logger that contain `MyIgnoredString`.
+This example ignores all messages for the ``HABApp.EventBus`` logger that contain ``MyIgnoredString``.
 
 
 .. exec_code::

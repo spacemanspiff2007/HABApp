@@ -1,12 +1,11 @@
-from typing import Any
-from typing import Mapping
+from typing import Any, Mapping
 
 from immutables import Map
-from pendulum import UTC
 from pendulum import now as pd_now
+from pendulum import UTC
 
 from HABApp.core.items import BaseItem
-from HABApp.openhab.events import ThingStatusInfoEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
+from HABApp.openhab.events import ThingConfigStatusInfoEvent, ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.interface import set_thing_enabled
 
 
@@ -29,6 +28,11 @@ class Thing(BaseItem):
 
         self.configuration: Mapping[str, Any] = Map()
         self.properties: Mapping[str, Any] = Map()
+
+    @property
+    def is_enabled(self) -> bool:
+        # https://github.com/openhab/openhab-core/issues/3055
+        return self.status_detail != 'DISABLED'
 
     def __update_timestamps(self, changed: bool):
         _now = pd_now(UTC)

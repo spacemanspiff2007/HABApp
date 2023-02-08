@@ -15,7 +15,7 @@ CONFIG_FILE = Path()
 def get_uptime() -> float:
 
     if sys.platform == 'linux':
-        with open('/proc/uptime', 'r') as f:
+        with open('/proc/uptime') as f:
             return float(f.readline().split()[0])
 
     if sys.platform == 'win32':

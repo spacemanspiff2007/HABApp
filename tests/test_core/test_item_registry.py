@@ -16,4 +16,4 @@ def test_basics():
     assert ir.get_items() == (created_item, )
 
     assert created_item == ir.pop_item(item_name)
-    assert ir.get_items() == tuple()
+    assert ir.get_items() == ()

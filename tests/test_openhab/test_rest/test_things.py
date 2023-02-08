@@ -96,7 +96,7 @@ def test_thing_full():
     assert c0.linked_items == ("LinkedItem1", "LinkedItem2")
     assert c0.configuration == {"offset": 0}
 
-    assert c1.linked_items == tuple()
+    assert c1.linked_items == ()
     assert c1.configuration == {}
 
     assert thing.status.status == 'UNINITIALIZED'

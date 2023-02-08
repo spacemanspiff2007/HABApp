@@ -84,8 +84,8 @@ class OpenhabItems(TestBaseRule):
         grp1 = GroupItem.get_item('group1')
         grp2 = GroupItem.get_item('group2')
 
-        assert grp1.members == tuple()
-        assert grp2.members == tuple()
+        assert grp1.members == ()
+        assert grp2.members == ()
 
         oh_item.create_item(groups=['group1'])
 
@@ -100,8 +100,8 @@ class OpenhabItems(TestBaseRule):
 
         oh_item.modify()
         assert item.groups == set()
-        assert grp1.members == tuple()
-        assert grp2.members == tuple()
+        assert grp1.members == ()
+        assert grp2.members == ()
 
     @OpenhabTmpItem.create('Color', arg_name='oh_item')
     def test_color(self, oh_item: OpenhabTmpItem):

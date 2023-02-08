@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import typing
 from pathlib import Path
 from typing import Callable, Awaitable, Any
 
@@ -39,7 +38,7 @@ class HABAppFile:
         file_state_changed(self)
 
     def _check_circ_refs(self, stack, prop: str):
-        c: typing.List[str] = getattr(self.properties, prop)
+        c: list[str] = getattr(self.properties, prop)
         for f in c:
             _stack = stack + (f, )
             if f in stack:

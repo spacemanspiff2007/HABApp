@@ -18,7 +18,7 @@ class BaseWatch(AutoContextBoundObj):
     EVENT: typing.Union[typing.Type[ItemNoUpdateEvent], typing.Type[ItemNoChangeEvent]]
 
     def __init__(self, name: str, secs: typing.Union[int, float]):
-        super(BaseWatch, self).__init__()
+        super().__init__()
         self.fut = PendingFuture(self._post_event, secs)
         self.name: str = name
 

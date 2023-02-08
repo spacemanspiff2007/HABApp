@@ -34,7 +34,7 @@ class ListenerCreatorBase:
 
 class EventListenerCreator(ListenerCreatorBase):
     def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], event_filter: EventFilter):
-        super(EventListenerCreator, self).__init__(item, callback)
+        super().__init__(item, callback)
         self.event_filter = event_filter
 
     def create_listener(self) -> EventBusListener:
@@ -43,7 +43,7 @@ class EventListenerCreator(ListenerCreatorBase):
 
 class NoUpdateEventListenerCreator(ListenerCreatorBase):
     def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: Union[int, float]):
-        super(NoUpdateEventListenerCreator, self).__init__(item, callback)
+        super().__init__(item, callback)
         self.secs = secs
 
     def create_listener(self) -> EventBusListener:
@@ -52,7 +52,7 @@ class NoUpdateEventListenerCreator(ListenerCreatorBase):
 
 class NoChangeEventListenerCreator(ListenerCreatorBase):
     def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: Union[int, float]):
-        super(NoChangeEventListenerCreator, self).__init__(item, callback)
+        super().__init__(item, callback)
         self.secs = secs
 
     def create_listener(self) -> EventBusListener:

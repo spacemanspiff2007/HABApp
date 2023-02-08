@@ -6,7 +6,7 @@ Description
 ======================================
 
 Configuration is done through ``config.yml`` The parent folder of the file can be specified with ``-c PATH`` or ``--config PATH``.
-If nothing is specified the file ``config.yml`` is searched in the subdirectory `HABApp` in
+If nothing is specified the file ``config.yml`` is searched in the subdirectory ``HABApp`` in
 
 * the current working directory
 * the venv directory

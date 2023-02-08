@@ -28,7 +28,7 @@ log = logging.getLogger('HABApp.Rule')
 
 # Func to log deprecation warnings
 def send_warnings_to_log(message, category, filename, lineno, file=None, line=None):
-    log.warning('%s:%s: %s:%s' % (filename, lineno, category.__name__, message))
+    log.warning(f'{filename}:{lineno}: {category.__name__}:{message}')
     return
 
 

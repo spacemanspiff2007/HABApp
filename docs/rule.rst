@@ -207,8 +207,8 @@ Example
 Scheduler
 ------------------------------
 With the scheduler it is easy to call functions in the future or periodically.
-Do not use `time.sleep` but rather `self.run.at`.
-Another very useful function is `self.run.countdown` as it can simplify many rules!
+Do not use ``time.sleep`` but rather ``self.run.at``.
+Another very useful function is ``self.run.countdown`` as it can simplify many rules!
 
 .. list-table::
    :widths: auto

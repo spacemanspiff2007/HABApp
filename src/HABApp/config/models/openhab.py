@@ -1,8 +1,7 @@
-from typing import Union, Literal
-
-from pydantic import Field, AnyHttpUrl, ByteSize, validator
+from typing import Literal, Union
 
 from easyconfig.models import BaseModel
+from pydantic import AnyHttpUrl, ByteSize, Field, validator
 
 
 class Ping(BaseModel):
@@ -48,7 +47,7 @@ class Connection(BaseModel):
         'openhab/channels/*,'   # Channel update
         # Thing events - don't listen to updated events
         # todo: check if this might be a good filter: 'openhab/things/*',
-        'openhab/things/*/added,openhab/things/*/removed,openhab/things/*/status,openhab/things/*/statuschanged',
+        'openhab/things/*',
         alias='topic filter', in_file=False,
         description='Topic filter for subscribing to openHAB. This filter is processed by openHAB and only events'
                     'matching this filter will be sent to HABApp.'

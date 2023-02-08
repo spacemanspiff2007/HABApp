@@ -120,6 +120,7 @@ MyOpenhabRule()
 #### 1.0.7 (2023-01-10)
 - ``ContactItem`` has ``open()``/``closed()`` methods
 - Setting persistence values now works for some persistence services
+- Don't connect when user/password is missing for openHAB
 
 #### 1.0.6 (2022-11-08)
 - Added log message if item for ping does not exist

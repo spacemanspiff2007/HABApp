@@ -5,7 +5,7 @@ from HABApp.mqtt.items import MqttBaseItem
 from tests.helpers.inspect import get_module_classes
 
 
-def get_item_classes(skip=tuple()):
+def get_item_classes(skip=()):
     classes = []
     for module_name in ('core', 'openhab', 'mqtt'):
         if module_name in skip:
