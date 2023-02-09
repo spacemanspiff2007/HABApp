@@ -200,7 +200,8 @@ async def setup_connection():
         return None
 
     # do not run without user/pw - since OH3 mandatory
-    if not user or not password:
+    is_token = user.startswith('oh.') or password.startswith('oh.')
+    if not is_token and (not user or not password):
         log_info(log, 'openHAB connection disabled (user/password missing)!')
         return None
 
