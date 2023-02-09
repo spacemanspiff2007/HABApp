@@ -8,8 +8,9 @@ paho-mqtt   >= 1.6,     < 1.7
 
 immutables  == 0.19
 eascheduler == 0.1.8
-easyconfig  == 0.2.7
+easyconfig  == 0.2.8
 stack_data  == 0.6.2
+colorama    == 0.4.6
 
 voluptuous      == 0.13.1
 
