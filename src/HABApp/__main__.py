@@ -46,6 +46,8 @@ def main() -> typing.Union[int, str]:
         # Sleep to allow underlying connections of aiohttp to close
         # https://aiohttp.readthedocs.io/en/stable/client_advanced.html#graceful-shutdown
         HABApp.core.const.loop.run_until_complete(asyncio.sleep(1))
+
+        asyncio.set_event_loop(None)
         HABApp.core.const.loop.close()
     return 0
 
