@@ -117,7 +117,7 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 1.0.7 (2023-01-10)
+#### 1.0.7 (2023-02-09)
 - ``ContactItem`` has ``open()``/``closed()`` methods
 - Setting persistence values now works for some persistence services
 - Don't connect when user/password is missing for openHAB
