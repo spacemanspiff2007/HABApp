@@ -1,5 +1,7 @@
-from asyncio import create_task, Task
+from asyncio import Task
 from typing import Callable, Awaitable, Any, Final, Optional
+
+from HABApp.core.const import loop
 
 
 class SingleTask:
@@ -19,7 +21,7 @@ class SingleTask:
 
     def start(self):
         self.cancel()
-        self.task = create_task(self._task_wrap(), name=self.name)
+        self.task = loop.create_task(self._task_wrap(), name=self.name)
 
     async def _task_wrap(self):
         # don't use try-finally because this also catches the asyncio.CancelledError
