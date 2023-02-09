@@ -11,13 +11,6 @@ jobs:
         with:
           ref: master
 
-      - name: Get Latest Release
-        id: latest_version
-        uses: abatilo/release-info-action@v1.3
-        with:
-          owner: spacemanspiff2007
-          repo: HABApp
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
@@ -43,7 +36,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           tags: |
             spacemanspiff2007/habapp:latest
-            spacemanspiff2007/habapp:${{ steps.latest_version.outputs.latest_tag }}
+            spacemanspiff2007/habapp:${{ github.ref_name }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
