@@ -43,7 +43,7 @@ def get_logging_dict(path: Path, log: BufferedLogger) -> Optional[dict]:
         return None
 
     with path.open('r', encoding='utf-8') as file:
-        cfg = _yaml_safe.load(file)  # type: Dict[str, Any]
+        cfg: Dict[str, Any] = _yaml_safe.load(file)
 
     # fix filenames
     for handler, handler_cfg in cfg.get('handlers', {}).items():

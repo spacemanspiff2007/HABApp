@@ -51,6 +51,7 @@ async def async_func_div_error():
     1 / 0
 
 
+@pytest.mark.ignore_log_errors
 @pytest.mark.parametrize(
     'func, name', ((func_div_error, 'func_div_error'), (async_func_div_error, 'async_func_div_error')))
 async def test_async_error_wrapper(eb: TestEventBus, name, func, sync_worker):

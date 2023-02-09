@@ -1,7 +1,6 @@
 """Load the json in json of openHAB and print it as a proper json"""
 
-from json import loads, dumps
-
+from json import dumps, loads
 
 INCLUDE_CHANNELS = False
 
@@ -36,4 +35,4 @@ def load_obj(obj):
 
 
 pretty_obj = load_obj(to_prettify)
-print(dumps(pretty_obj))
+print(dumps(pretty_obj, indent=4))

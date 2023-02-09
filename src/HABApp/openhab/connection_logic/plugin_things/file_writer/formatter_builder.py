@@ -64,8 +64,7 @@ class MultipleValueFormatterBuilder(ValueFormatterBuilder):
 class LinkFormatter(BuilderBase):
 
     def create_formatter(self, item_obj: UserItem) -> 'TYPE_FORMATTER':
-        link = item_obj.link.strip()
-        if not link:
+        if item_obj.link is None or not (link := item_obj.link.strip()):
             return EmptyFormatter()
 
         value = f'channel = "{link:s}"'

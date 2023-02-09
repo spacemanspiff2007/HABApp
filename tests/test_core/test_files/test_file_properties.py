@@ -2,6 +2,8 @@ from HABApp.core.files.file.properties import get_properties as get_props
 from HABApp.core.files.file.file import HABAppFile, CircularReferenceError, FileProperties, FILES, FileState
 import pytest
 
+from tests.helpers import LogCollector
+
 
 def test_prop_case():
     _in = """# habapp:
@@ -101,7 +103,7 @@ def test_deps():
     assert f1.state is FileState.DEPENDENCIES_OK
 
 
-def test_reloads():
+def test_reloads(test_logs: LogCollector):
     FILES.clear()
     FILES['name1'] = f1 = HABAppFile('name1', 'path1', FileProperties(reloads_on=['name2', 'asdf']))
     FILES['name2'] = f2 = HABAppFile('name2', 'path2', FileProperties())
@@ -109,6 +111,8 @@ def test_reloads():
     f1.check_properties()
     assert f1.properties.reloads_on == ['name2', 'asdf']
     assert f2.properties.reloads_on == []
+
+    test_logs.add_expected('HABApp.files', 'WARNING', "File path1 reloads on file that doesn't exist: asdf")
 
 
 def test_circ():

@@ -154,6 +154,8 @@ OrFilterGroup
 .. autoclass:: HABApp.core.events.OrFilterGroup
    :members:
 
+Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. exec_code::
     :hide_output:
@@ -175,6 +177,9 @@ OrFilterGroup
         def __init__(self):
             super().__init__()
             my_item = Item.get_item('MyItem')
+
+            # This will only call the callback for ValueUpdateEvents
+            my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter())
 
             # This will only call the callback for ValueUpdateEvents where the value==my_value
             my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter(value='my_value'))
@@ -202,8 +207,8 @@ OrFilterGroup
 Scheduler
 ------------------------------
 With the scheduler it is easy to call functions in the future or periodically.
-Do not use `time.sleep` but rather `self.run.at`.
-Another very useful function is `self.run.countdown` as it can simplify many rules!
+Do not use ``time.sleep`` but rather ``self.run.at``.
+Another very useful function is ``self.run.countdown`` as it can simplify many rules!
 
 .. list-table::
    :widths: auto

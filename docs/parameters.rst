@@ -6,7 +6,7 @@ Parameters
 ------------------------------
 Parameters are values which can easily be changed without having to reload the rules.
 Values will be picked up during runtime as soon as they get edited in the corresponding file.
-If the file doesn't exist yet it will automatically be generated in the configured `param` folder.
+If the file doesn't exist yet it will automatically be generated in the configured ``param`` folder.
 Parameters are perfect for boundaries (e.g. if value is below param switch something on).
 Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp.parameters.DictParameter` available.
 

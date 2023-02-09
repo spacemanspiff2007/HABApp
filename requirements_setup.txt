@@ -2,14 +2,15 @@ aiohttp     >= 3.8,     < 3.9
 pydantic    >= 1.10,    < 1.11
 pendulum    >= 2.1.2,   < 2.2
 bidict      >= 0.22,    < 0.23
-watchdog    >= 2.1.7,   < 2.2
-ujson       >= 5.5,     < 5.6
+watchdog    >= 2.2,     < 2.3
+ujson       >= 5.7,     < 5.8
 paho-mqtt   >= 1.6,     < 1.7
 
 immutables  == 0.19
-eascheduler == 0.1.7
-easyconfig  == 0.2.4
-stack_data  == 0.5.1
+eascheduler == 0.1.8
+easyconfig  == 0.2.8
+stack_data  == 0.6.2
+colorama    == 0.4.6
 
 voluptuous      == 0.13.1
 

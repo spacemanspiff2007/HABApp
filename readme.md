@@ -117,13 +117,18 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 1.0.6 (08.11.2022)
+#### 1.0.7 (2023-02-09)
+- ``ContactItem`` has ``open()``/``closed()`` methods
+- Setting persistence values now works for some persistence services
+- Don't connect when user/password is missing for openHAB
+
+#### 1.0.6 (2022-11-08)
 - Added log message if item for ping does not exist
 - Added ``execute_python`` and reworked ``execute_subprocess``:
   HABApp will now by default pass only the captured output as a str into the callback.
 - Reworked ``Thing`` handling
 
-#### 1.0.5 (20.10.2022)
+#### 1.0.5 (2022-10-20)
 - Added new item function ``post_value_if`` and ``oh_post_update_if`` to conditionally update an item
 - Added support for new alive event with openHAB 3.4
 - Reworked file writer for textual thing config
@@ -131,25 +136,25 @@ MyOpenhabRule()
 - MultiModeValue returns True/False if item value was changed
 - Updated dependencies
 
-#### 1.0.4 (25.08.2022)
+#### 1.0.4 (2022-08-25)
 - New RGB & HSB datatype for simpler color handling
 - Fixed Docker build
 - Bugfixes
 
-#### 1.0.3 (09.08.2022)
+#### 1.0.3 (2022-08-09)
 - OpenHAB Thing can now be enabled/disabled with ``thing.set_enabled()``
 - ClientID for MQTT should now be unique for every HABApp installation
 - Reworked MultiModeItem, now a default value is possible when no mode is active
 - Added some type hints and updated documentation
 
-#### 1.0.2 (29.07.2022)
+#### 1.0.2 (2022-07-29)
 - Fixed setup issues
 - Fixed unnecessary long tracebacks
 
-#### 1.0.1 (25.07.2022)
+#### 1.0.1 (2022-07-25)
 - Dockerfile is Python 3.10 and non slim
 
-#### 1.0.0 (25.07.2022)
+#### 1.0.0 (2022-07-25)
 - OpenHAB >= 3.3 and Python >= 3.8 only!
 - Major internal refactoring
 - Startup issues are gone with a new and improved connection mechanism.
@@ -208,19 +213,19 @@ MQTT:
 
 ---
 
-#### 0.31.2 (17.12.2021)
+#### 0.31.2 (2021-12-17)
 - Added command line switch to display debug information
 - Display debug information on missing dependencies
 - Added a small splash screen when HABApp is started
 - May doc updates
 - Reworked EventListenerGroup
 
-#### 0.31.1 (29.10.2021)
+#### 0.31.1 (2021-10-29)
 - Added support for item metadata
 - Added possibility to search for items by metadata
 - Added EventListenerGroup to subscribe/cancel multiple listeners at once
 
-#### 0.31.0 (08.10.2021)
+#### 0.31.0 (2021-10-08)
 - added self.get_items to easily search for items in a rule
 - added full support for tags and groups on OpenhabItem
 - Application should now properly shut down when there is a PermissionError
@@ -230,29 +235,29 @@ MQTT:
 - Examples in the docs get checked with a newly created sphinx extension
 - Reworked the openHAB tests
 
-#### 0.30.3 (17.06.2021)
+#### 0.30.3 (2021-06-17)
 - add support for custom ca cert for MQTT
 - Scheduler runs only when the rule file has been loaded properly
 - Sync openHAB calls raise an error when called from an async context
 - Replaced thread check for asyncio with a contextvar (internal)
 
-#### 0.30.3 (01.06.2021)
+#### 0.30.3 (2021-06-01)
 - Scheduler runs only when the rule file has been loaded properly
 - Replaced thread check for asyncio with a contextvar
 - Sync openHAB calls raise an error when called from an async context
 
-#### 0.30.2 (26.05.2021)
+#### 0.30.2 (2021-05-26)
 - Item and Thing loading from openHAB is more robust and disconnects now properly if openHAB is only partly ready
 - Renamed command line argument "-s" to "-wos" or "--wait_os_uptime"
 - Updated dependencies
 
-#### 0.30.1 (07.05.2021)
+#### 0.30.1 (2021-05-07)
 - latitude is now set correctly for sunrise/sunset calculation (closes #217)
 - Added missing " for tags in textual thing configuration
 - Updated scheduler which fixes an overflow error(#216)
 - States of openHAB groups are now unpacked correctly
 
-#### 0.30.0 (02.05.2021)
+#### 0.30.0 (2021-05-02)
 
 Attention:
 - No more support for python 3.6!
@@ -281,7 +286,7 @@ Migration of rules:
 - Search for ``HABAppError`` and replace with ``HABAppException``
 
 
-#### 0.20.2 (07.04.2021)
+#### 0.20.2 (2021-04-07)
 - Added HABApp.util.functions with min/max
 - Reworked small parts of the file watcher
 - Doc improvements

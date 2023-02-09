@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Type, Dict
 
 from pydantic import ValidationError
 
@@ -10,13 +9,13 @@ from HABApp.core.files.file import HABAppFile, FileState
 from HABApp.core.files.file.properties import get_properties, FileProperties
 from HABApp.core.logger import HABAppError
 
-FILE_TYPES: Dict[str, Type[HABAppFile]] = {}
+FILE_TYPES: dict[str, type[HABAppFile]] = {}
 
 
 log = logging.getLogger('HABApp.files')
 
 
-def register_file_type(prefix: str, cls: Type[HABAppFile]):
+def register_file_type(prefix: str, cls: type[HABAppFile]):
     assert prefix not in FILE_TYPES
 
     assert cls.LOGGER

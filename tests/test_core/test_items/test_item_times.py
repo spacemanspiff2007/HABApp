@@ -9,7 +9,7 @@ import HABApp
 import HABApp.core.items.tmp_data
 from HABApp.core.events import NoEventFilter
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
-from tests.helpers import TestEventBus
+from tests.helpers import TestEventBus, LogCollector
 from HABApp.core.internals import wrap_func, HINT_ITEM_REGISTRY, HINT_EVENT_BUS
 from HABApp.core.items import Item
 
@@ -44,7 +44,7 @@ def c():
         w2.cancel()
 
 
-def test_sec_timedelta(parent_rule):
+def test_sec_timedelta(parent_rule, test_logs: LogCollector):
     a = UpdatedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
 
@@ -57,6 +57,8 @@ def test_sec_timedelta(parent_rule):
 
     w1.cancel()
     w2.cancel()
+
+    test_logs.add_expected('HABApp', 'WARNING', 'Watcher ItemNoUpdateWatch (1s) for test has already been created')
 
 
 async def test_rem(parent_rule, u: UpdatedTime):
@@ -138,6 +140,7 @@ async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: HINT_E
     assert c.seconds == 3
 
     list.cancel()
+    await asyncio.sleep(0.01)
 
 
 async def test_watcher_change_restore(parent_rule, ir: HINT_ITEM_REGISTRY):
@@ -178,6 +181,7 @@ async def test_watcher_update_restore(parent_rule, ir: HINT_ITEM_REGISTRY):
     ir.pop_item(name)
 
 
+@pytest.mark.ignore_log_warnings
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
                                       sync_worker, eb: TestEventBus, ir: HINT_ITEM_REGISTRY):
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)

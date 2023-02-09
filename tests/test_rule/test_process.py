@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import sys
 from json import loads
 from pathlib import Path
@@ -10,6 +9,7 @@ import pytest
 import HABApp.rule
 from HABApp.rule import Rule, FinishedProcessInfo
 from HABApp.rule.interfaces import rule_subprocess
+from ..helpers import LogCollector
 from ..rule_runner import SimpleRuleRunner
 
 
@@ -34,9 +34,6 @@ def rule(monkeypatch):
     runner.tear_down()
 
 
-SLEEP_PROCESS_START = 0.3
-
-
 @pytest.mark.no_internals
 async def test_run_func_arg_errors(rule):
     with pytest.raises(ValueError) as e:
@@ -54,57 +51,56 @@ async def test_run_func_arg_errors(rule):
 @pytest.mark.no_internals
 async def test_run_func(rule, flag, result):
 
-    rule.execute_subprocess(
+    await rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=True, raw_info=flag
     )
 
-    await asyncio.sleep(SLEEP_PROCESS_START)
     rule.cb.assert_called_once_with(result)
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
 @pytest.mark.no_internals
 async def test_run_func_no_cap(rule, flag: bool, result):
-    rule.execute_subprocess(
+    await rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False, raw_info=flag
     )
 
-    await asyncio.sleep(SLEEP_PROCESS_START)
     rule.cb.assert_called_once_with(FinishedProcessInfo(0, None, None))
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
 @pytest.mark.no_internals
-async def test_run_func_cancel(rule, flag, result):
+async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector):
 
     task = rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import time; time.sleep(5)', capture_output=False, raw_info=flag
     )
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await asyncio.sleep(0.5)
 
     task.cancel()
 
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await asyncio.sleep(0.3)
     rule.cb.assert_not_called()
+
+    test_logs.add_expected(
+        None, 'WARNING',
+        f'Subprocess canceled! Call: "{sys.executable:s}" "-c" "import time; time.sleep(5)"'
+    )
 
 
 @pytest.mark.parametrize('flag', [True, False])
 @pytest.mark.no_internals
-async def test_invalid_program(rule, caplog, flag):
+async def test_invalid_program(rule, test_logs, flag):
     parent_dir = Path(__file__).parent
-    rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
 
-    err_count = 0
-    for c in caplog.records:
-        if c.levelno >= logging.ERROR:
-            err_count += 1
+    test_logs.add_expected(None, 'ERROR', [
+        'Creating subprocess failed!',
+        '  Call: "ProgramThatDoesNotExist"',
+        f'  Working dir: {parent_dir}',
+        None,
+    ])
 
-    assert caplog.records[0].getMessage() == 'Creating subprocess failed!'
-    assert caplog.records[1].getMessage() == '  Call: "ProgramThatDoesNotExist"'
-    assert caplog.records[2].getMessage() == f'  Working dir: {parent_dir}'
-
-    assert err_count > 7
     rule.cb.assert_not_called()
 
 
@@ -113,8 +109,7 @@ async def test_invalid_program(rule, caplog, flag):
 async def test_exec_python_file(rule, caplog, raw_info):
     parent_dir = Path(__file__).parent
 
-    rule.execute_python(rule.cb, parent_dir / '__exec_python_file.py', capture_output=True, raw_info=raw_info)
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.execute_python(rule.cb, parent_dir / '__exec_python_file.py', capture_output=True, raw_info=raw_info)
 
     rule.cb.assert_called_once()
     ret = rule.cb.call_args[0][0]
@@ -133,8 +128,7 @@ async def test_exec_python_file(rule, caplog, raw_info):
 async def test_exec_python_file_relative(rule):
     parent_dir = Path(__file__).parent
 
-    rule.execute_python(rule.cb, '__exec_python_file.py', capture_output=True)
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.execute_python(rule.cb, '__exec_python_file.py', capture_output=True)
 
     rule.cb.assert_called_once()
     _json = loads(rule.cb.call_args[0][0])
@@ -142,28 +136,34 @@ async def test_exec_python_file_relative(rule):
 
 
 @pytest.mark.no_internals
-async def test_exec_python_file_error(rule, caplog):
+async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector):
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
 
-    rule.execute_python(rule.cb, file, 'show_err', capture_output=True, additional_python_path=[folder])
-    await asyncio.sleep(SLEEP_PROCESS_START)
+    await rule.execute_python(rule.cb, file, 'show_err', capture_output=True, additional_python_path=[folder])
 
-    assert list(caplog.messages)[-4] == 'Process returned 1!'
-    assert list(caplog.messages)[-2:] == [
+    test_logs.add_expected(None, 'ERROR', [
+        'Process returned 1!',
+        None,
         'Stderr:',
-        '  Error in module!'
-    ]
+        '  Error in module!',
+    ])
+
     rule.cb.assert_not_called()
 
-    rule.execute_python(rule.cb, file, 'exit_3', capture_output=True, additional_python_path=[folder])
-    await asyncio.sleep(SLEEP_PROCESS_START)
 
-    assert list(caplog.messages)[-4] == 'Process returned 3!'
-    assert list(caplog.messages)[-2:] == [
+@pytest.mark.no_internals
+async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector):
+    folder = Path(__file__).parent
+    file = folder / '__exec_python_file.py'
+    await rule.execute_python(rule.cb, file, 'exit_3', capture_output=True, additional_python_path=[folder])
+
+    test_logs.add_expected(None, 'ERROR', [
+        'Process returned 3!',
+        None,
         'Stdout:',
         '  Error Message 3'
-    ]
+    ])
     rule.cb.assert_not_called()
 
 
@@ -171,9 +171,8 @@ async def test_exec_python_file_error(rule, caplog):
 @pytest.mark.no_internals
 async def test_exec_python_module(rule, raw_info, result):
     folder = Path(__file__).parent
-    rule.execute_python(
+    await rule.execute_python(
         rule.cb, '__exec_python_module', capture_output=True, additional_python_path=[folder], raw_info=raw_info)
-    await asyncio.sleep(SLEEP_PROCESS_START)
 
     rule.cb.assert_called_once_with(result)
 

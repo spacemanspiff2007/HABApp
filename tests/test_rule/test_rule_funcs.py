@@ -18,6 +18,7 @@ def test_unload_function():
     assert m.called
 
 
+@pytest.mark.ignore_log_errors
 @pytest.mark.no_internals
 def test_unload_function_exception(eb: TestEventBus):
     eb.allow_errors = True

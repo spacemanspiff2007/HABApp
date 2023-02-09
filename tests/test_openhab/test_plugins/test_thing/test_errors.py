@@ -1,10 +1,10 @@
 import time
 
 from HABApp.openhab.connection_logic.plugin_things.plugin_things import ManualThingConfig
-from tests.helpers import MockFile, TestEventBus
+from tests.helpers import MockFile, TestEventBus, LogCollector
 
 
-async def test_errors(caplog, eb: TestEventBus):
+async def test_errors(test_logs: LogCollector, eb: TestEventBus):
     eb.allow_errors = True
 
     cfg = ManualThingConfig()
@@ -40,9 +40,7 @@ async def test_errors(caplog, eb: TestEventBus):
     cfg.cache_ts = time.time()
     await cfg.file_load('/thing_test.yml', file)
 
-    errors = [rec.message for rec in caplog.records if rec.levelno >= 30]
-    assert errors == ['Duplicate item: Name1']
-    caplog.clear()
+    test_logs.add_expected(None, 'ERROR', 'Duplicate item: Name1')
 
     text = """
 test: False
@@ -64,9 +62,12 @@ channels:
     cfg.cache_ts = time.time()
     await cfg.file_load('/thing_test.yml', file)
 
-    errors = [rec.message for rec in caplog.records if rec.levelno >= 30]
-    assert errors[0] == '"â_ß_{_)" is not a valid name for an item!'
+    test_logs.add_expected(None, 'ERROR', '"â_ß_{_)" is not a valid name for an item!')
+    test_logs.add_expected(None, 'ERROR', "   (created for {'channel_uid': 'astro:sun:1d5f16df:rise#start', "
+                                          "'channel_type': 'astro:start', 'channel_label': 'Startzeit', "
+                                          "'channel_kind': 'STATE', 'thing_uid': 'astro:sun:1d5f16df', "
+                                          "'thing_type': 'astro:sun', 'thing_location': '', "
+                                          "'thing_label': 'Astronomische Sonnendaten', "
+                                          "'bridge_uid': '', 'editable': True})")
 
     cfg.do_cleanup.cancel()
-
-    caplog.clear()

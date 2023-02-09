@@ -14,7 +14,7 @@ class WrappedAsyncFunction(WrappedFunctionBase):
                  logger: Optional[logging.Logger] = None,
                  context: Optional[HINT_CONTEXT_OBJ] = None):
 
-        super(WrappedAsyncFunction, self).__init__(name=name, func=func, logger=logger, context=context)
+        super().__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)
 
         self.func = func

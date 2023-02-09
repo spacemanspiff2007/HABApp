@@ -1,4 +1,3 @@
-
 class Threshold:
     def __init__(self, threshold1, threshold2):
         """This is a simple Schmitt Trigger implementation.

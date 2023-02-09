@@ -8,7 +8,7 @@ import pytest
 import HABApp
 from HABApp.core.wrapper import ExceptionToHABApp, ignore_exception
 
-log = logging.getLogger('WrapperTest')
+log = Mock()
 
 
 @pytest.fixture
@@ -51,6 +51,7 @@ def func_a(_l):
     1 / 0
 
 
+@pytest.mark.ignore_log_errors
 def test_func_wrapper(p_mock):
     func_a(['asdf', 'asdf'])
 

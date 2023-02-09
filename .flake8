@@ -1,4 +1,7 @@
 [flake8]
+# settings for flake8-spellcheck
+dictionaries=en_US,python,technical
+
 ignore =
     # E201 whitespace after '('
     E201,

@@ -10,6 +10,7 @@ def get_dependencies() -> List[str]:
         'aiohttp-sse-client',
         'aiohttp',
         'bidict',
+        'colorama',
         'eascheduler',
         'easyconfig',
         'paho-mqtt',

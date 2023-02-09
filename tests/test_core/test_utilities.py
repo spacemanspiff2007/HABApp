@@ -1,11 +1,8 @@
 import asyncio
 
-import pytest
-
 from HABApp.core.lib import PendingFuture
 
 
-@pytest.mark.uses_rule_runner
 async def test_pending_future():
     a = 0
 

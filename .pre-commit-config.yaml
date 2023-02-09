@@ -1,19 +1,59 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.4.0
     hooks:
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-docstring-first
+      - id: check-merge-conflict
+      # - id: check-toml
       - id: check-yaml
+      - id: debug-statements
       - id: end-of-file-fixer
         exclude: ^docs/(?:images|gifs)
       - id: trailing-whitespace
 
+
 #  - repo: https://github.com/pycqa/isort
-#    rev: 5.8.0
+#    rev: 5.11.4
 #    hooks:
 #      - id: isort
 #        name: isort (python)
 
-  - repo: https://gitlab.com/PyCQA/flake8
-    rev: '4.0.1'
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: '6.0.0'
     hooks:
     -   id: flake8
+        # additional_dependencies:
+          # - flake8-bugbear==23.1.14
+          # - flake8-comprehensions==3.10.1
+          # - flake8-pytest-style==1.6
+          # - flake8-unused-arguments==0.0.12
+          # - flake8-noqa==1.3
+          # - pep8-naming==0.13.3
+
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.1
+    hooks:
+      - id: pyupgrade
+        args: ["--py38-plus"]
+
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: rst-backticks
+
+
+#  - repo: https://github.com/igorshubovych/markdownlint-cli
+#    rev: v0.33.0
+#    hooks:
+#      - id: markdownlint
+
+
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes

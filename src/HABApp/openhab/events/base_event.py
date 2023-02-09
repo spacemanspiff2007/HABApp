@@ -1,4 +1,3 @@
-
 class OpenhabEvent:
 
     @classmethod

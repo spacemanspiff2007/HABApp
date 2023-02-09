@@ -191,10 +191,17 @@ async def setup_connection():
 
     config = HABApp.CONFIG.openhab
     url: str = config.connection.url
+    user: str = config.connection.user
+    password: str = config.connection.password
 
     # do not run without an url
     if not url:
-        log_info(log, 'openHAB connection disabled!')
+        log_info(log, 'openHAB connection disabled (url missing)!')
+        return None
+
+    # do not run without user/pw - since OH3 mandatory
+    if not user or not password:
+        log_info(log, 'openHAB connection disabled (user/password missing)!')
         return None
 
     if not config.connection.verify_ssl:
@@ -207,8 +214,8 @@ async def setup_connection():
         base_url=url,
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
-        auth=aiohttp.BasicAuth(config.connection.user, config.connection.password),
-        read_bufsize=config.connection.buffer,
+        auth=aiohttp.BasicAuth(user, password),
+        read_bufsize=int(config.connection.buffer),
     )
 
     TASK_TRY_CONNECT.start()

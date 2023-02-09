@@ -7,7 +7,7 @@ from HABApp.core.internals import AutoContextBoundObj
 class BaseMode(AutoContextBoundObj):
 
     def __init__(self, name: str):
-        super(BaseMode, self).__init__()
+        super().__init__()
         self.name: str = name
 
         self.__mode_lower_prio: Optional[BaseMode] = None

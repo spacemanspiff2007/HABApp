@@ -8,6 +8,7 @@ from HABApp.core.internals import EventFilterBase, EventBusListener, EventBus, w
 
 
 class TestEventBus(EventBus):
+    __test__ = False  # prevents this class from being collected by pytest
 
     def __init__(self):
         super().__init__()
