@@ -6,7 +6,7 @@ import HABApp.core.lib.exceptions.format
 def test_doc_run():
     calls = []
 
-    from tests import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     import HABApp
@@ -43,7 +43,7 @@ def test_doc_run_exception(monkeypatch):
 
     monkeypatch.setattr(HABApp.core.lib.exceptions.format, 'format_frame_info', err)
 
-    from tests import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
 

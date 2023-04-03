@@ -17,7 +17,7 @@ Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp
     from HABApp.parameters.parameters import _PARAMETERS
     _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
 
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------
@@ -141,7 +141,7 @@ Just add the "reloads on" entry to the file.
     from HABApp.parameters.parameters import _PARAMETERS
     _PARAMETERS['my_param'] = {'key1': {'v': 10}, 'key2': {'v': 12}}
 
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------

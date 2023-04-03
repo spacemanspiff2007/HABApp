@@ -30,7 +30,7 @@ using an IDE!
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     SimpleRuleRunner().set_up()
     # ------------ hide: stop ------------
 
@@ -49,7 +49,7 @@ It is possible to check the item value by comparing it
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     SimpleRuleRunner().set_up()
 
     from HABApp.core.items import Item
@@ -88,7 +88,7 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
     :caption: Example
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
 
@@ -162,7 +162,7 @@ Example
     :caption: Example
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
 

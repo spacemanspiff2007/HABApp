@@ -58,7 +58,7 @@ Mqtt items have an additional publish method which make interaction with the mqt
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     SimpleRuleRunner().set_up()
 
     import HABApp
@@ -102,7 +102,7 @@ It is created on the topic that reports the state from the device.
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     SimpleRuleRunner().set_up()
 
     import HABApp

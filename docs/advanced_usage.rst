@@ -205,7 +205,7 @@ Add an openHAB mock item to the item registry
    :hide_output:
 
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
+   from HABApp.util.test.rule_runner import SimpleRuleRunner
    SimpleRuleRunner().set_up()
    # ------------ hide: stop -------------
 
@@ -221,7 +221,7 @@ Remove the mock item from the registry
    :hide_output:
 
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
+   from HABApp.util.test.rule_runner import SimpleRuleRunner
    SimpleRuleRunner().set_up()
 
    import HABApp
@@ -240,7 +240,7 @@ any internal item.
    :hide_output:
 
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
+   from HABApp.util.test.rule_runner import SimpleRuleRunner
    SimpleRuleRunner().set_up()
    # ------------ hide: stop -------------
 

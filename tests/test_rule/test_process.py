@@ -10,7 +10,7 @@ import HABApp.rule
 from HABApp.rule import Rule, FinishedProcessInfo
 from HABApp.rule.interfaces import rule_subprocess
 from ..helpers import LogCollector
-from ..rule_runner import SimpleRuleRunner
+from HABApp.util.test.rule_runner import SimpleRuleRunner
 
 
 class ProcRule(Rule):
