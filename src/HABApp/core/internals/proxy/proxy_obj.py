@@ -1,4 +1,5 @@
-import sys
+# noinspection PyProtectedMember
+from sys import _getframe as sys_get_frame
 from typing import Dict, List, Optional, Final, Callable
 
 from HABApp.core.errors import ProxyObjHasNotBeenReplacedError
@@ -60,7 +61,7 @@ class StartUpProxyObj(ProxyObjBase):
 
 
 def create_proxy(to_replace: Callable) -> StartUpProxyObj:
-    frm = sys._getframe(2)
+    frm = sys_get_frame(2)
     return StartUpProxyObj(to_replace, frm.f_globals)
 
 

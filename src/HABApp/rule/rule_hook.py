@@ -1,6 +1,7 @@
-import sys
+# noinspection PyProtectedMember
+from sys import _getframe as sys_get_frame
 from types import FrameType
-from typing import TYPE_CHECKING, Any, Callable, Final
+from typing import TYPE_CHECKING, Any, Callable, Final, Optional
 
 if TYPE_CHECKING:
     import HABApp
@@ -38,23 +39,19 @@ class HABAppRuleHook:
         return self._cb_suggest_name(rule)
 
 
-# todo: use inspect.currentframe
 def get_rule_hook() -> HABAppRuleHook:
 
-    depth = 0
-    while True:
-        depth += 1
-        try:
-            frame: FrameType = sys._getframe(depth)
-        except ValueError:
-            raise RuntimeError('Rule files are not meant to be executed directly! '
-                               'Put the file in the HABApp "rule" folder and HABApp will load it automatically.')
+    # noinspection PyUnresolvedReferences
+    frame: Optional[FrameType] = sys_get_frame(1)
 
+    while frame is not None:
         _globals = frame.f_globals
 
-        hook = _globals.get(_NAME, None)
-        if hook is None:
-            continue
+        if (hook := _globals.get(_NAME)) is not None:
+            assert isinstance(hook, HABAppRuleHook)
+            return hook
 
-        assert isinstance(hook, HABAppRuleHook)
-        return hook
+        frame = frame.f_back
+
+    raise RuntimeError('HABApp rule filess are not meant to be executed directly! '
+                       'Put the file in the HABApp "rule" folder and HABApp will load it automatically.')

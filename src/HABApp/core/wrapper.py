@@ -1,9 +1,10 @@
 import asyncio
 import functools
 import logging
-import sys
 import typing
 from logging import Logger
+# noinspection PyProtectedMember
+from sys import _getframe as sys_get_frame
 
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.const.topics import TOPIC_WARNINGS as TOPIC_WARNINGS
@@ -113,7 +114,7 @@ class ExceptionToHABApp:
 
         # try to get the parent function name
         try:
-            f_name = sys._getframe().f_back.f_code.co_name
+            f_name = sys_get_frame().f_back.f_code.co_name
         except Exception:
             f_name = 'Exception while getting the function name!'
 
