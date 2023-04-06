@@ -59,12 +59,13 @@ class RuleFile:
         return [line.replace('<module>', self.path.name) for line in tb]
 
     def create_rules(self, created_rules: list):
-        init_globals = HABAppRuleHook.in_dict(
-            {}, created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
+
+        rule_hook = HABAppRuleHook(created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
 
         # It seems like python 3.8 doesn't allow path like objects any more:
         # https://github.com/spacemanspiff2007/HABApp/issues/111
-        runpy.run_path(str(self.path), run_name=str(self.path), init_globals=init_globals)
+        with rule_hook:
+            runpy.run_path(str(self.path), run_name=str(self.path), init_globals=rule_hook.in_dict())
 
     def load(self) -> bool:
 
