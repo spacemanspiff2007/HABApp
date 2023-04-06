@@ -1,6 +1,6 @@
 import logging
 from queue import SimpleQueue, Empty
-from threading import Thread
+from threading import Thread, Lock
 from time import sleep
 from typing import Optional, Final
 
@@ -8,6 +8,9 @@ import HABApp
 from .config import CONFIG
 
 log = logging.getLogger('HABApp.logging')
+
+
+LOCK = Lock()
 
 
 class HABAppQueueHandler:
@@ -21,46 +24,53 @@ class HABAppQueueHandler:
         self._thread: Optional[Thread] = None
 
     def start(self) -> None:
-        if self._thread is not None:
-            raise RuntimeError('Thread can only be started once!')
+        with LOCK:
+            if self._thread is not None:
+                raise RuntimeError('Thread can only be started once!')
 
-        # resolve handler
-        self._handler = logging._handlers[self._handler_name]
+            # resolve handler
+            self._handler = logging._handlers[self._handler_name]
 
-        self._thread = Thread(target=self._worker, name=f'HABApp_{self._name}')
-        self._thread.start()
+            self._thread = thread = Thread(target=self._worker, name=f'HABApp_{self._name}')
+
+        thread.start()
 
     def signal_stop(self):
         self._queue.put_nowait(None)
 
     def stop(self) -> None:
-        if self._thread is None:
-            return None
-        thread = self._thread
+        with LOCK:
+            if (thread := self._thread) is None:
+                return None
 
         self.signal_stop()
         thread.join()
 
     def _worker(self):
         try:
-            assert self._handler is not None
-            while True:
-                sleep(self.FLUSH_DELAY)
-                if self.process_queue():
-                    break
+            log.debug(f'{self._name} thread running')
+
+            try:
+                assert self._handler is not None
+                while True:
+                    sleep(self.FLUSH_DELAY)
+                    if self.process_queue():
+                        break
+
+            except Exception as e:
+                HABApp.core.wrapper.process_exception(self._worker, e)
+
+            # clean up queue
+            try:
+                while True:
+                    self._queue.get_nowait()
+            except Empty:
+                pass
 
             log.debug(f'{self._name} thread stopped')
-        except Exception as e:
-            HABApp.core.wrapper.process_exception(self._worker, e)
-
-        # clean up queue
-        try:
-            while True:
-                self._queue.get_nowait()
-        except Empty:
-            pass
-
-        self._thread = None
+        finally:
+            with LOCK:
+                self._thread = None
 
     def process_queue(self) -> bool:
         q = self._queue
