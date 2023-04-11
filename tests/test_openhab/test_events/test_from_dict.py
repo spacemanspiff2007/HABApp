@@ -19,6 +19,12 @@ def test_ItemStateEvent():
                        'payload': '{"type":"String","value":"NONE"}', 'type': 'ItemStateEvent'})
     assert isinstance(event, ItemStateEvent)
     assert event.name == 'my_item_name'
+    assert event.value == 'NONE'
+
+    event = get_event({'topic': 'openhab/items/my_item_name/state',
+                       'payload': '{"type":"UnDef","value":"NULL"}', 'type': 'ItemStateEvent'})
+    assert isinstance(event, ItemStateEvent)
+    assert event.name == 'my_item_name'
     assert event.value is None
 
 
@@ -178,14 +184,14 @@ def test_channel_ChannelDescriptionChangedEvent():
 def test_thing_ThingStatusInfoEvent():
     data = {
         'topic': 'openhab/things/samsungtv:tv:mysamsungtv/status',
-        'payload': '{"status":"ONLINE","statusDetail":"MyStatusDetail"}',
+        'payload': '{"status":"ONLINE","statusDetail":"BRIDGE_OFFLINE"}',
         'type': 'ThingStatusInfoEvent'
     }
     event = get_event(data)
     assert isinstance(event, ThingStatusInfoEvent)
     assert event.name == 'samsungtv:tv:mysamsungtv'
     assert event.status == 'ONLINE'
-    assert event.detail == 'MyStatusDetail'
+    assert event.detail == 'BRIDGE_OFFLINE'
 
     data = {
         'topic': 'openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status',
@@ -196,7 +202,7 @@ def test_thing_ThingStatusInfoEvent():
     assert isinstance(event, ThingStatusInfoEvent)
     assert event.name == 'chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     assert event.status == 'ONLINE'
-    assert event.detail is None
+    assert event.detail == 'NONE'
 
 
 def test_thing_ThingStatusInfoChangedEvent():
@@ -209,9 +215,9 @@ def test_thing_ThingStatusInfoChangedEvent():
     assert isinstance(event, ThingStatusInfoChangedEvent)
     assert event.name == 'samsungtv:tv:mysamsungtv'
     assert event.status == 'OFFLINE'
-    assert event.detail is None
+    assert event.detail == 'NONE'
     assert event.old_status == 'ONLINE'
-    assert event.old_detail is None
+    assert event.old_detail == 'NONE'
 
 
 def test_thing_FirmwareStatusEvent():

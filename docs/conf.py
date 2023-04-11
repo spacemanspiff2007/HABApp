@@ -247,6 +247,12 @@ autodoc_pydantic_field_swap_name_and_alias = True
 regex_path = re.compile(r"^\w+Path\('([^']+)'\)")
 assert regex_path.search('WindowsPath(\'lib\')').group(1) == 'lib'
 
+# nicer type values
+TYPE_REPLACEMENTS = {
+    '_MissingType.MISSING': '<MISSING>',
+    'ConstrainedIntValue': 'int'
+}
+
 
 def replace_node_contents(node: Node):
     """Find nodes with given `tag_matches` and `text_matches`. Recursively
@@ -265,7 +271,7 @@ def replace_node_contents(node: Node):
     parent: Node = node.parent
     node_text: str = node.astext()
 
-    replacement = None
+    replacement = TYPE_REPLACEMENTS.get(node_text)
 
     # Replace default value
     # WindowsPath('config') -> 'config'
@@ -289,8 +295,8 @@ def replace_node_contents(node: Node):
 
 
 def transform_desc(app, domain, objtype: str, contentnode):
-    if objtype != 'pydantic_field':
-        return None
+    # if objtype != 'pydantic_field':
+    #     return None
 
     replace_node_contents(node=contentnode.parent)
 
