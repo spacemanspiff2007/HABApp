@@ -11,7 +11,7 @@ def assert_same_signature(func_a, func_b):
 
     doc_a = inspect.getdoc(func_a)
     doc_b = inspect.getdoc(func_b)
-    assert doc_a == doc_b
+    assert doc_a == doc_b, f'\n  {doc_a}\n  {doc_b}\n'
 
     return True
 
