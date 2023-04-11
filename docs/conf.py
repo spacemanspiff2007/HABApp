@@ -276,7 +276,7 @@ def replace_node_contents(node: Node):
     # Replace default value
     # WindowsPath('config') -> 'config'
     if node_text.endswith(')') and (m := regex_path.search(node_text)) is not None:
-        replacement = Text(f"'{m.group(1)}'")
+        replacement = f"'{m.group(1)}'"
 
     # # Type hints
     # tag_matches = {"pending_xref", "pending_xref_condition"}
@@ -287,9 +287,10 @@ def replace_node_contents(node: Node):
 
     # put replacement in place
     if replacement is not None:
-        replacement.parent = parent
+        replacement_obj = Text(replacement)
+        replacement_obj.parent = parent
         pos = parent.children.index(node)
-        parent.children[pos] = replacement
+        parent.children[pos] = replacement_obj
 
     return matched_nodes
 
