@@ -12,7 +12,7 @@ class TestOpenhabEventTypes(TestBaseRule):
 
         # test the states
         for oh_type in get_openhab_test_types():
-            self.add_test(f'{oh_type} events', self.test_events, oh_type, get_openhab_test_events(oh_type))
+            self.add_test(f'{oh_type} events', self.test_events, oh_type, get_openhab_test_events(oh_type) + [None])
 
         dimensions = {
             'Length': 'm', 'Temperature': '°C', 'Pressure': 'hPa', 'Speed': 'km/h', 'Intensity': 'W/m²', 'Angle': '°',
@@ -32,7 +32,7 @@ class TestOpenhabEventTypes(TestBaseRule):
                 waiter.wait_for_event(value=value)
 
                 # Contact does not support commands
-                if item_type != 'Contact':
+                if item_type != 'Contact' and value is not None:
                     self.openhab.send_command(item_name, value)
                     waiter.wait_for_event(value=value)
 

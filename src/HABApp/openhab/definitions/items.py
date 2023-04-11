@@ -1,12 +1,14 @@
-from enum import Enum as _Enum
 import typing
+from enum import Enum as _Enum
+
+from HABApp.core.const.const import StrEnum
 
 
 def _get_str_enum_values(obj: typing.Type[_Enum]) -> typing.Set[str]:
     return {_member.value for _member in obj}
 
 
-class ItemType(str, _Enum):
+class ItemType(StrEnum):
     STRING = 'String'
     NUMBER = 'Number'
     SWITCH = 'Switch'
@@ -25,7 +27,7 @@ class ItemType(str, _Enum):
 ITEM_TYPES: typing.Final = _get_str_enum_values(ItemType)
 
 
-class ItemDimensions(str, _Enum):
+class ItemDimensions(StrEnum):
     ACCELERATION = 'Acceleration'
     ANGLE = 'Angle'
     AREAL_DENSITY = 'ArealDensity'
@@ -69,7 +71,7 @@ class ItemDimensions(str, _Enum):
 ITEM_DIMENSIONS: typing.Final = _get_str_enum_values(ItemDimensions)
 
 
-class GroupItemFunctions(str, _Enum):
+class GroupItemFunctions(StrEnum):
     AND = 'AND'
     AVG = 'AVG'
     MAX = 'MAX'

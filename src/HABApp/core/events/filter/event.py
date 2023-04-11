@@ -1,3 +1,5 @@
+from typing import Optional
+
 from HABApp.core.const import MISSING
 from HABApp.core.const.hints import HINT_ANY_CLASS
 from HABApp.core.internals import EventFilterBase
@@ -12,9 +14,9 @@ class EventFilter(EventFilterBase):
         self.event_class = event_class
 
         # Property filters
-        self.attr_name1 = None
+        self.attr_name1: Optional[str] = None
         self.attr_value1 = None
-        self.attr_name2 = None
+        self.attr_name2: Optional[str] = None
         self.attr_value2 = None
 
         for arg, value in kwargs.items():

@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict, Any
 
 from .base_event import OpenhabEvent
+from ..definitions import ThingStatusEnum, ThingStatusDetailEnum
 
 
 class ThingStatusInfoEvent(OpenhabEvent):
@@ -10,8 +11,8 @@ class ThingStatusInfoEvent(OpenhabEvent):
     :ivar str detail:
     """
     name: str
-    status: str
-    detail: str
+    status: ThingStatusEnum
+    detail: ThingStatusDetailEnum
 
     def __init__(self, name: str = '', status: str = '', detail: str = ''):
         super().__init__()
@@ -23,7 +24,8 @@ class ThingStatusInfoEvent(OpenhabEvent):
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
-        return cls(name=topic[15:-7], status=payload['status'], detail=payload['statusDetail'])
+        return cls(name=topic[15:-7], status=ThingStatusEnum(payload['status']),
+                   detail=ThingStatusDetailEnum(payload['statusDetail']))
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, status: {self.status}, detail: {self.detail}>'
@@ -38,10 +40,10 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
     :ivar str old_detail:
     """
     name: str
-    status: str
-    detail: str
-    old_status: str
-    old_detail: str
+    status: ThingStatusEnum
+    detail: ThingStatusDetailEnum
+    old_status: ThingStatusEnum
+    old_detail: ThingStatusDetailEnum
 
     def __init__(self, name: str = '', status: str = '', detail: str = '', old_status: str = '', old_detail: str = ''):
         super().__init__()
@@ -58,8 +60,8 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
         name = topic[15:-14]
         new, old = payload
         return cls(
-            name=name, status=new['status'], detail=new['statusDetail'],
-            old_status=old['status'], old_detail=old['statusDetail']
+            name=name, status=ThingStatusEnum(new['status']), detail=ThingStatusDetailEnum(new['statusDetail']),
+            old_status=ThingStatusEnum(old['status']), old_detail=ThingStatusDetailEnum(old['statusDetail'])
         )
 
     def __repr__(self):

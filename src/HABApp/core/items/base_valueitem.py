@@ -84,7 +84,7 @@ class BaseValueItem(BaseItem):
         :param greater_than: item state has to be greater than the passed value
         :param gt: item state has to be greater than the passed value
         :param greater_equal: item state has to be greater equal the passed value
-        :param ge: tem state has to be greater equal the passed value
+        :param ge: item state has to be greater equal the passed value
         :param is_: item state has to be the same object as the passt value (e.g. None)
         :param is_not: item state has to be not the same object as the passt value (e.g. None)
 

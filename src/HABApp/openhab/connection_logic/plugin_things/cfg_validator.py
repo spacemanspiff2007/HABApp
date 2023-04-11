@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ValidationError, parse_obj_as, validator
 from HABApp.core.logger import HABAppError
 from HABApp.openhab.connection_logic.plugin_things.filters import ChannelFilter, ThingFilter
 from HABApp.openhab.connection_logic.plugin_things.str_builder import StrBuilder
-from HABApp.openhab.definitions.definitions import ITEM_TYPES
+from HABApp.openhab.definitions import ITEM_TYPES
 from ._log import log
 
 RE_VALID_NAME = re.compile(r'\w+')
