@@ -31,8 +31,6 @@ class ConstProxyObj(ProxyObjBase):
         return self.name
 
 
-
-
 class StartUpProxyObj(ProxyObjBase):
     def __init__(self, to_replace: Callable, globals: dict):
         self.to_replace: Optional[Callable] = to_replace
