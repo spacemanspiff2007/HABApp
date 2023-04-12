@@ -3,8 +3,7 @@ from typing import Generic, TypeVar, List, Union, Type
 
 from pendulum import DateTime
 
-from HABApp.core.asyncio import create_task
-from HABApp.core.wrapper import log_exception
+from HABApp.core.asyncio import run_func_from_async
 from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
 
 log = logging.getLogger('HABApp')
@@ -26,7 +25,7 @@ class ItemTimes(Generic[WATCH_OBJ]):
             return
 
         if events:
-            create_task(self.schedule_events())
+            run_func_from_async(self.__async_schedule_events)
         return None
 
     def add_watch(self, secs: Union[int, float]) -> WATCH_OBJ:
@@ -41,8 +40,7 @@ class ItemTimes(Generic[WATCH_OBJ]):
         log.debug(f'Added {self.WATCH.__name__} ({w.fut.secs}s) for {self.name}')
         return w
 
-    @log_exception
-    async def schedule_events(self):
+    def __async_schedule_events(self):
         canceled = []
         for t in self.tasks:
             if t.fut.is_canceled:

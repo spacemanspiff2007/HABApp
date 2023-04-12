@@ -321,11 +321,11 @@ async def output_queue_check_size():
                 log_info(log, f'{size} messages in queue')
 
 
-async def async_post_update(item, state: Any):
+def async_post_update(item, state: Any):
     QUEUE.put_nowait((item, state, False))
 
 
-async def async_send_command(item, state: Any):
+def async_send_command(item, state: Any):
     QUEUE.put_nowait((item, state, True))
 
 

@@ -4,7 +4,7 @@ from typing import Any, Optional, List, Dict
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.core.asyncio import run_coro_from_thread, create_task
+from HABApp.core.asyncio import run_coro_from_thread, run_func_from_async
 from HABApp.core.items import BaseValueItem
 from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, \
@@ -28,7 +28,7 @@ def post_update(item_name: str, state: Any):
     if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
 
-    create_task(async_post_update(item_name, state))
+    run_func_from_async(async_post_update, item_name, state)
 
 
 def send_command(item_name: str, command):
@@ -43,7 +43,7 @@ def send_command(item_name: str, command):
     if isinstance(item_name, BaseValueItem):
         item_name = item_name.name
 
-    create_task(async_send_command(item_name, command))
+    run_func_from_async(async_send_command, item_name, command)
 
 
 def create_item(item_type: str, name: str, label="", category="",
