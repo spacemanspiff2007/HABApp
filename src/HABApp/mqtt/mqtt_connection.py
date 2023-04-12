@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 
 import HABApp
 from HABApp.core.asyncio import async_context
-from HABApp.core.const.topics import TOPIC_EVENTS
+from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
 from HABApp.core.wrapper import log_exception

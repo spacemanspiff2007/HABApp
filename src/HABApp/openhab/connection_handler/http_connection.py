@@ -19,7 +19,7 @@ from HABApp.core.logger import log_info, log_warning
 from HABApp.core.wrapper import process_exception, ignore_exception
 from HABApp.openhab.errors import OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
 from .http_connection_waiter import WaitBetweenConnects
-from ...core.const.topics import TOPIC_EVENTS
+from ...core.const.log import TOPIC_EVENTS
 from ...core.lib import SingleTask
 
 log = logging.getLogger('HABApp.openhab.connection')
