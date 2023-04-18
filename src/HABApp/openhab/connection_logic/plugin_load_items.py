@@ -24,6 +24,14 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
         fresh_item_sync()
 
+        # UoM might have unexpected consequences, so it makes sense to skip it
+        # See https://habapp.readthedocs.io/en/latest/troubleshooting.html for explanation
+        if any(':' in _dict['type'] for _dict in data):
+            log.warning(
+                'One or more UoM items configured. UoM items can lead to unpredictable and '
+                "undesired behavior. It's recommended to not use them and use plain number items instead."
+            )
+
         found_items = len(data)
         for _dict in data:
             item_name = _dict['name']
