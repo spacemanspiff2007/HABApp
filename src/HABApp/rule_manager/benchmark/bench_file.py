@@ -13,7 +13,8 @@ class BenchFile(RuleFile):
         super().__init__(rule_manager, 'BenchmarkFile', path=Path('BenchmarkFile'))
 
     def create_rules(self, created_rules: list):
-        HABAppRuleHook.in_dict(globals(), created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
+        hook = HABAppRuleHook(created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
+        hook.in_dict(globals())
 
         rule_ha = rule = HABAppBenchRule()
         if HABApp.CONFIG.mqtt.connection.host:

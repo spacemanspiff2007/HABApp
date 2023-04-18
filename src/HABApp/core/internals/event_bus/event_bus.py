@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent
 from .base_listener import EventBusBaseListener
-from HABApp.core.const.topics import TOPIC_EVENTS
+from HABApp.core.const.log import TOPIC_EVENTS
 
 event_log = logging.getLogger(TOPIC_EVENTS)
 habapp_log = logging.getLogger('HABApp')

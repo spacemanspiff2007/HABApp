@@ -44,6 +44,7 @@ class Context:
 
     def link(self, obj: HINT_CONTEXT_BOUND_OBJ) -> HINT_CONTEXT_BOUND_OBJ:
         assert isinstance(obj, ContextBoundObj)
+        # noinspection PyProtectedMember
         obj._ctx_link(self)
         return obj
 

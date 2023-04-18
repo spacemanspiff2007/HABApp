@@ -2,7 +2,7 @@ import logging
 import typing
 
 import HABApp
-from HABApp.core.asyncio import create_task
+from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent, EventFilter
 from HABApp.core.lib import PendingFuture
 from HABApp.core.const.hints import HINT_EVENT_CALLBACK
@@ -25,14 +25,14 @@ class BaseWatch(AutoContextBoundObj):
     async def _post_event(self):
         post_event(self.name, self.EVENT(self.name, self.fut.secs))
 
-    async def __cancel_watch(self):
+    def __cancel_watch(self):
         self.fut.cancel()
         log.debug(f'Canceled {self.__class__.__name__} ({self.fut.secs}s) for {self.name}')
 
     def cancel(self):
         """Cancel the item watch"""
         self._ctx_unlink()
-        create_task(self.__cancel_watch())
+        run_func_from_async(self.__cancel_watch)
 
     def listen_event(self, callback: HINT_EVENT_CALLBACK) -> 'HABApp.core.base.HINT_EVENT_BUS_LISTENER':
         """Listen to (only) the event that is emitted by this watcher"""

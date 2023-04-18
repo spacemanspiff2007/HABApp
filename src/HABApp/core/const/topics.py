@@ -13,6 +13,3 @@ ALL_TOPICS: Tuple[str, ...] = (
 
     TOPIC_FILES
 )
-
-
-TOPIC_EVENTS: Final = 'HABApp.EventBus'
