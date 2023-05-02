@@ -6,6 +6,7 @@ from typing import Dict, List
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent
 from .base_listener import EventBusBaseListener
 from HABApp.core.const.log import TOPIC_EVENTS
+from HABApp.core.const.topics import TOPIC_ANY
 
 event_log = logging.getLogger(TOPIC_EVENTS)
 habapp_log = logging.getLogger('HABApp')
@@ -42,6 +43,11 @@ class EventBus:
 
         # Notify all listeners
         listeners = self._listeners.get(topic, None)
+        if listeners is not None:
+            for listener in listeners:
+                listener.notify_listeners(event)
+        # Notify all catch all listeners
+        listeners = self._listeners.get(TOPIC_ANY, None)
         if listeners is not None:
             for listener in listeners:
                 listener.notify_listeners(event)

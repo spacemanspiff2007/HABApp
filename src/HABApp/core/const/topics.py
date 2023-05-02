@@ -4,12 +4,13 @@ from typing import Final, Tuple
 TOPIC_INFOS: Final    = 'HABApp.Infos'
 TOPIC_WARNINGS: Final = 'HABApp.Warnings'
 TOPIC_ERRORS: Final   = 'HABApp.Errors'
+TOPIC_ANY: Final      = 'HABApp.Any'
 
 TOPIC_FILES: Final = 'HABApp.Files'
 
 
 ALL_TOPICS: Tuple[str, ...] = (
-    TOPIC_INFOS, TOPIC_WARNINGS, TOPIC_ERRORS,
+    TOPIC_INFOS, TOPIC_WARNINGS, TOPIC_ERRORS, TOPIC_ANY,
 
     TOPIC_FILES
 )
