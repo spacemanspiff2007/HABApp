@@ -1,10 +1,11 @@
 from typing import Any, Mapping
 
 from immutables import Map
-from pendulum import now as pd_now
 from pendulum import UTC
+from pendulum import now as pd_now
 
 from HABApp.core.items import BaseItem
+from HABApp.openhab.definitions import ThingStatusEnum, ThingStatusDetailEnum
 from HABApp.openhab.events import ThingConfigStatusInfoEvent, ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.interface import set_thing_enabled
 
@@ -21,8 +22,9 @@ class Thing(BaseItem):
     def __init__(self, name: str):
         super().__init__(name)
 
-        self.status: str = ''
-        self.status_detail: str = ''
+        # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/internal/ThingImpl.java#L67
+        self.status: ThingStatusEnum = ThingStatusEnum.UNINITIALIZED
+        self.status_detail: ThingStatusDetailEnum = ThingStatusDetailEnum.NONE
 
         self.label: str = ''
 

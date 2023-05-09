@@ -35,7 +35,7 @@ def get_status_event(status: str) -> ThingStatusInfoEvent:
 
 def test_thing_status_events(test_thing: Thing):
 
-    assert test_thing.status == ''
+    assert test_thing.status == 'UNINITIALIZED'
 
     # initial set -> update and change
     set_test_now(DateTime(2000, 1, 1, 1, tzinfo=UTC))
@@ -53,13 +53,10 @@ def test_thing_status_events(test_thing: Thing):
 
     # third set -> update & change
     set_test_now(DateTime(2000, 1, 1, 3, tzinfo=UTC))
-    test_thing.process_event(get_status_event('asdf'))
-    assert test_thing.status == 'asdf'
+    test_thing.process_event(get_status_event('INITIALIZING'))
+    assert test_thing.status == 'INITIALIZING'
     assert test_thing._last_update.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
     assert test_thing._last_change.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
-
-    test_thing.process_event(get_status_event('NONE'))
-    assert test_thing.status is None
 
 
 def test_thing_updated_event(test_thing: Thing):
@@ -128,7 +125,7 @@ def test_thing_called_status_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_thi
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
-    event = get_status_event('NEW_STATUS')
+    event = get_status_event('REMOVING')
     assert test_thing.name == event.name
 
     sse_handler.on_sse_event(event)

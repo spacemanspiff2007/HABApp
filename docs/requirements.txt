@@ -2,8 +2,5 @@
 sphinx                      >= 6.1,     < 7
 sphinx-autodoc-typehints    >= 1.22,    < 2
 sphinx_rtd_theme            == 1.2.0
-sphinx-exec-code            == 0.9
+sphinx-exec-code            == 0.10
 autodoc_pydantic            >= 1.8,     < 1.9
-
-# we use monkeypatch in the RuleRunner which is part of pytest
-pytest                      >= 7.2,     < 8

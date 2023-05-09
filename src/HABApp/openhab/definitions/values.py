@@ -1,5 +1,5 @@
-import base64
-import typing
+from base64 import b64decode
+from typing import Tuple, Union
 
 from HABApp.core.events import ComplexEventValue
 
@@ -64,7 +64,7 @@ class HSBValue(ComplexEventValue):
 class QuantityValue(ComplexEventValue):
 
     @staticmethod
-    def split_unit(value: str) -> typing.Tuple[str, str]:
+    def split_unit(value: str) -> Tuple[str, str]:
         p = value.rfind(' ')
         # dimensionless has no unit
         if p < 0:
@@ -76,7 +76,7 @@ class QuantityValue(ComplexEventValue):
     def __init__(self, value: str):
         value, unit = QuantityValue.split_unit(value)
         try:
-            val: typing.Union[int, float] = int(value)
+            val: Union[int, float] = int(value)
         except ValueError:
             val = float(value)
         super().__init__(val)
@@ -101,7 +101,7 @@ class RawValue(ComplexEventValue):
         assert encoding == 'base64', f'"{encoding}"'
 
         # set the bytes as value
-        super().__init__(base64.b64decode(value[sep_enc + 1:]))
+        super().__init__(b64decode(value[sep_enc + 1:]))
 
     def __str__(self):
         return f'{self.type}'

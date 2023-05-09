@@ -101,14 +101,14 @@ class Rule(ContextProvidingObj):
             event
         )
 
-    def listen_event(self, name: Union[HINT_ITEM_OBJ, str],
+    def listen_event(self, name: Union[HINT_ITEM_OBJ, str, None],
                      callback: HINT_EVENT_CALLBACK,
                      event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None
                      ) -> HINT_EVENT_BUS_LISTENER:
         """
         Register an event listener
 
-        :param name: item or name to listen to
+        :param name: item or name to listen to. If name is None the listener will listen to all events
         :param callback: callback that accepts one parameter which will contain the event
         :param event_filter: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEventFilter` or
             :class:`~HABApp.core.events.ValueChangeEventFilter` which will also trigger on changes/update from openhab

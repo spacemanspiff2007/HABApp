@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.events.filter import NoEventFilter, EventFilter, OrFilterGroup
 from HABApp.core.internals import EventBus, EventBusListener, wrap_func
+from HABApp.core.const.topics import TOPIC_ANY
 
 
 class TestEvent:
@@ -32,6 +33,31 @@ def test_str_event(sync_worker):
 
     eb.post_event('str_test', 'str_event')
     assert event_history == ['str_event']
+
+
+def test_catch_all_events(sync_worker):
+    event_history_all = []
+    event_history_selected = []
+    eb = EventBus()
+
+    def append_event_selected(event):
+        event_history_selected.append(event)
+
+    def append_event_all(event):
+        event_history_all.append(event)
+
+    listener = EventBusListener('topicA', wrap_func(append_event_selected), NoEventFilter())
+    eb.add_listener(listener)
+    listener_all = EventBusListener(TOPIC_ANY, wrap_func(append_event_all), NoEventFilter())
+    eb.add_listener(listener_all)
+
+    eb.post_event('topicA', 'valueA')
+    eb.post_event('topicB', 'valueB')
+    eb.post_event('topicC', 'valueC')
+    assert event_history_selected == ['valueA']
+    assert len(event_history_all) == 3
+
+
 
 
 def test_multiple_events(sync_worker):

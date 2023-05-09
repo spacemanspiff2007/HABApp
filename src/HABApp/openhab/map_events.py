@@ -33,12 +33,7 @@ _events['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming fr
 def get_event(_in_dict: dict) -> OpenhabEvent:
     event_type: str = _in_dict['type']
     topic: str = _in_dict['topic']
-
-    # Workaround for None values in the payload str
-    p_str: str = _in_dict['payload']
-    if '"NONE"' in p_str:
-        p_str = p_str.replace('"NONE"', 'null')
-    payload = load_json(p_str)
+    payload: dict = load_json(_in_dict['payload'])
 
     # Find event from implemented events
     try:
