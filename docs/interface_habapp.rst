@@ -108,7 +108,7 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     SimpleRuleRunner().set_up()
     # ------------ hide: stop -------------
 

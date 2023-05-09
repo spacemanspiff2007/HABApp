@@ -109,7 +109,7 @@ This example shows how to fade a Dimmer from 0 to 100 in 30 secs
 
     # ------------ hide: start ------------
     import HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
@@ -142,7 +142,7 @@ This example shows how to fade three values together (e.g. for an RGB strip)
 
     # ------------ hide: start ------------
     import HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
@@ -192,7 +192,7 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
 
     # ------------ hide: start ------------
     import HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.add_item(HABApp.openhab.items.SwitchItem('RoomLights'))
@@ -250,7 +250,7 @@ Basic Example
 
     # ------------ hide: start ------------
     import HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------
@@ -311,7 +311,7 @@ Advanced Example
 
 
     import HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------
@@ -391,7 +391,7 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
 
     # ------------ hide: start ------------
     import HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
 

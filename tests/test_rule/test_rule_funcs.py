@@ -4,7 +4,7 @@ import pytest
 
 from HABApp import Rule
 from tests.helpers import TestEventBus
-from ..rule_runner import SimpleRuleRunner
+from HABApp.util.test.rule_runner import SimpleRuleRunner
 
 
 @pytest.mark.no_internals

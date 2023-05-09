@@ -21,7 +21,7 @@ rules in the HABApp rule engine. So lets write a small rule which prints somethi
 .. exec_code::
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------
@@ -54,7 +54,7 @@ This often comes in handy if there is some logic that shall be applied to differ
 .. exec_code::
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------
@@ -98,7 +98,7 @@ An item is created and added to the item registry through the corresponding clas
    :hide_output:
 
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
+   from HABApp.util.test.rule_runner import SimpleRuleRunner
    SimpleRuleRunner().set_up()
    # ------------ hide: stop -------------
 
@@ -128,7 +128,7 @@ To access items from openHAB use the correct openHAB item type (see :ref:`the op
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------
@@ -177,7 +177,7 @@ All items have two additional timestamps set which can be used to simplify rule 
     # ------------ hide: start ------------
     from pendulum import DateTime
     from HABApp.core.items import Item
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
 
     runner = SimpleRuleRunner()
     runner.set_up()
@@ -218,7 +218,7 @@ passed to the callback.
 .. exec_code::
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
 
@@ -270,7 +270,7 @@ Trigger an event when an item is constant
 
     # ------------ hide: start ------------
     import time, HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.add_item(HABApp.core.items.Item('test_watch'))
@@ -321,7 +321,7 @@ Something similar is available for openHAB items (``oh_post_update_if``)
 
     # ------------ hide: start ------------
     import time, HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.add_item(HABApp.core.items.Item('Item_Name'))

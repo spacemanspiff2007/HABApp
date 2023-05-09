@@ -47,7 +47,7 @@ Example:
 .. exec_code::
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     SimpleRuleRunner().set_up()
 
     import HABApp
@@ -914,7 +914,7 @@ for 60 seconds.
 
     # ------------ hide: start ------------
     import time, HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     thing_item = HABApp.openhab.items.Thing('my:thing:uid')

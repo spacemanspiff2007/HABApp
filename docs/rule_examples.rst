@@ -21,7 +21,7 @@ Get an even when the item is constant for 5 and for 10 seconds.
 
     # ------------ hide: start ------------
     import time, HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     HABApp.core.Items.add_item(HABApp.core.items.Item('test_watch'))
@@ -73,7 +73,7 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
 
     # ------------ hide: start ------------
     import time, HABApp
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     from HABApp.core.items import Item
@@ -122,7 +122,7 @@ to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more inform
 
     # ------------ hide: start ------------
     import datetime
-    from rule_runner import SimpleRuleRunner
+    from HABApp.util.test.rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
     # ------------ hide: stop -------------
