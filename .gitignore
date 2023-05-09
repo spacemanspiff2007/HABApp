@@ -5,6 +5,9 @@
 run/*/log/
 run/*/config/*.items
 
+# Test files
+src/__*.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
