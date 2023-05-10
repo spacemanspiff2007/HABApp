@@ -16,14 +16,36 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     def __init__(self, name: str = '', value: Any = None):
         super().__init__()
 
-        # smarthome/items/NAME/state
         self.name: str = name
         self.value: Any = value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # smarthome/items/NAME/state
+        # openhab/items/NAME/state
         return cls(topic[14:-6], map_openhab_values(payload['type'], payload['value']))
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+
+
+class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
+    """
+    :ivar str name:
+    :ivar value:
+    """
+    name: str
+    value: Any
+
+    def __init__(self, name: str = '', value: Any = None):
+        super().__init__()
+
+        self.name: str = name
+        self.value: Any = value
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        # openhab/items/NAME/stateupdated
+        return cls(topic[14:-13], map_openhab_values(payload['type'], payload['value']))
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'

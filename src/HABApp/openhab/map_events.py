@@ -2,7 +2,7 @@ from typing import Dict, Type
 from HABApp.core.const.json import load_json
 
 from .events import OpenhabEvent, \
-    ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
+    ItemStateEvent, ItemStateUpdatedEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent, \
     ChannelTriggeredEvent, ChannelDescriptionChangedEvent, \
     ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, \
@@ -12,7 +12,7 @@ from .events import OpenhabEvent, \
 
 EVENT_LIST = [
     # item events
-    ItemStateEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,
+    ItemStateEvent, ItemStateUpdatedEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent,
 
     # channel events

@@ -41,6 +41,9 @@ ON_CONNECTED: typing.Callable = None
 ON_DISCONNECTED: typing.Callable = None
 
 
+OH_3: bool = False
+
+
 async def get(url: str, log_404=True, **kwargs: Any) -> ClientResponse:
 
     mgr = _RequestContextManager(
@@ -230,6 +233,7 @@ async def start_sse_event_listener():
         # cache so we don't have to look up every event
         _load_json = load_json
         _see_handler = on_sse_event
+        oh4 = not OH_3
 
         async with sse_client.EventSource(url=f'/rest/events?topics={HABApp.CONFIG.openhab.connection.topic_filter}',
                                           session=HTTP_SESSION, ssl=HTTP_VERIFY_SSL) as event_source:
@@ -245,12 +249,17 @@ async def start_sse_event_listener():
 
                 # Alive event from openhab to detect dropped connections
                 # -> Can be ignored on the HABApp side
-                if e_json.get('type') == 'ALIVE':
+                e_type = e_json.get('type')
+                if e_type == 'ALIVE':
                     continue
 
                 # Log raw sse event
                 if log_events.isEnabledFor(logging.DEBUG):
                     log_events._log(logging.DEBUG, e_str, [])
+
+                # With OH4 we have the ItemStateUpdatedEvent, so we can ignore the ItemStateEvent
+                if oh4 and e_type == 'ItemStateEvent':
+                    continue
 
                 # process
                 _see_handler(e_json)
@@ -383,7 +392,7 @@ async def wait_for_min_start_level():
 
 
 async def try_connect():
-    global IS_ONLINE
+    global IS_ONLINE, OH_3
 
     while True:
         try:
@@ -407,6 +416,9 @@ async def try_connect():
             vers = tuple(map(int, runtime_info["version"].split('.')[:2]))
             if vers < (3, 3):
                 log.warning('HABApp requires at least openHAB version 3.3!')
+
+            if vers < (4, 0):
+                OH_3 = True
 
             # wait for openhab startup to be complete
             await wait_for_min_start_level()

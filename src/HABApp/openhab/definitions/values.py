@@ -85,6 +85,11 @@ class QuantityValue(ComplexEventValue):
     def __str__(self):
         return f'{self.value} {self.unit}'
 
+    def __eq__(self, other):
+        if not isinstance(other, QuantityValue):
+            return NotImplemented
+        return self.value == other.value and self.unit == other.unit
+
 
 class RawValue(ComplexEventValue):
     def __init__(self, value: str):

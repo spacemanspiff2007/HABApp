@@ -1,13 +1,15 @@
 import datetime
 import pytest
 
+from HABApp.openhab.definitions import QuantityValue
 from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
-    ItemStateChangedEvent, ItemStateEvent, ItemStatePredictedEvent, ItemUpdatedEvent, \
+    ItemStateChangedEvent, ItemStateEvent, ItemStateUpdatedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, ChannelDescriptionChangedEvent, \
     ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
 from HABApp.openhab.map_events import get_event, EVENT_LIST
 
 
+# noinspection PyPep8Naming
 def test_ItemStateEvent():
     event = get_event({'topic': 'openhab/items/Ping/state', 'payload': '{"type":"String","value":"1"}',
                        'type': 'ItemStateEvent'})
@@ -28,6 +30,22 @@ def test_ItemStateEvent():
     assert event.value is None
 
 
+# noinspection PyPep8Naming
+def test_ItemStateUpdatedEvent():
+    event = get_event({'topic': 'openhab/items/my_item_name/stateupdated',
+                       'payload': '{"type":"Quantity","value":"9.5 °C"}', 'type': 'ItemStateUpdatedEvent'})
+    assert isinstance(event, ItemStateUpdatedEvent)
+    assert event.name == 'my_item_name'
+    assert event.value == QuantityValue('9.5 °C')
+
+    event = get_event({'topic': 'openhab/items/my_item_name/stateupdated',
+                       'payload': '{"type":"Decimal","value":"9.5"}', 'type': 'ItemStateUpdatedEvent'})
+    assert isinstance(event, ItemStateUpdatedEvent)
+    assert event.name == 'my_item_name'
+    assert event.value == 9.5
+
+
+# noinspection PyPep8Naming
 def test_ItemCommandEvent():
     event = get_event({'topic': 'openhab/items/Ping/command', 'payload': '{"type":"String","value":"1"}',
                        'type': 'ItemCommandEvent'})
@@ -36,6 +54,7 @@ def test_ItemCommandEvent():
     assert event.value == '1'
 
 
+# noinspection PyPep8Naming
 def test_ItemAddedEvent1():
     event = get_event({
         'topic': 'openhab/items/TestString/added',
@@ -48,6 +67,7 @@ def test_ItemAddedEvent1():
     assert event.label == 'MyLabel'
 
 
+# noinspection PyPep8Naming
 def test_ItemAddedEvent2():
     event = get_event({
         'topic': 'openhab/items/TestColor_OFF/added',
@@ -76,6 +96,7 @@ def test_ItemAddedEvent2():
                          'tags: {tag2, test_tag}, groups: {TestGroup}>'
 
 
+# noinspection PyPep8Naming
 def test_ItemUpdatedEvent():
     event = get_event({
         'topic': 'openhab/items/NameUpdated/updated',
@@ -104,6 +125,7 @@ def test_ItemUpdatedEvent():
     assert str(event) == '<ItemUpdatedEvent name: NameUpdated, type: Switch, tags: {tag1, tag5}, groups: {abc, def}>'
 
 
+# noinspection PyPep8Naming
 def test_ItemStateChangedEvent1():
     event = get_event({'topic': 'openhab/items/Ping/statechanged',
                        'payload': '{"type":"String","value":"1","oldType":"UnDef","oldValue":"NULL"}',
@@ -114,6 +136,7 @@ def test_ItemStateChangedEvent1():
     assert event.old_value is None
 
 
+# noinspection PyPep8Naming
 def test_ItemStatePredictedEvent():
     event = get_event({'topic': 'openhab/items/Buero_Lampe_Vorne_W/statepredicted',
                        'payload': '{"predictedType":"Percent","predictedValue":"10","isConfirmation":false}',
@@ -123,6 +146,7 @@ def test_ItemStatePredictedEvent():
     assert event.value.value == 10.0
 
 
+# noinspection PyPep8Naming
 def test_ItemStateChangedEvent2():
     UTC_OFFSET = datetime.datetime.now().astimezone(None).strftime('%z')
 
@@ -139,6 +163,7 @@ def test_ItemStateChangedEvent2():
     assert datetime.datetime(2018, 6, 21, 19, 47, 8), event.value
 
 
+# noinspection PyPep8Naming
 def test_GroupItemStateChangedEvent():
     d = {
         'topic': 'openhab/items/TestGroupAVG/TestNumber1/statechanged',
@@ -153,6 +178,7 @@ def test_GroupItemStateChangedEvent():
     assert event.old_value == 15
 
 
+# noinspection PyPep8Naming
 def test_channel_ChannelTriggeredEvent():
     d = {
         "topic": "openhab/channels/mihome:sensor_switch:00000000000000:button/triggered",
@@ -167,6 +193,7 @@ def test_channel_ChannelTriggeredEvent():
     assert event.event == 'SHORT_PRESSED'
 
 
+# noinspection PyPep8Naming
 def test_channel_ChannelDescriptionChangedEvent():
     data = {
         'topic': 'openhab/channels/lgwebos:WebOSTV:**********************:channel/descriptionchanged',
@@ -181,6 +208,7 @@ def test_channel_ChannelDescriptionChangedEvent():
     assert event.value == '{"options":[]}'
 
 
+# noinspection PyPep8Naming
 def test_thing_ThingStatusInfoEvent():
     data = {
         'topic': 'openhab/things/samsungtv:tv:mysamsungtv/status',
@@ -205,6 +233,7 @@ def test_thing_ThingStatusInfoEvent():
     assert event.detail == 'NONE'
 
 
+# noinspection PyPep8Naming
 def test_thing_ThingStatusInfoChangedEvent():
     data = {
         'topic': 'openhab/things/samsungtv:tv:mysamsungtv/statuschanged',
@@ -220,6 +249,7 @@ def test_thing_ThingStatusInfoChangedEvent():
     assert event.old_detail == 'NONE'
 
 
+# noinspection PyPep8Naming
 def test_thing_FirmwareStatusEvent():
     data = {
         'topic': 'openhab/things/zigbee:device:12345678:9abcdefghijklmno/firmware/status',
@@ -232,6 +262,7 @@ def test_thing_FirmwareStatusEvent():
     assert event.status == 'UNKNOWN'
 
 
+# noinspection PyPep8Naming
 def test_thing_ThingAddedEvent():
     data = {
         'topic': 'openhab/things/astro:sun:0a94363608/added',
@@ -249,6 +280,7 @@ def test_thing_ThingAddedEvent():
     assert event.properties == {}
 
 
+# noinspection PyPep8Naming
 def test_thing_ThingRemovedEvent():
     data = {
         'topic': 'openhab/things/astro:sun:0a94363608/removed',
@@ -266,6 +298,7 @@ def test_thing_ThingRemovedEvent():
     assert event.properties == {}
 
 
+# noinspection PyPep8Naming
 def test_thing_ThingUpdatedEvent():
     data = {
         "topic": "openhab/things/astro:sun:local/updated",
@@ -277,6 +310,7 @@ def test_thing_ThingUpdatedEvent():
     assert isinstance(event, ThingUpdatedEvent)
 
 
+# noinspection PyPep8Naming
 def test_thing_ConfigStatusInfoEvent():
     data = {
         'topic': 'openhab/things/zwave:device:gehirn:node29/config/status',
