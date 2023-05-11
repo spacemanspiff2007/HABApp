@@ -233,7 +233,7 @@ async def start_sse_event_listener():
         # cache so we don't have to look up every event
         _load_json = load_json
         _see_handler = on_sse_event
-        oh4 = not OH_3
+        oh3 = OH_3
 
         async with sse_client.EventSource(url=f'/rest/events?topics={HABApp.CONFIG.openhab.connection.topic_filter}',
                                           session=HTTP_SESSION, ssl=HTTP_VERIFY_SSL) as event_source:
@@ -258,11 +258,11 @@ async def start_sse_event_listener():
                     log_events._log(logging.DEBUG, e_str, [])
 
                 # With OH4 we have the ItemStateUpdatedEvent, so we can ignore the ItemStateEvent
-                if oh4 and e_type == 'ItemStateEvent':
+                if not oh3 and e_type == 'ItemStateEvent':
                     continue
 
                 # process
-                _see_handler(e_json)
+                _see_handler(e_json, oh3)
     except Exception as e:
         disconnect = is_disconnect_exception(e)
         lvl = logging.WARNING if disconnect else logging.ERROR

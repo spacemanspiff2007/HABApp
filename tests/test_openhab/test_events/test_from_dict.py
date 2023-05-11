@@ -2,10 +2,10 @@ import datetime
 import pytest
 
 from HABApp.openhab.definitions import QuantityValue
-from HABApp.openhab.events import ChannelTriggeredEvent, GroupItemStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
+from HABApp.openhab.events import ChannelTriggeredEvent, GroupStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
     ItemStateChangedEvent, ItemStateEvent, ItemStateUpdatedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, ChannelDescriptionChangedEvent, \
-    ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
+    ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent, GroupStateUpdatedEvent
 from HABApp.openhab.map_events import get_event, EVENT_LIST
 
 
@@ -164,6 +164,20 @@ def test_ItemStateChangedEvent2():
 
 
 # noinspection PyPep8Naming
+def test_GroupStateUpdatedEvent():
+    d = {
+        'topic': 'openhab/items/GroupThatChanged/ItemThatCausedChange/stateupdated',
+        'payload': '{"type":"OnOff","value":"ON"}',
+        'type': 'GroupStateUpdatedEvent'
+    }
+    event = get_event(d)
+    assert isinstance(event, GroupStateUpdatedEvent)
+    assert event.name == 'GroupThatChanged'
+    assert event.item == 'ItemThatCausedChange'
+    assert str(event.value) == 'ON'
+
+
+# noinspection PyPep8Naming
 def test_GroupItemStateChangedEvent():
     d = {
         'topic': 'openhab/items/TestGroupAVG/TestNumber1/statechanged',
@@ -171,7 +185,7 @@ def test_GroupItemStateChangedEvent():
         'type': 'GroupItemStateChangedEvent'
     }
     event = get_event(d)
-    assert isinstance(event, GroupItemStateChangedEvent)
+    assert isinstance(event, GroupStateChangedEvent)
     assert event.name == 'TestGroupAVG'
     assert event.item == 'TestNumber1'
     assert event.value == 16

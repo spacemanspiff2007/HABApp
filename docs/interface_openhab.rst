@@ -334,12 +334,12 @@ ItemStatePredictedEvent
    :member-order: groupwise
 
 
-GroupItemStateChangedEvent
+GroupStateChangedEvent
 --------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.GroupItemStateChangedEvent
+.. inheritance-diagram:: HABApp.openhab.events.GroupStateChangedEvent
    :parts: 1
 
-.. autoclass:: HABApp.openhab.events.GroupItemStateChangedEvent
+.. autoclass:: HABApp.openhab.events.GroupStateChangedEvent
    :members:
    :inherited-members:
    :member-order: groupwise

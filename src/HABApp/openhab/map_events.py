@@ -3,7 +3,8 @@ from HABApp.core.const.json import load_json
 
 from .events import OpenhabEvent, \
     ItemStateEvent, ItemStateUpdatedEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
-    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent, \
+    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, \
+    GroupStateUpdatedEvent, GroupStateChangedEvent, \
     ChannelTriggeredEvent, ChannelDescriptionChangedEvent, \
     ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, \
     ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, \
@@ -13,7 +14,9 @@ from .events import OpenhabEvent, \
 EVENT_LIST = [
     # item events
     ItemStateEvent, ItemStateUpdatedEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,
-    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupItemStateChangedEvent,
+    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent,
+
+    GroupStateUpdatedEvent, GroupStateChangedEvent,
 
     # channel events
     ChannelTriggeredEvent, ChannelDescriptionChangedEvent,
@@ -26,6 +29,7 @@ EVENT_LIST = [
 ]
 
 _events: Dict[str, Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
+_events['GroupItemStateChangedEvent'] = GroupStateChangedEvent       # Naming from openHAB is inconsistent here
 _events['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openHAB is inconsistent here
 _events['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming from openHAB is inconsistent here
 

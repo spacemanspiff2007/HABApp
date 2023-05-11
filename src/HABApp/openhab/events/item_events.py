@@ -222,14 +222,41 @@ class ItemStatePredictedEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # 'smarthome/items/NAME/statepredicted'
+        # 'openhab/items/NAME/statepredicted'
         return cls(topic[14:-15], map_openhab_values(payload['predictedType'], payload['predictedValue']))
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
-class GroupItemStateChangedEvent(OpenhabEvent):
+class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
+    """
+    :ivar str name: Group name
+    :ivar str item: Group item that caused the update
+    :ivar value:
+    """
+    name: str
+    item: str
+    value: Any
+
+    def __init__(self, name: str = '', item: str = '', value: Any = None):
+        super().__init__()
+
+        self.name: str = name
+        self.item: str = item
+        self.value: Any = value
+
+    @classmethod
+    def from_dict(cls, topic: str, payload: dict):
+        # openhab/items/GroupItem/ItemThatChanged/stateupdated
+        parts = topic.split('/')
+        return cls(parts[2], parts[3], map_openhab_values(payload['type'], payload['value']))
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+
+
+class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     """
     :ivar str name:
     :ivar str item:

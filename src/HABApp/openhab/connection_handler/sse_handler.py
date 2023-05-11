@@ -10,13 +10,14 @@ from HABApp.core.internals import uses_post_event, uses_get_item
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.connection_handler import http_connection
-from HABApp.openhab.events import GroupItemStateChangedEvent, ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
+from HABApp.openhab.definitions.topics import TOPIC_THINGS, TOPIC_ITEMS
+from HABApp.openhab.events import GroupStateChangedEvent, GroupStateUpdatedEvent, \
+    ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
     ThingStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
 from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry, remove_thing_from_registry, \
     add_thing_to_registry
 from HABApp.openhab.map_events import get_event
 from HABApp.openhab.map_items import map_item
-from HABApp.openhab.definitions.topics import TOPIC_THINGS, TOPIC_ITEMS
 
 log = http_connection.log
 
@@ -25,7 +26,7 @@ post_event = uses_post_event()
 get_item = uses_get_item()
 
 
-def on_sse_event(event_dict: dict):
+def on_sse_event(event_dict: dict, oh_3: bool):
     try:
         # Lookup corresponding OpenHAB event
         event = get_event(event_dict)
@@ -40,6 +41,12 @@ def on_sse_event(event_dict: dict):
                 return None
 
             if isinstance(event, ValueChangeEvent):
+                # Workaround because there is no GroupItemStateEvent in OH3
+                if oh_3 and isinstance(event, GroupStateChangedEvent):
+                    __item = get_item(event.name)  # type: HABApp.openhab.items.GroupItem
+                    __item.set_value(event.value)
+                    # Manually issue an GroupStateUpdatedEvent so we are consistent with OH4 behavior
+                    post_event(event.name, GroupStateUpdatedEvent(event.name, event.item, event.value))
                 post_event(event.name, event)
                 return None
 
@@ -49,12 +56,6 @@ def on_sse_event(event_dict: dict):
                 post_event(event.name, event)
                 return None
 
-            # Workaround because there is no GroupItemStateEvent
-            if isinstance(event, GroupItemStateChangedEvent):
-                __item = get_item(event.name)  # type: HABApp.openhab.items.GroupItem
-                __item.set_value(event.value)
-                post_event(event.name, event)
-                return None
         except ItemNotFoundException:
             log_warning(log, f'Received {event.__class__.__name__} for {event.name} but item does not exist!')
 

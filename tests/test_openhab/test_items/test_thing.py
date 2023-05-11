@@ -128,7 +128,7 @@ def test_thing_called_status_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_thi
     event = get_status_event('REMOVING')
     assert test_thing.name == event.name
 
-    sse_handler.on_sse_event(event)
+    sse_handler.on_sse_event(event, oh_3=False)
     test_thing.process_event.assert_called_once_with(event)
 
 
@@ -141,7 +141,7 @@ def test_thing_called_updated_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_th
     event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label')
     assert test_thing.name == event.name
 
-    sse_handler.on_sse_event(event)
+    sse_handler.on_sse_event(event, oh_3=False)
     test_thing.process_event.assert_called_once_with(event)
 
 
@@ -157,7 +157,7 @@ def test_thing_handler_add_event(monkeypatch, ir: HINT_ITEM_REGISTRY):
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, channels=channels,
                             configuration=configuration, properties=properties)
-    sse_handler.on_sse_event(event)
+    sse_handler.on_sse_event(event, oh_3=False)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)
@@ -177,7 +177,7 @@ def test_thing_handler_add_event(monkeypatch, ir: HINT_ITEM_REGISTRY):
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, channels=channels,
                             configuration=configuration, properties=properties)
-    sse_handler.on_sse_event(event)
+    sse_handler.on_sse_event(event, oh_3=False)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)
