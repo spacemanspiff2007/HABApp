@@ -4,42 +4,118 @@ from cProfile import Profile
 from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
 from pstats import Stats
-from time import time
-from typing import Callable, Any
+from threading import Lock
+from time import monotonic
+from typing import Callable, Any, Set, Final, Dict, Tuple
 from typing import Optional
 
-from HABApp.core.internals import HINT_CONTEXT_OBJ
 from HABApp.core.const import loop
+from HABApp.core.internals import HINT_CONTEXT_OBJ
 from .base import WrappedFunctionBase, default_logger
 
-WORKERS: Optional[ThreadPoolExecutor] = None
+POOL: Optional[ThreadPoolExecutor] = None
+POOL_THREADS: int = 0
+POOL_INFO: Set['PoolFunc'] = set()
+POOL_LOCK = Lock()
 
 
 def create_thread_pool(count: int):
-    global WORKERS
+    global POOL, POOL_THREADS
     assert isinstance(count, int) and count > 0
 
     default_logger.debug(f'Starting thread pool with {count:d} threads!')
 
     stop_thread_pool()
-    WORKERS = ThreadPoolExecutor(count, 'HabAppWorker')
+    POOL_THREADS = count
+    POOL = ThreadPoolExecutor(count, 'HabAppWorker')
 
 
 def stop_thread_pool():
-    global WORKERS
-    if WORKERS is not None:
-        WORKERS.shutdown()
-        WORKERS = None
+    global POOL, POOL_THREADS
+    if POOL is not None:
+        POOL.shutdown()
+        POOL = None
+        POOL_THREADS = 0
         default_logger.debug('Thread pool stopped!')
 
 
 async def run_in_thread_pool(func: Callable):
     return await loop.run_in_executor(
-        WORKERS, func
+        POOL, func
     )
 
 
 HINT_FUNC_SYNC = Callable[..., Any]
+
+
+class PoolFunc:
+    def __init__(self, parent: 'WrappedThreadFunction',
+                 func_obj: HINT_FUNC_SYNC, func_args: Tuple[Any, ...], func_kwargs: Dict[str, Any]):
+        self.parent: Final = parent
+        self.func_obj: Final = func_obj
+        self.func_args: Final = func_args
+        self.func_kwargs: Final = func_kwargs
+
+        # timing checks
+        self.submitted = monotonic()
+        self.dur_start = 0.0
+        self.dur_run = 0.0
+
+        # thread info
+        self.usage_high = 0
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} high: {self.usage_high:d}/{POOL_THREADS:d}>'
+
+    def run(self):
+        try:
+            ts_start = monotonic()
+            self.dur_start = ts_start - self.submitted
+
+            with POOL_LOCK:
+                POOL_INFO.add(self)
+                count = len(POOL_INFO)
+                for info in POOL_INFO:
+                    info.usage_high = max(count, info.usage_high)
+
+            parent = self.parent
+
+            # notify if we don't process quickly
+            if self.dur_start > 0.05:
+                parent.log.warning(f'Starting of {parent.name} took too long: {self.dur_start:.2f}s. '
+                                   f'Maybe there are not enough threads?')
+
+            # start profiler
+            pr = Profile()
+            pr.enable()
+
+            # Execute the function
+            self.func_obj(*self.func_args, **self.func_kwargs)
+
+            # disable profiler
+            pr.disable()
+
+            # log warning if execution takes too long
+            self.dur_run = monotonic() - ts_start
+
+            if parent.warn_too_long and self.dur_run > 0.8 and self.usage_high >= POOL_THREADS * 0.6:
+                parent.log.warning(f'{self.usage_high}/{POOL_THREADS} threads have been in use and '
+                                   f'execution of {parent.name} took too long: {self.dur_run:.2f}s')
+
+                s = io.StringIO()
+                ps = Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
+                ps.print_stats(0.1)  # limit to output to 10% of the lines
+
+                for line in s.getvalue().splitlines()[4:]:  # skip the amount of calls and "Ordered by:"
+                    if line:
+                        parent.log.warning(line)
+
+        except Exception as e:
+            self.parent.process_exception(e, *self.func_args, **self.func_kwargs)
+            return None
+        finally:
+            with POOL_LOCK:
+                POOL_INFO.discard(self)
 
 
 class WrappedThreadFunction(WrappedFunctionBase):
@@ -54,45 +130,7 @@ class WrappedThreadFunction(WrappedFunctionBase):
         assert callable(func)
 
         self.func = func
-
         self.warn_too_long: bool = warn_too_long
-        self.time_submitted: float = 0.0
 
     def run(self, *args, **kwargs):
-        self.time_submitted = time()
-        WORKERS.submit(self.run_sync, *args, **kwargs)
-
-    def run_sync(self, *args, **kwargs):
-        start = time()
-
-        # notify if we don't process quickly
-        if start - self.time_submitted > 0.05:
-            self.log.warning(f'Starting of {self.name} took too long: {start - self.time_submitted:.2f}s. '
-                             f'Maybe there are not enough threads?')
-
-        # start profiler
-        pr = Profile()
-        pr.enable()
-
-        # Execute the function
-        try:
-            self.func(*args, **kwargs)
-        except Exception as e:
-            self.process_exception(e, *args, **kwargs)
-            return None
-
-        # disable profiler
-        pr.disable()
-
-        # log warning if execution takes too long
-        duration = time() - start
-        if self.warn_too_long and duration > 0.8:
-            self.log.warning(f'Execution of {self.name} took too long: {duration:.2f}s')
-
-            s = io.StringIO()
-            ps = Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
-            ps.print_stats(0.1)  # limit to output to 10% of the lines
-
-            for line in s.getvalue().splitlines()[4:]:    # skip the amount of calls and "Ordered by:"
-                if line:
-                    self.log.warning(line)
+        POOL.submit(PoolFunc(self, self.func, args, kwargs).run)

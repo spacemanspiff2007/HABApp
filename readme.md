@@ -117,6 +117,11 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.1.0 (2023-XX-XX)
+- Renamed `GroupItemStateChangedEvent` to `GroupStateChangedEvent `
+- Groups issue a `GroupStateUpdateEvent`
+- Fewer warnings for long-running functions (execution of XXX took too long)
+
 #### 1.0.8 (2023-02-09)
 - Fixed an issue when using token based authentication with openHAB
 - Fixed an issue with the asyncio event loop under Python < 3.10
