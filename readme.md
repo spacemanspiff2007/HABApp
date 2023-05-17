@@ -119,8 +119,9 @@ MyOpenhabRule()
 # Changelog
 #### 1.1.0 (2023-XX-XX)
 - Renamed `GroupItemStateChangedEvent` to `GroupStateChangedEvent `
-- Groups issue a `GroupStateUpdateEvent`
-- Fewer warnings for long-running functions (execution of XXX took too long)
+- Groups issue a `GroupStateUpdateEvent` when the state updates
+- Fewer warnings for long-running functions (execution of <FUNC_NAME> took too long)
+- Added `status_detail` to `Thing`
 
 #### 1.0.8 (2023-02-09)
 - Fixed an issue when using token based authentication with openHAB

@@ -1,4 +1,5 @@
 from HABApp.core.const.const import StrEnum
+from typing import Final
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/ThingStatus.java
@@ -29,3 +30,8 @@ class ThingStatusDetailEnum(StrEnum):
     BRIDGE_UNINITIALIZED = 'BRIDGE_UNINITIALIZED'
     GONE = 'GONE'
     DISABLED = 'DISABLED'
+
+
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/internal/ThingImpl.java#L67
+THING_STATUS_DEFAULT: Final = ThingStatusEnum.UNINITIALIZED
+THING_STATUS_DETAIL_DEFAULT: Final = ThingStatusDetailEnum.NONE

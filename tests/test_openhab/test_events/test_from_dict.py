@@ -234,6 +234,8 @@ def test_thing_ThingStatusInfoEvent():
     assert event.name == 'samsungtv:tv:mysamsungtv'
     assert event.status == 'ONLINE'
     assert event.detail == 'BRIDGE_OFFLINE'
+    assert event.description == ''
+    assert str(event) == '<ThingStatusInfoEvent name: samsungtv:tv:mysamsungtv, status: ONLINE, detail: BRIDGE_OFFLINE>'
 
     data = {
         'topic': 'openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status',
@@ -245,6 +247,24 @@ def test_thing_ThingStatusInfoEvent():
     assert event.name == 'chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     assert event.status == 'ONLINE'
     assert event.detail == 'NONE'
+    assert event.description == ''
+
+    data = {
+        "topic": "openhab/things/fsinternetradio:radio:RadioWiGa/status",
+        "payload": "{\"status\":\"OFFLINE\",\"statusDetail\":\"COMMUNICATION_ERROR\",\"description\":"
+                   "\"java.util.concurrent.ExecutionException: java.net.NoRouteToHostException\"}",
+        "type": "ThingStatusInfoEvent"
+    }
+    event = get_event(data)
+    assert isinstance(event, ThingStatusInfoEvent)
+    assert event.name == 'fsinternetradio:radio:RadioWiGa'
+    assert event.status == 'OFFLINE'
+    assert event.detail == 'COMMUNICATION_ERROR'
+    assert event.description == 'java.util.concurrent.ExecutionException: java.net.NoRouteToHostException'
+    assert str(event) == '<ThingStatusInfoEvent name: fsinternetradio:radio:RadioWiGa, ' \
+                         'status: OFFLINE, ' \
+                         'detail: COMMUNICATION_ERROR , ' \
+                         'description: java.util.concurrent.ExecutionException: java.net.NoRouteToHostException>'
 
 
 # noinspection PyPep8Naming
@@ -336,7 +356,7 @@ def test_thing_ConfigStatusInfoEvent():
 
 
 @pytest.mark.parametrize('cls', [*EVENT_LIST])
-def test_event_has_name(cls):
+def test_every_event_has_name(cls):
     # this test ensure that alle events have a name argument
     c = cls('asdf')
     assert c.name == 'asdf'

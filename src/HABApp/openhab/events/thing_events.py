@@ -1,43 +1,53 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Final
 
 from .base_event import OpenhabEvent
 from ..definitions import ThingStatusEnum, ThingStatusDetailEnum
+from ..definitions.things import THING_STATUS_DEFAULT, THING_STATUS_DETAIL_DEFAULT
 
 
 class ThingStatusInfoEvent(OpenhabEvent):
     """
     :ivar str name:
-    :ivar str status:
-    :ivar str detail:
+    :ivar ThingStatusEnum status:
+    :ivar ThingStatusDetailEnum detail:
+    :ivar str description:
     """
     name: str
     status: ThingStatusEnum
     detail: ThingStatusDetailEnum
+    description: str
 
-    def __init__(self, name: str = '', status: str = '', detail: str = ''):
+    def __init__(self, name: str = '', status: ThingStatusEnum = THING_STATUS_DEFAULT,
+                 detail: ThingStatusDetailEnum = THING_STATUS_DETAIL_DEFAULT, description: str = ''):
         super().__init__()
 
-        self.name: str = name
-        self.status: str = status
-        self.detail: str = detail
+        self.name: Final = name
+        self.status: Final = status
+        self.detail: Final = detail
+        self.description: Final = description
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
         # openhab/things/chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/status
         return cls(name=topic[15:-7], status=ThingStatusEnum(payload['status']),
-                   detail=ThingStatusDetailEnum(payload['statusDetail']))
+                   detail=ThingStatusDetailEnum(payload['statusDetail']), description=payload.get('description', ''))
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, status: {self.status}, detail: {self.detail}>'
+        description = f' , description: {self.description:s}' if self.description else ''
+        return f'<{self.__class__.__name__} name: {self.name:s}, ' \
+               f'status: {self.status:s}, detail: {self.detail:s}{description:s}>'
+
+    # def __init__(self, name: str = '', status: ThingStatusEnum = THING_STATUS_DEFAULT,
+    #              detail: ThingStatusDetailEnum = THING_STATUS_DETAIL_DEFAULT, description: str = ''):
 
 
 class ThingStatusInfoChangedEvent(OpenhabEvent):
     """
     :ivar str name:
-    :ivar str status:
-    :ivar str detail:
-    :ivar str old_status:
-    :ivar str old_detail:
+    :ivar ThingStatusEnum status:
+    :ivar ThingStatusDetailEnum detail:
+    :ivar ThingStatusEnum old_status:
+    :ivar ThingStatusDetailEnum old_detail:
     """
     name: str
     status: ThingStatusEnum
@@ -45,14 +55,18 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
     old_status: ThingStatusEnum
     old_detail: ThingStatusDetailEnum
 
-    def __init__(self, name: str = '', status: str = '', detail: str = '', old_status: str = '', old_detail: str = ''):
+    def __init__(self, name: str = '',
+                 status: ThingStatusEnum = THING_STATUS_DEFAULT,
+                 detail: ThingStatusDetailEnum = THING_STATUS_DETAIL_DEFAULT,
+                 old_status: ThingStatusEnum = THING_STATUS_DEFAULT,
+                 old_detail: ThingStatusDetailEnum = THING_STATUS_DETAIL_DEFAULT):
         super().__init__()
 
-        self.name: str = name
-        self.status: str = status
-        self.detail: str = detail
-        self.old_status: str = old_status
-        self.old_detail: str = old_detail
+        self.name: Final = name
+        self.status: Final = status
+        self.detail: Final = detail
+        self.old_status: Final = old_status
+        self.old_detail: Final = old_detail
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):

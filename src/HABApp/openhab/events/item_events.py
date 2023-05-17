@@ -8,7 +8,7 @@ from ..map_values import map_openhab_values
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     """
     :ivar str name:
-    :ivar value:
+    :ivar Any value:
     """
     name: str
     value: Any
@@ -31,7 +31,7 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     """
     :ivar str name:
-    :ivar value:
+    :ivar Any value:
     """
     name: str
     value: Any
@@ -54,8 +54,8 @@ class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     """
     :ivar str name:
-    :ivar value:
-    :ivar old_value:
+    :ivar Any value:
+    :ivar Any old_value:
     """
     name: str
     value: Any
@@ -84,7 +84,7 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
 class ItemCommandEvent(OpenhabEvent):
     """
     :ivar str name:
-    :ivar value:
+    :ivar Any value:
     """
     name: str
     value: Any
@@ -109,8 +109,8 @@ class ItemAddedEvent(OpenhabEvent):
     :ivar str name:
     :ivar str type:
     :ivar Optional[str] label:
-    :ivar Tuple[str,...] tags:
-    :ivar Tuple[str,...] group_names:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
     """
     name: str
     type: str
@@ -148,8 +148,9 @@ class ItemUpdatedEvent(OpenhabEvent):
     """
     :ivar str name:
     :ivar str type:
-    :ivar Tuple[str,...] tags:
-    :ivar Tuple[str,...] group_names:
+    :ivar Optional[str] label:
+    :ivar FrozenSet[str] tags:
+    :ivar FrozenSet[str] groups:
     """
     name: str
     type: str
@@ -208,7 +209,7 @@ class ItemRemovedEvent(OpenhabEvent):
 class ItemStatePredictedEvent(OpenhabEvent):
     """
     :ivar str name:
-    :ivar value:
+    :ivar Any value:
     """
     name: str
     value: Any
@@ -233,7 +234,7 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     """
     :ivar str name: Group name
     :ivar str item: Group item that caused the update
-    :ivar value:
+    :ivar Any value:
     """
     name: str
     item: str
@@ -260,8 +261,8 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     """
     :ivar str name:
     :ivar str item:
-    :ivar value:
-    :ivar old_value:
+    :ivar Any value:
+    :ivar Any old_value:
     """
     name: str
     item: str

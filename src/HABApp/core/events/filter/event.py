@@ -1,4 +1,5 @@
 from typing import Optional
+from typing import get_type_hints as _get_type_hints
 
 from HABApp.core.const import MISSING
 from HABApp.core.const.hints import HINT_ANY_CLASS
@@ -19,11 +20,13 @@ class EventFilter(EventFilterBase):
         self.attr_name2: Optional[str] = None
         self.attr_value2 = None
 
+        type_hints = _get_type_hints(event_class)
+
         for arg, value in kwargs.items():
             if value is MISSING:
                 continue
 
-            if arg not in event_class.__annotations__:
+            if arg not in type_hints:
                 raise AttributeError(f'Filter attribute "{arg}" does not exist for "{event_class.__name__}"')
 
             if self.attr_name1 is None:
