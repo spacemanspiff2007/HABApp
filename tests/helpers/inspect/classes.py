@@ -3,7 +3,7 @@ from typing import Iterable, Optional, Any, get_type_hints, Dict
 
 import pytest
 
-from helpers.inspect.docstr import get_ivars_from_docstring
+from .docstr import get_ivars_from_docstring
 
 
 def check_class_annotations(cls: type[object],
