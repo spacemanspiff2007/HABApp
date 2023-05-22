@@ -61,6 +61,23 @@ class HSBValue(ComplexEventValue):
         return f'{self.value[0]}°,{self.value[1]}%,{self.value[2]}%'
 
 
+class PointValue(ComplexEventValue):
+    def __init__(self, value: str):
+        ret = []
+        for k in value.split(','):
+            if k is None:
+                ret.append(k)
+            else:
+                ret.append(float(k))
+        super().__init__(tuple(ret))
+
+    def __str__(self):
+        if len(self.value) == 2:
+            return f'{self.value[0]},{self.value[1]},'
+        else:
+            return f'{self.value[0]},{self.value[1]},{self.value[2]}'
+
+
 class QuantityValue(ComplexEventValue):
 
     @staticmethod

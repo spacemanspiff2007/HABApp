@@ -2,6 +2,7 @@ import datetime
 
 from HABApp.openhab.definitions import HSBValue, OnOffValue, OpenClosedValue, PercentValue, QuantityValue, RawValue, \
     UpDownValue
+from HABApp.openhab.definitions.values import PointValue
 
 
 def map_openhab_values(openhab_type: str, openhab_value: str):
@@ -24,6 +25,9 @@ def map_openhab_values(openhab_type: str, openhab_value: str):
             return int(openhab_value)
         except ValueError:
             return float(openhab_value)
+
+    if openhab_type == "String":
+        return openhab_value
 
     if openhab_type == "DateTime":
         dt = datetime.datetime.strptime(openhab_value, '%Y-%m-%dT%H:%M:%S.%f%z')
@@ -53,5 +57,8 @@ def map_openhab_values(openhab_type: str, openhab_value: str):
 
     if openhab_type == 'Raw':
         return RawValue(openhab_value)
+
+    if openhab_type == 'Point':
+        return PointValue(openhab_value)
 
     return openhab_value
