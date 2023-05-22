@@ -9,9 +9,7 @@ from HABApp.openhab.items import Thing, ColorItem, ImageItem, StringItem, Number
     RollershutterItem, DimmerItem, DatetimeItem, PlayerItem, LocationItem, CallItem, GroupItem
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
-from helpers.inspect import check_class_annotations
-from helpers.inspect.docstr import get_ivars_from_docstring
-from tests.helpers.inspect import assert_same_signature
+from ...helpers.inspect import check_class_annotations, get_ivars_from_docstring, assert_same_signature
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
