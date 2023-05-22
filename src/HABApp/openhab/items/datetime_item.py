@@ -1,9 +1,15 @@
 from datetime import datetime
-from typing import Optional, FrozenSet, Mapping
+from typing import TYPE_CHECKING, Optional, FrozenSet, Mapping
 
 from immutables import Map
 
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
+
+if TYPE_CHECKING:
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
 
 
 class DatetimeItem(OpenhabItem):

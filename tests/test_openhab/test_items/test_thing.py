@@ -1,3 +1,4 @@
+from typing import List, Dict, Any
 from unittest.mock import Mock
 
 import pytest
@@ -61,12 +62,18 @@ def test_thing_status_events(test_thing: Thing):
 
 def test_thing_updated_event(test_thing: Thing):
 
+    class MyThingUpdatedEvent(ThingUpdatedEvent):
+        def __init__(self, name: str = '', thing_type: str = '', label: str = '',
+                     channels: List[Dict[str, Any]] = [],
+                     configuration: Dict[str, Any] = {}, properties: Dict[str, str] = {}):
+            super().__init__(name, thing_type, label, channels, configuration, properties)
+
     assert test_thing.properties == Map()
     assert test_thing.configuration == Map()
 
     # initial set of configuration -> update and change
     set_test_now(DateTime(2000, 1, 1, 1, tzinfo=UTC))
-    test_thing.process_event(ThingUpdatedEvent(configuration={'a': 'b'}))
+    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
     assert test_thing.label == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map()
@@ -75,7 +82,7 @@ def test_thing_updated_event(test_thing: Thing):
 
     # second set of configuration -> update
     set_test_now(DateTime(2000, 1, 1, 2, tzinfo=UTC))
-    test_thing.process_event(ThingUpdatedEvent(configuration={'a': 'b'}))
+    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
     assert test_thing.label == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map()
@@ -84,7 +91,7 @@ def test_thing_updated_event(test_thing: Thing):
 
     # initial set of properties-> update and change
     set_test_now(DateTime(2000, 1, 1, 3, tzinfo=UTC))
-    test_thing.process_event(ThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
+    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
@@ -93,7 +100,7 @@ def test_thing_updated_event(test_thing: Thing):
 
     # second set of properties-> update
     set_test_now(DateTime(2000, 1, 1, 4, tzinfo=UTC))
-    test_thing.process_event(ThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
+    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
@@ -102,7 +109,7 @@ def test_thing_updated_event(test_thing: Thing):
 
     # initial set of label-> update and change
     set_test_now(DateTime(2000, 1, 1, 5, tzinfo=UTC))
-    test_thing.process_event(ThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
+    test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == 'l1'
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
@@ -111,7 +118,7 @@ def test_thing_updated_event(test_thing: Thing):
 
     # second set of label-> update
     set_test_now(DateTime(2000, 1, 1, 6, tzinfo=UTC))
-    test_thing.process_event(ThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
+    test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == 'l1'
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
@@ -138,7 +145,7 @@ def test_thing_called_updated_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_th
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
-    event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label')
+    event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label', channels=[], configuration={}, properties={})
     assert test_thing.name == event.name
 
     sse_handler.on_sse_event(event, oh_3=False)

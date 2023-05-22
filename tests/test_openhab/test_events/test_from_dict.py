@@ -1,4 +1,6 @@
 import datetime
+import inspect
+
 import pytest
 
 from HABApp.openhab.definitions import QuantityValue
@@ -248,23 +250,25 @@ def test_thing_ThingStatusInfoEvent():
     assert event.status == 'ONLINE'
     assert event.detail == 'NONE'
     assert event.description == ''
+    assert str(event) == '<ThingStatusInfoEvent name: chromecast:chromecast:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, ' \
+                         'status: ONLINE, detail: NONE>'
 
     data = {
-        "topic": "openhab/things/fsinternetradio:radio:RadioWiGa/status",
+        "topic": "openhab/things/fsinternetradio:radio:fsRadioStation/status",
         "payload": "{\"status\":\"OFFLINE\",\"statusDetail\":\"COMMUNICATION_ERROR\",\"description\":"
                    "\"java.util.concurrent.ExecutionException: java.net.NoRouteToHostException\"}",
         "type": "ThingStatusInfoEvent"
     }
     event = get_event(data)
     assert isinstance(event, ThingStatusInfoEvent)
-    assert event.name == 'fsinternetradio:radio:RadioWiGa'
+    assert event.name == 'fsinternetradio:radio:fsRadioStation'
     assert event.status == 'OFFLINE'
     assert event.detail == 'COMMUNICATION_ERROR'
     assert event.description == 'java.util.concurrent.ExecutionException: java.net.NoRouteToHostException'
-    assert str(event) == '<ThingStatusInfoEvent name: fsinternetradio:radio:RadioWiGa, ' \
+    assert str(event) == '<ThingStatusInfoEvent name: fsinternetradio:radio:fsRadioStation, ' \
                          'status: OFFLINE, ' \
-                         'detail: COMMUNICATION_ERROR , ' \
-                         'description: java.util.concurrent.ExecutionException: java.net.NoRouteToHostException>'
+                         'detail: COMMUNICATION_ERROR, ' \
+                         'description: "java.util.concurrent.ExecutionException: java.net.NoRouteToHostException">'
 
 
 # noinspection PyPep8Naming
@@ -281,6 +285,30 @@ def test_thing_ThingStatusInfoChangedEvent():
     assert event.detail == 'NONE'
     assert event.old_status == 'ONLINE'
     assert event.old_detail == 'NONE'
+
+    data = {
+        "topic": "openhab/things/fsinternetradio:radio:fsRadioStation/statuschanged",
+        "payload": "[{\"status\":\"OFFLINE\",\"statusDetail\":\"COMMUNICATION_ERROR\","
+                   "\"description\":\"java.util.concurrent.ExecutionException: java.net.NoRouteToHostException\"},"
+                   "{\"status\":\"OFFLINE\",\"statusDetail\":\"COMMUNICATION_ERROR\","
+                   "\"description\":\"java.util.concurrent.TimeoutException: Total timeout 5000 ms elapsed\"}]",
+        "type": "ThingStatusInfoChangedEvent"
+    }
+    event = get_event(data)
+    assert isinstance(event, ThingStatusInfoChangedEvent)
+    assert event.name == 'fsinternetradio:radio:fsRadioStation'
+    assert event.status == 'OFFLINE'
+    assert event.detail == 'COMMUNICATION_ERROR'
+    assert event.description == 'java.util.concurrent.ExecutionException: java.net.NoRouteToHostException'
+    assert event.old_status == 'OFFLINE'
+    assert event.old_detail == 'COMMUNICATION_ERROR'
+    assert event.old_description == 'java.util.concurrent.TimeoutException: Total timeout 5000 ms elapsed'
+    assert str(event) == '<ThingStatusInfoChangedEvent name: fsinternetradio:radio:fsRadioStation, ' \
+                         'status: OFFLINE, ' \
+                         'detail: COMMUNICATION_ERROR, ' \
+                         'description: "java.util.concurrent.ExecutionException: java.net.NoRouteToHostException", ' \
+                         'old_status: OFFLINE, old_detail: COMMUNICATION_ERROR, ' \
+                         'old_description: "java.util.concurrent.TimeoutException: Total timeout 5000 ms elapsed">'
 
 
 # noinspection PyPep8Naming
@@ -357,6 +385,5 @@ def test_thing_ConfigStatusInfoEvent():
 
 @pytest.mark.parametrize('cls', [*EVENT_LIST])
 def test_every_event_has_name(cls):
-    # this test ensure that alle events have a name argument
-    c = cls('asdf')
-    assert c.name == 'asdf'
+    # this test ensure that alle events have a name parameter
+    assert 'name' in inspect.getfullargspec(cls).annotations

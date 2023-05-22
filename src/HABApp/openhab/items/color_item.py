@@ -26,7 +26,7 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata:
     """
 
-    def __init__(self, name: str, h=0.0, s=0.0, b=0.0,
+    def __init__(self, name: str, h: float = 0.0, s: float = 0.0, b: float = 0.0,
                  label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
         super().__init__(name=name, initial_value=(h, s, b), label=label, tags=tags, groups=groups, metadata=metadata)

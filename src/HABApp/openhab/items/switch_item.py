@@ -1,13 +1,22 @@
+from typing import TYPE_CHECKING, Tuple, Optional, FrozenSet, Mapping
+
 from HABApp.openhab.definitions import OnOffValue
-from HABApp.openhab.items.base_item import OpenhabItem
+from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from HABApp.openhab.items.commands import OnOffCommand
+
+if TYPE_CHECKING:
+    Tuple = Tuple
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
 
 
 class SwitchItem(OpenhabItem, OnOffCommand):
     """SwitchItem which accepts and converts the data types from OpenHAB
 
     :ivar str name:
-    :ivar Tuple[str, ...] value:
+    :ivar str value:
 
     :ivar Optional[str] label:
     :ivar FrozenSet[str] tags:

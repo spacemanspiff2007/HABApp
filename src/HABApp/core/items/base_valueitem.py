@@ -1,15 +1,20 @@
 import logging
 import typing
+from datetime import datetime
 from math import ceil, floor
 
 from pendulum import UTC
 from pendulum import now as pd_now
 
+from HABApp.core.const import MISSING
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import uses_post_event
 from HABApp.core.items.base_item import BaseItem
-from HABApp.core.const import MISSING
 from HABApp.core.lib.funcs import compare as _compare
+
+if typing.TYPE_CHECKING:
+    datetime = datetime
+
 
 log = logging.getLogger('HABApp')
 
@@ -21,8 +26,8 @@ class BaseValueItem(BaseItem):
 
     :ivar str name: Name of the item (read only)
     :ivar value: Value of the item, can be anything (read only)
-    :ivar datetime.datetime last_change: Timestamp of the last time when the item has changed the value (read only)
-    :ivar datetime.datetime last_update: Timestamp of the last time when the item has updated the value (read only)
+    :ivar datetime last_change: Timestamp of the last time when the item has changed the value (read only)
+    :ivar datetime last_update: Timestamp of the last time when the item has updated the value (read only)
     """
 
     def __init__(self, name: str, initial_value=None):

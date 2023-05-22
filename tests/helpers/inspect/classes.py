@@ -1,88 +1,68 @@
-import importlib
 import inspect
-import re
-from typing import Iterable, Optional, get_origin, Union, get_args, Any, Type, get_type_hints
+from typing import Iterable, Optional, Any, get_type_hints, Dict
 
 import pytest
 
-from tests.helpers.inspect.module import get_module_classes
-
-RE_IVAR = re.compile(r':ivar\s+([^:]+?)\s+(\w+)\s*:', re.IGNORECASE)
+from helpers.inspect.docstr import get_ivars_from_docstring
 
 
-def get_ivars_from_docstring(cls: Type[object]) -> dict[str, Any]:
-    ret = {}
-    for cls in inspect.getmro(cls):
-        mod = importlib.import_module(cls.__module__)
-        docstr = cls.__doc__
-        if not docstr:
-            continue
-
-        for hint, name in RE_IVAR.findall(docstr):
-            hint = eval(hint, mod.__dict__)
-            if name in ret and ret[name] != hint:
-                pytest.fail(f'Redefinition of type hint for {cls}.{name}! {ret[name]} != {hint}')
-            ret[name] = hint
-    return ret
-
-
-def check_class_annotations(module_name: str, exclude: Optional[Iterable[str]] = None):
+def check_class_annotations(cls: type[object],
+                            correct_hints: Optional[Dict[str, Any]] = None,
+                            init_alias: Optional[Dict[str, str]] = None, init_missing: Iterable[str] = (),
+                            annotations_missing=False):
     """Ensure that the annotations match with the actual variables"""
 
-    classes = get_module_classes(module_name, exclude=exclude)
-    for name, cls in classes.items():
-        annotation_vars = get_type_hints(cls)
-        docstr_vars = get_ivars_from_docstring(cls)
+    if correct_hints is None:
+        correct_hints = {}
 
-        c = cls()
-        instance_vars = dict(filter(
-            lambda x: not x[0].startswith('__'),
-            dict(inspect.getmembers(c, lambda x: not inspect.ismethod(x))).items())
-        )
+    name = cls.__name__
 
-        # ensure that we have the same set of variables
-        if not (set(docstr_vars) == set(instance_vars) == set(annotation_vars)):
-            print(f'\nDocs invalid for: {name}')
-            print(f'Docstr    : {", ".join(sorted(docstr_vars))}')
-            print(f'Annotation: {", ".join(sorted(annotation_vars))}')
-            print(f'Instance  : {", ".join(sorted(instance_vars))}')
-            pytest.fail(f'Docs invalid for: {name}')
+    annotation_vars = get_type_hints(cls)
+    docstr_vars = get_ivars_from_docstring(cls, correct_hints)
+    init_vars = inspect.getfullargspec(cls).annotations
 
-        # ensure that both annotation and docstr have the same type
-        assert docstr_vars == annotation_vars, f'\n{name}\n{docstr_vars}\n{annotation_vars}'
+    # if we don't have annotations we can use the docstr vars
+    if annotations_missing:
+        assert not annotation_vars
+        annotation_vars = docstr_vars.copy()
 
-        # Check that the instance vars match with the annotation
-        for var_name, var_value in instance_vars.items():
-            annotation = annotation_vars[var_name]
+    if init_alias is not None:
+        for _alias, _name in init_alias.items():
+            if _alias in init_vars:
+                assert _name not in init_vars
+                init_vars[_name] = init_vars.pop(_alias)
 
-            # We don't check Any
-            if annotation is Any:
-                continue
+    # if it's missing from init we just copy and paste it
+    for var_name in init_missing:
+        assert var_name not in init_vars
+        for _hint_src in annotation_vars, docstr_vars:
+            if var_hint := _hint_src.get(var_name):
+                init_vars[var_name] = var_hint
+                break
 
-            annotation_origin = get_origin(annotation)
-            annotation_args = get_args(annotation)
+    # ensure that we have the same set of variables
+    if not (set(docstr_vars) == set(init_vars) == set(annotation_vars)):
+        print(f'\nDocs invalid for: {name}')
+        print(f'Docstr    : {", ".join(sorted(docstr_vars))}')
+        print(f'Annotation: {", ".join(sorted(annotation_vars))}')
+        print(f'__init__  : {", ".join(sorted(init_vars))}')
+        pytest.fail(f'Docs invalid for: {name}')
 
-            def assert_type(obj, target_type):
-                assert isinstance(obj, target_type), f'{name}.{var_name}: {type(obj)} != {target_type}'
+    # ensure that both annotation and docstr have the same type
+    assert docstr_vars == annotation_vars, f'\n{name}\n{docstr_vars}\n{annotation_vars}'
 
-            # get_origin returns None for unsupported types, e.g. if we have str
-            if annotation_origin is None:
-                assert not annotation_args
-                assert_type(var_value, annotation)
-            elif annotation_origin is Union:
-                assert annotation_args
-                assert isinstance(var_value, annotation_args)
-            elif annotation_origin in (type_test := (set, frozenset, list, tuple)):
-                assert_type(var_value, type_test)
-                for child in var_value:
-                    assert isinstance(child, annotation_args)
-            elif annotation_origin in (type_test := (dict, )):
-                assert_type(var_value, type_test)
-                type_key, type_value = annotation_args
-                for key, value in var_value.items():
-                    if type_key is not Any:
-                        assert isinstance(key, type_key)
-                    if type_value is not Any:
-                        assert isinstance(value, type_value)
-            else:
-                raise ValueError(f'Unsupported: {annotation_origin} for {name}')
+    # Check that the instance vars match with the annotation
+    for var_name, var_value in init_vars.items():
+        annotation = annotation_vars[var_name]
+
+        # We don't check Any, e.g. in the base class
+        if var_value is Any:
+            continue
+
+        if var_value != annotation:
+            pytest.fail(
+                f'Constructor of {name} does not match type hint for {var_name}: '
+                f'{var_value} != {annotation}'
+            )
+
+    return annotation_vars or docstr_vars

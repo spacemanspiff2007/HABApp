@@ -1,10 +1,18 @@
-from typing import Optional, FrozenSet, Mapping
+from typing import Union, TYPE_CHECKING, Optional, FrozenSet, Mapping
+
 
 from immutables import Map
 
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 from ..definitions import OnOffValue, PercentValue
+
+if TYPE_CHECKING:
+    Union = Union
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
 
 
 class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):

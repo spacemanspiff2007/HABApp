@@ -1,15 +1,22 @@
-from typing import Tuple
+from typing import TYPE_CHECKING, Optional, FrozenSet, Mapping, Tuple, Any
 
 from HABApp.core.events import ComplexEventValue
-from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.item_to_reg import get_members
+from HABApp.openhab.items.base_item import OpenhabItem, MetaData
+
+if TYPE_CHECKING:
+    Any = Any
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
 
 
 class GroupItem(OpenhabItem):
     """GroupItem which accepts and converts the data types from OpenHAB
 
     :ivar str name:
-    :ivar str value:
+    :ivar Any value:
 
     :ivar Optional[str] label:
     :ivar FrozenSet[str] tags:

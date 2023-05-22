@@ -1,4 +1,4 @@
-from typing import Any, FrozenSet, Optional
+from typing import Any, FrozenSet, Optional, Final
 
 import HABApp.core
 from .base_event import OpenhabEvent
@@ -6,18 +6,6 @@ from ..map_values import map_openhab_values
 
 
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
-    """
-    :ivar str name:
-    :ivar Any value:
-    """
-    name: str
-    value: Any
-
-    def __init__(self, name: str = '', value: Any = None):
-        super().__init__()
-
-        self.name: str = name
-        self.value: Any = value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -29,18 +17,6 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
-    """
-    :ivar str name:
-    :ivar Any value:
-    """
-    name: str
-    value: Any
-
-    def __init__(self, name: str = '', value: Any = None):
-        super().__init__()
-
-        self.name: str = name
-        self.value: Any = value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -52,25 +28,10 @@ class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
-    """
-    :ivar str name:
-    :ivar Any value:
-    :ivar Any old_value:
-    """
-    name: str
-    value: Any
-    old_value: Any
-
-    def __init__(self, name: str = '', value: Any = None, old_value: Any = None):
-        super().__init__()
-
-        self.name: str = name
-        self.value: Any = value
-        self.old_value: Any = old_value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # smarthome/items/Ping/statechanged
+        # openhab/items/Ping/statechanged
         return cls(
             topic[14:-13],
             map_openhab_values(payload['type'], payload['value']),
@@ -89,7 +50,7 @@ class ItemCommandEvent(OpenhabEvent):
     name: str
     value: Any
 
-    def __init__(self, name: str = '', value: Any = None):
+    def __init__(self, name: str, value: Any):
         super().__init__()
 
         self.name: str = name
@@ -118,8 +79,8 @@ class ItemAddedEvent(OpenhabEvent):
     tags: FrozenSet[str]
     groups: FrozenSet[str]
 
-    def __init__(self, name: str = '', type: str = '', label: Optional[str] = None,
-                 tags: FrozenSet[str] = frozenset(), group_names: FrozenSet[str] = frozenset()):
+    def __init__(self, name: str, type: str, label: Optional[str],
+                 tags: FrozenSet[str], group_names: FrozenSet[str]):
         super().__init__()
 
         self.name: str = name
@@ -130,7 +91,7 @@ class ItemAddedEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # {'topic': 'smarthome/items/NAME/added'
+        # {'topic': 'openhab/items/NAME/added'
         # 'payload': '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}'
         # 'type': 'ItemAddedEvent'}
         return cls(
@@ -158,8 +119,8 @@ class ItemUpdatedEvent(OpenhabEvent):
     tags: FrozenSet[str]
     groups: FrozenSet[str]
 
-    def __init__(self, name: str = '', type: str = '', label: Optional[str] = None,
-                 tags: FrozenSet[str] = frozenset(), group_names: FrozenSet[str] = frozenset()):
+    def __init__(self, name: str, type: str, label: Optional[str],
+                 tags: FrozenSet[str], group_names: FrozenSet[str]):
         super().__init__()
 
         self.name: str = name
@@ -170,7 +131,7 @@ class ItemUpdatedEvent(OpenhabEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # smarthome/items/NAME/updated
+        # openhab/items/NAME/updated
         # 'payload': '[{"type":"Switch","name":"Test","tags":[],"groupNames":[]},
         #              {"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
         # 'type': 'ItemUpdatedEvent'
@@ -192,9 +153,8 @@ class ItemRemovedEvent(OpenhabEvent):
     """
     name: str
 
-    def __init__(self, name: str = ''):
+    def __init__(self, name: str):
         super().__init__()
-
         self.name = name
 
     @classmethod
@@ -214,12 +174,10 @@ class ItemStatePredictedEvent(OpenhabEvent):
     name: str
     value: Any
 
-    def __init__(self, name: str = '', value: Any = None):
+    def __init__(self, name: str, value: Any):
         super().__init__()
-
-        # smarthome/items/NAME/state
-        self.name: str = name
-        self.value: Any = value
+        self.name: Final = name
+        self.value: Final = value
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -240,12 +198,9 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     item: str
     value: Any
 
-    def __init__(self, name: str = '', item: str = '', value: Any = None):
-        super().__init__()
-
-        self.name: str = name
-        self.item: str = item
-        self.value: Any = value
+    def __init__(self, name: str, item: str, value: Any):
+        super().__init__(name, value)
+        self.item: Final = item
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -254,7 +209,7 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
         return cls(parts[2], parts[3], map_openhab_values(payload['type'], payload['value']))
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, item: {self.item}, value: {self.value}>'
 
 
 class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
@@ -269,18 +224,13 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     value: Any
     old_value: Any
 
-    def __init__(self, name: str = '', item: str = '', value: Any = None, old_value: Any = None):
-        super().__init__()
-
-        self.name: str = name
-        self.item: str = item
-
-        self.value: Any = value
-        self.old_value: Any = old_value
+    def __init__(self, name: str, item: str, value: Any, old_value: Any):
+        super().__init__(name, value, old_value)
+        self.item: Final = item
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
-        # 'smarthome/items/TestGroupAVG/TestNumber1/statechanged'
+        # 'openhab/items/TestGroupAVG/TestNumber1/statechanged'
         parts = topic.split('/')
 
         return cls(
@@ -290,4 +240,5 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
         )
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
+        return f'<{self.__class__.__name__} name: {self.name}, item: {self.item}, ' \
+               f'value: {self.value}, old_value: {self.old_value}>'

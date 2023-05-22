@@ -1,9 +1,13 @@
-from typing import Optional, FrozenSet, Mapping
+from typing import Optional, FrozenSet, Mapping, Union, TYPE_CHECKING
 
 from immutables import Map
 
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from ..definitions import QuantityValue
+
+
+if TYPE_CHECKING:
+    Union = Union
 
 
 class NumberItem(OpenhabItem):
@@ -17,7 +21,6 @@ class NumberItem(OpenhabItem):
     :ivar FrozenSet[str] groups:
     :ivar Mapping[str, MetaData] metadata:
     """
-
 
     @classmethod
     def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),

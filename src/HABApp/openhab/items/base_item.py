@@ -26,7 +26,7 @@ class OpenhabItem(BaseValueItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
-    def __init__(self, name: str, initial_value=None,
+    def __init__(self, name: str, initial_value: Any = None,
                  label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
         super().__init__(name, initial_value)
