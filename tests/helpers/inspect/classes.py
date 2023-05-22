@@ -1,12 +1,12 @@
 import inspect
-from typing import Iterable, Optional, Any, get_type_hints, Dict
+from typing import Iterable, Optional, Any, get_type_hints, Dict, Type
 
 import pytest
 
 from .docstr import get_ivars_from_docstring
 
 
-def check_class_annotations(cls: type[object],
+def check_class_annotations(cls: Type[object],
                             correct_hints: Optional[Dict[str, Any]] = None,
                             init_alias: Optional[Dict[str, str]] = None, init_missing: Iterable[str] = (),
                             annotations_missing=False):
