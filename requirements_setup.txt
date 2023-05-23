@@ -14,5 +14,10 @@ colorama    == 0.4.6
 
 voluptuous      == 0.13.1
 
-typing-extensions   >= 4.6,   < 5
+# typing-extensions   >= 4.6,   < 5
+
+# Keep pinned until pydantic bug is fixed
+# https://github.com/pydantic/pydantic/issues/5821
+typing-extensions == 4.5
+
 aiohttp-sse-client  == 0.2.1
