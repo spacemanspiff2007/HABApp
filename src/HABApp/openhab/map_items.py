@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import logging
-from typing import Any
+from typing import Any, Dict, FrozenSet, Optional
 
 from immutables import Map
 
@@ -16,7 +14,7 @@ from HABApp.openhab.items.base_item import MetaData
 log = logging.getLogger('HABApp.openhab.items')
 
 
-_items: dict[str, HINT_TYPE_OPENHAB_ITEM] = {
+_items: Dict[str, HINT_TYPE_OPENHAB_ITEM] = {
     'String': StringItem,
     'Number': NumberItem,
     'Switch': SwitchItem,
@@ -33,10 +31,10 @@ _items: dict[str, HINT_TYPE_OPENHAB_ITEM] = {
 }
 
 
-def map_item(name: str, type: str, value: str | None,
-             label: str | None, tags: frozenset[str],
-             groups: frozenset[str], metadata: dict[str, dict[str, Any]] | None) -> \
-        HABApp.openhab.items.OpenhabItem | None:
+def map_item(name: str, type: str, value: Optional[str],
+             label: Optional[str], tags: FrozenSet[str],
+             groups: FrozenSet[str], metadata: Optional[Dict[str, Dict[str, Any]]]) -> \
+        Optional['HABApp.openhab.items.OpenhabItem']:
     try:
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)
