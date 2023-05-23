@@ -1,5 +1,5 @@
 aiohttp     == 3.8.4
-pydantic    == 1.10.7
+pydantic==1.10.8
 pendulum    == 2.1.2
 bidict      == 0.22.1
 watchdog    == 3.0.0
