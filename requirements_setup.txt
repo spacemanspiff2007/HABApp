@@ -1,10 +1,10 @@
-aiohttp     >= 3.8.4,   < 3.9
-pydantic    >= 1.10.7,  < 1.11
-pendulum    >= 2.1.2,   < 2.2
-bidict      >= 0.22,    < 0.23
-watchdog    >= 3.0,     < 3.1
-ujson       >= 5.7,     < 5.8
-paho-mqtt   >= 1.6,     < 1.7
+aiohttp     == 3.8.4
+pydantic    == 1.10.7
+pendulum    == 2.1.2
+bidict      == 0.22.1
+watchdog    == 3.0.0
+ujson       == 5.7.0
+paho-mqtt   == 1.6.1
 
 immutables  == 0.19
 eascheduler == 0.1.8
@@ -17,6 +17,7 @@ voluptuous      == 0.13.1
 # typing-extensions   >= 4.6,   < 5
 
 # Keep pinned until pydantic bug is fixed
+# Todo: Check before each release
 # https://github.com/pydantic/pydantic/issues/5821
 typing-extensions == 4.5
 
