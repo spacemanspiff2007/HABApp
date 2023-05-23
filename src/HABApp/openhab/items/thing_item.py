@@ -14,10 +14,11 @@ from HABApp.openhab.interface import set_thing_enabled
 class Thing(BaseItem):
     """Base class for Things
 
-    :ivar str status: Status of the thing (e.g. OFFLINE, ONLINE, ...)
-    :ivar str status_detail: Additional detail for the status
+    :ivar ThingStatusEnum status: Status of the thing (e.g. OFFLINE, ONLINE, ...)
+    :ivar ThingStatusDetailEnum status_detail: Additional detail for the status
     :ivar str status_description: Additional description for the status
     :ivar str label: Thing label
+    :ivar str location: Thing location
     :ivar Mapping[str, Any] configuration: Thing configuration
     :ivar Mapping[str, Any] properties: Thing properties
     """
@@ -29,6 +30,7 @@ class Thing(BaseItem):
         self.status_description: str = ''
 
         self.label: str = ''
+        self.location: str = ''
 
         self.configuration: Mapping[str, Any] = Map()
         self.properties: Mapping[str, Any] = Map()
@@ -63,13 +65,16 @@ class Thing(BaseItem):
             old_label = self.label
             old_configuration = self.configuration
             old_properties = self.properties
+            old_location = self.location
 
             self.label = new_label = event.label
+            self.location = new_location = event.location
             self.configuration = new_configuration = Map(event.configuration)
             self.properties = new_properties = Map(event.properties)
 
             self.__update_timestamps(
-                old_label != new_label or old_configuration != new_configuration or old_properties != new_properties
+                old_label != new_label or old_location != new_location or   # noqa: W504
+                old_configuration != new_configuration or old_properties != new_properties
             )
         elif isinstance(event, ThingConfigStatusInfoEvent):
             pass

@@ -12,7 +12,7 @@ easyconfig  == 0.2.8
 stack_data  == 0.6.2
 colorama    == 0.4.6
 
-voluptuous      == 0.13.1
+voluptuous == 0.13.1
 
 # typing-extensions   >= 4.6,   < 5
 

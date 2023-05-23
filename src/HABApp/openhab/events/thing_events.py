@@ -152,6 +152,7 @@ class ThingRegistryBaseEvent(OpenhabEvent):
     :ivar str name:
     :ivar str type:
     :ivar str label:
+    :ivar str location:
     :ivar List[Dict[str, Any]] channels:
     :ivar Dict[str, Any] configuration:
     :ivar Dict[str, str] properties:
@@ -159,11 +160,12 @@ class ThingRegistryBaseEvent(OpenhabEvent):
     name: str
     type: str
     label: str
+    location: str
     channels: List[Dict[str, Any]]
     configuration: Dict[str, Any]
     properties: Dict[str, str]
 
-    def __init__(self, name: str, thing_type: str, label: str,
+    def __init__(self, name: str, thing_type: str, label: str, location: str,
                  channels: List[Dict[str, Any]], configuration: Dict[str, Any],
                  properties: Dict[str, str]):
         super().__init__()
@@ -174,6 +176,7 @@ class ThingRegistryBaseEvent(OpenhabEvent):
 
         # optional entries
         self.label: Final = label
+        self.location: Final = location
         self.channels: Final = channels
         self.configuration: Final = configuration
         self.properties: Final = properties
@@ -183,7 +186,9 @@ class ThingRegistryBaseEvent(OpenhabEvent):
         # 'openhab/things/astro:sun:0a94363608/added'
         return cls(
             name=payload['UID'], thing_type=payload['thingTypeUID'], label=payload['label'],
-            channels=payload.get('channels', []), configuration=payload.get('configuration', {}),
+            location=payload.get('location', ''),
+            channels=payload.get('channels', []),
+            configuration=payload.get('configuration', {}),
             properties=payload.get('properties', {}),
         )
 
@@ -206,6 +211,8 @@ class ThingUpdatedEvent(ThingRegistryBaseEvent):
         payload = payload[0]
         return cls(
             name=payload['UID'], thing_type=payload['thingTypeUID'], label=payload['label'],
-            channels=payload.get('channels'), configuration=payload.get('configuration'),
+            location=payload.get('location', ''),
+            channels=payload.get('channels'),
+            configuration=payload.get('configuration'),
             properties=payload.get('properties'),
         )

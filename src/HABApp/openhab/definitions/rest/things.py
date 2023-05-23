@@ -1,6 +1,8 @@
 from typing import Any, Dict, Optional, Tuple
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
+
+from HABApp.openhab.definitions import ThingStatusEnum, ThingStatusDetailEnum
 
 
 class OpenhabThingChannelDefinition(BaseModel):
@@ -21,13 +23,9 @@ class OpenhabThingChannelDefinition(BaseModel):
 
 
 class OpenhabThingStatus(BaseModel):
-    status: str
-    detail: str = Field(..., alias='statusDetail')
+    status: ThingStatusEnum
+    detail: ThingStatusDetailEnum = Field(..., alias='statusDetail')
     description: Optional[str] = None
-
-    @validator('detail')
-    def _parse_detail(cls, v):
-        return '' if v == 'NONE' else v
 
 
 class OpenhabThingDefinition(BaseModel):

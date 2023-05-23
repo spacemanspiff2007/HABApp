@@ -21,7 +21,7 @@ def test_thing_summary():
     assert thing.thing_type == 'astro:sun'
 
     assert thing.status.status == 'UNINITIALIZED'
-    assert thing.status.detail == ''
+    assert thing.status.detail == 'NONE'
 
 
 def test_thing_full():
@@ -100,7 +100,7 @@ def test_thing_full():
     assert c1.configuration == {}
 
     assert thing.status.status == 'UNINITIALIZED'
-    assert thing.status.detail == ''
+    assert thing.status.detail == 'NONE'
 
     assert thing.editable is True
     assert thing.label == 'Astronomische Sonnendaten'

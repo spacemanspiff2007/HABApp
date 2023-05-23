@@ -63,10 +63,10 @@ def test_thing_status_events(test_thing: Thing):
 def test_thing_updated_event(test_thing: Thing):
 
     class MyThingUpdatedEvent(ThingUpdatedEvent):
-        def __init__(self, name: str = '', thing_type: str = '', label: str = '',
+        def __init__(self, name: str = '', thing_type: str = '', label: str = '', location='',
                      channels: List[Dict[str, Any]] = [],
                      configuration: Dict[str, Any] = {}, properties: Dict[str, str] = {}):
-            super().__init__(name, thing_type, label, channels, configuration, properties)
+            super().__init__(name, thing_type, label, location, channels, configuration, properties)
 
     assert test_thing.properties == Map()
     assert test_thing.configuration == Map()
@@ -75,6 +75,7 @@ def test_thing_updated_event(test_thing: Thing):
     set_test_now(DateTime(2000, 1, 1, 1, tzinfo=UTC))
     test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
     assert test_thing.label == ''
+    assert test_thing.location == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map()
     assert test_thing._last_update.dt == DateTime(2000, 1, 1, 1, tzinfo=UTC)
@@ -84,6 +85,7 @@ def test_thing_updated_event(test_thing: Thing):
     set_test_now(DateTime(2000, 1, 1, 2, tzinfo=UTC))
     test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
     assert test_thing.label == ''
+    assert test_thing.location == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map()
     assert test_thing._last_update.dt == DateTime(2000, 1, 1, 2, tzinfo=UTC)
@@ -93,6 +95,7 @@ def test_thing_updated_event(test_thing: Thing):
     set_test_now(DateTime(2000, 1, 1, 3, tzinfo=UTC))
     test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == ''
+    assert test_thing.location == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
     assert test_thing._last_update.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
@@ -102,6 +105,7 @@ def test_thing_updated_event(test_thing: Thing):
     set_test_now(DateTime(2000, 1, 1, 4, tzinfo=UTC))
     test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == ''
+    assert test_thing.location == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
     assert test_thing._last_update.dt == DateTime(2000, 1, 1, 4, tzinfo=UTC)
@@ -111,6 +115,7 @@ def test_thing_updated_event(test_thing: Thing):
     set_test_now(DateTime(2000, 1, 1, 5, tzinfo=UTC))
     test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == 'l1'
+    assert test_thing.location == ''
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
     assert test_thing._last_update.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
@@ -120,6 +125,31 @@ def test_thing_updated_event(test_thing: Thing):
     set_test_now(DateTime(2000, 1, 1, 6, tzinfo=UTC))
     test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
     assert test_thing.label == 'l1'
+    assert test_thing.location == ''
+    assert test_thing.configuration == Map({'a': 'b'})
+    assert test_thing.properties == Map({'p': 'prop'})
+    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 6, tzinfo=UTC)
+    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
+
+    # initial set of location-> update and change
+    set_test_now(DateTime(2000, 1, 1, 5, tzinfo=UTC))
+    test_thing.process_event(
+        MyThingUpdatedEvent(location='my_loc', label='l1', configuration={'a': 'b'}, properties={'p': 'prop'})
+    )
+    assert test_thing.label == 'l1'
+    assert test_thing.location == 'my_loc'
+    assert test_thing.configuration == Map({'a': 'b'})
+    assert test_thing.properties == Map({'p': 'prop'})
+    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
+    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
+
+    # second set of location-> update
+    set_test_now(DateTime(2000, 1, 1, 6, tzinfo=UTC))
+    test_thing.process_event(
+        MyThingUpdatedEvent(location='my_loc', label='l1', configuration={'a': 'b'}, properties={'p': 'prop'})
+    )
+    assert test_thing.label == 'l1'
+    assert test_thing.location == 'my_loc'
     assert test_thing.configuration == Map({'a': 'b'})
     assert test_thing.properties == Map({'p': 'prop'})
     assert test_thing._last_update.dt == DateTime(2000, 1, 1, 6, tzinfo=UTC)
@@ -145,7 +175,7 @@ def test_thing_called_updated_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_th
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
-    event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label', channels=[], configuration={}, properties={})
+    event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label', '', channels=[], configuration={}, properties={})
     assert test_thing.name == event.name
 
     sse_handler.on_sse_event(event, oh_3=False)
@@ -158,11 +188,12 @@ def test_thing_handler_add_event(monkeypatch, ir: HINT_ITEM_REGISTRY):
     name = 'AddedThing'
     type = 'thing:type'
     label = 'my_label'
+    location = 'my_loc'
     channels = [{'channel': 'data'}]
     configuration = {'my': 'config'}
     properties = {'my': 'properties'}
 
-    event = ThingAddedEvent(name=name, thing_type=type, label=label, channels=channels,
+    event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
     sse_handler.on_sse_event(event, oh_3=False)
 
@@ -172,6 +203,7 @@ def test_thing_handler_add_event(monkeypatch, ir: HINT_ITEM_REGISTRY):
     assert thing.status == 'UNINITIALIZED'
     assert thing.status_detail == 'NONE'
     assert thing.label == label
+    assert thing.location == location
     assert thing.configuration == Map(configuration)
     assert thing.properties == Map(properties)
 
@@ -179,10 +211,11 @@ def test_thing_handler_add_event(monkeypatch, ir: HINT_ITEM_REGISTRY):
     thing.status = 'EXISTING_STATUS'
     thing.status_detail = 'EXISTING_STATUS_DETAUL'
     thing.label = 'EXISTING_LABEL'
+    thing.location = 'EXISTING_LOCATION'
     thing.configuration = {'EXISTING': 'CONFIGURATION'}
     thing.properties = {'EXISTING': 'PROPERTIES'}
 
-    event = ThingAddedEvent(name=name, thing_type=type, label=label, channels=channels,
+    event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
     sse_handler.on_sse_event(event, oh_3=False)
 
@@ -192,5 +225,6 @@ def test_thing_handler_add_event(monkeypatch, ir: HINT_ITEM_REGISTRY):
     assert thing.status == 'UNINITIALIZED'
     assert thing.status_detail == 'NONE'
     assert thing.label == label
+    assert thing.location == location
     assert thing.configuration == Map(configuration)
     assert thing.properties == Map(properties)
