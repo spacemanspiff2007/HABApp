@@ -22,6 +22,13 @@ class NumberItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
+    @property
+    def unit(self) -> Optional[str]:
+        """Return the item unit if it is a "Unit of Measurement" item else None"""
+        if (unit := self.metadata.get('unit')) is None:
+            return None
+        return unit.value
+
     @classmethod
     def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
                 groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):

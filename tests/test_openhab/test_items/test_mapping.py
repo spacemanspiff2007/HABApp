@@ -5,6 +5,7 @@ import pytest
 from immutables import Map
 
 from HABApp.openhab.items import DatetimeItem, NumberItem
+from HABApp.openhab.items.base_item import MetaData
 from HABApp.openhab.map_items import map_item
 from tests.helpers import TestEventBus
 
@@ -37,14 +38,15 @@ def test_metadata():
 
 
 def test_number_unit_of_measurement():
-    make_item = partial(map_item, label='l', tags=frozenset(), groups=frozenset(), metadata={})
-    assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1)
-    assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2)
-    assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3)
-    assert make_item('test4', 'Number:Speed', '4.0 km/h', ) == NumberItem('test', 4)
-    assert make_item('test5', 'Number:Intensity', '5.0 W/m2', ) == NumberItem('test', 5)
-    assert make_item('test6', 'Number:Dimensionless', '6.0', ) == NumberItem('test', 6)
-    assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7)
+    make_item = partial(map_item, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}})
+    metadata = Map(unit=MetaData('°C'))
+    assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, metadata=metadata)
+    assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2, metadata=metadata)
+    assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3, metadata=metadata)
+    assert make_item('test4', 'Number:Speed', '4.0 km/h', ) == NumberItem('test', 4, metadata=metadata)
+    assert make_item('test5', 'Number:Intensity', '5.0 W/m2', ) == NumberItem('test', 5, metadata=metadata)
+    assert make_item('test6', 'Number:Dimensionless', '6.0', ) == NumberItem('test', 6, metadata=metadata)
+    assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7, metadata=metadata)
 
 
 def test_datetime():

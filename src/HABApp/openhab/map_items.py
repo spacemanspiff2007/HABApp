@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, FrozenSet, Optional
+from typing import Any
 
 from immutables import Map
 
@@ -11,10 +13,10 @@ from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerIte
 from HABApp.openhab.items.base_item import HINT_TYPE_OPENHAB_ITEM
 from HABApp.openhab.items.base_item import MetaData
 
-log = logging.getLogger('HABApp.openhab')
+log = logging.getLogger('HABApp.openhab.items')
 
 
-_items: Dict[str, HINT_TYPE_OPENHAB_ITEM] = {
+_items: dict[str, HINT_TYPE_OPENHAB_ITEM] = {
     'String': StringItem,
     'Number': NumberItem,
     'Switch': SwitchItem,
@@ -31,10 +33,10 @@ _items: Dict[str, HINT_TYPE_OPENHAB_ITEM] = {
 }
 
 
-def map_item(name: str, type: str, value: Optional[str],
-             label: Optional[str], tags: FrozenSet[str],
-             groups: FrozenSet[str], metadata: Optional[Dict[str, Dict[str, Any]]]) -> \
-        Optional['HABApp.openhab.items.OpenhabItem']:
+def map_item(name: str, type: str, value: str | None,
+             label: str | None, tags: frozenset[str],
+             groups: frozenset[str], metadata: dict[str, dict[str, Any]] | None) -> \
+        HABApp.openhab.items.OpenhabItem | None:
     try:
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)
@@ -55,6 +57,11 @@ def map_item(name: str, type: str, value: Optional[str],
             # if the item is not initialized its None and has no dimension
             if value is not None:
                 value, _ = QuantityValue.split_unit(value)
+
+            # Show warning
+            # https://github.com/spacemanspiff2007/HABApp/issues/383
+            if 'unit' not in meta:
+                log.warning(f'Item {name:s} is a UoM item but "unit" is not found in item metadata')
 
         cls = _items.get(type)
         if cls is not None:
