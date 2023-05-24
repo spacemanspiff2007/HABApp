@@ -1,5 +1,5 @@
 aiohttp     == 3.8.4
-pydantic    == 1.10.7
+pydantic    == 1.10.8
 pendulum    == 2.1.2
 bidict      == 0.22.1
 watchdog    == 3.0.0
@@ -14,11 +14,6 @@ colorama    == 0.4.6
 
 voluptuous == 0.13.1
 
-# typing-extensions   >= 4.6,   < 5
-
-# Keep pinned until pydantic bug is fixed
-# Todo: Check before each release
-# https://github.com/pydantic/pydantic/issues/5821
-typing-extensions == 4.5
+typing-extensions == 4.6
 
 aiohttp-sse-client  == 0.2.1
