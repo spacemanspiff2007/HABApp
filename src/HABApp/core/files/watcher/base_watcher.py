@@ -44,7 +44,7 @@ class FileSystemEventHandler:
             return None
 
         # we don't process open and close events
-        if (e_type := event.event_type) == WD_EVENT_TYPE_CLOSED or e_type == WD_EVENT_TYPE_OPENED:
+        if (e_type := event.event_type) == WD_EVENT_TYPE_OPENED or e_type == WD_EVENT_TYPE_CLOSED:
             return None
 
         src = event.src_path
