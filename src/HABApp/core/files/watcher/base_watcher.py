@@ -2,6 +2,9 @@ import logging
 from pathlib import Path
 
 from watchdog.events import FileSystemEvent
+from watchdog.events import EVENT_TYPE_CLOSED as WD_EVENT_TYPE_CLOSED
+from watchdog.events import EVENT_TYPE_OPENED as WD_EVENT_TYPE_OPENED
+
 
 log = logging.getLogger('HABApp.file.events')
 log.setLevel(logging.INFO)
@@ -34,11 +37,15 @@ class FileSystemEventHandler:
         self.filter: EventFilterBase = filter
 
     def dispatch(self, event: FileSystemEvent):
+        log.debug(event)
+
         # we don't process directory events
         if event.is_directory:
             return None
 
-        log.debug(event)
+        # we don't process open and close events
+        if (e_type := event.event_type) == WD_EVENT_TYPE_CLOSED or e_type == WD_EVENT_TYPE_OPENED:
+            return None
 
         src = event.src_path
         if self.filter.notify(src):
