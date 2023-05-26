@@ -38,6 +38,10 @@ class OnConnectPlugin(PluginBase):
 
     def on_connect(self):
         self.fut = asyncio.create_task(self.on_connect_function())
+        self.fut.add_done_callback(self._connect_function_complete)
+
+    def _connect_function_complete(self, fut: asyncio.Future):
+        self.fut = None
 
     def on_disconnect(self):
         if self.fut is not None:

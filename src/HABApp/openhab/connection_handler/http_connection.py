@@ -1,9 +1,9 @@
 import asyncio
 import logging
 import traceback
-import typing
 from asyncio import Queue, sleep, QueueEmpty
-from typing import Any, Optional, Final
+from time import monotonic
+from typing import Any, Optional, Final, Tuple, Callable, Union
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -37,8 +37,8 @@ HTTP_SESSION: aiohttp.ClientSession = None
 
 CONNECT_WAIT: WaitBetweenConnects = WaitBetweenConnects()
 
-ON_CONNECTED: typing.Callable = None
-ON_DISCONNECTED: typing.Callable = None
+ON_CONNECTED: Callable = None
+ON_DISCONNECTED: Callable = None
 
 
 OH_3: bool = False
@@ -357,38 +357,61 @@ async def async_get_system_info() -> dict:
     return await resp.json(loads=load_json, encoding='utf-8')
 
 
-async def async_get_start_level(default_level: int = -10) -> int:
+async def _start_level_reached() -> Tuple[bool, Union[None, int]]:
+    start_level_min = HABApp.CONFIG.openhab.general.min_start_level
+
     system_info = await async_get_system_info()
-    return system_info.get('systemInfo', {}).get('startLevel', default_level)
+    start_level_is = system_info.get('systemInfo', {}).get('startLevel')    # type: Optional[int]
+
+    if start_level_is is None:
+        return False, None
+
+    return start_level_is >= start_level_min, start_level_is
 
 
 async def wait_for_min_start_level():
 
-    waited_for_oh = False
-    last_level = -100
+    level_reached, level = await _start_level_reached()
+    if level_reached:
+        return None
 
-    while True:
-        start_level_is = await async_get_start_level()
-        start_level_min = HABApp.CONFIG.openhab.general.min_start_level
-        if start_level_is >= start_level_min:
-            break
+    log.info('Waiting for openHAB startup to be complete')
 
-        # show msg only once
-        if not waited_for_oh:
-            log.info('Waiting for openHAB startup to be complete')
+    last_level: int = -100
 
-        # show start level change
-        if last_level != start_level_is:
-            log.debug(f'Startlevel: {start_level_is}')
-        last_level = start_level_is
+    timeout_duration = 10 * 60
+    timeout_start_at_level = 70
+    timeout_timestamp = 0
 
-        # wait for openhab
-        waited_for_oh = True
+    while not level_reached:
         await asyncio.sleep(1)
 
-    # Startup complete
-    if waited_for_oh:
-        log.info('openHAB startup complete')
+        level_reached, level = await _start_level_reached()
+
+        # show start level change
+        if last_level != level:
+            if level is None:
+                log.debug('Start level: not received!')
+                level = -10
+            else:
+                log.debug(f'Start level: {level}')
+
+            # Wait but start eventually because sometimes we have a thing that prevents the start level from advancing
+            # This is a safety net, so we properly start e.g. after a power outage
+            # When starting manually one should fix the blocking thing
+            if level >= timeout_start_at_level:
+                timeout_timestamp = monotonic()
+                log.debug('Starting start level timeout')
+
+        # timeout is running
+        if timeout_timestamp and monotonic() - timeout_timestamp > timeout_duration:
+            log.warning(f'Starting even though openHAB is not ready yet (start level: {level})')
+            break
+
+        # update last level!
+        last_level = level
+
+    log.info('openHAB startup complete')
 
 
 async def try_connect():

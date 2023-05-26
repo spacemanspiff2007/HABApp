@@ -25,6 +25,9 @@ if typing.TYPE_CHECKING:
 
 
 def convert_to_oh_type(_in: Any) -> str:
+    if isinstance(_in, (str, int, float, bool)):
+        return str(_in)
+
     if isinstance(_in, datetime.datetime):
         # Add timezone (if not yet defined) to string, then remote anything below ms.
         # 2018-11-19T09:47:38.284000+0100 -> 2018-11-19T09:47:38.284+0100
