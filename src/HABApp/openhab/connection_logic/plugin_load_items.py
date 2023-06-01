@@ -18,9 +18,13 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
     @ignore_exception
     async def on_connect_function(self):
+        log.debug('Requesting items')
         data = await async_get_items(all_metadata=True)
         if data is None:
             return None
+
+        found_items = len(data)
+        log.debug(f'Got response with {found_items} items')
 
         fresh_item_sync()
 
@@ -32,7 +36,6 @@ class LoadAllOpenhabItems(OnConnectPlugin):
                 "undesired behavior. It's recommended to not use them and use plain number items instead."
             )
 
-        found_items = len(data)
         for _dict in data:
             item_name = _dict['name']
             new_item = map_item(item_name, _dict['type'], _dict['state'], _dict.get('label'),
@@ -52,7 +55,12 @@ class LoadAllOpenhabItems(OnConnectPlugin):
         log.info(f'Updated {found_items:d} Items')
 
         # try to update things, too
+        log.debug('Requesting things')
+
         data = await async_get_things()
+
+        found_things = len(data)
+        log.debug(f'Got response with {found_items} things')
 
         Thing = HABApp.openhab.items.Thing
         for thing_cfg in data:
@@ -65,7 +73,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
             if isinstance(Items.get_item(k), Thing):
                 remove_thing_from_registry(k)
 
-        log.info(f'Updated {len(data):d} Things')
+        log.info(f'Updated {found_things:d} Things')
         return None
 
 
