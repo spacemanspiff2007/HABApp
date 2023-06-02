@@ -30,7 +30,7 @@ SUPPRESSED_PATHS = (
 )
 
 
-def is_habapp_file(name: str) -> bool:
+def is_suppressed_habapp_file(name: str) -> bool:
     for r in SUPPRESSED_HABAPP_PATHS:
         if r.search(name):
             return True
@@ -40,6 +40,8 @@ def is_habapp_file(name: str) -> bool:
 def is_lib_file(name: str) -> bool:
     for r in SUPPRESSED_PATHS:
         if r.search(name):
+            if '/HABApp/' in name or '\\HABApp\\' in name:
+                continue
             return True
     return False
 
@@ -51,7 +53,7 @@ def format_frame_info(tb: List[str], frame_info: FrameInfo, is_last=False) -> bo
     if is_lib_file(filename):
         return False
 
-    if not is_last and is_habapp_file(filename):
+    if not is_last and is_suppressed_habapp_file(filename):
         return False
 
     # calc max line nr for indentation

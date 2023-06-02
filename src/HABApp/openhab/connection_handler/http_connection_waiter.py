@@ -12,7 +12,7 @@ class WaitBetweenConnects:
 
     async def wait(self):
 
-        # wenn wir lang connected sind oder beim ersten mal versuchen wir den reconnect gleich
+        # wenn wir lang connected sind oder beim ersten Mal versuchen wir den reconnect gleich
         if time.time() - self.last_try > MAX_WAIT:
             wait = 0
         else:
