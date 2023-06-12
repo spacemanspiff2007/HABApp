@@ -2,12 +2,12 @@ from typing import Any
 
 from HABApp.core.const import MISSING
 from HABApp.core.events.filter.event import TypeBoundEventFilter
-from . import ItemStateChangedEvent, ItemStateEvent, ItemCommandEvent
+from . import ItemStateChangedEvent, ItemStateUpdatedEvent, ItemCommandEvent
 
 
-class ItemStateEventFilter(TypeBoundEventFilter):
+class ItemStateUpdatedEventFilter(TypeBoundEventFilter):
     def __init__(self, value: Any = MISSING):
-        super().__init__(ItemStateEvent, value=value)
+        super().__init__(ItemStateUpdatedEvent, value=value)
 
 
 class ItemStateChangedEventFilter(TypeBoundEventFilter):

@@ -1,6 +1,6 @@
 from HABApp.openhab.items import SwitchItem, GroupItem
 from HABAppTests import ItemWaiter, TestBaseRule, OpenhabTmpItem, EventWaiter
-from HABApp.openhab.events import ItemStateEventFilter
+from HABApp.openhab.events import ItemStateUpdatedEventFilter
 from HABAppTests.errors import TestCaseFailed
 
 
@@ -46,7 +46,7 @@ class TestOpenhabGroupFunction(TestBaseRule):
     def add_item_to_grp(self):
         new_item = OpenhabTmpItem('Switch')
         try:
-            with EventWaiter(self.group.name, ItemStateEventFilter()) as w:
+            with EventWaiter(self.group.name, ItemStateUpdatedEventFilter()) as w:
                 new_item.create_item(groups=[self.group.name])
                 event = w.wait_for_event()
                 while event.name != self.group.name:

@@ -74,7 +74,7 @@ ExampleMqttTestRule()
 ```python
 import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent, ValueChangeEventFilter, ValueUpdateEventFilter
-from HABApp.openhab.events import ItemCommandEvent, ItemStateEventFilter, ItemCommandEventFilter, \
+from HABApp.openhab.events import ItemCommandEvent, ItemStateUpdatedEventFilter, ItemCommandEventFilter, \
   ItemStateChangedEventFilter
 
 
@@ -84,7 +84,7 @@ class MyOpenhabRule(HABApp.Rule):
     super().__init__()
 
     # Trigger on item updates
-    self.listen_event('TestContact', self.item_state_update, ItemStateEventFilter())
+    self.listen_event('TestContact', self.item_state_update, ItemStateUpdatedEventFilter())
     self.listen_event('TestDateTime', self.item_state_update, ValueUpdateEventFilter())
 
     # Trigger on item changes
@@ -120,6 +120,7 @@ MyOpenhabRule()
 #### 1.1.0 (2023-XX-XX)
 - Renamed `GroupItemStateChangedEvent` to `GroupStateChangedEvent `
 - Groups issue a `GroupStateUpdateEvent` when the state updates
+- Renamed `ItemStateEvent` changed to `ItemStateUpdatedEvent`
 - Fewer warnings for long-running functions (execution of <FUNC_NAME> took too long)
 - Added `status_detail` to `Thing`
 

@@ -434,12 +434,12 @@ Event filters
 ======================================
 
 
-ItemStateEventFilter
+ItemStateUpdatedEventFilter
 --------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.ItemStateEventFilter
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateUpdatedEventFilter
    :parts: 1
 
-.. autoclass:: HABApp.openhab.events.ItemStateEventFilter
+.. autoclass:: HABApp.openhab.events.ItemStateUpdatedEventFilter
    :members:
    :inherited-members:
    :member-order: groupwise
