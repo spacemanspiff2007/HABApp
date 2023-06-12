@@ -21,6 +21,10 @@ class StringItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        return state
+
 
 class PlayerItem(OpenhabItem):
     """PlayerItem which accepts and converts the data types from OpenHAB
@@ -33,3 +37,7 @@ class PlayerItem(OpenhabItem):
     :ivar FrozenSet[str] groups:
     :ivar Mapping[str, MetaData] metadata:
     """
+
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        return state

@@ -58,7 +58,8 @@ async def async_item_exists(item) -> bool:
 
 
 async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = None,
-                          all_metadata=False) -> Optional[List[Dict[str, Any]]]:
+                          all_metadata=False,
+                          only_item_state=False) -> Optional[List[Dict[str, Any]]]:
     params = None
     if include_habapp_meta:
         params = {'metadata': 'HABApp'}
@@ -68,6 +69,11 @@ async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = N
         params = {'metadata': metadata}
     if all_metadata:
         params = {'metadata': '.+'}
+
+    if only_item_state:
+        if params is None:
+            params = {}
+        params['fields'] = 'name,state'
 
     resp = await get('/rest/items', params=params)
     return await resp.json(loads=load_json, encoding='utf-8')

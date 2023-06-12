@@ -1,6 +1,4 @@
-from typing import TYPE_CHECKING, Optional, FrozenSet, Mapping, Union, Any
-
-from immutables import Map
+from typing import TYPE_CHECKING, Optional, FrozenSet, Mapping, Union
 
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from HABApp.openhab.items.commands import UpDownCommand, PercentCommand
@@ -26,12 +24,12 @@ class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata:
     """
 
-    def __init__(self, name: str, initial_value: Any = None, label: Optional[str] = None,
-                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()):
-        if initial_value is not None:
-            initial_value = float(initial_value)
-        super().__init__(name, initial_value, label, tags, groups, metadata)
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        try:
+            return int(state)
+        except ValueError:
+            return float(state)
 
     def set_value(self, new_value) -> bool:
 

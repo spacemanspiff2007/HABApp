@@ -123,6 +123,7 @@ MyOpenhabRule()
 - Renamed `ItemStateEvent` changed to `ItemStateUpdatedEvent`
 - Fewer warnings for long-running functions (execution of <FUNC_NAME> took too long)
 - Added `status_detail` to `Thing`
+- Improved item sync from openHAB (no more false item state `None` after startup)
 
 #### 1.0.8 (2023-02-09)
 - Fixed an issue when using token based authentication with openHAB

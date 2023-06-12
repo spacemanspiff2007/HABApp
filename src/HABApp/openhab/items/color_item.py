@@ -35,13 +35,18 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
         self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)
         self.brightness: float = min(max(0.0, b), PERCENT_FACTOR)
 
+    @staticmethod
+    def _state_from_oh_str(state: str) -> Tuple[float, float, float]:
+        h, s, b = state.split(',')
+        return float(h), float(s), float(b)
+
     @classmethod
     def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
                 groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
         if value is None:
             return cls(name, label=label, tags=tags, groups=groups, metadata=metadata)
         return cls(
-            name, *[float(k) for k in value.split(',')], label=label, tags=tags, groups=groups, metadata=metadata)
+            name, *cls._state_from_oh_str(value), label=label, tags=tags, groups=groups, metadata=metadata)
 
     def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
         """Set the color value

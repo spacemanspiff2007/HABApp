@@ -24,6 +24,10 @@ class GroupItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        return state
+
     def set_value(self, new_value) -> bool:
 
         if isinstance(new_value, ComplexEventValue):

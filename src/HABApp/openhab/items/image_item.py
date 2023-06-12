@@ -48,6 +48,10 @@ class ImageItem(OpenhabItem):
         # this item is unique because we also save the image type and thus have two states
         self.image_type: Optional[str] = None
 
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        return RawValue(state).value
+
     @classmethod
     def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
                 groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):

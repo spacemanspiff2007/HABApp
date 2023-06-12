@@ -1,12 +1,14 @@
 from typing import FrozenSet, Mapping, Optional, Tuple, TYPE_CHECKING
 
-from immutables import Map
-
 from HABApp.openhab.definitions.values import PointValue
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 
 if TYPE_CHECKING:
     Tuple = Tuple
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
 
 
 class CallItem(OpenhabItem):
@@ -21,12 +23,9 @@ class CallItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
-    @classmethod
-    def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
-                groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
-        if value is not None:
-            value = tuple(value.split(','))
-        return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        return tuple(state.split(','))
 
     def set_value(self, new_value) -> bool:
         if isinstance(new_value, str):
@@ -51,13 +50,11 @@ class LocationItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
-    @classmethod
-    def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
-                groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
-        if value is not None:
-            value = tuple(value.split(','))
-            assert 2 <= len(value) <= 3
-        return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        value = tuple(state.split(','))
+        assert 2 <= len(value) <= 3
+        return value
 
     def set_value(self, new_value) -> bool:
         if isinstance(new_value, PointValue):

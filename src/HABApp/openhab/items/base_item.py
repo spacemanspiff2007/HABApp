@@ -39,7 +39,13 @@ class OpenhabItem(BaseValueItem):
     def from_oh(cls, name: str, value=None,
                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                 metadata: Mapping[str, MetaData] = Map()):
+        if value is not None:
+            value = cls._state_from_oh_str(value)
         return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
+
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        raise NotImplementedError()
 
     def oh_send_command(self, value: Any = MISSING):
         """Send a command to the openHAB item

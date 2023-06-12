@@ -39,9 +39,6 @@ def map_item(name: str, type: str, value: Optional[str],
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)
 
-        if value == 'NULL' or value == 'UNDEF':
-            value = None
-
         # map Metadata
         if metadata is not None:
             meta = Map({k: MetaData(v['value'], Map(v.get('config', {}))) for k, v in metadata.items()})

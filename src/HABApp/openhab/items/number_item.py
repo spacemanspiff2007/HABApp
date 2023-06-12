@@ -1,13 +1,13 @@
 from typing import Optional, FrozenSet, Mapping, Union, TYPE_CHECKING
 
-from immutables import Map
-
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from ..definitions import QuantityValue
 
-
 if TYPE_CHECKING:
     Union = Union
+    MetaData = MetaData
+    FrozenSet = FrozenSet
+    Mapping = Mapping
 
 
 class NumberItem(OpenhabItem):
@@ -29,17 +29,12 @@ class NumberItem(OpenhabItem):
             return None
         return unit.value
 
-    @classmethod
-    def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),
-                groups: FrozenSet[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
-        if value is None:
-            return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
-
+    @staticmethod
+    def _state_from_oh_str(state: str):
         try:
-            value = int(value)
+            return int(state)
         except ValueError:
-            value = float(value)
-        return cls(name, value, label, tags, groups, metadata)
+            return float(state)
 
     def set_value(self, new_value) -> bool:
 

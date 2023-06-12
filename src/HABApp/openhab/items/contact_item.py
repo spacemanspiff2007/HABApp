@@ -29,6 +29,12 @@ class ContactItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        if state != OPEN and state != CLOSED:
+            raise ValueError(f'Invalid value for ContactItem: {state}')
+        return state
+
     def set_value(self, new_value) -> bool:
 
         if isinstance(new_value, OpenClosedValue):

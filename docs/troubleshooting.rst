@@ -49,25 +49,18 @@ The script can e.g. print the result as a json which HABApp can read and load ag
 If this warning only appears now and then it can be ignored.
 
 
-One or more UoM items configured
---------------------------------------
+Item <ITEM_NAME> is a UoM item but "unit" is not found in item metadata
+----------------------------------------------------------------------------
 
-The state of UoM item may arbitrarily change the scale of the item state depending on state updates.
-E.g. a state ``3.5kWh`` which is interpreted in HABApp as ``3.5`` can change to ``3500Wh``
-which is interpreted as ``3500`` and thus wrongly triggering rules.
+Starting from OH4 it's possible to use an internal normalisation unit and scale for UoM items.
+To use this normalisation one has to set the ``unit`` metadata on the item.::
 
-With persistence it's different:
-The persisted value ``3.5kWh`` is dependent on the item state description and/or on the system default.
-E.g. it's impossible to say how an item with the state ``"Length [%.1f]"`` will be persisted because it will depend
-on the system locale and the openHAB version. ``"Length [%.1f ft]"`` will persist the length in feet but it's very
-confusing and error prone because a change of the state description might persist the values in a different scale
-leading to broken graphs and data.
+    Number:Temperature  My_Temp     { unit="°C" }
 
-The lack of internal normalisation makes it impossible to use UoM items with external systems or they only work by
-chance (e.g. no event with different scale is received).
-There was a `big push to change it for OH4.0 <https://github.com/openhab/openhab-core/issues/3282>`_ but
-unfortunately no consensus was reached.
-Therefore the recommendation is to not use UoM items since a consistent behavior can not be ensured.
+
+It's strongly recommend to explicitly set this normalisation value.
+Only when used it'll prevent graphs and persisted values from changing the unit and scale
+which would result in broken graphs or broken persisted data.
 
 
 Errors
