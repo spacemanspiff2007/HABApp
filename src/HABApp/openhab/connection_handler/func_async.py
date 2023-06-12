@@ -73,7 +73,7 @@ async def async_get_items(include_habapp_meta=False, metadata: Optional[str] = N
     if only_item_state:
         if params is None:
             params = {}
-        params['fields'] = 'name,state'
+        params['fields'] = 'name,state,type'
 
     resp = await get('/rest/items', params=params)
     return await resp.json(loads=load_json, encoding='utf-8')

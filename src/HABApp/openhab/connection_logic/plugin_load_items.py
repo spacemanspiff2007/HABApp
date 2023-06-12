@@ -8,6 +8,7 @@ from HABApp.openhab.item_to_reg import add_to_registry, fresh_item_sync, remove_
     remove_thing_from_registry, add_thing_to_registry
 from HABApp.openhab.map_items import map_item
 from ._plugin import OnConnectPlugin
+from ..definitions import QuantityValue
 from ..interface_async import async_get_items, async_get_things
 from ..items import OpenhabItem
 from ...core.internals import uses_item_registry
@@ -70,6 +71,10 @@ class LoadAllOpenhabItems(OnConnectPlugin):
             # if the item is still None it was not initialized during the item request
             if (_new_value := map_null(_dict['state'])) is None:
                 continue
+
+            # UoM item handling
+            if ':' in _dict['type']:
+                _new_value, _ = QuantityValue.split_unit(_new_value)
 
             existing_item, existing_item_update = created_items[item_name]
             # noinspection PyProtectedMember
