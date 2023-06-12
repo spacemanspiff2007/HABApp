@@ -49,7 +49,7 @@ class Connection(BaseModel):
         # todo: check if this might be a good filter: 'openhab/things/*',
         'openhab/things/*',
         alias='topic filter', in_file=False,
-        description='Topic filter for subscribing to openHAB. This filter is processed by openHAB and only events'
+        description='Topic filter for subscribing to openHAB. This filter is processed by openHAB and only events '
                     'matching this filter will be sent to HABApp.'
     )
 

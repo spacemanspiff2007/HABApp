@@ -42,8 +42,9 @@ If the state changes ``autoupdate`` can remain off.
 
 In the ``*.items`` file ``autoupdate`` can be disabled by adding the following statement in the metadata field.
 
-```
-Number	MyItem    { channel = "zwave:my_zwave_link", autoupdate="false" }
-```
+.. code-block:: text
+
+    Number	MyItem    { channel = "zwave:my_zwave_link", autoupdate="false" }
+
 
 It's also possible with textual thing configuration to add it as :ref:`metadata <ref_textual_thing_config_metadata>`.
