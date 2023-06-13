@@ -28,10 +28,16 @@ class LoadAllOpenhabItems(OnConnectPlugin):
 
     @ignore_exception
     async def on_connect_function(self):
+        if await self.load_items():
+            return True
+        if await self.load_things():
+            return True
+
+    async def load_items(self) -> bool:
         log.debug('Requesting items')
         data = await async_get_items(all_metadata=True)
         if data is None:
-            return None
+            return True
 
         found_items = len(data)
         log.debug(f'Got response with {found_items} items')
@@ -63,7 +69,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
             i.name: (i, i.last_update) for i in Items.get_items() if isinstance(i, OpenhabItem)
         }
         if (data := await async_get_items(only_item_state=True)) is None:
-            return None
+            return True
 
         for _dict in data:
             item_name = _dict['name']
@@ -83,8 +89,11 @@ class LoadAllOpenhabItems(OnConnectPlugin):
             if existing_item.value != _new_value and existing_item.last_update == existing_item_update:
                 existing_item.value = _new_value
                 log.debug(f'Re-synced value of {item_name:s}')
-        log.debug('Item state sync complete')
 
+        log.debug('Item state sync complete')
+        return False
+
+    async def load_things(self):
         # try to update things, too
         log.debug('Requesting things')
 
@@ -105,7 +114,7 @@ class LoadAllOpenhabItems(OnConnectPlugin):
                 remove_thing_from_registry(k)
 
         log.info(f'Updated {found_things:d} Things')
-        return None
+        return False
 
 
 PLUGIN_LOAD_ITEMS = LoadAllOpenhabItems.create_plugin()
