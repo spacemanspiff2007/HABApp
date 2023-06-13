@@ -118,8 +118,7 @@ def add_thing_to_registry(data: Union['HABApp.openhab.definitions.rest.OpenhabTh
     new_thing.location = data.location
     new_thing.configuration = Map(data.configuration)
     new_thing.properties = Map(data.properties)
-    Items.add_item(new_thing)
-    return None
+    return Items.add_item(new_thing)
 
 
 def remove_thing_from_registry(name: str):
