@@ -369,12 +369,17 @@ async def _start_level_reached() -> Tuple[bool, Union[None, int]]:
     return start_level_is >= start_level_min, start_level_is
 
 
+WAITED_FOR_OPENHAB: bool = False
+
+
 async def wait_for_min_start_level():
+    global WAITED_FOR_OPENHAB
 
     level_reached, level = await _start_level_reached()
     if level_reached:
         return None
 
+    WAITED_FOR_OPENHAB = True
     log.info('Waiting for openHAB startup to be complete')
 
     last_level: int = -100
