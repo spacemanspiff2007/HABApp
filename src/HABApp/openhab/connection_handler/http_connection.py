@@ -6,6 +6,7 @@ from time import monotonic
 from typing import Any, Optional, Final, Tuple, Callable, Union
 
 import aiohttp
+from aiohttp import ContentTypeError
 from aiohttp.client import ClientResponse, _RequestContextManager
 from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT, METH_DELETE
 from aiohttp_sse_client import client as sse_client
@@ -343,11 +344,17 @@ async def async_get_uuid() -> str:
     return await resp.text(encoding='utf-8')
 
 
-async def async_get_root() -> dict:
+async def async_get_root() -> Optional[dict]:
     resp = await get('/rest/', log_404=False)
     if resp.status == 404:
-        return {}
-    return await resp.json(loads=load_json, encoding='utf-8')
+        return None
+
+    try:
+        return await resp.json(loads=load_json, encoding='utf-8')
+    except ContentTypeError:
+        # during start up openHAB sends an empty response with a wrong
+        # content type which causes the above error
+        return None
 
 
 async def async_get_system_info() -> dict:
@@ -428,7 +435,8 @@ async def try_connect():
             await CONNECT_WAIT.wait()
 
             log.debug('Trying to connect to OpenHAB ...')
-            root = await async_get_root()
+            if (root := await async_get_root()) is None:
+                root = {}
 
             # It's possible that we get status 4XX during startup and then the response is empty
             runtime_info = root.get('runtimeInfo')
