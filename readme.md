@@ -20,6 +20,9 @@ It is possible to create rules that listen to events from these instances and th
 The goal of this application is to provide a simple way to create home automation rules in python.
 With full syntax highlighting and descriptive names it should almost never be required to look something up in the documentation
 
+## Documentation
+[The documentation can be found at here](https://habapp.readthedocs.io)
+
 ## Help out
 HABApp was created for my own use, but I wanted others to profit from it, too.
 Creating, maintaining and developing it takes a lot of time.
@@ -30,8 +33,6 @@ so I can buy some more coffee to keep development going. :wink:
 
 All donations are greatly appreciated!
 
-## Documentation
-[The documentation can be found at here](https://habapp.readthedocs.io)
 
 ## Examples
 
