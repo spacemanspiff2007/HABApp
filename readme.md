@@ -26,7 +26,7 @@ Creating, maintaining and developing it takes a lot of time.
 If you think this is a great tool and want to support it you can donate,
 so I can buy some more coffee to keep development going. :wink:
 
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YU5U9YQN56JVA)
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-informational?logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YU5U9YQN56JVA)
 
 All donations are greatly appreciated!
 
