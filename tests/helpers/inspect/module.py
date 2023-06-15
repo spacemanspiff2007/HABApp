@@ -36,5 +36,5 @@ def get_module_classes(module_name: str, /, exclude: Optional[Iterable[Union[str
     importlib.import_module(module_name)
     return dict(inspect.getmembers(
         sys.modules[module_name],
-        lambda x: all(map(lambda f: f(x), filters))
+        lambda x: all(f(x) for f in filters)
     ))

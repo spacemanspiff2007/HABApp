@@ -1,10 +1,16 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING, Optional, FrozenSet, Mapping
 
-from HABApp.openhab.items.base_item import OpenhabItem
+from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from ..definitions import OpenClosedValue
 from ...core.const import MISSING
 from ..errors import SendCommandNotSupported
 from HABApp.openhab.interface import post_update
+
+if TYPE_CHECKING:
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
 
 
 OPEN = OpenClosedValue.OPEN
@@ -22,6 +28,12 @@ class ContactItem(OpenhabItem):
     :ivar FrozenSet[str] groups:
     :ivar Mapping[str, MetaData] metadata:
     """
+
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        if state != OPEN and state != CLOSED:
+            raise ValueError(f'Invalid value for ContactItem: {state}')
+        return state
 
     def set_value(self, new_value) -> bool:
 

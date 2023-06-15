@@ -1,10 +1,10 @@
-aiohttp     >= 3.8,     < 3.9
-pydantic    >= 1.10,    < 1.11
-pendulum    >= 2.1.2,   < 2.2
-bidict      >= 0.22,    < 0.23
-watchdog    >= 2.2,     < 2.3
-ujson       >= 5.7,     < 5.8
-paho-mqtt   >= 1.6,     < 1.7
+aiohttp     == 3.8.4
+pydantic    == 1.10.9
+pendulum    == 2.1.2
+bidict      == 0.22.1
+watchdog    == 3.0.0
+ujson       == 5.8.0
+paho-mqtt   == 1.6.1
 
 immutables  == 0.19
 eascheduler == 0.1.8
@@ -12,7 +12,8 @@ easyconfig  == 0.2.8
 stack_data  == 0.6.2
 colorama    == 0.4.6
 
-voluptuous      == 0.13.1
+voluptuous == 0.13.1
 
-typing-extensions   >= 4.1,   < 5
+typing-extensions == 4.6.3
+
 aiohttp-sse-client  == 0.2.1

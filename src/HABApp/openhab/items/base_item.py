@@ -26,7 +26,7 @@ class OpenhabItem(BaseValueItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
-    def __init__(self, name: str, initial_value=None,
+    def __init__(self, name: str, initial_value: Any = None,
                  label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
         super().__init__(name, initial_value)
@@ -39,7 +39,13 @@ class OpenhabItem(BaseValueItem):
     def from_oh(cls, name: str, value=None,
                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                 metadata: Mapping[str, MetaData] = Map()):
+        if value is not None:
+            value = cls._state_from_oh_str(value)
         return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
+
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        raise NotImplementedError()
 
     def oh_send_command(self, value: Any = MISSING):
         """Send a command to the openHAB item
@@ -75,7 +81,7 @@ class OpenhabItem(BaseValueItem):
         :param greater_than: item state has to be greater than the passed value
         :param gt: item state has to be greater than the passed value
         :param greater_equal: item state has to be greater equal the passed value
-        :param ge: tem state has to be greater equal the passed value
+        :param ge: item state has to be greater equal the passed value
         :param is_: item state has to be the same object as the passt value (e.g. None)
         :param is_not: item state has to be not the same object as the passt value (e.g. None)
 

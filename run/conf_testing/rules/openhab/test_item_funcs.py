@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import typing
 
-from HABApp.openhab.items import OpenhabItem, NumberItem, ContactItem
+from HABApp.openhab.items import OpenhabItem, NumberItem, ContactItem, LocationItem
 from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem, ImageItem
 from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem, get_openhab_test_states, get_openhab_test_types
 
@@ -22,7 +22,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
     def __init__(self):
         super().__init__()
 
-        self.add_func_test(ContactItem, [TestParam('open', 'OPEN'), TestParam('closed', 'CLOSED')])
+        self.add_func_test(ContactItem, {TestParam('open', 'OPEN'), TestParam('closed', 'CLOSED')})
 
         p_on = {TestParam('on', 'ON'), TestParam('off', 'OFF')}
         p_int = {TestParam('percent', 50, 50), TestParam('percent', 100, 100), TestParam('percent', 0, 0)}
@@ -40,7 +40,6 @@ class TestOpenhabItemFuncs(TestBaseRule):
             DimmerItem, {TestParam('on', 100), TestParam('off', 0)} | p_int | p_float
         )
 
-
         self.add_func_test(
             ColorItem, {
                 TestParam('on', (0, 0, 100)),
@@ -53,6 +52,14 @@ class TestOpenhabItemFuncs(TestBaseRule):
         self.add_func_test(
             ImageItem, {
                 TestParam('oh_post_update', func_params=img_byte, result=img_byte),
+            }
+        )
+
+        self.add_func_test(
+            LocationItem, {
+                TestParam(
+                    'oh_post_update', func_params="52.5185537,13.3758636,43", result=(52.5185537, 13.3758636, 43)
+                )
             }
         )
 

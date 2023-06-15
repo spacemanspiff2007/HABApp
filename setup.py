@@ -51,6 +51,7 @@ setup(
     },
     package_dir={'': 'src'},
     packages=find_packages('src', exclude=['tests*']),
+    package_data={'HABApp': ['py.typed']},
     install_requires=load_req(),
     python_requires='>=3.8',
     classifiers=[

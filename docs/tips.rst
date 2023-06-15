@@ -36,14 +36,16 @@ autoupdate
 
 If external devices are capable of reporting their state (e.g. Z-Wave) it is always advised to use disable ``autoupdate`` for these items.
 This prevents openHAB from guessing the item state based on the command and forces it to use the actual reported value.
-If in doubt if the device supports reporting their state watch the state after sending a command with ``autoupdate`` off.
+If in doubt if the device supports reporting their state it can be easily tested:
+Set ``autoupdate`` to off, then watch the item state after sending a command to it.
 If the state changes ``autoupdate`` can remain off.
 
 
 In the ``*.items`` file ``autoupdate`` can be disabled by adding the following statement in the metadata field.
 
-```
-Number	MyItem    { channel = "zwave:my_zwave_link", autoupdate="false" }
-```
+.. code-block:: text
+
+    Number	MyItem    { channel = "zwave:my_zwave_link", autoupdate="false" }
+
 
 It's also possible with textual thing configuration to add it as :ref:`metadata <ref_textual_thing_config_metadata>`.

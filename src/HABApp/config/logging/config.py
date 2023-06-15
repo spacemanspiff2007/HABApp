@@ -116,7 +116,7 @@ def rotate_files():
 
 
 def inject_log_buffer(cfg: dict, log: BufferedLogger):
-    from HABApp.core.const.topics import TOPIC_EVENTS
+    from HABApp.core.const.log import TOPIC_EVENTS
 
     handler_cfg = cfg.setdefault('handlers', {})
 

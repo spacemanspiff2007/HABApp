@@ -1,10 +1,16 @@
 from base64 import b64encode
-from typing import FrozenSet, Mapping, Optional
+from typing import Any, TYPE_CHECKING, Optional, FrozenSet, Mapping
 
 from immutables import Map
 
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from ..definitions import RawValue
+
+if TYPE_CHECKING:
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
 
 
 def _convert_bytes(data: bytes, img_type: Optional[str]) -> str:
@@ -34,13 +40,17 @@ class ImageItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata:
     """
 
-    def __init__(self, name: str, initial_value=None,
-                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+    def __init__(self, name: str, initial_value: Any = None, label: Optional[str] = None,
+                 tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
         super().__init__(name, initial_value, label, tags, groups, metadata)
 
         # this item is unique because we also save the image type and thus have two states
         self.image_type: Optional[str] = None
+
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        return RawValue(state).value
 
     @classmethod
     def from_oh(cls, name: str, value=None, label: Optional[str] = None, tags: FrozenSet[str] = frozenset(),

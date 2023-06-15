@@ -49,6 +49,20 @@ The script can e.g. print the result as a json which HABApp can read and load ag
 If this warning only appears now and then it can be ignored.
 
 
+Item <ITEM_NAME> is a UoM item but "unit" is not found in item metadata
+----------------------------------------------------------------------------
+
+Starting from OH4 it's possible to use an internal normalisation unit and scale for UoM items.
+To use this normalisation one has to set the ``unit`` metadata on the item.::
+
+    Number:Temperature  My_Temp     { unit="°C" }
+
+
+It's strongly recommend to explicitly set this normalisation value.
+Only when used it'll prevent graphs and persisted values from changing the unit and scale
+which would result in broken graphs or broken persisted data.
+
+
 Errors
 ======================================
 

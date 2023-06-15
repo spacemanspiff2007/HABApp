@@ -157,6 +157,7 @@ class Rule(ContextProvidingObj):
                          instance of :class:`~HABApp.rule.FinishedProcessInfo`.
         :param capture_output: Capture program output, set to ``False`` to only capture the return code
         :param additional_python_path: additional folders which will be added to the env variable ``PYTHONPATH``
+        :param kwargs: Additional kwargs that will be passed to ``asyncio.create_subprocess_exec``
         :return:
         """
 
@@ -201,6 +202,7 @@ class Rule(ContextProvidingObj):
                          instance of :class:`~HABApp.rule.FinishedProcessInfo`.
         :param capture_output: Capture program output, set to ``False`` to only capture the return code
         :param additional_python_path: additional folders which will be added to the env variable ``PYTHONPATH``
+        :param kwargs: Additional kwargs that will be passed to ``asyncio.create_subprocess_exec``
         :return:
         """
 

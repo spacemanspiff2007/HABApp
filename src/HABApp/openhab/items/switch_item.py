@@ -1,13 +1,26 @@
+from typing import TYPE_CHECKING, Tuple, Optional, FrozenSet, Mapping
+
 from HABApp.openhab.definitions import OnOffValue
-from HABApp.openhab.items.base_item import OpenhabItem
+from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from HABApp.openhab.items.commands import OnOffCommand
+
+if TYPE_CHECKING:
+    Tuple = Tuple
+    Optional = Optional
+    FrozenSet = FrozenSet
+    Mapping = Mapping
+    MetaData = MetaData
+
+
+ON = OnOffValue.ON
+OFF = OnOffValue.OFF
 
 
 class SwitchItem(OpenhabItem, OnOffCommand):
     """SwitchItem which accepts and converts the data types from OpenHAB
 
     :ivar str name:
-    :ivar Tuple[str, ...] value:
+    :ivar str value:
 
     :ivar Optional[str] label:
     :ivar FrozenSet[str] tags:
@@ -15,22 +28,29 @@ class SwitchItem(OpenhabItem, OnOffCommand):
     :ivar Mapping[str, MetaData] metadata:
     """
 
+
+    @staticmethod
+    def _state_from_oh_str(state: str):
+        if state != ON and state != OFF:
+            raise ValueError(f'Invalid value for SwitchItem: {state}')
+        return state
+
     def set_value(self, new_value) -> bool:
 
         if isinstance(new_value, OnOffValue):
             new_value = new_value.value
 
-        if new_value is not None and new_value != OnOffValue.ON and new_value != OnOffValue.OFF:
+        if new_value is not None and new_value != ON and new_value != OFF:
             raise ValueError(f'Invalid value for SwitchItem {self.name}: {new_value}')
         return super().set_value(new_value)
 
     def is_on(self) -> bool:
         """Test value against on-value"""
-        return self.value == OnOffValue.ON
+        return self.value == ON
 
     def is_off(self) -> bool:
         """Test value against off-value"""
-        return self.value == OnOffValue.OFF
+        return self.value == OFF
 
     def __str__(self):
         return self.value

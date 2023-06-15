@@ -1,11 +1,12 @@
 import asyncio
 import logging
 import traceback
-import typing
 from asyncio import Queue, sleep, QueueEmpty
-from typing import Any, Optional, Final
+from time import monotonic
+from typing import Any, Optional, Final, Tuple, Callable, Union
 
 import aiohttp
+from aiohttp import ContentTypeError
 from aiohttp.client import ClientResponse, _RequestContextManager
 from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT, METH_DELETE
 from aiohttp_sse_client import client as sse_client
@@ -19,7 +20,7 @@ from HABApp.core.logger import log_info, log_warning
 from HABApp.core.wrapper import process_exception, ignore_exception
 from HABApp.openhab.errors import OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
 from .http_connection_waiter import WaitBetweenConnects
-from ...core.const.topics import TOPIC_EVENTS
+from ...core.const.log import TOPIC_EVENTS
 from ...core.lib import SingleTask
 
 log = logging.getLogger('HABApp.openhab.connection')
@@ -37,8 +38,11 @@ HTTP_SESSION: aiohttp.ClientSession = None
 
 CONNECT_WAIT: WaitBetweenConnects = WaitBetweenConnects()
 
-ON_CONNECTED: typing.Callable = None
-ON_DISCONNECTED: typing.Callable = None
+ON_CONNECTED: Callable = None
+ON_DISCONNECTED: Callable = None
+
+
+OH_3: bool = False
 
 
 async def get(url: str, log_404=True, **kwargs: Any) -> ClientResponse:
@@ -230,6 +234,7 @@ async def start_sse_event_listener():
         # cache so we don't have to look up every event
         _load_json = load_json
         _see_handler = on_sse_event
+        oh3 = OH_3
 
         async with sse_client.EventSource(url=f'/rest/events?topics={HABApp.CONFIG.openhab.connection.topic_filter}',
                                           session=HTTP_SESSION, ssl=HTTP_VERIFY_SSL) as event_source:
@@ -245,15 +250,20 @@ async def start_sse_event_listener():
 
                 # Alive event from openhab to detect dropped connections
                 # -> Can be ignored on the HABApp side
-                if e_json.get('type') == 'ALIVE':
+                e_type = e_json.get('type')
+                if e_type == 'ALIVE':
                     continue
 
                 # Log raw sse event
                 if log_events.isEnabledFor(logging.DEBUG):
                     log_events._log(logging.DEBUG, e_str, [])
 
+                # With OH4 we have the ItemStateUpdatedEvent, so we can ignore the ItemStateEvent
+                if not oh3 and e_type == 'ItemStateEvent':
+                    continue
+
                 # process
-                _see_handler(e_json)
+                _see_handler(e_json, oh3)
     except Exception as e:
         disconnect = is_disconnect_exception(e)
         lvl = logging.WARNING if disconnect else logging.ERROR
@@ -321,11 +331,11 @@ async def output_queue_check_size():
                 log_info(log, f'{size} messages in queue')
 
 
-async def async_post_update(item, state: Any):
+def async_post_update(item, state: Any):
     QUEUE.put_nowait((item, state, False))
 
 
-async def async_send_command(item, state: Any):
+def async_send_command(item, state: Any):
     QUEUE.put_nowait((item, state, True))
 
 
@@ -334,11 +344,17 @@ async def async_get_uuid() -> str:
     return await resp.text(encoding='utf-8')
 
 
-async def async_get_root() -> dict:
+async def async_get_root() -> Optional[dict]:
     resp = await get('/rest/', log_404=False)
     if resp.status == 404:
-        return {}
-    return await resp.json(loads=load_json, encoding='utf-8')
+        return None
+
+    try:
+        return await resp.json(loads=load_json, encoding='utf-8')
+    except ContentTypeError:
+        # during start up openHAB sends an empty response with a wrong
+        # content type which causes the above error
+        return None
 
 
 async def async_get_system_info() -> dict:
@@ -348,42 +364,70 @@ async def async_get_system_info() -> dict:
     return await resp.json(loads=load_json, encoding='utf-8')
 
 
-async def async_get_start_level(default_level: int = -10) -> int:
+async def _start_level_reached() -> Tuple[bool, Union[None, int]]:
+    start_level_min = HABApp.CONFIG.openhab.general.min_start_level
+
     system_info = await async_get_system_info()
-    return system_info.get('systemInfo', {}).get('startLevel', default_level)
+    start_level_is = system_info.get('systemInfo', {}).get('startLevel')    # type: Optional[int]
+
+    if start_level_is is None:
+        return False, None
+
+    return start_level_is >= start_level_min, start_level_is
+
+
+WAITED_FOR_OPENHAB: bool = False
 
 
 async def wait_for_min_start_level():
+    global WAITED_FOR_OPENHAB
 
-    waited_for_oh = False
-    last_level = -100
+    level_reached, level = await _start_level_reached()
+    if level_reached:
+        return None
 
-    while True:
-        start_level_is = await async_get_start_level()
-        start_level_min = HABApp.CONFIG.openhab.general.min_start_level
-        if start_level_is >= start_level_min:
-            break
+    WAITED_FOR_OPENHAB = True
+    log.info('Waiting for openHAB startup to be complete')
 
-        # show msg only once
-        if not waited_for_oh:
-            log.info('Waiting for openHAB startup to be complete')
+    last_level: int = -100
 
-        # show start level change
-        if last_level != start_level_is:
-            log.debug(f'Startlevel: {start_level_is}')
-        last_level = start_level_is
+    timeout_duration = 10 * 60
+    timeout_start_at_level = 70
+    timeout_timestamp = 0
 
-        # wait for openhab
-        waited_for_oh = True
+    while not level_reached:
         await asyncio.sleep(1)
 
-    # Startup complete
-    if waited_for_oh:
-        log.info('openHAB startup complete')
+        level_reached, level = await _start_level_reached()
+
+        # show start level change
+        if last_level != level:
+            if level is None:
+                log.debug('Start level: not received!')
+                level = -10
+            else:
+                log.debug(f'Start level: {level}')
+
+            # Wait but start eventually because sometimes we have a thing that prevents the start level from advancing
+            # This is a safety net, so we properly start e.g. after a power outage
+            # When starting manually one should fix the blocking thing
+            if level >= timeout_start_at_level:
+                timeout_timestamp = monotonic()
+                log.debug('Starting start level timeout')
+
+        # timeout is running
+        if timeout_timestamp and monotonic() - timeout_timestamp > timeout_duration:
+            log.warning(f'Starting even though openHAB is not ready yet (start level: {level})')
+            break
+
+        # update last level!
+        last_level = level
+
+    log.info('openHAB startup complete')
 
 
 async def try_connect():
-    global IS_ONLINE
+    global IS_ONLINE, OH_3
 
     while True:
         try:
@@ -391,7 +435,8 @@ async def try_connect():
             await CONNECT_WAIT.wait()
 
             log.debug('Trying to connect to OpenHAB ...')
-            root = await async_get_root()
+            if (root := await async_get_root()) is None:
+                root = {}
 
             # It's possible that we get status 4XX during startup and then the response is empty
             runtime_info = root.get('runtimeInfo')
@@ -407,6 +452,9 @@ async def try_connect():
             vers = tuple(map(int, runtime_info["version"].split('.')[:2]))
             if vers < (3, 3):
                 log.warning('HABApp requires at least openHAB version 3.3!')
+
+            if vers < (4, 0):
+                OH_3 = True
 
             # wait for openhab startup to be complete
             await wait_for_min_start_level()

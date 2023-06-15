@@ -1,13 +1,15 @@
 import inspect
+from datetime import datetime
+from typing import Union, Tuple, Optional, Any
 
 import pytest
 
 from HABApp.core.items import Item
-from HABApp.openhab.items import Thing, ColorItem, ImageItem
+from HABApp.openhab.items import Thing, ColorItem, ImageItem, StringItem, NumberItem, SwitchItem, ContactItem, \
+    RollershutterItem, DimmerItem, DatetimeItem, PlayerItem, LocationItem, CallItem, GroupItem
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
-from tests.helpers.docs import get_ivars
-from tests.helpers.inspect import assert_same_signature
+from ...helpers.inspect import check_class_annotations, get_ivars_from_docstring, assert_same_signature
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
@@ -38,7 +40,42 @@ def test_conditional_function_call_signature(cls):
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
 def test_doc_ivar(cls):
 
-    class_vars = get_ivars(cls)
+    correct_hints = {
+        StringItem: {'value': str},
+        SwitchItem: {'value': str},
+        ContactItem: {'value': str},
+        PlayerItem: {'value': str},
+
+        NumberItem:        {'value': Union[int, float]},
+        RollershutterItem: {'value': Union[int, float]},
+        DimmerItem:        {'value': Union[int, float]},
+
+        ColorItem: {'value': Tuple[float, float, float]},
+        CallItem: {'value': Tuple[str, ...]},
+        LocationItem: {'value': Optional[Tuple[float, float, Optional[float]]]},
+
+        DatetimeItem: {'value': datetime},
+        ImageItem: {'value': bytes},
+
+        GroupItem: {'value': Any}
+    }
+
+    init_missing = {
+        **{k: ('last_change', 'last_update') for k in correct_hints},
+        ImageItem: ('image_type', 'last_change', 'last_update'),
+        ColorItem: ('value', 'last_change', 'last_update')
+    }
+
+    init_alias = {
+        **{k: {'initial_value': 'value'} for k in correct_hints},
+        ColorItem: {'b': 'brightness', 'h': 'hue', 's': 'saturation'}
+    }
+
+    class_vars = check_class_annotations(
+        cls, correct_hints.get(cls),
+        init_alias=init_alias.get(cls), init_missing=init_missing.get(cls, []),
+        annotations_missing=True
+    )
 
     # test that the class has the corresponding attribute
     obj = cls(name='test')
@@ -56,6 +93,6 @@ def test_doc_ivar(cls):
     class_vars.pop('value')
 
     # compare with base class so we have a consistent signature
-    target_vars = get_ivars(OpenhabItem)
+    target_vars = get_ivars_from_docstring(OpenhabItem)
     target_vars.pop('value')
     assert target_vars == class_vars

@@ -9,7 +9,7 @@ from ._log import log_item as log
 from .cfg_validator import UserItem
 
 
-def _filter_items(i):
+def _filter_items(i: dict):
     if not i.get('editable', False):
         return False
 

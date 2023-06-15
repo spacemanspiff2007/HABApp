@@ -4,7 +4,7 @@ from typing import Tuple, Any, Optional
 from paho.mqtt.client import MQTTMessage
 
 from HABApp.core.const.json import load_json
-from HABApp.core.const.topics import TOPIC_EVENTS
+from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.wrapper import process_exception
 
 log = logging.getLogger(f'{TOPIC_EVENTS}.mqtt')

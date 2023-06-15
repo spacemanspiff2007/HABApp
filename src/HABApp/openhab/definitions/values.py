@@ -1,5 +1,5 @@
-import base64
-import typing
+from base64 import b64decode
+from typing import Tuple, Union
 
 from HABApp.core.events import ComplexEventValue
 
@@ -61,10 +61,27 @@ class HSBValue(ComplexEventValue):
         return f'{self.value[0]}°,{self.value[1]}%,{self.value[2]}%'
 
 
+class PointValue(ComplexEventValue):
+    def __init__(self, value: str):
+        ret = []
+        for k in value.split(','):
+            if k is None:
+                ret.append(k)
+            else:
+                ret.append(float(k))
+        super().__init__(tuple(ret))
+
+    def __str__(self):
+        if len(self.value) == 2:
+            return f'{self.value[0]},{self.value[1]},'
+        else:
+            return f'{self.value[0]},{self.value[1]},{self.value[2]}'
+
+
 class QuantityValue(ComplexEventValue):
 
     @staticmethod
-    def split_unit(value: str) -> typing.Tuple[str, str]:
+    def split_unit(value: str) -> Tuple[str, str]:
         p = value.rfind(' ')
         # dimensionless has no unit
         if p < 0:
@@ -76,7 +93,7 @@ class QuantityValue(ComplexEventValue):
     def __init__(self, value: str):
         value, unit = QuantityValue.split_unit(value)
         try:
-            val: typing.Union[int, float] = int(value)
+            val: Union[int, float] = int(value)
         except ValueError:
             val = float(value)
         super().__init__(val)
@@ -84,6 +101,11 @@ class QuantityValue(ComplexEventValue):
 
     def __str__(self):
         return f'{self.value} {self.unit}'
+
+    def __eq__(self, other):
+        if not isinstance(other, QuantityValue):
+            return NotImplemented
+        return self.value == other.value and self.unit == other.unit
 
 
 class RawValue(ComplexEventValue):
@@ -101,7 +123,7 @@ class RawValue(ComplexEventValue):
         assert encoding == 'base64', f'"{encoding}"'
 
         # set the bytes as value
-        super().__init__(base64.b64decode(value[sep_enc + 1:]))
+        super().__init__(b64decode(value[sep_enc + 1:]))
 
     def __str__(self):
         return f'{self.type}'

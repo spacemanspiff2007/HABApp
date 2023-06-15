@@ -1,5 +1,5 @@
 import HABApp
-from HABApp.openhab.events import ItemStateEventFilter, ItemStateEvent
+from HABApp.openhab.events import ItemStateUpdatedEventFilter, ItemStateEvent
 from HABApp.openhab.items import OpenhabItem
 
 
@@ -10,7 +10,7 @@ class ExampleOpenhabToMQTTRule(HABApp.Rule):
         super().__init__()
 
         for item in self.get_items(OpenhabItem):
-            item.listen_event(self.process_update, ItemStateEventFilter())
+            item.listen_event(self.process_update, ItemStateUpdatedEventFilter())
 
     def process_update(self, event):
         assert isinstance(event, ItemStateEvent)

@@ -44,8 +44,8 @@ class WrappedFunctionBase(ContextProvidingObj):
         for line in lines:
             self.log.error(line)
 
-        # Create HABApp event, but only if we are not currently processing an exception while processing an error.
-        # Otherwise we might create an endless loop!
+        # Create an HABApp event, but only if we are not currently processing an exception while processing an error.
+        # Otherwise, we might create an endless loop!
         if not args or not isinstance(args[0], HABAppException):
             event_bus.post_event(
                 TOPIC_ERRORS, HABAppException(func_name=self.name, exception=e, traceback='\n'.join(lines))

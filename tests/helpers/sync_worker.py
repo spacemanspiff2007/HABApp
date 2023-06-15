@@ -11,5 +11,5 @@ class SyncTestWorker:
 
 @pytest.fixture(scope="function")
 def sync_worker(monkeypatch):
-    monkeypatch.setattr(wrapped_thread, 'WORKERS', SyncTestWorker())
+    monkeypatch.setattr(wrapped_thread, 'POOL', SyncTestWorker())
     yield

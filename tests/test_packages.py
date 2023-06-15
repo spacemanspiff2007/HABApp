@@ -1,7 +1,8 @@
 import re
 from pathlib import Path
-
+from packaging.version import VERSION_PATTERN
 import HABApp.__check_dependency_packages__
+from HABApp import __version__
 
 
 def test_installation_check():
@@ -19,3 +20,8 @@ def test_installation_check():
     coded = set(HABApp.__check_dependency_packages__.get_dependencies())
 
     assert coded == found
+
+
+def test_version():
+    check = re.compile(VERSION_PATTERN, re.VERBOSE | re.IGNORECASE)
+    assert check.fullmatch(__version__)

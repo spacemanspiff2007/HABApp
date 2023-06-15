@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, Final
 
 
 class ComplexEventValue:
@@ -9,15 +9,15 @@ class ComplexEventValue:
 class ValueUpdateEvent:
     """
     :ivar str name:
-    :ivar     value:
+    :ivar Any value:
     """
 
     name: str
     value: Any
 
-    def __init__(self, name: str = None, value=None):
-        self.name: str = name
-        self.value = value
+    def __init__(self, name: str, value: Any):
+        self.name: Final = name
+        self.value: Final = value
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
@@ -26,18 +26,18 @@ class ValueUpdateEvent:
 class ValueChangeEvent:
     """
     :ivar str name:
-    :ivar     value:
-    :ivar     old_value:
+    :ivar Any value:
+    :ivar Any old_value:
     """
 
     name: str
     value: Any
     old_value: Any
 
-    def __init__(self, name: str = None, value=None, old_value=None):
-        self.name: str = name
-        self.value = value
-        self.old_value = old_value
+    def __init__(self, name: str, value: Any, old_value: Any):
+        self.name: Final = name
+        self.value: Final = value
+        self.old_value: Final = old_value
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
@@ -52,9 +52,9 @@ class ItemNoChangeEvent:
     name: str
     seconds: Union[int, float]
 
-    def __init__(self, name=None, seconds=None):
-        self.name: str = name
-        self.seconds: int = seconds
+    def __init__(self, name: str, seconds: Union[int, float]):
+        self.name: Final = name
+        self.seconds: Final = seconds
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'
@@ -68,9 +68,9 @@ class ItemNoUpdateEvent:
     name: str
     seconds: Union[int, float]
 
-    def __init__(self, name=None, seconds=None):
-        self.name: str = name
-        self.seconds: int = seconds
+    def __init__(self, name: str, seconds: Union[int, float]):
+        self.name: Final = name
+        self.seconds: Final = seconds
 
     def __repr__(self):
         return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'

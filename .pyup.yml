@@ -13,5 +13,8 @@ requirements:
   - docs/requirements.txt:
       update: False
   - requirements.txt:
-      update: True
-      pin: True
+      update: False
+  - requirements_setup.txt:
+      update: False
+  - requirements_tests.txt:
+      update: False

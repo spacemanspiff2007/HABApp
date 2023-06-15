@@ -1,10 +1,12 @@
 from typing import Any, Mapping
 
 from immutables import Map
-from pendulum import now as pd_now
 from pendulum import UTC
+from pendulum import now as pd_now
 
 from HABApp.core.items import BaseItem
+from HABApp.openhab.definitions import ThingStatusEnum, ThingStatusDetailEnum
+from HABApp.openhab.definitions.things import THING_STATUS_DEFAULT, THING_STATUS_DETAIL_DEFAULT
 from HABApp.openhab.events import ThingConfigStatusInfoEvent, ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.interface import set_thing_enabled
 
@@ -12,19 +14,23 @@ from HABApp.openhab.interface import set_thing_enabled
 class Thing(BaseItem):
     """Base class for Things
 
-    :ivar str status: Status of the thing (e.g. OFFLINE, ONLINE, ...)
-    :ivar str status_detail: Additional detail for the status
+    :ivar ThingStatusEnum status: Status of the thing (e.g. OFFLINE, ONLINE, ...)
+    :ivar ThingStatusDetailEnum status_detail: Additional detail for the status
+    :ivar str status_description: Additional description for the status
     :ivar str label: Thing label
+    :ivar str location: Thing location
     :ivar Mapping[str, Any] configuration: Thing configuration
     :ivar Mapping[str, Any] properties: Thing properties
     """
     def __init__(self, name: str):
         super().__init__(name)
 
-        self.status: str = ''
-        self.status_detail: str = ''
+        self.status: ThingStatusEnum = THING_STATUS_DEFAULT
+        self.status_detail: ThingStatusDetailEnum = THING_STATUS_DETAIL_DEFAULT
+        self.status_description: str = ''
 
         self.label: str = ''
+        self.location: str = ''
 
         self.configuration: Mapping[str, Any] = Map()
         self.properties: Mapping[str, Any] = Map()
@@ -44,22 +50,31 @@ class Thing(BaseItem):
     def process_event(self, event):
 
         if isinstance(event, ThingStatusInfoEvent):
-            old = self.status
-            self.status = new = event.status
-            self.status_detail = event.detail
+            old_status = self.status
+            old_detail = self.status_detail
+            old_description = self.status_description
 
-            self.__update_timestamps(old != new)
-        elif isinstance(event, ThingUpdatedEvent):
-            old_label         = self.label
-            old_configuration = self.configuration
-            old_properties    = self.properties
-
-            self.label         = event.label
-            self.configuration = Map(event.configuration)
-            self.properties    = Map(event.properties)
+            self.status = new_status = event.status
+            self.status_detail = new_detail = event.detail
+            self.status_description = new_description = event.description
 
             self.__update_timestamps(
-                old_label != self.label or old_configuration != self.configuration or old_properties != self.properties
+                old_status != new_status or old_detail != new_detail or old_description != new_description
+            )
+        elif isinstance(event, ThingUpdatedEvent):
+            old_label = self.label
+            old_configuration = self.configuration
+            old_properties = self.properties
+            old_location = self.location
+
+            self.label = new_label = event.label
+            self.location = new_location = event.location
+            self.configuration = new_configuration = Map(event.configuration)
+            self.properties = new_properties = Map(event.properties)
+
+            self.__update_timestamps(
+                old_label != new_label or old_location != new_location or   # noqa: W504
+                old_configuration != new_configuration or old_properties != new_properties
             )
         elif isinstance(event, ThingConfigStatusInfoEvent):
             pass

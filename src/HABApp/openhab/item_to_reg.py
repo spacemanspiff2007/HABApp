@@ -7,6 +7,8 @@ import HABApp
 
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.logger import log_warning
+from HABApp.openhab.definitions.things import THING_STATUS_DEFAULT, THING_STATUS_DETAIL_DEFAULT, ThingStatusEnum, \
+    ThingStatusDetailEnum
 
 if TYPE_CHECKING:
     import HABApp.openhab.definitions.rest
@@ -86,12 +88,14 @@ def add_thing_to_registry(data: Union['HABApp.openhab.definitions.rest.OpenhabTh
 
     if isinstance(data, HABApp.openhab.events.thing_events.ThingAddedEvent):
         name = data.name
-        status: str = 'UNINITIALIZED'
-        status_detail: str = 'NONE'
+        status: ThingStatusEnum = THING_STATUS_DEFAULT
+        status_detail: ThingStatusDetailEnum = THING_STATUS_DETAIL_DEFAULT
+        status_description: str = ''
     elif isinstance(data, HABApp.openhab.definitions.rest.OpenhabThingDefinition):
         name = data.uid
         status = data.status.status
         status_detail = data.status.detail
+        status_description = data.status.description if data.status.description else ''
     else:
         raise ValueError()
 
@@ -109,11 +113,12 @@ def add_thing_to_registry(data: Union['HABApp.openhab.definitions.rest.OpenhabTh
 
     new_thing.status = status
     new_thing.status_detail = status_detail
+    new_thing.status_description = status_description
     new_thing.label = data.label
+    new_thing.location = data.location
     new_thing.configuration = Map(data.configuration)
     new_thing.properties = Map(data.properties)
-    Items.add_item(new_thing)
-    return None
+    return Items.add_item(new_thing)
 
 
 def remove_thing_from_registry(name: str):

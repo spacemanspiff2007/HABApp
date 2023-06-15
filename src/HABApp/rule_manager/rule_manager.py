@@ -16,6 +16,7 @@ from HABApp.runtime import shutdown
 from .rule_file import RuleFile
 from ..core.internals import uses_item_registry
 from HABApp.core.internals.wrapped_function import run_function
+from ..openhab.connection_logic.wait_startup import wait_for_openhab
 
 log = logging.getLogger('HABApp.Rules')
 
@@ -71,20 +72,13 @@ class RuleManager:
     async def load_rules_on_startup(self):
 
         if HABApp.CONFIG.openhab.connection.url and HABApp.CONFIG.openhab.general.wait_for_openhab:
-            items_found = False
-            while not items_found:
-                await sleep(3)
-                for item in item_registry.get_items():
-                    if isinstance(item, HABApp.openhab.items.OpenhabItem):
-                        items_found = True
-                        break
-
-                # stop waiting if we want to shut down
-                if HABApp.runtime.shutdown.requested:
-                    return None
-            await sleep(2.2)
+            await wait_for_openhab()
         else:
-            await sleep(5.2)
+            await sleep(1)
+
+        # if we want to shut down we don't load the rules
+        if HABApp.runtime.shutdown.requested:
+            return None
 
         # trigger event for every file
         await self.watcher.trigger_all()

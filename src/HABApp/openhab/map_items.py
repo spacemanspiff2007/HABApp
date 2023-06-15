@@ -11,7 +11,7 @@ from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerIte
 from HABApp.openhab.items.base_item import HINT_TYPE_OPENHAB_ITEM
 from HABApp.openhab.items.base_item import MetaData
 
-log = logging.getLogger('HABApp.openhab')
+log = logging.getLogger('HABApp.openhab.items')
 
 
 _items: Dict[str, HINT_TYPE_OPENHAB_ITEM] = {
@@ -39,9 +39,6 @@ def map_item(name: str, type: str, value: Optional[str],
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)
 
-        if value == 'NULL' or value == 'UNDEF':
-            value = None
-
         # map Metadata
         if metadata is not None:
             meta = Map({k: MetaData(v['value'], Map(v.get('config', {}))) for k, v in metadata.items()})
@@ -55,6 +52,11 @@ def map_item(name: str, type: str, value: Optional[str],
             # if the item is not initialized its None and has no dimension
             if value is not None:
                 value, _ = QuantityValue.split_unit(value)
+
+            # Show warning
+            # https://github.com/spacemanspiff2007/HABApp/issues/383
+            if 'unit' not in meta:
+                log.warning(f'Item {name:s} is a UoM item but "unit" is not found in item metadata')
 
         cls = _items.get(type)
         if cls is not None:

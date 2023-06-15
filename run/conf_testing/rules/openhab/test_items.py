@@ -3,10 +3,11 @@ import asyncio
 from immutables import Map
 
 from HABApp.core.const import loop
+from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.interface_async import async_get_items
 from HABApp.openhab.items import GroupItem, StringItem, ColorItem
-from HABAppTests import OpenhabTmpItem, TestBaseRule, ItemWaiter
+from HABAppTests import OpenhabTmpItem, TestBaseRule, ItemWaiter, EventWaiter
 
 
 class OpenhabItems(TestBaseRule):
@@ -19,6 +20,7 @@ class OpenhabItems(TestBaseRule):
         self.add_test('MemberGroups', self.test_groups)
         self.add_test('TestExisting', self.test_existing)
         self.add_test('TestColor', self.test_color)
+        self.add_test('TestGroupFunction', self.test_group_func)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -102,6 +104,28 @@ class OpenhabItems(TestBaseRule):
         assert item.groups == set()
         assert grp1.members == ()
         assert grp2.members == ()
+
+    @OpenhabTmpItem.use('Switch', arg_name='sw1')
+    @OpenhabTmpItem.use('Switch', arg_name='sw2')
+    @OpenhabTmpItem.use('Group', arg_name='grp')
+    def test_group_func(self, sw1: OpenhabTmpItem, sw2: OpenhabTmpItem, grp: OpenhabTmpItem):
+        grp_item = grp.create_item(group_type='Switch', group_function='AND', group_function_params=['ON', 'OFF'])
+
+        sw1_item = sw1.create_item(groups=[grp_item.name])
+        sw2_item = sw2.create_item(groups=[grp_item.name])
+
+        with EventWaiter(grp_item.name, ValueUpdateEventFilter(value='ON')) as e:
+            sw1_item.oh_send_command('ON')
+            sw2_item.oh_send_command('ON')
+            e.wait_for_event()
+
+        assert grp_item.value == 'ON'
+
+        with EventWaiter(grp_item.name, ValueUpdateEventFilter(value='OFF')) as e:
+            sw1_item.oh_send_command('OFF')
+            e.wait_for_event()
+
+        assert grp_item.value == 'OFF'
 
     @OpenhabTmpItem.create('Color', arg_name='oh_item')
     def test_color(self, oh_item: OpenhabTmpItem):

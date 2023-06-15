@@ -77,7 +77,7 @@ class SimpleRuleRunner:
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 
         # patch worker with a synchronous worker
-        self.monkeypatch.setattr(wrapped_thread, 'WORKERS', self)
+        self.monkeypatch.setattr(wrapped_thread, 'POOL', self)
         self.monkeypatch.setattr(wrapper, 'SYNC_CLS', WrappedThreadFunction, raising=False)
 
         # raise exceptions during error formatting

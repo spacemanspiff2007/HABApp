@@ -1,15 +1,20 @@
 import logging
 import typing
+from datetime import datetime
 from math import ceil, floor
 
 from pendulum import UTC
 from pendulum import now as pd_now
 
+from HABApp.core.const import MISSING
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import uses_post_event
 from HABApp.core.items.base_item import BaseItem
-from HABApp.core.const import MISSING
 from HABApp.core.lib.funcs import compare as _compare
+
+if typing.TYPE_CHECKING:
+    datetime = datetime
+
 
 log = logging.getLogger('HABApp')
 
@@ -21,8 +26,8 @@ class BaseValueItem(BaseItem):
 
     :ivar str name: Name of the item (read only)
     :ivar value: Value of the item, can be anything (read only)
-    :ivar datetime.datetime last_change: Timestamp of the last time when the item has changed the value (read only)
-    :ivar datetime.datetime last_update: Timestamp of the last time when the item has updated the value (read only)
+    :ivar datetime last_change: Timestamp of the last time when the item has changed the value (read only)
+    :ivar datetime last_update: Timestamp of the last time when the item has updated the value (read only)
     """
 
     def __init__(self, name: str, initial_value=None):
@@ -84,7 +89,7 @@ class BaseValueItem(BaseItem):
         :param greater_than: item state has to be greater than the passed value
         :param gt: item state has to be greater than the passed value
         :param greater_equal: item state has to be greater equal the passed value
-        :param ge: tem state has to be greater equal the passed value
+        :param ge: item state has to be greater equal the passed value
         :param is_: item state has to be the same object as the passt value (e.g. None)
         :param is_not: item state has to be not the same object as the passt value (e.g. None)
 

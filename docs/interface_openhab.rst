@@ -334,12 +334,12 @@ ItemStatePredictedEvent
    :member-order: groupwise
 
 
-GroupItemStateChangedEvent
+GroupStateChangedEvent
 --------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.GroupItemStateChangedEvent
+.. inheritance-diagram:: HABApp.openhab.events.GroupStateChangedEvent
    :parts: 1
 
-.. autoclass:: HABApp.openhab.events.GroupItemStateChangedEvent
+.. autoclass:: HABApp.openhab.events.GroupStateChangedEvent
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -434,12 +434,12 @@ Event filters
 ======================================
 
 
-ItemStateEventFilter
+ItemStateUpdatedEventFilter
 --------------------------------------
-.. inheritance-diagram:: HABApp.openhab.events.ItemStateEventFilter
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateUpdatedEventFilter
    :parts: 1
 
-.. autoclass:: HABApp.openhab.events.ItemStateEventFilter
+.. autoclass:: HABApp.openhab.events.ItemStateUpdatedEventFilter
    :members:
    :inherited-members:
    :member-order: groupwise

@@ -64,7 +64,7 @@ class PingOpenhab(PluginBase):
         self.listener = HABApp.core.internals.EventBusListener(
             HABApp.config.CONFIG.openhab.ping.item,
             HABApp.core.internals.wrap_func(self.ping_received),
-            HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateEvent)
+            HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateUpdatedEvent)
         )
         EVENT_BUS.add_listener(self.listener)
 
@@ -102,7 +102,7 @@ class PingOpenhab(PluginBase):
                 self.ping_sent = time.time()
 
                 if send_ping:
-                    await HABApp.openhab.interface_async.async_post_update(
+                    HABApp.openhab.interface_async.async_post_update(
                         item_name,
                         f'{self.ping_value:.1f}' if self.ping_value is not None else None
                     )

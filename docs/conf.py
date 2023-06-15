@@ -54,6 +54,7 @@ extensions = [
     'sphinx_exec_code',
     'sphinx.ext.inheritance_diagram',
     'sphinxcontrib.autodoc_pydantic',
+    'sphinx_copybutton'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -247,6 +248,12 @@ autodoc_pydantic_field_swap_name_and_alias = True
 regex_path = re.compile(r"^\w+Path\('([^']+)'\)")
 assert regex_path.search('WindowsPath(\'lib\')').group(1) == 'lib'
 
+# nicer type values
+TYPE_REPLACEMENTS = {
+    '_MissingType.MISSING': '<MISSING>',
+    'ConstrainedIntValue': 'int'
+}
+
 
 def replace_node_contents(node: Node):
     """Find nodes with given `tag_matches` and `text_matches`. Recursively
@@ -265,12 +272,12 @@ def replace_node_contents(node: Node):
     parent: Node = node.parent
     node_text: str = node.astext()
 
-    replacement = None
+    replacement = TYPE_REPLACEMENTS.get(node_text)
 
     # Replace default value
     # WindowsPath('config') -> 'config'
     if node_text.endswith(')') and (m := regex_path.search(node_text)) is not None:
-        replacement = Text(f"'{m.group(1)}'")
+        replacement = f"'{m.group(1)}'"
 
     # # Type hints
     # tag_matches = {"pending_xref", "pending_xref_condition"}
@@ -281,16 +288,17 @@ def replace_node_contents(node: Node):
 
     # put replacement in place
     if replacement is not None:
-        replacement.parent = parent
+        replacement_obj = Text(replacement)
+        replacement_obj.parent = parent
         pos = parent.children.index(node)
-        parent.children[pos] = replacement
+        parent.children[pos] = replacement_obj
 
     return matched_nodes
 
 
 def transform_desc(app, domain, objtype: str, contentnode):
-    if objtype != 'pydantic_field':
-        return None
+    # if objtype != 'pydantic_field':
+    #     return None
 
     replace_node_contents(node=contentnode.parent)
 
