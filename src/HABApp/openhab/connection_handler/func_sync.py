@@ -161,9 +161,9 @@ def set_metadata(item_name: str, namespace: str, value: str, config: dict):
     Add/set metadata to an item
 
     :param item_name: name of the item or item
-    :param namespace: namespace
+    :param namespace: namespace, e.g. ``stateDescription``
     :param value: value
-    :param config: configuration
+    :param config: configuration e.g. ``{"options": "A,B,C"}``
     :return: True if metadata was successfully created/updated
     """
     if isinstance(item_name, BaseValueItem):

@@ -128,15 +128,22 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 1.1.0 (2023-XX-XX)
+#### 1.1.0 (2023-06-15)
 - This is a breaking change!
-- Renamed `GroupItemStateChangedEvent` to `GroupStateChangedEvent `
-- Groups issue a `GroupStateUpdateEvent` when the state updates
+- Renamed `GroupItemStateChangedEvent` to `GroupStateChangedEvent`
+- Groups issue a `GroupStateUpdateEvent` when the state updates on OH3 (consistent with OH4 behavior)
+- Groups work now with `ValueUpdateEvent` and `ValueChangedEvent` as expected
 - Renamed `ItemStateEvent` to `ItemStateUpdatedEvent`
+- Ignored ItemStateEvent on OH4
 - Fewer warnings for long-running functions (execution of <FUNC_NAME> took too long)
+- `Thing` status and status_detail are now an Enum
 - Added `status_detail` to `Thing`
+- `LocationItem` now provides the location as a tuple
+- Added support for `Point` events
 - Improved item sync from openHAB (no more false item state `None` after startup)
 - Improved startup behavior when openHAB and HABApp get started together (e.g. after reboot)
+- Fixed an issue with short tracebacks for HABApp internal files
+- Doc improvements
 
 #### 1.0.8 (2023-02-09)
 - Fixed an issue when using token based authentication with openHAB
