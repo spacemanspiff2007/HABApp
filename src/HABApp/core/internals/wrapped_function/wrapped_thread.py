@@ -10,7 +10,7 @@ from typing import Callable, Any, Set, Final, Dict, Tuple
 from typing import Optional
 
 from HABApp.core.const import loop
-from HABApp.core.internals import HINT_CONTEXT_OBJ
+from HABApp.core.internals import HINT_CONTEXT_OBJ, ContextProvidingObj
 from .base import WrappedFunctionBase, default_logger
 
 POOL: Optional[ThreadPoolExecutor] = None
@@ -48,9 +48,10 @@ async def run_in_thread_pool(func: Callable):
 HINT_FUNC_SYNC = Callable[..., Any]
 
 
-class PoolFunc:
-    def __init__(self, parent: 'WrappedThreadFunction',
-                 func_obj: HINT_FUNC_SYNC, func_args: Tuple[Any, ...], func_kwargs: Dict[str, Any]):
+class PoolFunc(ContextProvidingObj):
+    def __init__(self, parent: 'WrappedThreadFunction', func_obj: HINT_FUNC_SYNC, func_args: Tuple[Any, ...],
+                 func_kwargs: Dict[str, Any], context: Optional[HINT_CONTEXT_OBJ] = None, **kwargs):
+        super().__init__(context=context, **kwargs)
         self.parent: Final = parent
         self.func_obj: Final = func_obj
         self.func_args: Final = func_args
@@ -133,4 +134,6 @@ class WrappedThreadFunction(WrappedFunctionBase):
         self.warn_too_long: bool = warn_too_long
 
     def run(self, *args, **kwargs):
-        POOL.submit(PoolFunc(self, self.func, args, kwargs).run)
+        # we need to copy the context, so it's available when the function is run
+        pool_func = PoolFunc(self, self.func, args, kwargs, context=self._habapp_ctx)
+        POOL.submit(pool_func.run)

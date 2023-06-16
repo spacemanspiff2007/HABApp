@@ -128,8 +128,11 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.1.1 (2023-06-16)
+- Fixed a bug where the rule context was not found
+
 #### 1.1.0 (2023-06-15)
-- This is a breaking change!
+This is a breaking change!
 - Renamed `GroupItemStateChangedEvent` to `GroupStateChangedEvent`
 - Groups issue a `GroupStateUpdateEvent` when the state updates on OH3 (consistent with OH4 behavior)
 - Groups work now with `ValueUpdateEvent` and `ValueChangedEvent` as expected
