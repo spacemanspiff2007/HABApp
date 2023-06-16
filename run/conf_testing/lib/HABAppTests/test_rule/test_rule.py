@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import Dict, Callable
 from typing import List
 
@@ -179,8 +180,11 @@ class TestBaseRule(HABApp.Rule):
             TestResult(c_name, tc.name, f'{i + 1:{width}d}/{count}') for i, tc in enumerate(self._tests.values())
         ]
 
+        module_of_class = Path(self.__class__.__module__)
+        relative_path = module_of_class.relative_to(HABApp.CONFIG.directories.rules)
+
         log.info('')
-        log.info(f'Running {count} tests for {c_name}')
+        log.info(f'Running {count} tests for {c_name}  (from "{relative_path}")')
 
         for res, tc in zip(results, self._tests.values()):
             if self.config.skip_on_failure and self.__worst_result >= TestResultStatus.FAILED:

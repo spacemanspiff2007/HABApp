@@ -42,6 +42,7 @@ item_registry = uses_item_registry()
 
 
 class Rule(ContextProvidingObj):
+
     def __init__(self):
         super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
 
