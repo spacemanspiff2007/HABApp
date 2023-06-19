@@ -128,9 +128,9 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 1.1.2 (2023-XX-XX)
-- Readded `ItemStateEventFilter`
-- Improved parsing of DateTime values
+#### 1.1.2 (2023-06-19)
+- Re-added `ItemStateEventFilter`
+- Improved parsing of `DateTime` values
 
 #### 1.1.1 (2023-06-16)
 - Fixed a bug where the rule context was not found
