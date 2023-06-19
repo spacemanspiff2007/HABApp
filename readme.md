@@ -128,6 +128,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.1.2 (2023-06-19)
+- Re-added `ItemStateEventFilter`
+- Improved parsing of `DateTime` values
+
 #### 1.1.1 (2023-06-16)
 - Fixed a bug where the rule context was not found
 
@@ -136,7 +140,7 @@ This is a breaking change!
 - Renamed `GroupItemStateChangedEvent` to `GroupStateChangedEvent`
 - Groups issue a `GroupStateUpdateEvent` when the state updates on OH3 (consistent with OH4 behavior)
 - Groups work now with `ValueUpdateEvent` and `ValueChangedEvent` as expected
-- Renamed `ItemStateEvent` to `ItemStateUpdatedEvent`
+- ~~Renamed `ItemStateEvent` to `ItemStateUpdatedEvent`~~
 - Ignored ItemStateEvent on OH4
 - Fewer warnings for long-running functions (execution of <FUNC_NAME> took too long)
 - `Thing` status and status_detail are now an Enum

@@ -6,7 +6,10 @@ from tests.helpers.inspect import get_module_classes, check_class_annotations
 def test_class_annotations():
     """EventFilter relies on the class annotations, so we test that every event has those"""
 
-    exclude = ('OpenhabEvent', 'ItemStateChangedEventFilter', 'ItemStateUpdatedEventFilter', 'ItemCommandEventFilter')
+    exclude = (
+        'OpenhabEvent',
+        'ItemStateChangedEventFilter', 'ItemStateUpdatedEventFilter', 'ItemStateEventFilter',
+        'ItemCommandEventFilter')
     for cls in get_module_classes('HABApp.openhab.events', exclude).values():
         check_class_annotations(
             cls, init_alias={'initial_value': 'value', 'group_names': 'groups', 'thing_type': 'type'}
