@@ -7,11 +7,6 @@ from HABApp.openhab.definitions.values import PointValue
 
 
 def map_openhab_values(openhab_type: str, openhab_value: str):
-    # because we preprocess the string value can be None.
-    # Either remove the preprocessing or remove this here
-    if openhab_value is None:
-        return None
-
     assert isinstance(openhab_type, str), type(openhab_type)
     assert isinstance(openhab_value, str), type(openhab_value)
 

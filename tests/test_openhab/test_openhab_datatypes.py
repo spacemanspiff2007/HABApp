@@ -35,13 +35,24 @@ def test_type_decimal(value: str, target: int):
     assert type(ret) is target.__class__
 
 
-@pytest.mark.parametrize(
-    'value, target', (
-        pytest.param('2023-06-17T15:31:04.754673068+0200', datetime(2023, 6, 17, 15, 31, 4, 754673), id='T1'),
-        pytest.param('2023-06-17T15:31:04.754673+0200',    datetime(2023, 6, 17, 15, 31, 4, 754673), id='T2'),
-        pytest.param('2023-06-17T15:31:04.754+0200',       datetime(2023, 6, 17, 15, 31, 4, 754000), id='T3'),
+def __get_dt_parms():
+
+    # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
+    now = datetime.now()
+    offset_secs = int(now.astimezone().tzinfo.utcoffset(now).total_seconds())
+    hours = offset_secs // 3600
+    minutes = (offset_secs - 3600 * hours) // 60
+    assert offset_secs - hours * 3600 - minutes * 60 == 0
+    offset_str = f'{hours:02d}:{minutes:02d}'
+
+    return (
+        pytest.param(f'2023-06-17T15:31:04.754673068+{offset_str}', datetime(2023, 6, 17, 15, 31, 4, 754673), id='T1'),
+        pytest.param(f'2023-06-17T15:31:04.754673+{offset_str}', datetime(2023, 6, 17, 15, 31, 4, 754673), id='T2'),
+        pytest.param(f'2023-06-17T15:31:04.754+{offset_str}', datetime(2023, 6, 17, 15, 31, 4, 754000), id='T3'),
     )
-)
+
+
+@pytest.mark.parametrize('value, target', __get_dt_parms())
 def test_type_datetime(value: str, target: datetime):
     assert DatetimeItem._state_from_oh_str(value) == target
     assert map_openhab_values('DateTime', value) == target
