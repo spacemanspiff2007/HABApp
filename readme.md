@@ -128,6 +128,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 1.1.X (2023-XX-XX)
+- Fail fast when a value instead of a callback is passed to the event listener / scheduler
+- Completely removed types and type hints from traceback
+
 #### 1.1.2 (2023-06-19)
 - Re-added `ItemStateEventFilter`
 - Improved parsing of `DateTime` values

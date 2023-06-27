@@ -1,7 +1,8 @@
 import ast
+import datetime
 from inspect import ismodule, isclass
-from typing import List, Tuple, Callable, Any, Set, TypeVar
 from pathlib import Path
+from typing import List, Tuple, Callable, Any, Set
 
 from immutables import Map
 from stack_data import Variable
@@ -10,22 +11,35 @@ from HABApp.core.const.json import load_json, dump_json
 from easyconfig.config_objs import ConfigObj
 from .const import SEPARATOR_VARIABLES, PRE_INDENT
 
+# don't show these types in the traceback
+SKIPPED_TYPES = (
+    bool, bytearray, bytes, complex, dict, float, frozenset, int, list, memoryview, set, str, tuple, type(None),
+    datetime.date, datetime.datetime, datetime.time, datetime.timedelta,
+    Map, Path,
+)
+
+
+def is_type_hint_or_type(value: Any) -> bool:
+    if isinstance(value, tuple):
+        return all(is_type_hint_or_type(obj) for obj in value)
+
+    if value in SKIPPED_TYPES:
+        return True
+
+    # check if it's something from the typing module
+    # we can't do that with isinstance, so we try this
+    try:
+        if value.__module__ == 'typing' or value.__class__.__module__ == 'typing':
+            return True
+    except AttributeError:
+        pass
+
+    return False
+
 
 def _filter_expressions(name: str, value: Any) -> bool:
     # a is None = True
     if name.endswith(' is None'):
-        return True
-
-    # These types show no explicit types
-    skipped_types = (type(None), str, float, int, list, dict, set, frozenset, Map, Path, bytes)
-
-    # type(b) = <class 'NoneType'>
-    if name.startswith('type(') and value in skipped_types:
-        return True
-
-    # (str, int, bytes) = (<class 'str'>, <class 'int'>)
-    # str, int = (<class 'str'>, <class 'int'>)
-    if isinstance(value, tuple) and all(map(lambda x: x in skipped_types, value)):
         return True
 
     return False
@@ -35,10 +49,8 @@ SKIP_VARIABLE: Tuple[Callable[[str, Any], bool], ...] = (
     # module imports
     lambda name, value: ismodule(value),
 
-    # type hints
-    lambda name, value: name.startswith('typing.'),
-    # type vars
-    lambda name, value: isinstance(value, TypeVar),
+    # type hints and type tuples
+    lambda name, value: is_type_hint_or_type(value),
 
     # functions
     lambda name, value: value is dump_json or value is load_json,
@@ -56,9 +68,9 @@ ORDER_VARIABLE: Tuple[Callable[[Variable], bool], ...] = (
 
 
 def skip_variable(var: Variable) -> bool:
+    name = var.name
+    value = var.value
     for func in SKIP_VARIABLE:
-        name = var.name
-        value = var.value
         if func(name, value):
             return True
     return False
