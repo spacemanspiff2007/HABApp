@@ -1,6 +1,4 @@
-import datetime
 import logging
-import pathlib
 from asyncio import iscoroutinefunction
 from typing import Union, Optional, Callable, Type
 
@@ -12,11 +10,6 @@ from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunct
 from HABApp.core.internals.wrapped_function.wrapped_thread import HINT_FUNC_SYNC, WrappedThreadFunction, \
     create_thread_pool, stop_thread_pool, run_in_thread_pool
 
-ERROR_ON_INSTANCE = (
-    bool, bytearray, bytes, complex, dict, float, frozenset, int, list, memoryview, set, str, tuple, type(None),
-    datetime.date, datetime.datetime, datetime.time, datetime.timedelta, pathlib.Path
-)
-
 
 def wrap_func(func: Union[HINT_FUNC_SYNC, HINT_FUNC_ASYNC],
               warn_too_long=True,
@@ -25,8 +18,12 @@ def wrap_func(func: Union[HINT_FUNC_SYNC, HINT_FUNC_ASYNC],
               context: Optional[HINT_CONTEXT_OBJ] = None) -> TYPE_WRAPPED_FUNC_OBJ:
 
     # Small helper so we fail quicker
-    if isinstance(func, ERROR_ON_INSTANCE):
-        raise ValueError(f'Callable or coroutine function expected! Got "{func}" (type {func.__class__.__name__})')
+    if not callable(func):
+        try:
+            type_name: str = func.__class__.__name__
+        except Exception:
+            type_name = type(func)
+        raise ValueError(f'Callable or coroutine function expected! Got "{func}" (type {type_name:s})')
 
     if iscoroutinefunction(func):
         return WrappedAsyncFunction(func, name=name, logger=logger, context=context)
