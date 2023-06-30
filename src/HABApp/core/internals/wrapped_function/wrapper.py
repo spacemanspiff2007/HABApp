@@ -17,7 +17,9 @@ def wrap_func(func: Union[HINT_FUNC_SYNC, HINT_FUNC_ASYNC],
               logger: Optional[logging.Logger] = None,
               context: Optional[HINT_CONTEXT_OBJ] = None) -> TYPE_WRAPPED_FUNC_OBJ:
 
-    # Small helper so we fail quicker
+    # Check that it's actually a callable, so we fail fast and not when we try to run the function.
+    # Some users pass the result of the function call (e.g. func()) by accident
+    # which will inevitably fail once we try to run the function.
     if not callable(func):
         try:
             type_name: str = func.__class__.__name__

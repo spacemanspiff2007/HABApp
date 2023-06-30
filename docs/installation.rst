@@ -262,7 +262,7 @@ Example Dockerfile installing scipy, pandas and numpy libraries:
     # Install required build dependencies (Optional)
         apt-get update; \
         DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-            build-essentials; \
+            build-essential; \
     # Prepare python packages
         pip3 wheel \
             --wheel-dir=/root/wheels \
