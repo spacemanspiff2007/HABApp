@@ -466,6 +466,40 @@ ItemCommandEventFilter
    :inherited-members:
    :member-order: groupwise
 
+**************************************
+Transformations
+**************************************
+
+From openHAB 4 on it's possible to use the existing transformations in HABApp.
+Transformations are loaded every time when HABApp connects to openHAB.
+OpenHAB does not issue an event when the transformations change so in order for HABApp to
+pick up the changes either HABApp or openHAB has to be restarted.
+
+map
+======================================
+The `map transformation <https://www.openhab.org/addons/transformations/map/>`_ is returned as a dict.
+If the map transformation is defined with a default the default is used accordingly.
+
+Example:
+
+.. exec_code::
+    hide_output
+
+    # ------------ hide: start ------------
+    from HABApp.openhab.transformations._map.registry import MAP_REGISTRY
+    MAP_REGISTRY.objs['test.map'] = {'test_key': 'test_value'}, None
+    MAP_REGISTRY.objs['numbers.map'] = {1: 'test number meaning'}, None
+
+    # ------------ hide: stop -------------
+    from HABApp.openhab import transformations
+
+    TEST_MAP = transformations.map['test.map']  # load the transformation, can be used anywhere
+    print(TEST_MAP['test_key'])                 # It's a normal dict with keys as str and values as str
+
+    # if all keys or values are numbers they are automatically casted to an int
+    NUMBERS = transformations.map['numbers.map']
+    print(NUMBERS[1])   # Note that the key is an int
+
 
 **************************************
 Textual thing configuration

@@ -20,6 +20,7 @@ def get_dependencies() -> List[str]:
         'watchdog',
         'ujson',
         'immutables',
+        'javaproperties',
         'pendulum',
 
         'typing-extensions',

@@ -63,3 +63,18 @@ class MetadataNotEditableError(HABAppOpenhabError):
     @classmethod
     def create_text(cls, item: str, namespace: str):
         return cls(f'Metadata {namespace} for {item} is not editable!')
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Transformation errors
+# ----------------------------------------------------------------------------------------------------------------------
+class TransformationsRequestError(HABAppOpenhabError):
+    pass
+
+
+class MapTransformationError(HABAppOpenhabError):
+    pass
+
+
+class MapTransformationNotFound(HABAppOpenhabError):
+    pass

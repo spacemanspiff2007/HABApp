@@ -8,13 +8,14 @@ from pydantic import parse_obj_as
 
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
-from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition
+from HABApp.core.types import HSB, RGB
+from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition, \
+    OpenhabTransformationDefinition
 from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from HABApp.openhab.errors import ThingNotEditableError, \
-    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError
+    ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError, TransformationsRequestError
 from .http_connection import delete, get, put, post, async_get_root, async_get_uuid, async_send_command, \
     async_post_update
-from HABApp.core.types import HSB, RGB
 
 if typing.TYPE_CHECKING:
     post = post
@@ -107,6 +108,15 @@ async def async_get_thing(uid: str) -> OpenhabThingDefinition:
         raise ThingNotFoundError.from_uid(uid)
 
     return OpenhabThingDefinition.parse_obj(await ret.json(loads=load_json, encoding='utf-8'))
+
+
+async def async_get_transformations() -> List[OpenhabTransformationDefinition]:
+    ret = await get('/rest/transformations')
+    if ret.status >= 300:
+        raise TransformationsRequestError()
+
+    data = await ret.json(loads=load_json, encoding='utf-8')
+    return parse_obj_as(List[OpenhabTransformationDefinition], data)
 
 
 async def async_get_persistence_data(item_name: str, persistence: typing.Optional[str],
