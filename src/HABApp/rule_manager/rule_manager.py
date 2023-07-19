@@ -130,6 +130,11 @@ class RuleManager:
     async def request_file_load(self, name: str, path: Path):
         path_str = str(path)
 
+        # if we want to shut down we don't load the rules
+        if HABApp.runtime.shutdown.requested:
+            log.debug(f'Skip load of {name:s} because of shutdown')
+            return None
+
         # Only load existing files
         if not path.is_file():
             log_warning(log, f'Rule file {name} ({path}) does not exist and can not be loaded!')
