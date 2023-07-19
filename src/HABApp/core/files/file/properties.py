@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from HABApp.core.const import yml
 
@@ -10,9 +10,7 @@ class FileProperties(BaseModel):
     depends_on: List[str] = Field(alias='depends on', default_factory=list)
     reloads_on: List[str] = Field(alias='reloads on', default_factory=list)
 
-    class Config:
-        extra = Extra.forbid
-        allow_population_by_field_name = True
+    model_config = ConfigDict(extra='forbid', populate_by_name=True)
 
 
 RE_START = re.compile(r'^#(\s*)HABApp\s*:', re.IGNORECASE)
@@ -59,4 +57,4 @@ def get_properties(_str: str) -> FileProperties:
     data = yml.load('\n'.join(cfg))
     if data is None:
         data = {}
-    return FileProperties.parse_obj(data.get('habapp', {}))
+    return FileProperties.model_validate(data.get('habapp', {}))

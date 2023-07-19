@@ -1,7 +1,8 @@
-from typing import Literal, Union
+from __future__ import annotations
+
+from pydantic import AnyHttpUrl, ByteSize, Field, field_validator, TypeAdapter
 
 from easyconfig.models import BaseModel
-from pydantic import AnyHttpUrl, ByteSize, Field, validator
 
 
 class Ping(BaseModel):
@@ -9,7 +10,7 @@ class Ping(BaseModel):
                                             'an update from HABApp and get the updated value back from openHAB '
                                             'in milliseconds')
     item: str = Field('HABApp_Ping', description='Name of the Numberitem')
-    interval: int = Field(10, description='Seconds between two pings', ge=0.1)
+    interval: int | float = Field(10, description='Seconds between two pings', ge=0.1)
 
 
 class General(BaseModel):
@@ -29,7 +30,7 @@ class General(BaseModel):
 
 
 class Connection(BaseModel):
-    url: Union[AnyHttpUrl, Literal['']] = Field(
+    url: str = Field(
         'http://localhost:8080', description='Connect to this url. Empty string ("") disables the connection.')
     user: str = ''
     password: str = ''
@@ -53,7 +54,12 @@ class Connection(BaseModel):
                     'matching this filter will be sent to HABApp.'
     )
 
-    @validator('buffer')
+    @field_validator('url')
+    def validate_url(cls, value: str):
+        TypeAdapter(AnyHttpUrl).validate_python(value)
+        return value
+
+    @field_validator('buffer')
     def validate_see_buffer(cls, value: ByteSize):
         valid_values = (
             '64kib', '128kib', '256kib', '512kib',
@@ -61,7 +67,8 @@ class Connection(BaseModel):
         )
 
         for _v in valid_values:
-            if value == ByteSize.validate(_v):
+            # noinspection PyProtectedMember
+            if value == ByteSize._validate(_v, None):
                 return value
 
         raise ValueError(f'Value must be one of {", ".join(valid_values)}')

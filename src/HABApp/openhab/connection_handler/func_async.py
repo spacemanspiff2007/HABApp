@@ -4,7 +4,7 @@ import warnings
 from typing import Any, Optional, Dict, List
 from urllib.parse import quote as quote_url
 
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
@@ -95,11 +95,14 @@ async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata
         return data
 
 
+TA_LIST_THING_DEFS = TypeAdapter(List[OpenhabThingDefinition])
+
+
 async def async_get_things() -> List[OpenhabThingDefinition]:
     resp = await get('/rest/things')
     data = await resp.json(loads=load_json, encoding='utf-8')
 
-    return parse_obj_as(List[OpenhabThingDefinition], data)
+    return TA_LIST_THING_DEFS.validate_python(data)
 
 
 async def async_get_thing(uid: str) -> OpenhabThingDefinition:
@@ -107,7 +110,10 @@ async def async_get_thing(uid: str) -> OpenhabThingDefinition:
     if ret.status >= 300:
         raise ThingNotFoundError.from_uid(uid)
 
-    return OpenhabThingDefinition.parse_obj(await ret.json(loads=load_json, encoding='utf-8'))
+    return OpenhabThingDefinition.model_validate(await ret.json(loads=load_json, encoding='utf-8'))
+
+
+TA_LIST_TRANSFORM_DEFS = TypeAdapter(List[OpenhabTransformationDefinition])
 
 
 async def async_get_transformations() -> List[OpenhabTransformationDefinition]:
@@ -116,7 +122,7 @@ async def async_get_transformations() -> List[OpenhabTransformationDefinition]:
         raise TransformationsRequestError()
 
     data = await ret.json(loads=load_json, encoding='utf-8')
-    return parse_obj_as(List[OpenhabTransformationDefinition], data)
+    return TA_LIST_TRANSFORM_DEFS.validate_python(data)
 
 
 async def async_get_persistence_data(item_name: str, persistence: typing.Optional[str],

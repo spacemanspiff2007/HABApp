@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import Dict, List
 from typing import Iterator, Optional, Union
 
-from pydantic import BaseModel, Field, ValidationError, parse_obj_as, validator
+from pydantic import BaseModel as _BaseModel, Field, ValidationError, field_validator, \
+    ConfigDict, TypeAdapter, AfterValidator
 
 from HABApp.core.logger import HABAppError
 from HABApp.openhab.connection_logic.plugin_things.filters import ChannelFilter, ThingFilter
@@ -43,21 +44,32 @@ class InvalidItemNameError(Exception):
     pass
 
 
+class BaseModel(_BaseModel):
+    model_config = ConfigDict(validate_assignment=True, extra='forbid', validate_default=True, strict=True)
+
+
 class MetadataCfg(BaseModel):
     value: str
     config: Dict[str, typing.Any] = {}
 
 
+def mk_str_builder(v: str) -> StrBuilder:
+    return StrBuilder(v)
+
+
+TypeStrBuilder = typing.Annotated[str, AfterValidator(mk_str_builder)]
+
+
 class UserItemCfg(BaseModel):
     type: str
-    name: str
-    label: str = ''
-    icon: str = ''
-    groups: List[str] = []
-    tags: List[str] = []
+    name: TypeStrBuilder
+    label: TypeStrBuilder = ''
+    icon: TypeStrBuilder = ''
+    groups: List[TypeStrBuilder] = []
+    tags: List[TypeStrBuilder] = []
     metadata: Optional[Dict[str, MetadataCfg]] = None
 
-    @validator('type', always=True)
+    @field_validator('type')
     def validate_item_type(cls, v):
         if v in ITEM_TYPES:
             return v
@@ -66,11 +78,7 @@ class UserItemCfg(BaseModel):
         except KeyError:
             raise ValueError(f'Must be one of {", ".join(ITEM_TYPES)}')
 
-    @validator('name', 'label', 'icon', 'groups', 'tags', each_item=True, always=True)
-    def validate_make_str_builder(cls, v):
-        return StrBuilder(v)
-
-    @validator('metadata', pre=True)
+    @field_validator('metadata', mode='before')
     def make_meta_cfg(cls, v):
         if not isinstance(v, dict):
             return v
@@ -82,7 +90,7 @@ class UserItemCfg(BaseModel):
 
     def get_item(self, context: dict) -> UserItem:
         v = {'link': None}
-        for k in self.__fields__:
+        for k in self.model_fields:
             val = self.__dict__[k]
 
             # type is const
@@ -113,11 +121,9 @@ class UserChannelCfg(BaseModel):
     filter: List[ChannelFilter]
     link_items: List[UserItemCfg] = Field(default_factory=list, alias='link items')
 
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)
 
-    @validator('filter', pre=True, always=True)
+    @field_validator('filter', mode='before')
     def validate_filter(cls, v):
         return create_filters(ChannelFilter, v)
 
@@ -134,11 +140,9 @@ class UserThingCfg(BaseModel):
     create_items: List[UserItemCfg] = Field(alias='create items', default_factory=list)
     channels: List[UserChannelCfg] = Field(default_factory=list)
 
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)
 
-    @validator('filter', pre=True, always=True)
+    @field_validator('filter', mode='before')
     def validate_filter(cls, v):
         return create_filters(ThingFilter, v)
 
@@ -161,9 +165,10 @@ def create_filters(cls, v: Union[List[Dict[str, str]], Dict[str, str]]):
 def validate_cfg(_in, filename: Optional[str] = None) -> Optional[List[UserThingCfg]]:
     try:
         if isinstance(_in, list):
-            return parse_obj_as(List[UserThingCfg], _in, type_name=filename)
+            return TypeAdapter(List[UserThingCfg]).validate_python(_in)
         else:
-            return [parse_obj_as(UserThingCfg, _in, type_name=filename)]
+            return [UserThingCfg.model_validate(_in)]
     except ValidationError as e:
+        log.error(f'Error while parsing "{filename}"')
         HABAppError(log).add_exception(e).dump()
         return None

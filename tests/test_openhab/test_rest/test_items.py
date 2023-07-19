@@ -26,7 +26,7 @@ def test_item_1():
         "tags": ["Tag1"],
         "groupNames": ["Group1", "Group2"]
     }
-    item = OpenhabItemDefinition.parse_obj(_in)  # type: OpenhabItemDefinition
+    item = OpenhabItemDefinition.model_validate(_in)
 
     assert item.name == 'Item1Name'
     assert item.label == 'Item1Label'
@@ -84,7 +84,7 @@ def test_group_item():
             "ALL_TOPICS"
         ]
     }
-    item = OpenhabItemDefinition.parse_obj(_in)   # type: OpenhabItemDefinition
+    item = OpenhabItemDefinition.model_validate(_in)
 
     assert item.name == 'SwitchGroup'
     assert isinstance(item.members[0], OpenhabItemDefinition)

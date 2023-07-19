@@ -1,18 +1,18 @@
 import typing
-from typing import List, Optional
+from typing import List, Optional, ClassVar
 
 from pydantic import BaseModel
 
 
 class HABAppThingPluginData(BaseModel):
-    _val_name = 'ThingPlugin'
+    obj_name: ClassVar[str] = 'ThingPlugin'
 
-    created_link: Optional[str]
+    created_link: Optional[str] = None
     created_ns: List[str] = []
 
 
 # keep this up to date
-cls_names = {k._val_name: k for k in (HABAppThingPluginData, )}
+cls_names = {k.obj_name: k for k in (HABAppThingPluginData, )}
 
 
 def load_habapp_meta(data: dict) -> dict:
@@ -21,9 +21,9 @@ def load_habapp_meta(data: dict) -> dict:
         return data
 
     cls = cls_names.get(meta['HABApp']['value'])    # type: typing.Union[HABAppThingPluginData]
-    meta['HABApp'] = cls.parse_obj(meta['HABApp'].get('config', {}))
+    meta['HABApp'] = cls.model_validate(meta['HABApp'].get('config', {}))
     return data
 
 
 def get_api_vals(obj: typing.Union[HABAppThingPluginData]) -> typing.Tuple[str, dict]:
-    return obj._val_name, obj.dict(exclude_defaults=True)
+    return obj.obj_name, obj.model_dump(exclude_defaults=True)

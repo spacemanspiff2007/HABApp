@@ -9,13 +9,13 @@ def test_or():
             "OFF"
         ]
     }
-    o = GroupFunctionDefinition.parse_obj(_in)  # type: GroupFunctionDefinition
+    o = GroupFunctionDefinition.model_validate(_in)
     assert o.name == 'OR'
     assert o.params == ['ON', 'OFF']
 
 
 def test_eq():
     _in = {"name": "EQUALITY"}
-    o = GroupFunctionDefinition.parse_obj(_in)  # type: GroupFunctionDefinition
+    o = GroupFunctionDefinition.model_validate(_in)
     assert o.name == 'EQUALITY'
     assert o.params is None

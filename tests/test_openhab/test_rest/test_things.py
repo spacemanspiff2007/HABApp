@@ -13,7 +13,7 @@ def test_thing_summary():
         "thingTypeUID": "astro:sun"
     }
 
-    thing = OpenhabThingDefinition.parse_obj(_in)
+    thing = OpenhabThingDefinition.model_validate(_in)
 
     assert thing.editable is True
     assert thing.uid == 'astro:sun:d522ba4b56'
@@ -89,7 +89,7 @@ def test_thing_full():
         "thingTypeUID": "astro:sun"
     }
 
-    thing = OpenhabThingDefinition.parse_obj(_in)
+    thing = OpenhabThingDefinition.model_validate(_in)
 
     c0, c1, c2 = thing.channels
 

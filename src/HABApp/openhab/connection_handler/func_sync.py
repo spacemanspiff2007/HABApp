@@ -117,7 +117,7 @@ def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False)
 
     data = run_coro_from_thread(
         async_get_item(item_name, metadata=metadata, all_metadata=all_metadata), calling=get_item)
-    return OpenhabItemDefinition.parse_obj(data)
+    return OpenhabItemDefinition.model_validate(data)
 
 
 def get_thing(thing_name: str) -> OpenhabThingDefinition:
