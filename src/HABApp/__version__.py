@@ -1,4 +1,4 @@
 # Version scheme:
 # X.X[.X] or X.X[.X].DEV-X
 
-__version__ = '1.1.3.DEV-2'
+__version__ = '1.1.3.DEV-3'
