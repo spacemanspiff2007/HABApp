@@ -1,17 +1,23 @@
 import re
 import typing
 from dataclasses import dataclass
-from typing import Dict, List
-from typing import Iterator, Optional, Union
+from typing import Iterator, Optional, Union, Dict, List
 
 from pydantic import BaseModel as _BaseModel, Field, ValidationError, field_validator, \
     ConfigDict, TypeAdapter, AfterValidator
 
+from HABApp.core.const.const import PYTHON_310
 from HABApp.core.logger import HABAppError
 from HABApp.openhab.connection_logic.plugin_things.filters import ChannelFilter, ThingFilter
 from HABApp.openhab.connection_logic.plugin_things.str_builder import StrBuilder
 from HABApp.openhab.definitions import ITEM_TYPES
 from ._log import log
+
+if PYTHON_310:
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 
 RE_VALID_NAME = re.compile(r'\w+')
 
@@ -57,7 +63,7 @@ def mk_str_builder(v: str) -> StrBuilder:
     return StrBuilder(v)
 
 
-TypeStrBuilder = typing.Annotated[str, AfterValidator(mk_str_builder)]
+TypeStrBuilder = Annotated[str, AfterValidator(mk_str_builder)]
 
 
 class UserItemCfg(BaseModel):
