@@ -14,7 +14,7 @@ colorama    == 0.4.6
 
 voluptuous == 0.13.1
 
-typing-extensions == 4.7.0
+typing-extensions == 4.7.1
 
 aiohttp-sse-client  == 0.2.1
 
