@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union, List
+from typing import Any, Optional, Union, List, Dict
 
 from pydantic import BaseModel, Field
 
@@ -44,7 +44,7 @@ class OpenhabItemDefinition(BaseModel):
     transformed_state: Optional[str] = Field(None, alias='transformedState')
     state_description: Optional[StateDescriptionDefinition] = Field(None, alias='stateDescription')
     command_description: Optional[CommandDescriptionDefinition] = Field(None, alias='commandDescription')
-    metadata: dict[str, Any] = {}
+    metadata: Dict[str, Any] = {}
     editable: bool = True
 
     # Group only fields
