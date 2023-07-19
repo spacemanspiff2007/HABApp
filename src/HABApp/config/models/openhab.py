@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Union
 
 from pydantic import AnyHttpUrl, ByteSize, Field, field_validator, TypeAdapter
 
@@ -10,7 +10,7 @@ class Ping(BaseModel):
                                             'an update from HABApp and get the updated value back from openHAB '
                                             'in milliseconds')
     item: str = Field('HABApp_Ping', description='Name of the Numberitem')
-    interval: int | float = Field(10, description='Seconds between two pings', ge=0.1)
+    interval: Union[int, float] = Field(10, description='Seconds between two pings', ge=0.1)
 
 
 class General(BaseModel):
