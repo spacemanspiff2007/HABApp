@@ -474,6 +474,7 @@ From openHAB 4 on it's possible to use the existing transformations in HABApp.
 Transformations are loaded every time when HABApp connects to openHAB.
 OpenHAB does not issue an event when the transformations change so in order for HABApp to
 pick up the changes either HABApp or openHAB has to be restarted.
+Available transformations are logged on connect.
 
 map
 ======================================

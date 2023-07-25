@@ -131,6 +131,10 @@ MyOpenhabRule()
 #### 1.1.X (2023-XX-XX)
 - Fail fast when a value instead of a callback is passed to the event listener / scheduler
 - Completely removed types and type hints from traceback
+- Added support for transformations
+- Updated dependencies:
+  - Improved performance
+  - Support for docker secrets and environment variables in the config file
 
 #### 1.1.2 (2023-06-19)
 - Re-added `ItemStateEventFilter`
