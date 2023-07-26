@@ -3,8 +3,7 @@ import re
 import sys
 import warnings
 from pathlib import Path
-from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal, ParamSpec, TypeVar, Callable
-
+from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal, TypeVar, Callable
 
 import HABApp
 import HABApp.core
@@ -23,6 +22,13 @@ from .interfaces import async_subprocess_exec
 from .interfaces.rule_subprocess import build_exec_params, HINT_PYTHON_PATH, HINT_EXEC_ARGS, HINT_PROCESS_CB_SIMPLE, \
     HINT_PROCESS_CB_FULL
 from .rule_hook import get_rule_hook as _get_rule_hook
+
+
+try:
+    from typing import ParamSpec
+except ImportError:
+    from typing_extensions import ParamSpec
+
 
 log = logging.getLogger('HABApp.Rule')
 
