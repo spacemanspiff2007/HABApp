@@ -4,9 +4,10 @@ from functools import partial
 import pytest
 from immutables import Map
 
-from HABApp.openhab.items import DatetimeItem, NumberItem
+from HABApp.openhab.items import NumberItem
 from HABApp.openhab.items.base_item import MetaData
 from HABApp.openhab.map_items import map_item
+from eascheduler.const import local_tz
 from tests.helpers import TestEventBus
 
 
@@ -50,13 +51,12 @@ def test_number_unit_of_measurement():
 
 
 def test_datetime():
-    # Todo: remove this test once we go >= OH3.1
-    # Old format
-    assert map_item('test1', 'DateTime', '2018-11-19T09:47:38.284+0000', '', frozenset(), frozenset(), {}) == \
-           DatetimeItem('test', datetime(2018, 11, 19,  9, 47, 38, 284000)) or \
-           DatetimeItem('test', datetime(2018, 11, 19, 10, 47, 38, 284000))
+    offset_str = datetime(2022, 6, 15, tzinfo=local_tz).isoformat()[-6:].replace(':', '')
 
-    # From >= OH3.1
-    assert map_item('test1', 'DateTime', '2021-04-10T21:00:43.043996+0000', '', frozenset(), frozenset(), {}) == \
-           DatetimeItem('test', datetime(2021, 4, 10, 21, 0, 43, 43996)) or \
-           DatetimeItem('test', datetime(2021, 4, 10, 23, 0, 43, 43996))
+    def get_dt(value: str):
+        return map_item(
+            'test1', 'DateTime', f'{value}{offset_str}', label='', tags=frozenset(), groups=frozenset(), metadata={})
+
+    assert get_dt('2022-06-15T09:47:38.284') == datetime(2022, 6, 15,  9, 47, 38, 284000)
+    assert get_dt('2022-06-15T09:21:43.043996') == datetime(2022, 6, 15,  9, 21, 43, 43996)
+    assert get_dt('2022-06-15T09:21:43.754673068') == datetime(2022, 6, 15,  9, 21, 43, 754673)
