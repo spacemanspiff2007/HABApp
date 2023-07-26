@@ -30,7 +30,8 @@ class DatetimeItem(OpenhabItem):
             dt = datetime.fromisoformat(state)
         else:
             pos_dot = state.find('.')
-            pos_plus = state.find('+')
+            if (pos_plus := state.rfind('+')) == -1:
+                pos_plus = state.rfind('-')
             if pos_plus - pos_dot > 6:
                 state = state[:pos_dot + 7] + state[pos_plus:]
             dt = datetime.strptime(state, '%Y-%m-%dT%H:%M:%S.%f%z')
