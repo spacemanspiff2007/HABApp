@@ -215,7 +215,7 @@ Add an openHAB mock item to the item registry
    item = SwitchItem('my_switch', 'ON')
    HABApp.core.Items.add_item(item)
 
-Remove the mock item from the registry
+Remove the mock item from the registry:
 
 .. exec_code::
    :hide_output:

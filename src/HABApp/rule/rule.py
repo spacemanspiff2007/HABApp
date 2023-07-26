@@ -3,7 +3,8 @@ import re
 import sys
 import warnings
 from pathlib import Path
-from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal
+from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal, ParamSpec, TypeVar, Callable
+
 
 import HABApp
 import HABApp.core
@@ -303,3 +304,16 @@ class Rule(ContextProvidingObj):
 
             ret.append(item)
         return ret
+
+
+PSPEC_RULE = ParamSpec('PSPEC_RULE')
+TYPE_RULE = TypeVar('TYPE_RULE', bound=Rule)
+
+
+def create_rule(f: Callable[PSPEC_RULE, TYPE_RULE], *args: PSPEC_RULE.args, **kwargs: PSPEC_RULE.kwargs) -> TYPE_RULE:
+    try:
+        _get_rule_hook()
+    except RuntimeError:
+        return None
+
+    return f(*args, **kwargs)
