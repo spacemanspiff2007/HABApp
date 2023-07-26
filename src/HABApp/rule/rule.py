@@ -11,6 +11,7 @@ import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.asyncio import create_task
+from HABApp.core.const.const import PYTHON_310
 from HABApp.core.const.hints import HINT_EVENT_CALLBACK
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextProvidingObj, \
     uses_post_event, EventFilterBase, uses_item_registry, ContextBoundEventBusListener
@@ -23,10 +24,9 @@ from .interfaces.rule_subprocess import build_exec_params, HINT_PYTHON_PATH, HIN
     HINT_PROCESS_CB_FULL
 from .rule_hook import get_rule_hook as _get_rule_hook
 
-
-try:
+if PYTHON_310:
     from typing import ParamSpec
-except ImportError:
+else:
     from typing_extensions import ParamSpec
 
 
