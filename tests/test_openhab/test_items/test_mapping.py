@@ -4,7 +4,7 @@ from functools import partial
 import pytest
 from immutables import Map
 
-from HABApp.openhab.items import NumberItem
+from HABApp.openhab.items import NumberItem, DatetimeItem
 from HABApp.openhab.items.base_item import MetaData
 from HABApp.openhab.map_items import map_item
 from eascheduler.const import local_tz
@@ -60,3 +60,6 @@ def test_datetime():
     assert get_dt('2022-06-15T09:47:38.284') == datetime(2022, 6, 15,  9, 47, 38, 284000)
     assert get_dt('2022-06-15T09:21:43.043996') == datetime(2022, 6, 15,  9, 21, 43, 43996)
     assert get_dt('2022-06-15T09:21:43.754673068') == datetime(2022, 6, 15,  9, 21, 43, 754673)
+
+    offset_str = '-0400'
+    assert isinstance(get_dt('2022-06-15T09:21:43.754673068'), DatetimeItem)

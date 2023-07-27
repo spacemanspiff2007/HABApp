@@ -95,6 +95,7 @@ async def create_item(item: UserItem, test: bool) -> bool:
             log.error(f'Item operation failed for {tmp}!')
             return False
         await async_set_habapp_metadata(name, habapp_data)
+        existing_item = await async_get_item_with_habapp_meta(name)
     else:
         log.debug(f'Item {name} is already correct!')
 
