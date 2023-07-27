@@ -13,7 +13,7 @@ def uses_event_bus() -> 'HABApp.core.internals.EventBus':
     return create_proxy(uses_event_bus)
 
 
-def uses_get_item() -> Callable[[str], 'HABApp.core.internals.item_registry.item_registry._HINT_ITEM_OBJ']:
+def uses_get_item() -> Callable[[str], 'HABApp.core.internals.item_registry.item_registry.ItemRegistryItem']:
     return create_proxy(uses_get_item)
 
 
