@@ -5,7 +5,7 @@ from .context import ContextProvidingObj, Context, ContextBoundObj, get_current_
 
 from .event_filter import EventFilterBase, HINT_EVENT_FILTER_OBJ
 from .event_bus import EventBus, HINT_EVENT_BUS
-from .item_registry import HINT_ITEM_REGISTRY, ItemRegistry, ItemRegistryItem
+from .item_registry import ItemRegistry, ItemRegistryItem
 
 # isort: split
 

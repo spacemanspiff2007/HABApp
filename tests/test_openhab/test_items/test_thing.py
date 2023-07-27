@@ -6,7 +6,7 @@ from immutables import Map
 from pendulum import set_test_now, DateTime, UTC
 
 import HABApp
-from HABApp.core.internals import HINT_ITEM_REGISTRY
+from HABApp.core.internals import ItemRegistry
 from HABApp.openhab.connection_handler import sse_handler
 from HABApp.openhab.events import ThingStatusInfoEvent, ThingUpdatedEvent, ThingAddedEvent
 from HABApp.openhab.items import Thing
@@ -14,7 +14,7 @@ from HABApp.openhab.map_events import get_event
 
 
 @pytest.fixture(scope="function")
-def test_thing(ir: HINT_ITEM_REGISTRY):
+def test_thing(ir: ItemRegistry):
     set_test_now(DateTime(2000, 1, 1, tzinfo=UTC))
     thing = HABApp.openhab.items.Thing('test_thing')
 
@@ -156,7 +156,7 @@ def test_thing_updated_event(test_thing: Thing):
     assert test_thing._last_change.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
 
 
-def test_thing_called_status_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_thing: Thing):
+def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Thing):
     monkeypatch.setattr(sse_handler, 'get_event', lambda x: x)
 
     ir.add_item(test_thing)
@@ -169,7 +169,7 @@ def test_thing_called_status_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_thi
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_called_updated_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_thing: Thing):
+def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: Thing):
     monkeypatch.setattr(sse_handler, 'get_event', lambda x: x)
 
     ir.add_item(test_thing)
@@ -182,7 +182,7 @@ def test_thing_called_updated_event(monkeypatch, ir: HINT_ITEM_REGISTRY, test_th
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_handler_add_event(monkeypatch, ir: HINT_ITEM_REGISTRY):
+def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry):
     monkeypatch.setattr(sse_handler, 'get_event', lambda x: x)
 
     name = 'AddedThing'

@@ -1,4 +1,4 @@
-from HABApp.core.internals import HINT_ITEM_REGISTRY
+from HABApp.core.internals import ItemRegistry
 from HABApp.mqtt.mqtt_connection import send_event_async
 
 
@@ -11,7 +11,7 @@ class MqttDummyMsg:
         self.qos = 0
 
 
-async def test_retain_create(ir: HINT_ITEM_REGISTRY):
+async def test_retain_create(ir: ItemRegistry):
     topic = '/test/creation'
 
     assert not ir.item_exists(topic)

@@ -17,11 +17,11 @@ def uses_get_item() -> Callable[[str], 'HABApp.core.internals.item_registry.item
     return create_proxy(uses_get_item)
 
 
-def uses_item_registry() -> 'HABApp.core.internals.HINT_ITEM_REGISTRY':
+def uses_item_registry() -> 'HABApp.core.internals.ItemRegistry':
     return create_proxy(uses_item_registry)
 
 
-def setup_internals(ir: 'HABApp.core.internals.HINT_ITEM_REGISTRY',
+def setup_internals(ir: 'HABApp.core.internals.ItemRegistry',
                     eb: 'HABApp.core.internals.HINT_EVENT_BUS', final=True):
     """Replace the proxy objects with the real thing"""
     replacements = {

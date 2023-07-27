@@ -4,7 +4,7 @@ from datetime import timedelta
 from pendulum import UTC
 from pendulum import now as pd_now
 
-from HABApp.core.internals import HINT_ITEM_REGISTRY
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
 
 
@@ -17,7 +17,7 @@ class ItemTests:
         assert self.CLS is not None
         assert self.TEST_VALUES, type(self)
 
-    def test_factories(self, ir: HINT_ITEM_REGISTRY):
+    def test_factories(self, ir: ItemRegistry):
         cls = self.CLS
 
         ITEM_NAME = 'testitem'

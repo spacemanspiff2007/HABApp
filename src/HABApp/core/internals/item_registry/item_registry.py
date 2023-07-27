@@ -67,6 +67,3 @@ class ItemRegistry:
         log.debug(f'Removed {name} ({item.__class__.__name__})')
         item._on_item_removed()
         return item
-
-
-HINT_ITEM_REGISTRY = TypeVar('HINT_ITEM_REGISTRY', bound=ItemRegistry)
