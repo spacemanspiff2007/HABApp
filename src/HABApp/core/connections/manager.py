@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Final
 
 from HABApp.core.connections import BaseConnection
-from HABApp.core.connections.status import connection_log
+from HABApp.core.connections._definitions import connection_log
 
 
 class ConnectionManager:

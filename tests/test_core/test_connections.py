@@ -1,7 +1,10 @@
 from unittest.mock import Mock
 
-from HABApp.core.connections import BaseConnectionPlugin, BaseConnection
-from HABApp.core.connections.status import StatusTransitions, ConnectionStatus
+import pytest
+
+from HABApp.core.connections import BaseConnectionPlugin, BaseConnection, PluginCallbackHandler
+from HABApp.core.connections._definitions import PluginReturn
+from HABApp.core.connections.status_transitions import StatusTransitions, ConnectionStatus
 
 
 def test_transitions():
@@ -55,10 +58,10 @@ async def test_plugin_callback():
             assert context is sentinel
             mock_connected()
 
-        async def on_disconnected(self):
+        async def on_disconnected(self) -> PluginReturn:
             pass
 
-        async def on_setup(self, context, connection):
+        async def on_setup(self, context, connection) -> PluginReturn | None:
             assert context is sentinel
             assert connection is b
             mock_setup()
@@ -83,3 +86,65 @@ async def test_plugin_callback():
 
     mock_connected.assert_called_once()
     mock_setup.assert_called_once()
+
+
+def test_coro_inspection():
+    p = BaseConnectionPlugin('test')
+
+    # -------------------------------------------------------------------------
+    # Check args
+    #
+    async def coro():
+        pass
+
+    assert PluginCallbackHandler._get_coro_kwargs(p, coro) == ()
+
+    async def coro(connection):
+        pass
+
+    assert PluginCallbackHandler._get_coro_kwargs(p, coro) == ('connection', )
+
+    async def coro(connection, context):
+        pass
+
+    assert PluginCallbackHandler._get_coro_kwargs(p, coro) == ('connection', 'context')
+
+    # typo in definition
+    async def coro(connection, contrxt):
+        pass
+
+    with pytest.raises(ValueError) as e:
+        PluginCallbackHandler._get_coro_kwargs(p, coro)
+    assert str(e.value) == 'Invalid parameter name "contrxt" for test.coro'
+
+    # -------------------------------------------------------------------------
+    # Check return type
+    #
+    async def coro() -> bool:
+        pass
+
+    with pytest.raises(ValueError) as e:
+        PluginCallbackHandler._get_coro_kwargs(p, coro)
+    assert str(e.value) == 'Coroutine function must return PluginReturn or Optional[PluginReturn]'
+
+
+async def test_call_order():
+
+    calls = []
+
+    class TestPlugin(BaseConnectionPlugin):
+        async def on_connected(self):
+            calls.append(self.plugin_name)
+
+    p1 = TestPlugin('p1', -10)
+    ph = TestPlugin('handler', 0)
+    p3 = TestPlugin('p2', 10)
+
+    b = BaseConnection('test')
+    b.register_plugin(p1).register_plugin(ph).register_plugin(p3)
+
+    b.status.status = ConnectionStatus.CONNECTED
+    b.plugin_task.start()
+    await b.plugin_task.wait()
+
+    assert calls == [ph.plugin_name, p3.plugin_name, p1.plugin_name]

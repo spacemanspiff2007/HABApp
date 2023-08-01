@@ -5,7 +5,8 @@ from typing import Final, TYPE_CHECKING
 
 import HABApp
 from HABApp.core.lib import SingleTask
-from .status import ConnectionStatus, StatusTransitions, connection_log
+from ._definitions import ConnectionStatus, connection_log, RETURN_ERROR
+from .status_transitions import StatusTransitions
 
 if TYPE_CHECKING:
     from .base_plugin import BaseConnectionPlugin
@@ -31,10 +32,16 @@ class BaseConnection:
     def register_plugin(self, obj: BaseConnectionPlugin):
         from .plugin_callback import PluginCallbackHandler
 
+        # Check that it's not already registered
         assert not obj.plugin_callbacks
-        assert obj not in self.plugins
-        valid_names = {f'on_{obj.lower():s}': obj for obj in ConnectionStatus}
 
+        for p in self.plugins:
+            if p.plugin_name == obj.plugin_name:
+                raise ValueError(f'Plugin with the same name already registered: {p}')
+            if p.plugin_priority == obj.plugin_priority:
+                raise ValueError(f'Plugin with priority {p.plugin_priority:d} already registered: {p}')
+
+        valid_names = {f'on_{obj.lower():s}': obj for obj in ConnectionStatus}
         for m_name, member in getmembers(obj, predicate=lambda x: callable(x)):
             if not m_name.lower().startswith('on_'):
                 continue
@@ -75,15 +82,16 @@ class BaseConnection:
         status = self.status.status
         wrapper = HABApp.core.wrapper.ExceptionToHABApp(logger=self.log)
 
-        for cb in sorted(self.plugin_callbacks[status]):
+        callbacks = self.plugin_callbacks[status]
+        for cb in sorted(callbacks, key=lambda x: (x.plugin.plugin_name == 'handler', x), reverse=True):
             with wrapper:
-                await cb.run(self, self.context)
+                ret = await cb.run(self, self.context)
 
-            if wrapper.raised_exception:
+            if wrapper.raised_exception or ret is RETURN_ERROR:
                 self.status.error = True
 
                 # Fail fast during connection
-                if status in self.status.is_connecting_or_connected():
+                if self.status.is_connecting_or_connected():
                     break
 
         self.log.debug('Plugin task done')

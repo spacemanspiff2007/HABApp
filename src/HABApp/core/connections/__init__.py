@@ -1,4 +1,4 @@
-from .status import ConnectionStatus
+from ._definitions import ConnectionStatus
 
 # isort: split
 
