@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from inspect import signature, iscoroutinefunction
 from typing import Awaitable, Callable, Any, TYPE_CHECKING, Union
 
-from ._definitions import PluginReturn
+from ._definitions import PluginReturn, ConnectionStatus, CONNECTION_HANDLER_NAME
 
 if TYPE_CHECKING:
     from .base_connection import BaseConnection
@@ -58,3 +58,13 @@ class PluginCallbackHandler:
         if not isinstance(other, PluginCallbackHandler):
             return NotImplemented
         return self.priority < other.priority
+
+    def sort_func(self, status: ConnectionStatus) -> tuple[int, int]:
+        is_handler = self.plugin.plugin_name == CONNECTION_HANDLER_NAME
+
+        # Handler runs first for every step, except disconnect & offline - there it runs last.
+        # That way it's possible to do some cleanup in the plugins when we gracefully disconnect
+        if status is ConnectionStatus.DISCONNECTED or status is ConnectionStatus.OFFLINE:
+            return int(not is_handler), self.priority
+
+        return int(is_handler), self.priority

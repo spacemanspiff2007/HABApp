@@ -136,6 +136,9 @@ async def test_call_order():
         async def on_connected(self):
             calls.append(self.plugin_name)
 
+        async def on_disconnected(self):
+            calls.append(self.plugin_name)
+
     p1 = TestPlugin('p1', -10)
     ph = TestPlugin('handler', 0)
     p3 = TestPlugin('p2', 10)
@@ -148,3 +151,10 @@ async def test_call_order():
     await b.plugin_task.wait()
 
     assert calls == [ph.plugin_name, p3.plugin_name, p1.plugin_name]
+    calls.clear()
+
+    b.status.status = ConnectionStatus.DISCONNECTED
+    b.plugin_task.start()
+    await b.plugin_task.wait()
+
+    assert calls == [p3.plugin_name, p1.plugin_name, ph.plugin_name]

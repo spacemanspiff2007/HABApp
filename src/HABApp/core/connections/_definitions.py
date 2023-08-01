@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from enum import Enum, auto
+from typing import Final
 
 from HABApp.core.const.const import StrEnum
 
@@ -36,3 +37,6 @@ class PluginReturn(Enum):
 
 RETURN_OK = PluginReturn.OK
 RETURN_ERROR = PluginReturn.ERROR
+
+# Handler which manages the connection
+CONNECTION_HANDLER_NAME: Final = 'handler'

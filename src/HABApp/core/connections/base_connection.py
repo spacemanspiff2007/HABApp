@@ -79,22 +79,35 @@ class BaseConnection:
         self.advance_status_task.task = None
 
     async def _task_plugin(self):
-        status = self.status.status
+        status = self.status
+        status_enum = status.status
+
         wrapper = HABApp.core.wrapper.ExceptionToHABApp(logger=self.log)
 
-        callbacks = self.plugin_callbacks[status]
-        for cb in sorted(callbacks, key=lambda x: (x.plugin.plugin_name == 'handler', x), reverse=True):
+        callbacks = self.plugin_callbacks[status_enum]
+        for cb in sorted(callbacks, key=lambda x: x.sort_func(status_enum), reverse=True):
             with wrapper:
                 ret = await cb.run(self, self.context)
 
+            # Error handling
             if wrapper.raised_exception or ret is RETURN_ERROR:
-                self.status.error = True
+                if status.error:
+                    self.log.debug('Error on connection status is already set')
+                else:
+                    status.error = True
+                    self.log.debug('Set error on connection status')
 
                 # Fail fast during connection
-                if self.status.is_connecting_or_connected():
+                if status.is_connecting_or_connected():
                     break
 
         self.log.debug('Plugin task done')
+
+    def clear_error(self):
+        if not self.status.error:
+            return None
+        self.log.debug('Cleared error')
+        self.status.error = False
 
     def status_from_setup_to_disabled(self):
         self.status.from_setup_to_disabled()
