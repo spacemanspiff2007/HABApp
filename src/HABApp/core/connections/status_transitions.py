@@ -33,6 +33,10 @@ class StatusTransitions:
         assert self.status == ConnectionStatus.SETUP
         self._set_manual(ConnectionStatus.DISABLED)
 
+    def from_connected_to_disconnected(self):
+        assert self.status == ConnectionStatus.CONNECTED
+        self._set_manual(ConnectionStatus.DISCONNECTED)
+
     def _next_step(self) -> ConnectionStatus:
         status = self.status
 

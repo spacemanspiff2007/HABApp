@@ -4,9 +4,9 @@ from inspect import getmembers
 from typing import Final, TYPE_CHECKING
 
 import HABApp
+from HABApp.core.connections._definitions import ConnectionStatus, connection_log, RETURN_ERROR
+from HABApp.core.connections.status_transitions import StatusTransitions
 from HABApp.core.lib import SingleTask
-from ._definitions import ConnectionStatus, connection_log, RETURN_ERROR
-from .status_transitions import StatusTransitions
 
 if TYPE_CHECKING:
     from .base_plugin import BaseConnectionPlugin
@@ -56,6 +56,9 @@ class BaseConnection:
             assert cb not in dst
             dst.append(cb)
 
+            # sort plugins
+            dst.sort(key=lambda x: x.sort_func(name), reverse=True)
+
         self.log.debug(f'Added plugin {obj.plugin_name:s}')
         return self
 
@@ -85,17 +88,13 @@ class BaseConnection:
         wrapper = HABApp.core.wrapper.ExceptionToHABApp(logger=self.log)
 
         callbacks = self.plugin_callbacks[status_enum]
-        for cb in sorted(callbacks, key=lambda x: x.sort_func(status_enum), reverse=True):
+        for cb in callbacks:
             with wrapper:
                 ret = await cb.run(self, self.context)
 
             # Error handling
             if wrapper.raised_exception or ret is RETURN_ERROR:
-                if status.error:
-                    self.log.debug('Error on connection status is already set')
-                else:
-                    status.error = True
-                    self.log.debug('Set error on connection status')
+                self.set_error()
 
                 # Fail fast during connection
                 if status.is_connecting_or_connected():
@@ -109,8 +108,20 @@ class BaseConnection:
         self.log.debug('Cleared error')
         self.status.error = False
 
+    def set_error(self):
+        if self.status.error:
+            self.log.debug('Error on connection status is already set')
+        else:
+            self.status.error = True
+            self.log.debug('Set error on connection status')
+        self.advance_status_task.start_if_not_running(run_wrapped=False)
+
     def status_from_setup_to_disabled(self):
         self.status.from_setup_to_disabled()
+        self.advance_status_task.start_if_not_running(run_wrapped=False)
+
+    def status_from_connected_to_disconnected(self):
+        self.status.from_connected_to_disconnected()
         self.advance_status_task.start_if_not_running(run_wrapped=False)
 
     def status_configuration_changed(self):
@@ -118,12 +129,19 @@ class BaseConnection:
         self.status.setup = True
         self.advance_status_task.start_if_not_running(run_wrapped=False)
 
-    def request_shutdown(self):
+    def application_shutdown(self):
         if not self.status.shutdown:
             return None
         self.log.debug('Requesting shutdown')
         self.status.shutdown = True
         self.advance_status_task.start_if_not_running(run_wrapped=False)
+
+    def application_startup_complete(self):
+        self.log.debug('Overview')
+        for name, objs in self.plugin_callbacks.items():
+            if not objs:
+                continue
+            self.log.debug(f' - {name}: {", ".join(obj.plugin.plugin_name for obj in objs)}')
 
     def is_shutdown(self):
         return self.status == ConnectionStatus.SHUTDOWN
