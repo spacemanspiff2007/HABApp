@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from aiomqtt import Client, TLSParameters, MqttError
+from aiomqtt import Client, TLSParameters
 
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
@@ -8,7 +8,6 @@ from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
 from HABApp.core.connections.status_transitions import WaitBetweenConnects
 from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
 from HABApp.mqtt.connection.connection import CONTEXT_TYPE, MqttConnection
-
 
 post_event = uses_post_event()
 get_item = uses_get_item()
@@ -62,36 +61,20 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
 
             # clean_session=False
         )
-        connection.log.debug('Created client')
 
     # noinspection PyProtectedMember
     async def on_connecting(self, connection: MqttConnection, context: CONTEXT_TYPE):
-        connection.log.info(f'Connecting to {context._hostname}:{context._port} ...')
         assert context is not None
-        try:
-            await context.__aenter__()
-        except Exception as e:
-            connection.set_error()
-            connection.log.warning(e)
-            return None
 
+        connection.log.info(f'Connecting to {context._hostname}:{context._port}')
+        await context.__aenter__()
         connection.log.info('Connection successful')
 
     async def on_disconnected(self, connection: MqttConnection, context: CONTEXT_TYPE):
-        client = context
-        assert client is not None
+        assert context is not None
 
-        # connection.context = None
-        # connection.log.debug('Client removed')
-
-        try:
-            await client.__aexit__(None, None, None)
-        except MqttError as e:
-            if connection.has_errors:
-                return None
-
-            connection.set_error()
-            connection.log.error(e)
+        connection.log.info('Disconnected')
+        await context.__aexit__(None, None, None)
 
     async def on_offline(self, connection: MqttConnection):
         if connection.has_errors:

@@ -6,11 +6,10 @@ from typing import Optional
 from aiomqtt import Client, MqttError
 
 import HABApp
-from HABApp.core.asyncio import async_context
+from HABApp.core.asyncio import AsyncContext
 from HABApp.core.connections import BaseConnection, Connections
 from HABApp.core.connections.base_plugin import BaseConnectionPluginConnectedTask
 from HABApp.core.const.const import PYTHON_310
-from HABApp.core.wrapper import process_exception
 
 log = logging.getLogger('HABApp.mqtt.connection')
 
@@ -45,6 +44,9 @@ class MqttConnection(BaseConnection):
         super().__init__('mqtt')
         self.context: CONTEXT_TYPE = None
 
+    def is_silent_exception(self, e: Exception):
+        return isinstance(e, MqttError)
+
 
 class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
 
@@ -55,20 +57,12 @@ class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
         raise NotImplementedError()
 
     async def _mqtt_wrap_task(self):
-        ctx = async_context.set('MQTT')
 
         connection = self.plugin_connection
         log = connection.log
         log.debug(f'{self.task.name} task start')
-
         try:
-            await self.mqtt_task()
-        except Exception as e:
-            connection.set_error()
-            if isinstance(e, MqttError):
-                connection.log.error(e)
-            else:
-                process_exception(self.task.name, e, logger=log)
+            with AsyncContext('MQTT'), connection.handle_exception(self.mqtt_task):
+                await self.mqtt_task()
         finally:
-            async_context.reset(ctx)
             log.debug(f'{self.task.name} task stop')

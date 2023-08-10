@@ -23,7 +23,7 @@ class BaseConnectionPlugin(Generic[T]):
 class BaseConnectionPluginConnectedTask(BaseConnectionPlugin[T]):
     def __init__(self, name: str, priority: int, task_coro: Callable[[], Awaitable[Any]], task_name: str):
         super().__init__(name, priority)
-        self.task = SingleTask(task_coro, name=task_name)
+        self.task: Final = SingleTask(task_coro, name=task_name)
 
     async def _on_connected__task(self):
         self.task.start()

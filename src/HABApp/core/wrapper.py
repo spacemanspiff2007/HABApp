@@ -5,6 +5,7 @@ import typing
 from logging import Logger
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
+from typing import Union, Callable
 
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.const.topics import TOPIC_WARNINGS as TOPIC_WARNINGS
@@ -17,7 +18,7 @@ log = logging.getLogger('HABApp')
 post_event = uses_post_event()
 
 
-def process_exception(func: typing.Union[typing.Callable, str], e: Exception,
+def process_exception(func: Union[Callable, str], e: Exception,
                       do_print=False, logger: logging.Logger = log):
     lines = format_exception(e)
 

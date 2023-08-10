@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from inspect import signature, iscoroutinefunction
-from typing import Awaitable, Callable, Any, TYPE_CHECKING, Union
+from typing import Awaitable, Callable, Any, TYPE_CHECKING
 
-from ._definitions import PluginReturn, ConnectionStatus, CONNECTION_HANDLER_NAME
+from ._definitions import ConnectionStatus, CONNECTION_HANDLER_NAME
 
 if TYPE_CHECKING:
     from .base_connection import BaseConnection
@@ -34,12 +34,6 @@ class PluginCallbackHandler:
             raise ValueError(f'Coroutine function expected for {plugin.plugin_name}.{coro.__name__}')
 
         sig = signature(coro)
-
-        # Valid return codes are None, PluginReturn or PluginReturn | None
-        if sig.return_annotation is not PluginReturn and sig.return_annotation is not sig.empty and \
-                sig.return_annotation != Union[PluginReturn, None]:
-            raise ValueError(
-                f'Coroutine function must return {PluginReturn.__name__} or Optional[{PluginReturn.__name__}]')
 
         kwargs = []
         for name in sig.parameters:

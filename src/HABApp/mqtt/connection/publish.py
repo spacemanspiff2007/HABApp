@@ -14,23 +14,25 @@ class PublishHandler(MqttPlugin):
         super().__init__('publish', 8, 'MqttPublish')
 
     async def mqtt_task(self):
-        client = self.plugin_connection.context
-        assert client is not None
+        connection = self.plugin_connection
+        with connection.handle_exception(self.mqtt_task):
+            client = self.plugin_connection.context
+            assert client is not None
 
-        cfg = CONFIG.mqtt.publish
-        queue = QUEUE
-        assert queue is not None
+            cfg = CONFIG.mqtt.publish
+            queue = QUEUE
+            assert queue is not None
 
-        # worker to publish things
-        while True:
-            topic, value, qos, retain = await queue.get()
-            if qos is None:
-                qos = cfg.qos
-            if retain is None:
-                retain = cfg.retain
+            # worker to publish things
+            while True:
+                topic, value, qos, retain = await queue.get()
+                if qos is None:
+                    qos = cfg.qos
+                if retain is None:
+                    retain = cfg.retain
 
-            await client.publish(topic, value, qos, retain)
-            queue.task_done()
+                await client.publish(topic, value, qos, retain)
+                queue.task_done()
 
     async def on_connected(self):
         global QUEUE

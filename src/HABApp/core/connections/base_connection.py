@@ -1,17 +1,43 @@
 from __future__ import annotations
-import re
 
+import re
+from asyncio import CancelledError
 from inspect import getmembers
-from typing import Final, TYPE_CHECKING
+from typing import Final, TYPE_CHECKING, Callable
 
 import HABApp
-from HABApp.core.connections._definitions import ConnectionStatus, connection_log, RETURN_ERROR
+from HABApp.core.connections._definitions import ConnectionStatus, connection_log
 from HABApp.core.connections.status_transitions import StatusTransitions
 from HABApp.core.lib import SingleTask
+from ..wrapper import process_exception
 
 if TYPE_CHECKING:
     from .base_plugin import BaseConnectionPlugin
     from .plugin_callback import PluginCallbackHandler
+
+
+class AlreadyHandledException(Exception):
+    pass
+
+
+class HandleExceptionInConnection:
+    def __init__(self, connection: BaseConnection, func_name: Callable):
+        self._connection: Final = connection
+        self._func_name: Final = func_name
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # no exception -> we exit gracefully
+        if exc_type is None and exc_val is None:
+            return True
+
+        if isinstance(exc_val, CancelledError):
+            return None
+
+        self._connection.process_exception(exc_val, self._func_name)
+        raise AlreadyHandledException from None
 
 
 class BaseConnection:
@@ -51,6 +77,21 @@ class BaseConnection:
     @property
     def has_errors(self) -> bool:
         return self.status.error
+
+    def handle_exception(self, func: Callable) -> HandleExceptionInConnection:
+        return HandleExceptionInConnection(self, func)
+
+    def is_silent_exception(self, e: Exception):
+        return False
+
+    def process_exception(self, e: Exception, func: Callable | str):
+        self.set_error()
+
+        if self.is_silent_exception(e):
+            name = func if isinstance(func, str) else func.__qualname__
+            self.log.debug(f'Error in {name:s}: {e}')
+        else:
+            process_exception(func, e, self.log)
 
     def register_plugin(self, obj: BaseConnectionPlugin):
         from .plugin_callback import PluginCallbackHandler
@@ -113,17 +154,20 @@ class BaseConnection:
         status = self.status
         status_enum = status.status
 
-        wrapper = HABApp.core.wrapper.ExceptionToHABApp(logger=self.log)
-
         callbacks = self.plugin_callbacks[status_enum]
         for cb in callbacks:
-            with wrapper:
-                ret = await cb.run(self, self.context)
 
-            # Error handling
-            if wrapper.raised_exception or ret is RETURN_ERROR:
-                self.set_error()
+            error = True
 
+            try:
+                await cb.run(self, self.context)
+                error = False
+            except AlreadyHandledException:
+                pass
+            except Exception as e:
+                self.process_exception(e, cb.coro)
+
+            if error:
                 # Fail fast during connection
                 if status.is_connecting_or_connected():
                     break
@@ -158,7 +202,7 @@ class BaseConnection:
         self.advance_status_task.start_if_not_running(run_wrapped=False)
 
     def application_shutdown(self):
-        if not self.status.shutdown:
+        if self.status.shutdown:
             return None
         self.log.debug('Requesting shutdown')
         self.status.shutdown = True

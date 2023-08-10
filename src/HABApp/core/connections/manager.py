@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import Final, TypeVar
 
 import HABApp
@@ -29,9 +30,12 @@ class ConnectionManager:
             raise ValueError()
         self.connections.pop(name)
 
-    def application_shutdown(self):
+    async def application_shutdown(self):
         for c in self.connections.values():
             c.application_shutdown()
+
+        tasks = [t.advance_status_task.wait() for t in self.connections.values()]
+        await asyncio.gather(*tasks)
 
     def application_startup_complete(self):
         for c in self.connections.values():
