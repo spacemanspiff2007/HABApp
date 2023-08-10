@@ -86,6 +86,7 @@ class StatusTransitions:
             if status in (ConnectionStatus.STARTUP, ConnectionStatus.OFFLINE, ConnectionStatus.DISABLED):
                 return ConnectionStatus.SHUTDOWN
 
+        # Automatically reconnect if there are no errors
         if not self.error and status is ConnectionStatus.OFFLINE:
             return ConnectionStatus.CONNECTING
 

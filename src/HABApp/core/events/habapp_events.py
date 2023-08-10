@@ -1,3 +1,6 @@
+from typing import Final
+
+
 class __FileEventBase:
     def __init__(self, name: str):
         self.name: str = name
@@ -38,3 +41,17 @@ class HABAppException:
     def to_str(self) -> str:
         """Create a readable str with all information"""
         return f'Exception in {self.func_name}: {self.exception}\n{self.traceback}'
+
+
+class HABAppConnectionStateEvent:
+    """Contains information about a connection managed by HABApp
+
+    :ivar str connection: name of the connection
+    :ivar str state: state of the connection
+    """
+    def __init__(self, connection: str, state: str):
+        self.connection: Final = connection
+        self.state: Final = state
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} connection: {self.connection:s}, state: {self.state:s}>'

@@ -132,10 +132,9 @@ class BaseConnection:
         return self
 
     def _new_status(self, status: ConnectionStatus):
-        self.log.debug(status)
+        self.log.debug(status.value)
 
         assert not self.plugin_task.is_running
-        self.log.debug('Plugin task start')
         self.plugin_task.start()
 
     async def _task_next_status(self):
@@ -153,6 +152,8 @@ class BaseConnection:
     async def _task_plugin(self):
         status = self.status
         status_enum = status.status
+
+        self.log.debug(f'Task {status_enum.value:s} start')
 
         callbacks = self.plugin_callbacks[status_enum]
         for cb in callbacks:
@@ -172,7 +173,7 @@ class BaseConnection:
                 if status.is_connecting_or_connected():
                     break
 
-        self.log.debug('Plugin task done')
+        self.log.debug(f'Task {status_enum.value:s} done')
 
     def clear_error(self):
         if not self.status.error:
@@ -213,7 +214,7 @@ class BaseConnection:
         for name, objs in self.plugin_callbacks.items():
             if not objs:
                 continue
-            self.log.debug(f' - {name}: {", ".join(obj.plugin.plugin_name for obj in objs)}')
+            self.log.debug(f' - {name}: {", ".join(f"{obj.plugin.plugin_name}.{obj.coro.__name__}" for obj in objs)}')
 
         self.status.setup = True
         self.advance_status_task.start_if_not_running(run_wrapped=False)

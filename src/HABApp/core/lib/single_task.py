@@ -1,4 +1,4 @@
-from asyncio import Task, CancelledError
+from asyncio import Task, current_task, CancelledError
 from typing import Callable, Awaitable, Any, Final, Optional
 
 from HABApp.core.const import loop
@@ -61,7 +61,7 @@ class SingleTask:
         return task
 
     async def _task_wrap(self):
-        task = self.task
+        task = current_task(loop)
 
         # don't use try-finally because
         try:
