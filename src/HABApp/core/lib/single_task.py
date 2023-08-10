@@ -61,10 +61,12 @@ class SingleTask:
         return task
 
     async def _task_wrap(self):
-        # don't use try-finally because this also runs on asyncio.CancelledError
+        task = self.task
+
+        # don't use try-finally because
         try:
             await self.coro()
-        except Exception:
-            pass
-
-        self.task = None
+        finally:
+            # This also runs on asyncio.CancelledError so we have to make sure it's the same task
+            if self.task is task:
+                self.task = None

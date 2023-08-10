@@ -5,7 +5,7 @@ import HABApp
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
-from HABApp.mqtt.mqtt_connection import connect, disconnect
+from HABApp.mqtt.connection.mqtt_connection import connect, disconnect
 from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule
 
 log = logging.getLogger('HABApp.MqttTestEvents')

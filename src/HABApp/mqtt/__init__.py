@@ -1,3 +1,7 @@
 from . import events
 from . import items
-from . import interface
+
+# isort: split
+
+import HABApp.mqtt.interface_async
+import HABApp.mqtt.interface_sync

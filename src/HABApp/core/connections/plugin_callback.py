@@ -65,6 +65,6 @@ class PluginCallbackHandler:
         # Handler runs first for every step, except disconnect & offline - there it runs last.
         # That way it's possible to do some cleanup in the plugins when we gracefully disconnect
         if status is ConnectionStatus.DISCONNECTED or status is ConnectionStatus.OFFLINE:
-            return int(not is_handler), self.priority
+            is_handler = not is_handler
 
-        return int(is_handler), self.priority
+        return int(is_handler), self.priority, int(not self.coro.__name__.startswith('_'))

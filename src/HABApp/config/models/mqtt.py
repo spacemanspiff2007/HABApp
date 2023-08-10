@@ -34,7 +34,7 @@ class Subscribe(BaseModel):
     qos: QOS = Field(default=0, description='Default QoS for subscribing')
     topics: Tuple[Tuple[str, Optional[QOS]], ...] = Field(default=('#', ))
 
-    @pydantic.validator('topics', pre=True)
+    @pydantic.field_validator('topics', mode='before')
     def parse_topics(cls, v):
         if not isinstance(v, (list, tuple, set)):
             raise ValueError('must be a list')

@@ -30,4 +30,6 @@ exclude =
     # the interfaces will throw unused imports
     src/HABApp/openhab/interface.py,
     src/HABApp/openhab/interface_async.py,
+    src/HABApp/mqtt/interface_sync.py,
+    src/HABApp/mqtt/interface_async.py,
     src/HABApp/rule/interfaces/http_interface.py,

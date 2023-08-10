@@ -1,4 +1,4 @@
-from ._definitions import ConnectionStatus
+from ._definitions import ConnectionStatus, CONNECTION_HANDLER_NAME
 
 # isort: split
 

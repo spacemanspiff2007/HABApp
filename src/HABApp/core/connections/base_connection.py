@@ -1,4 +1,5 @@
 from __future__ import annotations
+import re
 
 from inspect import getmembers
 from typing import Final, TYPE_CHECKING
@@ -17,17 +18,39 @@ class BaseConnection:
     def __init__(self, name: str):
         self.name: Final = name
         self.log: Final = connection_log.getChild(name)
-
         self.status: Final = StatusTransitions()
 
+        # this can be an arbitrary obj that can be reused
         self.context = None
 
+        # Plugin handling
         self.plugins: list[BaseConnectionPlugin] = []
         self.plugin_callbacks: dict[ConnectionStatus, list[PluginCallbackHandler]] = {
             name: [] for name in ConnectionStatus}
 
+        # Tasks
         self.plugin_task: Final = SingleTask(self._task_plugin, f'{name.title():s}PluginTask')
         self.advance_status_task: Final = SingleTask(self._task_next_status, f'{name.title():s}AdvanceStatusTask')
+
+    @property
+    def is_online(self) -> bool:
+        return self.status.status == ConnectionStatus.ONLINE
+
+    @property
+    def is_connected(self) -> bool:
+        return self.status.status == ConnectionStatus.CONNECTED
+
+    @property
+    def is_disconnected(self) -> bool:
+        return self.status.status == ConnectionStatus.DISCONNECTED
+
+    @property
+    def is_shutdown(self) -> bool:
+        return self.status.status == ConnectionStatus.SHUTDOWN
+
+    @property
+    def has_errors(self) -> bool:
+        return self.status.error
 
     def register_plugin(self, obj: BaseConnectionPlugin):
         from .plugin_callback import PluginCallbackHandler
@@ -41,23 +64,28 @@ class BaseConnection:
             if p.plugin_priority == obj.plugin_priority:
                 raise ValueError(f'Plugin with priority {p.plugin_priority:d} already registered: {p}')
 
-        valid_names = {f'on_{obj.lower():s}': obj for obj in ConnectionStatus}
+        name_to_status = {obj.lower(): obj for obj in ConnectionStatus}
+        name_regex = re.compile(f'_?on_({"|".join(name_to_status)})(?:__\\w+)?')
+
         for m_name, member in getmembers(obj, predicate=lambda x: callable(x)):
-            if not m_name.lower().startswith('on_'):
+            if not m_name.lower().startswith('on_') and not m_name.lower().startswith('_on'):
                 continue
 
-            name = valid_names[m_name]
+            if (m := name_regex.fullmatch(m_name)) is None:
+                raise ValueError(f'Invalid name: {m_name} in {obj.plugin_name}')
+
+            step = name_to_status[m.group(1)]
             cb = PluginCallbackHandler.create(obj, member)
 
-            assert name not in obj.plugin_callbacks
-            obj.plugin_callbacks[name] = cb
-
-            dst = self.plugin_callbacks[name]
+            dst = self.plugin_callbacks[step]
             assert cb not in dst
             dst.append(cb)
 
             # sort plugins
-            dst.sort(key=lambda x: x.sort_func(name), reverse=True)
+            dst.sort(key=lambda x: x.sort_func(step), reverse=True)
+
+        obj.plugin_connection = self
+        self.plugins.append(obj)
 
         self.log.debug(f'Added plugin {obj.plugin_name:s}')
         return self
@@ -143,5 +171,5 @@ class BaseConnection:
                 continue
             self.log.debug(f' - {name}: {", ".join(obj.plugin.plugin_name for obj in objs)}')
 
-    def is_shutdown(self):
-        return self.status == ConnectionStatus.SHUTDOWN
+        self.status.setup = True
+        self.advance_status_task.start_if_not_running(run_wrapped=False)

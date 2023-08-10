@@ -20,6 +20,9 @@ SUPPRESSED_HABAPP_PATHS = (
 
     # Item registry
     re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]item_registry[/\\]'),
+
+    # Connection wrappers
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]connections[/\\]'),
 )
 
 SUPPRESSED_PATHS = (

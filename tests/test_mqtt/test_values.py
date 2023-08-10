@@ -1,5 +1,5 @@
 import pytest
-from paho.mqtt.client import MQTTMessage
+from aiomqtt import Message
 
 from HABApp.mqtt.mqtt_payload import get_msg_payload
 
@@ -22,6 +22,6 @@ from HABApp.mqtt.mqtt_payload import get_msg_payload
     )
 )
 def test_value_cast(payload, expected):
-    msg = MQTTMessage(topic=b'test_topic')
-    msg.payload = payload.encode('utf-8') if not isinstance(payload, bytes) else payload
+    payload = payload.encode('utf-8') if not isinstance(payload, bytes) else payload
+    msg = Message('test_topic', payload, None, None, None, None)
     assert get_msg_payload(msg) == ('test_topic', expected)

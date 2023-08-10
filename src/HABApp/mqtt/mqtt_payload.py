@@ -1,7 +1,7 @@
 import logging
 from typing import Tuple, Any, Optional
 
-from paho.mqtt.client import MQTTMessage
+from aiomqtt import Message
 
 from HABApp.core.const.json import load_json
 from HABApp.core.const.log import TOPIC_EVENTS
@@ -10,9 +10,9 @@ from HABApp.core.wrapper import process_exception
 log = logging.getLogger(f'{TOPIC_EVENTS}.mqtt')
 
 
-def get_msg_payload(msg: MQTTMessage) -> Tuple[Optional[str], Any]:
+def get_msg_payload(msg: Message) -> Tuple[Optional[str], Any]:
     try:
-        topic = msg._topic.decode('utf-8')
+        topic = msg.topic.value
         raw = msg.payload
 
         try:
@@ -53,5 +53,5 @@ def get_msg_payload(msg: MQTTMessage) -> Tuple[Optional[str], Any]:
         except ValueError:
             return topic, val
     except Exception as e:
-        process_exception('get_msg_payload', e, logger=log)
+        process_exception(get_msg_payload, e, logger=log)
         return None, None

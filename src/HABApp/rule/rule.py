@@ -3,7 +3,7 @@ import re
 import sys
 import warnings
 from pathlib import Path
-from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal, TypeVar, Callable
+from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal, TypeVar, Callable, Final
 
 import HABApp
 import HABApp.core
@@ -67,9 +67,9 @@ class Rule(ContextProvidingObj):
 
         # interfaces
         self.async_http = interfaces.http
-        self.mqtt: HABApp.mqtt.interface = HABApp.mqtt.interface
-        self.oh: HABApp.openhab.interface = HABApp.openhab.interface
-        self.openhab: HABApp.openhab.interface = self.oh
+        self.mqtt: Final = HABApp.mqtt.interface_sync
+        self.oh: Final = HABApp.openhab.interface
+        self.openhab: Final = self.oh
 
     def on_rule_loaded(self):
         """Override this to implement logic that will be called when the rule and the file has been successfully loaded
