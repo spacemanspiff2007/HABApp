@@ -9,11 +9,11 @@ def get_dependencies() -> List[str]:
     return [
         'aiohttp-sse-client',
         'aiohttp',
+        'aiomqtt',
         'bidict',
         'colorama',
         'eascheduler',
         'easyconfig',
-        'paho-mqtt',
         'pydantic',
         'stack_data',
         'voluptuous',

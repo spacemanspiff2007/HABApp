@@ -106,10 +106,10 @@ class BaseConnection:
                 raise ValueError(f'Plugin with priority {p.plugin_priority:d} already registered: {p}')
 
         name_to_status = {obj.lower(): obj for obj in ConnectionStatus}
-        name_regex = re.compile(f'_?on_({"|".join(name_to_status)})(?:__\\w+)?')
+        name_regex = re.compile(f'on_({"|".join(name_to_status)})')
 
         for m_name, member in getmembers(obj, predicate=lambda x: callable(x)):
-            if not m_name.lower().startswith('on_') and not m_name.lower().startswith('_on'):
+            if not m_name.lower().startswith('on_'):
                 continue
 
             if (m := name_regex.fullmatch(m_name)) is None:
@@ -207,14 +207,27 @@ class BaseConnection:
             return None
         self.log.debug('Requesting shutdown')
         self.status.shutdown = True
+
+        for p in self.plugins:
+            p.application_shutdown()
+
         self.advance_status_task.start_if_not_running(run_wrapped=False)
 
     def application_startup_complete(self):
         self.log.debug('Overview')
-        for name, objs in self.plugin_callbacks.items():
+        for status, objs in self.plugin_callbacks.items():
             if not objs:
                 continue
-            self.log.debug(f' - {name}: {", ".join(f"{obj.plugin.plugin_name}.{obj.coro.__name__}" for obj in objs)}')
+            coros = []
+            for obj in objs:
+                name = obj.coro.__name__
+                for replace in (f'on_{status.value.lower():s}', f'_on_{status.value.lower():s}', ):
+                    if name.startswith(replace):
+                        name = name[len(replace):]
+                        break
+                coros.append(f'{obj.plugin.plugin_name}{"." if name else ""}{name}')
+
+            self.log.debug(f' - {status}: {", ".join(coros)}')
 
         self.status.setup = True
         self.advance_status_task.start_if_not_running(run_wrapped=False)

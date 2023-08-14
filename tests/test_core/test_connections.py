@@ -2,8 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from HABApp.core.connections import BaseConnectionPlugin, BaseConnection, PluginCallbackHandler
-from HABApp.core.connections._definitions import PluginReturn
+from HABApp.core.connections import BaseConnectionPlugin, BaseConnection, PluginCallbackHandler, CONNECTION_HANDLER_NAME
 from HABApp.core.connections.status_transitions import StatusTransitions, ConnectionStatus
 
 
@@ -17,15 +16,15 @@ def test_transitions():
         return ret
 
     status.setup = True
-    assert get_flow() == ['SETUP']
+    assert get_flow() == ['SETUP', 'CONNECTING', 'CONNECTED', 'ONLINE']
 
-    # Error Handling
+    # No error
     for initial_state in (ConnectionStatus.CONNECTING, ConnectionStatus.CONNECTED, ConnectionStatus.ONLINE):
         status = StatusTransitions()
         status.status = initial_state
         status.setup = True
 
-        assert get_flow() == ['DISCONNECTED', 'OFFLINE', 'SETUP']
+        assert get_flow() == ['DISCONNECTED', 'OFFLINE', 'SETUP', 'CONNECTING', 'CONNECTED', 'ONLINE']
 
     # Error Handling
     for initial_state in (ConnectionStatus.CONNECTING, ConnectionStatus.CONNECTED, ConnectionStatus.ONLINE):
@@ -58,10 +57,10 @@ async def test_plugin_callback():
             assert context is sentinel
             mock_connected()
 
-        async def on_disconnected(self) -> PluginReturn:
+        async def on_disconnected(self):
             pass
 
-        async def on_setup(self, context, connection) -> PluginReturn | None:
+        async def on_setup(self, context, connection):
             assert context is sentinel
             assert connection is b
             mock_setup()
@@ -117,16 +116,6 @@ def test_coro_inspection():
         PluginCallbackHandler._get_coro_kwargs(p, coro)
     assert str(e.value) == 'Invalid parameter name "contrxt" for test.coro'
 
-    # -------------------------------------------------------------------------
-    # Check return type
-    #
-    async def coro() -> bool:
-        pass
-
-    with pytest.raises(ValueError) as e:
-        PluginCallbackHandler._get_coro_kwargs(p, coro)
-    assert str(e.value) == 'Coroutine function must return PluginReturn or Optional[PluginReturn]'
-
 
 async def test_call_order():
 
@@ -140,7 +129,7 @@ async def test_call_order():
             calls.append(self.plugin_name)
 
     p1 = TestPlugin('p1', -10)
-    ph = TestPlugin('handler', 0)
+    ph = TestPlugin(CONNECTION_HANDLER_NAME, 0)
     p3 = TestPlugin('p2', 10)
 
     b = BaseConnection('test')

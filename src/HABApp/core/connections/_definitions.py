@@ -30,4 +30,4 @@ class ConnectionStatus(StrEnum):
 
 
 # Handler which manages the connection
-CONNECTION_HANDLER_NAME: Final = 'handler'
+CONNECTION_HANDLER_NAME: Final = 'ConnectionHandler'

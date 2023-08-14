@@ -7,7 +7,7 @@ from aiomqtt import Client, MqttError
 
 import HABApp
 from HABApp.core.asyncio import AsyncContext
-from HABApp.core.connections import BaseConnection, Connections
+from HABApp.core.connections import BaseConnection, Connections, ConnectionStateToEventBusPlugin, AutoReconnectPlugin
 from HABApp.core.connections.base_plugin import BaseConnectionPluginConnectedTask
 from HABApp.core.const.const import PYTHON_310
 
@@ -33,6 +33,8 @@ def setup():
     connection.register_plugin(CONNECTION_HANDLER)
     connection.register_plugin(SUBSCRIPTION_HANDLER)
     connection.register_plugin(PUBLISH_HANDLER)
+    connection.register_plugin(ConnectionStateToEventBusPlugin())
+    connection.register_plugin(AutoReconnectPlugin())
 
     # config changes
     config.subscribe.subscribe_for_changes(SUBSCRIPTION_HANDLER.subscription_cfg_changed)
@@ -50,8 +52,8 @@ class MqttConnection(BaseConnection):
 
 class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
 
-    def __init__(self, name: str, priority, task_name: str):
-        super().__init__(name, priority, self._mqtt_wrap_task, task_name)
+    def __init__(self, task_name: str, priority: int):
+        super().__init__(self._mqtt_wrap_task, task_name, priority=priority)
 
     async def mqtt_task(self):
         raise NotImplementedError()

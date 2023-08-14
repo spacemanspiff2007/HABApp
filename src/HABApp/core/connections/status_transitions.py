@@ -1,31 +1,6 @@
 from __future__ import annotations
 
-from asyncio import sleep
-from time import monotonic
-
 from ._definitions import ConnectionStatus
-
-
-class WaitBetweenConnects:
-    wait_max = 300
-
-    def __init__(self):
-        self.wait_time: int = 0
-        self.wait_finish: float = 0.0
-
-    async def wait(self):
-        # If we are connected for a long time we try the immediate reconnect
-        if monotonic() - self.wait_finish > self.wait_max + 60:
-            wait = 0
-        else:
-            wait = self.wait_time
-            wait = wait * 2 if wait <= 16 else wait * 1.5
-            wait = max(1, min(wait, self.wait_max))
-
-        self.wait_time = wait
-        await sleep(self.wait_time)
-
-        self.wait_finish = monotonic()
 
 
 class StatusTransitions:

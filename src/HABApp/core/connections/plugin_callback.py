@@ -61,4 +61,4 @@ class PluginCallbackHandler:
         if status is ConnectionStatus.DISCONNECTED or status is ConnectionStatus.OFFLINE:
             is_handler = not is_handler
 
-        return int(is_handler), self.priority, int(not self.coro.__name__.startswith('_'))
+        return int(is_handler), self.priority

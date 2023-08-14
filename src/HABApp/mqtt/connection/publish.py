@@ -11,7 +11,7 @@ from HABApp.mqtt.connection.connection import MqttPlugin
 
 class PublishHandler(MqttPlugin):
     def __init__(self):
-        super().__init__('publish', 8, 'MqttPublish')
+        super().__init__(task_name='MqttPublish', priority=8)
 
     async def mqtt_task(self):
         connection = self.plugin_connection
@@ -36,10 +36,14 @@ class PublishHandler(MqttPlugin):
 
     async def on_connected(self):
         global QUEUE
+
         QUEUE = Queue()
+        await super().on_connected()
 
     async def on_disconnected(self):
         global QUEUE
+
+        await super().on_disconnected()
         QUEUE = None
 
 

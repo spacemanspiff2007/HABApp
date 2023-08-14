@@ -19,7 +19,7 @@ SUBSCRIBE_CFG = CONFIG.mqtt.subscribe
 
 class SubscriptionHandler(MqttPlugin):
     def __init__(self):
-        super().__init__('subscribe', 9, 'MqttSubscribe')
+        super().__init__(priority=9, task_name='MqttSubscribe')
         self.runtime_subs: dict[str, int] = {}
         self.subscribed_to: dict[str, int] = {}
 
@@ -127,10 +127,12 @@ class SubscriptionHandler(MqttPlugin):
         log.debug('Subscriptions successfully updated')
 
     async def on_connected(self):
+        await super().on_connected()
         self.sub_task.start_if_not_running()
         await self.sub_task.wait()
 
     async def on_disconnected(self):
+        await super().on_disconnected()
         await self.sub_task.cancel_wait()
 
         # without errors, it's a graceful disconnect

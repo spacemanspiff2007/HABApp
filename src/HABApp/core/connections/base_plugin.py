@@ -2,54 +2,40 @@ from __future__ import annotations
 
 from typing import Final, TYPE_CHECKING, Generic, TypeVar, Callable, Awaitable, Any
 
-from ..const.topics import TOPIC_CONNECTIONS
-from ..internals import uses_post_event
-from ..lib import SingleTask
-from ..events.habapp_events import HABAppConnectionStateEvent
+from HABApp.core.lib import SingleTask
 
 if TYPE_CHECKING:
     from .plugin_callback import PluginCallbackHandler
     from .base_connection import BaseConnection
 
-
 T = TypeVar('T', bound='BaseConnection')
 
 
 class BaseConnectionPlugin(Generic[T]):
-    def __init__(self, name: str, priority: int = 0):
+    def __init__(self, name: str | None = None, priority: int = 0):
         super().__init__()
+        if name is None:
+            name = self.__class__.__name__
+            if name[-6:].lower() == 'plugin':
+                name = name[:-6]
+
         self.plugin_connection: T = None
         self.plugin_name: Final = name
         self.plugin_priority: int = priority
         self.plugin_callbacks: dict[str, PluginCallbackHandler] = {}
 
-
-post_event = uses_post_event()
-
-
-class ConnectionEventMixin:
-    def __init__(self):
-        self.__last_report = None
-
-    def __post_event(self, connection: BaseConnection):
-        if (status := connection.status.status.value) != self.__last_report:
-            self.__last_report = status
-            post_event(TOPIC_CONNECTIONS, HABAppConnectionStateEvent(connection.name, status))
-
-    async def _on_online__event(self, connection: 'BaseConnection'):
-        self.__post_event(connection)
-
-    async def _on_disconnected__event(self, connection: 'BaseConnection'):
-        self.__post_event(connection)
+    def application_shutdown(self):
+        pass
 
 
 class BaseConnectionPluginConnectedTask(BaseConnectionPlugin[T]):
-    def __init__(self, name: str, priority: int, task_coro: Callable[[], Awaitable[Any]], task_name: str):
+    def __init__(self, task_coro: Callable[[], Awaitable[Any]],
+                 task_name: str, name: str | None = None, priority: int = 0):
         super().__init__(name, priority)
         self.task: Final = SingleTask(task_coro, name=task_name)
 
-    async def _on_connected__task(self):
+    async def on_connected(self):
         self.task.start()
 
-    async def _on_disconnected__task(self):
+    async def on_disconnected(self):
         await self.task.cancel_wait()

@@ -3,9 +3,9 @@ from __future__ import annotations
 from aiomqtt import Client, TLSParameters
 
 from HABApp.config import CONFIG
-from HABApp.core.connections import BaseConnectionPlugin, ConnectionEventMixin
+from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
-from HABApp.core.connections.status_transitions import WaitBetweenConnects
+
 from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
 from HABApp.mqtt.connection.connection import CONTEXT_TYPE, MqttConnection
 
@@ -14,10 +14,9 @@ get_item = uses_get_item()
 Items = uses_item_registry()
 
 
-class ConnectionHandler(BaseConnectionPlugin[MqttConnection], ConnectionEventMixin):
+class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
     def __init__(self):
-        super().__init__(CONNECTION_HANDLER_NAME, 10)
-        self.waiter = WaitBetweenConnects()
+        super().__init__(name=CONNECTION_HANDLER_NAME, priority=0)
 
     async def on_setup(self, connection: MqttConnection):
         log = connection.log
@@ -75,11 +74,6 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection], ConnectionEventMix
 
         connection.log.info('Disconnected')
         await context.__aexit__(None, None, None)
-
-    async def on_offline(self, connection: MqttConnection):
-        if connection.has_errors:
-            await self.waiter.wait()
-            connection.clear_error()
 
 
 CONNECTION_HANDLER = ConnectionHandler()
