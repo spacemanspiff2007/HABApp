@@ -1,21 +1,23 @@
-import datetime
-import typing
+from datetime import datetime
+from typing import Optional, Union
 
-OPTIONAL_DT = typing.Optional[datetime.datetime]
+from HABApp.openhab.definitions.rest import ItemHistoryResp
+
+OPTIONAL_DT = Optional[datetime]
 
 
 class OpenhabPersistenceData:
 
     def __init__(self):
-        self.data: typing.Dict[float, typing.Union[int, float, str]] = {}
+        self.data: dict[float, Union[int, float, str]] = {}
 
     @classmethod
-    def from_dict(cls, data) -> 'OpenhabPersistenceData':
+    def from_resp(cls, data: ItemHistoryResp) -> 'OpenhabPersistenceData':
         c = cls()
-        for entry in data['data']:
+        for entry in data.data:
             # calc as timestamp
-            time = entry['time'] / 1000
-            state = entry['state']
+            time = entry.time / 1000
+            state = entry.state
             if '.' in state:
                 try:
                     state = float(state)
@@ -46,13 +48,13 @@ class OpenhabPersistenceData:
             ret[ts] = val
         return ret
 
-    def min(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> typing.Optional[float]:
+    def min(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> Optional[float]:
         return min(self.get_data(start_date, end_date).values(), default=None)
 
-    def max(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> typing.Optional[float]:
+    def max(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> Optional[float]:
         return max(self.get_data(start_date, end_date).values(), default=None)
 
-    def average(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> typing.Optional[float]:
+    def average(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> Optional[float]:
         values = list(self.get_data(start_date, end_date).values())
         ct = len(values)
         if ct == 0:

@@ -16,7 +16,7 @@ class OpenhabDisconnectedError(HABAppOpenhabError):
     pass
 
 
-class ExpectedSuccessFromOpenhab(HABAppOpenhabError):
+class OpenhabCredentialsInvalidError(HABAppOpenhabError):
     pass
 
 
@@ -78,3 +78,29 @@ class MapTransformationError(HABAppOpenhabError):
 
 class MapTransformationNotFound(HABAppOpenhabError):
     pass
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Persistence errors
+# ----------------------------------------------------------------------------------------------------------------------
+class PersistenceRequestError(HABAppOpenhabError):
+    pass
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Link errors
+# ----------------------------------------------------------------------------------------------------------------------
+class LinkRequestError(HABAppOpenhabError):
+    pass
+
+
+class LinkNotFoundError(HABAppOpenhabError):
+    @classmethod
+    def from_names(cls, item: str, channel: str):
+        return cls(f'Link {item:s} <-> {channel:s} not found!')
+
+
+class LinkNotEditableError(HABAppOpenhabError):
+    @classmethod
+    def from_names(cls, item: str, channel: str):
+        return cls(f'Link {item:s} <-> {channel:s} is not editable!')

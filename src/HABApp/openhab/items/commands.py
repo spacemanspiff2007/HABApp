@@ -1,5 +1,5 @@
 from HABApp.openhab.definitions import OnOffValue, UpDownValue
-from HABApp.openhab.interface import send_command
+from HABApp.openhab.interface_sync import send_command
 
 
 class OnOffCommand:

@@ -6,7 +6,7 @@ import HABApp.core
 import HABApp.openhab.events
 from HABApp.core.asyncio import run_coro_from_thread, run_func_from_async
 from HABApp.core.items import BaseValueItem
-from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
+# from HABApp.openhab.definitions.rest import OpenhabItemDefinition, OpenhabThingDefinition, ItemChannelLinkDefinition
 from .func_async import async_post_update, async_send_command, async_create_item, async_get_item, \
     async_get_thing, async_set_thing_enabled, \
     async_set_metadata, async_remove_metadata, async_get_channel_link, async_create_channel_link, \
@@ -102,7 +102,7 @@ def create_item(item_type: str, name: str, label="", category="",
     )
 
 
-def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False) -> OpenhabItemDefinition:
+def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False) -> 'OpenhabItemDefinition':
     """Return the complete openHAB item definition
 
     :param item_name: name of the item or item
@@ -120,7 +120,7 @@ def get_item(item_name: str, metadata: Optional[str] = None, all_metadata=False)
     return OpenhabItemDefinition.model_validate(data)
 
 
-def get_thing(thing_name: str) -> OpenhabThingDefinition:
+def get_thing(thing_name: str) -> 'OpenhabThingDefinition':
     """ Return the complete openHAB thing definition
 
     :param thing_name: name of the thing or the item
@@ -255,7 +255,7 @@ def set_persistence_data(item_name: str, persistence: Optional[str], time: datet
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+def get_channel_link(channel_uid: str, item_name: str) -> 'ItemChannelLinkDefinition':
     """ returns the ItemChannelLinkDefinition for a link between a (things) channel and an item
 
     :param channel_uid: uid of the (things) channel (usually something like AAAA:BBBBB:CCCCC:DDDD:0#SOME_NAME)

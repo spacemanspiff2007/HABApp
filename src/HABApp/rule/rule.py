@@ -68,7 +68,7 @@ class Rule(ContextProvidingObj):
         # interfaces
         self.async_http = interfaces.http
         self.mqtt: Final = HABApp.mqtt.interface_sync
-        self.oh: Final = HABApp.openhab.interface
+        self.oh: Final = HABApp.openhab.interface_sync
         self.openhab: Final = self.oh
 
     def on_rule_loaded(self):

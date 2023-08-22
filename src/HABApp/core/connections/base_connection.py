@@ -84,12 +84,15 @@ class BaseConnection:
     def is_silent_exception(self, e: Exception):
         return False
 
-    def process_exception(self, e: Exception, func: Callable | str):
+    def process_exception(self, e: Exception, func: Callable | str | None):
         self.set_error()
 
         if self.is_silent_exception(e):
-            name = func if isinstance(func, str) else func.__qualname__
-            self.log.debug(f'Error in {name:s}: {e}')
+            if func is None:
+                self.log.debug(f'Error: {e} ({e.__class__.__name__})')
+            else:
+                name = func if isinstance(func, str) else func.__qualname__
+                self.log.debug(f'Error in {name:s}: {e} ({e.__class__.__name__})')
         else:
             process_exception(func, e, self.log)
 

@@ -1,9 +1,9 @@
 from typing import Set, Dict
 
 import HABApp
-from HABApp.openhab.connection_handler.func_async import async_set_habapp_metadata, async_create_item, \
-    async_remove_item, async_create_channel_link, async_get_items, \
-    async_remove_channel_link, async_remove_metadata, async_set_metadata, async_get_item_with_habapp_meta
+from HABApp.openhab.connection.handler.func_async import async_set_habapp_metadata, async_create_item, \
+    async_remove_item, async_create_link, async_get_items, \
+    async_remove_link, async_remove_metadata, async_set_metadata, async_get_item_with_habapp_meta
 from HABApp.openhab.definitions.rest.habapp_data import HABAppThingPluginData, load_habapp_meta
 from ._log import log_item as log
 from .cfg_validator import UserItem
@@ -43,7 +43,7 @@ async def _remove_item(item: str, data: HABAppThingPluginData):
     # remove created links
     if data.created_link is not None:
         log.debug(f'Removing link from {data.created_link} to {item}')
-        await async_remove_channel_link(data.created_link, item)
+        await async_remove_link(item, data.created_link)
 
     # remove created metadata
     for ns in data.created_ns:
@@ -104,11 +104,11 @@ async def create_item(item: UserItem, test: bool) -> bool:
         # remove existing
         if habapp_data.created_link:
             log.debug(f'Removing link from {habapp_data.created_link} to {name}')
-            await async_remove_channel_link(habapp_data.created_link, name)
+            await async_remove_link(name, habapp_data.created_link)
 
         # create new link
         log.debug(f'Creating link from {item.link} to {item.name}')
-        if not await async_create_channel_link(item.link, name):
+        if not await async_create_link(name, item.link):
             log.error(f'Creating link from {item.link} to {name} failed!')
             await _remove_item(name, habapp_data)
             return False

@@ -4,7 +4,7 @@ from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from ..definitions import OpenClosedValue
 from ...core.const import MISSING
 from ..errors import SendCommandNotSupported
-from HABApp.openhab.interface import post_update
+from HABApp.openhab.interface_sync import post_update
 
 if TYPE_CHECKING:
     Optional = Optional

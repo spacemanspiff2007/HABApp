@@ -4,14 +4,9 @@ import warnings
 from typing import Any, Optional, Dict, List
 from urllib.parse import quote as quote_url
 
-from pydantic import TypeAdapter
-
 from HABApp.core.const.json import load_json
 from HABApp.core.items import BaseValueItem
 from HABApp.core.types import HSB, RGB
-from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition, LinkNotFoundError, OpenhabThingDefinition, \
-    OpenhabTransformationDefinition
-from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from HABApp.openhab.errors import ThingNotEditableError, \
     ThingNotFoundError, ItemNotEditableError, ItemNotFoundError, MetadataNotEditableError, TransformationsRequestError
 from .http_connection import delete, get, put, post, async_get_root, async_get_uuid, async_send_command, \
@@ -95,17 +90,14 @@ async def async_get_item(item: str, metadata: Optional[str] = None, all_metadata
         return data
 
 
-TA_LIST_THING_DEFS = TypeAdapter(List[OpenhabThingDefinition])
-
-
-async def async_get_things() -> List[OpenhabThingDefinition]:
+async def async_get_things() -> List['OpenhabThingDefinition']:
     resp = await get('/rest/things')
     data = await resp.json(loads=load_json, encoding='utf-8')
 
     return TA_LIST_THING_DEFS.validate_python(data)
 
 
-async def async_get_thing(uid: str) -> OpenhabThingDefinition:
+async def async_get_thing(uid: str) -> 'OpenhabThingDefinition':
     ret = await get(f'/rest/things/{uid:s}')
     if ret.status >= 300:
         raise ThingNotFoundError.from_uid(uid)
@@ -113,10 +105,7 @@ async def async_get_thing(uid: str) -> OpenhabThingDefinition:
     return OpenhabThingDefinition.model_validate(await ret.json(loads=load_json, encoding='utf-8'))
 
 
-TA_LIST_TRANSFORM_DEFS = TypeAdapter(List[OpenhabTransformationDefinition])
-
-
-async def async_get_transformations() -> List[OpenhabTransformationDefinition]:
+async def async_get_transformations() -> List['OpenhabTransformationDefinition']:
     ret = await get('/rest/transformations')
     if ret.status >= 300:
         raise TransformationsRequestError()
@@ -298,7 +287,7 @@ async def async_get_channel_link_mode_auto() -> bool:
         return await ret.json(loads=load_json, encoding='utf-8')
 
 
-async def async_get_channel_link(channel_uid: str, item_name: str) -> ItemChannelLinkDefinition:
+async def async_get_channel_link(channel_uid: str, item_name: str) -> 'ItemChannelLinkDefinition':
     ret = await get(__get_link_url(channel_uid, item_name), log_404=False)
     if ret.status == 404:
         raise LinkNotFoundError(f'Link {item_name} -> {channel_uid} not found!')
@@ -328,21 +317,3 @@ async def async_create_channel_link(
     if ret is None:
         return False
     return ret.status == 200
-
-
-# ---------------------------------------------------------------------------------------------------------------------
-# Funcs for handling HABApp Metadata
-# ---------------------------------------------------------------------------------------------------------------------
-async def async_remove_habapp_metadata(item: str):
-    return await async_remove_metadata(item, 'HABApp')
-
-
-async def async_set_habapp_metadata(item: str, obj):
-    val, cfg = get_api_vals(obj)
-    return await async_set_metadata(item, 'HABApp', val, cfg)
-
-
-async def async_get_item_with_habapp_meta(item: str) -> dict:
-    data = await async_get_item(item, all_metadata=True)
-    data['groups'] = data.pop('groupNames')
-    return load_habapp_meta(data)

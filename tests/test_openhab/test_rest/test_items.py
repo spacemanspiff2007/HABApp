@@ -1,4 +1,8 @@
-from HABApp.openhab.definitions.rest.items import OpenhabItemDefinition
+from json import dumps
+
+from msgspec.json import decode
+
+from HABApp.openhab.definitions.rest.items import ItemResp
 
 
 def test_item_1():
@@ -26,7 +30,7 @@ def test_item_1():
         "tags": ["Tag1"],
         "groupNames": ["Group1", "Group2"]
     }
-    item = OpenhabItemDefinition.model_validate(_in)
+    item = decode(dumps(_in), type=ItemResp)
 
     assert item.name == 'Item1Name'
     assert item.label == 'Item1Label'
@@ -84,8 +88,8 @@ def test_group_item():
             "ALL_TOPICS"
         ]
     }
-    item = OpenhabItemDefinition.model_validate(_in)
+    item = decode(dumps(_in), type=ItemResp)
 
     assert item.name == 'SwitchGroup'
-    assert isinstance(item.members[0], OpenhabItemDefinition)
+    assert isinstance(item.members[0], ItemResp)
     assert item.members[0].name == 'christmasTree'

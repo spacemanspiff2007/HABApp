@@ -15,7 +15,7 @@ from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.wrapper import process_exception
 import HABApp.mqtt.connection as mqtt_connection
-from HABApp.openhab import connection_logic as openhab_connection
+from HABApp.openhab import connection as openhab_connection
 from HABApp.runtime import shutdown
 
 

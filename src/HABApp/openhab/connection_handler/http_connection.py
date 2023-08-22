@@ -18,7 +18,7 @@ from HABApp.core.asyncio import async_context
 from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.logger import log_info, log_warning
 from HABApp.core.wrapper import process_exception, ignore_exception
-from HABApp.openhab.errors import OpenhabDisconnectedError, ExpectedSuccessFromOpenhab
+from HABApp.openhab.errors import OpenhabDisconnectedError
 from .http_connection_waiter import WaitBetweenConnects
 from ...core.const.log import TOPIC_EVENTS
 from ...core.lib import SingleTask
@@ -220,7 +220,7 @@ async def setup_connection():
         timeout=aiohttp.ClientTimeout(total=None),
         json_serialize=dump_json,
         auth=aiohttp.BasicAuth(user, password),
-        read_bufsize=int(config.connection.buffer),
+        read_bufsize=int(config.connection.buffer)
     )
 
     TASK_TRY_CONNECT.start()
@@ -497,5 +497,4 @@ HABApp.config.CONFIG.subscribe_for_changes(__load_cfg)
 
 
 # import it here otherwise we get cyclic imports
-from HABApp.openhab.connection_handler.sse_handler import on_sse_event  # noqa: E402
 from HABApp.openhab.connection_handler.func_async import convert_to_oh_type  # noqa: E402

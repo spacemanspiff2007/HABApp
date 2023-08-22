@@ -3,6 +3,8 @@ from typing import List, Optional, ClassVar
 
 from pydantic import BaseModel
 
+from HABApp.openhab.definitions.rest import ItemResp
+
 
 class HABAppThingPluginData(BaseModel):
     obj_name: ClassVar[str] = 'ThingPlugin'
@@ -15,8 +17,8 @@ class HABAppThingPluginData(BaseModel):
 cls_names = {k.obj_name: k for k in (HABAppThingPluginData, )}
 
 
-def load_habapp_meta(data: dict) -> dict:
-    meta = data.setdefault('metadata', {})
+def load_habapp_meta(data: ItemResp) -> ItemResp:
+    meta = data.metadata
     if meta.setdefault('HABApp', None) is None:
         return data
 

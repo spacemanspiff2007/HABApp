@@ -1,48 +1,59 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict
+from typing import Optional, Any
 
-from pydantic import BaseModel, Field
+from msgspec import Struct, field
 
 from HABApp.openhab.definitions import ThingStatusEnum, ThingStatusDetailEnum
 
 
-class OpenhabThingChannelDefinition(BaseModel):
+class ChannelResp(Struct, kw_only=True):
+    # ChannelDTO
+    # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/dto/ChannelDTO.java
+
     uid: str
     id: str
-    channel_type: str = Field(..., alias='channelTypeUID')
+    channel_type: str = field(name='channelTypeUID')
+    item_type: Optional[str] = field(default=None, name='itemType')
     kind: str
-
     label: str = ''
     description: str = ''
-    item_type: Optional[str] = Field(None, alias='itemType')
+    default_tags: list[str] = field(default=list, name='defaultTags')
+    properties: dict[str, Any] = {}
+    configuration: dict[str, Any] = {}
+    auto_update_policy: str = field(default='', name='autoUpdatePolicy')
 
-    linked_items: Tuple[str, ...] = Field(default_factory=tuple, alias='linkedItems')
-    default_tags: Tuple[str, ...] = Field(default_factory=tuple, alias='defaultTags')
-
-    properties: Dict[str, Any] = Field(default_factory=dict)
-    configuration: Dict[str, Any] = Field(default_factory=dict)
+    # EnrichedChannelDTO
+    # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/thing/EnrichedChannelDTO.java
+    linked_items: list[str] = field(name='linkedItems')
 
 
-class OpenhabThingStatus(BaseModel):
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/ThingStatusInfo.java
+class ThingStatusResp(Struct):
     status: ThingStatusEnum
-    detail: ThingStatusDetailEnum = Field(..., alias='statusDetail')
+    detail: ThingStatusDetailEnum = field(name='statusDetail')
     description: Optional[str] = None
 
 
-class OpenhabThingDefinition(BaseModel):
-    # These are mandatory fields
-    editable: bool
-    status: OpenhabThingStatus = Field(..., alias='statusInfo')
-    thing_type: str = Field(..., alias='thingTypeUID')
-    uid: str = Field(..., alias='UID')
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/firmware/dto/FirmwareStatusDTO.java
+class FirmwareStatusResp(Struct):
+    status: str
+    updatable_version: Optional[str] = field(default=None, name='updatableVersion')
 
-    # These fields are optional, but we want to have a value set
-    # because it simplifies the thing handling a lot
-    bridge_uid: Optional[str] = Field(None, alias='bridgeUID')
+
+class ThingResp(Struct, kw_only=True):
+    # AbstractThingDTO
+    # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/dto/AbstractThingDTO.java
     label: str = ''
+    bridge_uid: Optional[str] = field(default=None, name='bridgeUID')
+    configuration: Dict[str, Any] = {}
+    properties: Dict[str, str] = {}
+    uid: str = field(name='UID')
+    thing_type: str = field(name='thingTypeUID')
     location: str = ''
 
-    # Containers should always have a default, so it's easy to iterate over them
-    channels: Tuple[OpenhabThingChannelDefinition, ...] = Field(default_factory=tuple)
-    configuration: Dict[str, Any] = Field(default_factory=dict)
-    firmwareStatus: Dict[str, str] = Field(default_factory=dict)
-    properties: Dict[str, Any] = Field(default_factory=dict)
+    # EnrichedThingDTO
+    # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/thing/EnrichedThingDTO.java
+    channels: list[ChannelResp] = []
+    status: ThingStatusResp = field(name='statusInfo')
+    firmware_status: Optional[FirmwareStatusResp] = None
+    editable: bool

@@ -17,7 +17,6 @@ from HABApp.openhab.events import GroupStateChangedEvent, GroupStateUpdatedEvent
 from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry, remove_thing_from_registry, \
     add_thing_to_registry
 from HABApp.openhab.map_events import get_event
-from HABApp.openhab.map_items import map_item
 
 log = http_connection.log
 
@@ -95,16 +94,22 @@ def on_sse_event(event_dict: dict, oh_3: bool):
 
 
 async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
-    name = event.name
+    try:
+        from HABApp.openhab.map_items import map_item
 
-    # Since metadata is not part of the event we have to request it
-    cfg = await HABApp.openhab.interface_async.async_get_item(name, metadata='.+')
+        name = event.name
 
-    new_item = map_item(name, event.type, None, event.label, event.tags, event.groups, metadata=cfg.get('metadata'))
-    if new_item is None:
+        # Since metadata is not part of the event we have to request it
+        cfg = await HABApp.openhab.interface_async.async_get_item(name)
+
+        new_item = map_item(name, event.type, None, event.label, event.tags, event.groups, metadata=cfg.metadata)
+        if new_item is None:
+            return None
+
+        add_to_registry(new_item)
+        # Send Event to Event Bus
+        post_event(TOPIC_ITEMS, event)
         return None
-
-    add_to_registry(new_item)
-    # Send Event to Event Bus
-    post_event(TOPIC_ITEMS, event)
-    return None
+    except Exception as e:
+        process_exception(func=item_event, e=e)
+        return None

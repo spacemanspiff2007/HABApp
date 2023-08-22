@@ -1,55 +1,65 @@
-from typing import Any, Optional, Union, List, Dict
+from typing import Optional, Union, List, Any
 
-from pydantic import BaseModel, Field
+from msgspec import Struct, field
 
 
-class StateOptionDefinition(BaseModel):
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/types/StateOption.java
+class StateOptionResp(Struct):
     value: str
     label: Optional[str] = None
 
 
-class CommandOptionDefinition(BaseModel):
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/types/StateDescription.java
+class StateDescriptionResp(Struct, kw_only=True):
+    minimum: Union[int, float, None] = None
+    maximum: Union[int, float, None] = None
+    step: Union[int, float, None] = None
+    pattern: Optional[str] = None
+    read_only: bool = field(name='readOnly')
+    options: list[StateOptionResp]
+
+
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/types/CommandOption.java
+class CommandOptionResp(Struct):
     command: str
     label: Optional[str] = None
 
 
-class CommandDescriptionDefinition(BaseModel):
-    command_options: Optional[List[CommandOptionDefinition]] = Field(None, alias='commandOptions')
-
-
-class StateDescriptionDefinition(BaseModel):
-    minimum: Optional[Union[int, float]] = None
-    maximum: Optional[Union[int, float]] = None
-    step: Optional[Union[int, float]] = None
-    pattern: Optional[str] = None
-    read_only: Optional[bool] = Field(None, alias='readOnly')
-    options: Optional[List[StateOptionDefinition]] = None
-
-
-class GroupFunctionDefinition(BaseModel):
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/items/dto/GroupFunctionDTO.java
+class GroupFunctionResp(Struct):
     name: str
-    params: Optional[List[str]] = None
+    params: List[str] = []
 
 
-class OpenhabItemDefinition(BaseModel):
+class ItemResp(Struct, kw_only=True):
+    # ItemDTO
+    # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/items/dto/ItemDTO.java
     type: str
     name: str
-    link: str
-    state: Any
     label: Optional[str] = None
     category: Optional[str] = None
-    tags: List[str] = Field(default_factory=list)
-    groups: List[str] = Field(default_factory=list, alias='groupNames')
-    members: List['OpenhabItemDefinition'] = []
-    transformed_state: Optional[str] = Field(None, alias='transformedState')
-    state_description: Optional[StateDescriptionDefinition] = Field(None, alias='stateDescription')
-    command_description: Optional[CommandDescriptionDefinition] = Field(None, alias='commandDescription')
-    metadata: Dict[str, Any] = {}
+    tags: list[str]
+    groups: list[str] = field(name='groupNames')
+
+    # EnrichedItemDTO
+    # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/item/EnrichedItemDTO.java
+    link: Optional[str] = None
+    state: str
+    transformed_state: Optional[str] = field(default=None, name='transformedState')
+    state_description: Optional[StateDescriptionResp] = None
+    unit: Optional[str] = field(default=None, name='unitSymbol')
+    command_description: List[CommandOptionResp] = []
+    metadata: dict[str, Any] = {}
     editable: bool = True
 
-    # Group only fields
-    group_type: Optional[str] = Field(None, alias='groupType')
-    group_function: Optional[GroupFunctionDefinition] = Field(None, alias='function')
+    # EnrichedGroupItemDTO
+    # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/item/EnrichedGroupItemDTO.java
+    members: 'list[ItemResp]' = []
+    group_type: Optional[str] = field(default=None, name='groupType')
+    group_function: Optional[GroupFunctionResp] = field(default=None, name='function')
 
 
-OpenhabItemDefinition.model_rebuild()
+class ShortItemResp(Struct):
+    type: str
+    name: str
+    state: str

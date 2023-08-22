@@ -1,7 +1,7 @@
 from HABApp.core.events import EventFilter
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS
 from HABApp.openhab.events import ItemUpdatedEvent
-from HABApp.openhab.interface import create_item
+from HABApp.openhab.interface_sync import create_item
 from HABApp.openhab.items import StringItem, NumberItem, DatetimeItem
 from HABAppTests import TestBaseRule, OpenhabTmpItem, EventWaiter
 

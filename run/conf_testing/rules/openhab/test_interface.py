@@ -120,13 +120,7 @@ class TestOpenhabInterface(TestBaseRule):
 
     def test_openhab_item_not_found(self):
         test_item = get_random_name('String')
-        try:
-            self.openhab.get_item(test_item)
-        except Exception as e:
-            if isinstance(e, HABApp.openhab.errors.ItemNotFoundError):
-                return None
-
-        return 'Exception not raised!'
+        assert self.openhab.get_item(test_item) is None
 
     def test_item_definition(self):
         self.openhab.get_item('TestGroupAVG')

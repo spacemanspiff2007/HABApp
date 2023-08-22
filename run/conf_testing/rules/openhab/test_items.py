@@ -59,12 +59,12 @@ class OpenhabItems(TestBaseRule):
     def test_api(self):
         self.openhab.get_item(self.item_string.name)
 
-        self.openhab.get_item(self.item_number.name, all_metadata=True)
-        self.openhab.get_item(self.item_string.name, all_metadata=True)
-        self.openhab.get_item(self.item_switch.name, all_metadata=True)
+        self.openhab.get_item(self.item_number.name)
+        self.openhab.get_item(self.item_string.name)
+        self.openhab.get_item(self.item_switch.name)
 
-        self.openhab.get_item(self.item_group.name, all_metadata=True)
-        asyncio.run_coroutine_threadsafe(async_get_items(all_metadata=True), loop).result()
+        self.openhab.get_item(self.item_group.name)
+        asyncio.run_coroutine_threadsafe(async_get_items(), loop).result()
 
     @OpenhabTmpItem.use('String', arg_name='oh_item')
     def test_tags(self, oh_item: OpenhabTmpItem):

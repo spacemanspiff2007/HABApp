@@ -1,19 +1,20 @@
-from typing import Dict
+from __future__ import annotations
 
-from HABApp.core.wrapper import ignore_exception, ExceptionToHABApp
-# noinspection PyProtectedMember
+from HABApp.core.connections import BaseConnectionPlugin
+from HABApp.core.internals import uses_item_registry
+from HABApp.core.wrapper import ExceptionToHABApp
+from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
+from HABApp.openhab.connection.handler.func_async import async_get_transformations
 from HABApp.openhab.transformations._map import MAP_REGISTRY
 from HABApp.openhab.transformations.base import log, TransformationRegistryBase
-from ._plugin import OnConnectPlugin
-from ..connection_handler.func_async import async_get_transformations
-from ..connection_handler.http_connection import OH_3
+
+Items = uses_item_registry()
 
 
-class LoadTransformations(OnConnectPlugin):
+class LoadTransformationsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    @ignore_exception
-    async def on_connect_function(self):
-        if OH_3:
+    async def on_connected(self, context: OpenhabContext):
+        if context.is_oh3:
             log.info('Transformations are not supported on openHAB 3')
             return None
 
@@ -24,7 +25,7 @@ class LoadTransformations(OnConnectPlugin):
         transformation_count = len(objs)
         log.debug(f'Got response with {transformation_count} transformation{"" if transformation_count == 1 else ""}')
 
-        registries: Dict[str, TransformationRegistryBase] = {
+        registries: dict[str, TransformationRegistryBase] = {
             MAP_REGISTRY.name: MAP_REGISTRY
         }
 
@@ -42,6 +43,3 @@ class LoadTransformations(OnConnectPlugin):
             log.info('Transformations:')
             for name, reg in registries.items():
                 log.info(f'  {name.title()}: {", ".join(reg.available())}')
-
-
-PLUGIN_LOAD_TRANSFORMATIONS = LoadTransformations.create_plugin()

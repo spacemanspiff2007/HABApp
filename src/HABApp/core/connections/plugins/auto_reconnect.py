@@ -1,5 +1,4 @@
 from asyncio import sleep, Task, create_task, CancelledError
-from time import monotonic
 from typing import Optional
 
 from HABApp.core.connections import BaseConnection, BaseConnectionPlugin
@@ -10,8 +9,6 @@ class WaitBetweenConnects:
 
     def __init__(self):
         self.wait_time: int = 0
-        self.wait_finish: float = 0.0
-
         self.task: Optional[Task] = None
 
     def reset_wait(self):
@@ -31,8 +28,6 @@ class WaitBetweenConnects:
             pass
         finally:
             self.task = None
-
-        self.wait_finish = monotonic()
 
     def cancel(self):
         if task := self.task:

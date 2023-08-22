@@ -1,14 +1,12 @@
-from typing import Dict
+from msgspec import Struct
 
-from pydantic import BaseModel
 
 # Documentation of TransformationDTO
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.transform/src/main/java/org/openhab/core/io/rest/transform/TransformationDTO.java
 
-
-class OpenhabTransformationDefinition(BaseModel):
+class TransformationResp(Struct):
     uid: str
     label: str
     type: str
-    configuration: Dict[str, str]
+    configuration: dict[str, str]
     editable: bool
