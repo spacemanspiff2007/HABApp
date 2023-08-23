@@ -16,8 +16,8 @@ from HABApp.openhab.connection.handler import convert_to_oh_type, post, put
 
 class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None, priority: int = 0):
-        super().__init__(name, priority)
+    def __init__(self, name: str | None = None):
+        super().__init__(name)
 
         self.add: bool = False
 
@@ -104,7 +104,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         self.queue.put_nowait((item, state, True))
 
 
-OUTGOING_PLUGIN: Final = OutgoingCommandsPlugin(priority=90)
+OUTGOING_PLUGIN: Final = OutgoingCommandsPlugin()
 async_post_update: Final = OUTGOING_PLUGIN.async_post_update
 async_send_command: Final = OUTGOING_PLUGIN.async_send_command
 

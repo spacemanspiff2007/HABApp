@@ -42,13 +42,6 @@ handlers:
     formatter: HABApp_REST
     level: DEBUG
 
-  BufferEventFile:
-    class: logging.handlers.MemoryHandler
-    capacity: 10
-    formatter: HABApp_format
-    target: EventFile
-    level: DEBUG
-
 
 loggers:
   HABApp:
@@ -72,7 +65,7 @@ loggers:
   HABApp.EventBus:
     level: DEBUG
     handlers:
-      - BufferEventFile
+      - EventFile
     propagate: False
 
   HABApp.Tests:

@@ -11,7 +11,7 @@ from HABApp.mqtt.connection.connection import MqttPlugin
 
 class PublishHandler(MqttPlugin):
     def __init__(self):
-        super().__init__(task_name='MqttPublish', priority=8)
+        super().__init__(task_name='MqttPublish')
 
     async def mqtt_task(self):
         connection = self.plugin_connection

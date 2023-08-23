@@ -9,7 +9,6 @@ from ..interface_async import async_get_things
 
 class ThingOverview(OnConnectPlugin):
 
-
     def __init__(self):
         super().__init__()
         self.run = False

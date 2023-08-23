@@ -23,8 +23,6 @@ async def _start_level_reached() -> tuple[bool, None | int]:
 
 
 class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
-    def __init__(self):
-        super().__init__(priority=100)
 
     async def on_connected(self, context: OpenhabContext, connection: OpenhabConnection):
         level_reached, level = await _start_level_reached()

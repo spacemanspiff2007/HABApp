@@ -19,7 +19,7 @@ SUBSCRIBE_CFG = CONFIG.mqtt.subscribe
 
 class SubscriptionHandler(MqttPlugin):
     def __init__(self):
-        super().__init__(priority=9, task_name='MqttSubscribe')
+        super().__init__(task_name='MqttSubscribe')
         self.runtime_subs: dict[str, int] = {}
         self.subscribed_to: dict[str, int] = {}
 

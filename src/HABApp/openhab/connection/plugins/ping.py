@@ -21,8 +21,8 @@ EventBus = uses_event_bus()
 
 class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None, priority: int = 0):
-        super().__init__(name, priority)
+    def __init__(self, name: str | None = None):
+        super().__init__(name)
         self.task: Final = SingleTask(self.ping_worker, 'OhQueueWorker')
 
         self.sent_value: float | None = None

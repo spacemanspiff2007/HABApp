@@ -30,9 +30,10 @@ def setup():
 
     connection = Connections.add(MqttConnection())
 
-    connection.register_plugin(CONNECTION_HANDLER)
-    connection.register_plugin(SUBSCRIPTION_HANDLER)
-    connection.register_plugin(PUBLISH_HANDLER)
+    connection.register_plugin(CONNECTION_HANDLER, 0)
+    connection.register_plugin(SUBSCRIPTION_HANDLER, 10)
+    connection.register_plugin(PUBLISH_HANDLER, 20)
+
     connection.register_plugin(ConnectionStateToEventBusPlugin())
     connection.register_plugin(AutoReconnectPlugin())
 
@@ -52,8 +53,8 @@ class MqttConnection(BaseConnection):
 
 class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
 
-    def __init__(self, task_name: str, priority: int):
-        super().__init__(self._mqtt_wrap_task, task_name, priority=priority)
+    def __init__(self, task_name: str):
+        super().__init__(self._mqtt_wrap_task, task_name)
 
     async def mqtt_task(self):
         raise NotImplementedError()

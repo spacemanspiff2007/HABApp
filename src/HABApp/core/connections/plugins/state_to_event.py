@@ -10,8 +10,10 @@ post_event = uses_post_event()
 
 
 class ConnectionStateToEventBusPlugin(BaseConnectionPlugin):
-    def __init__(self):
-        super().__init__(priority=-100_000)
+    _DEFAULT_PRIORITY = 100_000
+
+    def __init__(self, name: str | None = None):
+        super().__init__(name)
         self.__last_report = None
 
     def __post_event(self, connection: BaseConnection):

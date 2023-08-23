@@ -48,16 +48,16 @@ class SingleTask:
         except CancelledError:
             pass
 
-    def start(self, /, run_wrapped=True) -> Task:
+    def start(self) -> Task:
         self.cancel()
-        self.task = task = loop.create_task(self._task_wrap() if run_wrapped else self.coro(), name=self.name)
+        self.task = task = loop.create_task(self._task_wrap(), name=self.name)
         return task
 
-    def start_if_not_running(self, /, run_wrapped=True) -> Task:
+    def start_if_not_running(self) -> Task:
         if (task := self.task) is not None:
             return task
 
-        self.task = task = loop.create_task(self._task_wrap() if run_wrapped else self.coro(), name=self.name)
+        self.task = task = loop.create_task(self._task_wrap(), name=self.name)
         return task
 
     async def _task_wrap(self):

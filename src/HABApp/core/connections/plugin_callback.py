@@ -1,14 +1,38 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from inspect import signature, iscoroutinefunction
+from inspect import signature, iscoroutinefunction, getmembers
 from typing import Awaitable, Callable, Any, TYPE_CHECKING
 
-from ._definitions import ConnectionStatus, CONNECTION_HANDLER_NAME
+from ._definitions import ConnectionStatus
 
 if TYPE_CHECKING:
     from .base_connection import BaseConnection
     from .base_plugin import BaseConnectionPlugin
+
+
+def get_plugin_callbacks(obj: BaseConnectionPlugin) -> list[tuple[ConnectionStatus, PluginCallbackHandler]]:
+    name_to_status = {obj.lower(): obj for obj in ConnectionStatus}
+    name_regex = re.compile(f'on_({"|".join(name_to_status)})')
+
+    ret = []
+    for m_name, member in getmembers(obj, predicate=lambda x: callable(x)):
+        if not m_name.lower().startswith('on_'):
+            continue
+
+        if m_name in ('on_application_shutdown', ):
+            continue
+
+        if (m := name_regex.fullmatch(m_name)) is None:
+            raise ValueError(f'Invalid name: {m_name} in {obj.plugin_name}')
+
+        status = name_to_status[m.group(1)]
+        cb = PluginCallbackHandler.create(obj, member)
+
+        ret.append((status, cb))
+
+    return ret
 
 
 @dataclass
@@ -16,7 +40,6 @@ class PluginCallbackHandler:
     plugin: BaseConnectionPlugin
     coro: Callable[[...], Awaitable]
     kwargs: tuple[str, ...]
-    priority: int
 
     async def run(self, connection: BaseConnection, context: Any):
         kwargs = {}
@@ -45,20 +68,4 @@ class PluginCallbackHandler:
 
     @classmethod
     def create(cls, plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]):
-        return cls(plugin, coro, cls._get_coro_kwargs(plugin, coro), plugin.plugin_priority)
-
-    # sorted uses __lt__
-    def __lt__(self, other):
-        if not isinstance(other, PluginCallbackHandler):
-            return NotImplemented
-        return self.priority < other.priority
-
-    def sort_func(self, status: ConnectionStatus) -> tuple[int, int]:
-        is_handler = self.plugin.plugin_name == CONNECTION_HANDLER_NAME
-
-        # Handler runs first for every step, except disconnect & offline - there it runs last.
-        # That way it's possible to do some cleanup in the plugins when we gracefully disconnect
-        if status is ConnectionStatus.DISCONNECTED or status is ConnectionStatus.OFFLINE:
-            is_handler = not is_handler
-
-        return int(is_handler), self.priority
+        return cls(plugin, coro, cls._get_coro_kwargs(plugin, coro))

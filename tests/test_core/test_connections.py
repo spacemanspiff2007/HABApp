@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from HABApp.core.connections import BaseConnectionPlugin, BaseConnection, PluginCallbackHandler, CONNECTION_HANDLER_NAME
+from HABApp.core.connections import BaseConnectionPlugin, BaseConnection, PluginCallbackHandler
 from HABApp.core.connections.status_transitions import StatusTransitions, ConnectionStatus
 
 
@@ -51,7 +51,7 @@ async def test_plugin_callback():
 
     class TestPlugin(BaseConnectionPlugin):
         def __init__(self):
-            super().__init__('asdf', 0)
+            super().__init__('asdf')
 
         async def on_connected(self, context):
             assert context is sentinel
@@ -115,35 +115,3 @@ def test_coro_inspection():
     with pytest.raises(ValueError) as e:
         PluginCallbackHandler._get_coro_kwargs(p, coro)
     assert str(e.value) == 'Invalid parameter name "contrxt" for test.coro'
-
-
-async def test_call_order():
-
-    calls = []
-
-    class TestPlugin(BaseConnectionPlugin):
-        async def on_connected(self):
-            calls.append(self.plugin_name)
-
-        async def on_disconnected(self):
-            calls.append(self.plugin_name)
-
-    p1 = TestPlugin('p1', -10)
-    ph = TestPlugin(CONNECTION_HANDLER_NAME, 0)
-    p3 = TestPlugin('p2', 10)
-
-    b = BaseConnection('test')
-    b.register_plugin(p1).register_plugin(ph).register_plugin(p3)
-
-    b.status.status = ConnectionStatus.CONNECTED
-    b.plugin_task.start()
-    await b.plugin_task.wait()
-
-    assert calls == [ph.plugin_name, p3.plugin_name, p1.plugin_name]
-    calls.clear()
-
-    b.status.status = ConnectionStatus.DISCONNECTED
-    b.plugin_task.start()
-    await b.plugin_task.wait()
-
-    assert calls == [p3.plugin_name, p1.plugin_name, ph.plugin_name]

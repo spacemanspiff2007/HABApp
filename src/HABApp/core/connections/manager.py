@@ -19,6 +19,7 @@ class ConnectionManager:
         assert connection.name not in self.connections
         self.connections[connection.name] = connection
         connection_log.debug(f'Added {connection.name:s}')
+
         return connection
 
     def get(self, name: str) -> BaseConnection:
@@ -30,9 +31,9 @@ class ConnectionManager:
             raise ValueError()
         self.connections.pop(name)
 
-    async def application_shutdown(self):
+    async def on_application_shutdown(self):
         for c in self.connections.values():
-            c.application_shutdown()
+            c.on_application_shutdown()
 
         tasks = [t.advance_status_task.wait() for t in self.connections.values()]
         await asyncio.gather(*tasks)

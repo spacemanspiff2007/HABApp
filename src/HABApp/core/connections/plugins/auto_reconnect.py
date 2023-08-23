@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from asyncio import sleep, Task, create_task, CancelledError
-from typing import Optional
 
 from HABApp.core.connections import BaseConnection, BaseConnectionPlugin
 
@@ -9,7 +10,7 @@ class WaitBetweenConnects:
 
     def __init__(self):
         self.wait_time: int = 0
-        self.task: Optional[Task] = None
+        self.task: Task | None = None
 
     def reset_wait(self):
         self.wait_time = 0
@@ -35,11 +36,13 @@ class WaitBetweenConnects:
 
 
 class AutoReconnectPlugin(BaseConnectionPlugin):
-    def __init__(self):
-        super().__init__(priority=-110_000)
+    _DEFAULT_PRIORITY = 110_000
+
+    def __init__(self, name: str | None = None):
+        super().__init__(name)
         self.waiter = WaitBetweenConnects()
 
-    def application_shutdown(self):
+    def on_application_shutdown(self):
         self.waiter.cancel()
 
     async def on_online(self):

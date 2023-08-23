@@ -16,7 +16,7 @@ Items = uses_item_registry()
 
 class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
     def __init__(self):
-        super().__init__(name=CONNECTION_HANDLER_NAME, priority=0)
+        super().__init__(name=CONNECTION_HANDLER_NAME)
 
     async def on_setup(self, connection: MqttConnection):
         log = connection.log

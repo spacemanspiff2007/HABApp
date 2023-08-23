@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import re
 from asyncio import CancelledError
-from inspect import getmembers
-from typing import Final, TYPE_CHECKING, Callable
+from typing import Final, TYPE_CHECKING, Callable, Literal
 
 import HABApp
 from HABApp.core.connections._definitions import ConnectionStatus, connection_log
 from HABApp.core.connections.status_transitions import StatusTransitions
-from HABApp.core.lib import SingleTask
+from HABApp.core.lib import SingleTask, PriorityList
 from ..wrapper import process_exception
 
 if TYPE_CHECKING:
@@ -51,8 +49,8 @@ class BaseConnection:
 
         # Plugin handling
         self.plugins: list[BaseConnectionPlugin] = []
-        self.plugin_callbacks: dict[ConnectionStatus, list[PluginCallbackHandler]] = {
-            name: [] for name in ConnectionStatus}
+        self.plugin_callbacks: dict[ConnectionStatus, PriorityList[PluginCallbackHandler]] = {
+            name: PriorityList() for name in ConnectionStatus}
 
         # Tasks
         self.plugin_task: Final = SingleTask(self._task_plugin, f'{name.title():s}PluginTask')
@@ -100,8 +98,12 @@ class BaseConnection:
         else:
             process_exception(func, e, self.log)
 
-    def register_plugin(self, obj: BaseConnectionPlugin):
-        from .plugin_callback import PluginCallbackHandler
+    def register_plugin(self, obj: BaseConnectionPlugin, priority: int | Literal['first', 'last'] | None = None):
+        from .plugin_callback import get_plugin_callbacks
+
+        # Possibility to specify default priority as a class variable
+        if priority is None:
+            priority = getattr(obj, '_DEFAULT_PRIORITY', None)
 
         # Check that it's not already registered
         assert not obj.plugin_callbacks
@@ -109,40 +111,23 @@ class BaseConnection:
         for p in self.plugins:
             if p.plugin_name == obj.plugin_name:
                 raise ValueError(f'Plugin with the same name already registered: {p}')
-            if p.plugin_priority == obj.plugin_priority:
-                raise ValueError(f'Plugin with priority {p.plugin_priority:d} already registered: {p}')
 
-        name_to_status = {obj.lower(): obj for obj in ConnectionStatus}
-        name_regex = re.compile(f'on_({"|".join(name_to_status)})')
-
-        for m_name, member in getmembers(obj, predicate=lambda x: callable(x)):
-            if not m_name.lower().startswith('on_'):
-                continue
-
-            if (m := name_regex.fullmatch(m_name)) is None:
-                raise ValueError(f'Invalid name: {m_name} in {obj.plugin_name}')
-
-            step = name_to_status[m.group(1)]
-            cb = PluginCallbackHandler.create(obj, member)
-
-            dst = self.plugin_callbacks[step]
-            assert cb not in dst
-            dst.append(cb)
-
-            # sort plugins
-            dst.sort(key=lambda x: x.sort_func(step), reverse=True)
+        for status, handler in get_plugin_callbacks(obj):
+            if priority is None:
+                # Handler runs first for every step, except disconnect & offline - there it runs last.
+                # That way it's possible to do some cleanup in the plugins when we gracefully disconnect
+                if status is ConnectionStatus.DISCONNECTED or status is ConnectionStatus.OFFLINE:
+                    self.plugin_callbacks[status].append(handler, 'last')
+                else:
+                    self.plugin_callbacks[status].append(handler, 'first')
+            else:
+                self.plugin_callbacks[status].append(handler, priority)
 
         obj.plugin_connection = self
         self.plugins.append(obj)
 
         self.log.debug(f'Added plugin {obj.plugin_name:s}')
         return self
-
-    def _new_status(self, status: ConnectionStatus):
-        self.log.debug(status.value)
-
-        assert not self.plugin_task.is_running
-        self.plugin_task.start()
 
     async def _task_next_status(self):
         with HABApp.core.wrapper.ExceptionToHABApp(logger=self.log):
@@ -151,7 +136,10 @@ class BaseConnection:
             await self.plugin_task.cancel_wait()
 
             while (next_value := self.status.advance_status()) is not None:
-                self._new_status(next_value)
+                self.log.debug(next_value.value)
+
+                assert not self.plugin_task.is_running
+                self.plugin_task.start()
                 await self.plugin_task.wait()
 
         self.advance_status_task.task = None
@@ -194,31 +182,31 @@ class BaseConnection:
         else:
             self.status.error = True
             self.log.debug('Set error on connection status')
-        self.advance_status_task.start_if_not_running(run_wrapped=False)
+        self.advance_status_task.start_if_not_running()
 
     def status_from_setup_to_disabled(self):
         self.status.from_setup_to_disabled()
-        self.advance_status_task.start_if_not_running(run_wrapped=False)
+        self.advance_status_task.start_if_not_running()
 
     def status_from_connected_to_disconnected(self):
         self.status.from_connected_to_disconnected()
-        self.advance_status_task.start_if_not_running(run_wrapped=False)
+        self.advance_status_task.start_if_not_running()
 
     def status_configuration_changed(self):
         self.log.debug('Requesting setup')
         self.status.setup = True
-        self.advance_status_task.start_if_not_running(run_wrapped=False)
+        self.advance_status_task.start_if_not_running()
 
-    def application_shutdown(self):
+    def on_application_shutdown(self):
         if self.status.shutdown:
             return None
         self.log.debug('Requesting shutdown')
         self.status.shutdown = True
 
         for p in self.plugins:
-            p.application_shutdown()
+            p.on_application_shutdown()
 
-        self.advance_status_task.start_if_not_running(run_wrapped=False)
+        self.advance_status_task.start_if_not_running()
 
     def application_startup_complete(self):
         self.log.debug('Overview')
@@ -237,4 +225,4 @@ class BaseConnection:
             self.log.debug(f' - {status}: {", ".join(coros)}')
 
         self.status.setup = True
-        self.advance_status_task.start_if_not_running(run_wrapped=False)
+        self.advance_status_task.start_if_not_running()

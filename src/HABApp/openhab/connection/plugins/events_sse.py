@@ -22,8 +22,8 @@ Items = uses_item_registry()
 
 class SseEventListenerPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None, priority: int = 0):
-        super().__init__(name, priority)
+    def __init__(self, name: str | None = None):
+        super().__init__(name)
         self.task: Final = SingleTask(self.sse_task, name='SSE Task')
 
     async def on_connected(self):

@@ -20,7 +20,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
     request: aiohttp.ClientSession._request
 
     def __init__(self):
-        super().__init__(name=CONNECTION_HANDLER_NAME, priority=0)
+        super().__init__(name=CONNECTION_HANDLER_NAME)
         self.options: dict[str, Any] = {}
         self.read_only: bool = False
         self.online = False

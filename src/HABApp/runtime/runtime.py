@@ -33,7 +33,7 @@ class Runtime:
             token = async_context.set('HABApp startup')
 
             # shutdown setup
-            shutdown.register_func(Connections.application_shutdown, msg='Shutting down connections')
+            shutdown.register_func(Connections.on_application_shutdown, msg='Shutting down connections')
 
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
