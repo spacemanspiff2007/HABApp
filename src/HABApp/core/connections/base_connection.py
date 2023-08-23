@@ -71,6 +71,10 @@ class BaseConnection:
         return self.status.status == ConnectionStatus.DISCONNECTED
 
     @property
+    def is_disabled(self) -> bool:
+        return self.status.status == ConnectionStatus.DISABLED
+
+    @property
     def is_shutdown(self) -> bool:
         return self.status.status == ConnectionStatus.SHUTDOWN
 

@@ -45,7 +45,7 @@ class TestOpenhabInterface(TestBaseRule):
         test_defs = []
         for type in get_openhab_test_types():
             test_defs.append((type, get_random_name(type)))
-        test_defs.append(('Number', 'HABApp_Ping'))
+        # test_defs.append(('Number', 'HABApp_Ping'))
 
         for item_type, item_name in test_defs:
             assert not self.openhab.item_exists(item_name)

@@ -16,7 +16,7 @@ from HABApp.runtime import shutdown
 from .rule_file import RuleFile
 from ..core.internals import uses_item_registry
 from HABApp.core.internals.wrapped_function import run_function
-from ..openhab.connection_logic.wait_startup import wait_for_openhab
+from HABApp.core.connections import Connections
 
 log = logging.getLogger('HABApp.Rules')
 
@@ -71,8 +71,10 @@ class RuleManager:
 
     async def load_rules_on_startup(self):
 
-        if HABApp.CONFIG.openhab.connection.url and HABApp.CONFIG.openhab.general.wait_for_openhab:
-            await wait_for_openhab()
+        if HABApp.CONFIG.openhab.general.wait_for_openhab:
+            c = Connections.get('openhab')
+            while not (c.is_shutdown or c.is_disabled or c.is_online):
+                await sleep(1)
         else:
             await sleep(1)
 

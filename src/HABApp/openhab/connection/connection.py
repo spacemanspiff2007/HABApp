@@ -42,7 +42,8 @@ def setup():
 
     from HABApp.openhab.connection.handler import HANDLER as CONNECTION_HANDLER
     from HABApp.openhab.connection.plugins import (WaitForStartlevelPlugin, LoadOpenhabItemsPlugin,
-                                                   SseEventListenerPlugin, OUTGOING_PLUGIN, LoadTransformationsPlugin)
+                                                   SseEventListenerPlugin, OUTGOING_PLUGIN, LoadTransformationsPlugin,
+                                                   WaitForPersistenceRestore, PingPlugin)
 
     connection = Connections.add(OpenhabConnection())
     connection.register_plugin(CONNECTION_HANDLER)
@@ -53,6 +54,8 @@ def setup():
     connection.register_plugin(SseEventListenerPlugin(priority=70))
     connection.register_plugin(LoadOpenhabItemsPlugin('SyncItemsAndThings', 60))
     connection.register_plugin(LoadTransformationsPlugin(priority=50))
+    connection.register_plugin(PingPlugin(priority=40))
+    connection.register_plugin(WaitForPersistenceRestore(priority=30))
 
     connection.register_plugin(ConnectionStateToEventBusPlugin())
     connection.register_plugin(AutoReconnectPlugin())
