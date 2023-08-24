@@ -233,7 +233,7 @@ or through an ``OpenhabItem``.
 
 Function parameters
 ======================================
-.. automodule:: HABApp.openhab.interface
+.. automodule:: HABApp.openhab.interface_sync
    :members:
    :imported-members:
 
