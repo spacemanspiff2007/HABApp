@@ -27,10 +27,10 @@ class ThingOverviewPlugin(BaseConnectionPlugin[OpenhabConnection]):
     async def on_online(self):
         if not self.do_run:
             return None
-        self.do_run = False
 
         # don't run this after the connect, let the rules load etc.
-        await asyncio.sleep(60)
+        await asyncio.sleep(90)
+        self.do_run = False
 
         thing_data = await HABApp.openhab.interface_async.async_get_things()
 
