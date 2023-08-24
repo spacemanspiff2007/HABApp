@@ -1,29 +1,38 @@
+from __future__ import annotations
+
 import asyncio
 import logging
+from typing import Final
 
 import HABApp
+from HABApp.config import CONFIG
+from HABApp.core.connections import BaseConnectionPlugin
+from HABApp.core.internals import uses_item_registry
+from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.definitions.helpers.log_table import Table
-from ._plugin import OnConnectPlugin
-from ..interface_async import async_get_things
+
+PING_CONFIG: Final = CONFIG.openhab.ping
+
+Items = uses_item_registry()
 
 
-class ThingOverview(OnConnectPlugin):
+class ThingOverviewPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self):
-        super().__init__()
-        self.run = False
+    def __init__(self, name: str | None = None):
+        super().__init__(name)
+
+        self.do_run = True
 
     @HABApp.core.wrapper.log_exception
-    async def on_connect_function(self):
+    async def on_online(self):
+        if not self.do_run:
+            return None
+        self.do_run = False
+
         # don't run this after the connect, let the rules load etc.
         await asyncio.sleep(60)
 
-        # show this overview only once!
-        if self.run:
-            return None
-        self.run = True
-
-        thing_data = await async_get_things()
+        thing_data = await HABApp.openhab.interface_async.async_get_things()
 
         thing_table = Table('Things')
         thing_stat = thing_table.add_column('Status', align='^')
@@ -90,6 +99,3 @@ class ThingOverview(OnConnectPlugin):
         log = logging.getLogger('HABApp.openhab.zwave')
         for line in zw_table.get_lines(sort_columns=[zw_type, 'Node']):
             log.info(line)
-
-
-PLUGIN_THING_OVERVIEW = ThingOverview.create_plugin()

@@ -109,7 +109,7 @@ async_post_update: Final = OUTGOING_PLUGIN.async_post_update
 async_send_command: Final = OUTGOING_PLUGIN.async_send_command
 
 
-def post_update(item: str, state: Any):
+def post_update(item: str | ItemRegistryItem, state: Any):
     """
     Post an update to the item
 
@@ -121,7 +121,7 @@ def post_update(item: str, state: Any):
     run_func_from_async(async_post_update, item, state)
 
 
-def send_command(item: str, command: Any):
+def send_command(item: str | ItemRegistryItem, command: Any):
     """
     Send the specified command to the item
 

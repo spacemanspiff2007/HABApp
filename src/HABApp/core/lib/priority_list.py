@@ -25,6 +25,12 @@ class PriorityList(Generic[T]):
         self._objs.append((priority, obj))
         self._objs.sort(key=sort_func)
 
+    def remove(self, obj: T):
+        for i, (_, existing) in self._objs:
+            if existing is obj:
+                self._objs.pop(i)
+                return None
+
     def __iter__(self) -> Iterator[T]:
         for p, o in self._objs:
             yield o

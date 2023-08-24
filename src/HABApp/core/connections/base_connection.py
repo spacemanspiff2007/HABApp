@@ -129,6 +129,15 @@ class BaseConnection:
         self.log.debug(f'Added plugin {obj.plugin_name:s}')
         return self
 
+    def remove_plugin(self, obj: BaseConnectionPlugin):
+        self.plugins.remove(obj)
+        obj.plugin_connection = None
+
+        for cb_list in self.plugin_callbacks.values():
+            rem = [cb for cb in cb_list if cb.plugin is obj]
+            for to_rem in rem:
+                cb_list.remove(to_rem)
+
     async def _task_next_status(self):
         with HABApp.core.wrapper.ExceptionToHABApp(logger=self.log):
 
