@@ -8,8 +8,8 @@ from pydantic import BaseModel as _BaseModel, Field, ValidationError, field_vali
 
 from HABApp.core.const.const import PYTHON_310
 from HABApp.core.logger import HABAppError
-from HABApp.openhab.connection_logic.plugin_things.filters import ChannelFilter, ThingFilter
-from HABApp.openhab.connection_logic.plugin_things.str_builder import StrBuilder
+from HABApp.openhab.connection.plugins.plugin_things.filters import ChannelFilter, ThingFilter
+from HABApp.openhab.connection.plugins.plugin_things.str_builder import StrBuilder
 from HABApp.openhab.definitions import ITEM_TYPES
 from ._log import log
 

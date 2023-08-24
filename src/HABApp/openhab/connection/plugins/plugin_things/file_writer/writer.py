@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Iterable, Optional, List, Dict
 
 from HABApp.core.const.const import PYTHON_311
-from HABApp.openhab.connection_logic.plugin_things.cfg_validator import UserItem
+from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserItem
 from .formatter import FormatterScope
 from .formatter_builder import ValueFormatterBuilder, MultipleValueFormatterBuilder, ConstValueFormatterBuilder, \
     MetadataFormatter, LinkFormatter

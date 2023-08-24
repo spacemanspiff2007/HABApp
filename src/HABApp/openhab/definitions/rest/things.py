@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from typing import Optional, Any
 
 from msgspec import Struct, field
@@ -17,14 +17,14 @@ class ChannelResp(Struct, kw_only=True):
     kind: str
     label: str = ''
     description: str = ''
-    default_tags: list[str] = field(default=list, name='defaultTags')
-    properties: dict[str, Any] = {}
-    configuration: dict[str, Any] = {}
+    default_tags: List[str] = field(default=list, name='defaultTags')
+    properties: Dict[str, Any] = {}
+    configuration: Dict[str, Any] = {}
     auto_update_policy: str = field(default='', name='autoUpdatePolicy')
 
     # EnrichedChannelDTO
     # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/thing/EnrichedChannelDTO.java
-    linked_items: list[str] = field(name='linkedItems')
+    linked_items: List[str] = field(name='linkedItems')
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/ThingStatusInfo.java
@@ -53,7 +53,7 @@ class ThingResp(Struct, kw_only=True):
 
     # EnrichedThingDTO
     # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/thing/EnrichedThingDTO.java
-    channels: list[ChannelResp] = []
+    channels: List[ChannelResp] = []
     status: ThingStatusResp = field(name='statusInfo')
     firmware_status: Optional[FirmwareStatusResp] = None
     editable: bool

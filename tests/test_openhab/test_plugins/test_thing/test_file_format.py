@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg, UserItemCfg
+from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import validate_cfg, UserItemCfg
 from tests.helpers import TestEventBus
 
 

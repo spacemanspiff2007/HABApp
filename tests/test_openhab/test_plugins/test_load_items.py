@@ -1,5 +1,6 @@
 import logging
 from json import dumps
+from typing import List
 
 import msgspec.json
 
@@ -53,7 +54,7 @@ async def _mock_get_all_items():
         },
     ]
 
-    return msgspec.json.decode(dumps(resp), type=list[ItemResp])
+    return msgspec.json.decode(dumps(resp), type=List[ItemResp])
 
 
 async def _mock_get_all_items_state():

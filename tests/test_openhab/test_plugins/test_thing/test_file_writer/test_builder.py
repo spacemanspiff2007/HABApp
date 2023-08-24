@@ -1,4 +1,4 @@
-from HABApp.openhab.connection_logic.plugin_things.file_writer.formatter_builder import ValueFormatterBuilder, \
+from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter_builder import ValueFormatterBuilder, \
     EmptyFormatter, \
     MultipleValueFormatterBuilder, LinkFormatter, MetadataFormatter
 

@@ -1,4 +1,4 @@
-from HABApp.openhab.connection_logic.plugin_things.filters import ThingFilter, apply_filters
+from HABApp.openhab.connection.plugins.plugin_things.filters import ThingFilter, apply_filters
 
 
 def test_thing_filter():

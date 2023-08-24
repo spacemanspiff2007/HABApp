@@ -1,3 +1,4 @@
+from typing import List
 from unittest.mock import Mock
 
 import pytest
@@ -9,7 +10,7 @@ from HABApp.core.connections.status_transitions import StatusTransitions, Connec
 def test_transitions():
     status = StatusTransitions()
 
-    def get_flow() -> list[str]:
+    def get_flow() -> List[str]:
         ret = []
         while add := status.advance_status():
             ret.append(add.value)

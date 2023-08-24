@@ -1,4 +1,4 @@
-from typing import Optional, Union, List, Any
+from typing import Optional, Union, List, Any, Dict
 
 from msgspec import Struct, field
 
@@ -16,7 +16,7 @@ class StateDescriptionResp(Struct, kw_only=True):
     step: Union[int, float, None] = None
     pattern: Optional[str] = None
     read_only: bool = field(name='readOnly')
-    options: list[StateOptionResp]
+    options: List[StateOptionResp]
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/types/CommandOption.java
@@ -38,8 +38,8 @@ class ItemResp(Struct, kw_only=True):
     name: str
     label: Optional[str] = None
     category: Optional[str] = None
-    tags: list[str]
-    groups: list[str] = field(name='groupNames')
+    tags: List[str]
+    groups: List[str] = field(name='groupNames')
 
     # EnrichedItemDTO
     # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/item/EnrichedItemDTO.java
@@ -49,12 +49,12 @@ class ItemResp(Struct, kw_only=True):
     state_description: Optional[StateDescriptionResp] = None
     unit: Optional[str] = field(default=None, name='unitSymbol')
     command_description: List[CommandOptionResp] = []
-    metadata: dict[str, Any] = {}
+    metadata: Dict[str, Any] = {}
     editable: bool = True
 
     # EnrichedGroupItemDTO
     # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/item/EnrichedGroupItemDTO.java
-    members: 'list[ItemResp]' = []
+    members: List['ItemResp'] = []
     group_type: Optional[str] = field(default=None, name='groupType')
     group_function: Optional[GroupFunctionResp] = field(default=None, name='function')
 

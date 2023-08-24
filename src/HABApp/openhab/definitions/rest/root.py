@@ -1,3 +1,5 @@
+from typing import List
+
 from msgspec import Struct
 
 
@@ -19,4 +21,4 @@ class RootResp(Struct, rename='camel'):
     locale: str
     measurement_system: str
     runtime_info: RuntimeResp
-    links: list[LinkResp]
+    links: List[LinkResp]

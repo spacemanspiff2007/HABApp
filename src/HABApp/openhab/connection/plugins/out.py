@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from asyncio import Queue, QueueEmpty
 from asyncio import sleep
-from typing import Any, Union
+from typing import Any
 from typing import Final
 
 from HABApp.core.asyncio import run_func_from_async
@@ -21,7 +21,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         self.add: bool = False
 
-        self.queue: Final = Queue[tuple[Union[str, ItemRegistryItem], Any, bool]]()
+        self.queue: Queue[tuple[str | ItemRegistryItem, Any, bool]] = Queue()
         self.task_worker: Final = SingleTask(self.queue_worker, 'OhQueueWorker')
         self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
 

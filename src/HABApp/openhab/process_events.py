@@ -1,3 +1,4 @@
+import logging
 from asyncio import create_task
 from typing import Union
 
@@ -9,7 +10,6 @@ from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
 from HABApp.core.internals import uses_post_event, uses_get_item
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
-from HABApp.openhab.connection_handler import http_connection
 from HABApp.openhab.definitions.topics import TOPIC_THINGS, TOPIC_ITEMS
 from HABApp.openhab.events import GroupStateChangedEvent, GroupStateUpdatedEvent, \
     ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
@@ -18,8 +18,7 @@ from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry, re
     add_thing_to_registry
 from HABApp.openhab.map_events import get_event
 
-log = http_connection.log
-
+log = logging.getLogger('HABApp.openhab.items')
 
 post_event = uses_post_event()
 get_item = uses_get_item()

@@ -69,7 +69,7 @@ async def create_item(item: UserItem, test: bool) -> bool:
     try:
         existing_ok = True
         existing_item = await async_get_item_with_habapp_meta(name)
-        habapp_data = existing_item['metadata']['HABApp']
+        habapp_data = existing_item.metadata['HABApp']
 
         # we only modify items we created
         if not isinstance(habapp_data, HABAppThingPluginData):
@@ -78,7 +78,7 @@ async def create_item(item: UserItem, test: bool) -> bool:
 
         # check if the item properties are already correct
         for k, v in item.get_oh_cfg().items():
-            if v != existing_item.get(k, ''):
+            if v != getattr(existing_item, k, ''):
                 existing_ok = False
 
     except HABApp.openhab.errors.ItemNotFoundError:
@@ -128,7 +128,7 @@ async def create_item(item: UserItem, test: bool) -> bool:
 
         # create new
         for ns, meta_cfg in item.metadata.items():
-            existing_cfg = existing_item.get('metadata', {}).get(ns, {})
+            existing_cfg = existing_item.metadata.get(ns, {})
             if 'config' not in existing_cfg:
                 existing_cfg['config'] = {}
             if existing_cfg == meta_cfg:

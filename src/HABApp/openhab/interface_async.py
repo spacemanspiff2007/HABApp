@@ -1,8 +1,3 @@
-from HABApp.openhab.connection_handler.func_async import \
-    async_get_persistence_data, \
-    async_get_channel_link, async_remove_channel_link, async_channel_link_exists, async_create_channel_link
-
-
 from HABApp.openhab.connection.handler.func_async import \
     async_get_root, async_get_system_info, async_get_uuid, \
     async_get_things, async_get_thing, async_set_thing_cfg, async_set_thing_enabled,\

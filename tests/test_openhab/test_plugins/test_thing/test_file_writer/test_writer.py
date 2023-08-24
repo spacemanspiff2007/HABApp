@@ -2,8 +2,8 @@
 
 import io
 
-from HABApp.openhab.connection_logic.plugin_things.cfg_validator import UserItem
-from HABApp.openhab.connection_logic.plugin_things.file_writer.writer import ItemsFileWriter
+from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserItem
+from HABApp.openhab.connection.plugins.plugin_things.file_writer import ItemsFileWriter
 
 
 class MyStringIO(io.StringIO):

@@ -1,44 +1,51 @@
-import asyncio
+from __future__ import annotations
+
 import time
 from pathlib import Path
-from typing import Dict, Set, Optional, List, Any
+from typing import Any
+
+import msgspec
 
 import HABApp
+import HABApp.openhab.events
+from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.files.file import HABAppFile
 from HABApp.core.files.folders import add_folder as add_habapp_folder
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.lib import PendingFuture
 from HABApp.core.logger import log_warning, HABAppError
-from HABApp.openhab.connection_handler.func_async import async_get_things
-from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg, InvalidItemNameError
-from HABApp.openhab.connection_logic.plugin_things.filters import THING_ALIAS, CHANNEL_ALIAS
-from HABApp.openhab.connection_logic.plugin_things.filters import apply_filters, log_overview
+from HABApp.openhab.connection.connection import OpenhabConnection
+from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import validate_cfg, InvalidItemNameError
+from HABApp.openhab.connection.plugins.plugin_things.filters import THING_ALIAS, CHANNEL_ALIAS
+from HABApp.openhab.connection.plugins.plugin_things.filters import apply_filters, log_overview
 from ._log import log
-from .item_worker import create_item, cleanup_items
 from .file_writer import ItemsFileWriter
+from .item_worker import create_item, cleanup_items
 from .thing_worker import update_thing_cfg
-from .._plugin import OnConnectPlugin
 
 
 class DuplicateItemError(Exception):
     pass
 
 
-class ManualThingConfig(OnConnectPlugin):
+class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     def __init__(self):
         super().__init__()
-        self.created_items: Dict[str, Set[str]] = {}
+        self.created_items: dict[str, set[str]] = {}
         self.do_cleanup = PendingFuture(self.clean_items, 120)
 
-        self.watcher: Optional[AggregatingAsyncEventHandler] = None
+        self.watcher: AggregatingAsyncEventHandler | None = None
 
         self.cache_ts: float = 0.0
-        self.cache_cfg: List[Dict[str, Any]] = []
+        self.cache_cfg: list[dict[str, Any]] = []
 
-    def setup(self):
+    async def on_setup(self):
         path = HABApp.CONFIG.directories.config
         if path is None:
+            return None
+
+        if self.watcher is not None:
             return None
 
         class HABAppThingConfigFile(HABAppFile):
@@ -53,11 +60,10 @@ class ManualThingConfig(OnConnectPlugin):
     async def file_unload(self, prefix: str, path: Path):
         return None
 
-    async def on_connect_function(self):
+    async def on_connected(self):
         if self.watcher is None:
             return None
 
-        await asyncio.sleep(0.3)
         await self.load_thing_data(always=True)
         await self.watcher.trigger_all()
 
@@ -68,9 +74,9 @@ class ManualThingConfig(OnConnectPlugin):
             items.update(s)
         await cleanup_items(items)
 
-    async def load_thing_data(self, always: bool) -> List[Dict[str, Any]]:
+    async def load_thing_data(self, always: bool) -> list[dict[str, Any]]:
         if always or not self.cache_cfg or time.time() - self.cache_ts > 20:
-            self.cache_cfg = [k.dict(by_alias=True) for k in await async_get_things()]
+            self.cache_cfg = [msgspec.to_builtins(k) for k in await HABApp.openhab.interface_async.async_get_things()]
             self.cache_ts = time.time()
         return self.cache_cfg
 
@@ -191,6 +197,3 @@ class ManualThingConfig(OnConnectPlugin):
             self.cache_cfg = []
 
         items_file_writer.create_file(items_file_path)
-
-
-PLUGIN_MANUAL_THING_CFG = ManualThingConfig.create_plugin()

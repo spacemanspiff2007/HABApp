@@ -3,8 +3,8 @@ import typing
 
 import bidict
 
+import HABApp
 from HABApp.core.logger import log_error
-from HABApp.openhab.connection_handler.func_async import async_set_thing_cfg
 from ._log import log_cfg as log
 
 
@@ -131,7 +131,7 @@ class ThingConfigChanger:
 
         try:
             # we write only the changed configuration
-            ret = await async_set_thing_cfg(self.uid, cfg=self.new)
+            ret = await HABApp.openhab.interface_async.async_set_thing_cfg(self.uid, cfg=self.new)
             if ret is None:
                 return None
         except Exception as e:

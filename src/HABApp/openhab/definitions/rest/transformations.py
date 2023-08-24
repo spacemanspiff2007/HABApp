@@ -1,3 +1,5 @@
+from typing import Dict
+
 from msgspec import Struct
 
 
@@ -8,5 +10,5 @@ class TransformationResp(Struct):
     uid: str
     label: str
     type: str
-    configuration: dict[str, str]
+    configuration: Dict[str, str]
     editable: bool

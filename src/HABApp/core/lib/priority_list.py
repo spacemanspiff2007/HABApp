@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generic, TypeVar, Literal, Union, Iterator
+from typing import Generic, TypeVar, Literal, Union, Iterator, Tuple
 
 from HABApp.core.const.const import PYTHON_310
 
@@ -13,7 +13,7 @@ else:
 T = TypeVar('T')
 
 T_PRIO: TypeAlias = Union[Literal['first', 'last'], int]
-T_ENTRY: TypeAlias = tuple[T_PRIO, T]
+T_ENTRY: TypeAlias = Tuple[T_PRIO, T]
 
 
 def sort_func(obj: T_ENTRY):

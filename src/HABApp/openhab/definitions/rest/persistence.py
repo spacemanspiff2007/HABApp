@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from msgspec import Struct, field
 
@@ -22,4 +22,4 @@ class ItemHistoryResp(Struct):
     name: str
     total_records: Optional[str] = field(default=None, name='totalrecords')
     data_points: Optional[str] = field(default=None, name='datapoints')
-    data: list[DataPoint] = []
+    data: List[DataPoint] = []
