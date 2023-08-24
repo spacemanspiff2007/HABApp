@@ -128,9 +128,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 1.1.X (2023-XX-XX)
+#### 1.2.0 (2023-XX-XX)
 - Fail fast when a value instead of a callback is passed to the event listener / scheduler
 - Completely removed types and type hints from traceback
+- Completely reworked connection logic for openHAB and mqtt
 - Added support for transformations
 - Updated dependencies:
   - Improved performance

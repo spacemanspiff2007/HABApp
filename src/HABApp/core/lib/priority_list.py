@@ -1,6 +1,14 @@
 from __future__ import annotations
 
-from typing import Generic, TypeVar, TypeAlias, Literal, Union, Iterator
+from typing import Generic, TypeVar, Literal, Union, Iterator
+
+from HABApp.core.const.const import PYTHON_310
+
+if PYTHON_310:
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 
 T = TypeVar('T')
 
