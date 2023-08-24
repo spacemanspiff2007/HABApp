@@ -8,7 +8,7 @@ ujson       == 5.8.0
 aiomqtt     == 1.1.0
 
 immutables  == 0.20
-eascheduler == 0.1.9
+eascheduler == 0.1.10
 easyconfig  == 0.3.0
 stack_data  == 0.6.2
 colorama    == 0.4.6

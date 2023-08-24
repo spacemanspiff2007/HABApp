@@ -33,7 +33,7 @@ Scheduler
 OneTimeJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.OneTimeJob
+.. autoclass:: eascheduler.scheduler_view.OneTimeJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -41,7 +41,7 @@ OneTimeJob
 CountdownJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.CountdownJob
+.. autoclass:: eascheduler.scheduler_view.CountdownJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -49,7 +49,7 @@ CountdownJob
 ReoccurringJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.ReoccurringJob
+.. autoclass:: eascheduler.scheduler_view.ReoccurringJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -57,7 +57,7 @@ ReoccurringJob
 DayOfWeekJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.DayOfWeekJob
+.. autoclass:: eascheduler.scheduler_view.DayOfWeekJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -65,7 +65,7 @@ DayOfWeekJob
 DawnJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.DawnJob
+.. autoclass:: eascheduler.scheduler_view.DawnJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -73,7 +73,7 @@ DawnJob
 SunriseJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.SunriseJob
+.. autoclass:: eascheduler.scheduler_view.SunriseJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -81,7 +81,7 @@ SunriseJob
 SunsetJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.SunsetJob
+.. autoclass:: eascheduler.scheduler_view.SunsetJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -89,7 +89,7 @@ SunsetJob
 DuskJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.jobs.DuskJob
+.. autoclass:: eascheduler.scheduler_view.DuskJob
    :members:
    :inherited-members:
    :member-order: groupwise

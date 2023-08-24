@@ -1,7 +1,9 @@
 import logging
 import time
 
-from HABAppTests import TestBaseRule
+from HABApp.core.events import ValueUpdateEventFilter
+from HABApp.core.items import Item
+from HABAppTests import TestBaseRule, get_random_name
 
 log = logging.getLogger('HABApp.TestParameterFiles')
 
@@ -20,6 +22,10 @@ class TestScheduler(TestBaseRule):
         f = self.run.on_sunset(print, 'sunset')
         print(f'Sunset : {f.get_next_run()}')
 
+        self.item = Item.get_create_item(get_random_name('HABApp'))
+        self.item.listen_event(lambda x: self.item_states.append(x), ValueUpdateEventFilter())
+        self.item_states = []
+
     def test_scheduler_every(self):
 
         executions = 5
@@ -29,6 +35,8 @@ class TestScheduler(TestBaseRule):
             calls.append(time.time())
 
         job = self.run.every(None, 0.5, called)
+        job.to_item(self.item)
+
         try:
             started = time.time()
             while time.time() - started < 7:
@@ -45,6 +53,8 @@ class TestScheduler(TestBaseRule):
 
         finally:
             job.cancel()
+
+        assert len(self.item_states) == 6
 
 
 TestScheduler()
