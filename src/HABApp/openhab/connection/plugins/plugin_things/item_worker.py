@@ -4,30 +4,31 @@ import HABApp
 from HABApp.openhab.connection.handler.func_async import async_set_habapp_metadata, async_create_item, \
     async_remove_item, async_create_link, async_get_items, \
     async_remove_link, async_remove_metadata, async_set_metadata, async_get_item_with_habapp_meta
+from HABApp.openhab.definitions.rest import ItemResp
 from HABApp.openhab.definitions.rest.habapp_data import HABAppThingPluginData, load_habapp_meta
 from ._log import log_item as log
 from .cfg_validator import UserItem
 
 
-def _filter_items(i: dict):
-    if not i.get('editable', False):
+def _filter_items(i: ItemResp):
+    if not i.editable:
         return False
 
-    if 'HABApp' not in i.setdefault('metadata', {}):
+    if 'HABApp' not in i.metadata:
         return False
 
     load_habapp_meta(i)
-    if not isinstance(i['metadata']['HABApp'], HABAppThingPluginData):
+    if not isinstance(i.metadata['HABApp'], HABAppThingPluginData):
         return False
     return True
 
 
 async def cleanup_items(keep_items: Set[str]):
-    all_items = await async_get_items(include_habapp_meta=True)
+    all_items = await async_get_items()
 
     to_delete: Dict[str, HABAppThingPluginData] = {}
     for cfg in filter(_filter_items, all_items):
-        name = cfg['name']
+        name = cfg.name
         if name not in keep_items:
             to_delete[name] = cfg['metadata']['HABApp']
 

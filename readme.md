@@ -137,6 +137,7 @@ MyOpenhabRule()
   - Improved performance
   - Support for docker secrets and environment variables in the config file
 - Support sending scheduler datetimes to an item
+- Search in the docs finally works again
 
 #### 1.1.2 (2023-06-19)
 - Re-added `ItemStateEventFilter`
