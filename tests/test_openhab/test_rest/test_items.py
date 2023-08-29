@@ -1,8 +1,6 @@
-from json import dumps
+from msgspec import convert
 
-from msgspec.json import decode
-
-from HABApp.openhab.definitions.rest.items import ItemResp
+from HABApp.openhab.definitions.rest.items import ItemResp, StateOptionResp, CommandOptionResp
 
 
 def test_item_1():
@@ -30,7 +28,7 @@ def test_item_1():
         "tags": ["Tag1"],
         "groupNames": ["Group1", "Group2"]
     }
-    item = decode(dumps(_in), type=ItemResp)
+    item = convert(_in, type=ItemResp)
 
     assert item.name == 'Item1Name'
     assert item.label == 'Item1Label'
@@ -38,6 +36,42 @@ def test_item_1():
     assert item.transformed_state == 'zu'
     assert item.tags == ["Tag1"]
     assert item.groups == ["Group1", "Group2"]
+
+
+def test_item_2():
+    d1 = 'DASDING 98.9 (Euro-Hits)'
+    d2 = 'SWR3 95.5 (Top 40/Pop)'
+
+    _in = {"link": "http://openhabian:8080/rest/items/iSbPlayer_Favorit",
+           "state": "6",
+           "stateDescription": {
+               "pattern": "%s",
+               "readOnly": False,
+               "options": [{"value": "0", "label": d1}, {"value": "1", "label": d2}]
+           },
+           "commandDescription": {
+               "commandOptions": [{"command": "0", "label": d1}, {"command": "1", "label": d2}]
+           },
+           "editable": False,
+           "type": "String",
+           "name": "iSbPlayer_Favorit",
+           "label": "Senderliste",
+           "category": None,
+           "tags": [], "groupNames": []}
+    item = convert(_in, type=ItemResp)
+
+    assert item.name == 'iSbPlayer_Favorit'
+    assert item.label == 'Senderliste'
+    assert item.state == '6'
+    assert item.transformed_state is None
+
+    desc = item.state_description
+    assert desc.pattern == '%s'
+    assert desc.read_only is False
+    assert desc.options == [StateOptionResp('0', d1), StateOptionResp('1', d2)]
+
+    desc = item.command_description
+    assert desc.command_options == [CommandOptionResp('0', d1), CommandOptionResp('1', d2)]
 
 
 def test_group_item():
@@ -88,7 +122,7 @@ def test_group_item():
             "ALL_TOPICS"
         ]
     }
-    item = decode(dumps(_in), type=ItemResp)
+    item = convert(_in, type=ItemResp)
 
     assert item.name == 'SwitchGroup'
     assert isinstance(item.members[0], ItemResp)

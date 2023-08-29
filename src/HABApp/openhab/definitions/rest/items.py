@@ -25,6 +25,10 @@ class CommandOptionResp(Struct):
     label: Optional[str] = None
 
 
+class CommandDescriptionResp(Struct):
+    command_options: List[CommandOptionResp] = field(name='commandOptions')
+
+
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/items/dto/GroupFunctionDTO.java
 class GroupFunctionResp(Struct):
     name: str
@@ -46,9 +50,9 @@ class ItemResp(Struct, kw_only=True):
     link: Optional[str] = None
     state: str
     transformed_state: Optional[str] = field(default=None, name='transformedState')
-    state_description: Optional[StateDescriptionResp] = None
+    state_description: Optional[StateDescriptionResp] = field(default=None, name='stateDescription')
     unit: Optional[str] = field(default=None, name='unitSymbol')
-    command_description: List[CommandOptionResp] = []
+    command_description: Optional[CommandDescriptionResp] = field(default=None, name='commandDescription')
     metadata: Dict[str, Any] = {}
     editable: bool = True
 
