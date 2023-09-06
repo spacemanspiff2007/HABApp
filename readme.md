@@ -5,10 +5,9 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/habapp)
 
 ![PyPI](https://img.shields.io/pypi/v/HABapp)
-[![Downloads](https://pepy.tech/badge/habapp/month)](https://pepy.tech/project/habapp)
+[![Downloads](https://static.pepy.tech/badge/habapp/month)](https://pepy.tech/project/habapp)
 ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/habapp?label=docker)
 ![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/habapp)
-
 
 _Easy automation with MQTT and/or openHAB_
 

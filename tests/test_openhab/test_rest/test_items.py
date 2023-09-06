@@ -127,3 +127,5 @@ def test_group_item():
     assert item.name == 'SwitchGroup'
     assert isinstance(item.members[0], ItemResp)
     assert item.members[0].name == 'christmasTree'
+    assert item.group_function.name == 'OR'
+    assert item.group_function.params == ['ON', 'OFF']
