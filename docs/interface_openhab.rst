@@ -37,6 +37,14 @@ It can be enabled through the gui in ``settings`` -> ``API Security`` -> ``Allow
 openHAB item types
 **************************************
 
+.. |oh_item_desc_name| replace:: Item name
+.. |oh_item_desc_value| replace:: Current item value (or state in openHAB wording)
+.. |oh_item_desc_label| replace:: Item label or ``None`` if not configured
+.. |oh_item_desc_tags| replace:: Item tags
+.. |oh_item_desc_group| replace:: The groups the item is in
+.. |oh_item_desc_metadata| replace:: Item metadata
+
+
 Description and example
 ======================================
 Items that are created from openHAB inherit all from :class:`~HABApp.openHAB.items.OpenhabItem` and

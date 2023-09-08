@@ -15,13 +15,13 @@ if TYPE_CHECKING:
 class GroupItem(OpenhabItem):
     """GroupItem which accepts and converts the data types from OpenHAB
 
-    :ivar str name:
-    :ivar Any value:
+    :ivar str name: |oh_item_desc_name|
+    :ivar Any value: |oh_item_desc_value|
 
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
-    :ivar Mapping[str, MetaData] metadata:
+    :ivar Optional[str] label: |oh_item_desc_label|
+    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
+    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
     @staticmethod
