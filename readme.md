@@ -127,7 +127,8 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 1.2.0 (2023-XX-XX)
+#### 23.09.0 (2023-XX-XX)
+- Switched version number scheme to CalVer (Calendar Versioning): ``YEAR.MONTH.COUNTER``
 - Fail fast when a value instead of a callback is passed to the event listener / scheduler
 - Completely removed types and type hints from traceback
 - Completely reworked connection logic for openHAB and mqtt
