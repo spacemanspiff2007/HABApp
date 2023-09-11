@@ -39,7 +39,7 @@ openhab:
     verify_ssl: true            # Check certificates when using https
   general:
     listen_only: false
-    wait_for_openhab: true
+    wait_for_openhab: false
   ping:
     enabled: false
     interval: 30
