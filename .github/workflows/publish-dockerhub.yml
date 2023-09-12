@@ -32,7 +32,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build and push release
-        id: docker_build
+        id: docker_build_release
         uses: docker/build-push-action@v4
         with:
           push: true
@@ -43,7 +43,7 @@ jobs:
         if: github.ref_type == 'tag'
 
       - name: Build and push latest
-        id: docker_build
+        id: docker_build_master
         uses: docker/build-push-action@v4
         with:
           push: true
