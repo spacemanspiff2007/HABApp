@@ -44,7 +44,7 @@ class ItemBoundJobMixin:
             self._next_run_callback = None
 
     def to_item(self, item: str | BaseValueItem | None):
-        """Sends the next execution (date)time to an item. Sends none if the job is not scheduled.
+        """Sends the next execution (date)time to an item. Sends ``None`` if the job is not scheduled.
 
         :param item: item name or item, None to disable
         """
