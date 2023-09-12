@@ -1,12 +1,13 @@
 from asyncio import run_coroutine_threadsafe, sleep
 from pathlib import Path
-from time import time
+from time import monotonic
 from typing import Any, List, Set, Awaitable, Callable
 
 import HABApp
 from HABApp.core.wrapper import ignore_exception
 from .base_watcher import EventFilterBase
 from .base_watcher import FileSystemEventHandler
+from HABApp.core.asyncio import AsyncContext
 
 DEBOUNCE_TIME: float = 0.6
 
@@ -28,7 +29,7 @@ class AggregatingAsyncEventHandler(FileSystemEventHandler):
 
     @ignore_exception
     async def _event_waiter(self, dst: Path):
-        self.last_event = ts = time()
+        self.last_event = ts = monotonic()
         self._files.add(dst)
 
         # debounce time
@@ -43,8 +44,10 @@ class AggregatingAsyncEventHandler(FileSystemEventHandler):
         self._files.clear()
 
         # process
-        await self.func(HABApp.core.lib.sort_files(files))
+        with AsyncContext('FileWatcherEvent'):
+            await self.func(HABApp.core.lib.sort_files(files))
 
     async def trigger_all(self):
         files = HABApp.core.lib.list_files(self.folder, self.filter, self.watch_subfolders)
-        await self.func(files)
+        with AsyncContext('FileWatcherAll'):
+            await self.func(files)

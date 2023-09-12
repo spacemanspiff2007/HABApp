@@ -4,18 +4,20 @@ from pathlib import Path
 import HABApp
 import HABApp.config
 import HABApp.core
-import HABApp.mqtt.mqtt_connection
 import HABApp.parameters.parameter_files
 import HABApp.rule.interfaces._http
 import HABApp.rule_manager
+from HABApp.core import Connections
 import HABApp.util
 import eascheduler
 from HABApp.core.asyncio import async_context
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.wrapper import process_exception
-from HABApp.openhab import connection_logic as openhab_connection
+import HABApp.mqtt.connection as mqtt_connection
+from HABApp.openhab import connection as openhab_connection
 from HABApp.runtime import shutdown
+
 
 
 class Runtime:
@@ -29,6 +31,9 @@ class Runtime:
     async def start(self, config_folder: Path):
         try:
             token = async_context.set('HABApp startup')
+
+            # shutdown setup
+            shutdown.register_func(Connections.on_application_shutdown, msg='Shutting down connections')
 
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
@@ -53,9 +58,11 @@ class Runtime:
             # generic HTTP
             await HABApp.rule.interfaces._http.create_client()
 
-            # openhab
+            # Connection setup
             openhab_connection.setup()
+            mqtt_connection.setup()
 
+            # File loader setup
             # Parameter Files
             await HABApp.parameters.parameter_files.setup_param_files()
 
@@ -63,11 +70,7 @@ class Runtime:
             self.rule_manager = HABApp.rule_manager.RuleManager(self)
             await self.rule_manager.setup()
 
-            # MQTT
-            HABApp.mqtt.mqtt_connection.setup()
-            HABApp.mqtt.mqtt_connection.connect()
-
-            await openhab_connection.start()
+            Connections.application_startup_complete()
 
             async_context.reset(token)
 

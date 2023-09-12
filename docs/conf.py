@@ -6,25 +6,41 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
+
+import logging
+import os
+import re
+import sys
+
+import sphinx
+from docutils.nodes import Text, Node
+from sphinx.addnodes import desc_signature
+
+IS_RTD_BUILD = os.environ.get('READTHEDOCS', '-').lower() == 'true'
+IS_CI = os.environ.get('CI', '-') == 'true'
+
+
+# https://www.sphinx-doc.org/en/master/extdev/logging.html
+sphinx_logger = sphinx.util.logging.getLogger('post')
+logger_lvl = logging.DEBUG if IS_RTD_BUILD or IS_CI else logging.INFO  # set level to DEBUG for CI
+
+
+def log(msg: str):
+    sphinx_logger.log(logger_lvl, f'[POST] {msg:s}')
+
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import re
-import sys
-
-from docutils.nodes import Text, Node
-
-# required for autodoc
 sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'HABApp'
-copyright = '2022, spacemanspiff2007'
+copyright = '2023, spacemanspiff2007'
 author = 'spacemanspiff2007'
 
 # The short X.Y version
@@ -248,6 +264,8 @@ autodoc_pydantic_field_swap_name_and_alias = True
 regex_path = re.compile(r"^\w+Path\('([^']+)'\)")
 assert regex_path.search('WindowsPath(\'lib\')').group(1) == 'lib'
 
+regex_item = re.compile(r'(class \w+Item)\(.+\)')
+
 # nicer type values
 TYPE_REPLACEMENTS = {
     '_MissingType.MISSING': '<MISSING>',
@@ -274,9 +292,16 @@ def replace_node_contents(node: Node):
 
     replacement = TYPE_REPLACEMENTS.get(node_text)
 
+    # https://www.sphinx-doc.org/en/master/extdev/nodes.html
+    if isinstance(node, desc_signature) and node.attributes.get('fullname', '').endswith('Item'):
+        log(f'Removing constructor signature of {", ".join(node.attributes["ids"])}')
+        assert len(node.children) == 3
+        signature_node = node.children[2]
+        signature_node.children = []
+
     # Replace default value
     # WindowsPath('config') -> 'config'
-    if node_text.endswith(')') and (m := regex_path.search(node_text)) is not None:
+    if replacement is None and node_text.endswith(')') and (m := regex_path.search(node_text)) is not None:
         replacement = f"'{m.group(1)}'"
 
     # # Type hints
@@ -305,3 +330,18 @@ def transform_desc(app, domain, objtype: str, contentnode):
 
 def setup(app):
     app.connect('object-description-transform', transform_desc)
+
+
+# -- Options for intersphinx -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+if IS_RTD_BUILD:
+    intersphinx_mapping = {
+        'python': ('https://docs.python.org/3', None)
+    }
+
+
+# Don't show warnings for missing python references since these are created via intersphinx during the RTD build
+if not IS_RTD_BUILD:
+    nitpick_ignore_regex.append(
+        (re.compile(r'py:data|py:class'), re.compile(r'typing\..+'))
+    )

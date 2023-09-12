@@ -5,13 +5,13 @@ from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBo
 
 
 class ContextBoundObj:
-    def __init__(self, parent_ctx: Optional['HINT_CONTEXT_OBJ'], **kwargs):
+    def __init__(self, parent_ctx: Optional['Context'], **kwargs):
         super().__init__(**kwargs)
         self._parent_ctx = parent_ctx
         if parent_ctx is not None:
             parent_ctx.add_obj(self)
 
-    def _ctx_link(self, parent_ctx: 'HINT_CONTEXT_OBJ'):
+    def _ctx_link(self, parent_ctx: 'Context'):
         assert isinstance(parent_ctx, Context)
         if self._parent_ctx is not None:
             raise ContextBoundObjectIsAlreadyLinkedError()
@@ -32,13 +32,13 @@ HINT_CONTEXT_BOUND_OBJ = TypeVar('HINT_CONTEXT_BOUND_OBJ', bound=ContextBoundObj
 
 class Context:
     def __init__(self):
-        self.objs: Set[HINT_CONTEXT_BOUND_OBJ] = set()
+        self.objs: Set[ContextBoundObj] = set()
 
-    def add_obj(self, obj: HINT_CONTEXT_BOUND_OBJ):
+    def add_obj(self, obj: ContextBoundObj):
         assert isinstance(obj, ContextBoundObj)
         self.objs.add(obj)
 
-    def remove_obj(self, obj: HINT_CONTEXT_BOUND_OBJ):
+    def remove_obj(self, obj: ContextBoundObj):
         assert isinstance(obj, ContextBoundObj)
         self.objs.remove(obj)
 
@@ -52,10 +52,7 @@ class Context:
         raise NotImplementedError()
 
 
-HINT_CONTEXT_OBJ = TypeVar('HINT_CONTEXT_OBJ', bound=Context)
-
-
 class ContextProvidingObj:
-    def __init__(self, context: Optional[HINT_CONTEXT_OBJ] = None, **kwargs):
+    def __init__(self, context: Optional[Context] = None, **kwargs):
         super().__init__(**kwargs)
-        self._habapp_ctx: HINT_CONTEXT_OBJ = context
+        self._habapp_ctx: Context = context

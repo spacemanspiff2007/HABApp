@@ -80,6 +80,9 @@ Example
                                # Useful for testing rules from another machine.
 
 
+It's possible to use environment variables and files (e.g. docker secrets) in the configuration.
+See `the easyconfig documentation <https://easyconfig.readthedocs.io>`_ for the exact syntax and examples.
+
 
 Configuration Reference
 ======================================

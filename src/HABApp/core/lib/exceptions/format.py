@@ -1,5 +1,14 @@
 from traceback import format_exception as _format_exception
-from typing import Tuple, Union, Any, List
+from types import TracebackType
+from typing import Tuple, Union, Any, List, Type
+
+from HABApp.core.const.const import PYTHON_310
+
+if PYTHON_310:
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 
 from stack_data import FrameInfo, Options
 
@@ -33,7 +42,10 @@ def fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
     return new_tb
 
 
-def format_exception(e: Union[Exception, Tuple[Any, Any, Any]]) -> List[str]:
+HINT_EXCEPTION: TypeAlias = Union[Exception, Tuple[Type[Exception], Exception, TracebackType]]
+
+
+def format_exception(e: HINT_EXCEPTION) -> List[str]:
     tb: List[str] = []
 
     try:

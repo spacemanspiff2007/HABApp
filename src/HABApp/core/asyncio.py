@@ -1,11 +1,12 @@
 from asyncio import Future as _Future
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
-from contextvars import ContextVar as _ContextVar
-from typing import Any as _Any, Callable
+from contextvars import ContextVar as _ContextVar, Token
+from typing import Any as _Any, Callable, Final, Optional
 from typing import Callable as _Callable
 from typing import Coroutine as _Coroutine
 from typing import Optional as _Optional
 from typing import TypeVar as _TypeVar
+
 from HABApp.core.const import loop
 from HABApp.core.const.const import PYTHON_310
 
@@ -16,6 +17,27 @@ else:
 
 
 async_context = _ContextVar('async_ctx')
+
+
+class AsyncContext:
+    def __init__(self, value: str):
+        self.value: Final = value
+        self.token: Optional[Token[str]] = None
+        self.parent: Optional[AsyncContext] = None
+
+    def __enter__(self):
+        assert self.token is None, self
+        self.parent = async_context.get(None)
+        self.token = async_context.set(self.value)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        async_context.reset(self.token)
+
+    def __repr__(self):
+        parent: str = ''
+        if self.parent:
+            parent = f'{self.parent} -> '
+        return f'<{self.__class__.__name__} {parent:s}{self.value:s}>'
 
 
 class AsyncContextError(Exception):

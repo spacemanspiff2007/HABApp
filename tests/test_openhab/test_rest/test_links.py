@@ -1,4 +1,5 @@
-from HABApp.openhab.definitions.rest import ItemChannelLinkDefinition
+from HABApp.openhab.definitions.rest import ItemChannelLinkResp
+from msgspec import convert
 
 
 def test_simple():
@@ -8,9 +9,9 @@ def test_simple():
         "itemName": "ZWaveItem1",
         'editable': False,
     }
-    o = ItemChannelLinkDefinition(**_in)
-    assert o.channel_uid == 'zwave:device:controller:node15:sensor_luminance'
-    assert o.item_name == 'ZWaveItem1'
+    o = convert(_in, type=ItemChannelLinkResp)
+    assert o.channel == 'zwave:device:controller:node15:sensor_luminance'
+    assert o.item == 'ZWaveItem1'
 
 
 def test_configuration():
@@ -23,7 +24,7 @@ def test_configuration():
         "itemName": "ZWaveItem1",
         'editable': False,
     }
-    o = ItemChannelLinkDefinition(**_in)
-    assert o.channel_uid == 'zwave:device:controller:node15:sensor_luminance'
-    assert o.item_name == 'ZWaveItem1'
+    o = convert(_in, type=ItemChannelLinkResp)
+    assert o.channel == 'zwave:device:controller:node15:sensor_luminance'
+    assert o.item == 'ZWaveItem1'
     assert o.configuration == {'profile': 'follow', 'offset': 1}

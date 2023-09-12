@@ -6,7 +6,7 @@ from immutables import Map
 from HABApp.core.const import MISSING
 from HABApp.core.items import BaseValueItem
 from HABApp.core.lib.funcs import compare as _compare
-from HABApp.openhab.interface import get_persistence_data, post_update, send_command
+from HABApp.openhab.interface_sync import get_persistence_data, post_update, send_command
 
 
 class MetaData(NamedTuple):

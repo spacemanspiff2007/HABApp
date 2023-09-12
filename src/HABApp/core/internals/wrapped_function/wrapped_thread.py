@@ -10,7 +10,7 @@ from typing import Callable, Any, Set, Final, Dict, Tuple
 from typing import Optional
 
 from HABApp.core.const import loop
-from HABApp.core.internals import HINT_CONTEXT_OBJ, ContextProvidingObj
+from HABApp.core.internals import Context, ContextProvidingObj
 from .base import WrappedFunctionBase, default_logger
 
 POOL: Optional[ThreadPoolExecutor] = None
@@ -50,7 +50,7 @@ HINT_FUNC_SYNC = Callable[..., Any]
 
 class PoolFunc(ContextProvidingObj):
     def __init__(self, parent: 'WrappedThreadFunction', func_obj: HINT_FUNC_SYNC, func_args: Tuple[Any, ...],
-                 func_kwargs: Dict[str, Any], context: Optional[HINT_CONTEXT_OBJ] = None, **kwargs):
+                 func_kwargs: Dict[str, Any], context: Optional[Context] = None, **kwargs):
         super().__init__(context=context, **kwargs)
         self.parent: Final = parent
         self.func_obj: Final = func_obj
@@ -125,7 +125,7 @@ class WrappedThreadFunction(WrappedFunctionBase):
                  warn_too_long=True,
                  name: Optional[str] = None,
                  logger: Optional[logging.Logger] = None,
-                 context: Optional[HINT_CONTEXT_OBJ] = None):
+                 context: Optional[Context] = None):
 
         super().__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)

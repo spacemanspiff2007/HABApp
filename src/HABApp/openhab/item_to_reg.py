@@ -83,7 +83,7 @@ def get_members(group_name: str) -> Tuple['HABApp.openhab.items.OpenhabItem', ..
 # ----------------------------------------------------------------------------------------------------------------------
 # Thing handling
 # ----------------------------------------------------------------------------------------------------------------------
-def add_thing_to_registry(data: Union['HABApp.openhab.definitions.rest.OpenhabThingDefinition',
+def add_thing_to_registry(data: Union['HABApp.openhab.definitions.rest.ThingResp',
                                       'HABApp.openhab.events.thing_events.ThingAddedEvent']):
 
     if isinstance(data, HABApp.openhab.events.thing_events.ThingAddedEvent):
@@ -91,7 +91,7 @@ def add_thing_to_registry(data: Union['HABApp.openhab.definitions.rest.OpenhabTh
         status: ThingStatusEnum = THING_STATUS_DEFAULT
         status_detail: ThingStatusDetailEnum = THING_STATUS_DETAIL_DEFAULT
         status_description: str = ''
-    elif isinstance(data, HABApp.openhab.definitions.rest.OpenhabThingDefinition):
+    elif isinstance(data, HABApp.openhab.definitions.rest.ThingResp):
         name = data.uid
         status = data.status.status
         status_detail = data.status.detail

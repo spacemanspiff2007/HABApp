@@ -1,6 +1,6 @@
 from pytest import fixture, raises
 
-from HABApp.openhab.connection_logic.plugin_things.thing_config import ThingConfigChanger
+from HABApp.openhab.connection.plugins.plugin_things.thing_config import ThingConfigChanger
 
 
 @fixture

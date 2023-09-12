@@ -47,12 +47,12 @@ class OpenhabTmpItem:
         self.remove()
 
     def remove(self):
-        HABApp.openhab.interface.remove_item(self.name)
+        HABApp.openhab.interface_sync.remove_item(self.name)
 
     def _create(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
                 group_type: str = '', group_function: str = '',
                 group_function_params: List[str] = []):
-        interface = HABApp.openhab.interface
+        interface = HABApp.openhab.interface_sync
         interface.create_item(self.type, self.name, label=label, category=category,
                               tags=tags, groups=groups, group_type=group_type,
                               group_function=group_function, group_function_params=group_function_params)

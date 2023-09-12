@@ -5,7 +5,7 @@ import HABApp.openhab.events
 # isort: split
 
 import HABApp.openhab.interface_async
-import HABApp.openhab.interface
+import HABApp.openhab.interface_sync
 
 # isort: split
 

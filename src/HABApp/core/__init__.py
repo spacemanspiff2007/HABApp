@@ -7,6 +7,11 @@ from HABApp.core import errors
 from HABApp.core import asyncio
 
 # isort: split
+
+# The connection manager has no dependencies - that's why we can set it up before the internals
+from HABApp.core.connections import Connections
+
+# isort: split
 from HABApp.core import internals
 
 from HABApp.core import wrapper

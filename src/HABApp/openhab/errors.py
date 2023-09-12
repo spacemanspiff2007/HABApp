@@ -16,7 +16,7 @@ class OpenhabDisconnectedError(HABAppOpenhabError):
     pass
 
 
-class ExpectedSuccessFromOpenhab(HABAppOpenhabError):
+class OpenhabCredentialsInvalidError(HABAppOpenhabError):
     pass
 
 
@@ -63,3 +63,44 @@ class MetadataNotEditableError(HABAppOpenhabError):
     @classmethod
     def create_text(cls, item: str, namespace: str):
         return cls(f'Metadata {namespace} for {item} is not editable!')
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Transformation errors
+# ----------------------------------------------------------------------------------------------------------------------
+class TransformationsRequestError(HABAppOpenhabError):
+    pass
+
+
+class MapTransformationError(HABAppOpenhabError):
+    pass
+
+
+class MapTransformationNotFound(HABAppOpenhabError):
+    pass
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Persistence errors
+# ----------------------------------------------------------------------------------------------------------------------
+class PersistenceRequestError(HABAppOpenhabError):
+    pass
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Link errors
+# ----------------------------------------------------------------------------------------------------------------------
+class LinkRequestError(HABAppOpenhabError):
+    pass
+
+
+class LinkNotFoundError(HABAppOpenhabError):
+    @classmethod
+    def from_names(cls, item: str, channel: str):
+        return cls(f'Link {item:s} <-> {channel:s} not found!')
+
+
+class LinkNotEditableError(HABAppOpenhabError):
+    @classmethod
+    def from_names(cls, item: str, channel: str):
+        return cls(f'Link {item:s} <-> {channel:s} is not editable!')

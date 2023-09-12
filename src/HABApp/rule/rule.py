@@ -3,7 +3,7 @@ import re
 import sys
 import warnings
 from pathlib import Path
-from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal
+from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal, TypeVar, Callable, Final
 
 import HABApp
 import HABApp.core
@@ -11,6 +11,7 @@ import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.asyncio import create_task
+from HABApp.core.const.const import PYTHON_310
 from HABApp.core.const.hints import HINT_EVENT_CALLBACK
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextProvidingObj, \
     uses_post_event, EventFilterBase, uses_item_registry, ContextBoundEventBusListener
@@ -22,6 +23,12 @@ from .interfaces import async_subprocess_exec
 from .interfaces.rule_subprocess import build_exec_params, HINT_PYTHON_PATH, HINT_EXEC_ARGS, HINT_PROCESS_CB_SIMPLE, \
     HINT_PROCESS_CB_FULL
 from .rule_hook import get_rule_hook as _get_rule_hook
+
+if PYTHON_310:
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
+
 
 log = logging.getLogger('HABApp.Rule')
 
@@ -60,9 +67,9 @@ class Rule(ContextProvidingObj):
 
         # interfaces
         self.async_http = interfaces.http
-        self.mqtt: HABApp.mqtt.interface = HABApp.mqtt.interface
-        self.oh: HABApp.openhab.interface = HABApp.openhab.interface
-        self.openhab: HABApp.openhab.interface = self.oh
+        self.mqtt: Final = HABApp.mqtt.interface_sync
+        self.oh: Final = HABApp.openhab.interface_sync
+        self.openhab: Final = self.oh
 
     def on_rule_loaded(self):
         """Override this to implement logic that will be called when the rule and the file has been successfully loaded
@@ -303,3 +310,16 @@ class Rule(ContextProvidingObj):
 
             ret.append(item)
         return ret
+
+
+PSPEC_RULE = ParamSpec('PSPEC_RULE')
+TYPE_RULE = TypeVar('TYPE_RULE', bound=Rule)
+
+
+def create_rule(f: Callable[PSPEC_RULE, TYPE_RULE], *args: PSPEC_RULE.args, **kwargs: PSPEC_RULE.kwargs) -> TYPE_RULE:
+    try:
+        _get_rule_hook()
+    except RuntimeError:
+        return None
+
+    return f(*args, **kwargs)

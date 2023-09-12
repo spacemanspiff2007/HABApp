@@ -84,6 +84,3 @@ class EventBus:
     def remove_all_listeners(self):
         with self._lock:
             self._listeners.clear()
-
-
-HINT_EVENT_BUS = TypeVar('HINT_EVENT_BUS', bound=EventBus)

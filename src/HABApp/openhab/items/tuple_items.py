@@ -14,13 +14,13 @@ if TYPE_CHECKING:
 class CallItem(OpenhabItem):
     """CallItem which accepts and converts the data types from OpenHAB
 
-    :ivar str name:
-    :ivar Tuple[str, ...] value:
+    :ivar str name: |oh_item_desc_name|
+    :ivar Tuple[str, ...] value: |oh_item_desc_value|
 
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
-    :ivar Mapping[str, MetaData] metadata:
+    :ivar Optional[str] label: |oh_item_desc_label|
+    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
+    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
     @staticmethod
@@ -41,13 +41,13 @@ class CallItem(OpenhabItem):
 class LocationItem(OpenhabItem):
     """LocationItem which accepts and converts the data types from OpenHAB
 
-    :ivar str name:
-    :ivar Optional[Tuple[float, float, Optional[float]]] value:
+    :ivar str name: |oh_item_desc_name|
+    :ivar Optional[Tuple[float, float, Optional[float]]] value: |oh_item_desc_value|
 
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
-    :ivar Mapping[str, MetaData] metadata:
+    :ivar Optional[str] label: |oh_item_desc_label|
+    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
+    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
     @staticmethod

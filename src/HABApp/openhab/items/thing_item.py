@@ -8,7 +8,7 @@ from HABApp.core.items import BaseItem
 from HABApp.openhab.definitions import ThingStatusEnum, ThingStatusDetailEnum
 from HABApp.openhab.definitions.things import THING_STATUS_DEFAULT, THING_STATUS_DETAIL_DEFAULT
 from HABApp.openhab.events import ThingConfigStatusInfoEvent, ThingStatusInfoEvent, ThingUpdatedEvent
-from HABApp.openhab.interface import set_thing_enabled
+from HABApp.openhab.interface_sync import set_thing_enabled
 
 
 class Thing(BaseItem):

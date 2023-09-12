@@ -7,7 +7,7 @@ import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 from .bench_base import BenchBaseRule
 from .bench_times import BenchContainer, BenchTime
-from HABApp.mqtt.interface import publish
+from HABApp.mqtt.interface_sync import publish
 
 LOCK = Lock()
 

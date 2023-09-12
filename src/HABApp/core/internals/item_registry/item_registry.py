@@ -15,20 +15,20 @@ log = logging.getLogger('HABApp.Items')
 class ItemRegistry:
     def __init__(self):
         self._lock = threading.Lock()
-        self._items: Dict[str, _HINT_ITEM_OBJ] = {}
+        self._items: Dict[str, ItemRegistryItem] = {}
 
-    def item_exists(self, name: Union[str, _HINT_ITEM_OBJ]) -> bool:
+    def item_exists(self, name: Union[str, ItemRegistryItem]) -> bool:
         if not isinstance(name, str):
             name = name.name
         return name in self._items
 
-    def get_item(self, name: str) -> _HINT_ITEM_OBJ:
+    def get_item(self, name: str) -> ItemRegistryItem:
         try:
             return self._items[name]
         except KeyError:
             raise ItemNotFoundException(name) from None
 
-    def get_items(self) -> Tuple[_HINT_ITEM_OBJ, ...]:
+    def get_items(self) -> Tuple[ItemRegistryItem, ...]:
         return tuple(self._items.values())
 
     def get_item_names(self) -> Tuple[str, ...]:
@@ -67,6 +67,3 @@ class ItemRegistry:
         log.debug(f'Removed {name} ({item.__class__.__name__})')
         item._on_item_removed()
         return item
-
-
-HINT_ITEM_REGISTRY = TypeVar('HINT_ITEM_REGISTRY', bound=ItemRegistry)

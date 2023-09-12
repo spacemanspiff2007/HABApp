@@ -1,4 +1,8 @@
-from HABApp.openhab.definitions.rest.items import GroupFunctionDefinition
+from json import dumps
+
+from msgspec.json import decode
+
+from HABApp.openhab.definitions.rest.items import GroupFunctionResp
 
 
 def test_or():
@@ -9,13 +13,13 @@ def test_or():
             "OFF"
         ]
     }
-    o = GroupFunctionDefinition.parse_obj(_in)  # type: GroupFunctionDefinition
+    o = decode(dumps(_in), type=GroupFunctionResp)
     assert o.name == 'OR'
     assert o.params == ['ON', 'OFF']
 
 
 def test_eq():
     _in = {"name": "EQUALITY"}
-    o = GroupFunctionDefinition.parse_obj(_in)  # type: GroupFunctionDefinition
+    o = decode(dumps(_in), type=GroupFunctionResp)
     assert o.name == 'EQUALITY'
-    assert o.params is None
+    assert o.params == []

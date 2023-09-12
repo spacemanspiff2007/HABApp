@@ -1,5 +1,6 @@
 import asyncio
 import sys
+from asyncio import get_event_loop_policy
 from json import loads
 from pathlib import Path
 from unittest.mock import Mock
@@ -11,6 +12,12 @@ from HABApp.rule import Rule, FinishedProcessInfo
 from HABApp.rule.interfaces import rule_subprocess
 from ..helpers import LogCollector
 from ..rule_runner import SimpleRuleRunner
+
+# It's either subprocesses or async-mqtt but never both
+pytestmark = pytest.mark.skipif(
+    get_event_loop_policy().__class__.__name__ == 'WindowsSelectorEventLoopPolicy',
+    reason='Subprocesses not supported with the WindowsSelectorEventLoopPolicy'
+)
 
 
 class ProcRule(Rule):

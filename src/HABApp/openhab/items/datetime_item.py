@@ -14,13 +14,13 @@ if TYPE_CHECKING:
 class DatetimeItem(OpenhabItem):
     """DateTimeItem which accepts and converts the data types from OpenHAB
 
-    :ivar str name:
-    :ivar datetime value:
+    :ivar str name: |oh_item_desc_name|
+    :ivar datetime value: |oh_item_desc_value|
 
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
-    :ivar Mapping[str, MetaData] metadata:
+    :ivar Optional[str] label: |oh_item_desc_label|
+    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
+    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
     @staticmethod
@@ -30,7 +30,8 @@ class DatetimeItem(OpenhabItem):
             dt = datetime.fromisoformat(state)
         else:
             pos_dot = state.find('.')
-            pos_plus = state.find('+')
+            if (pos_plus := state.rfind('+')) == -1:
+                pos_plus = state.rfind('-')
             if pos_plus - pos_dot > 6:
                 state = state[:pos_dot + 7] + state[pos_plus:]
             dt = datetime.strptime(state, '%Y-%m-%dT%H:%M:%S.%f%z')

@@ -1,4 +1,4 @@
-from HABApp.openhab.connection_logic.plugin_things.str_builder import StrBuilder
+from HABApp.openhab.connection.plugins.plugin_things.str_builder import StrBuilder
 
 
 def test_accessor():

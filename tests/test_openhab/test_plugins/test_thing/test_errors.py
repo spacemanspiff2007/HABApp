@@ -1,13 +1,13 @@
 import time
 
-from HABApp.openhab.connection_logic.plugin_things.plugin_things import ManualThingConfig
+from HABApp.openhab.connection.plugins.plugin_things.plugin_things import TextualThingConfigPlugin
 from tests.helpers import MockFile, TestEventBus, LogCollector
 
 
 async def test_errors(test_logs: LogCollector, eb: TestEventBus):
     eb.allow_errors = True
 
-    cfg = ManualThingConfig()
+    cfg = TextualThingConfigPlugin()
 
     data = [{"statusInfo": {"status": "ONLINE", "statusDetail": "NONE"}, "editable": True,
              "label": "Astronomische Sonnendaten",

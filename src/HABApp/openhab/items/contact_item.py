@@ -4,7 +4,7 @@ from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from ..definitions import OpenClosedValue
 from ...core.const import MISSING
 from ..errors import SendCommandNotSupported
-from HABApp.openhab.interface import post_update
+from HABApp.openhab.interface_sync import post_update
 
 if TYPE_CHECKING:
     Optional = Optional
@@ -20,13 +20,13 @@ CLOSED = OpenClosedValue.CLOSED
 class ContactItem(OpenhabItem):
     """ContactItem
 
-    :ivar str name:
-    :ivar str value:
+    :ivar str name: |oh_item_desc_name|
+    :ivar str value: |oh_item_desc_value|
 
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
-    :ivar Mapping[str, MetaData] metadata:
+    :ivar Optional[str] label: |oh_item_desc_label|
+    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
+    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
     @staticmethod

@@ -202,7 +202,7 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
     from datetime import time
 
     from HABApp import Rule
-    from HABApp.core.events import ValueChangeEvent
+    from HABApp.core.events import ValueChangeEventFilter
     from HABApp.openhab.items import SwitchItem, NumberItem
     from HABApp.util import EventListenerGroup
 
@@ -216,7 +216,7 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
 
             # use a list of items which will be subscribed with the same callback and event
             self.listeners = EventListenerGroup().add_listener(
-                [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEvent)
+                [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEventFilter())
 
             self.run.on_every_day(time(4), self.listen_sensors)
             self.run.on_every_day(time(8), self.sensors_cancel)

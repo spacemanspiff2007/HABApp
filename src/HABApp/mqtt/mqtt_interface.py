@@ -3,7 +3,7 @@ import typing
 import paho.mqtt.client as mqtt
 
 import HABApp
-from .mqtt_connection import STATUS, log
+from HABApp.mqtt.connection.mqtt_connection import STATUS, log
 from ..core.const.json import dump_json
 
 

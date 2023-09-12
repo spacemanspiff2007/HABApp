@@ -3,10 +3,10 @@ import time
 
 import HABApp
 from HABApp.core.events import ValueUpdateEventFilter
+from HABApp.mqtt.connection.handler import CONNECTION_HANDLER
 from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
-from HABApp.mqtt.mqtt_connection import connect, disconnect
-from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule
+from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule, run_coro
 
 log = logging.getLogger('HABApp.MqttTestEvents')
 
@@ -71,10 +71,10 @@ class TestMQTTEvents(TestBaseRule):
         assert self.mqtt.publish(topic, 'asdf', retain=True)
 
         # We need to reconnect to receive the message
-        disconnect()
-        connect()
-
-        time.sleep(0.1)
+        connection = CONNECTION_HANDLER.plugin_connection
+        run_coro(CONNECTION_HANDLER.on_disconnected(connection, connection.context))
+        run_coro(CONNECTION_HANDLER.on_connecting(connection, connection.context))
+        time.sleep(0.2)
         assert HABApp.core.Items.item_exists(topic) is True
 
         HABApp.core.Items.pop_item(topic)

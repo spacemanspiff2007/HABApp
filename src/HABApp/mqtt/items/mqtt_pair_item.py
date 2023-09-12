@@ -2,7 +2,7 @@ from typing import Optional
 
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_item_registry
-from HABApp.mqtt.mqtt_interface import publish
+from HABApp.mqtt.interface_sync import publish
 from . import MqttBaseItem
 
 Items = uses_item_registry()

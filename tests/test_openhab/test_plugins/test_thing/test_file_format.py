@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.openhab.connection_logic.plugin_things.cfg_validator import validate_cfg, UserItemCfg
+from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import validate_cfg, UserItemCfg
 from tests.helpers import TestEventBus
 
 
@@ -75,7 +75,7 @@ def test_cfg_item_builder():
 
 def test_item_cfg():
 
-    c = UserItemCfg.parse_obj({
+    c = UserItemCfg.model_validate({
         'type': 'Switch',
         'name': 'asdf',
         'metadata': {'a': 'b'}
@@ -84,7 +84,7 @@ def test_item_cfg():
     i = c.get_item({})
     assert i.metadata == {'a': {'value': 'b', 'config': {}}}
 
-    c = UserItemCfg.parse_obj({
+    c = UserItemCfg.model_validate({
         'type': 'Switch',
         'name': 'asdf',
         'metadata': {'k': {'value': 'b', 'config': {'d': 'e'}}},

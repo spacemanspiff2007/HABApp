@@ -1,5 +1,5 @@
-from HABApp.openhab.connection_logic.plugin_things.file_writer.formatter import FormatterScope
-from HABApp.openhab.connection_logic.plugin_things.file_writer.formatter_builder import ValueFormatter
+from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter import FormatterScope
+from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter_builder import ValueFormatter
 
 
 def test_scope():

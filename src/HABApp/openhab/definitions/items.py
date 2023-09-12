@@ -74,6 +74,7 @@ ITEM_DIMENSIONS: typing.Final = _get_str_enum_values(ItemDimensions)
 class GroupItemFunctions(StrEnum):
     AND = 'AND'
     AVG = 'AVG'
+    COUNT = 'COUNT'
     MAX = 'MAX'
     MIN = 'MIN'
     NAND = 'NAND'

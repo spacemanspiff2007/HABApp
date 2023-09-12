@@ -45,7 +45,7 @@ class TestOpenhabInterface(TestBaseRule):
         test_defs = []
         for type in get_openhab_test_types():
             test_defs.append((type, get_random_name(type)))
-        test_defs.append(('Number', 'HABApp_Ping'))
+        # test_defs.append(('Number', 'HABApp_Ping'))
 
         for item_type, item_name in test_defs:
             assert not self.openhab.item_exists(item_name)
@@ -120,13 +120,7 @@ class TestOpenhabInterface(TestBaseRule):
 
     def test_openhab_item_not_found(self):
         test_item = get_random_name('String')
-        try:
-            self.openhab.get_item(test_item)
-        except Exception as e:
-            if isinstance(e, HABApp.openhab.errors.ItemNotFoundError):
-                return None
-
-        return 'Exception not raised!'
+        assert self.openhab.get_item(test_item) is None
 
     def test_item_definition(self):
         self.openhab.get_item('TestGroupAVG')

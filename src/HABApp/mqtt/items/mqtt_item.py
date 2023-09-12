@@ -1,7 +1,7 @@
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_get_item, uses_item_registry
 from HABApp.core.items import BaseValueItem
-from HABApp.mqtt.mqtt_interface import publish
+from HABApp.mqtt.interface_sync import publish
 
 get_item = uses_get_item()
 item_registry = uses_item_registry()
@@ -40,7 +40,6 @@ class MqttItem(MqttBaseItem):
         :param payload: MQTT Payload
         :param qos: QoS, can be ``0``, ``1`` or ``2``. If not specified value from configuration file will be used.
         :param retain: retain message. If not specified value from configuration file will be used.
-        :return: 0 if successful
         """
 
         return publish(self.name, payload, qos=qos, retain=retain)

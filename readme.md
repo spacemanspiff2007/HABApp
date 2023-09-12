@@ -5,10 +5,9 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/habapp)
 
 ![PyPI](https://img.shields.io/pypi/v/HABapp)
-[![Downloads](https://pepy.tech/badge/habapp/month)](https://pepy.tech/project/habapp)
+[![Downloads](https://static.pepy.tech/badge/habapp/month)](https://pepy.tech/project/habapp)
 ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/spacemanspiff2007/habapp?label=docker)
 ![Docker Pulls](https://img.shields.io/docker/pulls/spacemanspiff2007/habapp)
-
 
 _Easy automation with MQTT and/or openHAB_
 
@@ -128,6 +127,19 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 23.09.0 (2023-XX-XX)
+- Switched version number scheme to CalVer (Calendar Versioning): ``YEAR.MONTH.COUNTER``
+- Fail fast when a value instead of a callback is passed to the event listener / scheduler
+- Completely removed types and type hints from traceback
+- Completely reworked connection logic for openHAB and mqtt
+- Added support for transformations
+- Updated dependencies:
+  - Improved performance
+  - Support for docker secrets and environment variables in the config file
+- Support sending scheduler datetimes to an item
+- Search in the docs finally works again
+- Updated dependencies
+
 #### 1.1.2 (2023-06-19)
 - Re-added `ItemStateEventFilter`
 - Improved parsing of `DateTime` values

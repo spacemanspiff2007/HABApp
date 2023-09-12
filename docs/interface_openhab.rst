@@ -37,6 +37,14 @@ It can be enabled through the gui in ``settings`` -> ``API Security`` -> ``Allow
 openHAB item types
 **************************************
 
+.. |oh_item_desc_name| replace:: Item name
+.. |oh_item_desc_value| replace:: Current item value (or state in openHAB wording)
+.. |oh_item_desc_label| replace:: Item label or ``None`` if not configured
+.. |oh_item_desc_tags| replace:: Item tags
+.. |oh_item_desc_group| replace:: The groups the item is in
+.. |oh_item_desc_metadata| replace:: Item metadata
+
+
 Description and example
 ======================================
 Items that are created from openHAB inherit all from :class:`~HABApp.openHAB.items.OpenhabItem` and
@@ -233,7 +241,7 @@ or through an ``OpenhabItem``.
 
 Function parameters
 ======================================
-.. automodule:: HABApp.openhab.interface
+.. automodule:: HABApp.openhab.interface_sync
    :members:
    :imported-members:
 
@@ -465,6 +473,41 @@ ItemCommandEventFilter
    :members:
    :inherited-members:
    :member-order: groupwise
+
+**************************************
+Transformations
+**************************************
+
+From openHAB 4 on it's possible to use the existing transformations in HABApp.
+Transformations are loaded every time when HABApp connects to openHAB.
+OpenHAB does not issue an event when the transformations change so in order for HABApp to
+pick up the changes either HABApp or openHAB has to be restarted.
+Available transformations are logged on connect.
+
+map
+======================================
+The `map transformation <https://www.openhab.org/addons/transformations/map/>`_ is returned as a dict.
+If the map transformation is defined with a default the default is used accordingly.
+
+Example:
+
+.. exec_code::
+    hide_output
+
+    # ------------ hide: start ------------
+    from HABApp.openhab.transformations._map.registry import MAP_REGISTRY
+    MAP_REGISTRY.objs['test.map'] = {'test_key': 'test_value'}, None
+    MAP_REGISTRY.objs['numbers.map'] = {1: 'test number meaning'}, None
+
+    # ------------ hide: stop -------------
+    from HABApp.openhab import transformations
+
+    TEST_MAP = transformations.map['test.map']  # load the transformation, can be used anywhere
+    print(TEST_MAP['test_key'])                 # It's a normal dict with keys as str and values as str
+
+    # if all keys or values are numbers they are automatically casted to an int
+    NUMBERS = transformations.map['numbers.map']
+    print(NUMBERS[1])   # Note that the key is an int
 
 
 **************************************

@@ -2,12 +2,12 @@ import json
 import logging
 import pprint
 
-import HABApp.openhab.connection_handler.http_connection
-import HABApp.openhab.connection_logic.connection
-from HABApp.config import CONFIG
+from pytest import MonkeyPatch
 
-FUNC_PATH = HABApp.openhab.connection_handler.func_async
-SSE_PATH = HABApp.openhab.connection_handler.sse_handler
+import HABApp.openhab.connection.handler
+import HABApp.openhab.connection.handler.func_async
+import HABApp.openhab.process_events
+from HABApp.config import CONFIG
 
 
 def shorten_url(url: str):
@@ -23,6 +23,8 @@ class RestPatcher:
         self.name = name
         self.logged_name = False
         self._log = logging.getLogger('HABApp.Rest')
+
+        self.monkeypatch = MonkeyPatch()
 
     def log(self, msg: str):
         # Log name when we log the first message
@@ -86,25 +88,22 @@ class RestPatcher:
         return new_call
 
     def __enter__(self):
-        self._get = FUNC_PATH.get
-        self._put = FUNC_PATH.put
-        self._post = FUNC_PATH.post
-        self._delete = FUNC_PATH.delete
+        m = self.monkeypatch
 
-        self._sse = SSE_PATH.get_event
+        # event handler
+        module = HABApp.openhab.process_events
+        m.setattr(module, 'get_event', self.wrap_sse(module.get_event))
 
-        FUNC_PATH.get = self.wrap(self._get)
-        FUNC_PATH.put = self.wrap(self._put)
-        FUNC_PATH.post = self.wrap(self._post)
-        FUNC_PATH.delete = self.wrap(self._delete)
+        # http functions
+        for module in (HABApp.openhab.connection.handler, HABApp.openhab.connection.handler.func_async,):
+            for name in ('get', 'put', 'post', 'delete'):
+                m.setattr(module, name, self.wrap(getattr(module, name)))
 
-        SSE_PATH.get_event = self.wrap_sse(self._sse)
+        # additional communication
+        module = HABApp.openhab.connection.plugins.out
+        m.setattr(module, 'put', self.wrap(getattr(module, 'put')))
+        m.setattr(module, 'post', self.wrap(getattr(module, 'post')))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        FUNC_PATH.get = self._get
-        FUNC_PATH.put = self._put
-        FUNC_PATH.post = self._post
-        FUNC_PATH.delete = self._delete
-
-        SSE_PATH.get_event = self._sse
+        self.monkeypatch.undo()
         return False

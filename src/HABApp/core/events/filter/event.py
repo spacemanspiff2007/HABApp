@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, Final
 from typing import get_type_hints as _get_type_hints
+from inspect import isclass
 
 from HABApp.core.const import MISSING
 from HABApp.core.const.hints import HINT_ANY_CLASS
@@ -11,8 +12,9 @@ class EventFilter(EventFilterBase):
 
     def __init__(self, event_class: HINT_ANY_CLASS, **kwargs):
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
+        assert isclass(event_class), f'Class for event required! Passed {event_class} ({type(event_class)})'
 
-        self.event_class = event_class
+        self.event_class: Final = event_class
 
         # Property filters
         self.attr_name1: Optional[str] = None

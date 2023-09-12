@@ -3,7 +3,7 @@ from asyncio import iscoroutinefunction
 from typing import Union, Optional, Callable, Type
 
 from HABApp.config import CONFIG
-from HABApp.core.internals import HINT_CONTEXT_OBJ
+from HABApp.core.internals import Context
 from HABApp.core.internals.wrapped_function.base import TYPE_WRAPPED_FUNC_OBJ
 from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction, HINT_FUNC_ASYNC
 from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunction
@@ -15,7 +15,17 @@ def wrap_func(func: Union[HINT_FUNC_SYNC, HINT_FUNC_ASYNC],
               warn_too_long=True,
               name: Optional[str] = None,
               logger: Optional[logging.Logger] = None,
-              context: Optional[HINT_CONTEXT_OBJ] = None) -> TYPE_WRAPPED_FUNC_OBJ:
+              context: Optional[Context] = None) -> TYPE_WRAPPED_FUNC_OBJ:
+
+    # Check that it's actually a callable, so we fail fast and not when we try to run the function.
+    # Some users pass the result of the function call (e.g. func()) by accident
+    # which will inevitably fail once we try to run the function.
+    if not callable(func):
+        try:
+            type_name: str = func.__class__.__name__
+        except Exception:
+            type_name = type(func)
+        raise ValueError(f'Callable or coroutine function expected! Got "{func}" (type {type_name:s})')
 
     if iscoroutinefunction(func):
         return WrappedAsyncFunction(func, name=name, logger=logger, context=context)
