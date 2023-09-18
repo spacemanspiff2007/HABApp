@@ -7,3 +7,4 @@ from .ping import PingPlugin
 from .wait_for_restore import WaitForPersistenceRestore
 from .overview_things import ThingOverviewPlugin
 from .plugin_things import TextualThingConfigPlugin
+from .overview_broken_links import BrokenLinksPlugin
