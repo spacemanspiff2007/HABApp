@@ -127,7 +127,11 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 23.09.0 (2023-XX-XX)
+#### 23.09.1 (2023-09-18)
+- Log a warning for broken links between items and things
+- Fix CI
+
+#### 23.09.0 (2023-09-12)
 - Switched version number scheme to CalVer (Calendar Versioning): ``YEAR.MONTH.COUNTER``
 - Fail fast when a value instead of a callback is passed to the event listener / scheduler
 - Completely removed types and type hints from traceback
