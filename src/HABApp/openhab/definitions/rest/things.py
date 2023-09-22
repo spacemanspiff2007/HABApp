@@ -12,7 +12,7 @@ class ChannelResp(Struct, kw_only=True):
 
     uid: str
     id: str
-    channel_type: str = field(name='channelTypeUID')
+    channel_type: Optional[str] = field(default=None, name='channelTypeUID')
     item_type: Optional[str] = field(default=None, name='itemType')
     kind: str
     label: str = ''
