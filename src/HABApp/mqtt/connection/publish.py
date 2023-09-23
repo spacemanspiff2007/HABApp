@@ -87,4 +87,4 @@ def publish(topic: Union[str, ItemRegistryItem], payload, qos: Optional[QOS] = N
     :param qos: QoS, can be 0, 1 or 2. If not specified the value from configuration file will be used.
     :param retain: retain message. If not specified the value from configuration file will be used.
     """
-    run_func_from_async(async_publish,topic, payload, qos, retain)
+    run_func_from_async(async_publish, topic, payload, qos, retain)
