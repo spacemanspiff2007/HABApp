@@ -127,6 +127,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 23.09.2 (2023-09-24)
+- Made channel type on a ``Thing`` optional (#416)
+- Fixed an issue with mqtt publish and reconnect
+
 #### 23.09.1 (2023-09-18)
 - Log a warning for broken links between items and things
 - Fix CI
