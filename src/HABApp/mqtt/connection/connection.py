@@ -8,6 +8,7 @@ from aiomqtt import Client, MqttError
 import HABApp
 from HABApp.core.asyncio import AsyncContext
 from HABApp.core.connections import BaseConnection, Connections, ConnectionStateToEventBusPlugin, AutoReconnectPlugin
+from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.connections.base_plugin import BaseConnectionPluginConnectedTask
 from HABApp.core.const.const import PYTHON_310
 
@@ -67,5 +68,7 @@ class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
         try:
             with AsyncContext('MQTT'), connection.handle_exception(self.mqtt_task):
                 await self.mqtt_task()
+        except AlreadyHandledException:
+            pass
         finally:
             log.debug(f'{self.task.name} task stop')

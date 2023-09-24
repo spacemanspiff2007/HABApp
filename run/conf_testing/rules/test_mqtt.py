@@ -2,8 +2,8 @@ import logging
 import time
 
 import HABApp
+from HABApp.core.connections import Connections, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
-from HABApp.mqtt.connection.handler import CONNECTION_HANDLER
 from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
 from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule, run_coro
@@ -63,21 +63,28 @@ class TestMQTTEvents(TestBaseRule):
         topic = 'mqtt/item/creation'
         assert HABApp.core.Items.item_exists(topic) is False
 
-        assert self.mqtt.publish(topic, 'asdf')
+        self.mqtt.publish(topic, 'asdf')
         time.sleep(0.1)
         assert HABApp.core.Items.item_exists(topic) is False
 
         # We create the item only on retain
-        assert self.mqtt.publish(topic, 'asdf', retain=True)
-
-        # We need to reconnect to receive the message
-        connection = CONNECTION_HANDLER.plugin_connection
-        run_coro(CONNECTION_HANDLER.on_disconnected(connection, connection.context))
-        run_coro(CONNECTION_HANDLER.on_connecting(connection, connection.context))
+        self.mqtt.publish(topic, 'asdf', retain=True)
         time.sleep(0.2)
+
+        run_coro(self.trigger_reconnect())
+
+        time.sleep(0.2)
+        connection = Connections.get('mqtt')
+        while not connection.is_online:
+            time.sleep(0.2)
         assert HABApp.core.Items.item_exists(topic) is True
 
         HABApp.core.Items.pop_item(topic)
+
+    async def trigger_reconnect(self):
+        connection = Connections.get('mqtt')
+        connection.status._set_manual(ConnectionStatus.DISCONNECTED)
+        connection.advance_status_task.start_if_not_running()
 
 
 TestMQTTEvents()
