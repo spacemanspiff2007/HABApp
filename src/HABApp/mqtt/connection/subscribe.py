@@ -128,6 +128,12 @@ class SubscriptionHandler(MqttPlugin):
 
     async def on_connected(self):
         await super().on_connected()
+
+        # Since we are freshly connected we have not yet subscribed to anything
+        # We need to clear this here because in case of error it might still have the topics
+        # from the last successful subscription in this dict
+        self.subscribed_to.clear()
+
         self.sub_task.start_if_not_running()
         await self.sub_task.wait()
 
