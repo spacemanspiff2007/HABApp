@@ -16,7 +16,7 @@ def convert_to_oh_type(obj: Any) -> str:
         if 'e-' not in v:
             return v
 
-        v = f'{obj:.{int(v.split("e-")[1]) + 6}f}'
+        v = f'{obj:.{int(v.split("e-", maxsplit=1)[1]) + 6}f}'
         return v.rstrip('0')
 
     if isinstance(obj, datetime):

@@ -127,6 +127,10 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 23.XX.X (2023-XX-XX)
+- Fix for very small float values (#425)
+- Fix for writing to persistence (#424)
+
 #### 23.09.2 (2023-09-24)
 - Made channel type on a ``Thing`` optional (#416)
 - Fixed an issue with mqtt publish and reconnect
