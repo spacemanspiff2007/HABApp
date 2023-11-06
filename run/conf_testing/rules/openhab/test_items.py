@@ -6,7 +6,7 @@ from HABApp.core.const import loop
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.interface_async import async_get_items
-from HABApp.openhab.items import GroupItem, StringItem, ColorItem
+from HABApp.openhab.items import GroupItem, StringItem, ColorItem, NumberItem
 from HABAppTests import OpenhabTmpItem, TestBaseRule, ItemWaiter, EventWaiter
 
 
@@ -21,6 +21,7 @@ class OpenhabItems(TestBaseRule):
         self.add_test('TestExisting', self.test_existing)
         self.add_test('TestColor', self.test_color)
         self.add_test('TestGroupFunction', self.test_group_func)
+        self.add_test('TestSmallValues', self.test_small_float_values)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -65,6 +66,18 @@ class OpenhabItems(TestBaseRule):
 
         self.openhab.get_item(self.item_group.name)
         asyncio.run_coroutine_threadsafe(async_get_items(), loop).result()
+
+    @OpenhabTmpItem.create('Number', arg_name='tmp_item')
+    def test_small_float_values(self, tmp_item: OpenhabTmpItem):
+        # https://github.com/spacemanspiff2007/HABApp/issues/425
+        item = NumberItem.get_item(tmp_item.name)
+        assert item.value is None
+
+        for i in range(3, 16, 3):
+            with ItemWaiter(item) as waiter:
+                value = 1 / 10 ** i
+                item.oh_post_update(value)
+                waiter.wait_for_state(value)
 
     @OpenhabTmpItem.use('String', arg_name='oh_item')
     def test_tags(self, oh_item: OpenhabTmpItem):

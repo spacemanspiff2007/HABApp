@@ -94,7 +94,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             return None
 
         mgr = _RequestContextManager(
-            self.request(METH_POST, url, data=data, json=json, **kwargs, **self.options, **kwargs)
+            self.request(METH_POST, url, data=data, json=json, **self.options, **kwargs)
         )
         if data is None:
             data = json
@@ -105,7 +105,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             return None
 
         mgr = _RequestContextManager(
-            self.request(METH_PUT, url, data=data, json=json, **kwargs, **self.options, **kwargs)
+            self.request(METH_PUT, url, data=data, json=json, **self.options, **kwargs)
         )
         if data is None:
             data = json
@@ -116,7 +116,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             return None
 
         mgr = _RequestContextManager(
-            self.request(METH_DELETE, url, data=data, json=json, **kwargs, **self.options, **kwargs)
+            self.request(METH_DELETE, url, data=data, json=json, **self.options, **kwargs)
         )
         if data is None:
             data = json

@@ -8,8 +8,16 @@ from HABApp.core.types import RGB, HSB
 
 
 def convert_to_oh_type(obj: Any) -> str:
-    if isinstance(obj, (str, int, float, bool)):
+    if isinstance(obj, (str, int, bool)):
         return str(obj)
+
+    if isinstance(obj, float):
+        v = str(obj)
+        if 'e-' not in v:
+            return v
+
+        v = f'{obj:.{int(v.split("e-")[1]) + 6}f}'
+        return v.rstrip('0')
 
     if isinstance(obj, datetime):
         # Add timezone (if not yet defined) to string, then remote anything below ms.
