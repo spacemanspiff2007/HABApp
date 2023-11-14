@@ -1,4 +1,4 @@
-aiohttp     == 3.8.5
+aiohttp     == 3.8.6
 pydantic    == 2.3.0
 msgspec     == 0.18.2
 pendulum    == 2.1.2
