@@ -60,3 +60,8 @@ builtins-ignorelist = ["id", "input"]
 [lint.per-file-ignores]
 "docs/conf.py" = ["INP001", "A001"]
 "setup.py" = ["PTH123"]
+
+
+[lint.isort]
+# https://docs.astral.sh/ruff/settings/#isort-lines-after-imports
+lines-after-imports = 2

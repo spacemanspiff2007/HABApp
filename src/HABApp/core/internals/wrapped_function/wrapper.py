@@ -5,13 +5,13 @@ from typing import Union, Optional, Callable, Type
 from HABApp.config import CONFIG
 from HABApp.core.internals import Context
 from HABApp.core.internals.wrapped_function.base import TYPE_WRAPPED_FUNC_OBJ
-from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction, HINT_FUNC_ASYNC
+from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction, TYPE_FUNC_ASYNC
 from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunction
 from HABApp.core.internals.wrapped_function.wrapped_thread import HINT_FUNC_SYNC, WrappedThreadFunction, \
     create_thread_pool, stop_thread_pool, run_in_thread_pool
 
 
-def wrap_func(func: Union[HINT_FUNC_SYNC, HINT_FUNC_ASYNC],
+def wrap_func(func: Union[HINT_FUNC_SYNC, TYPE_FUNC_ASYNC],
               warn_too_long=True,
               name: Optional[str] = None,
               logger: Optional[logging.Logger] = None,

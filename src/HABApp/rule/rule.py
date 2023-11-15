@@ -12,7 +12,7 @@ import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.asyncio import create_task
 from HABApp.core.const.const import PYTHON_310
-from HABApp.core.const.hints import HINT_EVENT_CALLBACK
+from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.internals import (
     HINT_EVENT_BUS_LISTENER,
     HINT_EVENT_FILTER_OBJ,
@@ -123,7 +123,7 @@ class Rule(ContextProvidingObj):
         )
 
     def listen_event(self, name: Union[HINT_ITEM_OBJ, str],
-                     callback: HINT_EVENT_CALLBACK,
+                     callback: TYPE_EVENT_CALLBACK,
                      event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None
                      ) -> HINT_EVENT_BUS_LISTENER:
         """
