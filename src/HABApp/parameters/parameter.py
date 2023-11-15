@@ -1,3 +1,7 @@
+# ruff: noqa: TRY003, EM101
+# EM101 Exception must not use a string literal, assign to variable first
+# TRY003 Avoid specifying long messages outside the exception class
+
 import typing
 from math import ceil, floor
 

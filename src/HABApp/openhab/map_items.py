@@ -62,7 +62,8 @@ def map_item(name: str, type: str, value: Optional[str],
         if cls is not None:
             return cls.from_oh(name, value, label=label, tags=tags, groups=groups, metadata=meta)
 
-        raise ValueError(f'Unknown openHAB type: {type} for {name}')
+        msg = f'Unknown openHAB type: {type} for {name}'
+        raise ValueError(msg)
 
     except Exception as e:
         process_exception('map_items', e, logger=log)

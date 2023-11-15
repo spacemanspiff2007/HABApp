@@ -6,7 +6,7 @@ from HABApp.core.wrapper import ExceptionToHABApp
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler.func_async import async_get_transformations
 from HABApp.openhab.transformations._map import MAP_REGISTRY
-from HABApp.openhab.transformations.base import log, TransformationRegistryBase
+from HABApp.openhab.transformations.base import TransformationRegistryBase, log
 
 Items = uses_item_registry()
 

@@ -1,8 +1,9 @@
 from threading import Lock
-from typing import Optional, Dict, Any, Tuple, List
+from typing import Any, Dict, List, Optional, Tuple
 
 from HABApp.core.const import MISSING
 from HABApp.core.items import Item
+
 from .mode_base import HINT_BASE_MODE, BaseMode
 
 LOCK = Lock()
@@ -117,7 +118,8 @@ class MultiModeItem(Item):
         try:
             return self.__values_by_name[name.lower()]
         except KeyError:
-            raise KeyError(f'Unknown mode "{name}"! Available: {", ".join(self.__values_by_name.keys())}') from None
+            msg = f'Unknown mode "{name}"! Available: {", ".join(self.__values_by_name.keys())}'
+            raise KeyError(msg) from None
 
     def calculate_value(self) -> Any:
         """Recalculate the value. If the new value is not ``MISSING`` the calculated value will be set as the item
@@ -128,7 +130,7 @@ class MultiModeItem(Item):
 
         # recalculate value
         new_value = MISSING
-        for priority, child in self.__values_by_prio.items():
+        for child in self.__values_by_prio.values():
             new_value = child.calculate_value(new_value)
 
         # if nothing is set try the default

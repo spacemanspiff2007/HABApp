@@ -142,7 +142,7 @@ async def async_create_item(item_type: str, name: str,
 
     if ret.status == 404:
         raise ItemNotFoundError.from_name(name)
-    elif ret.status == 405:
+    if ret.status == 405:
         raise ItemNotEditableError.from_name(name)
     return ret.status < 300
 
@@ -228,10 +228,11 @@ async def async_set_thing_enabled(thing: str | ItemRegistryItem, enabled: bool):
 
     if ret.status == 404:
         raise ThingNotFoundError.from_uid(thing)
-    elif ret.status == 409:
+    if ret.status == 409:
         raise ThingNotEditableError.from_uid(thing)
-    elif ret.status >= 300:
-        raise ValueError('Something went wrong')
+    if ret.status >= 300:
+        msg = 'Something went wrong'
+        raise ValueError(msg)
 
     return ret.status
 
@@ -289,7 +290,9 @@ async def async_get_link(item: str | ItemRegistryItem, channel: str) -> ItemChan
 
     if resp.status == 404:
         raise LinkNotFoundError.from_names(item, channel)
-    raise LinkRequestError('Unexpected error')
+
+    msg = 'Unexpected error'
+    raise LinkRequestError(msg)
 
 
 async def async_create_link(
@@ -314,7 +317,9 @@ async def async_create_link(
 
     if resp.status == 405:
         LinkNotEditableError.from_names(item, channel)
-    raise LinkRequestError('Unexpected error')
+
+    msg = 'Unexpected error'
+    raise LinkRequestError(msg)
 
 
 async def async_remove_link(item: str | ItemRegistryItem, channel: str):
@@ -328,7 +333,9 @@ async def async_remove_link(item: str | ItemRegistryItem, channel: str):
         raise LinkNotFoundError.from_names(item, channel)
     if resp.status == 405:
         LinkNotEditableError.from_names(item, channel)
-    raise LinkRequestError('Unexpected error')
+
+    msg = 'Unexpected error'
+    raise LinkRequestError(msg)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

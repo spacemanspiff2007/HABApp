@@ -95,8 +95,8 @@ class FinishedProcessInfo:
     def __eq__(self, other):
         if isinstance(other, FinishedProcessInfo):
             return self.returncode == other.returncode and self.stdout == other.stdout and self.stderr == other.stderr
-        else:
-            return NotImplementedError
+
+        return NotImplementedError
 
 
 HINT_PROCESS_CB_FULL: TypeAlias = Callable[[FinishedProcessInfo], Any]

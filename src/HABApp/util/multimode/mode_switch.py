@@ -64,7 +64,8 @@ class SwitchItemValueMode(ValueMode):
     # prevent direct calling
     def set_enabled(self, value: bool, only_on_change: bool = False):
         """"""  # Empty docstring so this function doesn't show up in Sphinx
-        raise PermissionError('Enabled is controlled through the switch item!')
+        msg = 'Enabled is controlled through the switch item!'
+        raise PermissionError(msg)
 
     def __switch_changed(self, event):
         self.__set_enable(event.value == ('ON' if not self.__invert_switch else 'OFF'))

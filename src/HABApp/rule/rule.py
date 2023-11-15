@@ -3,7 +3,7 @@ import re
 import sys
 import warnings
 from pathlib import Path
-from typing import Iterable, Union, Any, Optional, Tuple, Pattern, List, overload, Literal, TypeVar, Callable, Final
+from typing import Any, Callable, Final, Iterable, List, Literal, Optional, Pattern, Tuple, TypeVar, Union, overload
 
 import HABApp
 import HABApp.core
@@ -13,15 +13,28 @@ import HABApp.util
 from HABApp.core.asyncio import create_task
 from HABApp.core.const.const import PYTHON_310
 from HABApp.core.const.hints import HINT_EVENT_CALLBACK
-from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER, ContextProvidingObj, \
-    uses_post_event, EventFilterBase, uses_item_registry, ContextBoundEventBusListener
-from HABApp.core.internals import wrap_func
-from HABApp.core.items import BaseItem, HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseValueItem
+from HABApp.core.internals import (
+    HINT_EVENT_BUS_LISTENER,
+    HINT_EVENT_FILTER_OBJ,
+    ContextBoundEventBusListener,
+    ContextProvidingObj,
+    EventFilterBase,
+    uses_item_registry,
+    uses_post_event,
+    wrap_func,
+)
+from HABApp.core.items import HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseItem, BaseValueItem
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
+
 from .interfaces import async_subprocess_exec
-from .interfaces.rule_subprocess import build_exec_params, HINT_PYTHON_PATH, HINT_EXEC_ARGS, HINT_PROCESS_CB_SIMPLE, \
-    HINT_PROCESS_CB_FULL
+from .interfaces.rule_subprocess import (
+    HINT_EXEC_ARGS,
+    HINT_PROCESS_CB_FULL,
+    HINT_PROCESS_CB_SIMPLE,
+    HINT_PYTHON_PATH,
+    build_exec_params,
+)
 from .rule_hook import get_rule_hook as _get_rule_hook
 
 if PYTHON_310:
@@ -249,11 +262,11 @@ class Rule(ContextProvidingObj):
 
     @staticmethod
     def get_items(type: Union[Tuple[HINT_TYPE_ITEM_OBJ, ...], HINT_TYPE_ITEM_OBJ] = None,
-                  name: Union[str, Pattern[str]] = None,
-                  tags: Union[str, Iterable[str]] = None,
-                  groups: Union[str, Iterable[str]] = None,
-                  metadata: Union[str, Pattern[str]] = None,
-                  metadata_value: Union[str, Pattern[str]] = None,
+                  name: Union[str, Pattern[str], None] = None,
+                  tags: Union[str, Iterable[str], None] = None,
+                  groups: Union[str, Iterable[str], None] = None,
+                  metadata: Union[str, Pattern[str], None] = None,
+                  metadata_value: Union[str, Pattern[str], None] = None,
                   ) -> Union[List[HINT_ITEM_OBJ], List[BaseItem]]:
         """Search the HABApp item registry and return the found items.
 

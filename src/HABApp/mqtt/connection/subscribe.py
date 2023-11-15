@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 import HABApp
 from HABApp.config import CONFIG
-from HABApp.config.models.mqtt import QOS
 from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
+from HABApp.core.internals import uses_get_item, uses_item_registry, uses_post_event
 from HABApp.core.lib import SingleTask
 from HABApp.core.wrapper import process_exception
 from HABApp.mqtt.connection.connection import MqttPlugin
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 from HABApp.mqtt.mqtt_payload import get_msg_payload
+
+if TYPE_CHECKING:
+    from HABApp.config.models.mqtt import QOS
 
 SUBSCRIBE_CFG = CONFIG.mqtt.subscribe
 

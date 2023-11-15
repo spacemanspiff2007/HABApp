@@ -3,17 +3,20 @@ import typing
 import paho.mqtt.client as mqtt
 
 import HABApp
+from HABApp.core.const.json import dump_json
 from HABApp.mqtt.connection.mqtt_connection import STATUS, log
-from ..core.const.json import dump_json
 
 
 def __is_connected() -> bool:
     if STATUS.connected:
         return True
-    raise ConnectionError('Mqtt client not connected')
+
+    msg = 'Mqtt client not connected'
+    raise ConnectionError(msg)
 
 
-def publish(topic: str, payload: typing.Any, qos: int = None, retain: bool = None) -> int:
+def publish(topic: str, payload: typing.Any,
+            qos: typing.Optional[int] = None, retain: typing.Optional[bool] = None) -> int:
     """
     Publish a value under a certain topic.
     If qos and/or retain is not set the value from the configuration file will be used.
@@ -51,7 +54,7 @@ def publish(topic: str, payload: typing.Any, qos: int = None, retain: bool = Non
     return info
 
 
-def subscribe(topic: str, qos: int = None) -> int:
+def subscribe(topic: str, qos: typing.Optional[int] = None) -> int:
     """
     Subscribe to a MQTT topic. Note that subscriptions made this way are volatile and will only remain until
     the next disconnect.

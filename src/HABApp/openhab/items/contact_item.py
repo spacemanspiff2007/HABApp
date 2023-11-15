@@ -53,8 +53,8 @@ class ContactItem(OpenhabItem):
         return self.value == CLOSED
 
     def oh_send_command(self, value: Any = MISSING):
-        raise SendCommandNotSupported(f'{self.__class__.__name__} does not support send command! '
-                                      'See openHAB documentation for details.')
+        msg = f'{self.__class__.__name__} does not support send command! See openHAB documentation for details.'
+        raise SendCommandNotSupported(msg)
 
     def open(self):
         """Post an update to the item with the open value"""
@@ -70,9 +70,11 @@ class ContactItem(OpenhabItem):
     def __eq__(self, other):
         if isinstance(other, ContactItem):
             return self.value == other.value
-        elif isinstance(other, str):
+
+        if isinstance(other, str):
             return self.value == other
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             if other and self.is_open():
                 return True
             if not other and self.is_closed():

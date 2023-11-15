@@ -29,7 +29,8 @@ class EventFilter(EventFilterBase):
                 continue
 
             if arg not in type_hints:
-                raise AttributeError(f'Filter attribute "{arg}" does not exist for "{event_class.__name__}"')
+                msg = f'Filter attribute "{arg}" does not exist for "{event_class.__name__}"'
+                raise AttributeError(msg)
 
             if self.attr_name1 is None:
                 self.attr_name1 = arg

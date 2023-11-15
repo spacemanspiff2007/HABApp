@@ -1,5 +1,5 @@
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.internals import uses_item_registry, uses_get_item
+from HABApp.core.internals import uses_get_item, uses_item_registry
 from HABApp.core.items import BaseValueItem
 
 get_item = uses_get_item()

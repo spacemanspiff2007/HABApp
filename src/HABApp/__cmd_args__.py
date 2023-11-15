@@ -23,7 +23,8 @@ def get_uptime() -> float:
         lib.GetTickCount64.restype = ctypes.c_uint64
         return lib.GetTickCount64() / 1000
 
-    raise NotImplementedError(f'Not supported on {sys.platform}')
+    msg = f'Not supported on {sys.platform}'
+    raise NotImplementedError(msg)
 
 
 def parse_args(passed_args=None) -> argparse.Namespace:
@@ -79,10 +80,10 @@ def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
         # Nothing is specified, we try to find the config automatically
         check_path = []
         try:
-            working_dir = Path(os.getcwd())
-            check_path.append( working_dir / 'HABApp')
-            check_path.append( working_dir.with_name('HABApp'))
-            check_path.append( working_dir.parent.with_name('HABApp'))
+            working_dir = Path.cwd()
+            check_path.append(working_dir / 'HABApp')
+            check_path.append(working_dir.with_name('HABApp'))
+            check_path.append(working_dir.parent.with_name('HABApp'))
         except ValueError:
             # the ValueError gets raised if the working_dir or its parent is empty (e.g. c:\ or /)
             pass

@@ -178,7 +178,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
         # during startup we get OpenhabCredentialsInvalidError even though credentials are correct
         except (OpenhabDisconnectedError, OpenhabCredentialsInvalidError):
             connection.set_error()
-            raise AlreadyHandledException()
+            raise AlreadyHandledException() from None
 
 
 HANDLER = ConnectionHandler()
