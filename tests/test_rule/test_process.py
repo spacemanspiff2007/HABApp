@@ -47,7 +47,7 @@ async def test_run_func_arg_errors(rule):
         rule.execute_subprocess(rule.cb, sys.executable, "asfd", 123)
     assert str(e.value) == 'args[2] is not of type str! "123" (int)'
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         rule.execute_subprocess(
             rule.cb, sys.executable, "asfd", additional_python_path=[Path(__file__).parent, 123]
         )
