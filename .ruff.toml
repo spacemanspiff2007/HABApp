@@ -43,7 +43,9 @@ select = [
 
 ignore = [
     "RET501",   # https://docs.astral.sh/ruff/rules/unnecessary-return-none/#unnecessary-return-none-ret501
-    "TRY400"    # https://docs.astral.sh/ruff/rules/error-instead-of-exception/
+    "TRY400",   # https://docs.astral.sh/ruff/rules/error-instead-of-exception/
+
+    "A003",     # https://docs.astral.sh/ruff/rules/builtin-attribute-shadowing/
 ]
 
 

@@ -48,6 +48,7 @@ def add_to_registry(item: 'HABApp.openhab.items.OpenhabItem', set_value=False):
     # Replace existing item with the updated definition
     Items.pop_item(name)
     Items.add_item(item)
+    return None
 
 
 def remove_from_registry(name: str):

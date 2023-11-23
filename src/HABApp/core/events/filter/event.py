@@ -1,6 +1,6 @@
 from inspect import isclass
 from typing import Final, Optional
-from typing import get_type_hints as _get_type_hints
+from typing import get_type_hints as typing_get_type_hints
 
 from HABApp.core.const import MISSING
 from HABApp.core.const.hints import TYPE_ANY_CLASS_TYPE
@@ -22,7 +22,7 @@ class EventFilter(EventFilterBase):
         self.attr_name2: Optional[str] = None
         self.attr_value2 = None
 
-        type_hints = _get_type_hints(event_class)
+        type_hints = typing_get_type_hints(event_class)
 
         for arg, value in kwargs.items():
             if value is MISSING:
@@ -39,7 +39,8 @@ class EventFilter(EventFilterBase):
                 self.attr_name2 = arg
                 self.attr_value2 = value
             else:
-                raise ValueError('Not implemented for more than 2 values!')
+                msg = 'Not implemented for more than 2 values!'
+                raise ValueError(msg)
 
     def trigger(self, event) -> bool:
         if not isinstance(event, self.event_class):
