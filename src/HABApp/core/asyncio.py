@@ -4,7 +4,7 @@ from asyncio import Future as _Future
 from asyncio import Task as _Task
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
 from contextvars import ContextVar as _ContextVar
-from contextvars import Token
+from contextvars import Token as _Token
 from typing import Any as _Any
 from typing import Callable, Final
 from typing import Callable as _Callable
@@ -27,7 +27,7 @@ async_context = _ContextVar('async_ctx')
 class AsyncContext:
     def __init__(self, value: str):
         self.value: Final = value
-        self.token: Token[str] | None = None
+        self.token: _Token[str] | None = None
         self.parent: AsyncContext | None = None
 
     def __enter__(self):
