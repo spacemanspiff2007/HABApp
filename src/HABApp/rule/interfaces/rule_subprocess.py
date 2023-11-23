@@ -2,13 +2,14 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Union, Iterable, Any, Tuple, Dict, List, Callable
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from typing_extensions import TypeAlias
 
 import HABApp
 from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.core.wrapper import process_exception
+
 
 log = logging.getLogger('HABApp.execute')
 
@@ -28,10 +29,12 @@ def _ensure_str_objs(objs: Iterable[HINT_EXEC_ARGS], key: str, enforce_abs=False
             path_val = Path(val)
             str_val = val
         else:
-            raise ValueError(f'{key:s}[{i:d}] is not of type str! "{val}" ({type(val).__name__:s})')
+            msg = f'{key:s}[{i:d}] is not of type str! "{val}" ({type(val).__name__:s})'
+            raise TypeError(msg)
 
         if enforce_abs and not path_val.is_absolute():
-            raise ValueError(f'{key:s}[{i:d}] is not an absolute path: "{val}"')
+            msg = f'{key:s}[{i:d}] is not an absolute path: "{val}"'
+            raise ValueError(msg)
 
         new_args.append(str_val)
 
@@ -42,20 +45,22 @@ def build_exec_params(*args: HINT_EXEC_ARGS,
                       _capture_output=True,
                       _additional_python_path: HINT_PYTHON_PATH = None,
                       **kwargs: Any) -> Tuple[Iterable[str], Dict[str, Any]]:
-
     # convenience for easy capturing
     if _capture_output:
         if 'stdout' in kwargs:
-            raise ValueError('Parameter "capture_output" can not be used with "stdout" in kwargs!')
+            msg = 'Parameter "capture_output" can not be used with "stdout" in kwargs!'
+            raise ValueError(msg)
         kwargs['stdout'] = asyncio.subprocess.PIPE
         if 'stderr' in kwargs:
-            raise ValueError('Parameter "capture_output" can not be used with "stderr" in kwargs!')
+            msg = 'Parameter "capture_output" can not be used with "stderr" in kwargs!'
+            raise ValueError(msg)
         kwargs['stderr'] = asyncio.subprocess.PIPE
 
     # convenience for additional libraries
     if _additional_python_path is not None:
         if 'env' in kwargs:
-            raise ValueError('Parameter "additional_python_path" can not be used with "env" in kwargs!')
+            msg = 'Parameter "additional_python_path" can not be used with "env" in kwargs!'
+            raise ValueError(msg)
 
         ppath = _ensure_str_objs(_additional_python_path, 'additional_python_path', enforce_abs=True)
 
@@ -95,8 +100,8 @@ class FinishedProcessInfo:
     def __eq__(self, other):
         if isinstance(other, FinishedProcessInfo):
             return self.returncode == other.returncode and self.stdout == other.stdout and self.stderr == other.stderr
-        else:
-            return NotImplementedError
+
+        return NotImplementedError
 
 
 HINT_PROCESS_CB_FULL: TypeAlias = Callable[[FinishedProcessInfo], Any]
@@ -104,7 +109,6 @@ HINT_PROCESS_CB_SIMPLE: TypeAlias = Callable[[str], Any]
 
 
 async def async_subprocess_exec(callback, *args, calling_func, raw_info: bool, **kwargs):
-
     call_str = ''
 
     try:
@@ -113,7 +117,7 @@ async def async_subprocess_exec(callback, *args, calling_func, raw_info: bool, *
         stdout = None
         stderr = None
 
-        call_str = ' '.join(map(lambda x: f'"{x}"', args))
+        call_str = ' '.join(f'"{x}"' for x in args)
 
         try:
             proc = await asyncio.create_subprocess_exec(*args, **kwargs)

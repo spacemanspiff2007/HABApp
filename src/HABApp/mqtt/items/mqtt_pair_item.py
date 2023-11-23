@@ -3,6 +3,7 @@ from typing import Optional
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_item_registry
 from HABApp.mqtt.interface_sync import publish
+
 from . import MqttBaseItem
 
 Items = uses_item_registry()
@@ -14,7 +15,8 @@ def build_write_topic(read_topic: str) -> Optional[str]:
         parts.insert(-1, 'set')
         return '/'.join(parts)
 
-    raise ValueError(f'Can not build write topic for "{read_topic}"')
+    msg = f'Can not build write topic for "{read_topic}"'
+    raise ValueError(msg)
 
 
 class MqttPairItem(MqttBaseItem):
@@ -46,11 +48,11 @@ class MqttPairItem(MqttBaseItem):
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def __init__(self, name: str, initial_value=None, write_topic: str = None):
+    def __init__(self, name: str, initial_value=None, write_topic: Optional[str] = None):
         super().__init__(name, initial_value)
         self.write_topic: str = write_topic
 
-    def publish(self, payload, qos: int = None, retain: bool = None):
+    def publish(self, payload, qos: Optional[int] = None, retain: Optional[bool] = None):
         """
         Publish the payload under the write topic from the item.
 

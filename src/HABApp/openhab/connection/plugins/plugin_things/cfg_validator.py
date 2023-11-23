@@ -82,7 +82,8 @@ class UserItemCfg(BaseModel):
         try:
             return {k.lower(): k for k in ITEM_TYPES}[v.lower()]
         except KeyError:
-            raise ValueError(f'Must be one of {", ".join(ITEM_TYPES)}')
+            msg = f'Must be one of {", ".join(ITEM_TYPES)}'
+            raise ValueError(msg) from None
 
     @field_validator('metadata', mode='before')
     def make_meta_cfg(cls, v):

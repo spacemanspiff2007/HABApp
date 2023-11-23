@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import logging
 import threading
-from typing import Dict
-from typing import Tuple, Union, TypeVar
+from typing import TypeVar
 
-from HABApp.core.errors import ItemNotFoundException, ItemAlreadyExistsError
+from HABApp.core.errors import ItemAlreadyExistsError, ItemNotFoundException
 from HABApp.core.internals.item_registry import ItemRegistryItem
 
 
@@ -15,9 +16,9 @@ log = logging.getLogger('HABApp.Items')
 class ItemRegistry:
     def __init__(self):
         self._lock = threading.Lock()
-        self._items: Dict[str, ItemRegistryItem] = {}
+        self._items: dict[str, ItemRegistryItem] = {}
 
-    def item_exists(self, name: Union[str, ItemRegistryItem]) -> bool:
+    def item_exists(self, name: str | ItemRegistryItem) -> bool:
         if not isinstance(name, str):
             name = name.name
         return name in self._items
@@ -28,10 +29,10 @@ class ItemRegistry:
         except KeyError:
             raise ItemNotFoundException(name) from None
 
-    def get_items(self) -> Tuple[ItemRegistryItem, ...]:
+    def get_items(self) -> tuple[ItemRegistryItem, ...]:
         return tuple(self._items.values())
 
-    def get_item_names(self) -> Tuple[str, ...]:
+    def get_item_names(self) -> tuple[str, ...]:
         return tuple(self._items.keys())
 
     def add_item(self, item: _HINT_ITEM_OBJ) -> _HINT_ITEM_OBJ:
@@ -54,7 +55,7 @@ class ItemRegistry:
         item._on_item_added()
         return item
 
-    def pop_item(self, name: Union[str, _HINT_ITEM_OBJ]) -> _HINT_ITEM_OBJ:
+    def pop_item(self, name: str | _HINT_ITEM_OBJ) -> _HINT_ITEM_OBJ:
         if not isinstance(name, str):
             name = name.name
 

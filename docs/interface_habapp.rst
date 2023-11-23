@@ -122,7 +122,7 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     my_agg.aggregation_period(2 * 3600)
 
     # Use max as an aggregation function
-    my_agg.aggregation_func = max
+    my_agg.aggregation_func(max)
 
 
 The value of ``my_agg`` in the example will now always be the maximum of ``MyInputItem`` in the last two hours.

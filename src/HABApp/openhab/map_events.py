@@ -43,4 +43,5 @@ def get_event(_in_dict: dict) -> OpenhabEvent:
     try:
         return _events[event_type].from_dict(topic, payload)
     except KeyError:
-        raise ValueError(f'Unknown Event: {event_type:s} for {_in_dict}')
+        msg = f'Unknown Event: {event_type:s} for {_in_dict}'
+        raise ValueError(msg) from None

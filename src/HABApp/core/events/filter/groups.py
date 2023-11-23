@@ -18,10 +18,7 @@ class OrFilterGroup(EventFilterBaseGroup):
     """Only one child filter has to match"""
 
     def trigger(self, event: Any) -> bool:
-        for f in self.filters:
-            if f.trigger(event):
-                return True
-        return False
+        return any(f.trigger(event) for f in self.filters)
 
     def describe(self) -> str:
         objs = [f.describe() for f in self.filters]
@@ -32,10 +29,7 @@ class AndFilterGroup(EventFilterBaseGroup):
     """All child filters have to match"""
 
     def trigger(self, event: Any) -> bool:
-        for f in self.filters:
-            if not f.trigger(event):
-                return False
-        return True
+        return all(f.trigger(event) for f in self.filters)
 
     def describe(self) -> str:
         objs = [f.describe() for f in self.filters]

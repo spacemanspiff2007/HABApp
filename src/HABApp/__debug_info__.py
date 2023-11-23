@@ -1,10 +1,10 @@
 import platform
 import sys
+
 from HABApp.__version__ import __version__
 
 
 def get_debug_info() -> str:
-
     info = {
         'HABApp': __version__,
         'Platform': platform.platform(),
@@ -12,7 +12,7 @@ def get_debug_info() -> str:
         'Python': sys.version,
     }
 
-    indent = max(map(lambda x: len(x), info))
+    indent = max(len(x) for x in info)
     ret = '\n'.join('{:{indent}s}: {:s}'.format(k, str(v).replace('\n', ''), indent=indent) for k, v in info.items())
 
     try:
@@ -26,7 +26,7 @@ def get_debug_info() -> str:
             ret += f'\n\nInstalled Packages\n{"-" * 80}\n{table}'
 
     except Exception as e:
-        ret += f'\n\nCould not get installed Packages!\nError: {str(e)}'
+        ret += f'\n\nCould not get installed Packages!\nError: {e!s}'
 
     return ret
 

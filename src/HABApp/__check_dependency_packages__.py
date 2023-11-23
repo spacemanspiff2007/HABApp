@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import importlib
 import sys
-from typing import List, Dict
 
 from HABApp.__debug_info__ import print_debug_info
 
 
-def get_dependencies() -> List[str]:
+def get_dependencies() -> list[str]:
     return [
         'aiohttp-sse-client',
         'aiohttp',
@@ -31,7 +32,7 @@ def get_dependencies() -> List[str]:
 def check_dependency_packages():
     """Imports all dependencies and reports failures"""
 
-    missing: Dict[str, ModuleNotFoundError] = {}
+    missing: dict[str, ModuleNotFoundError] = {}
 
     # Package aliases (if the import name differs from the package name)
     alias = {
@@ -43,7 +44,7 @@ def check_dependency_packages():
     for name in get_dependencies():
         try:
             importlib.import_module(alias.get(name, name))
-        except ModuleNotFoundError as e:
+        except ModuleNotFoundError as e:  # noqa: PERF203
             missing[name] = e
 
     if not missing:

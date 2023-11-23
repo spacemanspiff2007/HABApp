@@ -1,21 +1,21 @@
-aiohttp     == 3.8.5
-pydantic    == 2.3.0
-msgspec     == 0.18.2
+aiohttp     == 3.9.0
+pydantic    == 2.5.2
+msgspec     == 0.18.4
 pendulum    == 2.1.2
 bidict      == 0.22.1
 watchdog    == 3.0.0
 ujson       == 5.8.0
-aiomqtt     == 1.2.0
+aiomqtt     == 1.2.1
 
 immutables  == 0.20
 eascheduler == 0.1.11
-easyconfig  == 0.3.0
-stack_data  == 0.6.2
+easyconfig  == 0.3.1
+stack_data  == 0.6.3
 colorama    == 0.4.6
 
-voluptuous == 0.13.1
+voluptuous == 0.14.1
 
-typing-extensions == 4.7.1
+typing-extensions == 4.8.0
 
 aiohttp-sse-client == 0.2.1
 

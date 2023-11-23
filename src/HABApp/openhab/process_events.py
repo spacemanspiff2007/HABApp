@@ -1,22 +1,36 @@
 import logging
-from asyncio import create_task
 from typing import Union
 
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
+from HABApp.core.asyncio import create_task_from_async
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
-from HABApp.core.internals import uses_post_event, uses_get_item
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.internals import uses_get_item, uses_post_event
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import process_exception
-from HABApp.openhab.definitions.topics import TOPIC_THINGS, TOPIC_ITEMS
-from HABApp.openhab.events import GroupStateChangedEvent, GroupStateUpdatedEvent, \
-    ItemAddedEvent, ItemRemovedEvent, ItemUpdatedEvent, \
-    ThingStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
-from HABApp.openhab.item_to_reg import add_to_registry, remove_from_registry, remove_thing_from_registry, \
-    add_thing_to_registry
+from HABApp.openhab.definitions.topics import TOPIC_ITEMS, TOPIC_THINGS
+from HABApp.openhab.events import (
+    GroupStateChangedEvent,
+    GroupStateUpdatedEvent,
+    ItemAddedEvent,
+    ItemRemovedEvent,
+    ItemUpdatedEvent,
+    ThingAddedEvent,
+    ThingConfigStatusInfoEvent,
+    ThingRemovedEvent,
+    ThingStatusInfoEvent,
+    ThingUpdatedEvent,
+)
+from HABApp.openhab.item_to_reg import (
+    add_thing_to_registry,
+    add_to_registry,
+    remove_from_registry,
+    remove_thing_from_registry,
+)
 from HABApp.openhab.map_events import get_event
+
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -64,7 +78,7 @@ def on_sse_event(event_dict: dict, oh_3: bool):
         # Events that add items to the item registry
         # These events require that we query openHAB because of the metadata, so we have to do it in a task
         if isinstance(event, (ItemAddedEvent, ItemUpdatedEvent)):
-            create_task(item_event(event))
+            create_task_from_async(item_event(event))
             return None
 
         # Events that remove items from the item registry

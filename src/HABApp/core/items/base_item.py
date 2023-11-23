@@ -1,17 +1,24 @@
-from typing import Type, TypeVar, Optional
+from typing import Optional, Type, TypeVar
 
+from eascheduler.const import local_tz
 from pendulum import UTC, DateTime
 from pendulum import now as pd_now
 
-from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, HINT_EVENT_BUS_LISTENER
-from HABApp.core.internals import uses_get_item, uses_item_registry, get_current_context
+from HABApp.core.internals import (
+    HINT_EVENT_BUS_LISTENER,
+    HINT_EVENT_FILTER_OBJ,
+    get_current_context,
+    uses_get_item,
+    uses_item_registry,
+)
 from HABApp.core.internals.item_registry import ItemRegistryItem
 from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
-from eascheduler.const import local_tz
+
+from ..const.hints import TYPE_EVENT_CALLBACK
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
 from .tmp_data import add_tmp_data as _add_tmp_data
 from .tmp_data import restore_tmp_data as _restore_tmp_data
-from ..const.hints import HINT_EVENT_CALLBACK
+
 
 get_item = uses_get_item()
 item_registry = uses_item_registry()
@@ -79,7 +86,7 @@ class BaseItem(ItemRegistryItem):
         secs = get_positive_time_diff(secs, round_digits=1)
         return self._last_update.add_watch(secs)
 
-    def listen_event(self, callback: HINT_EVENT_CALLBACK,
+    def listen_event(self, callback: TYPE_EVENT_CALLBACK,
                      event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None) -> HINT_EVENT_BUS_LISTENER:
         """
         Register an event listener which listens to all event that the item receives

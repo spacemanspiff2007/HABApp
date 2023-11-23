@@ -1,16 +1,16 @@
-from typing import Optional, Final
-from typing import get_type_hints as _get_type_hints
 from inspect import isclass
+from typing import Final, Optional
+from typing import get_type_hints as typing_get_type_hints
 
 from HABApp.core.const import MISSING
-from HABApp.core.const.hints import HINT_ANY_CLASS
+from HABApp.core.const.hints import TYPE_ANY_CLASS_TYPE
 from HABApp.core.internals import EventFilterBase
 
 
 class EventFilter(EventFilterBase):
     """Triggers on event types and optionally on their values, too"""
 
-    def __init__(self, event_class: HINT_ANY_CLASS, **kwargs):
+    def __init__(self, event_class: TYPE_ANY_CLASS_TYPE, **kwargs):
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
         assert isclass(event_class), f'Class for event required! Passed {event_class} ({type(event_class)})'
 
@@ -22,14 +22,15 @@ class EventFilter(EventFilterBase):
         self.attr_name2: Optional[str] = None
         self.attr_value2 = None
 
-        type_hints = _get_type_hints(event_class)
+        type_hints = typing_get_type_hints(event_class)
 
         for arg, value in kwargs.items():
             if value is MISSING:
                 continue
 
             if arg not in type_hints:
-                raise AttributeError(f'Filter attribute "{arg}" does not exist for "{event_class.__name__}"')
+                msg = f'Filter attribute "{arg}" does not exist for "{event_class.__name__}"'
+                raise AttributeError(msg)
 
             if self.attr_name1 is None:
                 self.attr_name1 = arg
@@ -38,7 +39,8 @@ class EventFilter(EventFilterBase):
                 self.attr_name2 = arg
                 self.attr_value2 = value
             else:
-                raise ValueError('Not implemented for more than 2 values!')
+                msg = 'Not implemented for more than 2 values!'
+                raise ValueError(msg)
 
     def trigger(self, event) -> bool:
         if not isinstance(event, self.event_class):

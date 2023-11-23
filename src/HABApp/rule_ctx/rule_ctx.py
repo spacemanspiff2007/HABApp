@@ -1,10 +1,9 @@
 import logging
-from typing import Optional, Callable
+from typing import Callable, Optional
 
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
-from HABApp.core.internals import Context, uses_item_registry, HINT_EVENT_BUS_LISTENER
-from HABApp.core.internals import uses_event_bus
+from HABApp.core.internals import HINT_EVENT_BUS_LISTENER, Context, uses_event_bus, uses_item_registry
 from HABApp.core.internals.event_bus import EventBusBaseListener
 
 event_bus = uses_event_bus()

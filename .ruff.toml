@@ -1,0 +1,69 @@
+
+line-length = 120
+indent-width = 4
+
+target-version = "py38"
+src = ["src", "test"]
+
+# https://docs.astral.sh/ruff/settings/#ignore-init-module-imports
+ignore-init-module-imports = true
+
+extend-exclude = ["__init__.py"]
+
+select = [
+    "E", "W",   # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+    "I",        # https://docs.astral.sh/ruff/rules/#isort-i
+    "UP",       # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+
+    "A",        # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+    "ASYNC",    # https://docs.astral.sh/ruff/rules/#flake8-async-async
+    "C4",       # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+    "EM",       # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
+    "FIX",      # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
+    "INP",      # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
+    "ISC",      # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
+    "PIE",      # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
+    "PT",       # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
+    "PTH",      # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+    "RET",      # https://docs.astral.sh/ruff/rules/#flake8-return-ret
+    "SIM",      # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+    "SLOT",     # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
+    "T10",      # https://docs.astral.sh/ruff/rules/#flake8-debugger-t10
+    "TCH",      # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
+    "TD",       # https://docs.astral.sh/ruff/rules/#flake8-todos-td
+
+    "TRY",      # https://docs.astral.sh/ruff/rules/#tryceratops-try
+    "FLY",      # https://docs.astral.sh/ruff/rules/#flynt-fly
+    "PERF",     # https://docs.astral.sh/ruff/rules/#perflint-perf
+    "RUF",      # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+
+    # "PL",       # https://docs.astral.sh/ruff/rules/#pylint-pl
+    # "FURB",     # https://docs.astral.sh/ruff/rules/#refurb-furb
+]
+
+ignore = [
+    "RET501",   # https://docs.astral.sh/ruff/rules/unnecessary-return-none/#unnecessary-return-none-ret501
+    "TRY400",   # https://docs.astral.sh/ruff/rules/error-instead-of-exception/
+
+    "A003",     # https://docs.astral.sh/ruff/rules/builtin-attribute-shadowing/
+]
+
+
+[format]
+# Use single quotes for non-triple-quoted strings.
+quote-style = "single"
+
+
+
+[lint.flake8-builtins]
+builtins-ignorelist = ["id", "input"]
+
+
+[lint.per-file-ignores]
+"docs/conf.py" = ["INP001", "A001"]
+"setup.py" = ["PTH123"]
+
+
+[lint.isort]
+# https://docs.astral.sh/ruff/settings/#isort-lines-after-imports
+lines-after-imports = 2

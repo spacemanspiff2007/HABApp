@@ -1,15 +1,13 @@
 import asyncio
 from datetime import date
-from unittest.mock import AsyncMock
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
 import HABApp
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.events import NoEventFilter
-from HABApp.core.internals import EventBusListener
-from HABApp.core.internals import wrap_func
+from HABApp.core.internals import EventBusListener, wrap_func
 from tests.helpers import TestEventBus
 
 
@@ -66,7 +64,7 @@ async def async_func_div_error():
     1 / 0
 
 
-@pytest.mark.ignore_log_errors
+@pytest.mark.ignore_log_errors()
 @pytest.mark.parametrize(
     'func, name', ((func_div_error, 'func_div_error'), (async_func_div_error, 'async_func_div_error')))
 async def test_async_error_wrapper(eb: TestEventBus, name, func, sync_worker):

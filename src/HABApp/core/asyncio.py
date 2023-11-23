@@ -1,14 +1,19 @@
+from __future__ import annotations
+
 from asyncio import Future as _Future
+from asyncio import Task as _Task
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
-from contextvars import ContextVar as _ContextVar, Token
-from typing import Any as _Any, Callable, Final, Optional
+from contextvars import ContextVar as _ContextVar
+from contextvars import Token as _Token
+from typing import Any as _Any
+from typing import Callable, Final
 from typing import Callable as _Callable
 from typing import Coroutine as _Coroutine
-from typing import Optional as _Optional
 from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
 from HABApp.core.const.const import PYTHON_310
+
 
 if PYTHON_310:
     from typing import ParamSpec as _ParamSpec
@@ -22,8 +27,8 @@ async_context = _ContextVar('async_ctx')
 class AsyncContext:
     def __init__(self, value: str):
         self.value: Final = value
-        self.token: Optional[Token[str]] = None
-        self.parent: Optional[AsyncContext] = None
+        self.token: _Token[str] | None = None
+        self.parent: AsyncContext | None = None
 
     def __enter__(self):
         assert self.token is None, self
@@ -52,22 +57,31 @@ class AsyncContextError(Exception):
 _tasks = set()
 
 
-def create_task(coro: _Coroutine, name: _Optional[str] = None) -> _Future:
+_T = _TypeVar('_T')
+
+
+def create_task(coro: _Coroutine[_Any, _Any, _T], name: str | None = None) -> _Future[_T]:
     # https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
     if async_context.get(None) is None:
         f = _run_coroutine_threadsafe(coro, loop)
+        _tasks.add(f)
         f.add_done_callback(_tasks.discard)
         return f
-    else:
-        t = loop.create_task(coro, name=name)
-        t.add_done_callback(_tasks.discard)
-        return t
+
+    t = loop.create_task(coro, name=name)
+    _tasks.add(t)
+    t.add_done_callback(_tasks.discard)
+    return t
 
 
-_CORO_RET = _TypeVar('_CORO_RET')
+def create_task_from_async(coro: _Coroutine[_Any, _Any, _T], name: str | None = None) -> _Task[_T]:
+    t = loop.create_task(coro, name=name)
+    _tasks.add(t)
+    t.add_done_callback(_tasks.discard)
+    return t
 
 
-def run_coro_from_thread(coro: _Coroutine[_Any, _Any, _CORO_RET], calling: _Callable) -> _CORO_RET:
+def run_coro_from_thread(coro: _Coroutine[_Any, _Any, _T], calling: _Callable) -> _T:
     # This function call is blocking, so it can't be called in the async context
     if async_context.get(None) is not None:
         raise AsyncContextError(calling)
@@ -76,11 +90,10 @@ def run_coro_from_thread(coro: _Coroutine[_Any, _Any, _CORO_RET], calling: _Call
     return fut.result()
 
 
-P = _ParamSpec('P')
-T = _TypeVar('T')
+_P = _ParamSpec('_P')
 
 
-def run_func_from_async(func: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
+def run_func_from_async(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
     # we already have an async context
     if async_context.get(None) is not None:
         return func(*args, **kwargs)
@@ -92,5 +105,5 @@ def run_func_from_async(func: Callable[P, T], *args: P.args, **kwargs: P.kwargs)
     # return future.result()
 
 
-async def _run_func_from_async_helper(func: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
+async def _run_func_from_async_helper(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
     return func(*args, **kwargs)

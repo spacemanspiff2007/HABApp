@@ -11,14 +11,14 @@ import logging
 import os
 import re
 import sys
+from pathlib import Path
 
 import sphinx
-from docutils.nodes import Text, Node
+from docutils.nodes import Node, Text
 from sphinx.addnodes import desc_signature
 
 IS_RTD_BUILD = os.environ.get('READTHEDOCS', '-').lower() == 'true'
 IS_CI = os.environ.get('CI', '-') == 'true'
-
 
 # https://www.sphinx-doc.org/en/master/extdev/logging.html
 sphinx_logger = sphinx.util.logging.getLogger('post')
@@ -35,7 +35,11 @@ def log(msg: str):
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
+src_folder = Path(__file__).parent.with_name('src')
+assert src_folder.is_dir()
+
+# required for autodoc
+sys.path.insert(0, str(src_folder))
 
 # -- Project information -----------------------------------------------------
 
@@ -49,6 +53,7 @@ version = ''
 release = 'beta'
 try:
     from HABApp import __version__
+
     version = __version__
     print(f'Building docs for {version}')
 except Exception as e:
@@ -229,14 +234,12 @@ nitpick_ignore_regex = [
     (re.compile(r'py:class'), re.compile(r'(?:datetime|pendulum|aiohttp|pathlib)\..+'))
 ]
 
-
 # -- Extension configuration -------------------------------------------------
 exec_code_working_dir = '../src'
 exec_code_source_folders = ['../src', '../tests']
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'class'
-
 
 # No config on member
 autodoc_pydantic_model_show_config_member = False
@@ -254,9 +257,6 @@ autodoc_pydantic_model_show_field_summary = False
 autodoc_pydantic_field_show_alias = False
 autodoc_pydantic_field_list_validators = False
 autodoc_pydantic_field_swap_name_and_alias = True
-
-
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Post processing of default value
@@ -338,7 +338,6 @@ if IS_RTD_BUILD:
     intersphinx_mapping = {
         'python': ('https://docs.python.org/3', None)
     }
-
 
 # Don't show warnings for missing python references since these are created via intersphinx during the RTD build
 if not IS_RTD_BUILD:

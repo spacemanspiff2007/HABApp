@@ -8,7 +8,7 @@ from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.logger import log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection
-from HABApp.openhab.connection.handler.func_async import async_get_things, async_get_links
+from HABApp.openhab.connection.handler.func_async import async_get_links, async_get_things
 
 PING_CONFIG: Final = CONFIG.openhab.ping
 

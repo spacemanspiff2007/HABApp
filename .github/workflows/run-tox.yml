@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   pre-commit:
-    name:
+    name: pre-commit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

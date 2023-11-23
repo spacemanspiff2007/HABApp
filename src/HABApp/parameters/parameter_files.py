@@ -35,7 +35,8 @@ def save_file(file: str):
     assert isinstance(file, str), type(file)
     path = HABApp.CONFIG.directories.param
     if path is None:
-        raise ValueError('Parameter files are disabled! Configure a folder to use them!')
+        msg = 'Parameter files are disabled! Configure a folder to use them!'
+        raise ValueError(msg)
 
     filename = path / (file + '.yml')
 
@@ -60,6 +61,7 @@ async def setup_param_files() -> bool:
     folder.add_file_type(HABAppParameterFile)
     watcher = folder.add_watch('.yml')
     await watcher.trigger_all()
+    return True
 
 
 def reload_param_file(name: str):
