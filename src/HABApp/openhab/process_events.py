@@ -4,7 +4,7 @@ from typing import Union
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
-from HABApp.core.asyncio import create_task
+from HABApp.core.asyncio import create_task_from_async
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import uses_get_item, uses_post_event
@@ -78,7 +78,7 @@ def on_sse_event(event_dict: dict, oh_3: bool):
         # Events that add items to the item registry
         # These events require that we query openHAB because of the metadata, so we have to do it in a task
         if isinstance(event, (ItemAddedEvent, ItemUpdatedEvent)):
-            create_task(item_event(event))
+            create_task_from_async(item_event(event))
             return None
 
         # Events that remove items from the item registry
