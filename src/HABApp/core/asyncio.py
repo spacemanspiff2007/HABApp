@@ -1,13 +1,14 @@
+from __future__ import annotations
+
 from asyncio import Future as _Future
 from asyncio import Task as _Task
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
 from contextvars import ContextVar as _ContextVar
 from contextvars import Token
 from typing import Any as _Any
-from typing import Callable, Final, Optional
+from typing import Callable, Final
 from typing import Callable as _Callable
 from typing import Coroutine as _Coroutine
-from typing import Optional as _Optional
 from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
@@ -26,8 +27,8 @@ async_context = _ContextVar('async_ctx')
 class AsyncContext:
     def __init__(self, value: str):
         self.value: Final = value
-        self.token: Optional[Token[str]] = None
-        self.parent: Optional[AsyncContext] = None
+        self.token: Token[str] | None = None
+        self.parent: AsyncContext | None = None
 
     def __enter__(self):
         assert self.token is None, self
@@ -59,7 +60,7 @@ _tasks = set()
 _T = _TypeVar('_T')
 
 
-def create_task(coro: _Coroutine[_Any, _Any, _T], name: _Optional[str] = None) -> _Future[_T]:
+def create_task(coro: _Coroutine[_Any, _Any, _T], name: str | None = None) -> _Future[_T]:
     # https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
     if async_context.get(None) is None:
         f = _run_coroutine_threadsafe(coro, loop)
@@ -73,7 +74,7 @@ def create_task(coro: _Coroutine[_Any, _Any, _T], name: _Optional[str] = None) -
     return t
 
 
-def create_task_from_async(coro: _Coroutine[_Any, _Any, _T], name: _Optional[str] = None) -> _Task[_T]:
+def create_task_from_async(coro: _Coroutine[_Any, _Any, _T], name: str | None = None) -> _Task[_T]:
     t = loop.create_task(coro, name=name)
     _tasks.add(t)
     t.add_done_callback(_tasks.discard)
