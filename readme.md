@@ -127,7 +127,12 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 23.11.1 (2023-11-23)
+#### 23.12.0-DEV (2023-XX-XX)
+- Added HABApp.util.RateLimiter
+- Added CompressedMidnightRotatingFileHandler
+- Updated dependencies
+
+#### 23.11.0 (2023-11-23)
 - Fix for very small float values (#425)
 - Fix for writing to persistence (#424)
 - Updated dependencies

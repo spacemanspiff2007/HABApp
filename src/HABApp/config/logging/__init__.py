@@ -1,4 +1,4 @@
-from .handler import MidnightRotatingFileHandler
+from .handler import MidnightRotatingFileHandler, CompressedMidnightRotatingFileHandler
 
 # isort: split
 
