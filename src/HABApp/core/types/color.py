@@ -1,6 +1,6 @@
 from colorsys import hsv_to_rgb as _hsv_to_rgb
 from colorsys import rgb_to_hsv as _rgb_to_hsv
-from typing import Tuple, Union, Optional
+from typing import Optional, Tuple, Union
 
 from typing_extensions import Self
 
@@ -90,19 +90,30 @@ class RGB(ColorType):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self._r == other._r and self._g == other._g and self._b == other._b
-        elif isinstance(other, HSB):
+        if isinstance(other, HSB):
             return self == self.__class__.from_hsb(other)
-        else:
-            return NotImplemented
+        return NotImplemented
 
-    def __getitem__(self, item: int) -> int:
-        if item == 0:
-            return self._r
-        if item == 1:
-            return self._g
-        if item == 2:
-            return self._b
-        raise IndexError()
+    def __getitem__(self, item: Union[int, str]) -> int:
+        if isinstance(item, int):
+            if item == 0:
+                return self._r
+            if item == 1:
+                return self._g
+            if item == 2:
+                return self._b
+            raise IndexError()
+
+        if isinstance(item, str):
+            if item in ('r', 'red'):
+                return self._r
+            if item in ('g', 'green'):
+                return self._g
+            if item in ('b', 'blue'):
+                return self._b
+            raise KeyError()
+
+        raise TypeError()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Conversions
@@ -227,17 +238,28 @@ class HSB(ColorType):
             return self._hue == other._hue and \
                 self._saturation == other._saturation and \
                 self._brightness == other._brightness
-        else:
-            return NotImplemented
+        return NotImplemented
 
-    def __getitem__(self, item: int) -> float:
-        if item == 0:
-            return self._hue
-        if item == 1:
-            return self._saturation
-        if item == 2:
-            return self._brightness
-        raise IndexError()
+    def __getitem__(self, item: Union[int, str]) -> float:
+        if isinstance(item, int):
+            if item == 0:
+                return self._hue
+            if item == 1:
+                return self._saturation
+            if item == 2:
+                return self._brightness
+            raise IndexError()
+
+        if isinstance(item, str):
+            if item in ('h', 'hue'):
+                return self._hue
+            if item in ('s', 'saturation'):
+                return self._saturation
+            if item in ('b', 'brightness'):
+                return self._brightness
+            raise KeyError()
+
+        raise TypeError()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Conversions

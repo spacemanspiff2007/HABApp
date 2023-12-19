@@ -131,6 +131,7 @@ MyOpenhabRule()
 - Added HABApp.util.RateLimiter
 - Added CompressedMidnightRotatingFileHandler
 - Updated dependencies
+- Small improvement for RGB and HSB types
 
 #### 23.11.0 (2023-11-23)
 - Fix for very small float values (#425)
