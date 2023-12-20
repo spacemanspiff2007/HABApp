@@ -3,13 +3,14 @@ from typing import Any, Dict, FrozenSet, Optional
 
 from immutables import Map
 
-import HABApp
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.definitions.values import QuantityValue
-from HABApp.openhab.items import ColorItem, ContactItem, DatetimeItem, DimmerItem, GroupItem, ImageItem, LocationItem, \
-    NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem, CallItem
-from HABApp.openhab.items.base_item import HINT_TYPE_OPENHAB_ITEM
-from HABApp.openhab.items.base_item import MetaData
+from HABApp.openhab.items import (
+    CallItem, ColorItem, ContactItem, DatetimeItem, DimmerItem, GroupItem, ImageItem,
+    LocationItem, NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem,
+)
+from HABApp.openhab.items.base_item import HINT_TYPE_OPENHAB_ITEM, MetaData, OpenhabItem
+
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -34,7 +35,7 @@ _items: Dict[str, HINT_TYPE_OPENHAB_ITEM] = {
 def map_item(name: str, type: str, value: Optional[str],
              label: Optional[str], tags: FrozenSet[str],
              groups: FrozenSet[str], metadata: Optional[Dict[str, Dict[str, Any]]]) -> \
-        Optional['HABApp.openhab.items.OpenhabItem']:
+        Optional[OpenhabItem]:
     try:
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)

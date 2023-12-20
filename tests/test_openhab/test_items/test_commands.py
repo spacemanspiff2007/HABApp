@@ -2,15 +2,20 @@ import typing
 
 import pytest
 
-from HABApp.openhab.definitions import OnOffValue, UpDownValue, OpenClosedValue
+from HABApp import __version__
+from HABApp.openhab.definitions import OnOffValue, OpenClosedValue, UpDownValue
 from HABApp.openhab.items import ContactItem
-from HABApp.openhab.items.commands import UpDownCommand, OnOffCommand
+from HABApp.openhab.items.commands import OnOffCommand, UpDownCommand
 from HABApp.openhab.map_items import _items as item_dict
 
 
 @pytest.mark.parametrize("cls", [cls for cls in item_dict.values() if issubclass(cls, OnOffCommand)])
 def test_OnOff(cls):
     c = cls('item_name')
+    assert not c.is_on()
+    if not __version__.startswith('23.12.0'):
+        assert not c.is_off()
+
     c.set_value(OnOffValue('ON'))
     assert c.is_on()
     assert not c.is_off()
@@ -37,6 +42,9 @@ def test_UpDown(cls):
 @pytest.mark.parametrize("cls", (ContactItem, ))
 def test_OpenClosed(cls: typing.Type[ContactItem]):
     c = cls('item_name')
+    assert not c.is_closed()
+    assert not c.is_open()
+
     c.set_value(OpenClosedValue.OPEN)
     assert c.is_open()
     assert not c.is_closed()
