@@ -7,11 +7,16 @@ jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
 
     steps:
     - uses: actions/checkout@v3
       with:
         ref: master
+
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
@@ -27,7 +32,4 @@ jobs:
         python setup.py sdist bdist_wheel
 
     - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.pypi_api_key }}
+      uses: pypa/gh-action-pypi-publish@release/v1
