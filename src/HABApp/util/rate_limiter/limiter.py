@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Final, List, Literal, Tuple, TypeAlias, Union
+from typing import Final, List, Literal, Tuple, Union
 
-from HABApp.core.const.const import StrEnum
+from HABApp.core.const.const import PYTHON_310, StrEnum
 
 from .limits import (
     BaseRateLimit,
@@ -11,6 +11,12 @@ from .limits import (
     LeakyBucketLimitInfo,
 )
 from .parser import parse_limit
+
+
+if PYTHON_310:
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 
 class LimitTypeEnum(StrEnum):
