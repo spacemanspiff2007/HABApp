@@ -1,18 +1,48 @@
+import re
+
 import pytest
 
-import HABApp.util.rate_limiter.limiter as limiter_module
-import HABApp.util.rate_limiter.rate_limit as rate_limit_module
+import HABApp.util.rate_limiter.limits.fixed_window as fixed_window_module
+import HABApp.util.rate_limiter.limits.leaky_bucket as leaky_bucket_module
 import HABApp.util.rate_limiter.registry as registry_module
-from HABApp.util.rate_limiter.limiter import Limiter, RateLimit, parse_limit
+from HABApp.util.rate_limiter.limiter import (
+    FixedWindowElasticExpiryLimit,
+    FixedWindowElasticExpiryLimitInfo,
+    LeakyBucketLimit,
+    LeakyBucketLimitInfo,
+    Limiter,
+    parse_limit,
+)
+from HABApp.util.rate_limiter.parser import LIMIT_REGEX
+
+
+class MockedMonotonic:
+    def __init__(self):
+        self.time = 0
+
+    def get_time(self):
+        return self.time
+
+    def __iadd__(self, other):
+        self.time += other
+        return self
+
+
+@pytest.fixture()
+def time(monkeypatch) -> MockedMonotonic:
+    m = MockedMonotonic()
+    monkeypatch.setattr(fixed_window_module, 'monotonic', m.get_time)
+    monkeypatch.setattr(leaky_bucket_module, 'monotonic', m.get_time)
+    return m
 
 
 @pytest.mark.parametrize(
-    'unit,factor', (
+    'unit,factor', [
         ('s', 1), ('sec', 1), ('second', 1),
         ('m', 60), ('min', 60), ('minute', 60),
         ('h', 3600), ('hour', 3600),
         ('day', 24 * 3600), ('month', 30 * 24 * 3600), ('year', 365 * 24 * 3600)
-    )
+    ]
 )
 def test_parse(unit: str, factor: int):
     assert parse_limit(f'  1   per   {unit}  ') == (1, factor)
@@ -29,138 +59,176 @@ def test_parse(unit: str, factor: int):
     assert str(e.value) == 'Invalid limit string: "asdf"'
 
 
-def test_window(monkeypatch):
-    time = 0
-    monkeypatch.setattr(rate_limit_module, 'monotonic', lambda: time)
+def test_regex_all_units():
+    m = re.search(r'\(([^)]+)\)s\?', LIMIT_REGEX.pattern)
+    values = m.group(1)
 
-    limit = RateLimit(5, 3)
-    assert str(limit) == '<RateLimit hits=0/5 expiry=3s window=0s>'
-    assert limit.test_allow()
+    for unit in values.split('|'):
+        parse_limit(f'1 in 3 {unit}')
+        parse_limit(f'1 in 3 {unit}s')
+
+
+def test_fixed_window(time):
+
+    limit = FixedWindowElasticExpiryLimit(5, 3)
+    assert str(limit) == '<FixedWindowElasticExpiryLimit hits=0/5 interval=3s window=0s>'
+    for _ in range(10):
+        assert limit.test_allow()
 
     assert limit.allow()
-    assert str(limit) == '<RateLimit hits=1/5 expiry=3s window=3s>'
+    assert str(limit) == '<FixedWindowElasticExpiryLimit hits=1/5 interval=3s window=3s>'
 
     for _ in range(4):
         assert limit.allow()
 
-    assert str(limit) == '<RateLimit hits=5/5 expiry=3s window=3s>'
+    assert str(limit) == '<FixedWindowElasticExpiryLimit hits=5/5 interval=3s window=3s>'
 
     # Limit is full, stop gets moved further
-    time = 1
+    time += 1
     assert not limit.allow()
-    assert str(limit) == '<RateLimit hits=5/5 expiry=3s window=4s>'
+    assert str(limit) == '<FixedWindowElasticExpiryLimit hits=5/5 interval=3s window=4s>'
 
     # move out of interval
-    time = 4.1
+    time += 3.1
     assert limit.allow()
     assert limit.hits == 1
-    assert str(limit) == '<RateLimit hits=1/5 expiry=3s window=3s>'
+    assert str(limit) == '<FixedWindowElasticExpiryLimit hits=1/5 interval=3s window=3s>'
 
 
-def test_window_test_allow(monkeypatch):
-    time = 0
-    monkeypatch.setattr(rate_limit_module, 'monotonic', lambda: time)
+def test_leaky_bucket(time):
+    limit = LeakyBucketLimit(4, 2)
+    assert str(limit) == '<LeakyBucketLimit hits=0/4 interval=2s drop_interval=0.5s>'
+    for _ in range(10):
+        assert limit.test_allow()
 
-    limit = RateLimit(5, 3)
+    assert limit.allow()
+    assert limit.hits == 1
+
+    assert limit.allow()
+    assert limit.hits == 2
+
+    assert limit.allow()
+    assert limit.allow()
+    assert not limit.allow()
+    assert not limit.allow()
+    assert limit.hits == 4
+
+    time += 0.5
+    assert limit.test_allow()
+    assert limit.hits == 3
+
+    time += 1.7
+    assert limit.test_allow()
+    assert limit.hits == 0
+
+    assert limit.allow()
+    assert limit.hits == 1
+
+    time += 0.3
+    assert limit.test_allow()
+    assert limit.hits == 0
+
+    time += 1
+    assert limit.allow()
+    time += 0.4999
+
+    limit.test_allow()
+    assert limit.hits == 1
+
+    time += 0.0001
+    limit.test_allow()
+    assert limit.hits == 0
+
+
+def test_window_test_allow(time):
+
+    limit = FixedWindowElasticExpiryLimit(5, 3)
     limit.hits = 5
     limit.stop = 2.99999
     assert not limit.test_allow()
 
     # expiry when out of window
-    time = 3
+    time += 3
     assert limit.test_allow()
     assert not limit.hits
 
 
-def test_limiter_add(monkeypatch):
+def test_limiter_add(time):
     limiter = Limiter('test')
     limiter.add_limit(3, 5).add_limit(3, 5).parse_limits('3 in 5s')
     assert len(limiter._limits) == 1
 
 
-def test_limiter_info(monkeypatch):
-    time = 0
-    monkeypatch.setattr(rate_limit_module, 'monotonic', lambda: time)
-    monkeypatch.setattr(limiter_module, 'monotonic', lambda: time)
+def test_fixed_window_info(time):
+    limit = FixedWindowElasticExpiryLimit(5, 3)
+    Info = FixedWindowElasticExpiryLimitInfo
 
-    limiter = Limiter('test')
+    assert limit.info() == Info(hits=0, skips=0, limit=5, time_remaining=3)
 
-    info = limiter.info()
-    assert info.time_remaining == 0
-    assert info.skipped == 0
+    limit.allow()
+    assert limit.info() == Info(hits=1, skips=0, limit=5, time_remaining=3)
+    limit.allow(4)
+    assert limit.info() == Info(hits=5, skips=0, limit=5, time_remaining=3)
+    limit.allow()
+    assert limit.info() == Info(hits=5, skips=1, limit=5, time_remaining=3)
 
-    with pytest.raises(ValueError):
-        limiter.allow()
+    time += 1
+    assert limit.info() == Info(hits=5, skips=1, limit=5, time_remaining=2)
 
-    with pytest.raises(ValueError):
-        limiter.test_allow()
+    time += 3
+    assert limit.info() == Info(hits=0, skips=0, limit=5, time_remaining=3)
 
-    limiter.add_limit(3, 3)
+    assert not limit.test_allow(6)
+    assert limit.info() == Info(hits=0, skips=0, limit=5, time_remaining=3)
 
-    info = limiter.info()
-    assert info.time_remaining == 0
-    assert info.skipped == 0
 
-    w_info = info.limits[0]
-    assert w_info.limit == 3
-    assert w_info.skips == 0
-    assert w_info.time_remaining == 3
-    assert w_info.hits == 0
+def test_leaky_bucket_info(time):
+    limit = LeakyBucketLimit(2, 2)
+    Info = LeakyBucketLimitInfo
 
-    limiter.allow()
-    time = 2
-    limiter.allow()
-
-    info = limiter.info()
-    assert info.time_remaining == 1
-    assert info.skipped == 0
-
-    w_info = info.limits[0]
-    assert w_info.limit == 3
-    assert w_info.skips == 0
-    assert w_info.time_remaining == 1
-    assert w_info.hits == 2
-
-    # add a longer limiter - this one should now define the time_remaining
-    limiter.add_limit(4, 5)
-    limiter.allow()
-
-    info = limiter.info()
-    assert info.time_remaining == 5
-    assert info.skipped == 0
-
-    w_info = info.limits[0]
-    assert w_info.limit == 3
-    assert w_info.skips == 0
-    assert w_info.time_remaining == 1
-    assert w_info.hits == 3
-
-    w_info = info.limits[1]
-    assert w_info.limit == 4
-    assert w_info.skips == 0
-    assert w_info.time_remaining == 5
-    assert w_info.hits == 1
-
-    time += 5.0001
-
-    info = limiter.info()
-    assert info.time_remaining == 0
-
-    w_info = info.limits[0]
-    assert w_info.limit == 3
-    assert w_info.skips == 0
-    assert w_info.time_remaining == 0
-    assert w_info.hits == 3
-
-    w_info = info.limits[1]
-    assert w_info.limit == 4
-    assert w_info.skips == 0
-    assert w_info.time_remaining == 0
-    assert w_info.hits == 1
+    assert limit.info() == Info(hits=0, skips=0, limit=2, time_remaining=1)
 
 
 def test_registry(monkeypatch):
     monkeypatch.setattr(registry_module, '_LIMITERS', {})
 
-    obj = registry_module.RateLimiter('test')
+    obj = registry_module.RateLimiter('Test')
     assert obj is registry_module.RateLimiter('TEST')
+    assert obj is registry_module.RateLimiter('test')
+
+
+def test_limiter(time):
+
+    limiter = Limiter('Test')
+    assert limiter.__repr__() == '<Limiter Test>'
+
+    info = limiter.info()
+    assert info.skips == 0
+
+    with pytest.raises(ValueError):
+        limiter.allow()
+
+    limiter.add_limit(2, 1).add_limit(2, 2)
+
+    assert limiter.allow()
+    assert limiter.allow()
+    time += 0.5
+    assert not limiter.allow()
+
+    time += 1
+    assert not limiter.allow()
+
+    assert limiter.info().skips == 2
+    time += 2
+
+    assert limiter.test_allow()
+    assert limiter.info().skips == 0
+
+    assert limiter.allow()
+    assert limiter.allow()
+    assert not limiter.allow()
+    assert limiter.info().skips == 1
+
+    time += 2
+    assert limiter.allow()
+    assert limiter.info().skips == 0

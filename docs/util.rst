@@ -81,6 +81,7 @@ A simple rate limiter implementation which can be used in rules.
 The limiter is not rule bound so the same limiter can be used in multiples files.
 It also works as expected across rule reloads.
 
+
 Defining limits
 ^^^^^^^^^^^^^^^^^^
 Limits can either be explicitly added or through a textual description.
@@ -100,10 +101,10 @@ Examples:
 * ``300 / hour``
 
 
-Elastic expiry
-^^^^^^^^^^^^^^^^^^
+Fixed window elastic expiry algorithm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The rate limiter implements a fixed window with elastic expiry.
+This algorithm implements a fixed window with elastic expiry.
 That means if the limit is hit the interval time will be increased by the expiry time.
 
 For example ``3 per minute``:
@@ -118,6 +119,14 @@ For example ``3 per minute``:
   will also get rejected and the intervall now goes from ``00:00:00`` - ``00:02:30``.
 
 
+Leaky bucket algorithm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The leaky bucket algorithm is based on the analogy of a bucket that leaks at a constant rate.
+As long as the bucket is not full the hits will pass. If the bucket overflows the hits will get rejected.
+Since the bucket leaks at a constant rate it will gradually get empty again thus allowing hits to pass again.
+
+
 Example
 ^^^^^^^^^^^^^^^^^^
 
@@ -128,10 +137,12 @@ Example
     # Create or get existing, name is case insensitive
     limiter = RateLimiter('MyRateLimiterName')
 
-    # define limits, duplicate limits will only be added once
+    # define limits, duplicate limits of the same algorithm will only be added once
     limiter.add_limit(5, 60)   # add limits explicitly
     limiter.parse_limits('5 per minute').parse_limits('5 in 60s', '5/60seconds')  # add limits through text
 
+    # add additional limit with leaky bucket algorithm
+    limiter.add_limit(10, 120, algorithm='leaky_bucket')
 
     # Test the limit without increasing the hits
     for _ in range(100):
@@ -155,6 +166,19 @@ Documentation
 
 .. autoclass:: HABApp.util.rate_limiter.limiter.Limiter
    :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.rate_limiter.limiter.LimiterInfo
+   :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.rate_limiter.limiter.FixedWindowElasticExpiryLimitInfo
+   :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.rate_limiter.limiter.LeakyBucketLimitInfo
+   :members:
+   :inherited-members:
 
 
 Statistics
