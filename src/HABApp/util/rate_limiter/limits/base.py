@@ -14,15 +14,16 @@ class BaseRateLimitInfo:
 
 
 class BaseRateLimit:
-    def __init__(self, allowed: int, interval: int):
+    def __init__(self, allowed: int, interval: int, hits: int = 0):
         super().__init__()
         assert allowed > 0, allowed
         assert interval > 0, interval
+        assert 0 <= hits <= allowed
 
         self.interval: Final = interval
         self.allowed: Final = allowed
 
-        self.hits: int = 0
+        self.hits: int = hits
         self.skips: int = 0
 
     def repr_text(self) -> str:

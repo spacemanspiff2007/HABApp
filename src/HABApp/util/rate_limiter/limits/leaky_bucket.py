@@ -11,8 +11,8 @@ class LeakyBucketLimitInfo(BaseRateLimitInfo):
 
 
 class LeakyBucketLimit(BaseRateLimit):
-    def __init__(self, allowed: int, interval: int):
-        super().__init__(allowed, interval)
+    def __init__(self, allowed: int, interval: int, hits: int = 0):
+        super().__init__(allowed, interval, hits)
 
         self.drop_interval: Final = interval / allowed
         self.next_drop: float = -1.0

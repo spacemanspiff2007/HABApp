@@ -138,11 +138,15 @@ Example
     limiter = RateLimiter('MyRateLimiterName')
 
     # define limits, duplicate limits of the same algorithm will only be added once
+    # These lines all define the same limit so it'll result in only one limiter added
     limiter.add_limit(5, 60)   # add limits explicitly
     limiter.parse_limits('5 per minute').parse_limits('5 in 60s', '5/60seconds')  # add limits through text
 
     # add additional limit with leaky bucket algorithm
-    limiter.add_limit(10, 120, algorithm='leaky_bucket')
+    limiter.add_limit(10, 100, algorithm='leaky_bucket')
+
+    # add additional limit with fixed window elastic expiry algorithm
+    limiter.add_limit(10, 100, algorithm='fixed_window_elastic_expiry')
 
     # Test the limit without increasing the hits
     for _ in range(100):

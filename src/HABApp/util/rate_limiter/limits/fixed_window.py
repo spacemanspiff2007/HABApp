@@ -10,8 +10,8 @@ class FixedWindowElasticExpiryLimitInfo(BaseRateLimitInfo):
 
 
 class FixedWindowElasticExpiryLimit(BaseRateLimit):
-    def __init__(self, allowed: int, interval: int):
-        super().__init__(allowed, interval)
+    def __init__(self, allowed: int, interval: int, hits: int = 0):
+        super().__init__(allowed, interval, hits)
 
         self.start: float = -1.0
         self.stop: float = -1.0

@@ -59,7 +59,7 @@ def test_parse(unit: str, factor: int):
     assert str(e.value) == 'Invalid limit string: "asdf"'
 
 
-def test_regex_all_units():
+def test_parse_regex_all_units():
     m = re.search(r'\(([^)]+)\)s\?', LIMIT_REGEX.pattern)
     values = m.group(1)
 
@@ -158,6 +158,22 @@ def test_limiter_add(time):
     limiter.add_limit(3, 5).add_limit(3, 5).parse_limits('3 in 5s')
     assert len(limiter._limits) == 1
 
+    with pytest.raises(ValueError) as e:
+        limiter.add_limit(0, 5)
+    assert str(e.value) == "Parameter allowed must be an int > 0, is 0 (<class 'int'>)"
+
+    with pytest.raises(ValueError) as e:
+        limiter.add_limit(1, 0.5)
+    assert str(e.value) == "Parameter interval must be an int > 0, is 0.5 (<class 'float'>)"
+
+    with pytest.raises(ValueError) as e:
+        limiter.add_limit(3, 5, hits=-1)
+    assert str(e.value) == "Parameter hits must be an int >= 0, is -1 (<class 'int'>)"
+
+    with pytest.raises(ValueError) as e:
+        limiter.add_limit(3, 5, hits=5)
+    assert str(e.value) == "Parameter hits must be <= parameter allowed! 5 <= 3!"
+
 
 def test_fixed_window_info(time):
     limit = FixedWindowElasticExpiryLimit(5, 3)
@@ -208,7 +224,8 @@ def test_limiter(time):
     with pytest.raises(ValueError):
         limiter.allow()
 
-    limiter.add_limit(2, 1).add_limit(2, 2)
+    limiter.add_limit(
+        2, 1, algorithm='fixed_window_elastic_expiry').add_limit(2, 2, algorithm='fixed_window_elastic_expiry')
 
     assert limiter.allow()
     assert limiter.allow()
