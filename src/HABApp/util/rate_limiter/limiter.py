@@ -34,20 +34,20 @@ class Limiter:
         return f'<{self.__class__.__name__} {self._name:s}>'
 
     def add_limit(self, allowed: int, interval: int, *,
-                  hits: int = 0,
+                  initial_hits: int = 0,
                   algorithm: LIMITER_ALGORITHM_HINT = 'leaky_bucket') -> 'Limiter':
         """Add a new rate limit
 
         :param allowed: How many hits are allowed
         :param interval: Interval in seconds
-        :param hits: How many hits the limit already has when it gets initially created
+        :param initial_hits: How many hits the limit already has when it gets initially created
         :param algorithm: Which algorithm should this limit use
         """
         _check_arg('allowed', allowed)
         _check_arg('interval', interval)
-        _check_arg('hits', hits, allow_0=True)
-        if not hits <= allowed:
-            msg = f'Parameter hits must be <= parameter allowed! {hits:d} <= {allowed:d}!'
+        _check_arg('hits', initial_hits, allow_0=True)
+        if not initial_hits <= allowed:
+            msg = f'Parameter hits must be <= parameter allowed! {initial_hits:d} <= {allowed:d}!'
             raise ValueError(msg)
 
         if algorithm == get_args(_LITERAL_LEAKY_BUCKET)[0]:
@@ -63,22 +63,22 @@ class Limiter:
             if isinstance(window, cls) and window.allowed == allowed and window.interval == interval:
                 return self
 
-        limit = cls(allowed, interval, hits=hits)
+        limit = cls(allowed, interval, hits=initial_hits)
         self._limits = tuple(sorted([*self._limits, limit], key=lambda x: x.interval))
         return self
 
     def parse_limits(self, *text: str,
-                     hits: int = 0,
+                     initial_hits: int = 0,
                      algorithm: LIMITER_ALGORITHM_HINT = 'leaky_bucket') -> 'Limiter':
         """Add one or more limits in textual form, e.g. ``5 in 60s``, ``10 per hour`` or ``10/15 mins``.
         If the limit does already exist it will not be added again.
 
         :param text: textual description of limit
-        :param hits: How many hits the limit already has when it gets initially created
+        :param initial_hits: How many hits the limit already has when it gets initially created
         :param algorithm: Which algorithm should these limits use
         """
         for limit in [parse_limit(t) for t in text]:
-            self.add_limit(*limit, hits=hits, algorithm=algorithm)
+            self.add_limit(*limit, initial_hits=initial_hits, algorithm=algorithm)
         return self
 
     def allow(self) -> bool:

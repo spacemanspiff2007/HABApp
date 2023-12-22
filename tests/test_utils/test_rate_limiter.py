@@ -167,11 +167,11 @@ def test_limiter_add(time):
     assert str(e.value) == "Parameter interval must be an int > 0, is 0.5 (<class 'float'>)"
 
     with pytest.raises(ValueError) as e:
-        limiter.add_limit(3, 5, hits=-1)
+        limiter.add_limit(3, 5, initial_hits=-1)
     assert str(e.value) == "Parameter hits must be an int >= 0, is -1 (<class 'int'>)"
 
     with pytest.raises(ValueError) as e:
-        limiter.add_limit(3, 5, hits=5)
+        limiter.add_limit(3, 5, initial_hits=5)
     assert str(e.value) == "Parameter hits must be <= parameter allowed! 5 <= 3!"
 
 
