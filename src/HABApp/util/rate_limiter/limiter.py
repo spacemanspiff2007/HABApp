@@ -28,7 +28,13 @@ class Limiter:
     def __init__(self, name: str):
         self._name: Final = name
         self._limits: Tuple[BaseRateLimit, ...] = ()
-        self._skips = 0
+        self._skips: int = 0
+        self._skips_total: int = 0
+
+    @property
+    def total_skips(self) -> int:
+        """A user counter to track skips which can be manually reset"""
+        return self._skips_total
 
     def __repr__(self):
         return f'<{self.__class__.__name__} {self._name:s}>'
@@ -95,6 +101,7 @@ class Limiter:
         for limit in self._limits:
             if not limit.allow():
                 self._skips += 1
+                self._skips_total += 1
                 return False
 
             # allow increments hits, if it's now 1 it was 0 before
@@ -134,12 +141,18 @@ class Limiter:
         """
 
         return LimiterInfo(
-            skips=self._skips,
+            skips=self._skips, total_skips=self._skips_total,
             limits=[limit.info() for limit in self._limits]
         )
+
+    def reset(self) -> 'Limiter':
+        """Reset the manual skip counter"""
+        self._skips_total = 0
+        return self
 
 
 @dataclass
 class LimiterInfo:
-    skips: int            #: How many entries were skipped
+    skips: int          #: How many entries were skipped in the active interval(s)
+    total_skips: int    #: How many entries were skipped in total
     limits: List[Union[FixedWindowElasticExpiryLimitInfo, LeakyBucketLimitInfo]]    #: Info for every limit
