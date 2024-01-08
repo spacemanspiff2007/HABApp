@@ -33,6 +33,8 @@ class OpenhabContext:
     session: aiohttp.ClientSession
     session_options: dict[str, Any]
 
+    workaround_small_floats: bool
+
 
 CONTEXT_TYPE: TypeAlias = Optional[OpenhabContext]
 

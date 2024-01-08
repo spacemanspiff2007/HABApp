@@ -1,8 +1,10 @@
-from typing import TYPE_CHECKING, Optional, FrozenSet, Mapping, Union
+from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional, Union
 
-from HABApp.openhab.items.base_item import OpenhabItem, MetaData
-from HABApp.openhab.items.commands import UpDownCommand, PercentCommand
-from ..definitions import UpDownValue, PercentValue
+from HABApp.core.errors import InvalidItemValue
+from HABApp.openhab.definitions import PercentValue, UpDownValue
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.openhab.items.commands import PercentCommand, UpDownCommand
+
 
 if TYPE_CHECKING:
     Union = Union
@@ -38,8 +40,14 @@ class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
         elif isinstance(new_value, PercentValue):
             new_value = new_value.value
 
-        assert isinstance(new_value, (int, float)) or new_value is None, new_value
-        return super().set_value(new_value)
+        # Position is 0 ... 100
+        if isinstance(new_value, (int, float)) and (0 <= new_value <= 100):
+            return super().set_value(new_value)
+
+        if new_value is None:
+            return super().set_value(new_value)
+
+        raise InvalidItemValue.from_item(self, new_value)
 
     def is_up(self) -> bool:
         return self.value <= 0

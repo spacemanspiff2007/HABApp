@@ -2,8 +2,9 @@ from builtins import max as _max
 from builtins import min as _min
 
 
-def max(*args, default=None):
-    """Behaves like the built in max function but ignores any ``None`` values. e.g. ``max([1, None, 2]) == 2``.
+# noinspection PyShadowingBuiltins
+def max(*args, default=None):   # noqa: A001
+    """Behaves like the built-in max function but ignores any ``None`` values. e.g. ``max([1, None, 2]) == 2``.
     If the iterable is empty ``default`` will be returned.
 
     :param args: Single iterable or 1..n arguments
@@ -16,8 +17,9 @@ def max(*args, default=None):
     )
 
 
-def min(*args, default=None):
-    """Behaves like the built in min function but ignores any ``None`` values. e.g. ``min([1, None, 2]) == 1``.
+# noinspection PyShadowingBuiltins
+def min(*args, default=None):   # noqa: A001
+    """Behaves like the built-in min function but ignores any ``None`` values. e.g. ``min([1, None, 2]) == 1``.
     If the iterable is empty ``default`` will be returned.
 
     :param args: Single iterable or 1..n arguments

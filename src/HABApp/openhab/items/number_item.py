@@ -2,6 +2,7 @@ from typing import Optional, FrozenSet, Mapping, Union, TYPE_CHECKING
 
 from HABApp.openhab.items.base_item import OpenhabItem, MetaData
 from ..definitions import QuantityValue
+from ...core.errors import ItemValueIsNoneError, InvalidItemValue
 
 if TYPE_CHECKING:
     Union = Union
@@ -41,4 +42,15 @@ class NumberItem(OpenhabItem):
         if isinstance(new_value, QuantityValue):
             return super().set_value(new_value.value)
 
-        return super().set_value(new_value)
+        if isinstance(new_value, (int, float)):
+            return super().set_value(new_value)
+
+        if new_value is None:
+            return super().set_value(new_value)
+
+        raise InvalidItemValue.from_item(self, new_value)
+
+    def __bool__(self):
+        if self.value is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return bool(self.value)

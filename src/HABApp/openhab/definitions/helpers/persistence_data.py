@@ -3,6 +3,7 @@ from typing import Optional, Union
 
 from HABApp.openhab.definitions.rest import ItemHistoryResp
 
+
 OPTIONAL_DT = Optional[datetime]
 
 

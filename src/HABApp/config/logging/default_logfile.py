@@ -18,6 +18,8 @@ handlers:
   #    Will rotate when the file reaches a certain size (see python logging documentation for args)
   #  - HABApp.config.logging.MidnightRotatingFileHandler:
   #    Will wait until the file reaches a certain size and then will rotate on midnight
+  #  - HABApp.config.logging.CompressedMidnightRotatingFileHandler:
+  #    Same as MidnightRotatingFileHandler but will rotate to a gzipped archive
   #  - More handlers:
   #    https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
 

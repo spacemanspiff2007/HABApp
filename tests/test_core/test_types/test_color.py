@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.types.color import RGB, HSB
+from HABApp.core.types.color import HSB, RGB
 
 
 def test_rgb():
@@ -10,8 +10,16 @@ def test_rgb():
     assert rgb.b == rgb.blue == 3
 
     assert rgb[0] == 1
+    assert rgb['r'] == 1
+    assert rgb['red'] == 1
+
     assert rgb[1] == 2
+    assert rgb['g'] == 2
+    assert rgb['green'] == 2
+
     assert rgb[2] == 3
+    assert rgb['b'] == 3
+    assert rgb['blue'] == 3
 
     r, g, b = rgb
     assert r == rgb.r
@@ -69,8 +77,16 @@ def test_hsb():
     assert hsb.b == hsb.brightness == 3
 
     assert hsb[0] == 1
+    assert hsb['h'] == 1
+    assert hsb['hue'] == 1
+
     assert hsb[1] == 2
+    assert hsb['s'] == 2
+    assert hsb['saturation'] == 2
+
     assert hsb[2] == 3
+    assert hsb['b'] == 3
+    assert hsb['brightness'] == 3
 
     h, s, b = hsb
     assert h == hsb.h

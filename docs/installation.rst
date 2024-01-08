@@ -59,8 +59,8 @@ Installation
    After the installation take a look how to configure HABApp.
    A default configuration will be created on the first start.
 
-Upgrading
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Upgrade to the latest version
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #. Stop HABApp
 
 #. Activate the virtual environment
@@ -86,6 +86,16 @@ Upgrading
 #. Start HABApp
 
 #. Observe the logs for errors in case there were changes
+
+Installation of a certain version
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Installing a certain version of HABApp requires the same steps used for installation or upgrading HABApp.
+However the final ``python3 -m pip install`` command is now different and contains the version number::
+
+    python3 -m pip install HABApp==23.12.0
+
+The complete list of available versions can be found on `pypi <https://pypi.org/project/HABApp/#history>`_.
 
 Autostart after reboot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

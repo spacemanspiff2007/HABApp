@@ -1,3 +1,6 @@
+from HABApp.core.const.hints import HasNameAttr as _HasNameAttr
+
+
 class HABAppException(Exception):
     pass
 
@@ -33,3 +36,22 @@ class ContextBoundObjectIsAlreadyLinkedError(HABAppException):
 
 class ContextBoundObjectIsAlreadyUnlinkedError(HABAppException):
     pass
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Value errors
+# ----------------------------------------------------------------------------------------------------------------------
+class HABAppValueError(ValueError, HABAppException):
+    pass
+
+
+class ItemValueIsNoneError(HABAppValueError):
+    @classmethod
+    def from_item(cls, item: _HasNameAttr):
+        return cls(f'Item value is None (item "{item.name:s}")')
+
+
+class InvalidItemValue(HABAppValueError):
+    @classmethod
+    def from_item(cls, item: _HasNameAttr, value):
+        return cls(f'Invalid value for {item.__class__.__name__} {item.name:s}: {value}')

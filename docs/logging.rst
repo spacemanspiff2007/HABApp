@@ -17,6 +17,17 @@ but the format should be pretty straight forward.
    | That way even if the HABApp configuration is invalid HABApp can still log the errors that have occurred.
    | e.g.: ``/HABApp/logs/habapp.log`` or ``c:\HABApp\logs\habapp.log``
 
+Provided loggers
+======================================
+
+The ``HABApp.config.logging`` module provides additional loggers which can be used
+
+
+.. autoclass:: HABApp.config.logging.MidnightRotatingFileHandler
+
+.. autoclass:: HABApp.config.logging.CompressedMidnightRotatingFileHandler
+
+
 Example
 ======================================
 
@@ -42,7 +53,7 @@ to the file configuration under ``handlers`` in the ``logging.yml``.
       ...
 
       MyRuleHandler: # <-- This is the name of the handler
-        class: HABApp.core.lib.handler.MidnightRotatingFileHandler
+        class: HABApp.config.logging.MidnightRotatingFileHandler
         filename: 'c:\HABApp\Logs\MyRule.log'
         maxBytes: 10_000_000
         backupCount: 3
@@ -84,7 +95,7 @@ Full Example configuration
     # -----------------------------------------------------------------------------------
     handlers:
       HABApp_default:
-        class: HABApp.core.lib.handler.MidnightRotatingFileHandler
+        class: HABApp.config.logging.MidnightRotatingFileHandler
         filename: 'HABApp.log'
         maxBytes: 10_000_000
         backupCount: 3
@@ -93,7 +104,7 @@ Full Example configuration
         level: DEBUG
 
       MyRuleHandler:
-        class: HABApp.core.lib.handler.MidnightRotatingFileHandler
+        class: HABApp.config.logging.MidnightRotatingFileHandler
         filename: 'c:\HABApp\Logs\MyRule.log'    # absolute filename is recommended
         maxBytes: 10_000_000
         backupCount: 3

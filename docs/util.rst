@@ -75,6 +75,140 @@ Converts a hsb value to the rgb color space
 .. autofunction:: HABApp.util.functions.hsb_to_rgb
 
 
+Rate limiter
+------------------------------
+A simple rate limiter implementation which can be used in rules.
+The limiter is not rule bound so the same limiter can be used in multiples files.
+It also works as expected across rule reloads.
+
+
+Defining limits
+^^^^^^^^^^^^^^^^^^
+Limits can either be explicitly added or through a textual description.
+If the limit does already exist it will not be added again.
+It's possible to explicitly create the limits or through some small textual description with the following syntax:
+
+.. code-block:: text
+
+    [count] [per|in|/] [count (optional)] [s|sec|second|m|min|minute|hour|h|day|month|year] [s (optional)]
+
+Whitespaces are ignored and can be added as desired
+
+Examples:
+
+* ``5 per minute``
+* ``20 in 15 mins``
+* ``300 / hour``
+
+
+Fixed window elastic expiry algorithm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This algorithm implements a fixed window with elastic expiry.
+That means if the limit is hit the interval time will be increased by the expiry time.
+
+For example ``3 per minute``:
+
+* First hit comes ``00:00:00``. Two more hits at ``00:00:59``.
+  All three pass, intervall goes from ``00:00:00`` - ``00:01:00``.
+  Another hit comes at ``00:01:01`` an passes. The intervall now goes from ``00:01:01`` - ``00:02:01``.
+
+* First hit comes ``00:00:00``. Two more hits at ``00:00:30``. All three pass.
+  Another hit comes at ``00:00:45``, which gets rejected and the intervall now goes from ``00:00:00`` - ``00:01:45``.
+  A rejected hit makes the interval time longer by expiry time. If another hit comes at ``00:01:30`` it
+  will also get rejected and the intervall now goes from ``00:00:00`` - ``00:02:30``.
+
+
+Leaky bucket algorithm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The leaky bucket algorithm is based on the analogy of a bucket that leaks at a constant rate.
+As long as the bucket is not full the hits will pass. If the bucket overflows the hits will get rejected.
+Since the bucket leaks at a constant rate it will gradually get empty again thus allowing hits to pass again.
+
+
+Example
+^^^^^^^^^^^^^^^^^^
+
+.. exec_code::
+
+    from HABApp.util import RateLimiter
+
+    # Create or get existing, name is case insensitive
+    limiter = RateLimiter('MyRateLimiterName')
+
+    # define limits, duplicate limits of the same algorithm will only be added once
+    # These lines all define the same limit so it'll result in only one limiter added
+    limiter.add_limit(5, 60)   # add limits explicitly
+    limiter.parse_limits('5 per minute').parse_limits('5 in 60s', '5/60seconds')  # add limits through text
+
+    # add additional limit with leaky bucket algorithm
+    limiter.add_limit(10, 100, algorithm='leaky_bucket')
+
+    # add additional limit with fixed window elastic expiry algorithm
+    limiter.add_limit(10, 100, algorithm='fixed_window_elastic_expiry')
+
+    # Test the limit without increasing the hits
+    for _ in range(100):
+        assert limiter.test_allow()
+
+    # the limiter will allow 5 calls ...
+    for _ in range(5):
+        assert limiter.allow()
+
+    # and reject the 6th
+    assert not limiter.allow()
+
+    # It's possible to get statistics about the limiter and the corresponding windows
+    print(limiter.info())
+
+    # There is a counter that keeps track of the total skips that can be reset
+    print('Counter:')
+    print(limiter.total_skips)
+    limiter.reset()     # Can be reset
+    print(limiter.total_skips)
+
+
+Recommendation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Limiting external requests to an external API works well with the leaky bucket algorithm (maybe with some initial hits).
+For limiting notifications the best results can be achieved by combining both algorithms.
+Fixed window elastic expiry will notify but block until an issue is resolved,
+that's why it's more suited for small intervals. Leaky bucket will allow hits even while the issue persists,
+that's why it's more suited for larger intervals.
+
+.. exec_code::
+
+    from HABApp.util import RateLimiter
+
+    limiter = RateLimiter('MyNotifications')
+    limiter.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
+    limiter.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^
+.. autofunction:: HABApp.util.RateLimiter
+
+
+.. autoclass:: HABApp.util.rate_limiter.limiter.Limiter
+   :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.rate_limiter.limiter.LimiterInfo
+   :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.rate_limiter.limiter.FixedWindowElasticExpiryLimitInfo
+   :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.rate_limiter.limiter.LeakyBucketLimitInfo
+   :members:
+   :inherited-members:
+
+
 Statistics
 ------------------------------
 

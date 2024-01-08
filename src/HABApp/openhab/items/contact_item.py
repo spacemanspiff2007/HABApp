@@ -5,6 +5,7 @@ from ..definitions import OpenClosedValue
 from ...core.const import MISSING
 from ..errors import SendCommandNotSupported
 from HABApp.openhab.interface_sync import post_update
+from ...core.errors import InvalidItemValue
 
 if TYPE_CHECKING:
     Optional = Optional
@@ -40,8 +41,9 @@ class ContactItem(OpenhabItem):
         if isinstance(new_value, OpenClosedValue):
             new_value = new_value.value
 
-        if new_value is not None and new_value != OPEN and new_value != CLOSED:
-            raise ValueError(f'Invalid value for ContactItem: {new_value}')
+        if new_value not in (OPEN, CLOSED, None):
+            raise InvalidItemValue.from_item(self, new_value)
+
         return super().set_value(new_value)
 
     def is_open(self) -> bool:

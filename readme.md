@@ -127,7 +127,15 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 23.11.1 (2023-11-23)
+#### 24.01.0 (2024-01-08)
+- Added HABApp.util.RateLimiter
+- Added CompressedMidnightRotatingFileHandler
+- Updated dependencies
+- Small improvement for RGB and HSB types
+- Small improvements for openHAB items
+- Added toggle for SwitchItem
+
+#### 23.11.0 (2023-11-23)
 - Fix for very small float values (#425)
 - Fix for writing to persistence (#424)
 - Updated dependencies

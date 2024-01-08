@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, FrozenSet, Mapping, NamedTuple, Optional, TypeVar, Type
+from typing import Any, FrozenSet, Mapping, NamedTuple, Optional, Type
 
 from immutables import Map
 
@@ -110,5 +110,4 @@ class OpenhabItem(BaseValueItem):
         )
 
 
-HINT_OPENHAB_ITEM = TypeVar('HINT_OPENHAB_ITEM', bound=OpenhabItem)
-HINT_TYPE_OPENHAB_ITEM = Type[HINT_OPENHAB_ITEM]
+HINT_TYPE_OPENHAB_ITEM = Type[OpenhabItem]

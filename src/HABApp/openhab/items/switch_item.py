@@ -1,8 +1,10 @@
-from typing import TYPE_CHECKING, Tuple, Optional, FrozenSet, Mapping
+from typing import TYPE_CHECKING, Final, FrozenSet, Mapping, Optional, Tuple
 
+from HABApp.core.errors import ItemValueIsNoneError, InvalidItemValue
 from HABApp.openhab.definitions import OnOffValue
-from HABApp.openhab.items.base_item import OpenhabItem, MetaData
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand
+
 
 if TYPE_CHECKING:
     Tuple = Tuple
@@ -12,8 +14,8 @@ if TYPE_CHECKING:
     MetaData = MetaData
 
 
-ON = OnOffValue.ON
-OFF = OnOffValue.OFF
+ON: Final = OnOffValue.ON
+OFF: Final = OnOffValue.OFF
 
 
 class SwitchItem(OpenhabItem, OnOffCommand):
@@ -28,7 +30,6 @@ class SwitchItem(OpenhabItem, OnOffCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-
     @staticmethod
     def _state_from_oh_str(state: str):
         if state != ON and state != OFF:
@@ -40,8 +41,9 @@ class SwitchItem(OpenhabItem, OnOffCommand):
         if isinstance(new_value, OnOffValue):
             new_value = new_value.value
 
-        if new_value is not None and new_value != ON and new_value != OFF:
-            raise ValueError(f'Invalid value for SwitchItem {self.name}: {new_value}')
+        if new_value not in (ON, OFF, None):
+            raise InvalidItemValue.from_item(self, new_value)
+
         return super().set_value(new_value)
 
     def is_on(self) -> bool:
@@ -52,15 +54,26 @@ class SwitchItem(OpenhabItem, OnOffCommand):
         """Test value against off-value"""
         return self.value == OFF
 
+    def toggle(self):
+        """Toggle the switch. Turns the switch on when off or off when currently on."""
+        if self.value == ON:
+            self.off()
+        elif self.value == OFF:
+            self.on()
+        elif self.value is None:
+            raise ItemValueIsNoneError.from_item(self)
+        else:
+            raise InvalidItemValue.from_item(self, self.value)
+
     def __str__(self):
         return self.value
 
     def __eq__(self, other):
         if isinstance(other, SwitchItem):
             return self.value == other.value
-        elif isinstance(other, str):
+        if isinstance(other, str):
             return self.value == other
-        elif isinstance(other, int):
+        if isinstance(other, int):
             if other and self.is_on():
                 return True
             if not other and self.is_off():
@@ -70,4 +83,6 @@ class SwitchItem(OpenhabItem, OnOffCommand):
         return NotImplemented
 
     def __bool__(self):
-        return self.is_on()
+        if self.value is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return self.value == ON
