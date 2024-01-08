@@ -127,7 +127,7 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 24.01.0-DEV (2024-XX-XX)
+#### 24.01.0 (2024-01-08)
 - Added HABApp.util.RateLimiter
 - Added CompressedMidnightRotatingFileHandler
 - Updated dependencies
