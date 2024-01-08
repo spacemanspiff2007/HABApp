@@ -162,6 +162,30 @@ Example
     # It's possible to get statistics about the limiter and the corresponding windows
     print(limiter.info())
 
+    # There is a counter that keeps track of the total skips that can be reset
+    print('Counter:')
+    print(limiter.total_skips)
+    limiter.reset()     # Can be reset
+    print(limiter.total_skips)
+
+
+Recommendation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Limiting external requests to an external API works well with the leaky bucket algorithm (maybe with some initial hits).
+For limiting notifications the best results can be achieved by combining both algorithms.
+Fixed window elastic expiry will notify but block until an issue is resolved,
+that's why it's more suited for small intervals. Leaky bucket will allow hits even while the issue persists,
+that's why it's more suited for larger intervals.
+
+.. exec_code::
+
+    from HABApp.util import RateLimiter
+
+    limiter = RateLimiter('MyNotifications')
+    limiter.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
+    limiter.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+
 
 Documentation
 ^^^^^^^^^^^^^^^^^^

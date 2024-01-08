@@ -15,7 +15,7 @@ class LeakyBucketLimit(BaseRateLimit):
         super().__init__(allowed, interval, hits)
 
         self.drop_interval: Final = interval / allowed
-        self.next_drop: float = -1.0
+        self.next_drop: float = monotonic() + self.drop_interval
 
     def repr_text(self):
         return f'drop_interval={self.drop_interval:.1f}s'

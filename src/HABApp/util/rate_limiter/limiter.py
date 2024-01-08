@@ -33,7 +33,7 @@ class Limiter:
 
     @property
     def total_skips(self) -> int:
-        """A user counter to track skips which can be manually reset"""
+        """A counter to track skips which can be manually reset"""
         return self._skips_total
 
     def __repr__(self):
@@ -146,7 +146,7 @@ class Limiter:
         )
 
     def reset(self) -> 'Limiter':
-        """Reset the manual skip counter"""
+        """Reset the skip counter"""
         self._skips_total = 0
         return self
 

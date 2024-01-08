@@ -72,6 +72,9 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
         assert context is not None
 
         connection.log.info('Disconnected')
+        # remove this check when https://github.com/sbtinstruments/aiomqtt/pull/249 gets merged
+        if not context._lock.locked():
+            await context._lock.acquire()
         await context.__aexit__(None, None, None)
 
 

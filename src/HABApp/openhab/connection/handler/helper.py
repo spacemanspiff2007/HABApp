@@ -4,14 +4,17 @@ from datetime import datetime
 from typing import Any
 
 from HABApp.core.items import BaseValueItem
-from HABApp.core.types import RGB, HSB
+from HABApp.core.types import HSB, RGB
 
 
-def convert_to_oh_type(obj: Any) -> str:
+def convert_to_oh_type(obj: Any, scientific_floats=False) -> str:
     if isinstance(obj, (str, int, bool)):
         return str(obj)
 
     if isinstance(obj, float):
+        if scientific_floats:
+            return str(obj)
+
         v = str(obj)
         if 'e-' not in v:
             return v

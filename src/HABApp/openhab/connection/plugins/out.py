@@ -75,6 +75,8 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         queue: Final = self.queue
         to_str: Final = convert_to_oh_type
 
+        scientific_floats = not self.plugin_connection.context.workaround_small_floats
+
         while True:
             try:
                 while True:
@@ -84,7 +86,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                         item = item._name
 
                     if not isinstance(state, str):
-                        state = to_str(state)
+                        state = to_str(state, scientific_floats=scientific_floats)
 
                     if is_cmd:
                         await post(f'/rest/items/{item:s}', data=state)

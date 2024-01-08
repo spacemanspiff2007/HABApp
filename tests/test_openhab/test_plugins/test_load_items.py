@@ -78,7 +78,9 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs):
         waited_for_openhab=False,
         created_items={}, created_things={},
 
-        session=None, session_options=None
+        session=None, session_options=None,
+
+        workaround_small_floats=False
     )
     # initial item create
     await LoadOpenhabItemsPlugin().on_connected(context)
