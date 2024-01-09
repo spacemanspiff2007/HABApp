@@ -71,6 +71,7 @@ except Exception as e:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
     'sphinx_autodoc_typehints',
     'sphinx_exec_code',
     'sphinx.ext.inheritance_diagram',
