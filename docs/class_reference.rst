@@ -33,7 +33,7 @@ Scheduler
 OneTimeJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.OneTimeJob
+.. autoclass:: HABApp.rule.scheduler.jobs.OneTimeJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -41,7 +41,7 @@ OneTimeJob
 CountdownJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.CountdownJob
+.. autoclass:: HABApp.rule.scheduler.jobs.CountdownJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -49,7 +49,7 @@ CountdownJob
 ReoccurringJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.ReoccurringJob
+.. autoclass:: HABApp.rule.scheduler.jobs.ReoccurringJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -57,7 +57,7 @@ ReoccurringJob
 DayOfWeekJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.DayOfWeekJob
+.. autoclass:: HABApp.rule.scheduler.jobs.DayOfWeekJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -65,7 +65,7 @@ DayOfWeekJob
 DawnJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.DawnJob
+.. autoclass:: HABApp.rule.scheduler.jobs.DawnJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -73,7 +73,7 @@ DawnJob
 SunriseJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.SunriseJob
+.. autoclass:: HABApp.rule.scheduler.jobs.SunriseJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -81,7 +81,7 @@ SunriseJob
 SunsetJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.SunsetJob
+.. autoclass:: HABApp.rule.scheduler.jobs.SunsetJob
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -89,7 +89,7 @@ SunsetJob
 DuskJob
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: eascheduler.scheduler_view.DuskJob
+.. autoclass:: HABApp.rule.scheduler.jobs.DuskJob
    :members:
    :inherited-members:
    :member-order: groupwise
