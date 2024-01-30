@@ -1,4 +1,4 @@
-aiohttp     == 3.9.1
+aiohttp     == 3.9.2
 pydantic    == 2.5.3
 msgspec     == 0.18.5
 bidict      == 0.22.1
