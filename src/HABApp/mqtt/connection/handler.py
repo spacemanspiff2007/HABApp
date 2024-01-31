@@ -5,9 +5,9 @@ from aiomqtt import Client, TLSParameters
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
-
-from HABApp.core.internals import uses_post_event, uses_get_item, uses_item_registry
+from HABApp.core.internals import uses_get_item, uses_item_registry, uses_post_event
 from HABApp.mqtt.connection.connection import CONTEXT_TYPE, MqttConnection
+
 
 post_event = uses_post_event()
 get_item = uses_get_item()
@@ -53,7 +53,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
         connection.context = Client(
             hostname=config.host, port=config.port,
             username=config.user if config.user else None, password=config.password if config.password else None,
-            client_id=config.client_id,
+            identifier=config.identifier,
 
             tls_insecure=tls_insecure,
             tls_params=None if not tls_enabled else TLSParameters(ca_certs=tls_ca_cert),
@@ -66,15 +66,16 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
 
         connection.log.info(f'Connecting to {context._hostname}:{context._port}')
         await context.__aenter__()
+
+        # TODO: remove once https://github.com/sbtinstruments/aiomqtt/issues/268 has been fixed
+        context.messages = context._messages()
+
         connection.log.info('Connection successful')
 
     async def on_disconnected(self, connection: MqttConnection, context: CONTEXT_TYPE):
         assert context is not None
 
         connection.log.info('Disconnected')
-        # remove this check when https://github.com/sbtinstruments/aiomqtt/pull/249 gets merged
-        if not context._lock.locked():
-            await context._lock.acquire()
         await context.__aexit__(None, None, None)
 
 

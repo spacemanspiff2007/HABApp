@@ -6,6 +6,7 @@ import time
 import typing
 from pathlib import Path
 
+
 # Global var if we want to run the benchmark
 DO_BENCH = False
 DO_DEBUG = False

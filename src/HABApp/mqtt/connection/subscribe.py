@@ -151,17 +151,15 @@ class SubscriptionHandler(MqttPlugin):
         client = self.plugin_connection.context
         assert client is not None
 
-        async with client.messages() as messages:
-            async for message in messages:
+        async for message in client.messages:
+            try:
+                topic, payload = get_msg_payload(message)
+                if topic is None:
+                    continue
 
-                try:
-                    topic, payload = get_msg_payload(message)
-                    if topic is None:
-                        continue
-
-                    msg_to_event(topic, payload, message.retain)
-                except Exception as e:
-                    process_exception('mqtt payload handling', e, logger=self.plugin_connection.log)
+                msg_to_event(topic, payload, message.retain)
+            except Exception as e:
+                process_exception('mqtt payload handling', e, logger=self.plugin_connection.log)
 
 
 post_event = uses_post_event()

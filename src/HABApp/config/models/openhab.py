@@ -59,7 +59,8 @@ class Connection(BaseModel):
 
     @field_validator('url')
     def validate_url(cls, value: str):
-        TypeAdapter(AnyHttpUrl).validate_python(value)
+        if value:
+            TypeAdapter(AnyHttpUrl).validate_python(value)
         return value
 
     @field_validator('buffer')

@@ -12,7 +12,7 @@ location:
 
 mqtt:
   connection:
-    client_id: HABAppTesting
+    identifier: HABAppTesting
     host: 'localhost'
     port: 1883
     user: ''

@@ -54,7 +54,7 @@ Example
 
     mqtt:
         connection:
-            client_id: HABApp
+            identifier: HABApp
             host: ''
             port: 8883
             user: ''
