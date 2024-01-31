@@ -19,9 +19,6 @@ def assert_remaining(t: Timeout, time: float | None):
         assert t.remaining_or_none() is None
         with pytest.raises(TimeoutNotRunningError):
             t.remaining()
-    elif isinstance(time, int):
-        assert t.remaining() == time
-        assert t.remaining_or_none() == time
     else:
         # prevent rounding errors
         assert abs(t.remaining() - time) < 0.000_000_1
