@@ -21,11 +21,11 @@ def assert_remaining(t: Timeout, time: float | None):
             t.remaining()
     else:
         # prevent rounding errors
-        assert abs(t.remaining() - time) < 0.000_003
-        assert abs(t.remaining_or_none() - time) < 0.000_003
+        assert abs(t.remaining() - time) < 0.000_000_1
+        assert abs(t.remaining_or_none() - time) < 0.000_000_1
 
 
-def test_timeout_init():
+def test_timeout_init(time):
 
     t = Timeout(5, start=False)
     with pytest.raises(TimeoutNotRunningError):
