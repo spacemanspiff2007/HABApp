@@ -5,8 +5,9 @@ import typing
 from pathlib import Path
 
 import HABApp
-from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.core.internals import get_current_context
+from HABApp.rule.rule_hook import HABAppRuleHook
+
 
 log = logging.getLogger('HABApp.Rules')
 

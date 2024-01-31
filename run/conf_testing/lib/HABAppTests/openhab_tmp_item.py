@@ -4,17 +4,18 @@ from typing import List, Optional
 
 import HABApp
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS
-from . import get_random_name, EventWaiter
+
+from . import EventWaiter, get_random_name
 
 
 class OpenhabTmpItem:
     @staticmethod
-    def use(type: str, name: Optional[str] = None, arg_name: str = 'item'):
+    def use(item_type: str, name: Optional[str] = None, arg_name: str = 'item'):
         def decorator(func):
             @wraps(func)
             def new_func(*args, **kwargs):
                 assert arg_name not in kwargs, f'arg {arg_name} already set'
-                item = OpenhabTmpItem(type, name)
+                item = OpenhabTmpItem(item_type, name)
                 try:
                     kwargs[arg_name] = item
                     return func(*args, **kwargs)
@@ -24,11 +25,11 @@ class OpenhabTmpItem:
         return decorator
 
     @staticmethod
-    def create(type: str, name: Optional[str] = None, arg_name: Optional[str] = None):
+    def create(item_type: str, name: Optional[str] = None, arg_name: Optional[str] = None):
         def decorator(func):
             @wraps(func)
             def new_func(*args, **kwargs):
-                with OpenhabTmpItem(type, name) as f:
+                with OpenhabTmpItem(item_type, name) as f:
                     if arg_name is not None:
                         assert arg_name not in kwargs, f'arg {arg_name} already set'
                         kwargs[arg_name] = f
@@ -69,7 +70,8 @@ class OpenhabTmpItem:
         while not HABApp.core.Items.item_exists(self.name):
             time.sleep(0.01)
             if time.time() > stop:
-                raise TimeoutError(f'Item {self.name} was not found!')
+                msg = f'Item {self.name} was not found!'
+                raise TimeoutError(msg)
 
         return HABApp.openhab.items.OpenhabItem.get_item(self.name)
 

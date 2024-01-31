@@ -1,15 +1,21 @@
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ
-from HABApp.core.items import BaseItem, HINT_ITEM_OBJ
-
+from HABApp.core.items import HINT_ITEM_OBJ, BaseItem
 from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF
-from .listener_creator import ListenerCreatorBase, EventListenerCreator, \
-    NoChangeEventListenerCreator, NoUpdateEventListenerCreator
+
+from .listener_creator import (
+    EventListenerCreator,
+    ListenerCreatorBase,
+    NoChangeEventListenerCreator,
+    NoUpdateEventListenerCreator,
+)
 
 
 class ListenerCreatorNotFoundError(Exception):
-    pass
+    @classmethod
+    def from_name(cls, name: str):
+        return cls(f'ListenerCreator for "{name}" not found!')
 
 
 class EventListenerGroup:
@@ -57,7 +63,7 @@ class EventListenerGroup:
         try:
             obj = self._items[name]
         except KeyError:
-            raise ListenerCreatorNotFoundError(f'ListenerCreator for "{name}" not found!') from None
+            raise ListenerCreatorNotFoundError.from_name(name) from None
         if obj.active:
             return False
 
@@ -76,7 +82,7 @@ class EventListenerGroup:
         try:
             obj = self._items[name]
         except KeyError:
-            raise ListenerCreatorNotFoundError(f'ListenerCreator for "{name}" not found!') from None
+            raise ListenerCreatorNotFoundError.from_name(name) from None
         if not obj.active:
             return False
 
@@ -135,7 +141,7 @@ class EventListenerGroup:
     def add_no_change_watcher(self, item: Union[HINT_ITEM_OBJ, Iterable[HINT_ITEM_OBJ]], callback: Callable[[Any], Any],
                               seconds: TH_POSITIVE_TIME_DIFF, alias: Optional[str] = None
                               ) -> 'EventListenerGroup':
-        """Add an no change watcher to the group. On ``listen`` this this will create a no change watcher and
+        """Add a no change watcher to the group. On ``listen`` this will create a no change watcher and
          the corresponding event listener that will trigger the callback
 
         :param item: Single or multiple items

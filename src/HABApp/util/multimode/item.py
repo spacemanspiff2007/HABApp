@@ -6,6 +6,7 @@ from HABApp.core.items import Item
 
 from .mode_base import HINT_BASE_MODE, BaseMode
 
+
 LOCK = Lock()
 
 

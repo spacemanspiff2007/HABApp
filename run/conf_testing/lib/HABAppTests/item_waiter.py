@@ -5,6 +5,7 @@ from HABApp.core.items import BaseValueItem
 from HABAppTests.compare_values import get_equal_text
 from HABAppTests.errors import TestCaseFailed
 
+
 log = logging.getLogger('HABApp.Tests')
 
 
@@ -35,9 +36,8 @@ class ItemWaiter:
                     for name, target in kwargs.items()
                 ]
                 failed_msg = "\n".join(failed)
-                raise TestCaseFailed(f'Timeout waiting for {self.item.name}!\n{failed_msg}')
-
-        raise ValueError()
+                msg = f'Timeout waiting for {self.item.name}!\n{failed_msg}'
+                raise TestCaseFailed(msg)
 
     def wait_for_state(self, state=None):
         return self.wait_for_attribs(value=state)

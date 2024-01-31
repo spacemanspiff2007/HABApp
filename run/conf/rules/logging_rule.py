@@ -2,6 +2,7 @@ import logging
 
 import HABApp
 
+
 log = logging.getLogger('MyRule')
 
 
