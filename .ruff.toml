@@ -8,7 +8,10 @@ src = ["src", "test"]
 # https://docs.astral.sh/ruff/settings/#ignore-init-module-imports
 ignore-init-module-imports = true
 
-extend-exclude = ["__init__.py"]
+extend-exclude = [
+    "__init__.py",
+    "src/__test_*.py"
+]
 
 select = [
     "E", "W",   # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
@@ -62,6 +65,7 @@ builtins-ignorelist = ["id", "input"]
 [lint.per-file-ignores]
 "docs/conf.py" = ["INP001", "A001"]
 "setup.py" = ["PTH123"]
+"run/**" = ["INP001"]
 
 
 [lint.isort]

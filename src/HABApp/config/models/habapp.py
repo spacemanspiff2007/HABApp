@@ -1,6 +1,5 @@
-from pydantic import Field, conint
-
 from easyconfig import BaseModel
+from pydantic import Field, conint
 
 
 class ThreadPoolConfig(BaseModel):

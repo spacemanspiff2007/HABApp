@@ -1,14 +1,20 @@
 import logging
 import time
-from typing import TypeVar, Dict, Any
-from typing import Union
+from typing import Any, Dict, TypeVar, Union
 
 from HABApp.core.events.filter import EventFilter
-from HABApp.core.internals import EventBusListener, wrap_func, EventFilterBase, HINT_EVENT_FILTER_OBJ, \
-    get_current_context
+from HABApp.core.internals import (
+    HINT_EVENT_FILTER_OBJ,
+    EventBusListener,
+    EventFilterBase,
+    get_current_context,
+    wrap_func,
+)
 from HABApp.core.items import BaseValueItem
 from HABAppTests.errors import TestCaseFailed
+
 from .compare_values import get_equal_text, get_value_text
+
 
 log = logging.getLogger('HABApp.Tests')
 
@@ -52,8 +58,8 @@ class EventWaiter:
 
             if time.time() > start + self.timeout:
                 expected_values = "with " + ", ".join([f"{__k}={__v}" for __k, __v in kwargs.items()]) if kwargs else ""
-                raise TestCaseFailed(f'Timeout while waiting for {self.event_filter.describe()} '
-                                     f'for {self.name} {expected_values}')
+                msg = f'Timeout while waiting for {self.event_filter.describe()} for {self.name} {expected_values}'
+                raise TestCaseFailed(msg)
 
             if not self._received_events:
                 continue

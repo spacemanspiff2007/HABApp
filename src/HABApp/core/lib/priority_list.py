@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Generic, TypeVar, Literal, Union, Iterator, Tuple
+from typing import Generic, Iterator, Literal, Tuple, TypeVar, Union
 
 from HABApp.core.const.const import PYTHON_310
+
 
 if PYTHON_310:
     from typing import TypeAlias
@@ -23,6 +24,7 @@ def sort_func(obj: T_ENTRY):
     return prio.get(key, 1), key
 
 
+# Todo: Move this to the connection
 class PriorityList(Generic[T]):
     def __init__(self):
         self._objs: list[T_ENTRY] = []
@@ -48,4 +50,4 @@ class PriorityList(Generic[T]):
             yield o
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} {[o for o in self]}>'
+        return f'<{self.__class__.__name__} {list(self)}>'

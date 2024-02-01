@@ -13,7 +13,7 @@ from HABApp.openhab.map_items import _items as item_dict
 def test_OnOff(cls):
     c = cls('item_name')
     assert not c.is_on()
-    if not __version__.startswith('24.01.0'):
+    if not __version__.startswith('24.02.0'):
         assert not c.is_off()
 
     c.set_value(OnOffValue('ON'))

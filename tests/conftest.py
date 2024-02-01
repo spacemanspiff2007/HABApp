@@ -6,12 +6,11 @@ import typing
 import pytest
 
 import HABApp
-import tests
 from HABApp.core.asyncio import async_context
-from HABApp.core.const.topics import TOPIC_ERRORS
-from HABApp.core.internals import setup_internals, EventBus, ItemRegistry
-from tests.helpers import params, parent_rule, sync_worker, eb, get_dummy_cfg, LogCollector
-from tests.helpers.log.log_matcher import LogLevelMatcher, AsyncDebugWarningMatcher
+from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
+from tests.helpers import LogCollector, eb, get_dummy_cfg, params, parent_rule, sync_worker
+from tests.helpers.log.log_matcher import AsyncDebugWarningMatcher, LogLevelMatcher
+
 
 if typing.TYPE_CHECKING:
     parent_rule = parent_rule
@@ -48,7 +47,7 @@ def use_dummy_cfg(monkeypatch):
     monkeypatch.setattr(HABApp, 'CONFIG', cfg)
     monkeypatch.setattr(HABApp.config, 'CONFIG', cfg)
     monkeypatch.setattr(HABApp.config.config, 'CONFIG', cfg)
-    yield cfg
+    return cfg
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -62,8 +61,7 @@ def event_loop():
 
 @pytest.fixture(scope='function')
 def ir():
-    ir = ItemRegistry()
-    yield ir
+    return ItemRegistry()
 
 
 @pytest.fixture(autouse=True, scope='function')

@@ -6,17 +6,18 @@ from pathlib import Path
 
 import HABApp
 import HABApp.__cmd_args__ as cmd_args
+from HABApp.core.connections import Connections
 from HABApp.core.files.errors import AlreadyHandledFileError
 from HABApp.core.files.file import HABAppFile
 from HABApp.core.files.folders import add_folder as add_habapp_folder
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
+from HABApp.core.internals import uses_item_registry
+from HABApp.core.internals.wrapped_function import run_function
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
+from HABApp.rule_manager.rule_file import RuleFile
 from HABApp.runtime import shutdown
-from .rule_file import RuleFile
-from ..core.internals import uses_item_registry
-from HABApp.core.internals.wrapped_function import run_function
-from HABApp.core.connections import Connections
+
 
 log = logging.getLogger('HABApp.Rules')
 

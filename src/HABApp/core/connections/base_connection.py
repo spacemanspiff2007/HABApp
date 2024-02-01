@@ -209,6 +209,7 @@ class BaseConnection:
     def on_application_shutdown(self):
         if self.status.shutdown:
             return None
+
         self.log.debug('Requesting shutdown')
         self.status.shutdown = True
 

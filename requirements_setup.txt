@@ -1,14 +1,14 @@
-aiohttp     == 3.9.1
-pydantic    == 2.5.3
-msgspec     == 0.18.5
+aiohttp     == 3.9.3
+pydantic    == 2.6.0
+msgspec     == 0.18.6
 bidict      == 0.22.1
 watchdog    == 3.0.0
 ujson       == 5.9.0
-aiomqtt     == 1.2.1
+aiomqtt     == 2.0.0
 
 immutables  == 0.20
 eascheduler == 0.1.11
-easyconfig  == 0.3.1
+easyconfig  == 0.3.2
 pendulum    == 2.1.2
 stack_data  == 0.6.3
 colorama    == 0.4.6

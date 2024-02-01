@@ -1,8 +1,7 @@
 from typing import Union
 
-from pydantic import AnyHttpUrl, ByteSize, Field, field_validator, TypeAdapter
-
 from easyconfig.models import BaseModel
+from pydantic import AnyHttpUrl, ByteSize, Field, TypeAdapter, field_validator
 
 
 class Ping(BaseModel):
@@ -28,6 +27,12 @@ class General(BaseModel):
         description='Minimum openHAB start level to load items and listen to events',
     )
 
+    # Minimum uptime
+    min_uptime: int = Field(
+        60, ge=0, le=3600, in_file=False,
+        description='Minimum openHAB uptime in seconds to load items and listen to events',
+    )
+
 
 class Connection(BaseModel):
     url: str = Field(
@@ -45,10 +50,8 @@ class Connection(BaseModel):
 
     topic_filter: str = Field(
         'openhab/items/*,'      # Item updates
-        'openhab/channels/*,'   # Channel update
-        # Thing events - don't listen to updated events
-        # todo: check if this might be a good filter: 'openhab/things/*',
-        'openhab/things/*',
+        'openhab/channels/*,'   # Channel updates
+        'openhab/things/*',     # Thing updates
         alias='topic filter', in_file=False,
         description='Topic filter for subscribing to openHAB. This filter is processed by openHAB and only events '
                     'matching this filter will be sent to HABApp.'
@@ -56,7 +59,8 @@ class Connection(BaseModel):
 
     @field_validator('url')
     def validate_url(cls, value: str):
-        TypeAdapter(AnyHttpUrl).validate_python(value)
+        if value:
+            TypeAdapter(AnyHttpUrl).validate_python(value)
         return value
 
     @field_validator('buffer')
@@ -71,7 +75,8 @@ class Connection(BaseModel):
             if value == ByteSize._validate(_v, None):
                 return value
 
-        raise ValueError(f'Value must be one of {", ".join(valid_values)}')
+        msg = f'Value must be one of {", ".join(valid_values)}'
+        raise ValueError(msg)
 
 
 class OpenhabConfig(BaseModel):

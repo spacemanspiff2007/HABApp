@@ -14,18 +14,7 @@ from HABApp.util.rate_limiter.limiter import (
     parse_limit,
 )
 from HABApp.util.rate_limiter.parser import LIMIT_REGEX
-
-
-class MockedMonotonic:
-    def __init__(self):
-        self.time = 0
-
-    def get_time(self):
-        return self.time
-
-    def __iadd__(self, other):
-        self.time += other
-        return self
+from tests.helpers import MockedMonotonic
 
 
 @pytest.fixture()

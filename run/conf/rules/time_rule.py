@@ -1,4 +1,5 @@
-from datetime import time, timedelta, datetime
+from datetime import datetime, time, timedelta
+
 from HABApp import Rule
 
 

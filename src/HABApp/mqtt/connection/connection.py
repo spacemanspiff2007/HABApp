@@ -71,4 +71,4 @@ class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
         except AlreadyHandledException:
             pass
         finally:
-            log.debug(f'{self.task.name} task stop')
+            log.debug(f'{self.task.name} task finished')

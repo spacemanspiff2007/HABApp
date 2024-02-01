@@ -1,12 +1,14 @@
 import logging
 import time
 
+from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule, run_coro
+
 import HABApp
 from HABApp.core.connections import Connections, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
-from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule, run_coro
+
 
 log = logging.getLogger('HABApp.MqttTestEvents')
 
@@ -73,10 +75,10 @@ class TestMQTTEvents(TestBaseRule):
 
         run_coro(self.trigger_reconnect())
 
-        time.sleep(0.2)
         connection = Connections.get('mqtt')
         while not connection.is_online:
             time.sleep(0.2)
+
         assert HABApp.core.Items.item_exists(topic) is True
 
         HABApp.core.Items.pop_item(topic)

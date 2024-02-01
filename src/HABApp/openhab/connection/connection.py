@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 class OpenhabContext:
     version: tuple[int, int, int]
     is_oh3: bool
+    is_oh41: bool
 
     # true when we waited during connect
     waited_for_openhab: bool
@@ -32,8 +33,6 @@ class OpenhabContext:
 
     session: aiohttp.ClientSession
     session_options: dict[str, Any]
-
-    workaround_small_floats: bool
 
 
 CONTEXT_TYPE: TypeAlias = Optional[OpenhabContext]

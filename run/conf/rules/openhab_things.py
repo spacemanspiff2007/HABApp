@@ -1,7 +1,7 @@
 from HABApp import Rule
+from HABApp.core.events import EventFilter
 from HABApp.openhab.events import ThingStatusInfoChangedEvent
 from HABApp.openhab.items import Thing
-from HABApp.core.events import EventFilter
 
 
 class CheckAllThings(Rule):

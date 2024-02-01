@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from asyncio import Queue, QueueEmpty
-from asyncio import sleep
-from typing import Any
-from typing import Final
+from asyncio import Queue, QueueEmpty, sleep
+from typing import Any, Final
 
 from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.connections import BaseConnectionPlugin
@@ -75,7 +73,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         queue: Final = self.queue
         to_str: Final = convert_to_oh_type
 
-        scientific_floats = not self.plugin_connection.context.workaround_small_floats
+        scientific_floats = self.plugin_connection.context.is_oh41
 
         while True:
             try:
@@ -92,7 +90,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                         await post(f'/rest/items/{item:s}', data=state)
                     else:
                         await put(f'/rest/items/{item:s}/state', data=state)
-            except Exception as e:
+            except Exception as e:  # noqa: PERF203
                 self.plugin_connection.process_exception(e, 'Outgoing queue worker')
 
     def async_post_update(self, item: str | ItemRegistryItem, state: Any):
