@@ -127,10 +127,12 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 24.02.0 (2024-XX-XX)
+#### 24.02.0 (2024-02-14)
 - For openHAB >= 4.1 it's possible to wait for a minimum openHAB uptime before connecting (defaults to 60s)
 - Renamed config entry mqtt.connection.client_id to identifier (backwards compatible)
+- ``ItemTimeSeriesUpdatedEvent`` gets ignored
 - Updated dependencies
+- Updated docs
 
 #### 24.01.0 (2024-01-08)
 - Added HABApp.util.RateLimiter
