@@ -1,9 +1,9 @@
 import itertools
 import logging
 import logging.handlers
+import signal
 import traceback
 import typing
-import signal
 from asyncio import iscoroutinefunction, sleep
 from dataclasses import dataclass
 from types import FunctionType, MethodType
@@ -30,7 +30,7 @@ def register_func(func, last=False, msg: str = ''):
     assert last is True or last is False, last
     assert isinstance(msg, str)
 
-    _FUNCS.append(ShutdownInfo(func, f'{func.__module__}.{func.__name__}' if not msg else msg, last))
+    _FUNCS.append(ShutdownInfo(func, msg if msg else f'{func.__module__}.{func.__name__}', last))
 
 
 def register_signal_handler():

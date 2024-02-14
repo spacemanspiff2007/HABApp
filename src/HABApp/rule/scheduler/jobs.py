@@ -3,17 +3,22 @@ from __future__ import annotations
 import inspect
 
 import eascheduler.scheduler_view
+from eascheduler.const import FAR_FUTURE
+from eascheduler.jobs import CountdownJob as CountdownJobBase
+from eascheduler.jobs import DawnJob as DawnJobBase
+from eascheduler.jobs import DayOfWeekJob as DayOfWeekJobBase
+from eascheduler.jobs import DuskJob as DuskJobBase
+from eascheduler.jobs import OneTimeJob as OneTimeJobBase
+from eascheduler.jobs import ReoccurringJob as ReoccurringJobBase
+from eascheduler.jobs import SunriseJob as SunriseJobBase
+from eascheduler.jobs import SunsetJob as SunsetJobBase
+from eascheduler.jobs.job_base import ScheduledJobBase
+
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.items import BaseValueItem
 from HABApp.core.wrapper import ignore_exception
 from HABApp.openhab.items import OpenhabItem
-from eascheduler.const import FAR_FUTURE
-from eascheduler.jobs import (
-    CountdownJob as CountdownJobBase, DawnJob as DawnJobBase, DayOfWeekJob as DayOfWeekJobBase,
-    DuskJob as DuskJobBase, OneTimeJob as OneTimeJobBase, ReoccurringJob as ReoccurringJobBase,
-    SunriseJob as SunriseJobBase, SunsetJob as SunsetJobBase
-)
-from eascheduler.jobs.job_base import ScheduledJobBase
+
 
 Items = uses_item_registry()
 
@@ -45,8 +50,9 @@ class ItemBoundJobMixin:
 
     def to_item(self, item: str | BaseValueItem | None):
         """Sends the next execution (date)time to an item. Sends ``None`` if the job is not scheduled.
+        Every time the scheduler updates to a new (date)time the item will also receive the updated time.
 
-        :param item: item name or item, None to disable
+        :param item: item name or item, ``None`` to disable
         """
         if item is None:
             self._item = None

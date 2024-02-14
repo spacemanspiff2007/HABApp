@@ -71,6 +71,12 @@ class SseEventListenerPlugin(BaseConnectionPlugin[OpenhabConnection]):
                         if not oh3 and e_type == 'ItemStateEvent':
                             continue
 
+                        # https://github.com/spacemanspiff2007/HABApp/issues/437
+                        # openHAB will automatically restore the future states of the item
+                        # which means we can safely ignore these events because we will see the ItemStateUpdatedEvent
+                        if e_type == 'ItemTimeSeriesUpdatedEvent':
+                            continue
+
                         # process
                         _see_handler(e_json, oh3)
         except Exception as e:

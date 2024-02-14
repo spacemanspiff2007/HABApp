@@ -1,5 +1,5 @@
 import HABApp
-from HABApp.openhab.events import ItemStateUpdatedEventFilter, ItemStateEvent
+from HABApp.openhab.events import ItemStateEvent, ItemStateUpdatedEventFilter
 from HABApp.openhab.items import OpenhabItem
 
 

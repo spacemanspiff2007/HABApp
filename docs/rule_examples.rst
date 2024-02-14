@@ -115,8 +115,10 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
 Process Errors in Rules
 ------------------------------------------
 This example shows how to create a rule with a function which will be called when **any** rule throws an error.
-The rule function then can push the error message to an openHAB item or e.g. use Pushover to send the error message
-to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more information).
+The rule function then can push the error message to an openHAB item, use a notification service to send the error
+message to the mobile device or send an email with the error message.
+See :doc:`Advanced Usage <advanced_usage>` for more information about the available internal topics.
+It also uses the built in :ref:`rate limiter <RATE_LIMITER>` to limit the amount of notifications.
 
 .. exec_code::
 
@@ -130,6 +132,14 @@ to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more inform
     import HABApp
     from HABApp.core.events.habapp_events import HABAppException
     from HABApp.core.events import EventFilter
+    from HABApp.util import RateLimiter
+
+
+    # Set up rate limiter to limit the amount of notifications
+    LIMITER = RateLimiter('MyNotifications')
+    LIMITER.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
+    LIMITER.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+
 
     class NotifyOnError(HABApp.Rule):
         def __init__(self):
@@ -140,12 +150,19 @@ to the mobile device (see :doc:`Advanced Usage <advanced_usage>` for more inform
 
         def on_error(self, error_event: HABAppException):
             msg = error_event.to_str() if isinstance(error_event, HABAppException) else error_event
+
+            # use limiter
+            if not LIMITER.allow():
+                return None
+
+            # Replace this part with your notification logic
+            print('Error in rules:')
             print(msg)
 
     NotifyOnError()
 
 
-    # this is a faulty example. Do not create this part!
+    # this is a faulty rule as an example. Do not create this part!
     class FaultyRule(HABApp.Rule):
         def __init__(self):
             super().__init__()

@@ -44,7 +44,7 @@ def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=Tr
         validator, required=True, extra=(voluptuous.ALLOW_EXTRA if allow_extra_keys else voluptuous.PREVENT_EXTRA)
     )
 
-    # todo: move this to file handling so we get the extension
+    # TODO: move this to file handling so we get the extension
     if old_validator != new_validator:
         reload_param_file(filename)
 

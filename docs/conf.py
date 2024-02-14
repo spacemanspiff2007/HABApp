@@ -17,6 +17,7 @@ import sphinx
 from docutils.nodes import Node, Text
 from sphinx.addnodes import desc_signature
 
+
 IS_RTD_BUILD = os.environ.get('READTHEDOCS', '-').lower() == 'true'
 IS_CI = os.environ.get('CI', '-') == 'true'
 
@@ -71,6 +72,7 @@ except Exception as e:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
     'sphinx_autodoc_typehints',
     'sphinx_exec_code',
     'sphinx.ext.inheritance_diagram',

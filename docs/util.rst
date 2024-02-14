@@ -75,6 +75,9 @@ Converts a hsb value to the rgb color space
 .. autofunction:: HABApp.util.functions.hsb_to_rgb
 
 
+.. _RATE_LIMITER:
+
+
 Rate limiter
 ------------------------------
 A simple rate limiter implementation which can be used in rules.

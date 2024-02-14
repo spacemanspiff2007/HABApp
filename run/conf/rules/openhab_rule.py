@@ -1,7 +1,7 @@
 import HABApp
-from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
-from HABApp.openhab.events import ItemStateEvent, ItemCommandEvent, ItemStateChangedEvent
-from HABApp.openhab.items import SwitchItem, ContactItem, DatetimeItem
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.openhab.events import ItemCommandEvent, ItemStateChangedEvent, ItemStateEvent
+from HABApp.openhab.items import ContactItem, DatetimeItem, SwitchItem
 
 
 class MyOpenhabRule(HABApp.Rule):

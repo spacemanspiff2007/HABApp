@@ -168,14 +168,8 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             if vers < (3, 3):
                 log.warning('HABApp requires at least openHAB version 3.3!')
 
-            connection.context = OpenhabContext(
-                version=vers, is_oh3=vers < (4, 0),
-                waited_for_openhab=False,
-                created_items={}, created_things={},
-                session=self.session, session_options=self.options,
-
-                workaround_small_floats=vers < (4, 1)
-            )
+            connection.context = OpenhabContext.new_context(
+                version=vers, session=self.session, session_options=self.options)
 
         # during startup we get OpenhabCredentialsInvalidError even though credentials are correct
         except (OpenhabDisconnectedError, OpenhabCredentialsInvalidError):

@@ -151,7 +151,7 @@ and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueUpdateEvent`.
 MqttValueChangeEvent
 """"""""""""""""""""""""""""""""""""""
 Since this event inherits from :class:`~HABApp.core.events.ValueChangeEvent` you can listen to :class:`~HABApp.core.events.ValueChangeEvent`
-and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueUpdateEvent`.
+and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueChangeEvent`.
 
 .. inheritance-diagram:: HABApp.mqtt.events.MqttValueChangeEvent
    :parts: 1

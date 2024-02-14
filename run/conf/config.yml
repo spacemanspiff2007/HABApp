@@ -12,7 +12,7 @@ location:
 
 mqtt:
   connection:
-    client_id: HABAppConf
+    identifier: HABAppConf
     host: localhost
     password: ''
     port: 1883
