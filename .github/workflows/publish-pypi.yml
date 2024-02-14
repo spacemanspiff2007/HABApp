@@ -7,7 +7,7 @@ jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
-    environment: release
+    environment: pypi
     permissions:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
