@@ -1,14 +1,19 @@
 import logging
 from asyncio import iscoroutinefunction
-from typing import Union, Optional, Callable, Type
+from typing import Callable, Optional, Type, Union
 
 from HABApp.config import CONFIG
 from HABApp.core.internals import Context
 from HABApp.core.internals.wrapped_function.base import TYPE_WRAPPED_FUNC_OBJ
-from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction, TYPE_FUNC_ASYNC
+from HABApp.core.internals.wrapped_function.wrapped_async import TYPE_FUNC_ASYNC, WrappedAsyncFunction
 from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunction
-from HABApp.core.internals.wrapped_function.wrapped_thread import HINT_FUNC_SYNC, WrappedThreadFunction, \
-    create_thread_pool, stop_thread_pool, run_in_thread_pool
+from HABApp.core.internals.wrapped_function.wrapped_thread import (
+    HINT_FUNC_SYNC,
+    WrappedThreadFunction,
+    create_thread_pool,
+    run_in_thread_pool,
+    stop_thread_pool,
+)
 
 
 def wrap_func(func: Union[HINT_FUNC_SYNC, TYPE_FUNC_ASYNC],
@@ -25,7 +30,9 @@ def wrap_func(func: Union[HINT_FUNC_SYNC, TYPE_FUNC_ASYNC],
             type_name: str = func.__class__.__name__
         except Exception:
             type_name = type(func)
-        raise ValueError(f'Callable or coroutine function expected! Got "{func}" (type {type_name:s})')
+
+        msg = f'Callable or coroutine function expected! Got "{func}" (type {type_name:s})'
+        raise TypeError(msg)
 
     if iscoroutinefunction(func):
         return WrappedAsyncFunction(func, name=name, logger=logger, context=context)

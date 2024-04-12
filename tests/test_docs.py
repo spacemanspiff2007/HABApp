@@ -1,11 +1,11 @@
 from inspect import getmembers, isclass
 from pathlib import Path
 
+from easyconfig import yaml
 from pydantic import BaseModel
 
 import HABApp.config.models
 from HABApp.config import CONFIG
-from easyconfig import yaml
 
 
 def test_sample_yaml(pytestconfig):

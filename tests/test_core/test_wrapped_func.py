@@ -12,15 +12,15 @@ from tests.helpers import TestEventBus
 
 
 def test_error():
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         wrap_func(None)
     assert str(e.value) == 'Callable or coroutine function expected! Got "None" (type NoneType)'
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         wrap_func(6)
     assert str(e.value) == 'Callable or coroutine function expected! Got "6" (type int)'
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         wrap_func(date(2023, 12, 24))
     assert str(e.value) == 'Callable or coroutine function expected! Got "2023-12-24" (type date)'
 
