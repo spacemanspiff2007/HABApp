@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional, Union
 
+from fastnumbers import real
+
 from HABApp.core.errors import InvalidItemValue
 from HABApp.openhab.definitions import PercentValue, UpDownValue
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem
@@ -28,10 +30,7 @@ class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
 
     @staticmethod
     def _state_from_oh_str(state: str):
-        try:
-            return int(state)
-        except ValueError:
-            return float(state)
+        return real(state)
 
     def set_value(self, new_value) -> bool:
 

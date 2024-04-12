@@ -1,5 +1,7 @@
 from base64 import b64decode
-from typing import Tuple, Union
+from typing import Tuple
+
+from fastnumbers import real
 
 from HABApp.core.events import ComplexEventValue
 
@@ -92,10 +94,7 @@ class QuantityValue(ComplexEventValue):
 
     def __init__(self, value: str):
         value, unit = QuantityValue.split_unit(value)
-        try:
-            val: Union[int, float] = int(value)
-        except ValueError:
-            val = float(value)
+        val = real(value)
         super().__init__(val)
         self.unit = unit
 

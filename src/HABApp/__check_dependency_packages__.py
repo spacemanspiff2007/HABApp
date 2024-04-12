@@ -15,6 +15,7 @@ def get_dependencies() -> list[str]:
         'colorama',
         'eascheduler',
         'easyconfig',
+        'fastnumbers',
         'pydantic',
         'stack_data',
         'voluptuous',

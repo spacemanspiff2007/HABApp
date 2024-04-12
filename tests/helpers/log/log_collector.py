@@ -132,7 +132,7 @@ class LogCollector:
             msg += '\n - ' + '\n - '.join(map(str, missing))
             msg += '\nLog:\n' + '\n'.join(self.get_messages())
 
-            pytest.fail(msg=msg)
+            pytest.fail(reason=msg)
 
         for rec in self.res_records:
             if not self.is_expected_record(rec):

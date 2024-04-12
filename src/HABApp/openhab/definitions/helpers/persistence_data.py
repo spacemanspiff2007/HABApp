@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional, Union
 
+from fastnumbers import try_real
+
 from HABApp.openhab.definitions.rest import ItemHistoryResp
 
 
@@ -18,19 +20,7 @@ class OpenhabPersistenceData:
         for entry in data.data:
             # calc as timestamp
             time = entry.time / 1000
-            state = entry.state
-            if '.' in state:
-                try:
-                    state = float(state)
-                except ValueError:
-                    pass
-            else:
-                try:
-                    state = int(state)
-                except ValueError:
-                    pass
-
-            c.data[time] = state
+            c.data[time] = try_real(entry.state)
         return c
 
     def get_data(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None):

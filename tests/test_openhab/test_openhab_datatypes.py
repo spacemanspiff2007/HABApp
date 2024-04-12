@@ -23,7 +23,7 @@ def test_type_number(value: str, target: int):
 
 
 @pytest.mark.parametrize(
-    'value, target', (('0.0', 0.0), ('-99.99', -99.99), ('99.99', 99.99), ('0', 0), ('-15', -15), ('55', 55), )
+    'value, target', (('0.0', 0), ('-99.99', -99.99), ('99.99', 99.99), ('0', 0), ('-15', -15), ('55', 55), )
 )
 def test_type_decimal(value: str, target: int):
     ret = NumberItem._state_from_oh_str(value)

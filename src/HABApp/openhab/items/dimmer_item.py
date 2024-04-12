@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional, Union
 
+from fastnumbers import real
+
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 
@@ -29,10 +31,7 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
 
     @staticmethod
     def _state_from_oh_str(state: str):
-        try:
-            return int(state)
-        except ValueError:
-            return float(state)
+        return real(state)
 
     def set_value(self, new_value) -> bool:
 
