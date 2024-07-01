@@ -128,6 +128,7 @@ MyOpenhabRule()
 
 # Changelog
 #### 24.XX.X (2024-XX-XX)
+- Fixed an issue with thing re-sync
 - Updated number parsing logic
 - Updated dependencies
 

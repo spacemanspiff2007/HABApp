@@ -120,7 +120,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             t = add_thing_to_registry(thing)
             created_things[t.name] = (t, t.last_update)
 
-        context.created_items.update(created_things)
+        context.created_things.update(created_things)
 
         # remove things which were deleted
         ist = set(Items.get_item_names())
