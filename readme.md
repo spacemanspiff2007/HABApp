@@ -131,6 +131,7 @@ MyOpenhabRule()
 - Fixed an issue with thing re-sync
 - Updated number parsing logic
 - Updated dependencies
+- ``ItemTimeSeriesEvent`` gets ignored
 
 #### 24.02.0 (2024-02-14)
 - For openHAB >= 4.1 it's possible to wait for a minimum openHAB uptime before connecting (defaults to 60s)
