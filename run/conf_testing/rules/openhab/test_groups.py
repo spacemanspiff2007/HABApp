@@ -1,7 +1,8 @@
-from HABApp.openhab.items import SwitchItem, GroupItem
-from HABAppTests import ItemWaiter, TestBaseRule, OpenhabTmpItem, EventWaiter
-from HABApp.openhab.events import ItemStateUpdatedEventFilter
+from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
 from HABAppTests.errors import TestCaseFailed
+
+from HABApp.openhab.events import ItemStateUpdatedEventFilter
+from HABApp.openhab.items import GroupItem, SwitchItem
 
 
 class TestOpenhabGroupFunction(TestBaseRule):

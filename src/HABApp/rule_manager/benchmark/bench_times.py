@@ -46,7 +46,7 @@ class BenchTime:
 
     @classmethod
     def show_table(cls, indent_name=0):
-        print(f'{"":{indent_name}s} | {format_duration("dur")} | {"per sec":7s} | 'f'{format_duration("median")} | '
+        print(f'{"":{indent_name}s} | {format_duration("dur")} | {"per sec":7s} | {format_duration("median")} | '
               f'{format_duration("min")} | {format_duration("max")} | {format_duration("mean")}')
 
     def __init__(self, name: str, factor: int = 1):

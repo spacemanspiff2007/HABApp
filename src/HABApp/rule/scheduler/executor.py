@@ -1,7 +1,8 @@
 from typing import Callable
 
-from HABApp.core.internals.wrapped_function import WrappedFunctionBase
 from eascheduler.executors import ExecutorBase
+
+from HABApp.core.internals.wrapped_function import WrappedFunctionBase
 
 
 class WrappedFunctionExecutor(ExecutorBase):

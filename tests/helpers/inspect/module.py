@@ -2,7 +2,7 @@ import importlib
 import inspect
 import sys
 import typing
-from typing import Iterable, Optional, Union, Tuple, List, Callable
+from typing import Callable, Iterable, List, Optional, Tuple, Union
 
 
 def get_module_classes(module_name: str, /, exclude: Optional[Iterable[Union[str, type]]] = None, include_imported=True,

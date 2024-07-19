@@ -1,7 +1,7 @@
 from logging import getLogger
 from unittest.mock import Mock
 
-from HABApp.core.logger import HABAppLogger, HABAppError, HABAppInfo, HABAppWarning
+from HABApp.core.logger import HABAppError, HABAppInfo, HABAppLogger, HABAppWarning
 from tests.helpers import TestEventBus
 
 

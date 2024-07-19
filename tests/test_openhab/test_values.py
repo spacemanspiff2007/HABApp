@@ -1,7 +1,14 @@
 import pytest
 
-from HABApp.openhab.definitions import HSBValue, OnOffValue, OpenClosedValue, PercentValue, QuantityValue, RawValue, \
-    UpDownValue
+from HABApp.openhab.definitions import (
+    HSBValue,
+    OnOffValue,
+    OpenClosedValue,
+    PercentValue,
+    QuantityValue,
+    RawValue,
+    UpDownValue,
+)
 
 
 @pytest.mark.parametrize(

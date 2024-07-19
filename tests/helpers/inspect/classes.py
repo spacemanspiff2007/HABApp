@@ -1,5 +1,5 @@
 import inspect
-from typing import Iterable, Optional, Any, get_type_hints, Dict, Type
+from typing import Any, Dict, Iterable, Optional, Type, get_type_hints
 
 import pytest
 

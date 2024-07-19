@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.asyncio import async_context, AsyncContextError
+from HABApp.core.asyncio import AsyncContextError, async_context
 
 
 async def test_error_msg():

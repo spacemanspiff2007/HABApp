@@ -3,7 +3,7 @@ import pkgutil
 from dataclasses import dataclass
 from inspect import getmembers
 from types import ModuleType
-from typing import List, Any, Iterable, Optional, Tuple, Type
+from typing import Any, Iterable, List, Optional, Tuple, Type
 
 import HABApp
 

@@ -4,7 +4,9 @@ from datetime import datetime, timedelta
 
 import HABApp
 from HABApp.core.lib import PendingFuture
+
 from .base_item_watch import BaseWatch
+
 
 if typing.TYPE_CHECKING:
     from .base_item import BaseItem

@@ -1,4 +1,4 @@
-from colorama import just_fix_windows_console, deinit, Fore
+from colorama import Fore, deinit, just_fix_windows_console
 
 from HABApp.__version__ import __version__
 

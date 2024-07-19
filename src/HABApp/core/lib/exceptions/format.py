@@ -1,8 +1,9 @@
 from traceback import format_exception as _format_exception
 from types import TracebackType
-from typing import Tuple, Union, Any, List, Type
+from typing import Any, List, Tuple, Type, Union
 
 from HABApp.core.const.const import PYTHON_310
+
 
 if PYTHON_310:
     from typing import TypeAlias

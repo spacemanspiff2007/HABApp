@@ -1,5 +1,7 @@
-from HABApp.openhab import transformations
 from HABAppTests import TestBaseRule
+
+from HABApp.openhab import transformations
+
 
 obj = transformations.map['de.map']
 

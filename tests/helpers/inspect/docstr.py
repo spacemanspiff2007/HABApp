@@ -1,9 +1,10 @@
 import importlib
 import inspect
 import re
-from typing import Any, Type, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
 import pytest
+
 
 RE_IVAR = re.compile(r':ivar\s+([^:]+?)\s+(\w+)\s*:', re.IGNORECASE)
 

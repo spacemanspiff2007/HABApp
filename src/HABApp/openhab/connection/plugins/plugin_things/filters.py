@@ -1,9 +1,11 @@
 import logging
 import re
-from typing import Dict, Iterator, List, Any
+from typing import Any, Dict, Iterator, List
 
 from HABApp.openhab.definitions.helpers.log_table import Table
+
 from ._log import log
+
 
 THING_ALIAS: Dict[str, str] = {
     'thing_uid': 'UID',

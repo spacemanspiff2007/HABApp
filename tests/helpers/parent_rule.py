@@ -11,7 +11,7 @@ class DummyRule(ContextProvidingObj):
         self.rule_name = 'DummyRule'
 
 
-@fixture
+@fixture()
 def parent_rule(monkeypatch):
     rule = DummyRule()
 
@@ -24,4 +24,4 @@ def parent_rule(monkeypatch):
 
     monkeypatch.setattr(HABApp.core.items.base_item_watch, 'get_current_context', ret_dummy_rule_context)
 
-    yield rule
+    return rule

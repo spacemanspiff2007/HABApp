@@ -1,10 +1,12 @@
 from base64 import b64encode
-from typing import Any, TYPE_CHECKING, Optional, FrozenSet, Mapping
+from typing import TYPE_CHECKING, Any, FrozenSet, Mapping, Optional
 
 from immutables import Map
 
-from HABApp.openhab.items.base_item import OpenhabItem, MetaData
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+
 from ..definitions import RawValue
+
 
 if TYPE_CHECKING:
     Optional = Optional

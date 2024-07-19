@@ -1,14 +1,14 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 from unittest.mock import Mock
 
 import pytest
 from immutables import Map
-from pendulum import set_test_now, DateTime, UTC
+from pendulum import UTC, DateTime, set_test_now
 
 import HABApp
 from HABApp.core.internals import ItemRegistry
 from HABApp.openhab import process_events as process_events_module
-from HABApp.openhab.events import ThingStatusInfoEvent, ThingUpdatedEvent, ThingAddedEvent
+from HABApp.openhab.events import ThingAddedEvent, ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.items import Thing
 from HABApp.openhab.map_events import get_event
 

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, NoEventFilter
+from HABApp.core.events import NoEventFilter, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.items import ColorItem
 from tests.helpers import TestEventBus
 

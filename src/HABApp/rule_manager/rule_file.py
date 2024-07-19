@@ -87,7 +87,7 @@ class RuleFile:
             return False
 
         if not created_rules:
-            log.warning(f'Found no instances of HABApp.Rule in {str(self.path)}')
+            log.warning(f'Found no instances of HABApp.Rule in {self.path!s}')
             return True
 
         with ign:

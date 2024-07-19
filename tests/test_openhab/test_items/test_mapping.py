@@ -2,16 +2,16 @@ from datetime import datetime
 from functools import partial
 
 import pytest
+from eascheduler.const import local_tz
 from immutables import Map
 
-from HABApp.openhab.items import NumberItem, DatetimeItem
+from HABApp.openhab.items import DatetimeItem, NumberItem
 from HABApp.openhab.items.base_item import MetaData
 from HABApp.openhab.map_items import map_item
-from eascheduler.const import local_tz
 from tests.helpers import TestEventBus
 
 
-@pytest.mark.ignore_log_errors
+@pytest.mark.ignore_log_errors()
 def test_exception(eb: TestEventBus):
     eb.allow_errors = True
     assert map_item('test', 'Number', 'asdf', 'my_label', frozenset(), frozenset(), {}) is None

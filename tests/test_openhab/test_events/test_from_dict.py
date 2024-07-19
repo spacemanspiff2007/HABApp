@@ -4,11 +4,27 @@ import inspect
 import pytest
 
 from HABApp.openhab.definitions import QuantityValue
-from HABApp.openhab.events import ChannelTriggeredEvent, GroupStateChangedEvent, ItemAddedEvent, ItemCommandEvent, \
-    ItemStateChangedEvent, ItemStateEvent, ItemStateUpdatedEvent, ItemStatePredictedEvent, ItemUpdatedEvent, \
-    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, ChannelDescriptionChangedEvent, \
-    ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent, GroupStateUpdatedEvent
-from HABApp.openhab.map_events import get_event, EVENT_LIST
+from HABApp.openhab.events import (
+    ChannelDescriptionChangedEvent,
+    ChannelTriggeredEvent,
+    GroupStateChangedEvent,
+    GroupStateUpdatedEvent,
+    ItemAddedEvent,
+    ItemCommandEvent,
+    ItemStateChangedEvent,
+    ItemStateEvent,
+    ItemStatePredictedEvent,
+    ItemStateUpdatedEvent,
+    ItemUpdatedEvent,
+    ThingAddedEvent,
+    ThingConfigStatusInfoEvent,
+    ThingFirmwareStatusInfoEvent,
+    ThingRemovedEvent,
+    ThingStatusInfoChangedEvent,
+    ThingStatusInfoEvent,
+    ThingUpdatedEvent,
+)
+from HABApp.openhab.map_events import EVENT_LIST, get_event
 
 
 # noinspection PyPep8Naming

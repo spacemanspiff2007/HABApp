@@ -3,9 +3,15 @@
 
 import time
 
-from HABApp.openhab.connection_handler.func_async import async_create_item, async_get_item, ItemNotFoundError, \
-    async_create_channel_link, async_remove_item
-from HABAppTests import TestBaseRule, get_random_name, run_coro, find_astro_sun_thing
+from HABAppTests import TestBaseRule, find_astro_sun_thing, get_random_name, run_coro
+
+from HABApp.openhab.connection_handler.func_async import (
+    ItemNotFoundError,
+    async_create_channel_link,
+    async_create_item,
+    async_get_item,
+    async_remove_item,
+)
 
 
 class BugLinks(TestBaseRule):

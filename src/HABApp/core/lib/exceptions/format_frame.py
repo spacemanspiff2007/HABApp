@@ -1,10 +1,11 @@
 import re
 from typing import List
 
-from stack_data import FrameInfo, LINE_GAP
+from stack_data import LINE_GAP, FrameInfo
 
-from .const import SEPARATOR_NEW_FRAME, PRE_INDENT
+from .const import PRE_INDENT, SEPARATOR_NEW_FRAME
 from .format_frame_vars import format_frame_variables
+
 
 SUPPRESSED_HABAPP_PATHS = (
     # This exception formatter

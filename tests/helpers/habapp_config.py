@@ -1,6 +1,7 @@
+from easyconfig import create_app_config
+
 import HABApp
 import HABApp.config.models
-from easyconfig import create_app_config
 
 
 def get_dummy_cfg():

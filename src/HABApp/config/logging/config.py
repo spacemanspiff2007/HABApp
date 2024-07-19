@@ -4,10 +4,12 @@ from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from easyconfig.yaml import yaml_safe as _yaml_safe
+
 import HABApp
 from HABApp.config.config import CONFIG
 from HABApp.config.errors import AbsolutePathExpected
-from easyconfig.yaml import yaml_safe as _yaml_safe
+
 from .buffered_logger import BufferedLogger
 from .queue_handler import HABAppQueueHandler, SimpleQueue
 
@@ -87,7 +89,7 @@ def get_logging_dict(path: Path, log: BufferedLogger) -> Optional[dict]:
         if not isinstance(level, int):
             level = logging._nameToLevel[level]
         logging.addLevelName(level, str(alias))
-        log.debug(f'Added custom Level "{str(alias)}" ({level})')
+        log.debug(f'Added custom Level "{alias!s}" ({level})')
 
     return cfg
 

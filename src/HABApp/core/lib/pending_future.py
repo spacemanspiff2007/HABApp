@@ -1,12 +1,12 @@
 import asyncio
 import typing
-from asyncio import Task, sleep, run_coroutine_threadsafe, create_task
+from asyncio import Task, create_task, run_coroutine_threadsafe, sleep
 from typing import Any, Awaitable, Callable, Optional
 
 from HABApp.core.const import loop
 
 
-# todo: switch to time.monotonic for measurements instead of fixed sleep time
+# TODO: switch to time.monotonic for measurements instead of fixed sleep time
 
 class PendingFuture:
     def __init__(self, future: Callable[[], Awaitable[Any]], secs: typing.Union[int, float]):

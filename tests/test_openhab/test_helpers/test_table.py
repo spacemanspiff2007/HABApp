@@ -1,4 +1,4 @@
-from HABApp.openhab.definitions.helpers.log_table import Table, Column
+from HABApp.openhab.definitions.helpers.log_table import Column, Table
 
 
 def test_col():

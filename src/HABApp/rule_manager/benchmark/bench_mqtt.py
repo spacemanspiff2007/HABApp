@@ -5,9 +5,11 @@ from threading import Lock
 
 import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
+from HABApp.mqtt.interface_sync import publish
+
 from .bench_base import BenchBaseRule
 from .bench_times import BenchContainer, BenchTime
-from HABApp.mqtt.interface_sync import publish
+
 
 LOCK = Lock()
 
@@ -37,7 +39,6 @@ class MqttBenchRule(BenchBaseRule):
         self.cleanup()
 
     def tear_down(self):
-        pass
         self.cleanup()
 
     def run_bench(self):

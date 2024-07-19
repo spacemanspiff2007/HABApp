@@ -1,11 +1,13 @@
-from typing import Any, TYPE_CHECKING, Optional, FrozenSet, Mapping
+from typing import TYPE_CHECKING, Any, FrozenSet, Mapping, Optional
 
-from HABApp.openhab.items.base_item import OpenhabItem, MetaData
-from ..definitions import OpenClosedValue
-from ...core.const import MISSING
-from ..errors import SendCommandNotSupported
 from HABApp.openhab.interface_sync import post_update
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+
+from ...core.const import MISSING
 from ...core.errors import InvalidItemValue
+from ..definitions import OpenClosedValue
+from ..errors import SendCommandNotSupported
+
 
 if TYPE_CHECKING:
     Optional = Optional

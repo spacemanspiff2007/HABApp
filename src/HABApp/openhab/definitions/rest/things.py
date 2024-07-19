@@ -1,9 +1,8 @@
-from typing import Dict, List
-from typing import Optional, Any
+from typing import Any, Dict, List, Optional
 
 from msgspec import Struct, field
 
-from HABApp.openhab.definitions import ThingStatusEnum, ThingStatusDetailEnum
+from HABApp.openhab.definitions import ThingStatusDetailEnum, ThingStatusEnum
 
 
 class ChannelResp(Struct, kw_only=True):

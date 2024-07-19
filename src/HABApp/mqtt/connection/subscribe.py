@@ -13,6 +13,7 @@ from HABApp.mqtt.connection.connection import MqttPlugin
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 from HABApp.mqtt.mqtt_payload import get_msg_payload
 
+
 if TYPE_CHECKING:
     from HABApp.config.models.mqtt import QOS
 

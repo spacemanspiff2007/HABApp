@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, TypeVar, Optional, Any
+from typing import TYPE_CHECKING, Any, Optional, TypeVar
 
 import HABApp
 from HABApp.core.internals import AutoContextBoundObj

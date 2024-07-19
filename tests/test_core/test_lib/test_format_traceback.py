@@ -1,17 +1,18 @@
 import logging
+from pathlib import Path
 from typing import Optional, Union
 
 import pytest
+from easyconfig import create_app_config
 from pydantic import BaseModel
 
 import HABApp
 from HABApp.core.const.const import PYTHON_311
-from HABApp.core.const.json import load_json, dump_json
+from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.lib import format_exception
-from easyconfig import create_app_config
-from tests.helpers.traceback import remove_dyn_parts_from_traceback
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_lib_file, is_suppressed_habapp_file
-from pathlib import Path
+from tests.helpers.traceback import remove_dyn_parts_from_traceback
+
 
 log = logging.getLogger('TestLogger')
 
@@ -27,8 +28,8 @@ def exec_func(func) -> str:
 
 
 def func_obj_def_multilines():
-    item = HABApp.core.items.Item  # noqa: F841
-    a = [  # noqa: F841
+    item = HABApp.core.items.Item
+    a = [
         1,
         2,
         3,
@@ -59,8 +60,8 @@ def func_obj_def_multilines():
 # File "test_core/test_lib/test_format_traceback.py", line 37 in func_obj_def_multilines
 # --------------------------------------------------------------------------------
 #      25 | def func_obj_def_multilines():
-#      26 |     item = HABApp.core.items.Item  # noqa: F841
-#      27 |     a = [  # noqa: F841
+#      26 |     item = HABApp.core.items.Item
+#      27 |     a = [
 #      28 |         1,
 #       (...)
 #      35 |         8

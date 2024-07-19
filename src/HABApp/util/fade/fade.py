@@ -1,8 +1,8 @@
 from datetime import timedelta
 from time import time
-from typing import Union, Optional
+from typing import Optional, Union
 
-from HABApp.core.internals import wrap_func, AutoContextBoundObj
+from HABApp.core.internals import AutoContextBoundObj, wrap_func
 
 
 VAL_TYPE = Union[int, float]
@@ -12,7 +12,7 @@ class FadeWorker(AutoContextBoundObj):
 
     def __init__(self, parent: 'Fade', interval: float):
         super().__init__()
-        self.parent: 'Fade' = parent
+        self.parent: Fade = parent
         self.scheduler = self._parent_ctx.rule.run.every(None, interval, self.parent._scheduled_worker)
 
     def cancel(self):

@@ -1,8 +1,9 @@
 import pytest
+
 import HABApp.core.lib.exceptions.format
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 def test_doc_run():
     calls = []
 
@@ -31,7 +32,7 @@ def test_doc_run():
     assert len(calls) == 4
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 def test_doc_run_exception(monkeypatch):
     """Check that the RuleRunner propagates exceptions which happen during exception formatting"""
 

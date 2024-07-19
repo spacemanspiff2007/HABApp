@@ -12,6 +12,7 @@ from HABApp.core.internals import uses_post_event
 from HABApp.core.items.base_item import BaseItem
 from HABApp.core.lib.funcs import compare as _compare
 
+
 if typing.TYPE_CHECKING:
     datetime = datetime
 

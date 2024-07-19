@@ -1,5 +1,6 @@
-from HABApp.openhab.definitions.rest import ItemChannelLinkResp
 from msgspec import convert
+
+from HABApp.openhab.definitions.rest import ItemChannelLinkResp
 
 
 def test_simple():

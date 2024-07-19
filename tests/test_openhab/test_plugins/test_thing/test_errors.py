@@ -1,7 +1,7 @@
 import time
 
 from HABApp.openhab.connection.plugins.plugin_things.plugin_things import TextualThingConfigPlugin
-from tests.helpers import MockFile, TestEventBus, LogCollector
+from tests.helpers import LogCollector, MockFile, TestEventBus
 
 
 async def test_errors(test_logs: LogCollector, eb: TestEventBus):

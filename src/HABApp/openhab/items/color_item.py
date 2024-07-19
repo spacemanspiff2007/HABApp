@@ -5,7 +5,9 @@ from immutables import Map
 from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
+
 from ..definitions import HSBValue, OnOffValue, PercentValue
+
 
 HUE_FACTOR = 360
 PERCENT_FACTOR = 100

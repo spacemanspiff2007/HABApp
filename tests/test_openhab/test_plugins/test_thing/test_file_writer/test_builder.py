@@ -1,6 +1,10 @@
-from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter_builder import ValueFormatterBuilder, \
-    EmptyFormatter, \
-    MultipleValueFormatterBuilder, LinkFormatter, MetadataFormatter
+from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter_builder import (
+    EmptyFormatter,
+    LinkFormatter,
+    MetadataFormatter,
+    MultipleValueFormatterBuilder,
+    ValueFormatterBuilder,
+)
 
 
 def test_value_formatter():

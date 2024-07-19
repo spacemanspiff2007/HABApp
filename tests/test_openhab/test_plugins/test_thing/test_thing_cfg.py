@@ -3,7 +3,7 @@ from pytest import fixture, raises
 from HABApp.openhab.connection.plugins.plugin_things.thing_config import ThingConfigChanger
 
 
-@fixture
+@fixture()
 def cfg():
     return ThingConfigChanger.from_dict('UID', {
         'config_1_1': 0,                # 1 byte

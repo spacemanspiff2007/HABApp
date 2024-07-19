@@ -2,6 +2,7 @@ from typing import List
 
 from msgspec import Struct
 
+
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest/src/main/java/org/openhab/core/io/rest/internal/resources/beans/RootBean.java
 
 

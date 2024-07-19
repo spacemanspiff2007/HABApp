@@ -1,6 +1,7 @@
+from HABAppTests import TestBaseRule, find_astro_sun_thing
+
 from HABApp.openhab.errors import LinkNotFoundError
 from HABApp.openhab.items import Thing
-from HABAppTests import TestBaseRule, find_astro_sun_thing
 
 
 class TestOpenhabInterfaceLinks(TestBaseRule):

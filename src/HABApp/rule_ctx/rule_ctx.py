@@ -6,6 +6,7 @@ from HABApp.core.const.topics import ALL_TOPICS
 from HABApp.core.internals import HINT_EVENT_BUS_LISTENER, Context, uses_event_bus, uses_item_registry
 from HABApp.core.internals.event_bus import EventBusBaseListener
 
+
 event_bus = uses_event_bus()
 item_registry = uses_item_registry()
 
@@ -15,7 +16,7 @@ log = logging.getLogger('HABApp.Rule')
 class HABAppRuleContext(Context):
     def __init__(self, rule: 'HABApp.rule.Rule'):
         super().__init__()
-        self.rule: Optional['HABApp.rule.Rule'] = rule
+        self.rule: Optional[HABApp.rule.Rule] = rule
 
     def get_callback_name(self, callback: Callable) -> Optional[str]:
         return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None

@@ -1,11 +1,12 @@
 import logging
-from typing import Tuple, Any, Optional
+from typing import Any, Optional, Tuple
 
 from aiomqtt import Message
 
 from HABApp.core.const.json import load_json
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.wrapper import process_exception
+
 
 log = logging.getLogger(f'{TOPIC_EVENTS}.mqtt')
 

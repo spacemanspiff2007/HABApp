@@ -1,5 +1,5 @@
 from HABApp.mqtt.connection.publish import async_publish, publish
-from HABApp.mqtt.connection.subscribe import async_subscribe, subscribe, async_unsubscribe, unsubscribe
+from HABApp.mqtt.connection.subscribe import async_subscribe, async_unsubscribe, subscribe, unsubscribe
 from tests.helpers.inspect import assert_same_signature
 
 

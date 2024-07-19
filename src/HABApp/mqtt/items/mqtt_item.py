@@ -5,6 +5,7 @@ from HABApp.core.internals import uses_get_item, uses_item_registry
 from HABApp.core.items import BaseValueItem
 from HABApp.mqtt.interface_sync import publish
 
+
 get_item = uses_get_item()
 item_registry = uses_item_registry()
 

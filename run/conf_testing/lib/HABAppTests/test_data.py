@@ -2,6 +2,7 @@ import copy
 import datetime
 import itertools
 
+
 # we only support milliseconds on openHAB side
 now = datetime.datetime.now()
 now = now.replace(microsecond=now.microsecond // 1000 * 1000)

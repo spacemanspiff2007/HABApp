@@ -1,14 +1,29 @@
 from typing import Dict, Type
+
 from HABApp.core.const.json import load_json
 
-from .events import OpenhabEvent, \
-    ItemStateEvent, ItemStateUpdatedEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent, \
-    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, \
-    GroupStateUpdatedEvent, GroupStateChangedEvent, \
-    ChannelTriggeredEvent, ChannelDescriptionChangedEvent, \
-    ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, \
-    ThingStatusInfoChangedEvent, ThingStatusInfoEvent, ThingFirmwareStatusInfoEvent, \
-    ThingConfigStatusInfoEvent
+from .events import (
+    ChannelDescriptionChangedEvent,
+    ChannelTriggeredEvent,
+    GroupStateChangedEvent,
+    GroupStateUpdatedEvent,
+    ItemAddedEvent,
+    ItemCommandEvent,
+    ItemRemovedEvent,
+    ItemStateChangedEvent,
+    ItemStateEvent,
+    ItemStatePredictedEvent,
+    ItemStateUpdatedEvent,
+    ItemUpdatedEvent,
+    OpenhabEvent,
+    ThingAddedEvent,
+    ThingConfigStatusInfoEvent,
+    ThingFirmwareStatusInfoEvent,
+    ThingRemovedEvent,
+    ThingStatusInfoChangedEvent,
+    ThingStatusInfoEvent,
+    ThingUpdatedEvent,
+)
 
 
 EVENT_LIST = [

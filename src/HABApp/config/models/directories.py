@@ -8,6 +8,7 @@ from pydantic import Field, validator
 
 from HABApp.config.platform_defaults import get_log_folder
 
+
 log = logging.getLogger('HABApp.Config')
 
 

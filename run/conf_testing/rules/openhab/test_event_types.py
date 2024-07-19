@@ -1,7 +1,14 @@
-from HABApp.core.events import ValueUpdateEventFilter
+from HABAppTests import (
+    EventWaiter,
+    ItemWaiter,
+    OpenhabTmpItem,
+    TestBaseRule,
+    get_openhab_test_events,
+    get_openhab_test_states,
+    get_openhab_test_types,
+)
 
-from HABAppTests import TestBaseRule, EventWaiter, OpenhabTmpItem, get_openhab_test_events, \
-    get_openhab_test_types, get_openhab_test_states, ItemWaiter
+from HABApp.core.events import ValueUpdateEventFilter
 
 
 class TestOpenhabEventTypes(TestBaseRule):

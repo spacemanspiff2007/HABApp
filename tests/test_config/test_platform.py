@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from HABApp.config.logging.config import _yaml_safe
 from HABApp.config.logging import default_logfile
-
+from HABApp.config.logging.config import _yaml_safe
 from HABApp.config.platform_defaults import get_log_folder
 
 

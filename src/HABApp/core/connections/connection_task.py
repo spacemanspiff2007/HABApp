@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Final, Callable, Awaitable, Any
+from typing import Any, Awaitable, Callable, Final
 
 from HABApp.core.lib import SingleTask
 

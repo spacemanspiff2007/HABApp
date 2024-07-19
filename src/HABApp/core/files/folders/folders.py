@@ -1,12 +1,13 @@
 from pathlib import Path
-from typing import Dict
-from typing import List, Type
+from typing import Dict, List, Type
 
 import HABApp
 from HABApp.core.const.topics import TOPIC_FILES as T_FILES
-from HABApp.core.events.habapp_events import RequestFileUnloadEvent, RequestFileLoadEvent
-from ..watcher import AggregatingAsyncEventHandler
+from HABApp.core.events.habapp_events import RequestFileLoadEvent, RequestFileUnloadEvent
 from HABApp.core.internals import uses_post_event
+
+from ..watcher import AggregatingAsyncEventHandler
+
 
 FOLDERS: Dict[str, 'ConfiguredFolder'] = {}
 

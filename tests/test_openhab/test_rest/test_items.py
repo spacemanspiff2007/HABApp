@@ -1,6 +1,6 @@
 from msgspec import convert
 
-from HABApp.openhab.definitions.rest.items import ItemResp, StateOptionResp, CommandOptionResp
+from HABApp.openhab.definitions.rest.items import CommandOptionResp, ItemResp, StateOptionResp
 
 
 def test_item_1():

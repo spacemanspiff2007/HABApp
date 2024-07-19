@@ -1,10 +1,12 @@
 import logging
-from typing import Generic, TypeVar, List, Union, Type
+from typing import Generic, List, Type, TypeVar, Union
 
 from pendulum import DateTime
 
 from HABApp.core.asyncio import run_func_from_async
+
 from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
+
 
 log = logging.getLogger('HABApp')
 

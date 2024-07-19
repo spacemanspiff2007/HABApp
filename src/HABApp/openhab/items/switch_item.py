@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Final, FrozenSet, Mapping, Optional, Tuple
 
-from HABApp.core.errors import ItemValueIsNoneError, InvalidItemValue
+from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
 from HABApp.openhab.definitions import OnOffValue
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand

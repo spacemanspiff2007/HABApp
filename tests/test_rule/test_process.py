@@ -8,10 +8,12 @@ from unittest.mock import Mock
 import pytest
 
 import HABApp.rule
-from HABApp.rule import Rule, FinishedProcessInfo
+from HABApp.rule import FinishedProcessInfo, Rule
 from HABApp.rule.interfaces import rule_subprocess
+
 from ..helpers import LogCollector
 from ..rule_runner import SimpleRuleRunner
+
 
 # It's either subprocesses or async-mqtt but never both
 pytestmark = pytest.mark.skipif(
@@ -41,7 +43,7 @@ def rule(monkeypatch):
     runner.tear_down()
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_run_func_arg_errors(rule):
     with pytest.raises(TypeError) as e:
         rule.execute_subprocess(rule.cb, sys.executable, "asfd", 123)
@@ -55,7 +57,7 @@ async def test_run_func_arg_errors(rule):
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, 'OK', '')], [False, 'OK']])
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_run_func(rule, flag, result):
 
     await rule.execute_subprocess(
@@ -66,7 +68,7 @@ async def test_run_func(rule, flag, result):
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_run_func_no_cap(rule, flag: bool, result):
     await rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False, raw_info=flag
@@ -76,7 +78,7 @@ async def test_run_func_no_cap(rule, flag: bool, result):
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector):
 
     task = rule.execute_subprocess(
@@ -96,7 +98,7 @@ async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector):
 
 
 @pytest.mark.parametrize('flag', [True, False])
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_invalid_program(rule, test_logs, flag):
     parent_dir = Path(__file__).parent
     await rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
@@ -112,7 +114,7 @@ async def test_invalid_program(rule, test_logs, flag):
 
 
 @pytest.mark.parametrize('raw_info', [True, False])
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_exec_python_file(rule, caplog, raw_info):
     parent_dir = Path(__file__).parent
 
@@ -131,7 +133,7 @@ async def test_exec_python_file(rule, caplog, raw_info):
     assert _json['cwd'] == str(parent_dir)
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_exec_python_file_relative(rule):
     parent_dir = Path(__file__).parent
 
@@ -142,7 +144,7 @@ async def test_exec_python_file_relative(rule):
     assert _json['cwd'] == str(parent_dir)
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector):
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
@@ -159,7 +161,7 @@ async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector):
     rule.cb.assert_not_called()
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector):
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
@@ -175,7 +177,7 @@ async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector):
 
 
 @pytest.mark.parametrize('raw_info, result', [[True, FinishedProcessInfo(0, 'module ok', '')], [False, 'module ok']])
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 async def test_exec_python_module(rule, raw_info, result):
     folder = Path(__file__).parent
     await rule.execute_python(
@@ -184,7 +186,7 @@ async def test_exec_python_module(rule, raw_info, result):
     rule.cb.assert_called_once_with(result)
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 def test_param_pythonpath(monkeypatch):
     monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__))
     folder = str(Path(__file__).parent)

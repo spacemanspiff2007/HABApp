@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import sleep, Task, create_task, CancelledError
+from asyncio import CancelledError, Task, create_task, sleep
 
 from HABApp.core.connections import BaseConnection, BaseConnectionPlugin
 

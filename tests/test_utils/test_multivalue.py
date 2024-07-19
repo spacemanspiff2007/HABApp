@@ -4,9 +4,10 @@ from unittest.mock import Mock
 import pytest
 
 from HABApp.core.const import MISSING
-from HABApp.util.multimode import BaseMode, ValueMode, MultiModeItem
-from ..test_core import ItemTests
+from HABApp.util.multimode import BaseMode, MultiModeItem, ValueMode
 from tests.helpers.parent_rule import DummyRule
+
+from ..test_core import ItemTests
 
 
 class TestMultiModeItem(ItemTests):

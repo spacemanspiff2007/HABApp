@@ -1,8 +1,10 @@
-import HABApp
 import typing
 
-from HABApp import Parameter
 from tests.conftest import params
+
+import HABApp
+from HABApp import Parameter
+
 
 if typing.TYPE_CHECKING:
     params = params

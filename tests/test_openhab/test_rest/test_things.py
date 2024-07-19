@@ -1,6 +1,8 @@
-from HABApp.openhab.definitions.rest.things import ThingResp
-from msgspec.json import decode
 from json import dumps
+
+from msgspec.json import decode
+
+from HABApp.openhab.definitions.rest.things import ThingResp
 
 
 def test_thing_summary():

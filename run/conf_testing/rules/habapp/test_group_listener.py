@@ -1,11 +1,13 @@
 import logging
 import time
 
+from HABAppTests import TestBaseRule
+from HABAppTests.errors import TestCaseFailed
+
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.items import Item
 from HABApp.util import EventListenerGroup
-from HABAppTests import TestBaseRule
-from HABAppTests.errors import TestCaseFailed
+
 
 log = logging.getLogger('HABApp.Tests.MultiMode')
 

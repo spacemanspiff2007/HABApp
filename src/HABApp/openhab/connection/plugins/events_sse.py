@@ -17,6 +17,7 @@ from HABApp.core.lib import SingleTask
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.process_events import on_sse_event
 
+
 Items = uses_item_registry()
 
 

@@ -1,7 +1,7 @@
-from HABApp.core.files.file.properties import get_properties as get_props
-from HABApp.core.files.file.file import HABAppFile, CircularReferenceError, FileProperties, FILES, FileState
 import pytest
 
+from HABApp.core.files.file.file import FILES, CircularReferenceError, FileProperties, FileState, HABAppFile
+from HABApp.core.files.file.properties import get_properties as get_props
 from tests.helpers import LogCollector
 
 

@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.rule import create_rule, Rule
+from HABApp.rule import Rule, create_rule
 from tests import SimpleRuleRunner
 
 
@@ -11,7 +11,7 @@ def test_rule_no_create():
     assert create_rule(MyRule) is None
 
 
-@pytest.mark.no_internals
+@pytest.mark.no_internals()
 def test_rule_create():
     class MyRule(Rule):
         pass

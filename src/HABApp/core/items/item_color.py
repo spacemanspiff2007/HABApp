@@ -6,6 +6,7 @@ from HABApp.core.internals import uses_item_registry
 from HABApp.core.items import BaseValueItem
 from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
 
+
 HUE_FACTOR = 360
 PERCENT_FACTOR = 100
 

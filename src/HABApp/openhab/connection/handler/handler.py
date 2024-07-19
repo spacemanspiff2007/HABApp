@@ -4,7 +4,7 @@ from typing import Any
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
-from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT, METH_DELETE
+from aiohttp.hdrs import METH_DELETE, METH_GET, METH_POST, METH_PUT
 
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
@@ -12,7 +12,7 @@ from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.const.json import dump_json
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
-from HABApp.openhab.errors import OpenhabDisconnectedError, OpenhabCredentialsInvalidError
+from HABApp.openhab.errors import OpenhabCredentialsInvalidError, OpenhabDisconnectedError
 
 
 # noinspection PyProtectedMember

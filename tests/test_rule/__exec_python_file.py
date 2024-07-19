@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+
 if len(sys.argv) == 1:
     print(json.dumps({'cwd': os.getcwd()}))
 else:

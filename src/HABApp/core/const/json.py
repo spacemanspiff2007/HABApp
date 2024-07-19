@@ -2,6 +2,7 @@ from typing import Any, Callable
 
 import msgspec
 
+
 try:
     import ujson
     load_json: Callable[[str], Any] = ujson.loads

@@ -21,7 +21,7 @@ class SystemInfoResp(Struct, rename='camel', kw_only=True):
     total_memory: int
     start_level: int
 
-    uptime: int = -1    # todo: remove default if we go OH4.1 only
+    uptime: int = -1    # TODO: remove default if we go OH4.1 only
 
 
 class SystemInfoRootResp(Struct, rename='camel'):

@@ -4,13 +4,25 @@ from typing import Callable
 import pytest
 
 import HABApp.openhab.interface_sync
-from HABApp.core.asyncio import async_context, AsyncContextError
-from HABApp.openhab.interface_sync import \
-    post_update, send_command, \
-    get_item, item_exists, remove_item, create_item, \
-    get_thing, get_persistence_data, get_persistence_services, set_persistence_data, set_thing_enabled, \
-    remove_metadata, set_metadata, \
-    get_link, remove_link, create_link
+from HABApp.core.asyncio import AsyncContextError, async_context
+from HABApp.openhab.interface_sync import (
+    create_item,
+    create_link,
+    get_item,
+    get_link,
+    get_persistence_data,
+    get_persistence_services,
+    get_thing,
+    item_exists,
+    post_update,
+    remove_item,
+    remove_link,
+    remove_metadata,
+    send_command,
+    set_metadata,
+    set_persistence_data,
+    set_thing_enabled,
+)
 
 
 @pytest.mark.parametrize('func', [

@@ -1,6 +1,13 @@
-from HABApp.openhab.events import ItemStateChangedEvent, ItemStateChangedEventFilter, ItemStateUpdatedEventFilter, \
-    ItemCommandEventFilter, ItemCommandEvent, ItemStateUpdatedEvent
-from tests.helpers.inspect import get_module_classes, check_class_annotations
+from tests.helpers.inspect import check_class_annotations, get_module_classes
+
+from HABApp.openhab.events import (
+    ItemCommandEvent,
+    ItemCommandEventFilter,
+    ItemStateChangedEvent,
+    ItemStateChangedEventFilter,
+    ItemStateUpdatedEvent,
+    ItemStateUpdatedEventFilter,
+)
 
 
 def test_class_annotations():

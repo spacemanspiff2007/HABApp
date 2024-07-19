@@ -1,11 +1,11 @@
 import logging
 import typing
 
-from HABApp.core.internals import uses_post_event
-from HABApp.core.lib import format_exception
 from HABApp.core.const.topics import TOPIC_ERRORS as _T_ERRORS
 from HABApp.core.const.topics import TOPIC_INFOS as _T_INFOS
 from HABApp.core.const.topics import TOPIC_WARNINGS as _T_WARNINGS
+from HABApp.core.internals import uses_post_event
+from HABApp.core.lib import format_exception
 
 
 post_event = uses_post_event()

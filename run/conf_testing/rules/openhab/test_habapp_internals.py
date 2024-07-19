@@ -1,7 +1,11 @@
-from HABApp.openhab.connection.handler.func_async import async_get_item_with_habapp_meta, async_set_habapp_metadata, \
-    async_remove_habapp_metadata
+from HABAppTests import OpenhabTmpItem, TestBaseRule, run_coro
+
+from HABApp.openhab.connection.handler.func_async import (
+    async_get_item_with_habapp_meta,
+    async_remove_habapp_metadata,
+    async_set_habapp_metadata,
+)
 from HABApp.openhab.definitions.rest.habapp_data import HABAppThingPluginData
-from HABAppTests import TestBaseRule, OpenhabTmpItem, run_coro
 
 
 class OpenhabMetaData(TestBaseRule):

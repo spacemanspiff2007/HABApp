@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from asyncio import CancelledError
-from typing import Final, TYPE_CHECKING, Callable, Literal
+from typing import TYPE_CHECKING, Callable, Final, Literal
 
 import HABApp
 from HABApp.core.connections._definitions import ConnectionStatus, connection_log
 from HABApp.core.connections.status_transitions import StatusTransitions
-from HABApp.core.lib import SingleTask, PriorityList
+from HABApp.core.lib import PriorityList, SingleTask
+
 from ..wrapper import process_exception
+
 
 if TYPE_CHECKING:
     from .base_plugin import BaseConnectionPlugin

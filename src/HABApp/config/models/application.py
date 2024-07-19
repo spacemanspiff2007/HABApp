@@ -1,10 +1,11 @@
 from easyconfig import AppBaseModel
+from pydantic import Field
+
+from HABApp.config.models.directories import DirectoriesConfig
+from HABApp.config.models.habapp import HABAppConfig
 from HABApp.config.models.location import LocationConfig
 from HABApp.config.models.mqtt import MqttConfig
 from HABApp.config.models.openhab import OpenhabConfig
-from HABApp.config.models.habapp import HABAppConfig
-from HABApp.config.models.directories import DirectoriesConfig
-from pydantic import Field
 
 
 class ApplicationConfig(AppBaseModel):

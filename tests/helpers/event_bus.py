@@ -4,7 +4,7 @@ import pytest
 
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.internals import EventFilterBase, EventBusListener, EventBus, wrap_func
+from HABApp.core.internals import EventBus, EventBusListener, EventFilterBase, wrap_func
 
 
 class TestEventBus(EventBus):

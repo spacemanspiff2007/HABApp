@@ -1,13 +1,14 @@
 from asyncio import run_coroutine_threadsafe, sleep
 from pathlib import Path
 from time import monotonic
-from typing import Any, List, Set, Awaitable, Callable
+from typing import Any, Awaitable, Callable, List, Set
 
 import HABApp
-from HABApp.core.wrapper import ignore_exception
-from .base_watcher import EventFilterBase
-from .base_watcher import FileSystemEventHandler
 from HABApp.core.asyncio import AsyncContext
+from HABApp.core.wrapper import ignore_exception
+
+from .base_watcher import EventFilterBase, FileSystemEventHandler
+
 
 DEBOUNCE_TIME: float = 0.6
 

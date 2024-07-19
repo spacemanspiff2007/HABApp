@@ -1,8 +1,8 @@
-from typing import List, Dict, Any, Final
+from typing import Any, Dict, Final, List
 
-from .base_event import OpenhabEvent
-from ..definitions import ThingStatusEnum, ThingStatusDetailEnum
+from ..definitions import ThingStatusDetailEnum, ThingStatusEnum
 from ..definitions.things import THING_STATUS_DEFAULT, THING_STATUS_DETAIL_DEFAULT
+from .base_event import OpenhabEvent
 
 
 class ThingStatusInfoEvent(OpenhabEvent):

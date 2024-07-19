@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from logging import LogRecord
-from typing import Union, Optional
+from typing import Optional, Union
 
 
 def get_log_level_no(level: Union[str, int]) -> int:

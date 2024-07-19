@@ -5,14 +5,13 @@ indent-width = 4
 target-version = "py38"
 src = ["src", "test"]
 
-# https://docs.astral.sh/ruff/settings/#ignore-init-module-imports
-ignore-init-module-imports = true
 
 extend-exclude = [
     "__init__.py",
     "src/__test_*.py"
 ]
 
+[lint]
 select = [
     "E", "W",   # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
     "I",        # https://docs.astral.sh/ruff/rules/#isort-i

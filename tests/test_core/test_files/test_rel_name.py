@@ -2,11 +2,11 @@ from pathlib import Path
 
 import pytest
 
-from HABApp.core.files.folders import get_path, get_name, add_folder, get_prefixes
+from HABApp.core.files.folders import add_folder, get_name, get_path, get_prefixes
 from HABApp.core.files.folders.folders import FOLDERS
 
 
-@pytest.fixture
+@pytest.fixture()
 def cfg():
     FOLDERS.clear()
     add_folder('rules/', Path('c:/HABApp/my_rules/'), 0)

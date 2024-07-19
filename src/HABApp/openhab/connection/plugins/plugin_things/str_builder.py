@@ -1,7 +1,7 @@
 import re
-from typing import Optional, Dict, Tuple, Pattern, Union
+from typing import Dict, Optional, Pattern, Tuple, Union
 
-from .filters import THING_ALIAS, CHANNEL_ALIAS
+from .filters import CHANNEL_ALIAS, THING_ALIAS
 
 
 SEPARATOR = ','

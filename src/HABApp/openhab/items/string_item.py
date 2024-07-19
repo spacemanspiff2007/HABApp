@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING, Optional, FrozenSet, Mapping
+from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional
 
-from HABApp.openhab.items.base_item import OpenhabItem, MetaData
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+
 
 if TYPE_CHECKING:
     MetaData = MetaData

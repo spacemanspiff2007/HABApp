@@ -1,8 +1,10 @@
 import logging
+
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
 from types import FrameType
 from typing import TYPE_CHECKING, Any, Callable, Final, Optional
+
 
 if TYPE_CHECKING:
     import HABApp

@@ -11,9 +11,16 @@
 # ----------------------------------------------------------------------------------------------------------------------
 import time
 
+from HABAppTests import (
+    ItemWaiter,
+    OpenhabTmpItem,
+    TestBaseRule,
+    get_openhab_test_states,
+    get_openhab_test_types,
+    get_random_name,
+)
+
 import HABApp
-from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types, \
-    get_random_name
 
 
 class TestOpenhabInterface(TestBaseRule):
@@ -135,7 +142,7 @@ class TestOpenhabInterface(TestBaseRule):
     def test_async_oder(self):
         with OpenhabTmpItem('String', 'AsyncOrderTest') as item, ItemWaiter(item) as waiter:
             for _ in range(10):
-                for i in range(0, 5):
+                for i in range(5):
                     item.oh_post_update(i)
             waiter.wait_for_state('4')
 

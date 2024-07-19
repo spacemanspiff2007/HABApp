@@ -6,8 +6,8 @@ from functools import partial
 import HABApp.openhab.connection.plugins.overview_broken_links as plugin_module
 from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
-from HABApp.openhab.definitions.rest import ThingResp, ItemChannelLinkResp
-from HABApp.openhab.definitions.rest.things import ThingStatusResp, ChannelResp
+from HABApp.openhab.definitions.rest import ItemChannelLinkResp, ThingResp
+from HABApp.openhab.definitions.rest.things import ChannelResp, ThingStatusResp
 
 
 async def _mock_things() -> list[ThingResp]:

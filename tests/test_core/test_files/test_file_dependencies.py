@@ -55,7 +55,7 @@ class CfgObj:
         return self.cls(name, MockFile(name), self.properties[name])
 
 
-@pytest.fixture
+@pytest.fixture()
 def cfg(monkeypatch):
     obj = CfgObj()
 

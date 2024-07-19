@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Union
 
+
 TH_POSITIVE_TIME_DIFF = Union[int, float, timedelta]
 
 

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from inspect import signature, iscoroutinefunction, getmembers
-from typing import Awaitable, Callable, Any, TYPE_CHECKING
+from inspect import getmembers, iscoroutinefunction, signature
+from typing import TYPE_CHECKING, Any, Awaitable, Callable
 
 from ._definitions import ConnectionStatus
+
 
 if TYPE_CHECKING:
     from .base_connection import BaseConnection

@@ -1,12 +1,13 @@
 import logging
 from pathlib import Path
-from typing import Dict, Callable
-from typing import List
+from typing import Callable, Dict, List
 
 import HABApp
-from HABAppTests.test_rule.test_case import TestResult, TestResultStatus, TestCase
-from ._rule_ids import get_test_rules, get_next_id, test_rules_running
+from HABAppTests.test_rule.test_case import TestCase, TestResult, TestResultStatus
+
+from ._rule_ids import get_next_id, get_test_rules, test_rules_running
 from ._rule_status import TestRuleStatus
+
 
 log = logging.getLogger('HABApp.Tests')
 

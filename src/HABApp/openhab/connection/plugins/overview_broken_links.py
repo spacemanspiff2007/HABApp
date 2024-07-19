@@ -10,6 +10,7 @@ from HABApp.core.logger import log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.connection.handler.func_async import async_get_links, async_get_things
 
+
 PING_CONFIG: Final = CONFIG.openhab.ping
 
 Items = uses_item_registry()

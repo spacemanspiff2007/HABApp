@@ -1,15 +1,30 @@
 import inspect
 from datetime import datetime
-from typing import Union, Tuple, Optional, Any
+from typing import Any, Optional, Tuple, Union
 
 import pytest
 
 from HABApp.core.items import Item
-from HABApp.openhab.items import Thing, ColorItem, ImageItem, StringItem, NumberItem, SwitchItem, ContactItem, \
-    RollershutterItem, DimmerItem, DatetimeItem, PlayerItem, LocationItem, CallItem, GroupItem
+from HABApp.openhab.items import (
+    CallItem,
+    ColorItem,
+    ContactItem,
+    DatetimeItem,
+    DimmerItem,
+    GroupItem,
+    ImageItem,
+    LocationItem,
+    NumberItem,
+    PlayerItem,
+    RollershutterItem,
+    StringItem,
+    SwitchItem,
+    Thing,
+)
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
-from ...helpers.inspect import check_class_annotations, get_ivars_from_docstring, assert_same_signature
+
+from ...helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
