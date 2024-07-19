@@ -109,26 +109,26 @@ def test_exception_expression_remove_py310():
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
 --------------------------------------------------------------------------------
-     19 | def exec_func(func) -> str:
-     20 |     try:
--->  21 |         func()
-     22 |     except Exception as e:
+     20 | def exec_func(func) -> str:
+     21 |     try:
+-->  22 |         func()
+     23 |     except Exception as e:
    ------------------------------------------------------------
      e = ZeroDivisionError('division by zero')
      func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
+File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_none
 --------------------------------------------------------------------------------
-     91 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
+     92 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
       (...)
-     94 |     assert isinstance(c, (str, int)), type(c)
-     95 |     CONFIGURATION = '3'
-     96 |     my_dict = {'key_a': 'val_a'}
--->  97 |     1 / 0
-     98 |     log.error('Error message')
+     95 |     assert isinstance(c, (str, int)), type(c)
+     96 |     CONFIGURATION = '3'
+     97 |     my_dict = {'key_a': 'val_a'}
+-->  98 |     1 / 0
+     99 |     log.error('Error message')
    ------------------------------------------------------------
      CONFIG.a = 3
      a = None
@@ -143,9 +143,9 @@ File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_
 
 --------------------------------------------------------------------------------
 Traceback (most recent call last):
-  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+  File "test_core/test_lib/test_format_traceback.py", line 22, in exec_func
     func()
-  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
+  File "test_core/test_lib/test_format_traceback.py", line 98, in func_test_assert_none
     1 / 0
 ZeroDivisionError: division by zero'''
 
@@ -155,26 +155,26 @@ def test_exception_expression_remove():
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
 --------------------------------------------------------------------------------
-     19 | def exec_func(func) -> str:
-     20 |     try:
--->  21 |         func()
-     22 |     except Exception as e:
+     20 | def exec_func(func) -> str:
+     21 |     try:
+-->  22 |         func()
+     23 |     except Exception as e:
    ------------------------------------------------------------
      e = ZeroDivisionError('division by zero')
      func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
+File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_none
 --------------------------------------------------------------------------------
-     91 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
+     92 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
       (...)
-     94 |     assert isinstance(c, (str, int)), type(c)
-     95 |     CONFIGURATION = '3'
-     96 |     my_dict = {'key_a': 'val_a'}
--->  97 |     1 / 0
-     98 |     log.error('Error message')
+     95 |     assert isinstance(c, (str, int)), type(c)
+     96 |     CONFIGURATION = '3'
+     97 |     my_dict = {'key_a': 'val_a'}
+-->  98 |     1 / 0
+     99 |     log.error('Error message')
    ------------------------------------------------------------
      CONFIG.a = 3
      a = None
@@ -189,9 +189,9 @@ File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_
 
 --------------------------------------------------------------------------------
 Traceback (most recent call last):
-  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+  File "test_core/test_lib/test_format_traceback.py", line 22, in exec_func
     func()
-  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
+  File "test_core/test_lib/test_format_traceback.py", line 98, in func_test_assert_none
     1 / 0
     ~~^~~
 ZeroDivisionError: division by zero'''
