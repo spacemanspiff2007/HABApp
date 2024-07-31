@@ -1,5 +1,5 @@
 # Packages required to build the documentation
-sphinx                      == 8.0.2
+sphinx                      == 7.4.7
 sphinx-autodoc-typehints    == 2.2.3
 sphinx_rtd_theme            == 2.0.0
 sphinx-exec-code            == 0.12
