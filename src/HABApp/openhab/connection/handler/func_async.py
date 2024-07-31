@@ -294,7 +294,7 @@ def __get_item_link_url(item: str | ItemRegistryItem, channel: str) -> str:
     # rest/links/ endpoint needs the channel to be url encoded
     # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
     # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-    return '/rest/links/' + quote_url(f"{item:s}/{channel:s}")
+    return '/rest/links/' + quote_url(f'{item:s}/{channel:s}')
 
 
 async def async_get_link(item: str | ItemRegistryItem, channel: str) -> ItemChannelLinkResp:

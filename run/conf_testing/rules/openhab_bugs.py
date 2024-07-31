@@ -22,7 +22,7 @@ class BugLinks(TestBaseRule):
 
     def create_meta(self):
         astro_thing = find_astro_sun_thing()
-        astro_channel = f"{astro_thing}:rise#start"
+        astro_channel = f'{astro_thing}:rise#start'
         name = get_random_name('DateTime')
 
         # create item and link

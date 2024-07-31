@@ -101,8 +101,8 @@ class ItemAddedEvent(OpenhabEvent):
         )
 
     def __repr__(self):
-        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""
-        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ""
+        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ''
+        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ''
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, tags:{tags}, groups:{grps}>'
 
 
@@ -143,8 +143,8 @@ class ItemUpdatedEvent(OpenhabEvent):
         )
 
     def __repr__(self):
-        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""
-        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ""
+        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ''
+        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ''
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, tags:{tags}, groups:{grps}>'
 
 

@@ -17,7 +17,7 @@ def get_msg_payload(msg: Message) -> Tuple[Optional[str], Any]:
         raw = msg.payload
 
         try:
-            val = raw.decode("utf-8")
+            val = raw.decode('utf-8')
         except UnicodeDecodeError:
             # Payload ist a byte stream
             if log.isEnabledFor(logging.DEBUG):

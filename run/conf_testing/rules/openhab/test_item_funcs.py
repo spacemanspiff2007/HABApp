@@ -69,7 +69,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
         self.add_func_test(
             LocationItem, {
                 TestParam(
-                    'oh_post_update', func_params="52.5185537,13.3758636,43", result=(52.5185537, 13.3758636, 43)
+                    'oh_post_update', func_params='52.5185537,13.3758636,43', result=(52.5185537, 13.3758636, 43)
                 )
             }
         )

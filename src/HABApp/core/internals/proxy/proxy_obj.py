@@ -41,7 +41,7 @@ class StartUpProxyObj(ProxyObjBase):
 
     @property
     def to_replace_name(self) -> str:
-        return str(getattr(self.to_replace, "__name__", self.to_replace))
+        return str(getattr(self.to_replace, '__name__', self.to_replace))
 
     def replace(self, replacements: Dict[object, object], final: bool):
         assert self.globals is not None

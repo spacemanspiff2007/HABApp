@@ -5,9 +5,9 @@ from HABApp.openhab.definitions.rest import ItemChannelLinkResp
 
 def test_simple():
     _in = {
-        "channelUID": "zwave:device:controller:node15:sensor_luminance",
-        "configuration": {},
-        "itemName": "ZWaveItem1",
+        'channelUID': 'zwave:device:controller:node15:sensor_luminance',
+        'configuration': {},
+        'itemName': 'ZWaveItem1',
         'editable': False,
     }
     o = convert(_in, type=ItemChannelLinkResp)
@@ -17,12 +17,12 @@ def test_simple():
 
 def test_configuration():
     _in = {
-        "channelUID": "zwave:device:controller:node15:sensor_luminance",
-        "configuration": {
+        'channelUID': 'zwave:device:controller:node15:sensor_luminance',
+        'configuration': {
             'profile': 'follow',
             'offset': 1,
         },
-        "itemName": "ZWaveItem1",
+        'itemName': 'ZWaveItem1',
         'editable': False,
     }
     o = convert(_in, type=ItemChannelLinkResp)

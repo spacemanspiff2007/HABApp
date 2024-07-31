@@ -14,7 +14,7 @@ from HABApp.core.items.base_item import ChangedTime, UpdatedTime
 from tests.helpers import LogCollector, TestEventBus
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def u():
     a = UpdatedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
@@ -29,7 +29,7 @@ def u():
         w2.cancel()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def c():
     a = ChangedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)

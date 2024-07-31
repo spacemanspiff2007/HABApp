@@ -12,16 +12,16 @@ def cfg():
         'config_100_4_000000FF': 0,     # 4 byte with bitmask 0xFF
 
         # sometimes parameters are inside the dict multiple times with a bitmask
-        "config_154_4_00FF0000": 255,
-        "config_154_4": 4294967295,
-        "config_154_4_7F000000": 127,
-        "config_154_4_000000FF": 255,
-        "config_154_4_0000FF00": 255,
+        'config_154_4_00FF0000': 255,
+        'config_154_4': 4294967295,
+        'config_154_4_7F000000': 127,
+        'config_154_4_000000FF': 255,
+        'config_154_4_0000FF00': 255,
 
         'group_1': ['controller'],
 
         'binding_cmdrepollperiod': 2600,
-        "wakeup_interval": 3600,
+        'wakeup_interval': 3600,
     })
 
 
@@ -63,7 +63,7 @@ def test_set_keys(cfg: ThingConfigChanger):
 
 def test_set_wrong_type(cfg: ThingConfigChanger):
     with raises(ValueError) as e:
-        cfg[1] = "asdf"
+        cfg[1] = 'asdf'
     assert str(e.value) == "Datatype of parameter '1' must be 'int' but is 'str': 'asdf'"
 
     with raises(ValueError):

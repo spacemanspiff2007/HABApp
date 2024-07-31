@@ -264,7 +264,7 @@ autodoc_pydantic_field_swap_name_and_alias = True
 # Post processing of default value
 
 regex_path = re.compile(r"^\w+Path\('([^']+)'\)")
-assert regex_path.search('WindowsPath(\'lib\')').group(1) == 'lib'
+assert regex_path.search("WindowsPath('lib')").group(1) == 'lib'
 
 regex_item = re.compile(r'(class \w+Item)\(.+\)')
 

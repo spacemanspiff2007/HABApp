@@ -6,7 +6,7 @@ from HABApp.config.platform_defaults import get_log_folder, is_openhabian
 
 
 def get_default_logfile() -> str:
-    template = Template("""
+    template = Template('''
 ${LOG_LEVELS}formatters:
   HABApp_format:
     format: '[%(asctime)s] [%(name)25s] %(levelname)8s | %(message)s'
@@ -55,7 +55,7 @@ loggers:
       - EventFile
     propagate: False
 
-""")
+''')
 
     # Default values are relative
     subs = {
@@ -77,8 +77,8 @@ loggers:
 
         # With openhabian we typically use frontail
         if is_openhabian():
-            subs['FRONTAIL_FORMAT'] = '\n'\
-                '  Frontail_format:\n' \
+            subs['FRONTAIL_FORMAT'] = "\n"\
+                "  Frontail_format:\n" \
                 "    format: '%(asctime)s.%(msecs)03d [%(levelname)-5s] [%(name)-36s] - %(message)s'\n" \
                 "    datefmt: '%Y-%m-%d %H:%M:%S'"
 

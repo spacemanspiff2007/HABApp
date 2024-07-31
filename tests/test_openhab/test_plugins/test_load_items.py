@@ -14,43 +14,43 @@ from HABApp.openhab.definitions.rest import ItemResp, ShortItemResp
 async def _mock_get_all_items():
     resp = [
         {
-            "link": "link length",
-            "state": "NULL",
-            "stateDescription": {
-                "pattern": "%d",
-                "readOnly": True,
-                "options": []
+            'link': 'link length',
+            'state': 'NULL',
+            'stateDescription': {
+                'pattern': '%d',
+                'readOnly': True,
+                'options': []
             },
-            "metadata": {
-                "autoupdate": {
-                    "value": "false"
+            'metadata': {
+                'autoupdate': {
+                    'value': 'false'
                 }
             },
-            "editable": False,
-            "type": "Number:Length",
-            "name": "ItemLength",
-            "label": "Label length",
-            "tags": [],
-            "groupNames": ["grp1"]
+            'editable': False,
+            'type': 'Number:Length',
+            'name': 'ItemLength',
+            'label': 'Label length',
+            'tags': [],
+            'groupNames': ['grp1']
         },
         {
-            "link": "link plain",
-            "state": "NULL",
-            "editable": False,
-            "type": "Number",
-            "name": "ItemPlain",
-            "label": "Label plain",
-            "tags": [],
-            "groupNames": []
+            'link': 'link plain',
+            'state': 'NULL',
+            'editable': False,
+            'type': 'Number',
+            'name': 'ItemPlain',
+            'label': 'Label plain',
+            'tags': [],
+            'groupNames': []
         },
         {
-            "link": "link no update",
-            "state": "NULL",
-            "editable": False,
-            "type": "Number",
-            "name": "ItemNoUpdate",
-            "tags": [],
-            "groupNames": []
+            'link': 'link no update',
+            'state': 'NULL',
+            'editable': False,
+            'type': 'Number',
+            'name': 'ItemNoUpdate',
+            'tags': [],
+            'groupNames': []
         },
     ]
 
@@ -59,8 +59,8 @@ async def _mock_get_all_items():
 
 async def _mock_get_all_items_state():
     return [
-        ShortItemResp("Number:Length", "ItemLength", "5 m"),
-        ShortItemResp("Number", "ItemPlain", "3.14")
+        ShortItemResp('Number:Length', 'ItemLength', '5 m'),
+        ShortItemResp('Number', 'ItemPlain', '3.14')
     ]
 
 

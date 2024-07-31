@@ -23,31 +23,31 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
         config = CONFIG.mqtt.connection
 
         if not config.host:
-            log.info("MQTT disabled")
+            log.info('MQTT disabled')
             connection.status_from_setup_to_disabled()
             return None
 
         tls_insecure: bool | None = None
         tls_ca_cert: str | None = None
         if tls_enabled := config.tls.enabled:
-            log.debug("TLS enabled")
+            log.debug('TLS enabled')
 
             # add option to specify tls certificate
             ca_cert = config.tls.ca_cert
             if ca_cert is not None and ca_cert.name:
                 if not ca_cert.is_file():
-                    log.error(f"Ca cert file does not exist: {ca_cert}")
+                    log.error(f'Ca cert file does not exist: {ca_cert}')
                     # don't connect without the properly set certificate
                     connection.set_error()
                     return None
 
-                log.debug(f"CA cert path: {ca_cert}")
+                log.debug(f'CA cert path: {ca_cert}')
                 tls_ca_cert = str(ca_cert)
 
             # we can only set tls_insecure if we have a tls connection
             if config.tls.insecure:
-                log.warning("Verification of server hostname in server certificate disabled!")
-                log.warning("Use this only for testing, not for a real system!")
+                log.warning('Verification of server hostname in server certificate disabled!')
+                log.warning('Use this only for testing, not for a real system!')
                 tls_insecure = True
 
         connection.context = Client(
@@ -64,15 +64,15 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
     async def on_connecting(self, connection: MqttConnection, context: CONTEXT_TYPE):
         assert context is not None
 
-        connection.log.info(f"Connecting to {context._hostname}:{context._port}")
+        connection.log.info(f'Connecting to {context._hostname}:{context._port}')
         await context.__aenter__()
 
-        connection.log.info("Connection successful")
+        connection.log.info('Connection successful')
 
     async def on_disconnected(self, connection: MqttConnection, context: CONTEXT_TYPE):
         assert context is not None
 
-        connection.log.info("Disconnected")
+        connection.log.info('Disconnected')
         await context.__aexit__(None, None, None)
 
 

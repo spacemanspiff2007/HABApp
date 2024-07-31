@@ -13,7 +13,7 @@ from HABApp.openhab.items import Thing
 from HABApp.openhab.map_events import get_event
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def test_thing(ir: ItemRegistry):
     set_test_now(DateTime(2000, 1, 1, tzinfo=UTC))
     thing = HABApp.openhab.items.Thing('test_thing')

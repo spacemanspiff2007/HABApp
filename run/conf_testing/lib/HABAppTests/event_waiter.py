@@ -57,7 +57,7 @@ class EventWaiter:
             time.sleep(0.02)
 
             if time.time() > start + self.timeout:
-                expected_values = "with " + ", ".join([f"{__k}={__v}" for __k, __v in kwargs.items()]) if kwargs else ""
+                expected_values = 'with ' + ', '.join([f'{__k}={__v}' for __k, __v in kwargs.items()]) if kwargs else ''
                 msg = f'Timeout while waiting for {self.event_filter.describe()} for {self.name} {expected_values}'
                 raise TestCaseFailed(msg)
 

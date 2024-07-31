@@ -57,7 +57,7 @@ def test_func_wrapper(p_mock):
     func_a(['asdf', 'asdf'])
 
 
-@pytest.mark.skip(reason="Behavior still unclear")
+@pytest.mark.skip(reason='Behavior still unclear')
 def test_exception_format_included_files(p_mock):
     async def test():
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(0.01)) as session:

@@ -56,7 +56,7 @@ class RuleFile:
         return None
 
     def __process_tc(self, tb: list):
-        tb.insert(0, f"Could not load {self.path}!")
+        tb.insert(0, f'Could not load {self.path}!')
         return [line.replace('<module>', self.path.name) for line in tb]
 
     def create_rules(self, created_rules: list):

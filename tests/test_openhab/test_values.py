@@ -12,7 +12,7 @@ from HABApp.openhab.definitions import (
 
 
 @pytest.mark.parametrize(
-    "cls,values", [
+    'cls,values', [
         (UpDownValue, (UpDownValue.DOWN, UpDownValue.UP)),
         (OnOffValue, (OnOffValue.ON, OnOffValue.OFF)),
         (OpenClosedValue, (OpenClosedValue.OPEN, OpenClosedValue.CLOSED)),
@@ -24,7 +24,7 @@ def test_val_same_type(cls, values):
 
 
 @pytest.mark.parametrize(
-    "cls,values", [
+    'cls,values', [
         (PercentValue, (('0', 0.0), ('5', 5.0), ('55.5', 55.5), ('100.0', 100), )),
         (HSBValue, (
             ('0,0,0', (0, 0, 0)), ('5,0,0', (5, 0, 0)),

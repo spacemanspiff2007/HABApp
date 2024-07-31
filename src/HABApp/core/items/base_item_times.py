@@ -10,7 +10,7 @@ from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
 
 log = logging.getLogger('HABApp')
 
-WATCH_OBJ = TypeVar("WATCH_OBJ", bound=BaseWatch)
+WATCH_OBJ = TypeVar('WATCH_OBJ', bound=BaseWatch)
 
 
 class ItemTimes(Generic[WATCH_OBJ]):

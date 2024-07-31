@@ -56,6 +56,11 @@ ignore = [
 quote-style = "single"
 
 
+# https://docs.astral.sh/ruff/settings/#lintflake8-quotes
+[lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+
 
 [lint.flake8-builtins]
 builtins-ignorelist = ["id", "input"]

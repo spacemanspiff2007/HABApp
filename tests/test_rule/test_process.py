@@ -29,7 +29,7 @@ class ProcRule(Rule):
         self.cb.__name__ = 'mock_callback'
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def rule(monkeypatch):
     monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__).with_name('config.yml'))
 
@@ -46,12 +46,12 @@ def rule(monkeypatch):
 @pytest.mark.no_internals()
 async def test_run_func_arg_errors(rule):
     with pytest.raises(TypeError) as e:
-        rule.execute_subprocess(rule.cb, sys.executable, "asfd", 123)
+        rule.execute_subprocess(rule.cb, sys.executable, 'asfd', 123)
     assert str(e.value) == 'args[2] is not of type str! "123" (int)'
 
     with pytest.raises(TypeError) as e:
         rule.execute_subprocess(
-            rule.cb, sys.executable, "asfd", additional_python_path=[Path(__file__).parent, 123]
+            rule.cb, sys.executable, 'asfd', additional_python_path=[Path(__file__).parent, 123]
         )
     assert str(e.value) == 'additional_python_path[1] is not of type str! "123" (int)'
 

@@ -7,7 +7,7 @@ import HABApp
 import HABApp.parameters.parameters as Parameters
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def params():
     class DummyCfg:
         class directories:

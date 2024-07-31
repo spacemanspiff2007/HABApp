@@ -60,7 +60,7 @@ def format_exception(e: HINT_EXCEPTION) -> List[str]:
             else:
                 # repeated frames in case of recursion
                 if added:
-                    tb.append(f"... {frame_info.description} ...\n")
+                    tb.append(f'... {frame_info.description} ...\n')
 
         # add a short traceback
         tb.append(SEPARATOR_NEW_FRAME)

@@ -68,6 +68,6 @@ def test_ivar_redefinition():
 
     with pytest.raises(ExpectedHintNotFound) as e:
         get_ivars_from_docstring(Child, {'a': Dict[str, str]})
-    assert str(e.value) == "Expected hint not found for Child.a: typing.Dict[str, str]"
+    assert str(e.value) == 'Expected hint not found for Child.a: typing.Dict[str, str]'
 
     get_ivars_from_docstring(Child, {'a': Optional[Dict[str, str]]})
