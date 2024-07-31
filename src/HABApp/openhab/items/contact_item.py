@@ -68,8 +68,8 @@ class ContactItem(OpenhabItem):
         """Post an update to the item with the closed value"""
         return post_update(self.name, CLOSED)
 
-    def __str__(self):
-        return self.value
+    def __str__(self) -> str:
+        return str(self.value)
 
     def __eq__(self, other):
         if isinstance(other, ContactItem):

@@ -65,8 +65,8 @@ class SwitchItem(OpenhabItem, OnOffCommand):
         else:
             raise InvalidItemValue.from_item(self, self.value)
 
-    def __str__(self):
-        return self.value
+    def __str__(self) -> str:
+        return str(self.value)
 
     def __eq__(self, other):
         if isinstance(other, SwitchItem):

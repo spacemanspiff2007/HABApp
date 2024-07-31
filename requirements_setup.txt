@@ -15,7 +15,7 @@ colorama    == 0.4.6
 fastnumbers == 5.1.0
 
 
-voluptuous == 0.15.2
+voluptuous == 0.14.2
 
 typing-extensions == 4.12.2
 

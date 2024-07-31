@@ -54,5 +54,5 @@ class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
     def is_down(self) -> bool:
         return self.value >= 100
 
-    def __str__(self):
-        return self.value
+    def __str__(self) -> str:
+        return str(self.value)

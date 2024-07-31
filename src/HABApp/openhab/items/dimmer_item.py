@@ -57,8 +57,8 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
         """Test value against off-value"""
         return self.value is not None and not self.value
 
-    def __str__(self):
-        return self.value
+    def __str__(self) -> str:
+        return str(self.value)
 
     def __bool__(self):
         if self.value is None:
