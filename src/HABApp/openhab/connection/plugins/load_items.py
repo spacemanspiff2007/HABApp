@@ -163,6 +163,6 @@ def thing_changed(old: HABApp.openhab.items.Thing, new: ThingResp) -> bool:
         old.status_detail != new.status.detail or \
         old.status_description != ('' if not new.status.description else new.status.description) or \
         old.label != new.label or \
-        old.location != new.configuration or \
+        old.location != new.location or \
         old.configuration != new.configuration or \
         old.properties != new.properties
