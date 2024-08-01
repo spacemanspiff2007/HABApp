@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Any, Final, TypeVar, Tuple, Generic
+from typing import Any, Dict, Final, Generic, Tuple, TypeVar
 
 
 T = TypeVar('T')

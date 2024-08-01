@@ -1,13 +1,14 @@
 import re
 from typing import Tuple
 
+
 LIMIT_REGEX = re.compile(
-    r"""
+    r'''
     \s* ([1-9][0-9]*)
     \s* (/|per|in)
     \s* ([1-9][0-9]*)?
     \s* (s|sec|second|m|min|minute|h|hour|day|month|year)s?
-    \s*""",
+    \s*''',
     re.IGNORECASE | re.VERBOSE,
 )
 

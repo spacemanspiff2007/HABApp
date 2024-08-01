@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.errors import ItemNotFoundException, ItemAlreadyExistsError
+from HABApp.core.errors import ItemAlreadyExistsError, ItemNotFoundException
 from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
 

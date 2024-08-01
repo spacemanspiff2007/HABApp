@@ -49,7 +49,7 @@ def request_shutdown():
 
 async def _shutdown():
     global requested
-    "Request execution of all functions"
+    'Request execution of all functions'
 
     async_context.set('Shutdown')
 

@@ -1,11 +1,12 @@
 import logging
-from typing import Tuple, Any, Optional
+from typing import Any, Optional, Tuple
 
 from aiomqtt import Message
 
 from HABApp.core.const.json import load_json
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.wrapper import process_exception
+
 
 log = logging.getLogger(f'{TOPIC_EVENTS}.mqtt')
 
@@ -16,7 +17,7 @@ def get_msg_payload(msg: Message) -> Tuple[Optional[str], Any]:
         raw = msg.payload
 
         try:
-            val = raw.decode("utf-8")
+            val = raw.decode('utf-8')
         except UnicodeDecodeError:
             # Payload ist a byte stream
             if log.isEnabledFor(logging.DEBUG):

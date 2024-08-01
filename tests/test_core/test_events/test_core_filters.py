@@ -1,11 +1,17 @@
 from typing import Any
 
 import pytest
+from tests.helpers.inspect import check_class_annotations, get_module_classes
 
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
-from HABApp.core.events.filter import EventFilter, ValueChangeEventFilter, ValueUpdateEventFilter, NoEventFilter, \
-    OrFilterGroup, AndFilterGroup
-from tests.helpers.inspect import get_module_classes, check_class_annotations
+from HABApp.core.events.filter import (
+    AndFilterGroup,
+    EventFilter,
+    NoEventFilter,
+    OrFilterGroup,
+    ValueChangeEventFilter,
+    ValueUpdateEventFilter,
+)
 
 
 def test_class_annotations():

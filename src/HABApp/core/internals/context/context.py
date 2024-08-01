@@ -1,5 +1,4 @@
-from typing import Set, Optional, Callable
-from typing import TypeVar
+from typing import Callable, Optional, Set, TypeVar
 
 from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBoundObjectIsAlreadyUnlinkedError
 

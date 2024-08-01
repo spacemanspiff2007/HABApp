@@ -5,6 +5,7 @@ from typing import Final
 
 from HABApp.core.const.const import StrEnum
 
+
 connection_log = logging.getLogger('HABApp.connection')
 
 

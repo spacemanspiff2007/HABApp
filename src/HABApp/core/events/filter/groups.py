@@ -1,6 +1,6 @@
 from typing import Any, Tuple
 
-from HABApp.core.internals import EventFilterBase, HINT_EVENT_FILTER_OBJ
+from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, EventFilterBase
 
 
 class EventFilterBaseGroup(EventFilterBase):

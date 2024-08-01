@@ -1,7 +1,7 @@
 from typing import Any
 
 from HABApp.core.const import MISSING
-from HABApp.core.events import ValueUpdateEvent, ValueChangeEvent
+from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.events.filter.event import TypeBoundEventFilter
 
 

@@ -3,6 +3,7 @@ from pathlib import Path
 import HABApp
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.rule_manager import RuleFile
+
 from .bench_habapp import HABAppBenchRule
 from .bench_mqtt import MqttBenchRule
 from .bench_oh import OpenhabBenchRule

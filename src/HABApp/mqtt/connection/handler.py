@@ -30,7 +30,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
         tls_insecure: bool | None = None
         tls_ca_cert: str | None = None
         if tls_enabled := config.tls.enabled:
-            log.debug("TLS enabled")
+            log.debug('TLS enabled')
 
             # add option to specify tls certificate
             ca_cert = config.tls.ca_cert
@@ -41,7 +41,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
                     connection.set_error()
                     return None
 
-                log.debug(f"CA cert path: {ca_cert}")
+                log.debug(f'CA cert path: {ca_cert}')
                 tls_ca_cert = str(ca_cert)
 
             # we can only set tls_insecure if we have a tls connection
@@ -66,9 +66,6 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
 
         connection.log.info(f'Connecting to {context._hostname}:{context._port}')
         await context.__aenter__()
-
-        # TODO: remove once https://github.com/sbtinstruments/aiomqtt/issues/268 has been fixed
-        context.messages = context._messages()
 
         connection.log.info('Connection successful')
 

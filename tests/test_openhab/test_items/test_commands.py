@@ -9,11 +9,11 @@ from HABApp.openhab.items.commands import OnOffCommand, UpDownCommand
 from HABApp.openhab.map_items import _items as item_dict
 
 
-@pytest.mark.parametrize("cls", [cls for cls in item_dict.values() if issubclass(cls, OnOffCommand)])
+@pytest.mark.parametrize('cls', [cls for cls in item_dict.values() if issubclass(cls, OnOffCommand)])
 def test_OnOff(cls):
     c = cls('item_name')
     assert not c.is_on()
-    if not __version__.startswith('24.02.0'):
+    if not __version__.startswith('24.08.0'):
         assert not c.is_off()
 
     c.set_value(OnOffValue('ON'))
@@ -26,7 +26,7 @@ def test_OnOff(cls):
     assert not c.is_on()
 
 
-@pytest.mark.parametrize("cls", [cls for cls in item_dict.values() if issubclass(cls, UpDownCommand)])
+@pytest.mark.parametrize('cls', [cls for cls in item_dict.values() if issubclass(cls, UpDownCommand)])
 def test_UpDown(cls):
     c = cls('item_name')
     c.set_value(UpDownValue('UP'))
@@ -39,7 +39,7 @@ def test_UpDown(cls):
     assert c.is_down()
 
 
-@pytest.mark.parametrize("cls", (ContactItem, ))
+@pytest.mark.parametrize('cls', (ContactItem, ))
 def test_OpenClosed(cls: typing.Type[ContactItem]):
     c = cls('item_name')
     assert not c.is_closed()

@@ -1,7 +1,8 @@
-from typing import FrozenSet, Mapping, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional, Tuple
 
 from HABApp.openhab.definitions.values import PointValue
-from HABApp.openhab.items.base_item import OpenhabItem, MetaData
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+
 
 if TYPE_CHECKING:
     Tuple = Tuple

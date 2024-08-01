@@ -11,12 +11,17 @@ from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import map_null_str
-from HABApp.openhab.connection.handler.func_async import async_get_items, \
-    async_get_all_items_state, async_get_things
+from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
 from HABApp.openhab.definitions import QuantityValue
 from HABApp.openhab.definitions.rest import ThingResp
-from HABApp.openhab.item_to_reg import fresh_item_sync, add_to_registry, remove_from_registry, add_thing_to_registry, \
-    remove_thing_from_registry
+from HABApp.openhab.item_to_reg import (
+    add_thing_to_registry,
+    add_to_registry,
+    fresh_item_sync,
+    remove_from_registry,
+    remove_thing_from_registry,
+)
+
 
 log = logging.getLogger('HABApp.openhab.items')
 Items = uses_item_registry()
@@ -120,7 +125,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             t = add_thing_to_registry(thing)
             created_things[t.name] = (t, t.last_update)
 
-        context.created_items.update(created_things)
+        context.created_things.update(created_things)
 
         # remove things which were deleted
         ist = set(Items.get_item_names())
@@ -158,6 +163,6 @@ def thing_changed(old: HABApp.openhab.items.Thing, new: ThingResp) -> bool:
         old.status_detail != new.status.detail or \
         old.status_description != ('' if not new.status.description else new.status.description) or \
         old.label != new.label or \
-        old.location != new.configuration or \
+        old.location != new.location or \
         old.configuration != new.configuration or \
         old.properties != new.properties

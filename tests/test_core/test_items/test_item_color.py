@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, NoEventFilter
+from HABApp.core.events import NoEventFilter, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.items import ColorItem
 from tests.helpers import TestEventBus
 
@@ -24,9 +24,9 @@ def test_init():
     assert ColorItem('', brightness=22).value == (0, 0, 22)
 
 
-@pytest.mark.parametrize("func_name", ['set_value', 'post_value'])
+@pytest.mark.parametrize('func_name', ['set_value', 'post_value'])
 @pytest.mark.parametrize(
-    "test_vals", [
+    'test_vals', [
         ((45, 46, 47), (45, 46, 47)),
         ((10, None, None), (10, 22.22, 33.33)),
         ((None, 50, None), (11.11, 50, 33.33)),

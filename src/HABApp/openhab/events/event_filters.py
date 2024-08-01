@@ -2,10 +2,11 @@ from typing import Any
 
 from HABApp.core.const import MISSING
 from HABApp.core.events.filter.event import TypeBoundEventFilter
-from . import ItemStateChangedEvent, ItemStateEvent, ItemStateUpdatedEvent, ItemCommandEvent
+
+from . import ItemCommandEvent, ItemStateChangedEvent, ItemStateEvent, ItemStateUpdatedEvent
 
 
-# Todo: Drop this when we go OH4.0 only
+# TODO: Drop this when we go OH4.0 only
 class ItemStateEventFilter(TypeBoundEventFilter):
     def __init__(self, value: Any = MISSING):
         super().__init__(ItemStateEvent, value=value)

@@ -1,7 +1,7 @@
 import asyncio
+from unittest.mock import Mock
 
 from HABApp.core.lib import SingleTask
-from unittest.mock import Mock
 
 
 async def test_single_task_start():

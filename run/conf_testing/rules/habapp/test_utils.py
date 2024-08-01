@@ -1,9 +1,11 @@
+import logging
+
 from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_random_name
 
 import HABApp
-import logging
 from HABApp.openhab.items import OpenhabItem
 from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode
+
 
 log = logging.getLogger('HABApp.Tests.MultiMode')
 

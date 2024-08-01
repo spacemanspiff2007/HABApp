@@ -14,28 +14,28 @@ class TestCases(unittest.TestCase):
     def test_a(self):
         t = Threshold(10, 20)
 
-        self.assertFalse( 19 > t)
+        self.assertFalse( t < 19)
         # Über obere Grenze
-        self.assertTrue(21 > t)
-        self.assertTrue(20 > t)
-        self.assertTrue(11 > t)
+        self.assertTrue(t < 21)
+        self.assertTrue(t < 20)
+        self.assertTrue(t < 11)
 
         # unter untere Grenze
-        self.assertFalse(9 > t)
-        self.assertFalse(19 > t)
+        self.assertFalse(t < 9)
+        self.assertFalse(t < 19)
 
     def test_b(self):
         t = Threshold(10, 20)
         self.assertEqual(t.current_threshold, 20)
 
-        self.assertFalse(19 >= t)
+        self.assertFalse(t <= 19)
         # Über obere Grenze
-        self.assertTrue(21 >= t)
-        self.assertTrue(10 >= t)
+        self.assertTrue(t <= 21)
+        self.assertTrue(t <= 10)
 
         # unter untere Grenze
-        self.assertFalse(9 >= t)
-        self.assertFalse(19 >= t)
+        self.assertFalse(t <= 9)
+        self.assertFalse(t <= 19)
 
 
 if __name__ == '__main__':

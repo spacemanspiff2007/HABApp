@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Callable, Awaitable, Any
+from typing import Any, Awaitable, Callable
 
-from HABApp.core.files.errors import CircularReferenceError, DependencyDoesNotExistError, AlreadyHandledFileError
+from HABApp.core.files.errors import AlreadyHandledFileError, CircularReferenceError, DependencyDoesNotExistError
 from HABApp.core.files.file.properties import FileProperties
 from HABApp.core.files.manager.files import FILES, file_state_changed
 from HABApp.core.wrapper import process_exception
+
 from . import FileState
+
 
 log = logging.getLogger('HABApp.files')
 

@@ -1,8 +1,10 @@
 import pytest
 
 from HABApp.openhab.errors import MapTransformationError
+
 # noinspection PyProtectedMember
 from HABApp.openhab.transformations._map import MapTransformation, MapTransformationWithDefault
+
 # noinspection PyProtectedMember
 from HABApp.openhab.transformations._map.registry import MapTransformationRegistry
 

@@ -1,8 +1,9 @@
 from traceback import format_exception as _format_exception
 from types import TracebackType
-from typing import Tuple, Union, Any, List, Type
+from typing import Any, List, Tuple, Type, Union
 
 from HABApp.core.const.const import PYTHON_310
+
 
 if PYTHON_310:
     from typing import TypeAlias
@@ -59,7 +60,7 @@ def format_exception(e: HINT_EXCEPTION) -> List[str]:
             else:
                 # repeated frames in case of recursion
                 if added:
-                    tb.append(f"... {frame_info.description} ...\n")
+                    tb.append(f'... {frame_info.description} ...\n')
 
         # add a short traceback
         tb.append(SEPARATOR_NEW_FRAME)

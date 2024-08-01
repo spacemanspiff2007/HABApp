@@ -7,17 +7,33 @@ from urllib.parse import quote as quote_url
 
 from HABApp.core.const.json import decode_struct
 from HABApp.core.internals import ItemRegistryItem
-from HABApp.openhab.definitions.rest import PersistenceServiceResp
-from HABApp.openhab.definitions.rest import RootResp, SystemInfoRootResp, ItemResp, ShortItemResp, ItemHistoryResp, \
-    ItemChannelLinkResp
-from HABApp.openhab.definitions.rest import ThingResp
-from HABApp.openhab.definitions.rest import TransformationResp
-from HABApp.openhab.errors import (ThingNotFoundError, ItemNotFoundError, ItemNotEditableError,
-                                   MetadataNotEditableError, ThingNotEditableError, TransformationsRequestError,
-                                   PersistenceRequestError, LinkRequestError, LinkNotFoundError, LinkNotEditableError)
-from . import convert_to_oh_type
-from .handler import get, put, delete, post
+from HABApp.openhab.definitions.rest import (
+    ItemChannelLinkResp,
+    ItemHistoryResp,
+    ItemResp,
+    PersistenceServiceResp,
+    RootResp,
+    ShortItemResp,
+    SystemInfoRootResp,
+    ThingResp,
+    TransformationResp,
+)
+from HABApp.openhab.errors import (
+    ItemNotEditableError,
+    ItemNotFoundError,
+    LinkNotEditableError,
+    LinkNotFoundError,
+    LinkRequestError,
+    MetadataNotEditableError,
+    PersistenceRequestError,
+    ThingNotEditableError,
+    ThingNotFoundError,
+    TransformationsRequestError,
+)
+
 from ...definitions.rest.habapp_data import get_api_vals, load_habapp_meta
+from . import convert_to_oh_type
+from .handler import delete, get, post, put
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -278,7 +294,7 @@ def __get_item_link_url(item: str | ItemRegistryItem, channel: str) -> str:
     # rest/links/ endpoint needs the channel to be url encoded
     # (AAAA:BBBB:CCCC:0#NAME -> AAAA%3ABBBB%3ACCCC%3A0%23NAME)
     # otherwise the REST-api returns HTTP-Status 500 InternalServerError
-    return '/rest/links/' + quote_url(f"{item:s}/{channel:s}")
+    return '/rest/links/' + quote_url(f'{item:s}/{channel:s}')
 
 
 async def async_get_link(item: str | ItemRegistryItem, channel: str) -> ItemChannelLinkResp:

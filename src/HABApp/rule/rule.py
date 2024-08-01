@@ -37,6 +37,7 @@ from .interfaces.rule_subprocess import (
 )
 from .rule_hook import get_rule_hook as _get_rule_hook
 
+
 if PYTHON_310:
     from typing import ParamSpec
 else:

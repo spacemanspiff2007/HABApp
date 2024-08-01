@@ -26,7 +26,7 @@ def test_max():
     assert max([2, 3, None]) == 3
 
 
-@pytest.mark.parametrize("rgb,hsv", [
+@pytest.mark.parametrize('rgb,hsv', [
     ((224, 201, 219), (313.04,  10.27, 87.84)),
     ((  0, 201, 219), (184.93, 100.00, 85.88)),
     ((128, 138,  33), ( 65.71,  76.09, 54.12)),
@@ -36,7 +36,7 @@ def test_rgb_to_hsv(rgb, hsv):
     assert hsv == rgb_to_hsb(*rgb)
 
 
-@pytest.mark.parametrize("hsv,rgb", [
+@pytest.mark.parametrize('hsv,rgb', [
     (( 75,  75,  75), (155, 191,  48)),
     ((150,  40, 100), (153, 255, 204)),
     ((234,  46,  72), ( 99, 108, 184)),

@@ -7,10 +7,11 @@ from aiomqtt import Client, MqttError
 
 import HABApp
 from HABApp.core.asyncio import AsyncContext
-from HABApp.core.connections import BaseConnection, Connections, ConnectionStateToEventBusPlugin, AutoReconnectPlugin
+from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.connections.base_plugin import BaseConnectionPluginConnectedTask
 from HABApp.core.const.const import PYTHON_310
+
 
 log = logging.getLogger('HABApp.mqtt.connection')
 
@@ -26,8 +27,8 @@ def setup():
     config = HABApp.config.CONFIG.mqtt
 
     from HABApp.mqtt.connection.handler import CONNECTION_HANDLER
-    from HABApp.mqtt.connection.subscribe import SUBSCRIPTION_HANDLER
     from HABApp.mqtt.connection.publish import PUBLISH_HANDLER
+    from HABApp.mqtt.connection.subscribe import SUBSCRIPTION_HANDLER
 
     connection = Connections.add(MqttConnection())
 

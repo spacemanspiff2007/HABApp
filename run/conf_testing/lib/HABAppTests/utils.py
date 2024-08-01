@@ -43,7 +43,7 @@ def run_coro(coro: typing.Coroutine):
 def find_astro_sun_thing() -> str:
     items = HABApp.core.Items.get_items()
     for item in items:
-        if isinstance(item, Thing) and item.name.startswith("astro:sun"):
+        if isinstance(item, Thing) and item.name.startswith('astro:sun'):
             return item.name
 
     raise ValueError('No astro thing found!')

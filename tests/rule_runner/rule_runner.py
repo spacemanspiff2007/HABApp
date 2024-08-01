@@ -7,7 +7,7 @@ import HABApp.core.lib.exceptions.format
 import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.habappschedulerview as ha_sched
 from HABApp.core.asyncio import async_context
-from HABApp.core.internals import setup_internals, ItemRegistry, EventBus
+from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
 from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction

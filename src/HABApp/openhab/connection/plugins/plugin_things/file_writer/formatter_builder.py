@@ -1,6 +1,7 @@
-from typing import Final, Optional, Callable, Any
+from typing import Any, Callable, Final, Optional
 
 from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserItem
+
 from .formatter import TYPE_FORMATTER, EmptyFormatter, ValueFormatter
 
 

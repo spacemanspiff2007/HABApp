@@ -1,17 +1,18 @@
 import logging
+from pathlib import Path
 from typing import Optional, Union
 
 import pytest
+from easyconfig import create_app_config
 from pydantic import BaseModel
 
 import HABApp
 from HABApp.core.const.const import PYTHON_311
-from HABApp.core.const.json import load_json, dump_json
+from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.lib import format_exception
-from easyconfig import create_app_config
-from tests.helpers.traceback import remove_dyn_parts_from_traceback
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_lib_file, is_suppressed_habapp_file
-from pathlib import Path
+from tests.helpers.traceback import remove_dyn_parts_from_traceback
+
 
 log = logging.getLogger('TestLogger')
 
@@ -27,8 +28,8 @@ def exec_func(func) -> str:
 
 
 def func_obj_def_multilines():
-    item = HABApp.core.items.Item  # noqa: F841
-    a = [  # noqa: F841
+    item = HABApp.core.items.Item
+    a = [
         1,
         2,
         3,
@@ -59,8 +60,8 @@ def func_obj_def_multilines():
 # File "test_core/test_lib/test_format_traceback.py", line 37 in func_obj_def_multilines
 # --------------------------------------------------------------------------------
 #      25 | def func_obj_def_multilines():
-#      26 |     item = HABApp.core.items.Item  # noqa: F841
-#      27 |     a = [  # noqa: F841
+#      26 |     item = HABApp.core.items.Item
+#      27 |     a = [
 #      28 |         1,
 #       (...)
 #      35 |         8
@@ -108,26 +109,26 @@ def test_exception_expression_remove_py310():
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
 --------------------------------------------------------------------------------
-     19 | def exec_func(func) -> str:
-     20 |     try:
--->  21 |         func()
-     22 |     except Exception as e:
+     20 | def exec_func(func) -> str:
+     21 |     try:
+-->  22 |         func()
+     23 |     except Exception as e:
    ------------------------------------------------------------
      e = ZeroDivisionError('division by zero')
      func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
+File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_none
 --------------------------------------------------------------------------------
-     91 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
+     92 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
       (...)
-     94 |     assert isinstance(c, (str, int)), type(c)
-     95 |     CONFIGURATION = '3'
-     96 |     my_dict = {'key_a': 'val_a'}
--->  97 |     1 / 0
-     98 |     log.error('Error message')
+     95 |     assert isinstance(c, (str, int)), type(c)
+     96 |     CONFIGURATION = '3'
+     97 |     my_dict = {'key_a': 'val_a'}
+-->  98 |     1 / 0
+     99 |     log.error('Error message')
    ------------------------------------------------------------
      CONFIG.a = 3
      a = None
@@ -142,9 +143,9 @@ File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_
 
 --------------------------------------------------------------------------------
 Traceback (most recent call last):
-  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+  File "test_core/test_lib/test_format_traceback.py", line 22, in exec_func
     func()
-  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
+  File "test_core/test_lib/test_format_traceback.py", line 98, in func_test_assert_none
     1 / 0
 ZeroDivisionError: division by zero'''
 
@@ -154,26 +155,26 @@ def test_exception_expression_remove():
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
 --------------------------------------------------------------------------------
-     19 | def exec_func(func) -> str:
-     20 |     try:
--->  21 |         func()
-     22 |     except Exception as e:
+     20 | def exec_func(func) -> str:
+     21 |     try:
+-->  22 |         func()
+     23 |     except Exception as e:
    ------------------------------------------------------------
      e = ZeroDivisionError('division by zero')
      func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
+File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_none
 --------------------------------------------------------------------------------
-     91 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
+     92 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
       (...)
-     94 |     assert isinstance(c, (str, int)), type(c)
-     95 |     CONFIGURATION = '3'
-     96 |     my_dict = {'key_a': 'val_a'}
--->  97 |     1 / 0
-     98 |     log.error('Error message')
+     95 |     assert isinstance(c, (str, int)), type(c)
+     96 |     CONFIGURATION = '3'
+     97 |     my_dict = {'key_a': 'val_a'}
+-->  98 |     1 / 0
+     99 |     log.error('Error message')
    ------------------------------------------------------------
      CONFIG.a = 3
      a = None
@@ -188,9 +189,9 @@ File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_
 
 --------------------------------------------------------------------------------
 Traceback (most recent call last):
-  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+  File "test_core/test_lib/test_format_traceback.py", line 22, in exec_func
     func()
-  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
+  File "test_core/test_lib/test_format_traceback.py", line 98, in func_test_assert_none
     1 / 0
     ~~^~~
 ZeroDivisionError: division by zero'''

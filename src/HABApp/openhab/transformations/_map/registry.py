@@ -1,10 +1,10 @@
-from typing import Dict, Union, Tuple, Any, Final
+from typing import Any, Dict, Final, Tuple, Union
 
 from javaproperties import loads as load_map_file
 
 from HABApp.openhab.errors import MapTransformationNotFound
 from HABApp.openhab.transformations._map.classes import MapTransformation, MapTransformationWithDefault
-from HABApp.openhab.transformations.base import TransformationRegistryBase, TransformationFactoryBase, log
+from HABApp.openhab.transformations.base import TransformationFactoryBase, TransformationRegistryBase, log
 
 
 class MapTransformationRegistry(TransformationRegistryBase):

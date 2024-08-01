@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import validate_cfg, UserItemCfg
+from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserItemCfg, validate_cfg
 from tests.helpers import TestEventBus
 
 
@@ -23,7 +23,7 @@ def test_thing_cfg_types():
     })
 
 
-@pytest.mark.ignore_log_errors
+@pytest.mark.ignore_log_errors()
 def test_cfg_err(eb: TestEventBus):
     eb.allow_errors = True
     assert None is validate_cfg({'test': True, 'filter1': {}}, 'filename')

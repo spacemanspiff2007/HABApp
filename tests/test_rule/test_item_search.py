@@ -2,7 +2,7 @@ import pytest
 
 from HABApp import Rule
 from HABApp.core.internals import ItemRegistry
-from HABApp.core.items import Item, BaseValueItem
+from HABApp.core.items import BaseValueItem, Item
 from HABApp.openhab.items import OpenhabItem, SwitchItem
 from HABApp.openhab.items.base_item import MetaData
 

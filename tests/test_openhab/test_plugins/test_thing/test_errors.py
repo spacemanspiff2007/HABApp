@@ -1,7 +1,7 @@
 import time
 
 from HABApp.openhab.connection.plugins.plugin_things.plugin_things import TextualThingConfigPlugin
-from tests.helpers import MockFile, TestEventBus, LogCollector
+from tests.helpers import LogCollector, MockFile, TestEventBus
 
 
 async def test_errors(test_logs: LogCollector, eb: TestEventBus):
@@ -9,16 +9,16 @@ async def test_errors(test_logs: LogCollector, eb: TestEventBus):
 
     cfg = TextualThingConfigPlugin()
 
-    data = [{"statusInfo": {"status": "ONLINE", "statusDetail": "NONE"}, "editable": True,
-             "label": "Astronomische Sonnendaten",
-             "configuration": {"interval": 120, "geolocation": "26.399750112407446,34.980468750000014"},
-             "properties": {}, "UID": "astro:sun:1d5f16df", "thingTypeUID": "astro:sun", "channels": [
-            {"linkedItems": [], "uid": "astro:sun:1d5f16df:rise#start", "id": "rise#start",
-             "channelTypeUID": "astro:start", "itemType": "DateTime", "kind": "STATE", "label": "Startzeit",
-             "description": "Die Startzeit des Ereignisses", "defaultTags": [], "properties": {},
-             "configuration": {"offset": 0}}, ]}]
+    data = [{'statusInfo': {'status': 'ONLINE', 'statusDetail': 'NONE'}, 'editable': True,
+             'label': 'Astronomische Sonnendaten',
+             'configuration': {'interval': 120, 'geolocation': '26.399750112407446,34.980468750000014'},
+             'properties': {}, 'UID': 'astro:sun:1d5f16df', 'thingTypeUID': 'astro:sun', 'channels': [
+            {'linkedItems': [], 'uid': 'astro:sun:1d5f16df:rise#start', 'id': 'rise#start',
+             'channelTypeUID': 'astro:start', 'itemType': 'DateTime', 'kind': 'STATE', 'label': 'Startzeit',
+             'description': 'Die Startzeit des Ereignisses', 'defaultTags': [], 'properties': {},
+             'configuration': {'offset': 0}}, ]}]
 
-    text = """
+    text = '''
     test: False
 
     filter:
@@ -32,7 +32,7 @@ async def test_errors(test_logs: LogCollector, eb: TestEventBus):
             name: Name1
           - type: Number
             name: Name1
-        """
+        '''
     file = MockFile('/thing_test.yml', data=text)
     file.warn_on_delete = False
 
@@ -42,7 +42,7 @@ async def test_errors(test_logs: LogCollector, eb: TestEventBus):
 
     test_logs.add_expected(None, 'ERROR', 'Duplicate item: Name1')
 
-    text = """
+    text = '''
 test: False
 
 filter:
@@ -54,7 +54,7 @@ channels:
     link items:
       - type: Number
         name: â ß { )
-    """
+    '''
     file = MockFile('/thing_test.yml', data=text)
     file.warn_on_delete = False
 

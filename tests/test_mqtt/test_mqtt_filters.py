@@ -1,6 +1,10 @@
-from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueChangeEventFilter, MqttValueUpdateEvent, \
-    MqttValueUpdateEventFilter
-from tests.helpers.inspect import get_module_classes, check_class_annotations
+from HABApp.mqtt.events import (
+    MqttValueChangeEvent,
+    MqttValueChangeEventFilter,
+    MqttValueUpdateEvent,
+    MqttValueUpdateEventFilter,
+)
+from tests.helpers.inspect import check_class_annotations, get_module_classes
 
 
 def test_class_annotations():

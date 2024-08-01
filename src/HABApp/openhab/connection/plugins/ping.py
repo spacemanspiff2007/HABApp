@@ -8,9 +8,10 @@ from typing import Final
 import HABApp.openhab.events
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.internals import uses_item_registry, uses_event_bus
+from HABApp.core.internals import uses_event_bus, uses_item_registry
 from HABApp.core.lib import SingleTask
 from HABApp.openhab.connection.connection import OpenhabConnection
+
 
 PING_CONFIG: Final = CONFIG.openhab.ping
 

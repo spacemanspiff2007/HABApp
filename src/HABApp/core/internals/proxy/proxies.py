@@ -1,5 +1,7 @@
+from typing import TYPE_CHECKING, Any, Callable
+
 from HABApp.core.internals.proxy.proxy_obj import create_proxy, replace_proxies
-from typing import Callable, TYPE_CHECKING, Any
+
 
 if TYPE_CHECKING:
     import HABApp

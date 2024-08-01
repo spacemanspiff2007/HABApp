@@ -4,7 +4,7 @@ import sys
 import typing
 
 import HABApp
-from HABApp.__cmd_args__ import parse_args, find_config_folder
+from HABApp.__cmd_args__ import find_config_folder, parse_args
 from HABApp.__debug_info__ import print_debug_info
 from HABApp.__splash_screen__ import show_screen
 
@@ -27,7 +27,7 @@ def main() -> typing.Union[int, str]:
 
         # see if we have user code (e.g. for additional logging configuration or additional setup)
         try:
-            import HABAppUser   # noqa: F401
+            import HABAppUser
         except ModuleNotFoundError:
             pass
 
@@ -52,5 +52,5 @@ def main() -> typing.Union[int, str]:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main())

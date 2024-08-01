@@ -1,8 +1,9 @@
-from typing import Any, FrozenSet, Optional, Final
+from typing import Any, Final, FrozenSet, Optional
 
 import HABApp.core
-from .base_event import OpenhabEvent
+
 from ..map_values import map_openhab_values
+from .base_event import OpenhabEvent
 
 
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
@@ -100,8 +101,8 @@ class ItemAddedEvent(OpenhabEvent):
         )
 
     def __repr__(self):
-        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""
-        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ""
+        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ''
+        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ''
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, tags:{tags}, groups:{grps}>'
 
 
@@ -142,8 +143,8 @@ class ItemUpdatedEvent(OpenhabEvent):
         )
 
     def __repr__(self):
-        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ""
-        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ""
+        tags = f' {{{", ".join(sorted(self.tags))}}}' if self.tags else ''
+        grps = f' {{{", ".join(sorted(self.groups))}}}' if self.groups else ''
         return f'<{self.__class__.__name__} name: {self.name}, type: {self.type}, tags:{tags}, groups:{grps}>'
 
 

@@ -1,4 +1,4 @@
-from typing import Any, Union, Final
+from typing import Any, Final, Union
 
 
 class ComplexEventValue:

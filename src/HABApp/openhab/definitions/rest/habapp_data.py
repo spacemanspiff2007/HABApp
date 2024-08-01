@@ -1,5 +1,5 @@
 import typing
-from typing import List, Optional, ClassVar
+from typing import ClassVar, List, Optional
 
 from pydantic import BaseModel
 

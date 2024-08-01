@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Optional, Dict, List, Union, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 class Column:

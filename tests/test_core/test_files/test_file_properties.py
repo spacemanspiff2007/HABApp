@@ -1,37 +1,37 @@
-from HABApp.core.files.file.properties import get_properties as get_props
-from HABApp.core.files.file.file import HABAppFile, CircularReferenceError, FileProperties, FILES, FileState
 import pytest
 
+from HABApp.core.files.file.file import FILES, CircularReferenceError, FileProperties, FileState, HABAppFile
+from HABApp.core.files.file.properties import get_properties as get_props
 from tests.helpers import LogCollector
 
 
 def test_prop_case():
-    _in = """# habapp:
+    _in = '''# habapp:
     #   depends on:
     #    - my_Param.yml
     #   reloads on:
     #    - my_File.py
     #    - other_file.py
-    """
+    '''
     p = get_props(_in)
     assert p.depends_on == ['my_Param.yml']
     assert p.reloads_on == ['my_File.py', 'other_file.py']
 
-    _in = """#
+    _in = '''#
 #     habapp:
 #       depends on:
 #        - my_Param.yml
 #       reloads on:
 #        - my_File.py
 #        - other_file.py
-"""
+'''
     p = get_props(_in)
     assert p.depends_on == ['my_Param.yml']
     assert p.reloads_on == ['my_File.py', 'other_file.py']
 
 
 def test_prop_1():
-    _in = """# HABApp:
+    _in = '''# HABApp:
 #   depends on:
 #    - my_Param.yml
 #
@@ -39,14 +39,14 @@ def test_prop_1():
 #    - my_File.py
 # This is my comment
 #    - other_file.py
-"""
+'''
     p = get_props(_in)
     assert p.depends_on == ['my_Param.yml']
     assert p.reloads_on == ['my_File.py']
 
 
 def test_prop_2():
-    _in = """
+    _in = '''
 
 #
 # HABApp:
@@ -58,14 +58,14 @@ def test_prop_2():
 #   reloads on:
 #    - my_file.py
 # This is my comment
-"""
+'''
     p = get_props(_in)
     assert p.depends_on == ['my_param.yml']
     assert p.reloads_on == []
 
 
 def test_prop_3():
-    _in = """
+    _in = '''
 
 #
 # HABApp:
@@ -73,15 +73,15 @@ def test_prop_3():
 #    - my_param1.yml
 import asdf
 #    - my_param2.yml
-"""
+'''
     p = get_props(_in)
     assert p.depends_on == ['my_param1.yml']
     assert p.reloads_on == []
 
 
 def test_prop_missing():
-    _in = """import bla bla bla
-"""
+    _in = '''import bla bla bla
+'''
     p = get_props(_in)
     assert p.depends_on == []
     assert p.reloads_on == []

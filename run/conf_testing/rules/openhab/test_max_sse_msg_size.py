@@ -1,8 +1,10 @@
 import logging
 
+from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
+
 from HABApp.openhab.events import ItemStateChangedEventFilter
 from HABApp.openhab.items import OpenhabItem
-from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
+
 
 log = logging.getLogger('HABApp.Tests')
 

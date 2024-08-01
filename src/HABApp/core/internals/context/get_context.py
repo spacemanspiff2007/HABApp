@@ -1,10 +1,11 @@
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
 from types import FrameType
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
-from HABApp.core.errors import ContextNotSetError, ContextNotFoundError
-from HABApp.core.internals.context import ContextProvidingObj, ContextBoundObj, Context
+from HABApp.core.errors import ContextNotFoundError, ContextNotSetError
+from HABApp.core.internals.context import Context, ContextBoundObj, ContextProvidingObj
+
 
 if TYPE_CHECKING:
     import HABApp

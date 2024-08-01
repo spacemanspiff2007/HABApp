@@ -1,9 +1,9 @@
 import logging
 import os
 import re
-from typing import List, Final, Iterable, Union, Optional
+from typing import Final, Iterable, List, Optional, Union
 
-from .log_utils import SimpleLogRecord, get_log_level_no, get_log_level_name
+from .log_utils import SimpleLogRecord, get_log_level_name, get_log_level_no
 
 
 class LogEntryMatcherBase:

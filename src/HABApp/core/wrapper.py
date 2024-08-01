@@ -3,15 +3,17 @@ import functools
 import logging
 import typing
 from logging import Logger
+
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
-from typing import Union, Callable
+from typing import Callable, Union
 
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.const.topics import TOPIC_WARNINGS as TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import uses_post_event
 from HABApp.core.lib import format_exception
+
 
 log = logging.getLogger('HABApp')
 

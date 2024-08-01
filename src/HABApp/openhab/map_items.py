@@ -6,8 +6,19 @@ from immutables import Map
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.definitions.values import QuantityValue
 from HABApp.openhab.items import (
-    CallItem, ColorItem, ContactItem, DatetimeItem, DimmerItem, GroupItem, ImageItem,
-    LocationItem, NumberItem, PlayerItem, RollershutterItem, StringItem, SwitchItem,
+    CallItem,
+    ColorItem,
+    ContactItem,
+    DatetimeItem,
+    DimmerItem,
+    GroupItem,
+    ImageItem,
+    LocationItem,
+    NumberItem,
+    PlayerItem,
+    RollershutterItem,
+    StringItem,
+    SwitchItem,
 )
 from HABApp.openhab.items.base_item import HINT_TYPE_OPENHAB_ITEM, MetaData, OpenhabItem
 

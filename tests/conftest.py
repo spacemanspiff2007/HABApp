@@ -34,14 +34,14 @@ def raise_err(func):
     return f
 
 
-@pytest.fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True)
 def show_errors(monkeypatch):
     # Patch the wrapper so that we always raise the exception
     monkeypatch.setattr(HABApp.core.wrapper, 'ignore_exception', raise_err)
     monkeypatch.setattr(HABApp.core.wrapper, 'log_exception', raise_err)
 
 
-@pytest.fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True)
 def use_dummy_cfg(monkeypatch):
     cfg = get_dummy_cfg()
     monkeypatch.setattr(HABApp, 'CONFIG', cfg)
@@ -59,12 +59,12 @@ def event_loop():
     async_context.reset(token)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def ir():
     return ItemRegistry()
 
 
-@pytest.fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True)
 def clean_objs(ir: ItemRegistry, eb: EventBus, request):
     markers = request.node.own_markers
     for marker in markers:
@@ -83,7 +83,7 @@ def clean_objs(ir: ItemRegistry, eb: EventBus, request):
         r.restore()
 
 
-@pytest.fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True)
 def test_logs(caplog, request):
     caplog.set_level(logging.DEBUG)
 

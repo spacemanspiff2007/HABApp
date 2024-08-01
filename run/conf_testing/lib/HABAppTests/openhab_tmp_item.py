@@ -50,7 +50,7 @@ class OpenhabTmpItem:
     def remove(self):
         HABApp.openhab.interface_sync.remove_item(self.name)
 
-    def _create(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
+    def _create(self, label='', category='', tags: List[str] = [], groups: List[str] = [],
                 group_type: str = '', group_function: str = '',
                 group_function_params: List[str] = []):
         interface = HABApp.openhab.interface_sync
@@ -58,7 +58,7 @@ class OpenhabTmpItem:
                               tags=tags, groups=groups, group_type=group_type,
                               group_function=group_function, group_function_params=group_function_params)
 
-    def create_item(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
+    def create_item(self, label='', category='', tags: List[str] = [], groups: List[str] = [],
                     group_type: str = '', group_function: str = '',
                     group_function_params: List[str] = []) -> HABApp.openhab.items.OpenhabItem:
 
@@ -75,7 +75,7 @@ class OpenhabTmpItem:
 
         return HABApp.openhab.items.OpenhabItem.get_item(self.name)
 
-    def modify(self, label="", category="", tags: List[str] = [], groups: List[str] = [],
+    def modify(self, label='', category='', tags: List[str] = [], groups: List[str] = [],
                group_type: str = '', group_function: str = '', group_function_params: List[str] = []):
 
         with EventWaiter(TOPIC_ITEMS, HABApp.core.events.EventFilter(HABApp.openhab.events.ItemUpdatedEvent)) as w:

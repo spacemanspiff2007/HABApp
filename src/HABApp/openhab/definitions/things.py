@@ -1,5 +1,6 @@
-from HABApp.core.const.const import StrEnum
 from typing import Final
+
+from HABApp.core.const.const import StrEnum
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/ThingStatus.java

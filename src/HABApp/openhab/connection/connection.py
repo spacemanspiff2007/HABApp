@@ -10,6 +10,7 @@ from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connect
 from HABApp.core.const.const import PYTHON_310
 from HABApp.core.items.base_valueitem import datetime
 
+
 if PYTHON_310:
     from typing import TypeAlias
 else:
@@ -52,10 +53,18 @@ def setup():
     config = HABApp.config.CONFIG.openhab
 
     from HABApp.openhab.connection.handler import HANDLER as CONNECTION_HANDLER
-    from HABApp.openhab.connection.plugins import (WaitForStartlevelPlugin, LoadOpenhabItemsPlugin,
-                                                   SseEventListenerPlugin, OUTGOING_PLUGIN, LoadTransformationsPlugin,
-                                                   WaitForPersistenceRestore, PingPlugin, ThingOverviewPlugin,
-                                                   TextualThingConfigPlugin, BrokenLinksPlugin)
+    from HABApp.openhab.connection.plugins import (
+        OUTGOING_PLUGIN,
+        BrokenLinksPlugin,
+        LoadOpenhabItemsPlugin,
+        LoadTransformationsPlugin,
+        PingPlugin,
+        SseEventListenerPlugin,
+        TextualThingConfigPlugin,
+        ThingOverviewPlugin,
+        WaitForPersistenceRestore,
+        WaitForStartlevelPlugin,
+    )
 
     connection = Connections.add(OpenhabConnection())
     connection.register_plugin(CONNECTION_HANDLER)
@@ -86,8 +95,8 @@ class OpenhabConnection(BaseConnection):
 
     def is_silent_exception(self, e: Exception):
         return isinstance(e, (
-            # aiohttp Exceptions
-            aiohttp.ClientPayloadError, aiohttp.ClientConnectorError, aiohttp.ClientOSError,
+            # https://docs.aiohttp.org/en/stable/client_reference.html#client-exceptions
+            aiohttp.ClientError,
 
             # aiohttp_sse_client Exceptions
             ConnectionRefusedError, ConnectionError, ConnectionAbortedError)

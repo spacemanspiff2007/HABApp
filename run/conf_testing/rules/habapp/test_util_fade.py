@@ -1,8 +1,9 @@
 import time
 
+from HABAppTests import ItemWaiter, TestBaseRule
+
 from HABApp.core.items import Item
 from HABApp.util.fade.fade import Fade
-from HABAppTests import ItemWaiter, TestBaseRule
 
 
 class TestFadeRun(TestBaseRule):

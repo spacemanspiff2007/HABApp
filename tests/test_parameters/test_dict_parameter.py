@@ -1,9 +1,11 @@
-import pytest
 import typing
+
+import pytest
+from tests.conftest import params
 
 import HABApp
 from HABApp import DictParameter
-from tests.conftest import params
+
 
 if typing.TYPE_CHECKING:
     params = params

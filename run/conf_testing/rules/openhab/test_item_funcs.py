@@ -2,9 +2,20 @@ import dataclasses
 import logging
 import typing
 
-from HABApp.openhab.items import OpenhabItem, NumberItem, ContactItem, LocationItem
-from HABApp.openhab.items import SwitchItem, RollershutterItem, DimmerItem, ColorItem, ImageItem
-from HABAppTests import TestBaseRule, ItemWaiter, OpenhabTmpItem, get_openhab_test_states, get_openhab_test_types
+from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types
+
+from HABApp.openhab.items import (
+    ColorItem,
+    ContactItem,
+    DimmerItem,
+    ImageItem,
+    LocationItem,
+    NumberItem,
+    OpenhabItem,
+    RollershutterItem,
+    SwitchItem,
+)
+
 
 log = logging.getLogger('HABApp.Tests')
 
@@ -58,7 +69,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
         self.add_func_test(
             LocationItem, {
                 TestParam(
-                    'oh_post_update', func_params="52.5185537,13.3758636,43", result=(52.5185537, 13.3758636, 43)
+                    'oh_post_update', func_params='52.5185537,13.3758636,43', result=(52.5185537, 13.3758636, 43)
                 )
             }
         )

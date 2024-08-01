@@ -1,6 +1,7 @@
 import logging
-from operator import ge as ge_func, eq as eq_func
-from typing import List, Callable, Final, Any, Iterable, Dict, Union, Optional
+from operator import eq as eq_func
+from operator import ge as ge_func
+from typing import Any, Callable, Dict, Final, Iterable, List, Optional, Union
 
 import pytest
 from pytest import LogCaptureFixture
@@ -8,6 +9,7 @@ from typing_extensions import Self
 
 from .log_matcher import LogEntryMatcherBase, create_matcher
 from .log_utils import SimpleLogRecord
+
 
 ALL_PYTEST_PHASES = ('setup', 'call', 'teardown')
 
@@ -97,7 +99,7 @@ class LogCollector:
                     continue
 
                 # emit warning only on dev machine until we fix asyncio handling
-                # todo: remove this once we fixed asyncio handling
+                # TODO: remove this once we fixed asyncio handling
                 import os
                 if os.name != 'nt' and record.name == 'asyncio':
                     record.unlink()
@@ -132,7 +134,7 @@ class LogCollector:
             msg += '\n - ' + '\n - '.join(map(str, missing))
             msg += '\nLog:\n' + '\n'.join(self.get_messages())
 
-            pytest.fail(msg=msg)
+            pytest.fail(reason=msg)
 
         for rec in self.res_records:
             if not self.is_expected_record(rec):

@@ -2,7 +2,9 @@ import threading
 import typing
 
 import HABAppTests
+
 from ._rule_status import TestRuleStatus
+
 
 LOCK = threading.Lock()
 

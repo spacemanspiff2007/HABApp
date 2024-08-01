@@ -1,6 +1,7 @@
-from HABApp.openhab.connection.handler.func_async import async_get_links, async_get_link
 from HABAppTests import TestBaseRule
 from HABAppTests.utils import find_astro_sun_thing, run_coro
+
+from HABApp.openhab.connection.handler.func_async import async_get_link, async_get_links
 
 
 class OpenhabLinkApi(TestBaseRule):

@@ -35,7 +35,7 @@ class ItemWaiter:
                     f'{name:>{indent:d}s}: {get_equal_text(getattr(self.item, name), target)}'
                     for name, target in kwargs.items()
                 ]
-                failed_msg = "\n".join(failed)
+                failed_msg = '\n'.join(failed)
                 msg = f'Timeout waiting for {self.item.name}!\n{failed_msg}'
                 raise TestCaseFailed(msg)
 

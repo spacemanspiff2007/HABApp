@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from HABApp.core.events import ItemNoUpdateEvent, ItemNoChangeEvent
+from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent
 from HABApp.core.items import Item
 from tests.helpers import LogCollector
 from tests.helpers.parent_rule import DummyRule

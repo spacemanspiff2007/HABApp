@@ -1,10 +1,12 @@
 import logging
 
+from HABAppTests import TestBaseRule, get_random_name
+
 from HABApp.core.events import ValueChangeEventFilter
 from HABApp.core.items import Item
-from HABApp.util import EventListenerGroup
-from HABAppTests import TestBaseRule, get_random_name
 from HABApp.rule_ctx import HABAppRuleContext
+from HABApp.util import EventListenerGroup
+
 
 log = logging.getLogger('HABApp.Tests.MultiMode')
 

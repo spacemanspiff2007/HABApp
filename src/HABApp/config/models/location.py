@@ -1,8 +1,8 @@
 import logging.config
 
+from easyconfig import BaseModel
 from pydantic import Field
 
-from easyconfig import BaseModel
 
 log = logging.getLogger('HABApp.Config')
 

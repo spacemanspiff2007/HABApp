@@ -1,7 +1,9 @@
 import logging
 
-import HABApp
 from HABAppTests import TestBaseRule
+
+import HABApp
+
 
 log = logging.getLogger('HABApp.TestParameterFiles')
 

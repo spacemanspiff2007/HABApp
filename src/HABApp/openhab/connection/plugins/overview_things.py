@@ -11,6 +11,7 @@ from HABApp.core.internals import uses_item_registry
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.definitions.helpers.log_table import Table
 
+
 PING_CONFIG: Final = CONFIG.openhab.ping
 
 Items = uses_item_registry()

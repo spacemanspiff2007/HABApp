@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent, ValueUpdateEvent
-from HABApp.core.events.filter import NoEventFilter, EventFilter, OrFilterGroup
+from HABApp.core.events.filter import EventFilter, NoEventFilter, OrFilterGroup
 from HABApp.core.internals import EventBus, EventBusListener, wrap_func
 
 

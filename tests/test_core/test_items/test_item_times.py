@@ -8,13 +8,13 @@ from pendulum import now as pd_now
 import HABApp
 import HABApp.core.items.tmp_data
 from HABApp.core.events import NoEventFilter
-from HABApp.core.items.base_item import ChangedTime, UpdatedTime
-from tests.helpers import TestEventBus, LogCollector
-from HABApp.core.internals import wrap_func, ItemRegistry, EventBus
+from HABApp.core.internals import EventBus, ItemRegistry, wrap_func
 from HABApp.core.items import Item
+from HABApp.core.items.base_item import ChangedTime, UpdatedTime
+from tests.helpers import LogCollector, TestEventBus
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def u():
     a = UpdatedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
@@ -29,7 +29,7 @@ def u():
         w2.cancel()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def c():
     a = ChangedTime('test', pd_now(UTC))
     w1 = a.add_watch(1)
@@ -181,7 +181,7 @@ async def test_watcher_update_restore(parent_rule, ir: ItemRegistry):
     ir.pop_item(name)
 
 
-@pytest.mark.ignore_log_warnings
+@pytest.mark.ignore_log_warnings()
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
                                       sync_worker, eb: TestEventBus, ir: ItemRegistry):
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)

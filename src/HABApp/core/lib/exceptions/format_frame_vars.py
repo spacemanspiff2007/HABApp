@@ -1,15 +1,17 @@
 import ast
 import datetime
-from inspect import ismodule, isclass
+from inspect import isclass, ismodule
 from pathlib import Path
-from typing import List, Tuple, Callable, Any, Set
+from typing import Any, Callable, List, Set, Tuple
 
+from easyconfig.config_objs import ConfigObj
 from immutables import Map
 from stack_data import Variable
 
-from HABApp.core.const.json import load_json, dump_json
-from easyconfig.config_objs import ConfigObj
-from .const import SEPARATOR_VARIABLES, PRE_INDENT
+from HABApp.core.const.json import dump_json, load_json
+
+from .const import PRE_INDENT, SEPARATOR_VARIABLES
+
 
 # don't show these types in the traceback
 SKIPPED_TYPES = (
@@ -117,6 +119,6 @@ def format_frame_variables(tb: List[str], stack_variables: List[Variable]):
     tb.append(SEPARATOR_VARIABLES)
 
     for name, value in variables.items():
-        tb.append(f'{" " * (PRE_INDENT + 1)}{name} = {repr(value)}')
+        tb.append(f'{" " * (PRE_INDENT + 1)}{name} = {value!r}')
 
     tb.append(SEPARATOR_VARIABLES)

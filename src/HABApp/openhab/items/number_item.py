@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional, Union
 
+from fastnumbers import real
+
 from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
 from HABApp.openhab.definitions import QuantityValue
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem
@@ -33,10 +35,7 @@ class NumberItem(OpenhabItem):
 
     @staticmethod
     def _state_from_oh_str(state: str):
-        try:
-            return int(state)
-        except ValueError:
-            return float(state)
+        return real(state)
 
     def set_value(self, new_value) -> bool:
 

@@ -161,7 +161,7 @@ def test_limiter_add(time):
 
     with pytest.raises(ValueError) as e:
         limiter.add_limit(3, 5, initial_hits=5)
-    assert str(e.value) == "Parameter hits must be <= parameter allowed! 5 <= 3!"
+    assert str(e.value) == 'Parameter hits must be <= parameter allowed! 5 <= 3!'
 
 
 def test_fixed_window_info(time):

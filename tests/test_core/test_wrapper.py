@@ -8,14 +8,15 @@ import pytest
 import HABApp
 from HABApp.core.wrapper import ExceptionToHABApp, ignore_exception
 
+
 log = Mock()
 
 
-@pytest.fixture
+@pytest.fixture()
 def p_mock(monkeypatch):
     m = Mock()
     monkeypatch.setattr(HABApp.core.wrapper, 'post_event', m)
-    yield m
+    return m
 
 
 def test_error_catch(p_mock):
@@ -51,12 +52,12 @@ def func_a(_l):
     1 / 0
 
 
-@pytest.mark.ignore_log_errors
+@pytest.mark.ignore_log_errors()
 def test_func_wrapper(p_mock):
     func_a(['asdf', 'asdf'])
 
 
-@pytest.mark.skip(reason="Behavior still unclear")
+@pytest.mark.skip(reason='Behavior still unclear')
 def test_exception_format_included_files(p_mock):
     async def test():
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(0.01)) as session:

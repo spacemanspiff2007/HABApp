@@ -13,14 +13,19 @@ from HABApp.core.files.file import HABAppFile
 from HABApp.core.files.folders import add_folder as add_habapp_folder
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.lib import PendingFuture
-from HABApp.core.logger import log_warning, HABAppError
+from HABApp.core.logger import HABAppError, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection
-from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import validate_cfg, InvalidItemNameError
-from HABApp.openhab.connection.plugins.plugin_things.filters import THING_ALIAS, CHANNEL_ALIAS
-from HABApp.openhab.connection.plugins.plugin_things.filters import apply_filters, log_overview
+from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import InvalidItemNameError, validate_cfg
+from HABApp.openhab.connection.plugins.plugin_things.filters import (
+    CHANNEL_ALIAS,
+    THING_ALIAS,
+    apply_filters,
+    log_overview,
+)
+
 from ._log import log
 from .file_writer import ItemsFileWriter
-from .item_worker import create_item, cleanup_items
+from .item_worker import cleanup_items, create_item
 from .thing_worker import update_thing_cfg
 
 

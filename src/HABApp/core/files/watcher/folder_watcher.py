@@ -1,12 +1,13 @@
 import logging
 from pathlib import Path
 from threading import Lock
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from watchdog.observers import Observer
 from watchdog.observers.api import ObservedWatch
 
 from .base_watcher import FileSystemEventHandler
+
 
 log = logging.getLogger('HABApp.files.watcher')
 

@@ -1,8 +1,9 @@
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
-from typing import Dict, List, Optional, Final, Callable
+from typing import Callable, Dict, Final, List, Optional
 
 from HABApp.core.errors import ProxyObjHasNotBeenReplacedError
+
 
 PROXIES: List['StartUpProxyObj'] = []
 
@@ -40,7 +41,7 @@ class StartUpProxyObj(ProxyObjBase):
 
     @property
     def to_replace_name(self) -> str:
-        return str(getattr(self.to_replace, "__name__", self.to_replace))
+        return str(getattr(self.to_replace, '__name__', self.to_replace))
 
     def replace(self, replacements: Dict[object, object], final: bool):
         assert self.globals is not None

@@ -33,7 +33,7 @@ class CompressedMidnightRotatingFileHandler(MidnightRotatingFileHandler):
         super().__init__(*args, **kwargs)
 
     def compressed_namer(self, default_name: str) -> str:
-        return default_name + ".gz"
+        return default_name + '.gz'
 
     def compressed_rotator(self, source: str, dest: str):
         src = Path(source)

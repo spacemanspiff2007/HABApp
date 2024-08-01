@@ -5,6 +5,7 @@ import bidict
 
 import HABApp
 from HABApp.core.logger import log_error
+
 from ._log import log_cfg as log
 
 

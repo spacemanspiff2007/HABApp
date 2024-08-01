@@ -2,23 +2,23 @@ import random
 from datetime import datetime as dt_datetime
 from datetime import time as dt_time
 from datetime import timedelta as dt_timedelta
-from typing import Callable, Any
-from typing import Iterable, Union
+from typing import Any, Callable, Iterable, Union
+
+from eascheduler import SchedulerView
 
 import HABApp.rule_ctx
 from HABApp.core.const.const import PYTHON_310
-from HABApp.core.internals import ContextProvidingObj, Context
-from HABApp.core.internals import wrap_func
+from HABApp.core.internals import Context, ContextProvidingObj, wrap_func
 from HABApp.rule.scheduler.executor import WrappedFunctionExecutor
 from HABApp.rule.scheduler.scheduler import HABAppScheduler as _HABAppScheduler
-from eascheduler import SchedulerView
-from .jobs import CountdownJob, DawnJob, DayOfWeekJob, DuskJob, OneTimeJob, ReoccurringJob, SunriseJob, \
-    SunsetJob
+
+from .jobs import CountdownJob, DawnJob, DayOfWeekJob, DuskJob, OneTimeJob, ReoccurringJob, SunriseJob, SunsetJob
+
 
 if PYTHON_310:
-    from typing import TypeAlias, ParamSpec
+    from typing import ParamSpec, TypeAlias
 else:
-    from typing_extensions import TypeAlias, ParamSpec
+    from typing_extensions import ParamSpec, TypeAlias
 
 
 HINT_CB_P = ParamSpec('HINT_CB_P')

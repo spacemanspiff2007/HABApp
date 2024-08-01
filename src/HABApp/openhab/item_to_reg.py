@@ -1,14 +1,18 @@
 import logging
-from typing import Dict, Set, Tuple, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Dict, Set, Tuple, Union
 
 from immutables import Map
 
 import HABApp
-
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.logger import log_warning
-from HABApp.openhab.definitions.things import THING_STATUS_DEFAULT, THING_STATUS_DETAIL_DEFAULT, ThingStatusEnum, \
-    ThingStatusDetailEnum
+from HABApp.openhab.definitions.things import (
+    THING_STATUS_DEFAULT,
+    THING_STATUS_DETAIL_DEFAULT,
+    ThingStatusDetailEnum,
+    ThingStatusEnum,
+)
+
 
 if TYPE_CHECKING:
     import HABApp.openhab.definitions.rest

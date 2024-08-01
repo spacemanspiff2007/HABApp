@@ -1,13 +1,13 @@
 import asyncio
 
+from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
 from immutables import Map
 
 from HABApp.core.const import loop
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.interface_async import async_get_items
-from HABApp.openhab.items import GroupItem, StringItem, ColorItem, NumberItem
-from HABAppTests import OpenhabTmpItem, TestBaseRule, ItemWaiter, EventWaiter
+from HABApp.openhab.items import ColorItem, GroupItem, NumberItem, StringItem
 
 
 class OpenhabItems(TestBaseRule):

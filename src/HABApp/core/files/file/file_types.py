@@ -5,9 +5,10 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from HABApp.core.files.file import HABAppFile, FileState
-from HABApp.core.files.file.properties import get_properties, FileProperties
+from HABApp.core.files.file import FileState, HABAppFile
+from HABApp.core.files.file.properties import FileProperties, get_properties
 from HABApp.core.logger import HABAppError
+
 
 FILE_TYPES: dict[str, type[HABAppFile]] = {}
 

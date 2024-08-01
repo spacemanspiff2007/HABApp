@@ -1,9 +1,8 @@
 from typing import Optional, TypeVar
 
+from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, AutoContextBoundObj, Context, uses_event_bus
 from HABApp.core.internals.event_bus import EventBusBaseListener
 from HABApp.core.internals.wrapped_function import TYPE_WRAPPED_FUNC_OBJ, WrappedFunctionBase
-from HABApp.core.internals import uses_event_bus, Context
-from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, AutoContextBoundObj
 
 
 event_bus = uses_event_bus()

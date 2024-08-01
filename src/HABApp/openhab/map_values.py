@@ -1,8 +1,17 @@
 from datetime import datetime
 
+from fastnumbers import real
+
 from HABApp.core.const.const import PYTHON_311
-from HABApp.openhab.definitions import HSBValue, OnOffValue, OpenClosedValue, PercentValue, QuantityValue, RawValue, \
-    UpDownValue
+from HABApp.openhab.definitions import (
+    HSBValue,
+    OnOffValue,
+    OpenClosedValue,
+    PercentValue,
+    QuantityValue,
+    RawValue,
+    UpDownValue,
+)
 from HABApp.openhab.definitions.values import PointValue
 
 
@@ -13,22 +22,19 @@ def map_openhab_values(openhab_type: str, openhab_value: str):
     if openhab_type == 'UnDef' or openhab_value == 'NULL':
         return None
 
-    if openhab_type == "Number":
+    if openhab_type == 'Number':
         return int(openhab_value)
 
-    if openhab_type == "Decimal":
-        try:
-            return int(openhab_value)
-        except ValueError:
-            return float(openhab_value)
+    if openhab_type == 'Decimal':
+        return real(openhab_value)
 
-    if openhab_type == "String":
+    if openhab_type == 'String':
         return openhab_value
 
-    if openhab_type == "HSB":
+    if openhab_type == 'HSB':
         return HSBValue(openhab_value)
 
-    if openhab_type == "DateTime":
+    if openhab_type == 'DateTime':
         # see implementation im datetime_item.py
         if PYTHON_311:
             dt = datetime.fromisoformat(openhab_value)

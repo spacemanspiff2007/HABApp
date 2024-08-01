@@ -1,8 +1,9 @@
 from time import sleep
 
+from HABAppTests import TestBaseRule
+
 from HABApp import Rule
 from HABApp.core.internals import get_current_context
-from HABAppTests import TestBaseRule
 
 
 class OtherRule(Rule):

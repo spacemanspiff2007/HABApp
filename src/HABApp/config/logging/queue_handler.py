@@ -1,11 +1,13 @@
 import logging
-from queue import SimpleQueue, Empty
-from threading import Thread, Lock
+from queue import Empty, SimpleQueue
+from threading import Lock, Thread
 from time import sleep
-from typing import Optional, Final
+from typing import Final, Optional
 
 import HABApp
+
 from .config import CONFIG
+
 
 log = logging.getLogger('HABApp.logging')
 

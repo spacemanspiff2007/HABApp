@@ -1,8 +1,9 @@
-from pathlib import Path
-from typing import List, Iterable, TYPE_CHECKING
 import operator as _operator
+from pathlib import Path
+from typing import TYPE_CHECKING, Iterable, List
 
 from HABApp.core.const import MISSING
+
 
 if TYPE_CHECKING:
     import HABApp

@@ -1,17 +1,19 @@
 import re
 import typing
 from dataclasses import dataclass
-from typing import Iterator, Optional, Union, Dict, List
+from typing import Dict, Iterator, List, Optional, Union
 
-from pydantic import BaseModel as _BaseModel, Field, ValidationError, field_validator, \
-    ConfigDict, TypeAdapter, AfterValidator
+from pydantic import AfterValidator, ConfigDict, Field, TypeAdapter, ValidationError, field_validator
+from pydantic import BaseModel as _BaseModel
 
 from HABApp.core.const.const import PYTHON_310
 from HABApp.core.logger import HABAppError
 from HABApp.openhab.connection.plugins.plugin_things.filters import ChannelFilter, ThingFilter
 from HABApp.openhab.connection.plugins.plugin_things.str_builder import StrBuilder
 from HABApp.openhab.definitions import ITEM_TYPES
+
 from ._log import log
+
 
 if PYTHON_310:
     from typing import Annotated

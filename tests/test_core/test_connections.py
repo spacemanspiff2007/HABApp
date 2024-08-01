@@ -3,8 +3,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from HABApp.core.connections import BaseConnectionPlugin, BaseConnection, PluginCallbackHandler
-from HABApp.core.connections.status_transitions import StatusTransitions, ConnectionStatus
+from HABApp.core.connections import BaseConnection, BaseConnectionPlugin, PluginCallbackHandler
+from HABApp.core.connections.status_transitions import ConnectionStatus, StatusTransitions
 
 
 def test_transitions():

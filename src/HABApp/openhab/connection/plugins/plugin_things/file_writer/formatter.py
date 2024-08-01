@@ -1,6 +1,7 @@
-from typing import Final, Iterable, List, Dict, TypeVar
+from typing import Dict, Final, Iterable, List, TypeVar
 
 from HABApp.core.const.const import PYTHON_311
+
 
 if not PYTHON_311:
     from typing_extensions import Self

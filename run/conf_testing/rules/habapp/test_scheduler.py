@@ -1,9 +1,11 @@
 import logging
 import time
 
+from HABAppTests import TestBaseRule, get_random_name
+
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.items import Item
-from HABAppTests import TestBaseRule, get_random_name
+
 
 log = logging.getLogger('HABApp.TestParameterFiles')
 

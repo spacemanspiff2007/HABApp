@@ -7,10 +7,10 @@ from HABApp.openhab.definitions.rest.items import GroupFunctionResp
 
 def test_or():
     _in = {
-        "name": "OR",
-        "params": [
-            "ON",
-            "OFF"
+        'name': 'OR',
+        'params': [
+            'ON',
+            'OFF'
         ]
     }
     o = decode(dumps(_in), type=GroupFunctionResp)
@@ -19,7 +19,7 @@ def test_or():
 
 
 def test_eq():
-    _in = {"name": "EQUALITY"}
+    _in = {'name': 'EQUALITY'}
     o = decode(dumps(_in), type=GroupFunctionResp)
     assert o.name == 'EQUALITY'
     assert o.params == []

@@ -17,6 +17,7 @@ from HABApp.core.lib import SingleTask
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.process_events import on_sse_event
 
+
 Items = uses_item_registry()
 
 
@@ -72,9 +73,10 @@ class SseEventListenerPlugin(BaseConnectionPlugin[OpenhabConnection]):
                             continue
 
                         # https://github.com/spacemanspiff2007/HABApp/issues/437
+                        # https://github.com/spacemanspiff2007/HABApp/issues/449
                         # openHAB will automatically restore the future states of the item
                         # which means we can safely ignore these events because we will see the ItemStateUpdatedEvent
-                        if e_type == 'ItemTimeSeriesUpdatedEvent':
+                        if e_type in ('ItemTimeSeriesUpdatedEvent', 'ItemTimeSeriesEvent'):
                             continue
 
                         # process

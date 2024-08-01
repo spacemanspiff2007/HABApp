@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from asyncio import CancelledError
-from typing import Final, TYPE_CHECKING, Callable, Literal
+from typing import TYPE_CHECKING, Callable, Final, Literal
 
 import HABApp
 from HABApp.core.connections._definitions import ConnectionStatus, connection_log
 from HABApp.core.connections.status_transitions import StatusTransitions
-from HABApp.core.lib import SingleTask, PriorityList
+from HABApp.core.lib import PriorityList, SingleTask
+
 from ..wrapper import process_exception
+
 
 if TYPE_CHECKING:
     from .base_plugin import BaseConnectionPlugin
@@ -96,6 +98,8 @@ class BaseConnection:
                 name = func if isinstance(func, str) else func.__qualname__
                 self.log.debug(f'Error in {name:s}: {e} ({e.__class__.__name__})')
         else:
+            if func is None:
+                func = f'{self.name} connection'
             process_exception(func, e, self.log)
 
     def register_plugin(self, obj: BaseConnectionPlugin, priority: int | Literal['first', 'last'] | None = None):
@@ -110,7 +114,8 @@ class BaseConnection:
 
         for p in self.plugins:
             if p.plugin_name == obj.plugin_name:
-                raise ValueError(f'Plugin with the same name already registered: {p}')
+                msg = f'Plugin with the same name already registered: {p}'
+                raise ValueError(msg)
 
         for status, handler in get_plugin_callbacks(obj):
             if priority is None:

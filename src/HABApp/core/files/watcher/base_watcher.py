@@ -1,9 +1,9 @@
 import logging
 from pathlib import Path
 
-from watchdog.events import FileSystemEvent
 from watchdog.events import EVENT_TYPE_CLOSED as WD_EVENT_TYPE_CLOSED
 from watchdog.events import EVENT_TYPE_OPENED as WD_EVENT_TYPE_OPENED
+from watchdog.events import FileSystemEvent
 
 
 log = logging.getLogger('HABApp.file.events')

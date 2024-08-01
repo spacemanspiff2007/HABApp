@@ -24,7 +24,7 @@ def sort_func(obj: T_ENTRY):
     return prio.get(key, 1), key
 
 
-# Todo: Move this to the connection
+# TODO: Move this to the connection
 class PriorityList(Generic[T]):
     def __init__(self):
         self._objs: list[T_ENTRY] = []

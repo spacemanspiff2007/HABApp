@@ -1,11 +1,12 @@
 import logging
 import threading
-from typing import Any, TypeVar
-from typing import Dict, List
+from typing import Any, Dict, List, TypeVar
 
-from HABApp.core.events import ComplexEventValue, ValueChangeEvent
-from .base_listener import EventBusBaseListener
 from HABApp.core.const.log import TOPIC_EVENTS
+from HABApp.core.events import ComplexEventValue, ValueChangeEvent
+
+from .base_listener import EventBusBaseListener
+
 
 event_log = logging.getLogger(TOPIC_EVENTS)
 habapp_log = logging.getLogger('HABApp')
