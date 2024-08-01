@@ -1,10 +1,17 @@
+from typing import Final
+
 from HABApp.core.const.hints import HasNameAttr as _HasNameAttr
 from HABApp.openhab.definitions import OnOffValue, UpDownValue
 from HABApp.openhab.interface_sync import send_command
 
 
-class OnOffCommand:
+ON: Final = OnOffValue.ON
+OFF: Final = OnOffValue.OFF
+UP: Final = UpDownValue.UP
+DOWN: Final = UpDownValue.DOWN
 
+
+class OnOffCommand:
     def is_on(self: _HasNameAttr) -> bool:
         """Test value against on-value"""
         raise NotImplementedError()
@@ -15,11 +22,11 @@ class OnOffCommand:
 
     def on(self: _HasNameAttr):
         """Command item on"""
-        send_command(self.name, OnOffValue.ON)
+        send_command(self.name, ON)
 
     def off(self: _HasNameAttr):
         """Command item off"""
-        send_command(self.name, OnOffValue.OFF)
+        send_command(self.name, OFF)
 
 
 class PercentCommand:
@@ -32,11 +39,11 @@ class PercentCommand:
 class UpDownCommand:
     def up(self: _HasNameAttr):
         """Command up"""
-        send_command(self.name, UpDownValue.UP)
+        send_command(self.name, UP)
 
     def down(self: _HasNameAttr):
         """Command down"""
-        send_command(self.name, UpDownValue.DOWN)
+        send_command(self.name, DOWN)
 
     def is_up(self: _HasNameAttr) -> bool:
         """Test value against on-value"""

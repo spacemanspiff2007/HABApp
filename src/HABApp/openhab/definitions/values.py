@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Tuple
+from typing import Final, Tuple
 
 from fastnumbers import real
 
@@ -7,8 +7,8 @@ from HABApp.core.events import ComplexEventValue
 
 
 class OnOffValue(ComplexEventValue):
-    ON = 'ON'
-    OFF = 'OFF'
+    ON: Final = 'ON'
+    OFF: Final = 'OFF'
 
     def __init__(self, value):
         super().__init__(value)
@@ -30,8 +30,8 @@ class PercentValue(ComplexEventValue):
 
 
 class OpenClosedValue(ComplexEventValue):
-    OPEN = 'OPEN'
-    CLOSED = 'CLOSED'
+    OPEN: Final = 'OPEN'
+    CLOSED: Final = 'CLOSED'
 
     def __init__(self, value):
         super().__init__(value)
