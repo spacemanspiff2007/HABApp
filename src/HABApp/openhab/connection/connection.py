@@ -95,8 +95,8 @@ class OpenhabConnection(BaseConnection):
 
     def is_silent_exception(self, e: Exception):
         return isinstance(e, (
-            # aiohttp Exceptions
-            aiohttp.ClientPayloadError, aiohttp.ClientConnectorError, aiohttp.ClientOSError,
+            # https://docs.aiohttp.org/en/stable/client_reference.html#client-exceptions
+            aiohttp.ClientError,
 
             # aiohttp_sse_client Exceptions
             ConnectionRefusedError, ConnectionError, ConnectionAbortedError)

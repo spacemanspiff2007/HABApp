@@ -98,6 +98,8 @@ class BaseConnection:
                 name = func if isinstance(func, str) else func.__qualname__
                 self.log.debug(f'Error in {name:s}: {e} ({e.__class__.__name__})')
         else:
+            if func is None:
+                func = f'{self.name} connection'
             process_exception(func, e, self.log)
 
     def register_plugin(self, obj: BaseConnectionPlugin, priority: int | Literal['first', 'last'] | None = None):
@@ -112,7 +114,8 @@ class BaseConnection:
 
         for p in self.plugins:
             if p.plugin_name == obj.plugin_name:
-                raise ValueError(f'Plugin with the same name already registered: {p}')
+                msg = f'Plugin with the same name already registered: {p}'
+                raise ValueError(msg)
 
         for status, handler in get_plugin_callbacks(obj):
             if priority is None:

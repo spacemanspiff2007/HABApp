@@ -127,11 +127,13 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 24.XX.X (2024-XX-XX)
+#### 24.08.0 (2024-08-01)
 - Fixed an issue with thing re-sync
 - Updated number parsing logic
-- Updated dependencies
 - ``ItemTimeSeriesEvent`` gets ignored
+- Removed verbose error messages when openHAB server disconnects
+- Updated dependencies
+- Reformatted some files
 
 #### 24.02.0 (2024-02-14)
 - For openHAB >= 4.1 it's possible to wait for a minimum openHAB uptime before connecting (defaults to 60s)
