@@ -127,6 +127,9 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 24.08.1 (2024-08-02)
+- Fixed a possible infinite loop during thing re-sync
+
 #### 24.08.0 (2024-08-01)
 - Fixed an issue with thing re-sync
 - Updated number parsing logic
