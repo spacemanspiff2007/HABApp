@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from asyncio import sleep
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 from immutables import Map
 
@@ -13,14 +13,20 @@ from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabConte
 from HABApp.openhab.connection.handler import map_null_str
 from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
 from HABApp.openhab.definitions import QuantityValue
-from HABApp.openhab.definitions.rest import ThingResp
 from HABApp.openhab.item_to_reg import (
     add_thing_to_registry,
     add_to_registry,
     fresh_item_sync,
+    get_thing_status_from_resp,
     remove_from_registry,
     remove_thing_from_registry,
 )
+
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from HABApp.openhab.definitions.rest import ThingResp
 
 
 log = logging.getLogger('HABApp.openhab.items')
@@ -30,19 +36,36 @@ Items = uses_item_registry()
 class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     async def on_connected(self, context: OpenhabContext):
+        # The context will be created fresh for each connect
         if not context.created_items and not context.created_things:
             await self.load_items(context)
             await self.load_things(context)
+
+        # We create the same plugin twice because it uses the same logic to load the objects,
+        # One plugin instance will create the objects the other one will sync the state.
+        # That's why this is in the else branch
         else:
-            # Sleep so the event handler is running
+            # Sleep so we make sure that the openhab event handler is running
             await sleep(0.1)
 
+            # First two delays are 0: First sync and the completion check after the first sync
+            delays = (0, 0, *(2 ** i for i in range(6)))
+
             if context.created_items:
-                while await self.sync_items(context):
-                    pass
+                for d in delays:
+                    await sleep(d)
+                    if not await self.sync_items(context):
+                        break
+                else:
+                    log.warning(f'Item state sync failed!')
+
             if context.created_things:
-                while await self.sync_things(context):
-                    pass
+                for d in delays:
+                    await sleep(d)
+                    if not await self.sync_things(context):
+                        break
+                else:
+                    log.warning(f'Thing sync failed!')
 
     async def load_items(self, context: OpenhabContext):
         from HABApp.openhab.map_items import map_item
@@ -145,9 +168,11 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             existing_thing, existing_datetime = created_things[thing.uid]
 
             if thing_changed(existing_thing, thing) and existing_thing.last_update != existing_datetime:
-                existing_thing.status = thing.status.status
-                existing_thing.status_description = thing.status.description
-                existing_thing.status_detail = thing.status.detail if thing.status.detail else ''
+                new_status, new_status_detail, new_status_description = get_thing_status_from_resp(thing)
+
+                existing_thing.status = new_status
+                existing_thing.status_detail = new_status_detail
+                existing_thing.status_description = new_status_description
                 existing_thing.label = thing.label
                 existing_thing.location = thing.location
                 existing_thing.configuration = Map(thing.configuration)
@@ -155,14 +180,17 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 log.debug(f'Re-synced {existing_thing.name:s}')
                 synced += 1
 
+        log.debug('Thing sync complete')
         return synced
 
 
 def thing_changed(old: HABApp.openhab.items.Thing, new: ThingResp) -> bool:
-    return old.status != new.status.status or \
-        old.status_detail != new.status.detail or \
-        old.status_description != ('' if not new.status.description else new.status.description) or \
+    new_status, new_status_detail, new_status_description = get_thing_status_from_resp(new)
+
+    return old.status != new_status or \
+        old.status_detail != new_status_detail or \
+        old.status_description != new_status_description or \
         old.label != new.label or \
         old.location != new.location or \
-        old.configuration != new.configuration or \
-        old.properties != new.properties
+        old.configuration != Map(new.configuration) or \
+        old.properties != Map(new.properties)
