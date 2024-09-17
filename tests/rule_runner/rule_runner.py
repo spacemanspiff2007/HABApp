@@ -1,11 +1,9 @@
-from typing import List
-
 from pytest import MonkeyPatch
 
 import HABApp
 import HABApp.core.lib.exceptions.format
 import HABApp.rule.rule as rule_module
-import HABApp.rule.scheduler.habappschedulerview as ha_sched
+import HABApp.rule.scheduler.job_builder as job_builder_module
 from HABApp.core.asyncio import async_context
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
@@ -23,7 +21,7 @@ def suggest_rule_name(obj: object) -> str:
 class SyncScheduler:
     ALL = []
 
-    def __init__(self):
+    def __init__(self, event_loop=None):
         SyncScheduler.ALL.append(self)
         self.jobs = []
 
@@ -36,13 +34,16 @@ class SyncScheduler:
     def cancel_all(self):
         self.jobs.clear()
 
+    def set_job_time(self, job, next_time):
+        return self
+
 
 class DummyRuntime(Runtime):
     def __init__(self):
         pass
 
 
-def raising_fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
+def raising_fallback_format(e: Exception, existing_traceback: list[str]) -> list[str]:
     traceback = fallback_format(e, existing_traceback)
     traceback = traceback
     raise
@@ -84,7 +85,7 @@ class SimpleRuleRunner:
         self.monkeypatch.setattr(HABApp.core.lib.exceptions.format, 'fallback_format', raising_fallback_format)
 
         # patch scheduler, so we run synchronous
-        self.monkeypatch.setattr(ha_sched, '_HABAppScheduler', SyncScheduler)
+        self.monkeypatch.setattr(job_builder_module, 'AsyncScheduler', SyncScheduler)
 
     def tear_down(self):
         ctx = async_context.set('Tear down test')
@@ -103,7 +104,7 @@ class SimpleRuleRunner:
     def process_events(self):
         for s in SyncScheduler.ALL:
             for job in s.jobs:
-                job._func.execute()
+                job.executor.execute()
 
     def __enter__(self):
         self.set_up()

@@ -1,8 +1,8 @@
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from immutables import Map
-from pendulum import UTC
-from pendulum import now as pd_now
+from whenever import Instant
 
 from HABApp.core.items import BaseItem
 from HABApp.openhab.definitions import ThingStatusDetailEnum, ThingStatusEnum
@@ -41,7 +41,7 @@ class Thing(BaseItem):
         return self.status_detail != 'DISABLED'
 
     def __update_timestamps(self, changed: bool):
-        _now = pd_now(UTC)
+        _now = Instant.now()
         self._last_update.set(_now)
         if changed:
             self._last_change.set(_now)

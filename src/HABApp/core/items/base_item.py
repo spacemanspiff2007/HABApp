@@ -1,8 +1,7 @@
-from typing import Optional, Type, TypeVar
+from datetime import datetime as dt_datetime
+from typing import Optional, TypeVar
 
-from eascheduler.const import local_tz
-from pendulum import UTC, DateTime
-from pendulum import now as pd_now
+from whenever import Instant
 
 from HABApp.core.internals import (
     HINT_EVENT_BUS_LISTENER,
@@ -42,23 +41,23 @@ class BaseItem(ItemRegistryItem):
     def __init__(self, name: str):
         super().__init__(name)
 
-        _now = pd_now(UTC)
+        _now = Instant.now()
         self._last_change: ChangedTime = ChangedTime(self._name, _now)
         self._last_update: UpdatedTime = UpdatedTime(self._name, _now)
 
     @property
-    def last_change(self) -> DateTime:
+    def last_change(self) -> dt_datetime:
         """
         :return: Timestamp of the last time when the item has been changed (read only)
         """
-        return self._last_change.dt.in_timezone(local_tz).naive()
+        return self._last_change.instant.py_datetime()
 
     @property
-    def last_update(self) -> DateTime:
+    def last_update(self) -> dt_datetime:
         """
         :return: Timestamp of the last time when the item has been updated (read only)
         """
-        return self._last_update.dt.in_timezone(local_tz).naive()
+        return self._last_update.instant.py_datetime()
 
     def __repr__(self):
         ret = ''
@@ -113,4 +112,4 @@ class BaseItem(ItemRegistryItem):
 
 # Hints for functions that use an item class as an input parameter
 HINT_ITEM_OBJ = TypeVar('HINT_ITEM_OBJ', bound=BaseItem)
-HINT_TYPE_ITEM_OBJ = Type[HINT_ITEM_OBJ]
+HINT_TYPE_ITEM_OBJ = type[HINT_ITEM_OBJ]

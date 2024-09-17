@@ -1,21 +1,29 @@
+from __future__ import annotations
+
 import io
-import logging
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from cProfile import Profile
 from pstats import SortKey, Stats
 from threading import Lock
 from time import monotonic
-from typing import Any, Callable, Dict, Final, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Final
 
+from typing_extensions import override
+
+from HABApp.core.asyncio import async_context
 from HABApp.core.const import loop
 from HABApp.core.internals import Context, ContextProvidingObj
+from HABApp.core.internals.wrapped_function.base import WrappedFunctionBase, default_logger
 
-from .base import WrappedFunctionBase, default_logger
+
+if TYPE_CHECKING:
+    import logging
 
 
-POOL: Optional[ThreadPoolExecutor] = None
+POOL: ThreadPoolExecutor | None = None
 POOL_THREADS: int = 0
-POOL_INFO: Set['PoolFunc'] = set()
+POOL_INFO: set[PoolFunc] = set()
 POOL_LOCK = Lock()
 
 
@@ -32,11 +40,15 @@ def create_thread_pool(count: int):
 
 def stop_thread_pool():
     global POOL, POOL_THREADS
-    if POOL is not None:
-        POOL.shutdown()
-        POOL = None
-        POOL_THREADS = 0
-        default_logger.debug('Thread pool stopped!')
+
+    if (pool := POOL) is None:
+        return None
+
+    POOL_THREADS = 0
+    POOL = None
+
+    pool.shutdown()
+    default_logger.debug('Thread pool stopped!')
 
 
 async def run_in_thread_pool(func: Callable):
@@ -49,8 +61,8 @@ HINT_FUNC_SYNC = Callable[..., Any]
 
 
 class PoolFunc(ContextProvidingObj):
-    def __init__(self, parent: 'WrappedThreadFunction', func_obj: HINT_FUNC_SYNC, func_args: Tuple[Any, ...],
-                 func_kwargs: Dict[str, Any], context: Optional[Context] = None, **kwargs):
+    def __init__(self, parent: WrappedThreadFunction, func_obj: HINT_FUNC_SYNC, func_args: tuple[Any, ...],
+                 func_kwargs: dict[str, Any], context: Context | None = None, **kwargs):
         super().__init__(context=context, **kwargs)
         self.parent: Final = parent
         self.func_obj: Final = func_obj
@@ -123,9 +135,9 @@ class WrappedThreadFunction(WrappedFunctionBase):
 
     def __init__(self, func: HINT_FUNC_SYNC,
                  warn_too_long=True,
-                 name: Optional[str] = None,
-                 logger: Optional[logging.Logger] = None,
-                 context: Optional[Context] = None):
+                 name: str | None = None,
+                 logger: logging.Logger | None = None,
+                 context: Context | None = None):
 
         super().__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)
@@ -133,7 +145,18 @@ class WrappedThreadFunction(WrappedFunctionBase):
         self.func = func
         self.warn_too_long: bool = warn_too_long
 
+    @override
     def run(self, *args, **kwargs):
         # we need to copy the context, so it's available when the function is run
         pool_func = PoolFunc(self, self.func, args, kwargs, context=self._habapp_ctx)
-        POOL.submit(pool_func.run)
+        return POOL.submit(pool_func.run)
+
+    @override
+    async def async_run(self, *args, **kwargs):
+
+        token = async_context.set('WrappedThreadFunction')
+
+        pool_func = PoolFunc(self, self.func, args, kwargs, context=self._habapp_ctx)
+        await loop.run_in_executor(POOL, pool_func.run)
+
+        async_context.reset(token)

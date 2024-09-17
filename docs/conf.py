@@ -233,7 +233,7 @@ nitpick_ignore = [
 
 nitpick_ignore_regex = [
     (re.compile(r'py:data|py:class'), re.compile(r'typing\..+')),
-    (re.compile(r'py:class'), re.compile(r'(?:datetime|pendulum|aiohttp|pathlib)\..+'))
+    (re.compile(r'py:class'), re.compile(r'(?:datetime|aiohttp|pathlib)\..+'))
 ]
 
 # -- Extension configuration -------------------------------------------------

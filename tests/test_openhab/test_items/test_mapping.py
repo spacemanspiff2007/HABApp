@@ -2,8 +2,8 @@ from datetime import datetime
 from functools import partial
 
 import pytest
-from eascheduler.const import local_tz
 from immutables import Map
+from whenever import SystemDateTime
 
 from HABApp.openhab.items import DatetimeItem, NumberItem
 from HABApp.openhab.items.base_item import MetaData
@@ -51,7 +51,8 @@ def test_number_unit_of_measurement():
 
 
 def test_datetime():
-    offset_str = datetime(2022, 6, 15, tzinfo=local_tz).isoformat()[-6:].replace(':', '')
+
+    offset_str = SystemDateTime.now().format_common_iso()[-6:].replace(':', '')
 
     def get_dt(value: str):
         return map_item(

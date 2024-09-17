@@ -1,6 +1,6 @@
 import logging
 from asyncio import iscoroutinefunction
-from typing import Callable, Optional, Type, Union
+from collections.abc import Callable
 
 from HABApp.config import CONFIG
 from HABApp.core.internals import Context
@@ -16,11 +16,11 @@ from HABApp.core.internals.wrapped_function.wrapped_thread import (
 )
 
 
-def wrap_func(func: Union[HINT_FUNC_SYNC, TYPE_FUNC_ASYNC],
+def wrap_func(func: HINT_FUNC_SYNC | TYPE_FUNC_ASYNC,
               warn_too_long=True,
-              name: Optional[str] = None,
-              logger: Optional[logging.Logger] = None,
-              context: Optional[Context] = None) -> TYPE_WRAPPED_FUNC_OBJ:
+              name: str | None = None,
+              logger: logging.Logger | None = None,
+              context: Context | None = None) -> TYPE_WRAPPED_FUNC_OBJ:
 
     # Check that it's actually a callable, so we fail fast and not when we try to run the function.
     # Some users pass the result of the function call (e.g. func()) by accident
@@ -36,11 +36,11 @@ def wrap_func(func: Union[HINT_FUNC_SYNC, TYPE_FUNC_ASYNC],
 
     if iscoroutinefunction(func):
         return WrappedAsyncFunction(func, name=name, logger=logger, context=context)
-    else:
-        return SYNC_CLS(func, warn_too_long=warn_too_long, name=name, logger=logger, context=context)
+
+    return SYNC_CLS(func, warn_too_long=warn_too_long, name=name, logger=logger, context=context)
 
 
-SYNC_CLS: Union[Type[WrappedThreadFunction], Type[WrappedSyncFunction]]
+SYNC_CLS: type[WrappedThreadFunction] | type[WrappedSyncFunction]
 
 
 def setup():
@@ -69,5 +69,5 @@ THREAD_POOL.subscribe_for_changes(setup)
 async def run_function(func: Callable):
     if not THREAD_POOL.enabled:
         return func()
-    else:
-        return await run_in_thread_pool(func)
+
+    return await run_in_thread_pool(func)

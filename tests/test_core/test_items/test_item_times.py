@@ -2,8 +2,7 @@ import asyncio
 from unittest.mock import MagicMock
 
 import pytest
-from pendulum import UTC
-from pendulum import now as pd_now
+from whenever import Instant
 
 import HABApp
 import HABApp.core.items.tmp_data
@@ -16,7 +15,7 @@ from tests.helpers import LogCollector, TestEventBus
 
 @pytest.fixture(scope='function')
 def u():
-    a = UpdatedTime('test', pd_now(UTC))
+    a = UpdatedTime('test', Instant.now())
     w1 = a.add_watch(1)
     w2 = a.add_watch(3)
 
@@ -31,7 +30,7 @@ def u():
 
 @pytest.fixture(scope='function')
 def c():
-    a = ChangedTime('test', pd_now(UTC))
+    a = ChangedTime('test', Instant.now())
     w1 = a.add_watch(1)
     w2 = a.add_watch(3)
 
@@ -45,7 +44,7 @@ def c():
 
 
 def test_sec_timedelta(parent_rule, test_logs: LogCollector):
-    a = UpdatedTime('test', pd_now(UTC))
+    a = UpdatedTime('test', Instant.now())
     w1 = a.add_watch(1)
 
     # We return the same object because it is the same time
@@ -67,7 +66,7 @@ async def test_rem(parent_rule, u: UpdatedTime):
 
 
 async def test_cancel_running(parent_rule, u: UpdatedTime):
-    u.set(pd_now(UTC))
+    u.set(Instant.now())
 
     w1 = u.tasks[0]
     w2 = u.tasks[1]
@@ -79,18 +78,18 @@ async def test_cancel_running(parent_rule, u: UpdatedTime):
     assert w2 in u.tasks
     w2.cancel()
     await asyncio.sleep(0.05)
-    u.set(pd_now(UTC))
+    u.set(Instant.now())
     await asyncio.sleep(0.05)
     assert w2 not in u.tasks
 
 
 async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: EventBus):
     m = MagicMock()
-    u.set(pd_now(UTC))
+    u.set(Instant.now())
     list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
     eb.add_listener(list)
 
-    u.set(pd_now(UTC))
+    u.set(Instant.now())
     await asyncio.sleep(1)
     m.assert_not_called()
 
@@ -115,11 +114,11 @@ async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: EventB
 
 async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: EventBus):
     m = MagicMock()
-    c.set(pd_now(UTC))
+    c.set(Instant.now())
     list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
     eb.add_listener(list)
 
-    c.set(pd_now(UTC))
+    c.set(Instant.now())
     await asyncio.sleep(1)
     m.assert_not_called()
 

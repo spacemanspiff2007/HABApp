@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
-from typing import Callable, Optional, TypeVar
+from collections.abc import Callable
+from typing import Final, TypeVar
 
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
@@ -14,8 +17,8 @@ event_bus = uses_event_bus()
 
 class WrappedFunctionBase(ContextProvidingObj):
 
-    def __init__(self, func: Callable, name: Optional[str] = None, logger: Optional[logging.Logger] = None,
-                 context: Optional[Context] = None):
+    def __init__(self, func: Callable, name: str | None = None, logger: logging.Logger | None = None,
+                 context: Context | None = None):
 
         # Allow setting of the rule context
         super().__init__(context)
@@ -29,11 +32,12 @@ class WrappedFunctionBase(ContextProvidingObj):
         self.name: str = name
 
         # Allow custom logger
-        self.log = default_logger
-        if logger:
-            self.log = logger
+        self.log: Final = default_logger if logger is None else logger
 
     def run(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    async def async_run(self, *args, **kwargs):
         raise NotImplementedError()
 
     def process_exception(self, e: Exception, *args, **kwargs):

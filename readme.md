@@ -127,6 +127,15 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 24.XX.XX (2024-XX-XX)
+This is a breaking change!
+
+Changelog:
+- Switched to new scheduler
+
+Migration of rules:
+- Search for ``self.run.at`` and replace with ``self.run.once``
+
 #### 24.08.1 (2024-08-02)
 - Fixed a possible infinite loop during thing re-sync
 

@@ -1,4 +1,3 @@
-from typing import Tuple
 from unittest.mock import Mock
 
 import pytest
@@ -6,13 +5,6 @@ import pytest
 from HABApp.core.const import MISSING
 from HABApp.util.multimode import BaseMode, MultiModeItem, ValueMode
 from tests.helpers.parent_rule import DummyRule
-
-from ..test_core import ItemTests
-
-
-class TestMultiModeItem(ItemTests):
-    CLS = MultiModeItem
-    TEST_VALUES = [0, 'str', (1, 2, 3)]
 
 
 def test_diff_prio(parent_rule: DummyRule):
@@ -35,7 +27,7 @@ def test_diff_prio(parent_rule: DummyRule):
     assert p.value == 8888
 
 
-def get_value_mode(enabled: bool, enable_on_value: bool, current_value=0) -> Tuple[Mock, ValueMode]:
+def get_value_mode(enabled: bool, enable_on_value: bool, current_value=0) -> tuple[Mock, ValueMode]:
     parent = Mock()
     parent.calculate_value = Mock()
 

@@ -1,5 +1,7 @@
 import logging
-from typing import Callable, Optional
+from collections.abc import Callable
+
+from typing_extensions import override
 
 from HABApp.core.asyncio import async_context, create_task
 from HABApp.core.internals import Context
@@ -11,9 +13,9 @@ class WrappedSyncFunction(WrappedFunctionBase):
 
     def __init__(self, func: Callable,
                  warn_too_long=True,
-                 name: Optional[str] = None,
-                 logger: Optional[logging.Logger] = None,
-                 context: Optional[Context] = None):
+                 name: str | None = None,
+                 logger: logging.Logger | None = None,
+                 context: Context | None = None):
 
         super().__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)
@@ -21,9 +23,11 @@ class WrappedSyncFunction(WrappedFunctionBase):
         self.func = func
         self.warn_too_long: bool = warn_too_long
 
+    @override
     def run(self, *args, **kwargs):
         create_task(self.async_run(*args, **kwargs), name=self.name)
 
+    @override
     async def async_run(self, *args, **kwargs):
 
         token = async_context.set('WrappedSyncFunction')

@@ -3,8 +3,7 @@ import typing
 from datetime import datetime
 from math import ceil, floor
 
-from pendulum import UTC
-from pendulum import now as pd_now
+from whenever import Instant
 
 from HABApp.core.const import MISSING
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
@@ -44,7 +43,7 @@ class BaseValueItem(BaseItem):
         """
         state_changed = self.value != new_value
 
-        _now = pd_now(UTC)
+        _now = Instant.now()
         if state_changed:
             self._last_change.set(_now)
         self._last_update.set(_now)

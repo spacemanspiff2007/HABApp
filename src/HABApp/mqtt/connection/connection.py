@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from aiomqtt import Client, MqttError
 
@@ -18,9 +17,9 @@ log = logging.getLogger('HABApp.mqtt.connection')
 if PYTHON_310:
     from typing import TypeAlias
 else:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
-CONTEXT_TYPE: TypeAlias = Optional[Client]
+CONTEXT_TYPE: TypeAlias = Client | None
 
 
 def setup():
@@ -30,7 +29,7 @@ def setup():
     from HABApp.mqtt.connection.publish import PUBLISH_HANDLER
     from HABApp.mqtt.connection.subscribe import SUBSCRIPTION_HANDLER
 
-    connection = Connections.add(MqttConnection())
+    connection = Connections.add(CONNECTION)
 
     connection.register_plugin(CONNECTION_HANDLER, 0)
     connection.register_plugin(SUBSCRIPTION_HANDLER, 10)
@@ -51,6 +50,9 @@ class MqttConnection(BaseConnection):
 
     def is_silent_exception(self, e: Exception):
         return isinstance(e, MqttError)
+
+
+CONNECTION = MqttConnection()
 
 
 class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):

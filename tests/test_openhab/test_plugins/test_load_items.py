@@ -1,9 +1,8 @@
 import logging
 from json import dumps
-from typing import List
 
 import msgspec.json
-from pendulum import DateTime
+from whenever import Instant
 
 import HABApp.openhab.connection.plugins.load_items as load_items_module
 from HABApp.core.internals import ItemRegistry
@@ -57,7 +56,7 @@ async def _mock_get_all_items():
         },
     ]
 
-    return msgspec.json.decode(dumps(resp), type=List[ItemResp])
+    return msgspec.json.decode(dumps(resp), type=list[ItemResp])
 
 
 async def _mock_get_all_items_state():
@@ -129,7 +128,7 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs):
     assert isinstance(ir_thing, Thing)
     assert ir_thing.status_description == ''
 
-    ir_thing._last_update.set(DateTime(2001, 1, 1))
+    ir_thing._last_update.set(Instant.from_utc(2001, 1, 1))
     t2.status.description = 'asdf'
 
     # sync state

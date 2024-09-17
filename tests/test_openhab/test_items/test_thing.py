@@ -1,9 +1,9 @@
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
 from immutables import Map
-from pendulum import UTC, DateTime, set_test_now
+from whenever import Instant, patch_current_time
 
 import HABApp
 from HABApp.core.internals import ItemRegistry
@@ -15,13 +15,9 @@ from HABApp.openhab.map_events import get_event
 
 @pytest.fixture(scope='function')
 def test_thing(ir: ItemRegistry):
-    set_test_now(DateTime(2000, 1, 1, tzinfo=UTC))
-    thing = HABApp.openhab.items.Thing('test_thing')
-
-    yield thing
-
-    set_test_now()
-
+    with patch_current_time(Instant.from_utc(2000, 1, 1), keep_ticking=False):
+        thing = HABApp.openhab.items.Thing('test_thing')
+        yield thing
 
 def get_status_event(status: str) -> ThingStatusInfoEvent:
     data = {
@@ -39,121 +35,132 @@ def test_thing_status_events(test_thing: Thing):
     assert test_thing.status == 'UNINITIALIZED'
 
     # initial set -> update and change
-    set_test_now(DateTime(2000, 1, 1, 1, tzinfo=UTC))
-    test_thing.process_event(get_status_event('ONLINE'))
-    assert test_thing.status == 'ONLINE'
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 1, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 1, tzinfo=UTC)
+    instant1 = Instant.from_utc(2000, 1, 1, 1)
+    with patch_current_time(instant1, keep_ticking=False):
+        test_thing.process_event(get_status_event('ONLINE'))
+        assert test_thing.status == 'ONLINE'
+        assert test_thing._last_update.instant == instant1
+        assert test_thing._last_change.instant == instant1
 
     # second set -> update
-    set_test_now(DateTime(2000, 1, 1, 2, tzinfo=UTC))
-    test_thing.process_event(get_status_event('ONLINE'))
-    assert test_thing.status == 'ONLINE'
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 2, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 1, tzinfo=UTC)
+    instant2 = Instant.from_utc(2000, 1, 1, 2)
+    with patch_current_time(instant2, keep_ticking=False):
+        test_thing.process_event(get_status_event('ONLINE'))
+        assert test_thing.status == 'ONLINE'
+        assert test_thing._last_update.instant == instant2
+        assert test_thing._last_change.instant == instant1
 
     # third set -> update & change
-    set_test_now(DateTime(2000, 1, 1, 3, tzinfo=UTC))
-    test_thing.process_event(get_status_event('INITIALIZING'))
-    assert test_thing.status == 'INITIALIZING'
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
+    instant3 = Instant.from_utc(2000, 1, 1, 3)
+    with patch_current_time(instant3, keep_ticking=False):
+        test_thing.process_event(get_status_event('INITIALIZING'))
+        assert test_thing.status == 'INITIALIZING'
+        assert test_thing._last_update.instant == instant3
+        assert test_thing._last_change.instant == instant3
 
 
 def test_thing_updated_event(test_thing: Thing):
 
     class MyThingUpdatedEvent(ThingUpdatedEvent):
         def __init__(self, name: str = '', thing_type: str = '', label: str = '', location='',
-                     channels: List[Dict[str, Any]] = [],
-                     configuration: Dict[str, Any] = {}, properties: Dict[str, str] = {}):
+                     channels: list[dict[str, Any]] = [],
+                     configuration: dict[str, Any] = {}, properties: dict[str, str] = {}):
             super().__init__(name, thing_type, label, location, channels, configuration, properties)
 
     assert test_thing.properties == Map()
     assert test_thing.configuration == Map()
 
     # initial set of configuration -> update and change
-    set_test_now(DateTime(2000, 1, 1, 1, tzinfo=UTC))
-    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
-    assert test_thing.label == ''
-    assert test_thing.location == ''
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map()
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 1, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 1, tzinfo=UTC)
+    instant1 = Instant.from_utc(2000, 1, 1, 1)
+    with patch_current_time(instant1, keep_ticking=False):
+        test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
+        assert test_thing.label == ''
+        assert test_thing.location == ''
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map()
+        assert test_thing._last_update.instant == instant1
+        assert test_thing._last_change.instant == instant1
 
     # second set of configuration -> update
-    set_test_now(DateTime(2000, 1, 1, 2, tzinfo=UTC))
-    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
-    assert test_thing.label == ''
-    assert test_thing.location == ''
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map()
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 2, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 1, tzinfo=UTC)
+    instant2 = Instant.from_utc(2000, 1, 1, 2)
+    with patch_current_time(instant2, keep_ticking=False):
+        test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}))
+        assert test_thing.label == ''
+        assert test_thing.location == ''
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map()
+        assert test_thing._last_update.instant == instant2
+        assert test_thing._last_change.instant == instant1
 
     # initial set of properties-> update and change
-    set_test_now(DateTime(2000, 1, 1, 3, tzinfo=UTC))
-    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
-    assert test_thing.label == ''
-    assert test_thing.location == ''
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map({'p': 'prop'})
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
+    instant3 = Instant.from_utc(2000, 1, 1, 3)
+    with patch_current_time(instant3, keep_ticking=False):
+        test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
+        assert test_thing.label == ''
+        assert test_thing.location == ''
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map({'p': 'prop'})
+        assert test_thing._last_update.instant == instant3
+        assert test_thing._last_change.instant == instant3
 
     # second set of properties-> update
-    set_test_now(DateTime(2000, 1, 1, 4, tzinfo=UTC))
-    test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
-    assert test_thing.label == ''
-    assert test_thing.location == ''
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map({'p': 'prop'})
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 4, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 3, tzinfo=UTC)
+    instant4 = Instant.from_utc(2000, 1, 1, 4)
+    with patch_current_time(instant4, keep_ticking=False):
+        test_thing.process_event(MyThingUpdatedEvent(configuration={'a': 'b'}, properties={'p': 'prop'}))
+        assert test_thing.label == ''
+        assert test_thing.location == ''
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map({'p': 'prop'})
+        assert test_thing._last_update.instant == instant4
+        assert test_thing._last_change.instant == instant3
 
     # initial set of label-> update and change
-    set_test_now(DateTime(2000, 1, 1, 5, tzinfo=UTC))
-    test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
-    assert test_thing.label == 'l1'
-    assert test_thing.location == ''
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map({'p': 'prop'})
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
+    instant5 = Instant.from_utc(2000, 1, 1, 5)
+    with patch_current_time(instant5, keep_ticking=False):
+        test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
+        assert test_thing.label == 'l1'
+        assert test_thing.location == ''
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map({'p': 'prop'})
+        assert test_thing._last_update.instant == instant5
+        assert test_thing._last_change.instant == instant5
 
     # second set of label-> update
-    set_test_now(DateTime(2000, 1, 1, 6, tzinfo=UTC))
-    test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
-    assert test_thing.label == 'l1'
-    assert test_thing.location == ''
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map({'p': 'prop'})
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 6, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
+    instant6 = Instant.from_utc(2000, 1, 5, 6)
+    with patch_current_time(instant6, keep_ticking=False):
+        test_thing.process_event(MyThingUpdatedEvent(label='l1', configuration={'a': 'b'}, properties={'p': 'prop'}))
+        assert test_thing.label == 'l1'
+        assert test_thing.location == ''
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map({'p': 'prop'})
+        assert test_thing._last_update.instant == instant6
+        assert test_thing._last_change.instant == instant5
 
     # initial set of location-> update and change
-    set_test_now(DateTime(2000, 1, 1, 5, tzinfo=UTC))
-    test_thing.process_event(
-        MyThingUpdatedEvent(location='my_loc', label='l1', configuration={'a': 'b'}, properties={'p': 'prop'})
-    )
-    assert test_thing.label == 'l1'
-    assert test_thing.location == 'my_loc'
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map({'p': 'prop'})
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
+    instant7 = Instant.from_utc(2000, 1, 5, 7)
+    with patch_current_time(instant7, keep_ticking=False):
+        test_thing.process_event(
+            MyThingUpdatedEvent(location='my_loc', label='l1', configuration={'a': 'b'}, properties={'p': 'prop'})
+        )
+        assert test_thing.label == 'l1'
+        assert test_thing.location == 'my_loc'
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map({'p': 'prop'})
+        assert test_thing._last_update.instant == instant7
+        assert test_thing._last_change.instant == instant7
 
     # second set of location-> update
-    set_test_now(DateTime(2000, 1, 1, 6, tzinfo=UTC))
-    test_thing.process_event(
-        MyThingUpdatedEvent(location='my_loc', label='l1', configuration={'a': 'b'}, properties={'p': 'prop'})
-    )
-    assert test_thing.label == 'l1'
-    assert test_thing.location == 'my_loc'
-    assert test_thing.configuration == Map({'a': 'b'})
-    assert test_thing.properties == Map({'p': 'prop'})
-    assert test_thing._last_update.dt == DateTime(2000, 1, 1, 6, tzinfo=UTC)
-    assert test_thing._last_change.dt == DateTime(2000, 1, 1, 5, tzinfo=UTC)
+    instant8 = Instant.from_utc(2000, 1, 5, 8)
+    with patch_current_time(instant8, keep_ticking=False):
+        test_thing.process_event(
+            MyThingUpdatedEvent(location='my_loc', label='l1', configuration={'a': 'b'}, properties={'p': 'prop'})
+        )
+        assert test_thing.label == 'l1'
+        assert test_thing.location == 'my_loc'
+        assert test_thing.configuration == Map({'a': 'b'})
+        assert test_thing.properties == Map({'p': 'prop'})
+        assert test_thing._last_update.instant == instant8
+        assert test_thing._last_change.instant == instant7
 
 
 def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Thing):

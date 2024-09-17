@@ -4,11 +4,11 @@ import paho.mqtt.client as mqtt
 
 import HABApp
 from HABApp.core.const.json import dump_json
-from HABApp.mqtt.connection.mqtt_connection import STATUS, log
+from HABApp.mqtt.connection.connection import CONNECTION, log
 
 
 def __is_connected() -> bool:
-    if STATUS.connected:
+    if CONNECTION.is_connected:
         return True
 
     msg = 'Mqtt client not connected'
@@ -48,7 +48,7 @@ def publish(topic: str, payload: typing.Any,
     if isinstance(payload, (dict, list)):
         payload = dump_json(payload)
 
-    info = STATUS.client.publish(topic, payload, qos, retain)
+    info = CONNECTION.client.publish(topic, payload, qos, retain)
     if info.rc != mqtt.MQTT_ERR_SUCCESS:
         log.error(f'Could not publish to "{topic}": {mqtt.error_string(info.rc)}')
     return info
@@ -74,7 +74,7 @@ def subscribe(topic: str, qos: typing.Optional[int] = None) -> int:
     if qos is None:
         qos = HABApp.config.CONFIG.mqtt.subscribe.qos
 
-    res, mid = STATUS.client.subscribe(topic, qos)
+    res, mid = CONNECTION.client.subscribe(topic, qos)
     if res != mqtt.MQTT_ERR_SUCCESS:
         log.error(f'Could not subscribe to "{topic}": {mqtt.error_string(res)}')
     return res
@@ -93,7 +93,7 @@ def unsubscribe(topic: str) -> int:
     if not __is_connected():
         return mqtt.MQTT_ERR_NO_CONN
 
-    result, mid = STATUS.client.unsubscribe(topic)
+    result, mid = CONNECTION.context.unsubscribe(topic)
     if result != mqtt.MQTT_ERR_SUCCESS:
         log.error(f'Could not unsubscribe from "{topic}": {mqtt.error_string(result)}')
     return result

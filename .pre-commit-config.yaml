@@ -15,8 +15,13 @@ repos:
 
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.0
+    rev: v0.6.5
     hooks:
+      - id: ruff
+        name: ruff unused imports
+        #  F401 [*] {name} imported but unused
+        args: [ "--select", "F401", "--extend-exclude", "__init__.py", "--fix"]
+
       - id: ruff
         #  I001 [*] Import block is un-sorted or un-formatted
         # UP035 [*] Import from {target} instead: {names}
