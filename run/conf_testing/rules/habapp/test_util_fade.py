@@ -32,7 +32,7 @@ class TestFadeRun(TestBaseRule):
         ItemWaiter(item, 3.1).wait_for_state(10.0)
 
         assert f._fade_worker is None
-        assert len(vals) == 11  # start value + 10 fade steps
+        assert len(vals) == 10  # 10 fade steps
 
 
 TestFadeRun()

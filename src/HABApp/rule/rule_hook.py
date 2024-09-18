@@ -70,5 +70,8 @@ def get_rule_hook() -> HABAppRuleHook:
 
         frame = frame.f_back
 
-    raise RuntimeError('HABApp rule files are not meant to be executed directly! '
-                       'Put the file in the HABApp "rule" folder and HABApp will load it automatically.')
+    msg = (
+        'HABApp rule files are not meant to be executed directly! '
+        'Put the file in the HABApp "rule" folder and HABApp will load it automatically.'
+    )
+    raise RuntimeError(msg)

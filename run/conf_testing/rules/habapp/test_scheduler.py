@@ -1,5 +1,5 @@
 import logging
-import time
+from time import monotonic, sleep
 
 from HABAppTests import TestBaseRule, get_random_name
 
@@ -34,29 +34,30 @@ class TestScheduler(TestBaseRule):
         calls = []
 
         def called():
-            calls.append(time.time())
+            calls.append(monotonic())
 
         job = self.run.every(None, 0.5, called)
         job.to_item(self.item)
 
         try:
-            started = time.time()
-            while time.time() - started < 7:
-                time.sleep(0.1)
+            started = monotonic()
+            while monotonic() - started < 7:
+                sleep(0.1)
 
                 if len(calls) >= executions:
                     break
-
-            assert len(calls) >= executions, calls
-
-            for i in range(len(calls) - 1):
-                diff = calls[i + 1] - calls[i]
-                assert 0.47 <= diff <= 0.53, diff
-
         finally:
             job.cancel()
 
-        assert len(self.item_states) == 6
+        assert len(calls) == executions, calls
+
+        for i in range(len(calls) - 1):
+            diff = calls[i + 1] - calls[i]
+            assert 0.47 <= diff <= 0.53, diff
+
+        sleep(0.1)
+        assert len(self.item_states) == executions + 2  # First event before the first call, then None as the last event
+        assert self.item_states[-1].value is None
 
 
 TestScheduler()

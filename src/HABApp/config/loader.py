@@ -79,7 +79,6 @@ def load_habapp_cfg(do_print=False):
 
     CONFIG.directories.create_folders()
 
-    log.debug(f'Local Timezone: {eascheduler.const.local_tz}')
     location = CONFIG.location
     eascheduler.set_location(location.latitude, location.longitude, location.elevation)
 

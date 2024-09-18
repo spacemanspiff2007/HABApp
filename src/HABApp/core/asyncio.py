@@ -95,10 +95,9 @@ def run_func_from_async(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwa
         return func(*args, **kwargs)
 
     future = _run_coroutine_threadsafe(_run_func_from_async_helper(func, *args, **kwargs), loop)
-    return future
     # Doc build fails if we enable this
     # TODO: Fix the Rule Runner
-    # return future.result()
+    return future.result()
 
 
 async def _run_func_from_async_helper(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:

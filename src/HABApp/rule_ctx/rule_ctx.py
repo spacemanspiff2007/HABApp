@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 import logging
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
 from HABApp.core.internals import HINT_EVENT_BUS_LISTENER, Context, uses_event_bus, uses_item_registry
 from HABApp.core.internals.event_bus import EventBusBaseListener
+
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from HABApp import Rule
 
 
 event_bus = uses_event_bus()
@@ -14,9 +22,9 @@ log = logging.getLogger('HABApp.Rule')
 
 
 class HABAppRuleContext(Context):
-    def __init__(self, rule: 'HABApp.rule.Rule') -> None:
+    def __init__(self, rule: Rule) -> None:
         super().__init__()
-        self.rule: HABApp.rule.Rule | None = rule
+        self.rule: Rule | None = rule
 
     def get_callback_name(self, callback: Callable) -> str | None:
         return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None
@@ -34,7 +42,8 @@ class HABAppRuleContext(Context):
             rule = self.rule
 
             # Unload the scheduler
-            rule.run._scheduler.cancel_all()
+            rule.run._scheduler.disable_scheduler()
+            rule.run._scheduler.remove_all()
             rule.run._habapp_ctx = None
 
             # cancel things and set obj to None
@@ -50,6 +59,7 @@ class HABAppRuleContext(Context):
 
             # user implementation
             rule.on_rule_removed()
+
 
     def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
@@ -71,7 +81,7 @@ class HABAppRuleContext(Context):
                                     f'self.listen_event in "{self.rule.rule_name}" may not work as intended.')
 
             # enable the scheduler
-            self.rule.run._scheduler.resume()
+            self.rule.run._scheduler.enable_scheduler()
 
             # user implementation
             self.rule.on_rule_loaded()
