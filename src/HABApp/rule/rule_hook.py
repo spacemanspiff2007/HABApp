@@ -1,9 +1,10 @@
 import logging
+from collections.abc import Callable
 
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
 from types import FrameType
-from typing import TYPE_CHECKING, Any, Callable, Final, Optional
+from typing import TYPE_CHECKING, Any, Final
 
 
 if TYPE_CHECKING:
@@ -48,7 +49,7 @@ class HABAppRuleHook:
     def suggest_rule_name(self, rule: 'HABApp.rule.Rule') -> str:
         return self._cb_suggest_name(rule)
 
-    def in_dict(self, obj: Optional[dict] = None) -> dict:
+    def in_dict(self, obj: dict | None = None) -> dict:
         if obj is None:
             obj = {}
         obj[_NAME] = self
@@ -58,7 +59,7 @@ class HABAppRuleHook:
 def get_rule_hook() -> HABAppRuleHook:
 
     # noinspection PyUnresolvedReferences
-    frame: Optional[FrameType] = sys_get_frame(1)
+    frame: FrameType | None = sys_get_frame(1)
 
     while frame is not None:
         _globals = frame.f_globals

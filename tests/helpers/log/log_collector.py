@@ -1,7 +1,8 @@
 import logging
+from collections.abc import Callable, Iterable
 from operator import eq as eq_func
 from operator import ge as ge_func
-from typing import Any, Callable, Dict, Final, Iterable, List, Optional, Union
+from typing import Any, Final
 
 import pytest
 from pytest import LogCaptureFixture
@@ -23,12 +24,12 @@ class LogCollector:
 
         self.phases: Iterable[str] = ALL_PYTEST_PHASES
 
-        self.rec_expected: List[LogEntryMatcherBase] = []
-        self.rec_ignored: List[LogEntryMatcherBase] = []
+        self.rec_expected: list[LogEntryMatcherBase] = []
+        self.rec_ignored: list[LogEntryMatcherBase] = []
 
         # results
-        self.res_records: List[SimpleLogRecord] = []
-        self.res_indent: Dict[str, int] = {}
+        self.res_records: list[SimpleLogRecord] = []
+        self.res_indent: dict[str, int] = {}
 
     def is_expected_record(self, rec: SimpleLogRecord) -> bool:
         for expected in self.rec_expected:
@@ -69,15 +70,15 @@ class LogCollector:
         return self
 
     def add_expected(self,
-                     name: Union[Iterable[str], Optional[str]],
-                     level: Union[Iterable[Union[str, int]], Union[str, int]],
-                     msg: Union[Iterable[str], str]):
+                     name: Iterable[str] | str | None,
+                     level: Iterable[str | int] | str | int,
+                     msg: Iterable[str] | str):
         self.rec_expected.extend(create_matcher(name, level, msg))
 
     def add_ignored(self,
-                    name: Union[Iterable[str], Optional[str]],
-                    level: Union[Iterable[Union[str, int]], Union[str, int]],
-                    msg: Union[Iterable[str], str]):
+                    name: Iterable[str] | str | None,
+                    level: Iterable[str | int] | str | int,
+                    msg: Iterable[str] | str):
         self.rec_ignored.extend(create_matcher(name, level, msg))
 
     def update(self) -> Self:
@@ -112,7 +113,7 @@ class LogCollector:
 
         return self
 
-    def get_messages(self) -> List[str]:
+    def get_messages(self) -> list[str]:
         return [
             f'{"ok " if self.is_expected_record(rec) else "   " }'
             f'[{rec.name:>{self.res_indent["name"]:d}s}] | '

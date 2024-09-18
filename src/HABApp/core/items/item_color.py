@@ -1,5 +1,4 @@
 import typing
-from typing import Optional
 
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_item_registry
@@ -66,7 +65,7 @@ class ColorItem(BaseValueItem):
         """
         return hsb_to_rgb(self.hue, self.saturation, self.brightness, max_rgb_value=max_rgb_value)
 
-    def set_rgb(self, r, g, b, max_rgb_value=255, ndigits: Optional[int] = 2) -> 'ColorItem':
+    def set_rgb(self, r, g, b, max_rgb_value=255, ndigits: int | None = 2) -> 'ColorItem':
         """Set a rgb value
 
         :param r: red value

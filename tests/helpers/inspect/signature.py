@@ -1,5 +1,4 @@
 import inspect
-from typing import Optional
 
 import pytest
 
@@ -17,16 +16,16 @@ def assert_same_signature(func_a, func_b):
 
 
 def test_assert_same_signature():
-    def func1(a: int, b: Optional[str] = None) -> float:
+    def func1(a: int, b: str | None = None) -> float:
         """Doc1"""
 
-    def func1_no_ret(a: int, b: Optional[str] = None):
+    def func1_no_ret(a: int, b: str | None = None):
         """Doc1"""
 
-    def func1_diff_args(a: int, b: str = None) -> float:
+    def func1_diff_args(a: int, b: str = None) -> float:  # noqa: RUF013
         """Doc1"""
 
-    def func1_diff_doc(a: int, b: Optional[str] = None) -> float:
+    def func1_diff_doc(a: int, b: str | None = None) -> float:
         """Doc2"""
 
     with pytest.raises(AssertionError):

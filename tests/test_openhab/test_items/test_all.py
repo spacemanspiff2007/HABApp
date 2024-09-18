@@ -1,6 +1,6 @@
 import inspect
 from datetime import datetime
-from typing import Any, Optional, Tuple, Union
+from typing import Any
 
 import pytest
 
@@ -61,13 +61,13 @@ def test_doc_ivar(cls):
         ContactItem: {'value': str},
         PlayerItem: {'value': str},
 
-        NumberItem:        {'value': Union[int, float]},
-        RollershutterItem: {'value': Union[int, float]},
-        DimmerItem:        {'value': Union[int, float]},
+        NumberItem:        {'value': int | float},
+        RollershutterItem: {'value': int | float},
+        DimmerItem:        {'value': int | float},
 
-        ColorItem: {'value': Tuple[float, float, float]},
-        CallItem: {'value': Tuple[str, ...]},
-        LocationItem: {'value': Optional[Tuple[float, float, Optional[float]]]},
+        ColorItem: {'value': tuple[float, float, float]},
+        CallItem: {'value': tuple[str, ...]},
+        LocationItem: {'value': tuple[float, float, float | None] | None},
 
         DatetimeItem: {'value': datetime},
         ImageItem: {'value': bytes},

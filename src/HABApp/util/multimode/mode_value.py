@@ -22,8 +22,8 @@ class ValueMode(BaseMode):
     """
 
     def __init__(self, name: str,
-                 initial_value=None, enabled: typing.Optional[bool] = None, enable_on_value: bool = True,
-                 logger: typing.Optional[logging.Logger] = None,
+                 initial_value=None, enabled: bool | None = None, enable_on_value: bool = True,
+                 logger: logging.Logger | None = None,
                  auto_disable_after=None, auto_disable_func=None,
                  calc_value_func=None):
         """
@@ -60,10 +60,10 @@ class ValueMode(BaseMode):
         self.__enable_on_value: bool = enable_on_value
 
         assert isinstance(auto_disable_after, timedelta) or auto_disable_after is None, type(auto_disable_after)
-        self.auto_disable_after: typing.Optional[timedelta] = auto_disable_after
-        self.auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]] = auto_disable_func
+        self.auto_disable_after: timedelta | None = auto_disable_after
+        self.auto_disable_func: typing.Callable[[typing.Any, typing.Any], bool] | None = auto_disable_func
 
-        self.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = calc_value_func
+        self.calc_value_func: typing.Callable[[typing.Any, typing.Any], typing.Any] | None = calc_value_func
 
     @property
     def value(self):

@@ -1,4 +1,4 @@
-from typing import Iterable as _Iterable
+from collections.abc import Iterable as _Iterable
 
 
 class CircularReferenceError(Exception):

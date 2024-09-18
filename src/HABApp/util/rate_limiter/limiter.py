@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import Final, List, Literal, Tuple, Union, get_args
+from typing import Final, Literal, TypeAlias, get_args
 
-from HABApp.core.const.const import PYTHON_310
 from HABApp.util.rate_limiter.limits import (
     BaseRateLimit,
     FixedWindowElasticExpiryLimit,
@@ -10,12 +9,6 @@ from HABApp.util.rate_limiter.limits import (
     LeakyBucketLimitInfo,
 )
 from HABApp.util.rate_limiter.parser import parse_limit
-
-
-if PYTHON_310:
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
 
 _LITERAL_LEAKY_BUCKET = Literal['leaky_bucket']
@@ -33,7 +26,7 @@ def _check_arg(name: str, value, allow_0=False):
 class Limiter:
     def __init__(self, name: str):
         self._name: Final = name
-        self._limits: Tuple[BaseRateLimit, ...] = ()
+        self._limits: tuple[BaseRateLimit, ...] = ()
         self._skips: int = 0
         self._skips_total: int = 0
 
@@ -161,4 +154,4 @@ class Limiter:
 class LimiterInfo:
     skips: int          #: How many entries were skipped in the active interval(s)
     total_skips: int    #: How many entries were skipped in total
-    limits: List[Union[FixedWindowElasticExpiryLimitInfo, LeakyBucketLimitInfo]]    #: Info for every limit
+    limits: list[FixedWindowElasticExpiryLimitInfo | LeakyBucketLimitInfo]    #: Info for every limit

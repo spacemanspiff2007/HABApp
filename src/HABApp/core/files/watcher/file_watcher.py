@@ -1,7 +1,8 @@
 from asyncio import run_coroutine_threadsafe, sleep
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from time import monotonic
-from typing import Any, Awaitable, Callable, List, Set
+from typing import Any
 
 import HABApp
 from HABApp.core.asyncio import AsyncContext
@@ -14,13 +15,13 @@ DEBOUNCE_TIME: float = 0.6
 
 
 class AggregatingAsyncEventHandler(FileSystemEventHandler):
-    def __init__(self, folder: Path, func: Callable[[List[Path]], Awaitable[Any]], filter: EventFilterBase,
+    def __init__(self, folder: Path, func: Callable[[list[Path]], Awaitable[Any]], filter: EventFilterBase,
                  watch_subfolders: bool = False):
         super().__init__(folder, filter, watch_subfolders=watch_subfolders)
 
         self.func = func
 
-        self._files: Set[Path] = set()
+        self._files: set[Path] = set()
         self.last_event: float = 0
 
     @ignore_exception

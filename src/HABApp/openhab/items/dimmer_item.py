@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 from fastnumbers import real
 
@@ -10,9 +11,6 @@ from ..definitions import OnOffValue, PercentValue
 
 
 if TYPE_CHECKING:
-    Union = Union
-    Optional = Optional
-    FrozenSet = FrozenSet
     Mapping = Mapping
     MetaData = MetaData
 
@@ -21,11 +19,11 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
     """DimmerItem which accepts and converts the data types from OpenHAB
 
     :ivar str name: |oh_item_desc_name|
-    :ivar Union[int, float] value: |oh_item_desc_value|
+    :ivar int | float value: |oh_item_desc_value|
 
-    :ivar Optional[str] label: |oh_item_desc_label|
-    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
-    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar str | None label: |oh_item_desc_label|
+    :ivar frozenset[str] tags: |oh_item_desc_tags|
+    :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 

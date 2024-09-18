@@ -1,13 +1,14 @@
 import logging
 import re
-from typing import Any, Dict, Iterator, List
+from collections.abc import Iterator
+from typing import Any
 
 from HABApp.openhab.definitions.helpers.log_table import Table
 
 from ._log import log
 
 
-THING_ALIAS: Dict[str, str] = {
+THING_ALIAS: dict[str, str] = {
     'thing_uid': 'UID',
     'thing_type': 'thingTypeUID',
     'thing_location': 'location',
@@ -16,7 +17,7 @@ THING_ALIAS: Dict[str, str] = {
     'editable': 'editable',
 }
 
-CHANNEL_ALIAS: Dict[str, str] = {
+CHANNEL_ALIAS: dict[str, str] = {
     'channel_uid': 'uid',
     'channel_type': 'channelTypeUID',
     'channel_label': 'label',
@@ -26,7 +27,7 @@ CHANNEL_ALIAS: Dict[str, str] = {
 
 
 class BaseFilter:
-    KEYS: Dict[str, str]
+    KEYS: dict[str, str]
 
     def __init__(self, key: str, regex: str):
         self.key = key
@@ -65,11 +66,11 @@ class ChannelFilter(BaseFilter):
     KEYS = CHANNEL_ALIAS
 
 
-def apply_filters(filters: List[BaseFilter], iterable: List[Dict[str, str]], test: bool) -> Iterator[Dict[str, Any]]:
+def apply_filters(filters: list[BaseFilter], iterable: list[dict[str, str]], test: bool) -> Iterator[dict[str, Any]]:
     return filter(lambda n: all(map(lambda filter: filter.matches(n, test), filters)), iterable)
 
 
-def log_overview(data: List[dict], aliases: Dict[str, str], heading=''):
+def log_overview(data: list[dict], aliases: dict[str, str], heading=''):
     table = Table(heading)
     for k in aliases:
         table.add_column(k, align='<')

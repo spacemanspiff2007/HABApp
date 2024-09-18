@@ -5,9 +5,9 @@ import signal
 import traceback
 import typing
 from asyncio import iscoroutinefunction, sleep
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from types import FunctionType, MethodType
-from typing import Callable, Coroutine, Union
 
 from HABApp.core.asyncio import async_context, create_task
 from HABApp.core.const import loop
@@ -15,7 +15,7 @@ from HABApp.core.const import loop
 
 @dataclass(frozen=True)
 class ShutdownInfo:
-    func: Union[Callable[[], typing.Any], Coroutine]
+    func: Callable[[], typing.Any] | Coroutine
     msg: str
     last: bool
 

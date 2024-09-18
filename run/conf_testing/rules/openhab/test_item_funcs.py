@@ -1,6 +1,5 @@
 import dataclasses
 import logging
-import typing
 
 from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_openhab_test_states, get_openhab_test_types
 
@@ -23,8 +22,8 @@ log = logging.getLogger('HABApp.Tests')
 @dataclasses.dataclass(frozen=True)
 class TestParam:
     func_name: str
-    result: typing.Union[str, float, int, tuple]
-    func_params: typing.Union[str, float, int, tuple] = None
+    result: str | float | int | tuple
+    func_params: str | float | int | tuple = None
 
 
 class TestOpenhabItemFuncs(TestBaseRule):

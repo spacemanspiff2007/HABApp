@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 from threading import Lock
-from typing import Dict, Optional
 
 from watchdog.observers import Observer
 from watchdog.observers.api import ObservedWatch
@@ -13,8 +12,8 @@ log = logging.getLogger('HABApp.files.watcher')
 
 LOCK = Lock()
 
-OBSERVER: Optional[Observer] = None
-WATCHES: Dict[str, ObservedWatch] = {}
+OBSERVER: Observer | None = None
+WATCHES: dict[str, ObservedWatch] = {}
 
 
 def start():

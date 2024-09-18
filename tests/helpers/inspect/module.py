@@ -2,13 +2,13 @@ import importlib
 import inspect
 import sys
 import typing
-from typing import Callable, Iterable, List, Optional, Tuple, Union
+from collections.abc import Callable, Iterable
 
 
-def get_module_classes(module_name: str, /, exclude: Optional[Iterable[Union[str, type]]] = None, include_imported=True,
-                       subclass: Union[None, type, Tuple[type, ...]] = None, include_subclass=True):
+def get_module_classes(module_name: str, /, exclude: Iterable[str | type] | None = None, include_imported=True,
+                       subclass: None | type | tuple[type, ...] = None, include_subclass=True):
 
-    filters: List[Callable[[type], bool]] = [
+    filters: list[Callable[[type], bool]] = [
         lambda x: inspect.isclass(x),
 
         # exclude typing classes by default (e.g. Any, Union)

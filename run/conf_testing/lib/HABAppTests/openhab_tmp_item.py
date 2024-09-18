@@ -1,6 +1,5 @@
 import time
 from functools import wraps
-from typing import List, Optional
 
 import HABApp
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS
@@ -10,7 +9,7 @@ from . import EventWaiter, get_random_name
 
 class OpenhabTmpItem:
     @staticmethod
-    def use(item_type: str, name: Optional[str] = None, arg_name: str = 'item'):
+    def use(item_type: str, name: str | None = None, arg_name: str = 'item'):
         def decorator(func):
             @wraps(func)
             def new_func(*args, **kwargs):
@@ -25,7 +24,7 @@ class OpenhabTmpItem:
         return decorator
 
     @staticmethod
-    def create(item_type: str, name: Optional[str] = None, arg_name: Optional[str] = None):
+    def create(item_type: str, name: str | None = None, arg_name: str | None = None):
         def decorator(func):
             @wraps(func)
             def new_func(*args, **kwargs):
@@ -37,7 +36,7 @@ class OpenhabTmpItem:
             return new_func
         return decorator
 
-    def __init__(self, item_type: str, item_name: Optional[str] = None):
+    def __init__(self, item_type: str, item_name: str | None = None):
         self.type: str = item_type
         self.name = get_random_name(item_type) if item_name is None else item_name
 
@@ -50,17 +49,17 @@ class OpenhabTmpItem:
     def remove(self):
         HABApp.openhab.interface_sync.remove_item(self.name)
 
-    def _create(self, label='', category='', tags: List[str] = [], groups: List[str] = [],
+    def _create(self, label='', category='', tags: list[str] = [], groups: list[str] = [],
                 group_type: str = '', group_function: str = '',
-                group_function_params: List[str] = []):
+                group_function_params: list[str] = []):
         interface = HABApp.openhab.interface_sync
         interface.create_item(self.type, self.name, label=label, category=category,
                               tags=tags, groups=groups, group_type=group_type,
                               group_function=group_function, group_function_params=group_function_params)
 
-    def create_item(self, label='', category='', tags: List[str] = [], groups: List[str] = [],
+    def create_item(self, label='', category='', tags: list[str] = [], groups: list[str] = [],
                     group_type: str = '', group_function: str = '',
-                    group_function_params: List[str] = []) -> HABApp.openhab.items.OpenhabItem:
+                    group_function_params: list[str] = []) -> HABApp.openhab.items.OpenhabItem:
 
         self._create(label=label, category=category, tags=tags, groups=groups, group_type=group_type,
                      group_function=group_function, group_function_params=group_function_params)
@@ -75,8 +74,8 @@ class OpenhabTmpItem:
 
         return HABApp.openhab.items.OpenhabItem.get_item(self.name)
 
-    def modify(self, label='', category='', tags: List[str] = [], groups: List[str] = [],
-               group_type: str = '', group_function: str = '', group_function_params: List[str] = []):
+    def modify(self, label='', category='', tags: list[str] = [], groups: list[str] = [],
+               group_type: str = '', group_function: str = '', group_function_params: list[str] = []):
 
         with EventWaiter(TOPIC_ITEMS, HABApp.core.events.EventFilter(HABApp.openhab.events.ItemUpdatedEvent)) as w:
 

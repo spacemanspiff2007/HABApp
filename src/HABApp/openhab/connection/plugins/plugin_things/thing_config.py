@@ -59,7 +59,7 @@ class ThingConfigChanger:
 
     def __init__(self, uid: str):
         self.uid: str = uid
-        self.alias: bidict.bidict[typing.Union[str, int], str] = bidict.bidict()
+        self.alias: bidict.bidict[str | int, str] = bidict.bidict()
         self.org: typing.Dict[str, typing.Any] = {}
         self.new: typing.Dict[str, typing.Any] = {}
 

@@ -12,42 +12,49 @@ extend-exclude = [
 ]
 
 [lint]
-select = [
-    "E", "W",   # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
-    "I",        # https://docs.astral.sh/ruff/rules/#isort-i
-    "UP",       # https://docs.astral.sh/ruff/rules/#pyupgrade-up
-
-    "A",        # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
-    "ASYNC",    # https://docs.astral.sh/ruff/rules/#flake8-async-async
-    "C4",       # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
-    "EM",       # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
-    "FIX",      # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
-    "INP",      # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
-    "ISC",      # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
-    "PIE",      # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
-    "PT",       # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
-    "PTH",      # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
-    "RET",      # https://docs.astral.sh/ruff/rules/#flake8-return-ret
-    "SIM",      # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
-    "SLOT",     # https://docs.astral.sh/ruff/rules/#flake8-slots-slot
-    "T10",      # https://docs.astral.sh/ruff/rules/#flake8-debugger-t10
-    "TCH",      # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
-    "TD",       # https://docs.astral.sh/ruff/rules/#flake8-todos-td
-
-    "TRY",      # https://docs.astral.sh/ruff/rules/#tryceratops-try
-    "FLY",      # https://docs.astral.sh/ruff/rules/#flynt-fly
-    "PERF",     # https://docs.astral.sh/ruff/rules/#perflint-perf
-    "RUF",      # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
-
-    # "PL",       # https://docs.astral.sh/ruff/rules/#pylint-pl
-    # "FURB",     # https://docs.astral.sh/ruff/rules/#refurb-furb
-]
+select = ["ALL"]
 
 ignore = [
+    "D",        # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+    "T20",      # https://docs.astral.sh/ruff/rules/#flake8-print-t20
+    "DTZ",      # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+    "SLF",      # https://docs.astral.sh/ruff/rules/#flake8-self-slf
+
     "RET501",   # https://docs.astral.sh/ruff/rules/unnecessary-return-none/#unnecessary-return-none-ret501
     "TRY400",   # https://docs.astral.sh/ruff/rules/error-instead-of-exception/
 
-    "A003",     # https://docs.astral.sh/ruff/rules/builtin-attribute-shadowing/
+    # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+    "A003",     # Python builtin is shadowed by class attribute {name} from {row}
+
+    # https://docs.astral.sh/ruff/rules/#pyflakes-f
+    "F401",     # {name} imported but unused; consider using importlib.util.find_spec to test for availability
+
+    # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+    "S311",     # Standard pseudo-random generators are not suitable for cryptographic purposes
+
+    # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+    "UP038",    # Use X | Y in {} call instead of (X, Y)
+
+    # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+    "ANN101",   # Missing type annotation for {name} in method
+    "ANN102",   # Missing type annotation for {name} in classmethod
+    "ANN401",   # Dynamically typed expressions (typing.Any) are disallowed in {name}
+
+    # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
+    "BLE001",   # Do not catch blind exception: {name}
+
+    # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
+    "RSE102",   # Unnecessary parentheses on raised exception
+
+    # https://docs.astral.sh/ruff/rules/#flake8-commas-com
+    "COM812",   # Trailing comma missing
+    "COM819",   # Trailing comma prohibited
+
+    # https://docs.astral.sh/ruff/rules/#warning-w_1
+    "PLW0603",  # Using the global statement to update {name} is discouraged
+
+    # https://docs.astral.sh/ruff/rules/#flake8-logging-format-g
+    "G004",     # Logging statement uses f-string
 ]
 
 
@@ -67,10 +74,24 @@ builtins-ignorelist = ["id", "input"]
 
 
 [lint.per-file-ignores]
-"docs/conf.py" = ["INP001", "A001"]
+"docs/conf.py" = [
+    "INP001",   # File `conf.py` is part of an implicit namespace package. Add an `__init__.py`.
+    "A001",     # Variable `copyright` is shadowing a Python builtin
+    "PTH118",   # `os.path.join()` should be replaced by `Path` with `/` operator
+    "PTH100",   # `os.path.abspath()` should be replaced by `Path.resolve()`
+]
 "setup.py" = ["PTH123"]
 "run/**" = ["INP001"]
+"tests/*" = [
+    "ANN",  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
 
+    # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+    "S101",     # Use of assert detected
+
+    # https://docs.astral.sh/ruff/rules/#refactor-r
+    "PLR2004",  # Magic value used in comparison, consider replacing {value} with a constant variable
+    "PLR0913",  # Too many arguments in function definition ({c_args} > {max_args})
+]
 
 [lint.isort]
 # https://docs.astral.sh/ruff/settings/#isort-lines-after-imports

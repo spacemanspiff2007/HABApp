@@ -1,4 +1,4 @@
-from typing import Any, Final, FrozenSet, Optional
+from typing import Any, Final
 
 import HABApp.core
 
@@ -70,25 +70,25 @@ class ItemAddedEvent(OpenhabEvent):
     """
     :ivar str name:
     :ivar str type:
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
+    :ivar str | None label:
+    :ivar frozenset[str] tags:
+    :ivar frozenset[str] groups:
     """
     name: str
     type: str
-    label: Optional[str]
-    tags: FrozenSet[str]
-    groups: FrozenSet[str]
+    label: str | None
+    tags: frozenset[str]
+    groups: frozenset[str]
 
-    def __init__(self, name: str, type: str, label: Optional[str],
-                 tags: FrozenSet[str], group_names: FrozenSet[str]):
+    def __init__(self, name: str, type: str, label: str | None,
+                 tags: frozenset[str], group_names: frozenset[str]):
         super().__init__()
 
         self.name: str = name
         self.type: str = type
-        self.label: Optional[str] = label
-        self.tags: FrozenSet[str] = tags
-        self.groups: FrozenSet[str] = group_names
+        self.label: str | None = label
+        self.tags: frozenset[str] = tags
+        self.groups: frozenset[str] = group_names
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
@@ -110,25 +110,25 @@ class ItemUpdatedEvent(OpenhabEvent):
     """
     :ivar str name:
     :ivar str type:
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
+    :ivar str | None label:
+    :ivar frozenset[str] tags:
+    :ivar frozenset[str] groups:
     """
     name: str
     type: str
-    label: Optional[str]
-    tags: FrozenSet[str]
-    groups: FrozenSet[str]
+    label: str | None
+    tags: frozenset[str]
+    groups: frozenset[str]
 
-    def __init__(self, name: str, type: str, label: Optional[str],
-                 tags: FrozenSet[str], group_names: FrozenSet[str]):
+    def __init__(self, name: str, type: str, label: str | None,
+                 tags: frozenset[str], group_names: frozenset[str]):
         super().__init__()
 
         self.name: str = name
         self.type: str = type
-        self.label: Optional[str] = label
-        self.tags: FrozenSet[str] = tags
-        self.groups: FrozenSet[str] = group_names
+        self.label: str | None = label
+        self.tags: frozenset[str] = tags
+        self.groups: frozenset[str] = group_names
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):

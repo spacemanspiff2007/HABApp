@@ -1,4 +1,3 @@
-from typing import Union
 
 from easyconfig.models import BaseModel
 from pydantic import AnyHttpUrl, ByteSize, Field, TypeAdapter, field_validator
@@ -9,7 +8,7 @@ class Ping(BaseModel):
                                             'an update from HABApp and get the updated value back from openHAB '
                                             'in milliseconds')
     item: str = Field('HABApp_Ping', description='Name of the Numberitem')
-    interval: Union[int, float] = Field(10, description='Seconds between two pings', ge=0.1)
+    interval: int | float = Field(10, description='Seconds between two pings', ge=0.1)
 
 
 class General(BaseModel):

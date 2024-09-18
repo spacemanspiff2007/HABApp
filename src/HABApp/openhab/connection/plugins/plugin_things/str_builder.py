@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Optional, Pattern, Tuple, Union
+from re import Pattern
 
 from .filters import CHANNEL_ALIAS, THING_ALIAS
 
@@ -12,7 +12,7 @@ RE_ACCESSOR = re.compile(f'(?P<accessor>[^{SEPARATOR}]+)(?:{SEPARATOR}(?P<operat
 class StrBuilder:
     def __init__(self, value: str):
         self.template: str = value.strip()
-        self.regex: Dict[str, Tuple[str, Optional[Pattern], Optional[str]]] = {}
+        self.regex: dict[str, tuple[str, Pattern | None, str | None]] = {}
 
         for p in RE_PLACEHOLDERS.findall(value):
             m = RE_ACCESSOR.fullmatch(p)
@@ -40,7 +40,7 @@ class StrBuilder:
             assert accessor in THING_ALIAS or accessor in CHANNEL_ALIAS, accessor
             self.regex[f'{{{p}}}'] = accessor.strip(), regex, replace
 
-    def get_str(self, context: Dict[str, str]) -> str:
+    def get_str(self, context: dict[str, str]) -> str:
         out = self.template
         for search, p in self.regex.items():
             accessor, regex, replace = p
@@ -64,7 +64,7 @@ class StrBuilder:
         return f'<{self.__class__.__name__} "{self.template}">'
 
 
-def apply_builder(_in: Union[dict, list], context: dict):
+def apply_builder(_in: dict | list, context: dict):
     if isinstance(_in, StrBuilder):
         return _in.get_str(context)
 

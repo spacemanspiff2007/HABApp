@@ -3,22 +3,17 @@ from __future__ import annotations
 from asyncio import Future as _Future
 from asyncio import Task as _Task
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
+from collections.abc import Callable
+from collections.abc import Callable as _Callable
+from collections.abc import Coroutine as _Coroutine
 from contextvars import ContextVar as _ContextVar
 from contextvars import Token as _Token
 from typing import Any as _Any
-from typing import Callable, Final
-from typing import Callable as _Callable
-from typing import Coroutine as _Coroutine
+from typing import Final
+from typing import ParamSpec as _ParamSpec
 from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
-from HABApp.core.const.const import PYTHON_310
-
-
-if PYTHON_310:
-    from typing import ParamSpec as _ParamSpec
-else:
-    from typing_extensions import ParamSpec as _ParamSpec
 
 
 async_context = _ContextVar('async_ctx')

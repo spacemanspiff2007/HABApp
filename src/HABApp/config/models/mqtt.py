@@ -2,7 +2,7 @@ import logging
 import random
 import string
 from pathlib import Path
-from typing import Literal, Optional, Tuple
+from typing import Literal
 
 import pydantic
 from easyconfig.models import BaseModel
@@ -42,7 +42,7 @@ class Connection(BaseModel):
 
 class Subscribe(BaseModel):
     qos: QOS = Field(default=0, description='Default QoS for subscribing')
-    topics: Tuple[Tuple[str, Optional[QOS]], ...] = Field(default=('#', ))
+    topics: tuple[tuple[str, QOS | None], ...] = Field(default=('#', ))
 
     @pydantic.field_validator('topics', mode='before')
     def parse_topics(cls, v):

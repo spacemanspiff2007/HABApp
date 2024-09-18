@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import sys
-import typing
 
 import HABApp
 from HABApp.__cmd_args__ import find_config_folder, parse_args
@@ -9,7 +8,7 @@ from HABApp.__debug_info__ import print_debug_info
 from HABApp.__splash_screen__ import show_screen
 
 
-def main() -> typing.Union[int, str]:
+def main() -> int | str:
 
     show_screen()
 
@@ -27,7 +26,7 @@ def main() -> typing.Union[int, str]:
 
         # see if we have user code (e.g. for additional logging configuration or additional setup)
         try:
-            import HABAppUser
+            import HABAppUser  # noqa: F401
         except ModuleNotFoundError:
             pass
 

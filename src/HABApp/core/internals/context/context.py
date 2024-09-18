@@ -1,4 +1,5 @@
-from typing import Callable, Optional, Set, TypeVar
+from collections.abc import Callable
+from typing import Optional, TypeVar
 
 from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBoundObjectIsAlreadyUnlinkedError
 
@@ -31,7 +32,7 @@ HINT_CONTEXT_BOUND_OBJ = TypeVar('HINT_CONTEXT_BOUND_OBJ', bound=ContextBoundObj
 
 class Context:
     def __init__(self):
-        self.objs: Set[ContextBoundObj] = set()
+        self.objs: set[ContextBoundObj] = set()
 
     def add_obj(self, obj: ContextBoundObj):
         assert isinstance(obj, ContextBoundObj)
@@ -47,11 +48,11 @@ class Context:
         obj._ctx_link(self)
         return obj
 
-    def get_callback_name(self, callback: Callable) -> Optional[str]:
+    def get_callback_name(self, callback: Callable) -> str | None:
         raise NotImplementedError()
 
 
 class ContextProvidingObj:
-    def __init__(self, context: Optional[Context] = None, **kwargs):
+    def __init__(self, context: Context | None = None, **kwargs):
         super().__init__(**kwargs)
         self._habapp_ctx: Context = context

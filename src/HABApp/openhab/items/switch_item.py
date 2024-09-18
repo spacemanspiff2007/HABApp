@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Final, FrozenSet, Mapping, Optional, Tuple
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Final
 
 from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
 from HABApp.openhab.definitions import OnOffValue
@@ -7,9 +8,6 @@ from HABApp.openhab.items.commands import OnOffCommand
 
 
 if TYPE_CHECKING:
-    Tuple = Tuple
-    Optional = Optional
-    FrozenSet = FrozenSet
     Mapping = Mapping
     MetaData = MetaData
 
@@ -24,9 +22,9 @@ class SwitchItem(OpenhabItem, OnOffCommand):
     :ivar str name: |oh_item_desc_name|
     :ivar str value: |oh_item_desc_value|
 
-    :ivar Optional[str] label: |oh_item_desc_label|
-    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
-    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar str | None label: |oh_item_desc_label|
+    :ivar frozenset[str] tags: |oh_item_desc_tags|
+    :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 

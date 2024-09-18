@@ -1,4 +1,5 @@
-from typing import Dict, Final, Iterable, List, TypeVar
+from collections.abc import Iterable
+from typing import Final, TypeVar
 
 from HABApp.core.const.const import PYTHON_311
 
@@ -30,8 +31,8 @@ TYPE_FORMATTER = TypeVar('TYPE_FORMATTER', bound=ValueFormatter)
 
 class FormatterScope:
     def __init__(self, field_names: Iterable[str],
-                 skip_alignment: Iterable[str] = (), min_width: Dict[str, int] = {}):
-        self.lines: List[Dict[str, TYPE_FORMATTER]] = []
+                 skip_alignment: Iterable[str] = (), min_width: dict[str, int] = {}):
+        self.lines: list[dict[str, TYPE_FORMATTER]] = []
         self.keys: Final = tuple(field_names)
 
         # alignment options
@@ -40,13 +41,13 @@ class FormatterScope:
 
         assert set(skip_alignment).issubset(self.keys)
 
-    def add(self, obj: Dict[str, TYPE_FORMATTER]) -> Self:
+    def add(self, obj: dict[str, TYPE_FORMATTER]) -> Self:
         assert set(obj.keys()).issubset(self.keys)
         self.lines.append(obj)
         return self
 
-    def get_indent_dict(self, ) -> Dict[str, int]:
-        columns: Dict[str, List[TYPE_FORMATTER]] = {key: [] for key in self.keys}
+    def get_indent_dict(self, ) -> dict[str, int]:
+        columns: dict[str, list[TYPE_FORMATTER]] = {key: [] for key in self.keys}
         for line_dict in self.lines:
             for key in self.keys:
                 formatter = line_dict.get(key)
@@ -71,14 +72,14 @@ class FormatterScope:
 
         return column_width
 
-    def get_lines(self) -> List[str]:
+    def get_lines(self) -> list[str]:
         if not self.lines:
             return []
 
         column_width = self.get_indent_dict()
 
         ret_lines = []
-        for line_dict in self.lines:    # type: Dict[str, TYPE_FORMATTER]
+        for line_dict in self.lines:    # type: dict[str, TYPE_FORMATTER]
             line_vals = []
             for key, value_formatter in line_dict.items():
                 width = column_width.get(key, 0)

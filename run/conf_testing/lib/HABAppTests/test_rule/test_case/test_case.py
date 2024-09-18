@@ -1,5 +1,5 @@
 import time
-from typing import Callable
+from collections.abc import Callable
 
 from HABAppTests.test_rule._rest_patcher import RestPatcher
 from HABAppTests.test_rule.test_case import TestResult, TestResultStatus

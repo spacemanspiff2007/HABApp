@@ -1,10 +1,9 @@
 from colorsys import hsv_to_rgb as _hsv_to_rgb
 from colorsys import rgb_to_hsv as _rgb_to_hsv
-from typing import Optional, Tuple, Union
 
 
-def rgb_to_hsb(r: Union[int, float], g: Union[int, float], b: Union[int, float],
-               max_rgb_value: int = 255, ndigits: Optional[int] = 2) -> Tuple[float, float, float]:
+def rgb_to_hsb(r: int | float, g: int | float, b: int | float,
+               max_rgb_value: int = 255, ndigits: int | None = 2) -> tuple[float, float, float]:
     """Convert from rgb to hsb/hsv
 
     :param r: red value
@@ -27,7 +26,7 @@ def rgb_to_hsb(r: Union[int, float], g: Union[int, float], b: Union[int, float],
     return h, s, v
 
 
-def hsb_to_rgb(h, s, b, max_rgb_value=255) -> Tuple[int, int, int]:
+def hsb_to_rgb(h, s, b, max_rgb_value=255) -> tuple[int, int, int]:
     """Convert from rgb to hsv/hsb
 
     :param h: hue

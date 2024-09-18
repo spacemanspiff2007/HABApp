@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import TypeAlias
 
 from aiomqtt import Client, MqttError
 
@@ -9,15 +10,10 @@ from HABApp.core.asyncio import AsyncContext
 from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.connections.base_plugin import BaseConnectionPluginConnectedTask
-from HABApp.core.const.const import PYTHON_310
 
 
 log = logging.getLogger('HABApp.mqtt.connection')
 
-if PYTHON_310:
-    from typing import TypeAlias
-else:
-    from typing import TypeAlias
 
 CONTEXT_TYPE: TypeAlias = Client | None
 

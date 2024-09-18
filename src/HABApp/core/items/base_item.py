@@ -1,5 +1,5 @@
 from datetime import datetime as dt_datetime
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from whenever import Instant
 
@@ -86,7 +86,7 @@ class BaseItem(ItemRegistryItem):
         return self._last_update.add_watch(secs)
 
     def listen_event(self, callback: TYPE_EVENT_CALLBACK,
-                     event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None) -> HINT_EVENT_BUS_LISTENER:
+                     event_filter: HINT_EVENT_FILTER_OBJ | None = None) -> HINT_EVENT_BUS_LISTENER:
         """
         Register an event listener which listens to all event that the item receives
 

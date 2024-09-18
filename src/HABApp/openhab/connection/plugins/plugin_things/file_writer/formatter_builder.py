@@ -1,4 +1,5 @@
-from typing import Any, Callable, Final, Optional
+from collections.abc import Callable
+from typing import Any, Final
 
 from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserItem
 
@@ -11,7 +12,7 @@ class BuilderBase:
 
 
 class ConstValueFormatterBuilder(BuilderBase):
-    def __init__(self, value: str, condition: Optional[Callable] = None):
+    def __init__(self, value: str, condition: Callable | None = None):
         self.value: Final = value
         self.condition: Final = condition
 

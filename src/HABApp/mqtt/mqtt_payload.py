@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, Tuple
+from typing import Any
 
 from aiomqtt import Message
 
@@ -11,7 +11,7 @@ from HABApp.core.wrapper import process_exception
 log = logging.getLogger(f'{TOPIC_EVENTS}.mqtt')
 
 
-def get_msg_payload(msg: Message) -> Tuple[Optional[str], Any]:
+def get_msg_payload(msg: Message) -> tuple[str | None, Any]:
     try:
         topic = msg.topic.value
         raw = msg.payload

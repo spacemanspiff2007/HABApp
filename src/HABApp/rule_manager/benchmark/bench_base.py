@@ -1,4 +1,3 @@
-from typing import Optional
 
 import HABApp
 from HABApp.core.const.topics import TOPIC_ERRORS
@@ -13,8 +12,8 @@ class BenchBaseRule(HABApp.Rule):
         self.err_watcher = None
         self.errors = []
 
-        self.prev_rule: Optional[BenchBaseRule] = None
-        self.next_rule: Optional[BenchBaseRule] = None
+        self.prev_rule: BenchBaseRule | None = None
+        self.next_rule: BenchBaseRule | None = None
 
     def link_rule(self, next_rule: 'BenchBaseRule'):
         assert self.next_rule is None

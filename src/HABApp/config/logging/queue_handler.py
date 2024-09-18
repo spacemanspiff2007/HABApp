@@ -2,7 +2,7 @@ import logging
 from queue import Empty, SimpleQueue
 from threading import Lock, Thread
 from time import sleep
-from typing import Final, Optional
+from typing import Final
 
 import HABApp
 
@@ -19,11 +19,11 @@ class HABAppQueueHandler:
     FLUSH_DELAY: float = CONFIG.habapp.logging.flush_every
 
     def __init__(self, queue: SimpleQueue, handler_name: str, thread_name: str):
-        self._handler: Optional[logging.Handler] = None
+        self._handler: logging.Handler | None = None
         self._handler_name: Final = handler_name
         self._queue: Final = queue
         self._name: Final = thread_name
-        self._thread: Optional[Thread] = None
+        self._thread: Thread | None = None
 
     def start(self) -> None:
         with LOCK:

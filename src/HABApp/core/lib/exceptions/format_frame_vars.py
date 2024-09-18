@@ -1,8 +1,9 @@
 import ast
 import datetime
+from collections.abc import Callable
 from inspect import isclass, ismodule
 from pathlib import Path
-from typing import Any, Callable, List, Set, Tuple
+from typing import Any
 
 from easyconfig.config_objs import ConfigObj
 from immutables import Map
@@ -47,7 +48,7 @@ def _filter_expressions(name: str, value: Any) -> bool:
     return False
 
 
-SKIP_VARIABLE: Tuple[Callable[[str, Any], bool], ...] = (
+SKIP_VARIABLE: tuple[Callable[[str, Any], bool], ...] = (
     # module imports
     lambda name, value: ismodule(value),
 
@@ -64,7 +65,7 @@ SKIP_VARIABLE: Tuple[Callable[[str, Any], bool], ...] = (
     _filter_expressions
 )
 
-ORDER_VARIABLE: Tuple[Callable[[Variable], bool], ...] = (
+ORDER_VARIABLE: tuple[Callable[[Variable], bool], ...] = (
     lambda x: isclass(x.value),
 )
 
@@ -78,15 +79,15 @@ def skip_variable(var: Variable) -> bool:
     return False
 
 
-def format_frame_variables(tb: List[str], stack_variables: List[Variable]):
+def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
     if not stack_variables:
         return None
 
     # remove variables that shall not be printed
-    used_vars: List[Variable] = [v for v in stack_variables if not skip_variable(v)]
+    used_vars: list[Variable] = [v for v in stack_variables if not skip_variable(v)]
 
     # attributes
-    dotted_names: Set[str] = {n.name.split('.')[0] for n in used_vars if '.' in n.name}
+    dotted_names: set[str] = {n.name.split('.')[0] for n in used_vars if '.' in n.name}
 
     # Sort output
     used_vars = sorted(used_vars, key=lambda x: (

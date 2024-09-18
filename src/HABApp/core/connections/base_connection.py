@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from asyncio import CancelledError
-from typing import TYPE_CHECKING, Callable, Final, Literal
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Final, Literal
 
 import HABApp
 from HABApp.core.connections._definitions import ConnectionStatus, connection_log

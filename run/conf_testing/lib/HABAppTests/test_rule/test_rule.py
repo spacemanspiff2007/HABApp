@@ -1,6 +1,6 @@
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Dict, List
 
 import HABApp
 from HABAppTests.test_rule.test_case import TestCase, TestResult, TestResultStatus
@@ -25,7 +25,7 @@ class TestBaseRule(HABApp.Rule):
         super().__init__()
         self._rule_status = TestRuleStatus.CREATED
         self._rule_id = get_next_id(self)
-        self._tests: Dict[str, TestCase] = {}
+        self._tests: dict[str, TestCase] = {}
 
         self.__warnings = []
         self.__errors = []
@@ -144,7 +144,7 @@ class TestBaseRule(HABApp.Rule):
 
         self.__worst_result = max(self.__worst_result, res.state)
 
-    def _run_tests(self) -> List[TestResult]:
+    def _run_tests(self) -> list[TestResult]:
         self._rule_status = TestRuleStatus.RUNNING
         self._worker_events_sub()
 
@@ -170,7 +170,7 @@ class TestBaseRule(HABApp.Rule):
         self._rule_status = TestRuleStatus.FINISHED
         return results
 
-    def __run_tests(self) -> List[TestResult]:
+    def __run_tests(self) -> list[TestResult]:
         count = len(self._tests)
         width = 1
         while count >= 10 ** width:

@@ -5,7 +5,7 @@ import warnings
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from re import Pattern
-from typing import Any, Final, Literal, Optional, TypeVar, Union, overload
+from typing import Any, Final, Literal, ParamSpec, TypeVar, overload
 
 import HABApp
 import HABApp.core
@@ -13,7 +13,6 @@ import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.asyncio import create_task
-from HABApp.core.const.const import PYTHON_310
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.internals import (
     HINT_EVENT_BUS_LISTENER,
@@ -38,12 +37,6 @@ from .interfaces.rule_subprocess import (
     build_exec_params,
 )
 from .rule_hook import get_rule_hook as _get_rule_hook
-
-
-if PYTHON_310:
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
 
 
 log = logging.getLogger('HABApp.Rule')
@@ -125,9 +118,9 @@ class Rule(ContextProvidingObj):
             event
         )
 
-    def listen_event(self, name: Union[HINT_ITEM_OBJ, str],
+    def listen_event(self, name: HINT_ITEM_OBJ | str,
                      callback: TYPE_EVENT_CALLBACK,
-                     event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None
+                     event_filter: HINT_EVENT_FILTER_OBJ | None = None
                      ) -> HINT_EVENT_BUS_LISTENER:
         """
         Register an event listener
@@ -259,18 +252,18 @@ class Rule(ContextProvidingObj):
                 cb.run, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
         )
 
-    def get_rule(self, rule_name: str) -> 'Union[Rule, list[Rule]]':
+    def get_rule(self, rule_name: str) -> 'Rule | list[Rule]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     @staticmethod
-    def get_items(type: Union[tuple[HINT_TYPE_ITEM_OBJ, ...], HINT_TYPE_ITEM_OBJ] = None,
-                  name: Union[str, Pattern[str], None] = None,
-                  tags: Union[str, Iterable[str], None] = None,
-                  groups: Union[str, Iterable[str], None] = None,
-                  metadata: Union[str, Pattern[str], None] = None,
-                  metadata_value: Union[str, Pattern[str], None] = None,
-                  ) -> Union[list[HINT_ITEM_OBJ], list[BaseItem]]:
+    def get_items(type: tuple[HINT_TYPE_ITEM_OBJ, ...] | HINT_TYPE_ITEM_OBJ = None,
+                  name: str | Pattern[str] | None = None,
+                  tags: str | Iterable[str] | None = None,
+                  groups: str | Iterable[str] | None = None,
+                  metadata: str | Pattern[str] | None = None,
+                  metadata_value: str | Pattern[str] | None = None,
+                  ) -> list[HINT_ITEM_OBJ] | list[BaseItem]:
         """Search the HABApp item registry and return the found items.
 
         :param type: item has to be an instance of this class

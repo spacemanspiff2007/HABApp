@@ -2,11 +2,11 @@ import asyncio
 import functools
 import logging
 import typing
+from collections.abc import Callable
 from logging import Logger
 
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
-from typing import Callable, Union
 
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.const.topics import TOPIC_WARNINGS as TOPIC_WARNINGS
@@ -20,7 +20,7 @@ log = logging.getLogger('HABApp')
 post_event = uses_post_event()
 
 
-def process_exception(func: Union[Callable, str], e: Exception,
+def process_exception(func: Callable | str, e: Exception,
                       do_print=False, logger: logging.Logger = log):
     lines = format_exception(e)
 
@@ -89,15 +89,15 @@ def ignore_exception(func):
 
 
 class ExceptionToHABApp:
-    def __init__(self, logger: typing.Optional[Logger] = None, log_level: int = logging.ERROR,
+    def __init__(self, logger: Logger | None = None, log_level: int = logging.ERROR,
                  ignore_exception: bool = True):
-        self.log: typing.Optional[Logger] = logger
+        self.log: Logger | None = logger
         self.log_level = log_level
         self.ignore_exception: bool = ignore_exception
 
         self.raised_exception = False
 
-        self.proc_tb: typing.Optional[typing.Callable[[list], list]] = None
+        self.proc_tb: typing.Callable[[list], list] | None = None
 
     def __enter__(self):
         self.raised_exception = False

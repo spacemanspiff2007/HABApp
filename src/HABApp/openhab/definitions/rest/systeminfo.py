@@ -1,4 +1,3 @@
-from typing import Optional
 
 from msgspec import Struct
 
@@ -9,13 +8,13 @@ from msgspec import Struct
 class SystemInfoResp(Struct, rename='camel', kw_only=True):
     config_folder: str
     userdata_folder: str
-    log_folder: Optional[str] = None
-    java_version: Optional[str] = None
-    java_vendor: Optional[str] = None
-    java_vendor_version: Optional[str] = None
-    os_name: Optional[str] = None
-    os_version: Optional[str] = None
-    os_architecture: Optional[str] = None
+    log_folder: str | None = None
+    java_version: str | None = None
+    java_vendor: str | None = None
+    java_vendor_version: str | None = None
+    os_name: str | None = None
+    os_version: str | None = None
+    os_architecture: str | None = None
     available_processors: int
     free_memory: int
     total_memory: int

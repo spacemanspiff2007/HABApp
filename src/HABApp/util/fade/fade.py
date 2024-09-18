@@ -1,6 +1,6 @@
 from datetime import timedelta
 from time import time
-from typing import Optional, Union
+from typing import Union
 
 from HABApp.core.internals import AutoContextBoundObj, wrap_func
 
@@ -46,13 +46,13 @@ class Fade:
         self._fade_factor = 0
         self._fade_finished = True
 
-        self._fade_worker: Optional[FadeWorker] = None
+        self._fade_worker: FadeWorker | None = None
         self.__callback = wrap_func(callback) if callback is not None else None
 
         self.value = 0
 
-    def setup(self, start_value: VAL_TYPE, stop_value: VAL_TYPE, duration: Union[int, float, timedelta],
-              min_step_duration: float = MIN_STEP_TIME, now: Optional[float] = None) -> 'Fade':
+    def setup(self, start_value: VAL_TYPE, stop_value: VAL_TYPE, duration: int | float | timedelta,
+              min_step_duration: float = MIN_STEP_TIME, now: float | None = None) -> 'Fade':
         """Calculates everything that is needed to fade a value
 
         :param start_value: Start value
@@ -87,7 +87,7 @@ class Fade:
         self._fade_finished = False
         return self
 
-    def get_value(self, now: Optional[float] = None) -> float:
+    def get_value(self, now: float | None = None) -> float:
         """Returns the current value. If the fade is finished it will always return the stop value.
 
         :param now: time.time() timestamp for which the value shall be returned. Can be used to sync multiple fades

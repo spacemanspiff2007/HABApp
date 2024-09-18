@@ -1,4 +1,3 @@
-from typing import Optional
 
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_get_item, uses_item_registry
@@ -36,7 +35,7 @@ class MqttItem(MqttBaseItem):
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def publish(self, payload, qos: Optional[int] = None, retain: Optional[bool] = None):
+    def publish(self, payload, qos: int | None = None, retain: bool | None = None):
         """
         Publish the payload under the topic from the item.
 

@@ -53,9 +53,9 @@ class AggregationItem(BaseValueItem):
         self._ts: typing.Deque[float] = collections.deque()
         self._vals: typing.Deque[typing.Any] = collections.deque()
 
-        self.__listener: typing.Optional[HINT_EVENT_BUS_LISTENER] = None
+        self.__listener: HINT_EVENT_BUS_LISTENER | None = None
 
-        self.__task: typing.Optional[asyncio.Future] = None
+        self.__task: asyncio.Future | None = None
 
     def aggregation_func(self, func: typing.Callable[[typing.Iterable], typing.Any]) -> 'AggregationItem':
         """Set the function which will be used to aggregate all values. E.g. ``min`` or ``max``
@@ -66,7 +66,7 @@ class AggregationItem(BaseValueItem):
         self.__aggregation_func = func
         return self
 
-    def aggregation_period(self, period: typing.Union[float, int, timedelta]) -> 'AggregationItem':
+    def aggregation_period(self, period: float | int | timedelta) -> 'AggregationItem':
         """Set the period in which the items will be aggregated
 
         :param period: period in seconds
@@ -84,7 +84,7 @@ class AggregationItem(BaseValueItem):
 
         return self
 
-    def aggregation_source(self, source: typing.Union[BaseValueItem, str],
+    def aggregation_source(self, source: BaseValueItem | str,
                            only_changes: bool = False) -> 'AggregationItem':
         """Set the source item which changes will be aggregated
 

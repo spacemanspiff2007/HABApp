@@ -5,7 +5,7 @@ from typing import Union
 TH_POSITIVE_TIME_DIFF = Union[int, float, timedelta]
 
 
-def get_positive_time_diff(arg: TH_POSITIVE_TIME_DIFF, round_digits=None) -> Union[int, float]:
+def get_positive_time_diff(arg: TH_POSITIVE_TIME_DIFF, round_digits=None) -> int | float:
     if isinstance(arg, timedelta):
         diff = arg.total_seconds()
         if round_digits is not None:

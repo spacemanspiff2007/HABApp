@@ -1,5 +1,5 @@
 from threading import Lock
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from HABApp.core.const import MISSING
 from HABApp.core.items import Item
@@ -30,8 +30,8 @@ class MultiModeItem(Item):
     def __init__(self, name: str, initial_value=None, default_value=MISSING):
         super().__init__(name=name, initial_value=initial_value)
 
-        self.__values_by_prio: Dict[int, HINT_BASE_MODE] = {}
-        self.__values_by_name: Dict[str, HINT_BASE_MODE] = {}
+        self.__values_by_prio: dict[int, HINT_BASE_MODE] = {}
+        self.__values_by_name: dict[str, HINT_BASE_MODE] = {}
 
         self._default_value = default_value
 
@@ -58,7 +58,7 @@ class MultiModeItem(Item):
         modes = sorted(self.__values_by_prio.items())
         self.__values_by_prio.clear()
 
-        lower_mode: Optional[HINT_BASE_MODE] = None
+        lower_mode: HINT_BASE_MODE | None = None
         for prio, mode in modes:
             self.__values_by_prio[prio] = mode
             mode._set_mode_lower_prio(lower_mode)
@@ -103,7 +103,7 @@ class MultiModeItem(Item):
             self.__sort_modes()
         return self
 
-    def all_modes(self) -> List[Tuple[int, HINT_BASE_MODE]]:
+    def all_modes(self) -> list[tuple[int, HINT_BASE_MODE]]:
         """Returns a sorted list containing tuples with the priority and the mode
 
         :return: List with priorities and modes

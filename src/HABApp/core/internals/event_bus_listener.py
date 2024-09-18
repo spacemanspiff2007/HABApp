@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, AutoContextBoundObj, Context, uses_event_bus
 from HABApp.core.internals.event_bus import EventBusBaseListener
@@ -33,7 +33,7 @@ HINT_EVENT_BUS_LISTENER = TypeVar('HINT_EVENT_BUS_LISTENER', bound=EventBusListe
 
 class ContextBoundEventBusListener(EventBusListener, AutoContextBoundObj):
     def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: HINT_EVENT_FILTER_OBJ,
-                 parent_ctx: Optional[Context] = None):
+                 parent_ctx: Context | None = None):
         super().__init__(topic=topic, callback=callback, event_filter=event_filter, parent_ctx=parent_ctx)
 
         assert isinstance(callback, WrappedFunctionBase)

@@ -1,4 +1,5 @@
-from typing import Any, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import aiohttp
 
@@ -6,7 +7,7 @@ import HABApp
 from HABApp.core.const.json import dump_json
 
 
-CLIENT: Optional[aiohttp.ClientSession] = None
+CLIENT: aiohttp.ClientSession | None = None
 
 
 async def create_client():
@@ -19,7 +20,7 @@ async def create_client():
     shutdown.register_func(CLIENT.close, msg='Closing generic http connection')
 
 
-def get(url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
+def get(url: str, params: Mapping[str, str] | None = None, **kwargs: Any)\
         -> aiohttp.client._RequestContextManager:
     """http get request
 
@@ -36,7 +37,7 @@ def get(url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
     return CLIENT.get(url, params=params, **kwargs)
 
 
-def post(url: str, params: Optional[Mapping[str, str]] = None,
+def post(url: str, params: Mapping[str, str] | None = None,
          data: Any = None, json: Any = None, **kwargs: Any) -> aiohttp.client._RequestContextManager:
     """http post request
 
@@ -57,7 +58,7 @@ def post(url: str, params: Optional[Mapping[str, str]] = None,
     return CLIENT.post(url, params=params, data=data, json=json, **kwargs)
 
 
-def put(url: str, params: Optional[Mapping[str, str]] = None,
+def put(url: str, params: Mapping[str, str] | None = None,
         data: Any = None, json: Any = None, **kwargs: Any) -> aiohttp.client._RequestContextManager:
     """http put request
 
@@ -78,7 +79,7 @@ def put(url: str, params: Optional[Mapping[str, str]] = None,
     return CLIENT.put(url, params=params, data=data, json=json, **kwargs)
 
 
-def delete(url: str, params: Optional[Mapping[str, str]] = None, **kwargs: Any)\
+def delete(url: str, params: Mapping[str, str] | None = None, **kwargs: Any)\
         -> aiohttp.client._RequestContextManager:
     """http delete request
 

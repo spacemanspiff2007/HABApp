@@ -1,14 +1,15 @@
 import inspect
-from typing import Any, Dict, Iterable, Optional, Type, get_type_hints
+from collections.abc import Iterable
+from typing import Any, get_type_hints
 
 import pytest
 
 from .docstr import get_ivars_from_docstring
 
 
-def check_class_annotations(cls: Type[object],
-                            correct_hints: Optional[Dict[str, Any]] = None,
-                            init_alias: Optional[Dict[str, str]] = None, init_missing: Iterable[str] = (),
+def check_class_annotations(cls: type[object],
+                            correct_hints: dict[str, Any] | None = None,
+                            init_alias: dict[str, str] | None = None, init_missing: Iterable[str] = (),
                             annotations_missing=False):
     """Ensure that the annotations match with the actual variables"""
 

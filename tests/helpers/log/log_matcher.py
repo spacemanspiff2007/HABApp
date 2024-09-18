@@ -1,7 +1,8 @@
 import logging
 import os
 import re
-from typing import Final, Iterable, List, Optional, Union
+from collections.abc import Iterable
+from typing import Final
 
 from .log_utils import SimpleLogRecord, get_log_level_name, get_log_level_no
 
@@ -18,7 +19,7 @@ class LogEntryMatcherBase:
 
 
 class LogLevelMatcher(LogEntryMatcherBase):
-    def __init__(self, level: Union[int, str]):
+    def __init__(self, level: int | str):
         self.level: Final = get_log_level_no(level)
         self.level_name: Final = get_log_level_name(self.level)
 
@@ -65,7 +66,7 @@ class AsyncDebugWarningMatcher(LogEntryMatcherBase):
 
 
 class LogEntryMatcher(LogEntryMatcherBase):
-    def __init__(self, name: Optional[str], level: Union[int, str], msg: str):
+    def __init__(self, name: str | None, level: int | str, msg: str):
         self.name: Final = name
         self.level: Final = get_log_level_no(level)
         self.level_name: Final = get_log_level_name(self.level)
@@ -83,7 +84,7 @@ class LogEntryMatcher(LogEntryMatcherBase):
 class ConsecutiveMatcher(LogEntryMatcherBase):
     def __init__(self, matcher: Iterable[LogEntryMatcherBase]):
         self.matchers: Final = tuple(matcher)
-        self.rec_ok: List[SimpleLogRecord] = []
+        self.rec_ok: list[SimpleLogRecord] = []
 
     def matches(self, r: SimpleLogRecord):
         if r in self.rec_ok:
@@ -92,7 +93,7 @@ class ConsecutiveMatcher(LogEntryMatcherBase):
 
         recs = []
 
-        current: Optional[SimpleLogRecord] = None
+        current: SimpleLogRecord | None = None
         for m in self.matchers:
             if current is not None:
                 current = current.next
@@ -114,9 +115,9 @@ class ConsecutiveMatcher(LogEntryMatcherBase):
 
 
 
-def create_matcher(name: Union[Iterable[str], Union[str, None]],
-                   level: Union[Iterable[Union[str, int]], Union[str, int]],
-                   msg: Union[Iterable[str], str]) -> List[LogEntryMatcher]:
+def create_matcher(name: Iterable[str] | str | None,
+                   level: Iterable[str | int] | str | int,
+                   msg: Iterable[str] | str) -> list[LogEntryMatcher]:
 
     names = [name] if isinstance(name, str) or name is None else name
     levels = [level] if isinstance(level, (str, int)) else level

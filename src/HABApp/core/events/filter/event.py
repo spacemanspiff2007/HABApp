@@ -1,5 +1,5 @@
 from inspect import isclass
-from typing import Final, Optional
+from typing import Final
 from typing import get_type_hints as typing_get_type_hints
 
 from HABApp.core.const import MISSING
@@ -17,9 +17,9 @@ class EventFilter(EventFilterBase):
         self.event_class: Final = event_class
 
         # Property filters
-        self.attr_name1: Optional[str] = None
+        self.attr_name1: str | None = None
         self.attr_value1 = None
-        self.attr_name2: Optional[str] = None
+        self.attr_name2: str | None = None
         self.attr_value2 = None
 
         type_hints = typing_get_type_hints(event_class)

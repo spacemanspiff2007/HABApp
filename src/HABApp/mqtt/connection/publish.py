@@ -1,5 +1,4 @@
 from asyncio import Queue
-from typing import Optional, Union
 
 from HABApp.config import CONFIG
 from HABApp.config.models.mqtt import QOS
@@ -47,14 +46,14 @@ class PublishHandler(MqttPlugin):
         QUEUE = None
 
 
-QUEUE: Optional[Queue] = Queue()
+QUEUE: Queue | None = Queue()
 
 
 PUBLISH_HANDLER = PublishHandler()
 
 
-def async_publish(topic: Union[str, ItemRegistryItem], payload, qos: Optional[QOS] = None,
-                  retain: Optional[bool] = None):
+def async_publish(topic: str | ItemRegistryItem, payload, qos: QOS | None = None,
+                  retain: bool | None = None):
     """
     Publish a value under a certain topic.
     If qos and/or retain is not set the value from the configuration file will be used.
@@ -77,7 +76,7 @@ def async_publish(topic: Union[str, ItemRegistryItem], payload, qos: Optional[QO
     queue.put_nowait((topic, payload, qos, retain))
 
 
-def publish(topic: Union[str, ItemRegistryItem], payload, qos: Optional[QOS] = None, retain: Optional[bool] = None):
+def publish(topic: str | ItemRegistryItem, payload, qos: QOS | None = None, retain: bool | None = None):
     """
     Publish a value under a certain topic.
     If qos and/or retain is not set the value from the configuration file will be used.

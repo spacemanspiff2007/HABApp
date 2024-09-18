@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 import HABApp
 from HABApp.core.const.topics import TOPIC_FILES as T_FILES
@@ -12,7 +11,7 @@ log = logging.getLogger('HABApp.Files')
 event_bus = uses_event_bus()
 
 
-async def _process_event(event: Union[RequestFileUnloadEvent, RequestFileLoadEvent]):
+async def _process_event(event: RequestFileUnloadEvent | RequestFileLoadEvent):
     name = event.name
     await HABApp.core.files.manager.process_file(name, HABApp.core.files.folders.get_path(name))
 

@@ -1,10 +1,9 @@
 import asyncio
 import logging
 import os
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
-
-from typing_extensions import TypeAlias
+from typing import Any, TypeAlias
 
 import HABApp
 from HABApp.core.logger import HABAppError, HABAppWarning
@@ -13,12 +12,12 @@ from HABApp.core.wrapper import process_exception
 
 log = logging.getLogger('HABApp.execute')
 
-HINT_EXEC_ARGS: TypeAlias = Union[str, Path]
-HINT_PYTHON_PATH: TypeAlias = Optional[Iterable[Union[str, Path]]]
+HINT_EXEC_ARGS: TypeAlias = str | Path
+HINT_PYTHON_PATH: TypeAlias = Iterable[str | Path] | None
 
 
-def _ensure_str_objs(objs: Iterable[HINT_EXEC_ARGS], key: str, enforce_abs=False) -> List[str]:
-    new_args: List[str] = []
+def _ensure_str_objs(objs: Iterable[HINT_EXEC_ARGS], key: str, enforce_abs=False) -> list[str]:
+    new_args: list[str] = []
 
     # args must be str, but we support str and Path
     for i, val in enumerate(objs):
@@ -44,7 +43,7 @@ def _ensure_str_objs(objs: Iterable[HINT_EXEC_ARGS], key: str, enforce_abs=False
 def build_exec_params(*args: HINT_EXEC_ARGS,
                       _capture_output=True,
                       _additional_python_path: HINT_PYTHON_PATH = None,
-                      **kwargs: Any) -> Tuple[Iterable[str], Dict[str, Any]]:
+                      **kwargs: Any) -> tuple[Iterable[str], dict[str, Any]]:
     # convenience for easy capturing
     if _capture_output:
         if 'stdout' in kwargs:
@@ -89,10 +88,10 @@ class FinishedProcessInfo:
     :var Optional[str] stderr: Error output of the process or ``None``
     """
 
-    def __init__(self, returncode: int, stdout: Optional[str], stderr: Optional[str]):
+    def __init__(self, returncode: int, stdout: str | None, stderr: str | None):
         self.returncode: int = returncode
-        self.stdout: Optional[str] = stdout
-        self.stderr: Optional[str] = stderr
+        self.stdout: str | None = stdout
+        self.stderr: str | None = stderr
 
     def __repr__(self):
         return f'<ProcessInfo: returncode: {self.returncode}, stdout: {self.stdout}, stderr: {self.stderr}>'

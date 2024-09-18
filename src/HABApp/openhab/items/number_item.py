@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 from fastnumbers import real
 
@@ -8,9 +9,7 @@ from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
 
 if TYPE_CHECKING:
-    Union = Union
     MetaData = MetaData
-    FrozenSet = FrozenSet
     Mapping = Mapping
 
 
@@ -18,16 +17,16 @@ class NumberItem(OpenhabItem):
     """NumberItem which accepts and converts the data types from OpenHAB
 
     :ivar str name: |oh_item_desc_name|
-    :ivar Union[int, float] value: |oh_item_desc_value|
+    :ivar int | float value: |oh_item_desc_value|
 
-    :ivar Optional[str] label: |oh_item_desc_label|
-    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
-    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar str | None label: |oh_item_desc_label|
+    :ivar frozenset[str] tags: |oh_item_desc_tags|
+    :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
     @property
-    def unit(self) -> Optional[str]:
+    def unit(self) -> str | None:
         """Return the item unit if it is a "Unit of Measurement" item else None"""
         if (unit := self.metadata.get('unit')) is None:
             return None

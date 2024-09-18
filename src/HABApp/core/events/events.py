@@ -1,4 +1,4 @@
-from typing import Any, Final, Union
+from typing import Any, Final
 
 
 class ComplexEventValue:
@@ -46,13 +46,13 @@ class ValueChangeEvent:
 class ItemNoChangeEvent:
     """
     :ivar str               name:
-    :ivar Union[int, float] seconds:
+    :ivar int | float seconds:
     """
 
     name: str
-    seconds: Union[int, float]
+    seconds: int | float
 
-    def __init__(self, name: str, seconds: Union[int, float]):
+    def __init__(self, name: str, seconds: int | float):
         self.name: Final = name
         self.seconds: Final = seconds
 
@@ -63,12 +63,12 @@ class ItemNoChangeEvent:
 class ItemNoUpdateEvent:
     """
     :ivar str               name:
-    :ivar Union[int, float] seconds:
+    :ivar int | float seconds:
     """
     name: str
-    seconds: Union[int, float]
+    seconds: int | float
 
-    def __init__(self, name: str, seconds: Union[int, float]):
+    def __init__(self, name: str, seconds: int | float):
         self.name: Final = name
         self.seconds: Final = seconds
 

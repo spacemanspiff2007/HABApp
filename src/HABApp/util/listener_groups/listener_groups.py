@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, Iterable, Optional, Union
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ
 from HABApp.core.items import HINT_ITEM_OBJ, BaseItem
@@ -23,7 +24,7 @@ class EventListenerGroup:
     """
 
     def __init__(self):
-        self._items: Dict[str, ListenerCreatorBase] = {}
+        self._items: dict[str, ListenerCreatorBase] = {}
         self._is_active = False
 
     @property
@@ -91,8 +92,8 @@ class EventListenerGroup:
         obj.active = False
         return True
 
-    def __add_objs(self, cls, item: Union[HINT_ITEM_OBJ, Iterable[HINT_ITEM_OBJ]], callback: Callable[[Any], Any],
-                   arg, alias: Optional[str] = None):
+    def __add_objs(self, cls, item: HINT_ITEM_OBJ | Iterable[HINT_ITEM_OBJ], callback: Callable[[Any], Any],
+                   arg, alias: str | None = None):
         # alias -> single param
         if alias is not None:
             if not isinstance(item, BaseItem):
@@ -107,8 +108,8 @@ class EventListenerGroup:
             if self._is_active:
                 obj.listen()
 
-    def add_listener(self, item: Union[HINT_ITEM_OBJ, Iterable[HINT_ITEM_OBJ]], callback: Callable[[Any], Any],
-                     event_filter: HINT_EVENT_FILTER_OBJ, alias: Optional[str] = None) -> 'EventListenerGroup':
+    def add_listener(self, item: HINT_ITEM_OBJ | Iterable[HINT_ITEM_OBJ], callback: Callable[[Any], Any],
+                     event_filter: HINT_EVENT_FILTER_OBJ, alias: str | None = None) -> 'EventListenerGroup':
         """Add an event listener to the group
 
         :param item: Single or multiple items
@@ -122,8 +123,8 @@ class EventListenerGroup:
         self.__add_objs(EventListenerCreator, item, callback, event_filter, alias)
         return self
 
-    def add_no_update_watcher(self, item: Union[HINT_ITEM_OBJ, Iterable[HINT_ITEM_OBJ]], callback: Callable[[Any], Any],
-                              seconds: TH_POSITIVE_TIME_DIFF, alias: Optional[str] = None
+    def add_no_update_watcher(self, item: HINT_ITEM_OBJ | Iterable[HINT_ITEM_OBJ], callback: Callable[[Any], Any],
+                              seconds: TH_POSITIVE_TIME_DIFF, alias: str | None = None
                               ) -> 'EventListenerGroup':
         """Add an no update watcher to the group. On ``listen`` this will create a no update watcher and
          the corresponding event listener that will trigger the callback
@@ -138,8 +139,8 @@ class EventListenerGroup:
         self.__add_objs(NoUpdateEventListenerCreator, item, callback, seconds, alias)
         return self
 
-    def add_no_change_watcher(self, item: Union[HINT_ITEM_OBJ, Iterable[HINT_ITEM_OBJ]], callback: Callable[[Any], Any],
-                              seconds: TH_POSITIVE_TIME_DIFF, alias: Optional[str] = None
+    def add_no_change_watcher(self, item: HINT_ITEM_OBJ | Iterable[HINT_ITEM_OBJ], callback: Callable[[Any], Any],
+                              seconds: TH_POSITIVE_TIME_DIFF, alias: str | None = None
                               ) -> 'EventListenerGroup':
         """Add a no change watcher to the group. On ``listen`` this will create a no change watcher and
          the corresponding event listener that will trigger the callback

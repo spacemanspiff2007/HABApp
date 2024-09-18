@@ -16,7 +16,7 @@ def __is_connected() -> bool:
 
 
 def publish(topic: str, payload: typing.Any,
-            qos: typing.Optional[int] = None, retain: typing.Optional[bool] = None) -> int:
+            qos: int | None = None, retain: bool | None = None) -> int:
     """
     Publish a value under a certain topic.
     If qos and/or retain is not set the value from the configuration file will be used.
@@ -54,7 +54,7 @@ def publish(topic: str, payload: typing.Any,
     return info
 
 
-def subscribe(topic: str, qos: typing.Optional[int] = None) -> int:
+def subscribe(topic: str, qos: int | None = None) -> int:
     """
     Subscribe to a MQTT topic. Note that subscriptions made this way are volatile and will only remain until
     the next disconnect.

@@ -1,8 +1,7 @@
 from statistics import mean, median
-from typing import Union
 
 
-def format_duration(duration: Union[None, str, float]) -> str:
+def format_duration(duration: None | str | float) -> str:
     if duration is None:
         return ' ' * 6
     if isinstance(duration, str):

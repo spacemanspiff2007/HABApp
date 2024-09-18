@@ -39,7 +39,7 @@ class RuleManager:
         # Processing
         self.__process_last_sec = 60
 
-        self.watcher: typing.Optional[AggregatingAsyncEventHandler] = None
+        self.watcher: AggregatingAsyncEventHandler | None = None
 
     async def setup(self):
 

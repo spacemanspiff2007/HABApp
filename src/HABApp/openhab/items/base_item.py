@@ -1,5 +1,6 @@
 import datetime
-from typing import Any, FrozenSet, Mapping, NamedTuple, Optional, Type
+from collections.abc import Mapping
+from typing import Any, NamedTuple
 
 from immutables import Map
 
@@ -20,24 +21,24 @@ class OpenhabItem(BaseValueItem):
     :ivar str name:
     :ivar Any value:
 
-    :ivar Optional[str] label:
-    :ivar FrozenSet[str] tags:
-    :ivar FrozenSet[str] groups:
+    :ivar str | None label:
+    :ivar frozenset[str] tags:
+    :ivar frozenset[str] groups:
     :ivar Mapping[str, MetaData] metadata:
     """
 
     def __init__(self, name: str, initial_value: Any = None,
-                 label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                 label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()):
         super().__init__(name, initial_value)
-        self.label: Optional[str] = label
-        self.tags: FrozenSet[str] = tags
-        self.groups: FrozenSet[str] = groups
+        self.label: str | None = label
+        self.tags: frozenset[str] = tags
+        self.groups: frozenset[str] = groups
         self.metadata: Mapping[str, MetaData] = metadata
 
     @classmethod
     def from_oh(cls, name: str, value=None,
-                label: Optional[str] = None, tags: FrozenSet[str] = frozenset(), groups: FrozenSet[str] = frozenset(),
+                label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                 metadata: Mapping[str, MetaData] = Map()):
         if value is not None:
             value = cls._state_from_oh_str(value)
@@ -95,9 +96,9 @@ class OpenhabItem(BaseValueItem):
             return True
         return False
 
-    def get_persistence_data(self, persistence: Optional[str] = None,
-                             start_time: Optional[datetime.datetime] = None,
-                             end_time: Optional[datetime.datetime] = None):
+    def get_persistence_data(self, persistence: str | None = None,
+                             start_time: datetime.datetime | None = None,
+                             end_time: datetime.datetime | None = None):
         """Query historical data from the OpenHAB persistence service
 
         :param persistence: name of the persistence service (e.g. ``rrd4j``, ``mapdb``). If not set default will be used
@@ -110,4 +111,4 @@ class OpenhabItem(BaseValueItem):
         )
 
 
-HINT_TYPE_OPENHAB_ITEM = Type[OpenhabItem]
+HINT_TYPE_OPENHAB_ITEM = type[OpenhabItem]

@@ -1,5 +1,4 @@
 import logging
-import typing
 
 import HABApp
 
@@ -28,7 +27,7 @@ class SwitchItemValueMode(ValueMode):
                  switch_item: 'HABApp.openhab.items.SwitchItem', invert_switch: bool = False,
                  # default kw-args from the base class
                  initial_value=None,
-                 logger: typing.Optional[logging.Logger] = None,
+                 logger: logging.Logger | None = None,
                  auto_disable_after=None, auto_disable_func=None,
                  calc_value_func=None):
         """

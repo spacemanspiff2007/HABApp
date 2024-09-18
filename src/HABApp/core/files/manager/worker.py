@@ -2,7 +2,6 @@ import logging
 import time
 from asyncio import Future, create_task, sleep
 from pathlib import Path
-from typing import Optional
 
 import HABApp
 from HABApp.core.files.file import FileState
@@ -14,7 +13,7 @@ from . import FILES
 log = logging.getLogger('HABApp.files')
 
 
-TASK: Optional[Future] = None
+TASK: Future | None = None
 TASK_SLEEP: float = 0.3
 TASK_DURATION: float = 15
 

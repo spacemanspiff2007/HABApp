@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 from HABApp.core.events import EventFilter
 from HABApp.core.internals import EventBusListener
@@ -10,7 +11,7 @@ class ListenerCreatorBase:
         self.item = item
         self.callback = callback
 
-        self.listener: Optional[EventBusListener] = None
+        self.listener: EventBusListener | None = None
         self.active = True
 
     def create_listener(self) -> EventBusListener:
@@ -42,7 +43,7 @@ class EventListenerCreator(ListenerCreatorBase):
 
 
 class NoUpdateEventListenerCreator(ListenerCreatorBase):
-    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: Union[int, float]):
+    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: int | float):
         super().__init__(item, callback)
         self.secs = secs
 
@@ -51,7 +52,7 @@ class NoUpdateEventListenerCreator(ListenerCreatorBase):
 
 
 class NoChangeEventListenerCreator(ListenerCreatorBase):
-    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: Union[int, float]):
+    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: int | float):
         super().__init__(item, callback)
         self.secs = secs
 

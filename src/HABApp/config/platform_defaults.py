@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Optional
 
 
-def get_log_folder(default: Optional[Path] = None) -> Optional[Path]:
+def get_log_folder(default: Path | None = None) -> Path | None:
     # As a default we log into the openHAB folder
     choices = ('/var/log/openhab', '/opt/openhab/userdata/logs')
     for choice in choices:

@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Any, Dict, TypeVar, Union
+from typing import Any, TypeVar
 
 from HABApp.core.events.filter import EventFilter
 from HABApp.core.internals import (
@@ -22,7 +22,7 @@ EVENT_TYPE = TypeVar('EVENT_TYPE')
 
 
 class EventWaiter:
-    def __init__(self, name: Union[BaseValueItem, str],
+    def __init__(self, name: BaseValueItem | str,
                  event_filter: HINT_EVENT_FILTER_OBJ, timeout=1):
         if isinstance(name, BaseValueItem):
             name = name.name
@@ -83,7 +83,7 @@ class EventWaiter:
         get_current_context().remove_event_listener(self.event_listener)
 
     @staticmethod
-    def compare_event_value(event, kwargs: Dict[str, Any]):
+    def compare_event_value(event, kwargs: dict[str, Any]):
         only_value = 'value' in kwargs and len(kwargs) == 1
         val_msg = []
 

@@ -2,7 +2,7 @@ import logging
 import logging.config
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from easyconfig.yaml import yaml_safe as _yaml_safe
 
@@ -39,13 +39,13 @@ def remove_memory_handler_from_cfg(cfg: dict, log: BufferedLogger):
             logger_handlers[i] = replacement_handler
 
 
-def get_logging_dict(path: Path, log: BufferedLogger) -> Optional[dict]:
+def get_logging_dict(path: Path, log: BufferedLogger) -> dict | None:
     # config gets created on startup - if it gets deleted we do nothing here
     if not path.is_file():
         return None
 
     with path.open('r', encoding='utf-8') as file:
-        cfg: Dict[str, Any] = _yaml_safe.load(file)
+        cfg: dict[str, Any] = _yaml_safe.load(file)
 
     # fix filenames
     for handler, handler_cfg in cfg.get('handlers', {}).items():
@@ -147,7 +147,7 @@ def inject_log_buffer(cfg: dict, log: BufferedLogger):
         return []
 
     handler_cfg = cfg.setdefault('handlers', {})
-    q_handlers: List[HABAppQueueHandler] = []
+    q_handlers: list[HABAppQueueHandler] = []
 
     for handler_name, buffered_handler_name in buffered_handlers.items():
         q: SimpleQueue = SimpleQueue()

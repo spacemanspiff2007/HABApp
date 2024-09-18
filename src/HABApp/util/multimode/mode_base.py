@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import HABApp
 from HABApp.core.internals import AutoContextBoundObj
@@ -10,7 +10,7 @@ class BaseMode(AutoContextBoundObj):
         super().__init__()
         self.name: str = name
 
-        self.__mode_lower_prio: Optional[BaseMode] = None
+        self.__mode_lower_prio: BaseMode | None = None
 
         self.parent: HABApp.util.multimode.MultiModeItem
 

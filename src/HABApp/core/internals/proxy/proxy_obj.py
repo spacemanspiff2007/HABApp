@@ -1,11 +1,12 @@
 # noinspection PyProtectedMember
+from collections.abc import Callable
 from sys import _getframe as sys_get_frame
-from typing import Callable, Dict, Final, List, Optional
+from typing import Final
 
 from HABApp.core.errors import ProxyObjHasNotBeenReplacedError
 
 
-PROXIES: List['StartUpProxyObj'] = []
+PROXIES: list['StartUpProxyObj'] = []
 
 
 class ProxyObjBase:
@@ -34,8 +35,8 @@ class ConstProxyObj(ProxyObjBase):
 
 class StartUpProxyObj(ProxyObjBase):
     def __init__(self, to_replace: Callable, globals: dict):
-        self.to_replace: Optional[Callable] = to_replace
-        self.globals: Optional[dict] = globals
+        self.to_replace: Callable | None = to_replace
+        self.globals: dict | None = globals
 
         PROXIES.append(self)
 
@@ -43,7 +44,7 @@ class StartUpProxyObj(ProxyObjBase):
     def to_replace_name(self) -> str:
         return str(getattr(self.to_replace, '__name__', self.to_replace))
 
-    def replace(self, replacements: Dict[object, object], final: bool):
+    def replace(self, replacements: dict[object, object], final: bool):
         assert self.globals is not None
         replacement = replacements[self.to_replace]
 
@@ -79,7 +80,7 @@ class RestoreableObj:
         self.proxy = None
 
 
-def replace_proxies(replacements: Dict[object, object], final: bool) -> List[RestoreableObj]:
+def replace_proxies(replacements: dict[object, object], final: bool) -> list[RestoreableObj]:
     restore_objs = []
     for proxy in PROXIES:
         restore = proxy.replace(replacements, final)
