@@ -31,6 +31,6 @@ def get_debug_info() -> str:
     return ret
 
 
-def print_debug_info():
+def print_debug_info() -> None:
     print(f'Debug information\n{"-" * 80}')
     print(get_debug_info())

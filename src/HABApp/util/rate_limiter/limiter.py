@@ -24,7 +24,7 @@ def _check_arg(name: str, value, allow_0=False):
 
 
 class Limiter:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self._name: Final = name
         self._limits: tuple[BaseRateLimit, ...] = ()
         self._skips: int = 0
@@ -35,7 +35,7 @@ class Limiter:
         """A counter to track skips which can be manually reset"""
         return self._skips_total
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self._name:s}>'
 
     def add_limit(self, allowed: int, interval: int, *,

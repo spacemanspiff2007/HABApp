@@ -23,7 +23,7 @@ class EventListenerGroup:
     """Helper to create/cancel multiple event listeners simultaneously
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._items: dict[str, ListenerCreatorBase] = {}
         self._is_active = False
 
@@ -55,7 +55,7 @@ class EventListenerGroup:
         for o in self._items.values():
             o.cancel()
 
-    def activate_listener(self, name: str):
+    def activate_listener(self, name: str) -> bool:
         """Resume a previously deactivated listener creator in the group.
 
         :param name: item name or alias of the listener
@@ -73,7 +73,7 @@ class EventListenerGroup:
             obj.listen()
         return True
 
-    def deactivate_listener(self, name: str, cancel_if_active=True):
+    def deactivate_listener(self, name: str, cancel_if_active=True) -> bool:
         """Exempt the listener creator from further listener/cancel calls
 
         :param name: item name or alias of the listener

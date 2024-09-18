@@ -33,7 +33,7 @@ def brackets_needed(obj: UserItem):
 
 
 class ItemsFileWriter:
-    def __init__(self):
+    def __init__(self) -> None:
         self.items: list[UserItem] = []
 
     def add_item(self, obj) -> Self:
@@ -97,7 +97,7 @@ class ItemsFileWriter:
 
         return '\n'.join(lines)
 
-    def create_file(self, file: Path):
+    def create_file(self, file: Path) -> bool:
 
         output = self.generate()
 

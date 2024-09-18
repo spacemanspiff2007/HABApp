@@ -1,6 +1,6 @@
 import logging
 import threading
-from typing import Any, Dict, List, TypeVar
+from typing import Any, TypeVar
 
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent
@@ -15,9 +15,9 @@ _TYPE_LISTENER = TypeVar('_TYPE_LISTENER', bound=EventBusBaseListener)
 
 
 class EventBus:
-    def __init__(self):
+    def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._listeners: Dict[str, List[EventBusBaseListener]] = {}
+        self._listeners: dict[str, list[EventBusBaseListener]] = {}
 
     def post_event(self, topic: str, event: Any):
         assert isinstance(topic, str), type(topic)
@@ -82,6 +82,6 @@ class EventBus:
             habapp_log.debug(f'Removed event listener for {listener.describe()}')
             return None
 
-    def remove_all_listeners(self):
+    def remove_all_listeners(self) -> None:
         with self._lock:
             self._listeners.clear()

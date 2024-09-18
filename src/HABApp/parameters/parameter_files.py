@@ -15,7 +15,7 @@ LOCK = threading.Lock()
 PARAM_PREFIX = 'params/'
 
 
-async def load_file(name: str, path: Path):
+async def load_file(name: str, path: Path) -> None:
     with LOCK:  # serialize to get proper error messages
         with path.open(mode='r', encoding='utf-8') as file:
             data = HABApp.core.const.yml.load(file)
@@ -26,7 +26,7 @@ async def load_file(name: str, path: Path):
     log.debug(f'Loaded params from {name}!')
 
 
-async def unload_file(name: str, path: Path):
+async def unload_file(name: str, path: Path) -> None:
     with LOCK:  # serialize to get proper error messages
         remove_parameter_file(path.stem)
 
@@ -66,7 +66,7 @@ async def setup_param_files() -> bool:
     return True
 
 
-def reload_param_file(name: str):
+def reload_param_file(name: str) -> None:
     name = f'{PARAM_PREFIX}{name}.yml'
     path = HABApp.core.files.folders.get_path(name)
     HABApp.core.asyncio.create_task(HABApp.core.files.manager.process_file(name, path))

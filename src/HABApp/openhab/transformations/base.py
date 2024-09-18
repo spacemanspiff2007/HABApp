@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Final, Generic, Tuple, TypeVar
+from typing import Any, Final, Generic, TypeVar
 
 
 T = TypeVar('T')
@@ -8,10 +8,10 @@ log = logging.getLogger('HABApp.openhab.transform')
 
 
 class TransformationFactoryBase(Generic[T]):
-    def __init__(self, registry: 'TransformationRegistryBase'):
+    def __init__(self, registry: 'TransformationRegistryBase') -> None:
         self._registry: Final = registry
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self._registry.name.title()}{self.__class__.__name__}>'
 
     def __getitem__(self, key: str) -> T:
@@ -29,15 +29,15 @@ def sort_order(uid: str):
 
 
 class TransformationRegistryBase:
-    objs: Dict[str, Any]
+    objs: dict[str, Any]
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name: Final = name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {" ".join(self.available())}'
 
-    def available(self) -> Tuple[str, ...]:
+    def available(self) -> tuple[str, ...]:
         return tuple(sorted(self.objs.keys(), key=sort_order))
 
     def get(self, name: str):
@@ -46,5 +46,5 @@ class TransformationRegistryBase:
     def set(self, name: str, configuration: dict):
         raise NotImplementedError()
 
-    def clear(self):
+    def clear(self) -> None:
         self.objs.clear()

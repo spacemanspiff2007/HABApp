@@ -14,7 +14,7 @@ log = logging.getLogger('HABApp.Items')
 
 
 class ItemRegistry:
-    def __init__(self):
+    def __init__(self) -> None:
         self._lock = threading.Lock()
         self._items: dict[str, ItemRegistryItem] = {}
 

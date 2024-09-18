@@ -58,7 +58,7 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
     def __str__(self) -> str:
         return str(self.value)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         if self.value is None:
             raise ItemValueIsNoneError.from_item(self)
         return self.is_on()

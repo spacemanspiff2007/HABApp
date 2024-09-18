@@ -80,7 +80,7 @@ class SwitchItem(OpenhabItem, OnOffCommand):
 
         return NotImplemented
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         if self.value is None:
             raise ItemValueIsNoneError.from_item(self)
         return self.value == ON

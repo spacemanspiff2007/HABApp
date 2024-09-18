@@ -11,12 +11,12 @@ log = logging.getLogger('HABApp.Files')
 event_bus = uses_event_bus()
 
 
-async def _process_event(event: RequestFileUnloadEvent | RequestFileLoadEvent):
+async def _process_event(event: RequestFileUnloadEvent | RequestFileLoadEvent) -> None:
     name = event.name
     await HABApp.core.files.manager.process_file(name, HABApp.core.files.folders.get_path(name))
 
 
-async def setup_file_manager():
+async def setup_file_manager() -> None:
     # Setup events so we can process load/unload
     event_bus.add_listener(
         EventBusListener(

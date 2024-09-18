@@ -3,7 +3,7 @@ from collections.abc import Callable
 
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
-from types import FrameType
+from types import FrameType, TracebackType
 from typing import TYPE_CHECKING, Any, Final
 
 
@@ -22,7 +22,7 @@ class HABAppRuleHook:
     def __init__(self,
                  cb_register_rule: Callable[['HABApp.rule.Rule'], Any],
                  cb_suggest_name: Callable[['HABApp.rule.Rule'], str],
-                 runtime: 'HABApp.runtime.Runtime', rule_file: 'HABApp.rule_manager.RuleFile'):
+                 runtime: 'HABApp.runtime.Runtime', rule_file: 'HABApp.rule_manager.RuleFile') -> None:
         # callbacks
         self._cb_register: Final = cb_register_rule
         self._cb_suggest_name: Final = cb_suggest_name
@@ -33,10 +33,10 @@ class HABAppRuleHook:
 
         self.closed = False
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> None:
         self.closed = True
 
     def register_rule(self, rule: 'HABApp.rule.Rule'):

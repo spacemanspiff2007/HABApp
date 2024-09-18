@@ -9,7 +9,7 @@ _TASK_REFS = set()
 
 
 class SingleTask:
-    def __init__(self, coro: Callable[[], Awaitable[Any]], name: str | None = None):
+    def __init__(self, coro: Callable[[], Awaitable[Any]], name: str | None = None) -> None:
         if name is None:
             name = f'{self.__class__.__name__}_{coro.__name__}'
 
@@ -34,7 +34,7 @@ class SingleTask:
         task.cancel()
         return task
 
-    async def cancel_wait(self):
+    async def cancel_wait(self) -> None:
         if task := self.cancel():
             try:
                 await task
@@ -62,7 +62,7 @@ class SingleTask:
         self.task = task = loop.create_task(self._task_wrap(), name=self.name)
         return task
 
-    async def _task_wrap(self):
+    async def _task_wrap(self) -> None:
         task = current_task(loop)
 
         # don't use try-finally because

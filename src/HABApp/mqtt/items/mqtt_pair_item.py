@@ -48,7 +48,7 @@ class MqttPairItem(MqttBaseItem):
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def __init__(self, name: str, initial_value=None, write_topic: str | None = None):
+    def __init__(self, name: str, initial_value=None, write_topic: str | None = None) -> None:
         super().__init__(name, initial_value)
         self.write_topic: str = write_topic
 

@@ -11,7 +11,7 @@ from HABApp.core.lib import format_exception
 post_event = uses_post_event()
 
 
-def log_error(logger: logging.Logger, text: str):
+def log_error(logger: logging.Logger, text: str) -> None:
     if '\n' in text:
         for line in text.splitlines():
             logger.error(line)
@@ -22,7 +22,7 @@ def log_error(logger: logging.Logger, text: str):
     )
 
 
-def log_warning(logger: logging.Logger, text: str):
+def log_warning(logger: logging.Logger, text: str) -> None:
     if '\n' in text:
         for line in text.splitlines():
             logger.warning(line)
@@ -34,7 +34,7 @@ def log_warning(logger: logging.Logger, text: str):
     )
 
 
-def log_info(logger: logging.Logger, text: str):
+def log_info(logger: logging.Logger, text: str) -> None:
     if '\n' in text:
         for line in text.splitlines():
             logger.info(line)
@@ -50,7 +50,7 @@ class HABAppLogger:
     _LEVEL: int
     _TOPIC: str
 
-    def __init__(self, log: logging.Logger):
+    def __init__(self, log: logging.Logger) -> None:
         self.lines: typing.List[str] = []
         self.logger = log
 
@@ -80,7 +80,7 @@ class HABAppLogger:
         self.lines.clear()
         return True
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.lines)
 
 

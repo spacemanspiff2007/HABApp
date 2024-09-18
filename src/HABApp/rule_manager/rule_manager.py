@@ -26,7 +26,7 @@ item_registry = uses_item_registry()
 
 class RuleManager:
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         assert isinstance(parent, HABApp.runtime.Runtime)
         self.runtime = parent
 
@@ -165,6 +165,6 @@ class RuleManager:
         # Do simple checks which prevent errors
         file.check_all_rules()
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         for f in self.files.values():
             f.unload()

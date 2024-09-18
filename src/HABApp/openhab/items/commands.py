@@ -20,28 +20,28 @@ class OnOffCommand:
         """Test value against off-value"""
         raise NotImplementedError()
 
-    def on(self: _HasNameAttr):
+    def on(self: _HasNameAttr) -> None:
         """Command item on"""
         send_command(self.name, ON)
 
-    def off(self: _HasNameAttr):
+    def off(self: _HasNameAttr) -> None:
         """Command item off"""
         send_command(self.name, OFF)
 
 
 class PercentCommand:
-    def percent(self: _HasNameAttr, value: float):
+    def percent(self: _HasNameAttr, value: float) -> None:
         """Command to value (in percent)"""
         assert 0 <= value <= 100, value
         send_command(self.name, str(value))
 
 
 class UpDownCommand:
-    def up(self: _HasNameAttr):
+    def up(self: _HasNameAttr) -> None:
         """Command up"""
         send_command(self.name, UP)
 
-    def down(self: _HasNameAttr):
+    def down(self: _HasNameAttr) -> None:
         """Command down"""
         send_command(self.name, DOWN)
 

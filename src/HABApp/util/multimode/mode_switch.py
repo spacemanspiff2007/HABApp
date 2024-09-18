@@ -29,7 +29,7 @@ class SwitchItemValueMode(ValueMode):
                  initial_value=None,
                  logger: logging.Logger | None = None,
                  auto_disable_after=None, auto_disable_func=None,
-                 calc_value_func=None):
+                 calc_value_func=None) -> None:
         """
 
         :param name: Name of the mode
@@ -67,5 +67,5 @@ class SwitchItemValueMode(ValueMode):
         msg = 'Enabled is controlled through the switch item!'
         raise PermissionError(msg)
 
-    def __switch_changed(self, event):
+    def __switch_changed(self, event) -> None:
         self.__set_enable(event.value == ('ON' if not self.__invert_switch else 'OFF'))

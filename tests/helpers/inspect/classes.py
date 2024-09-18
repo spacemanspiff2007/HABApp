@@ -22,6 +22,10 @@ def check_class_annotations(cls: type[object],
     docstr_vars = get_ivars_from_docstring(cls, correct_hints)
     init_vars = inspect.getfullargspec(cls).annotations
 
+    # If we return None we can just skip the annotation because it's most likely to be auto gernerated
+    if 'return' not in annotation_vars and 'return' in init_vars and init_vars['return'] is None:
+        del init_vars['return']
+
     # if we don't have annotations we can use the docstr vars
     if annotations_missing:
         assert not annotation_vars

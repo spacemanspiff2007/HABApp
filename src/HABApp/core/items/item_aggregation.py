@@ -45,7 +45,7 @@ class AggregationItem(BaseValueItem):
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(name)
         self.__period: float = 0
         self.__aggregation_func: typing.Callable[[typing.Iterable], typing.Any] = lambda x: x
@@ -105,7 +105,7 @@ class AggregationItem(BaseValueItem):
         event_bus.add_listener(self.__listener)
         return self
 
-    def _on_item_removed(self):
+    def _on_item_removed(self) -> None:
         super()._on_item_removed()
 
         if self.__listener is not None:

@@ -8,7 +8,7 @@ from HABApp.core.const import loop
 
 
 class HABAppScheduler(AsyncScheduler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # we start paused, so we execute stuff only if we can load the whole file properly
@@ -18,19 +18,19 @@ class HABAppScheduler(AsyncScheduler):
         async_context.set('HABAppScheduler')
         return await super()._run_next()
 
-    async def __add_job(self, job: ScheduledJobBase):
+    async def __add_job(self, job: ScheduledJobBase) -> None:
         super().add_job(job)
 
-    async def __remove_job(self, job: ScheduledJobBase):
+    async def __remove_job(self, job: ScheduledJobBase) -> None:
         super().remove_job(job)
 
-    async def __cancel_all(self):
+    async def __cancel_all(self) -> None:
         super().cancel_all()
 
-    async def __pause(self):
+    async def __pause(self) -> None:
         super().pause()
 
-    async def __resume(self):
+    async def __resume(self) -> None:
         super().resume()
 
     def pause(self):

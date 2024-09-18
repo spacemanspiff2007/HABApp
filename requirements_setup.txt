@@ -1,10 +1,10 @@
-aiohttp     == 3.10.0
-pydantic    == 2.8.2
+aiohttp     == 3.10.5
+pydantic    == 2.9.2
 msgspec     == 0.18.6
 bidict      == 0.23.1
-watchdog    == 4.0.1
+watchdog    == 5.0.2
 ujson       == 5.10.0
-aiomqtt     == 2.2.0
+aiomqtt     == 2.3.0
 
 # eascheduler ==
 git+https://github.com/spacemanspiff2007/eascheduler.git@rework
@@ -16,7 +16,7 @@ colorama    == 0.4.6
 fastnumbers == 5.1.0
 
 
-voluptuous == 0.14.2
+voluptuous == 0.15.2
 
 typing-extensions == 4.12.2
 

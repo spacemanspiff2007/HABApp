@@ -33,7 +33,7 @@ def get_current_context(obj: ContextProvidingObj | None = None) -> 'HABApp.rule_
 
 
 class AutoContextBoundObj(ContextBoundObj):
-    def __init__(self, parent_ctx: Optional['Context'] = None, **kwargs):
+    def __init__(self, parent_ctx: Optional['Context'] = None, **kwargs) -> None:
         if parent_ctx is None:
             parent_ctx = get_current_context()
         super().__init__(parent_ctx=parent_ctx, **kwargs)

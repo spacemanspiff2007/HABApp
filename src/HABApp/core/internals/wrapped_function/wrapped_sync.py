@@ -15,7 +15,7 @@ class WrappedSyncFunction(WrappedFunctionBase):
                  warn_too_long=True,
                  name: str | None = None,
                  logger: logging.Logger | None = None,
-                 context: Context | None = None):
+                 context: Context | None = None) -> None:
 
         super().__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)
@@ -24,11 +24,11 @@ class WrappedSyncFunction(WrappedFunctionBase):
         self.warn_too_long: bool = warn_too_long
 
     @override
-    def run(self, *args, **kwargs):
+    def run(self, *args, **kwargs) -> None:
         create_task(self.async_run(*args, **kwargs), name=self.name)
 
     @override
-    async def async_run(self, *args, **kwargs):
+    async def async_run(self, *args, **kwargs) -> None:
 
         token = async_context.set('WrappedSyncFunction')
 

@@ -13,7 +13,7 @@ log = logging.getLogger('HABApp.Rules')
 
 
 class RuleFile:
-    def __init__(self, rule_manager, name: str, path: Path):
+    def __init__(self, rule_manager, name: str, path: Path) -> None:
         from .rule_manager import RuleManager
 
         assert isinstance(rule_manager, RuleManager)
@@ -38,7 +38,7 @@ class RuleFile:
 
         return f'{name:s}.{found:d}' if found > 1 else f'{name:s}'
 
-    def check_all_rules(self):
+    def check_all_rules(self) -> None:
         for rule in self.rules.values():  # type: HABApp.Rule
             get_current_context(rule).check_rule()
 
@@ -59,7 +59,7 @@ class RuleFile:
         tb.insert(0, f'Could not load {self.path}!')
         return [line.replace('<module>', self.path.name) for line in tb]
 
-    def create_rules(self, created_rules: list):
+    def create_rules(self, created_rules: list) -> None:
 
         rule_hook = HABAppRuleHook(created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
 

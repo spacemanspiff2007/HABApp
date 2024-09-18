@@ -22,7 +22,7 @@ class Thing(BaseItem):
     :ivar Mapping[str, Any] configuration: Thing configuration
     :ivar Mapping[str, Any] properties: Thing properties
     """
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(name)
 
         self.status: ThingStatusEnum = THING_STATUS_DEFAULT

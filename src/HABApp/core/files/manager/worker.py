@@ -37,7 +37,7 @@ async def process_file(name: str, file: Path):
         TASK = create_task(_process())
 
 
-async def _process():
+async def _process() -> None:
     global TASK
 
     prefixes = get_prefixes()

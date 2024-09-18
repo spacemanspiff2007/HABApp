@@ -12,7 +12,7 @@ class BuilderBase:
 
 
 class ConstValueFormatterBuilder(BuilderBase):
-    def __init__(self, value: str, condition: Callable | None = None):
+    def __init__(self, value: str, condition: Callable | None = None) -> None:
         self.value: Final = value
         self.condition: Final = condition
 
@@ -23,7 +23,7 @@ class ConstValueFormatterBuilder(BuilderBase):
 
 
 class ValueFormatterBuilder(BuilderBase):
-    def __init__(self, name: str, fmt_value: str):
+    def __init__(self, name: str, fmt_value: str) -> None:
         self.name: Final = name
         self.fmt_value: Final = fmt_value
 
@@ -43,7 +43,7 @@ class ValueFormatterBuilder(BuilderBase):
 
 class MultipleValueFormatterBuilder(ValueFormatterBuilder):
 
-    def __init__(self, name: str, fmt_value: str, wrapped_by: str):
+    def __init__(self, name: str, fmt_value: str, wrapped_by: str) -> None:
         super().__init__(name, fmt_value)
         self.wrapped_by: Final = wrapped_by
 

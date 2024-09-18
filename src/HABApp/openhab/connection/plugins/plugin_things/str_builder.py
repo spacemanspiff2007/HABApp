@@ -10,7 +10,7 @@ RE_ACCESSOR = re.compile(f'(?P<accessor>[^{SEPARATOR}]+)(?:{SEPARATOR}(?P<operat
 
 
 class StrBuilder:
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         self.template: str = value.strip()
         self.regex: dict[str, tuple[str, Pattern | None, str | None]] = {}
 
@@ -60,7 +60,7 @@ class StrBuilder:
 
         return out
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} "{self.template}">'
 
 

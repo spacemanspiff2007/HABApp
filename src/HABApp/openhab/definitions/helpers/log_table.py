@@ -5,7 +5,7 @@ from typing import Any
 class Column:
     wrap: int = 80
 
-    def __init__(self, name: str, align: str | None = None, alias: str | None = None, wrap: int | None = None):
+    def __init__(self, name: str, align: str | None = None, alias: str | None = None, wrap: int | None = None) -> None:
         self.name: str = name
         self.alias: str | None = alias
 
@@ -35,7 +35,7 @@ class Column:
             ret.append(f.format(val))
         return ret
 
-    def add(self, val):
+    def add(self, val) -> None:
         _res = []
         if isinstance(val, (list, set, tuple)):
             _len = 0
@@ -55,12 +55,12 @@ class Column:
             self.width = max(self.width, len(str(k)))
         self.entries.append(tuple(_res))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}'
 
 
 class Table:
-    def __init__(self, heading: str = ''):
+    def __init__(self, heading: str = '') -> None:
         self.columns: dict[str, Column] = OrderedDict()
         self.heading: str = heading
 
@@ -69,7 +69,7 @@ class Table:
         self.columns[name] = c = Column(name, align, alias, wrap)
         return c
 
-    def add_dict(self, _in: dict):
+    def add_dict(self, _in: dict) -> None:
         for k, col in self.columns.items():
             col.add(_in[k])
 

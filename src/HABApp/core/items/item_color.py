@@ -15,7 +15,7 @@ item_registry = uses_item_registry()
 class ColorItem(BaseValueItem):
     """Item for dealing with color related values"""
 
-    def __init__(self, name: str, hue=0.0, saturation=0.0, brightness=0.0):
+    def __init__(self, name: str, hue=0.0, saturation=0.0, brightness=0.0) -> None:
         super().__init__(name=name, initial_value=(hue, saturation, brightness))
 
         self.hue: float = min(max(0.0, hue), HUE_FACTOR)
@@ -42,7 +42,7 @@ class ColorItem(BaseValueItem):
 
         return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
 
-    def post_value(self, hue=0.0, saturation=0.0, brightness=0.0):
+    def post_value(self, hue=0.0, saturation=0.0, brightness=0.0) -> None:
         """Set a new value and post appropriate events on the HABApp event bus
         (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
@@ -101,7 +101,7 @@ class ColorItem(BaseValueItem):
         """Return true if item is off"""
         return self.brightness <= 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.brightness}%>'
 
     @classmethod

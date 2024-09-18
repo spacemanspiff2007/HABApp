@@ -43,7 +43,7 @@ class OpenhabContext:
 CONTEXT_TYPE: TypeAlias = OpenhabContext | None
 
 
-def setup():
+def setup() -> None:
     config = HABApp.config.CONFIG.openhab
 
     from HABApp.openhab.connection.handler import HANDLER as CONNECTION_HANDLER
@@ -83,7 +83,7 @@ def setup():
 
 
 class OpenhabConnection(BaseConnection):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('openhab')
         self.context: CONTEXT_TYPE = None
 

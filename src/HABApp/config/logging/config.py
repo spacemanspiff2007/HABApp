@@ -14,7 +14,7 @@ from .buffered_logger import BufferedLogger
 from .queue_handler import HABAppQueueHandler, SimpleQueue
 
 
-def remove_memory_handler_from_cfg(cfg: dict, log: BufferedLogger):
+def remove_memory_handler_from_cfg(cfg: dict, log: BufferedLogger) -> None:
     # find memory handlers
     m_handlers = {}
     for handler, handler_cfg in cfg.get('handlers', {}).items():
@@ -94,7 +94,7 @@ def get_logging_dict(path: Path, log: BufferedLogger) -> dict | None:
     return cfg
 
 
-def rotate_files():
+def rotate_files() -> None:
     for wr in logging._handlerList:
         handler = wr()  # weakref -> call it to get object
 

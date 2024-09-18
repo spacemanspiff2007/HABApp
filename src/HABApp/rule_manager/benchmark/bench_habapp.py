@@ -16,7 +16,7 @@ LOCK = Lock()
 class HABAppBenchRule(BenchBaseRule):
     BENCH_TYPE = 'HABApp'
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.name_list = [f'BenchItem{k}' for k in range(300)]
@@ -29,22 +29,22 @@ class HABAppBenchRule(BenchBaseRule):
         self.name = ''
         self.values = deque()
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         for n in self.name_list:
             if HABApp.core.Items.item_exists(n):
                 HABApp.core.Items.pop_item(n)
 
-    def set_up(self):
+    def set_up(self) -> None:
         self.cleanup()
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         self.cleanup()
 
-    def run_bench(self):
+    def run_bench(self) -> None:
         # These are the benchmarks
         self.bench_rtt_time()
 
-    def bench_rtt_time(self):
+    def bench_rtt_time(self) -> None:
         print('Bench events ', end='')
         self.bench_times_container = BenchContainer()
 
@@ -60,7 +60,7 @@ class HABAppBenchRule(BenchBaseRule):
         time.sleep(0.1)
         self.bench_times_container.show()
 
-    def run_rtt(self, test_name, do_async=False):
+    def run_rtt(self, test_name, do_async=False) -> None:
         self.name = self.name_list[0]
         self.openhab.create_item('String', self.name, label='MyLabel')
 
@@ -106,5 +106,5 @@ class HABAppBenchRule(BenchBaseRule):
         self.time_sent = time.time()
         self.post_event(self.name, self.values[0])
 
-    async def a_post_next_event_val(self, event: ValueUpdateEvent):
+    async def a_post_next_event_val(self, event: ValueUpdateEvent) -> None:
         self.post_next_event_val(event)

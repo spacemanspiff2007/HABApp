@@ -14,7 +14,7 @@ class BaseRateLimitInfo:
 
 
 class BaseRateLimit:
-    def __init__(self, allowed: int, interval: int, hits: int = 0):
+    def __init__(self, allowed: int, interval: int, hits: int = 0) -> None:
         super().__init__()
         assert allowed > 0, allowed
         assert interval > 0, interval
@@ -29,7 +29,7 @@ class BaseRateLimit:
     def repr_text(self) -> str:
         return ''
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f'<{self.__class__.__name__} hits={self.hits:d}/{self.allowed:d} interval={self.interval:d}s '
             f'{self.repr_text():s}>'

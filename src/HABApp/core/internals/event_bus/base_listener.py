@@ -1,5 +1,5 @@
 class EventBusBaseListener:
-    def __init__(self, topic: str, **kwargs):
+    def __init__(self, topic: str, **kwargs) -> None:
         super().__init__(**kwargs)
         assert isinstance(topic, str)
         self.topic: str = topic

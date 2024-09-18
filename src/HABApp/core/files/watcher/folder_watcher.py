@@ -32,7 +32,7 @@ def start():
     return None
 
 
-def add_folder_watch(handler: FileSystemEventHandler):
+def add_folder_watch(handler: FileSystemEventHandler) -> None:
     assert OBSERVER is not None
     assert isinstance(handler, FileSystemEventHandler), type(handler)
     assert isinstance(handler.folder, Path) and handler.folder.is_dir()
@@ -48,7 +48,7 @@ def add_folder_watch(handler: FileSystemEventHandler):
         WATCHES[_folder] = OBSERVER.schedule(handler, _folder, recursive=handler.watch_subfolders)
 
 
-def remove_folder_watch(folder: Path):
+def remove_folder_watch(folder: Path) -> None:
     assert OBSERVER is not None
     assert isinstance(folder, Path)
 

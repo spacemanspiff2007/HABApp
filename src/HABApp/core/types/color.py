@@ -13,7 +13,7 @@ class ColorType:
 class RGB(ColorType):
     _RGB_MAX: int = 2 ** 8 - 1
 
-    def __init__(self, r: int, g: int, b: int):
+    def __init__(self, r: int, g: int, b: int) -> None:
         max_value = self._RGB_MAX
         if not 0 <= r <= max_value or not 0 <= g <= max_value or not 0 <= b <= max_value:
             raise ValueError()
@@ -85,7 +85,7 @@ class RGB(ColorType):
             blue if blue is not None else self._b,
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._r:d}, {self._g:d}, {self._b})'
 
     def __eq__(self, other):
@@ -159,7 +159,7 @@ PERCENT_FACTOR = 100
 
 class HSB(ColorType):
 
-    def __init__(self, hue: float, saturation: float, brightness: float):
+    def __init__(self, hue: float, saturation: float, brightness: float) -> None:
         if not 0 <= hue <= HUE_FACTOR or not 0 <= saturation <= PERCENT_FACTOR or not 0 <= brightness <= PERCENT_FACTOR:
             raise ValueError()
 
@@ -231,7 +231,7 @@ class HSB(ColorType):
             brightness if brightness is not None else self._brightness,
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._hue:.2f}, {self._saturation:.2f}, {self._brightness:.2f})'
 
     def __eq__(self, other):

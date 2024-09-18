@@ -10,7 +10,7 @@ from HABApp.core.internals import EventFilterBase
 class EventFilter(EventFilterBase):
     """Triggers on event types and optionally on their values, too"""
 
-    def __init__(self, event_class: TYPE_ANY_CLASS_TYPE, **kwargs):
+    def __init__(self, event_class: TYPE_ANY_CLASS_TYPE, **kwargs) -> None:
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
         assert isclass(event_class), f'Class for event required! Passed {event_class} ({type(event_class)})'
 

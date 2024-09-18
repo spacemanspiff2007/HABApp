@@ -38,7 +38,7 @@ class BaseItem(ItemRegistryItem):
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(name)
 
         _now = Instant.now()
@@ -59,7 +59,7 @@ class BaseItem(ItemRegistryItem):
         """
         return self._last_update.instant.py_datetime()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         ret = ''
         for k in ['name', 'last_change', 'last_update']:
             ret += f'{", " if ret else ""}{k}: {getattr(self, k)}'
@@ -99,12 +99,12 @@ class BaseItem(ItemRegistryItem):
         """
         return get_current_context().rule.listen_event(self._name, callback=callback, event_filter=event_filter)
 
-    def _on_item_added(self):
+    def _on_item_added(self) -> None:
         """This function gets automatically called when the item is added to the item registry
         """
         _restore_tmp_data(self)
 
-    def _on_item_removed(self):
+    def _on_item_removed(self) -> None:
         """This function gets automatically called when the item is removed from the item registry
         """
         _add_tmp_data(self)

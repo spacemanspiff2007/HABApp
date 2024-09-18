@@ -63,7 +63,7 @@ def wrapped_func_executor(func: Any, args: Iterable = (), kwargs: Mapping[str, A
 
 
 class HABAppJobBuilder:
-    def __init__(self, context: HABAppRuleContext):
+    def __init__(self, context: HABAppRuleContext) -> None:
         self._habapp_rule_ctx: Context = context
         self._scheduler: Final = AsyncScheduler(event_loop=loop)
         self._builder: Final = JobBuilder(self._scheduler, wrapped_func_executor)

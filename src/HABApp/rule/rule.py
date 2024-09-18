@@ -43,7 +43,7 @@ log = logging.getLogger('HABApp.Rule')
 
 
 # Func to log deprecation warnings
-def send_warnings_to_log(message, category, filename, lineno, file=None, line=None):
+def send_warnings_to_log(message, category, filename, lineno, file=None, line=None) -> None:
     log.warning(f'{filename}:{lineno}: {category.__name__}:{message}')
     return
 
@@ -59,7 +59,7 @@ item_registry = uses_item_registry()
 
 class Rule(ContextProvidingObj):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
 
         hook = _get_rule_hook()
@@ -80,15 +80,15 @@ class Rule(ContextProvidingObj):
         self.oh: Final = HABApp.openhab.interface_sync
         self.openhab: Final = self.oh
 
-    def on_rule_loaded(self):
+    def on_rule_loaded(self) -> None:
         """Override this to implement logic that will be called when the rule and the file has been successfully loaded
         """
 
-    def on_rule_removed(self):
+    def on_rule_removed(self) -> None:
         """Override this to implement logic that will be called when the rule has been unloaded.
         """
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # empty string, so we have a space if we have more than one entry
         parts = ['']
 
@@ -147,13 +147,13 @@ class Rule(ContextProvidingObj):
     @overload
     def execute_subprocess(self, callback: HINT_PROCESS_CB_SIMPLE, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                            additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                           raw_info: Literal[False], **kwargs):
+                           raw_info: Literal[False], **kwargs) -> None:
         ...
 
     @overload
     def execute_subprocess(self, callback: HINT_PROCESS_CB_FULL, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                            additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                           raw_info: Literal[True], **kwargs):
+                           raw_info: Literal[True], **kwargs) -> None:
         ...
 
     def execute_subprocess(self, callback, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
@@ -191,13 +191,13 @@ class Rule(ContextProvidingObj):
     @overload
     def execute_python(self, callback: HINT_PROCESS_CB_SIMPLE, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                        additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                       raw_info: Literal[False], **kwargs):
+                       raw_info: Literal[False], **kwargs) -> None:
         ...
 
     @overload
     def execute_python(self, callback: HINT_PROCESS_CB_FULL, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                        additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                       raw_info: Literal[True], **kwargs):
+                       raw_info: Literal[True], **kwargs) -> None:
         ...
 
     def execute_python(self, callback, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,

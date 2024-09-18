@@ -42,7 +42,7 @@ class ImageItem(OpenhabItem):
 
     def __init__(self, name: str, initial_value: Any = None, label: str | None = None,
                  tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()):
+                 metadata: Mapping[str, MetaData] = Map()) -> None:
         super().__init__(name, initial_value, label, tags, groups, metadata)
 
         # this item is unique because we also save the image type and thus have two states

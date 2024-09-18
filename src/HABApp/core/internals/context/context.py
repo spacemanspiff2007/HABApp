@@ -5,7 +5,7 @@ from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBo
 
 
 class ContextBoundObj:
-    def __init__(self, parent_ctx: Optional['Context'], **kwargs):
+    def __init__(self, parent_ctx: Optional['Context'], **kwargs) -> None:
         super().__init__(**kwargs)
         self._parent_ctx = parent_ctx
         if parent_ctx is not None:
@@ -31,14 +31,14 @@ HINT_CONTEXT_BOUND_OBJ = TypeVar('HINT_CONTEXT_BOUND_OBJ', bound=ContextBoundObj
 
 
 class Context:
-    def __init__(self):
+    def __init__(self) -> None:
         self.objs: set[ContextBoundObj] = set()
 
-    def add_obj(self, obj: ContextBoundObj):
+    def add_obj(self, obj: ContextBoundObj) -> None:
         assert isinstance(obj, ContextBoundObj)
         self.objs.add(obj)
 
-    def remove_obj(self, obj: ContextBoundObj):
+    def remove_obj(self, obj: ContextBoundObj) -> None:
         assert isinstance(obj, ContextBoundObj)
         self.objs.remove(obj)
 
@@ -53,6 +53,6 @@ class Context:
 
 
 class ContextProvidingObj:
-    def __init__(self, context: Context | None = None, **kwargs):
+    def __init__(self, context: Context | None = None, **kwargs) -> None:
         super().__init__(**kwargs)
         self._habapp_ctx: Context = context

@@ -1,7 +1,6 @@
 import logging
 import logging.config
 from pathlib import Path
-from typing import List
 
 import eascheduler
 import pydantic
@@ -19,7 +18,7 @@ from .logging.buffered_logger import BufferedLogger
 log = logging.getLogger('HABApp.Config')
 
 
-def load_config(config_folder: Path):
+def load_config(config_folder: Path) -> None:
 
     CONFIG.set_file_path(config_folder / 'config.yml')
 
@@ -51,11 +50,11 @@ def load_config(config_folder: Path):
     CONFIG.habapp.logging.subscribe_for_changes(set_flush_delay)
 
 
-def set_flush_delay():
+def set_flush_delay() -> None:
     HABAppQueueHandler.FLUSH_DELAY = CONFIG.habapp.logging.flush_every
 
 
-async def config_files_changed(paths: List[Path]):
+async def config_files_changed(paths: list[Path]) -> None:
     for path in paths:
         if path.name == 'config.yml':
             load_habapp_cfg()
@@ -87,10 +86,10 @@ def load_habapp_cfg(do_print=False):
     log.debug('Loaded HABApp config')
 
 
-QUEUE_HANDLER: List['HABAppQueueHandler'] = []
+QUEUE_HANDLER: list['HABAppQueueHandler'] = []
 
 
-def stop_queue_handlers():
+def stop_queue_handlers() -> None:
     for qh in QUEUE_HANDLER:
         qh.signal_stop()
     while QUEUE_HANDLER:

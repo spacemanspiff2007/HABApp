@@ -16,18 +16,18 @@ class EventFilterBase:
 
 
 class FileEndingFilter(EventFilterBase):
-    def __init__(self, ending: str):
+    def __init__(self, ending: str) -> None:
         self.ending: str = ending
 
     def notify(self, path: str) -> bool:
         return path.endswith(self.ending)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} ending: {self.ending}>'
 
 
 class FileSystemEventHandler:
-    def __init__(self, folder: Path, filter: EventFilterBase, watch_subfolders: bool = False):
+    def __init__(self, folder: Path, filter: EventFilterBase, watch_subfolders: bool = False) -> None:
         assert isinstance(folder, Path), type(folder)
         assert watch_subfolders is True or watch_subfolders is False
 

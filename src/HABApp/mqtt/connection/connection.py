@@ -18,7 +18,7 @@ log = logging.getLogger('HABApp.mqtt.connection')
 CONTEXT_TYPE: TypeAlias = Client | None
 
 
-def setup():
+def setup() -> None:
     config = HABApp.config.CONFIG.mqtt
 
     from HABApp.mqtt.connection.handler import CONNECTION_HANDLER
@@ -40,7 +40,7 @@ def setup():
 
 
 class MqttConnection(BaseConnection):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('mqtt')
         self.context: CONTEXT_TYPE = None
 
@@ -53,13 +53,13 @@ CONNECTION = MqttConnection()
 
 class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
 
-    def __init__(self, task_name: str):
+    def __init__(self, task_name: str) -> None:
         super().__init__(self._mqtt_wrap_task, task_name)
 
     async def mqtt_task(self):
         raise NotImplementedError()
 
-    async def _mqtt_wrap_task(self):
+    async def _mqtt_wrap_task(self) -> None:
 
         connection = self.plugin_connection
         log = connection.log

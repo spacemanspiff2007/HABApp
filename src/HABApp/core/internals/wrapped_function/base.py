@@ -18,7 +18,7 @@ event_bus = uses_event_bus()
 class WrappedFunctionBase(ContextProvidingObj):
 
     def __init__(self, func: Callable, name: str | None = None, logger: logging.Logger | None = None,
-                 context: Context | None = None):
+                 context: Context | None = None) -> None:
 
         # Allow setting of the rule context
         super().__init__(context)
@@ -40,7 +40,7 @@ class WrappedFunctionBase(ContextProvidingObj):
     async def async_run(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def process_exception(self, e: Exception, *args, **kwargs):
+    def process_exception(self, e: Exception, *args, **kwargs) -> None:
 
         lines = format_exception(e)
 

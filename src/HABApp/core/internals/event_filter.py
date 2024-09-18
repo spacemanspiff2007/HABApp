@@ -8,7 +8,7 @@ class EventFilterBase:
     def describe(self) -> str:
         raise NotImplementedError()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.describe()} at 0x{id(self):X}>'
 
 

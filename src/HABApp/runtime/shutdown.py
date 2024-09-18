@@ -25,7 +25,7 @@ _FUNCS: typing.List[ShutdownInfo] = []
 requested: bool = False
 
 
-def register_func(func, last=False, msg: str = ''):
+def register_func(func, last=False, msg: str = '') -> None:
     assert isinstance(func, (FunctionType, MethodType)) or iscoroutinefunction(func), print(type(func))
     assert last is True or last is False, last
     assert isinstance(msg, str)
@@ -33,8 +33,8 @@ def register_func(func, last=False, msg: str = ''):
     _FUNCS.append(ShutdownInfo(func, msg if msg else f'{func.__module__}.{func.__name__}', last))
 
 
-def register_signal_handler():
-    def shutdown_handler(sig, frame):
+def register_signal_handler() -> None:
+    def shutdown_handler(sig, frame) -> None:
         print('Shutting down ...')
         request_shutdown()
 
@@ -43,7 +43,7 @@ def register_signal_handler():
     signal.signal(signal.SIGTERM, shutdown_handler)
 
 
-def request_shutdown():
+def request_shutdown() -> None:
     create_task(_shutdown())
 
 

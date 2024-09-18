@@ -29,7 +29,7 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
 
     def __init__(self, name: str, h: float = 0.0, s: float = 0.0, b: float = 0.0,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()):
+                 metadata: Mapping[str, MetaData] = Map()) -> None:
         super().__init__(name=name, initial_value=(h, s, b), label=label, tags=tags, groups=groups, metadata=metadata)
 
         self.hue: float = min(max(0.0, h), HUE_FACTOR)
@@ -79,7 +79,7 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
 
         return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
 
-    def post_value(self, hue=0.0, saturation=0.0, brightness=0.0):
+    def post_value(self, hue=0.0, saturation=0.0, brightness=0.0) -> None:
         """Set a new value and post appropriate events on the HABApp event bus
         (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
@@ -138,5 +138,5 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
         """Return true if item is off"""
         return self.brightness <= 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.brightness}%>'

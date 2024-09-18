@@ -4,7 +4,7 @@ from ._definitions import ConnectionStatus
 
 
 class StatusTransitions:
-    def __init__(self):
+    def __init__(self) -> None:
         self.status = ConnectionStatus.STARTUP
         self.manual: ConnectionStatus | None = None
 
@@ -24,18 +24,18 @@ class StatusTransitions:
 
         return status
 
-    def is_connecting_or_connected(self):
+    def is_connecting_or_connected(self) -> bool:
         return self.status in (ConnectionStatus.CONNECTING, ConnectionStatus.CONNECTED, ConnectionStatus.ONLINE)
 
-    def _set_manual(self, status: ConnectionStatus):
+    def _set_manual(self, status: ConnectionStatus) -> None:
         assert self.manual is None
         self.manual = status
 
-    def from_setup_to_disabled(self):
+    def from_setup_to_disabled(self) -> None:
         assert self.status == ConnectionStatus.SETUP
         self._set_manual(ConnectionStatus.DISABLED)
 
-    def from_connected_to_disconnected(self):
+    def from_connected_to_disconnected(self) -> None:
         assert self.status == ConnectionStatus.CONNECTED
         self._set_manual(ConnectionStatus.DISCONNECTED)
 
@@ -76,7 +76,7 @@ class StatusTransitions:
         }
         return transitions.get(status)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self.status} ' \
                f'[{"x" if self.error else " "}] Error, ' \
                f'[{"x" if self.setup else " "}] Setup>'

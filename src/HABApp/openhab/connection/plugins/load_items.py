@@ -35,7 +35,7 @@ Items = uses_item_registry()
 
 class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    async def on_connected(self, context: OpenhabContext):
+    async def on_connected(self, context: OpenhabContext) -> None:
         # The context will be created fresh for each connect
         if not context.created_items and not context.created_things:
             await self.load_items(context)
@@ -67,7 +67,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 else:
                     log.warning(f'Thing sync failed!')
 
-    async def load_items(self, context: OpenhabContext):
+    async def load_items(self, context: OpenhabContext) -> None:
         from HABApp.openhab.map_items import map_item
         OpenhabItem = HABApp.openhab.items.OpenhabItem
 
@@ -133,7 +133,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         log.debug('Item state sync complete')
         return synced
 
-    async def load_things(self, context: OpenhabContext):
+    async def load_things(self, context: OpenhabContext) -> None:
         Thing = HABApp.openhab.items.Thing
 
         # try to update things, too

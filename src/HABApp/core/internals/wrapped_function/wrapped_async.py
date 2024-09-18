@@ -14,7 +14,7 @@ class WrappedAsyncFunction(WrappedFunctionBase):
     def __init__(self, func: TYPE_FUNC_ASYNC,
                  name: str | None = None,
                  logger: logging.Logger | None = None,
-                 context: Context | None = None):
+                 context: Context | None = None) -> None:
 
         super().__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)
@@ -22,11 +22,11 @@ class WrappedAsyncFunction(WrappedFunctionBase):
         self.func = func
 
     @override
-    def run(self, *args, **kwargs):
+    def run(self, *args, **kwargs) -> None:
         create_task(self.async_run(*args, **kwargs), name=self.name)
 
     @override
-    async def async_run(self, *args, **kwargs):
+    async def async_run(self, *args, **kwargs) -> None:
 
         token = async_context.set('WrappedAsyncFunction')
 

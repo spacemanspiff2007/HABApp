@@ -9,21 +9,21 @@ event_bus = uses_event_bus()
 
 
 class EventBusListener(EventBusBaseListener):
-    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: HINT_EVENT_FILTER_OBJ, **kwargs):
+    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: HINT_EVENT_FILTER_OBJ, **kwargs) -> None:
         super().__init__(topic, **kwargs)
 
         assert isinstance(callback, WrappedFunctionBase)
         self.func: TYPE_WRAPPED_FUNC_OBJ = callback
         self.filter: HINT_EVENT_FILTER_OBJ = event_filter
 
-    def notify_listeners(self, event):
+    def notify_listeners(self, event) -> None:
         if self.filter.trigger(event):
             self.func.run(event)
 
     def describe(self) -> str:
         return f'"{self.topic}" (filter={self.filter.describe()})'
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Stop listening on the event bus"""
         event_bus.remove_listener(self)
 
@@ -33,14 +33,14 @@ HINT_EVENT_BUS_LISTENER = TypeVar('HINT_EVENT_BUS_LISTENER', bound=EventBusListe
 
 class ContextBoundEventBusListener(EventBusListener, AutoContextBoundObj):
     def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: HINT_EVENT_FILTER_OBJ,
-                 parent_ctx: Context | None = None):
+                 parent_ctx: Context | None = None) -> None:
         super().__init__(topic=topic, callback=callback, event_filter=event_filter, parent_ctx=parent_ctx)
 
         assert isinstance(callback, WrappedFunctionBase)
         self.func: TYPE_WRAPPED_FUNC_OBJ = callback
         self.filter: HINT_EVENT_FILTER_OBJ = event_filter
 
-    def notify_listeners(self, event):
+    def notify_listeners(self, event) -> None:
         if self.filter.trigger(event):
             self.func.run(event)
 
@@ -51,6 +51,6 @@ class ContextBoundEventBusListener(EventBusListener, AutoContextBoundObj):
         event_bus.remove_listener(self)
         return super()._ctx_unlink()
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Stop listening on the event bus"""
         self._ctx_unlink()

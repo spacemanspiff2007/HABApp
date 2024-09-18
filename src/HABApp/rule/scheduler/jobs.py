@@ -24,7 +24,7 @@ Items = uses_item_registry()
 
 
 class ItemBoundJobMixin:
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._item: BaseValueItem | None = None
 
@@ -48,7 +48,7 @@ class ItemBoundJobMixin:
             self._item = None
             self._next_run_callback = None
 
-    def to_item(self, item: str | BaseValueItem | None):
+    def to_item(self, item: str | BaseValueItem | None) -> None:
         """Sends the next execution (date)time to an item. Sends ``None`` if the job is not scheduled.
         Every time the scheduler updates to a new (date)time the item will also receive the updated time.
 
@@ -106,7 +106,7 @@ class SunsetJob(SunsetJobBase, ItemBoundJobMixin):
 
 
 # This is a very dirty hack - I really should come up with something different
-def replace_jobs():
+def replace_jobs() -> None:
     g = globals()
     module = eascheduler.scheduler_view
     for name, obj in inspect.getmembers(module):

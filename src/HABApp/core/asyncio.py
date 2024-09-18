@@ -8,6 +8,7 @@ from collections.abc import Callable as _Callable
 from collections.abc import Coroutine as _Coroutine
 from contextvars import ContextVar as _ContextVar
 from contextvars import Token as _Token
+from types import TracebackType
 from typing import Any as _Any
 from typing import Final
 from typing import ParamSpec as _ParamSpec
@@ -20,20 +21,20 @@ async_context = _ContextVar('async_ctx')
 
 
 class AsyncContext:
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         self.value: Final = value
         self.token: _Token[str] | None = None
         self.parent: AsyncContext | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         assert self.token is None, self
         self.parent = async_context.get(None)
         self.token = async_context.set(self.value)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> None:
         async_context.reset(self.token)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         parent: str = ''
         if self.parent:
             parent = f'{self.parent} -> '
@@ -45,7 +46,7 @@ class AsyncContextError(Exception):
         super().__init__()
         self.func: _Callable = func
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'Function "{self.func.__name__}" may not be called from an async context!'
 
 

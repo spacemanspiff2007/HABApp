@@ -6,7 +6,7 @@ from HABApp.core.const.topics import TOPIC_ERRORS
 class BenchBaseRule(HABApp.Rule):
     BENCH_TYPE: str
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.err_watcher = None
@@ -23,16 +23,16 @@ class BenchBaseRule(HABApp.Rule):
         next_rule.prev_rule = self
         return next_rule
 
-    def _err_event(self, event):
+    def _err_event(self, event) -> None:
         self.errors.append(event)
 
-    def do_bench_start(self):
+    def do_bench_start(self) -> None:
         self.errors.clear()
         self.err_watcher = self.listen_event(TOPIC_ERRORS, self._err_event)
 
         self.run.at(1, self.do_bench_run)
 
-    def do_bench_run(self):
+    def do_bench_run(self) -> None:
         try:
             try:
                 print('+' + '-' * 78 + '+')
@@ -47,16 +47,16 @@ class BenchBaseRule(HABApp.Rule):
         finally:
             self.run.at(1, self.do_bench_finished)
 
-    def set_up(self):
+    def set_up(self) -> None:
         pass
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         pass
 
     def run_bench(self):
         raise NotImplementedError()
 
-    def do_bench_finished(self):
+    def do_bench_finished(self) -> None:
         self.err_watcher.cancel()
 
         if self.errors:

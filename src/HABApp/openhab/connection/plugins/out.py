@@ -14,7 +14,7 @@ from HABApp.openhab.connection.handler import convert_to_oh_type, post, put
 
 class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
 
         self.add: bool = False
@@ -23,25 +23,25 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         self.task_worker: Final = SingleTask(self.queue_worker, 'OhQueueWorker')
         self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
 
-    async def _clear_queue(self):
+    async def _clear_queue(self) -> None:
         try:
             while True:
                 self.queue.get_nowait()
         except QueueEmpty:
             pass
 
-    async def on_connected(self):
+    async def on_connected(self) -> None:
         self.add = True
         self.task_worker.start()
         self.task_watcher.start()
 
-    async def on_disconnected(self):
+    async def on_disconnected(self) -> None:
         self.add = False
         await self.task_worker.cancel_wait()
         await self.task_watcher.cancel_wait()
         await self._clear_queue()
 
-    async def queue_watcher(self):
+    async def queue_watcher(self) -> None:
         log = self.plugin_connection.log
         first_msg_at = 150
 
@@ -68,7 +68,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     log_info(log, f'{size} messages in queue')
 
     # noinspection PyProtectedMember
-    async def queue_worker(self):
+    async def queue_worker(self) -> None:
 
         queue: Final = self.queue
         to_str: Final = convert_to_oh_type
@@ -109,7 +109,7 @@ async_post_update: Final = OUTGOING_PLUGIN.async_post_update
 async_send_command: Final = OUTGOING_PLUGIN.async_send_command
 
 
-def post_update(item: str | ItemRegistryItem, state: Any):
+def post_update(item: str | ItemRegistryItem, state: Any) -> None:
     """
     Post an update to the item
 
@@ -121,7 +121,7 @@ def post_update(item: str | ItemRegistryItem, state: Any):
     run_func_from_async(async_post_update, item, state)
 
 
-def send_command(item: str | ItemRegistryItem, command: Any):
+def send_command(item: str | ItemRegistryItem, command: Any) -> None:
     """
     Send the specified command to the item
 

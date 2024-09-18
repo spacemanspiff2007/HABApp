@@ -88,12 +88,12 @@ class FinishedProcessInfo:
     :var Optional[str] stderr: Error output of the process or ``None``
     """
 
-    def __init__(self, returncode: int, stdout: str | None, stderr: str | None):
+    def __init__(self, returncode: int, stdout: str | None, stderr: str | None) -> None:
         self.returncode: int = returncode
         self.stdout: str | None = stdout
         self.stderr: str | None = stderr
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<ProcessInfo: returncode: {self.returncode}, stdout: {self.stdout}, stderr: {self.stderr}>'
 
     def __eq__(self, other):

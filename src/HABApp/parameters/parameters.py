@@ -11,7 +11,7 @@ def remove_parameter_file(file):
     return _PARAMETERS.pop(file)
 
 
-def set_parameter_file(file: str, value):
+def set_parameter_file(file: str, value) -> None:
     # validate the parameters, this will raise an exception
     validator = _VALIDATORS.get(file)
     if validator is not None:
@@ -24,7 +24,7 @@ def get_parameter_file(file: str):
     return _PARAMETERS[file]
 
 
-def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=True):
+def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=True) -> None:
     """Add a validator for the parameter file. If the file is already loaded this will reload the file.
 
     :param filename: filename which shall be validated (without extension)

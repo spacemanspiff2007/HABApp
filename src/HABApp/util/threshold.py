@@ -1,5 +1,5 @@
 class Threshold:
-    def __init__(self, threshold1, threshold2):
+    def __init__(self, threshold1, threshold2) -> None:
         """This is a simple Schmitt Trigger implementation.
         If the value is > upper_threshold is_higher will return true.
         The return value will stay true until the value goes below the lower threshold.
@@ -18,7 +18,7 @@ class Threshold:
         self.check_value(value)
         return self.__threshold == self.lower_threshold
 
-    def is_off(self, value):
+    def is_off(self, value) -> bool:
         return not self.is_on(value)
 
     @property

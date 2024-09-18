@@ -1,27 +1,25 @@
 from pathlib import Path
-from typing import Dict, List, Type
 
 import HABApp
 from HABApp.core.const.topics import TOPIC_FILES as T_FILES
 from HABApp.core.events.habapp_events import RequestFileLoadEvent, RequestFileUnloadEvent
+from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.internals import uses_post_event
 
-from ..watcher import AggregatingAsyncEventHandler
 
-
-FOLDERS: Dict[str, 'ConfiguredFolder'] = {}
+FOLDERS: dict[str, 'ConfiguredFolder'] = {}
 
 post_event = uses_post_event()
 
 
-async def _generate_file_events(files: List[Path]):
+async def _generate_file_events(files: list[Path]) -> None:
     for file in files:
         name = get_name(file)
         post_event(T_FILES, RequestFileLoadEvent(name) if file.is_file() else RequestFileUnloadEvent(name))
 
 
 class ConfiguredFolder:
-    def __init__(self, prefix: str, folder: Path, priority: int):
+    def __init__(self, prefix: str, folder: Path, priority: int) -> None:
         self.prefix = prefix
         self.folder = folder
         self.priority: int = priority   # priority determines the order how the files will be loaded
@@ -32,11 +30,11 @@ class ConfiguredFolder:
         HABApp.core.files.watcher.add_folder_watch(handler)
         return handler
 
-    def add_file_type(self, cls: Type['HABApp.core.files.file.HABAppFile']):
+    def add_file_type(self, cls: type['HABApp.core.files.file.HABAppFile']) -> None:
         HABApp.core.files.file.register_file_type(self.prefix, cls)
 
 
-def get_prefixes() -> List[str]:
+def get_prefixes() -> list[str]:
     return list(map(lambda x: x.prefix, sorted(FOLDERS.values(), key=lambda x: x.priority, reverse=True)))
 
 

@@ -42,7 +42,7 @@ class DirectoriesConfig(BaseModel):
 
         return value
 
-    def create_folders(self):
+    def create_folders(self) -> None:
 
         # create folder structure if it does not exist
         if not self.rules.is_dir():

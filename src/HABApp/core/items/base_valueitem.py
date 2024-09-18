@@ -30,7 +30,7 @@ class BaseValueItem(BaseItem):
     :ivar datetime last_update: Timestamp of the last time when the item has updated the value (read only)
     """
 
-    def __init__(self, name: str, initial_value=None):
+    def __init__(self, name: str, initial_value=None) -> None:
         super().__init__(name)
 
         self.value: typing.Any = initial_value
@@ -114,7 +114,7 @@ class BaseValueItem(BaseItem):
             return default_value
         return self.value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         ret = ''
         for k in ['name', 'value', 'last_change', 'last_update']:
             ret += f'{", " if ret else ""}{k}: {getattr(self, k)}'
@@ -125,7 +125,7 @@ class BaseValueItem(BaseItem):
     def __eq__(self, other):
         return self.value == other
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.value)
 
     # rich comparisons
@@ -227,13 +227,13 @@ class BaseValueItem(BaseItem):
         return self.value.__invert__()
 
     # built-in functions complex(), int() and float().
-    def __complex__(self):
+    def __complex__(self) -> complex:
         return self.value.__complex__()
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value.__int__()
 
-    def __float__(self):
+    def __float__(self) -> float:
         return self.value.__float__()
 
     # built-in function round() and math functions trunc(), floor() and ceil().

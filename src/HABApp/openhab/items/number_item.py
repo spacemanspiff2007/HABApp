@@ -49,7 +49,7 @@ class NumberItem(OpenhabItem):
 
         raise InvalidItemValue.from_item(self, new_value)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         if self.value is None:
             raise ItemValueIsNoneError.from_item(self)
         return bool(self.value)

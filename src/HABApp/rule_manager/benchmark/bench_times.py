@@ -25,7 +25,7 @@ def format_duration(duration: None | str | float) -> str:
 
 
 class BenchContainer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.times = []
 
     def create(self, name: str) -> 'BenchTime':
@@ -33,7 +33,7 @@ class BenchContainer:
         self.times.append(c)
         return c
 
-    def show(self):
+    def show(self) -> None:
         indent = max(map(lambda x: len(x.name), self.times), default=0)
         BenchTime.show_table(indent)
         for b in self.times:
@@ -44,16 +44,16 @@ class BenchContainer:
 class BenchTime:
 
     @classmethod
-    def show_table(cls, indent_name=0):
+    def show_table(cls, indent_name=0) -> None:
         print(f'{"":{indent_name}s} | {format_duration("dur")} | {"per sec":7s} | {format_duration("median")} | '
               f'{format_duration("min")} | {format_duration("max")} | {format_duration("mean")}')
 
-    def __init__(self, name: str, factor: int = 1):
+    def __init__(self, name: str, factor: int = 1) -> None:
         self.name = name
         self.times = []
         self.factor = factor
 
-    def show(self, indent_name=0):
+    def show(self, indent_name=0) -> None:
         total = sum(self.times)
         count = len(self.times)
         _mean = mean(self.times) if self.times else 0

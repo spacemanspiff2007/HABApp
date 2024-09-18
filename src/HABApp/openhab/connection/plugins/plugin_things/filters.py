@@ -29,7 +29,7 @@ CHANNEL_ALIAS: dict[str, str] = {
 class BaseFilter:
     KEYS: dict[str, str]
 
-    def __init__(self, key: str, regex: str):
+    def __init__(self, key: str, regex: str) -> None:
         self.key = key
         try:
             self.alias = self.KEYS[key]
@@ -54,7 +54,7 @@ class BaseFilter:
             )
         return m
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} "{self.key}", "{self.search.pattern}">'
 
 
@@ -70,7 +70,7 @@ def apply_filters(filters: list[BaseFilter], iterable: list[dict[str, str]], tes
     return filter(lambda n: all(map(lambda filter: filter.matches(n, test), filters)), iterable)
 
 
-def log_overview(data: list[dict], aliases: dict[str, str], heading=''):
+def log_overview(data: list[dict], aliases: dict[str, str], heading='') -> None:
     table = Table(heading)
     for k in aliases:
         table.add_column(k, align='<')

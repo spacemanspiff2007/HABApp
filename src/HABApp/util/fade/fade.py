@@ -10,12 +10,12 @@ VAL_TYPE = Union[int, float]
 
 class FadeWorker(AutoContextBoundObj):
 
-    def __init__(self, parent: 'Fade', interval: float):
+    def __init__(self, parent: 'Fade', interval: float) -> None:
         super().__init__()
         self.parent: Fade = parent
         self.scheduler = self._parent_ctx.rule.run.every(None, interval, self.parent._scheduled_worker)
 
-    def cancel(self):
+    def cancel(self) -> None:
         self._ctx_unlink()
         self.scheduler.cancel()
         self.scheduler = None
@@ -35,7 +35,7 @@ class Fade:
     :ivar callback: Function with one argument that will be automatically called with the new values when the scheduled
                     fade runs
     """
-    def __init__(self, callback=None, min_value: VAL_TYPE = 0, max_value: VAL_TYPE = 100):
+    def __init__(self, callback=None, min_value: VAL_TYPE = 0, max_value: VAL_TYPE = 100) -> None:
         self.min_value = min_value
         self.max_value = max_value
 
@@ -121,7 +121,7 @@ class Fade:
         """True if the fade is finished"""
         return self._fade_finished
 
-    async def _scheduled_worker(self):
+    async def _scheduled_worker(self) -> None:
         self.get_value()
         if self._fade_finished:
             self.stop_fade()

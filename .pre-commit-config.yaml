@@ -30,6 +30,15 @@ repos:
         args: [ "--select", "I001,UP035,Q000,Q001", "--fix"]
 
 
+#  - repo: https://github.com/JelleZijlstra/autotyping
+#    rev:  v0.0.1
+#    hooks:
+#      - id: autotyping
+#        stages: [commit]
+#        types: [python]
+#        args: [--safe]
+
+
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:

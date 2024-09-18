@@ -57,7 +57,7 @@ class ThingConfigChanger:
                 continue
         return c
 
-    def __init__(self, uid: str):
+    def __init__(self, uid: str) -> None:
         self.uid: str = uid
         self.alias: bidict.bidict[str | int, str] = bidict.bidict()
         self.org: typing.Dict[str, typing.Any] = {}
@@ -66,7 +66,7 @@ class ThingConfigChanger:
     def __getitem__(self, key):
         return self.org[self.alias.get(key, key)]
 
-    def __setitem__(self, o_key, value):
+    def __setitem__(self, o_key, value) -> None:
         key = self.alias.get(o_key, o_key)
         if key not in self.org:
             raise KeyError(f'Parameter "{o_key}" does not exist for {self.uid}!')
@@ -101,7 +101,7 @@ class ThingConfigChanger:
             return None
         self.new[key] = value
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         return self.alias.get(key, key) in self.org
 
     def get(self, key, default=None):

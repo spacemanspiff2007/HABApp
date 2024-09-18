@@ -11,7 +11,7 @@ OPTIONAL_DT = Optional[datetime]
 
 class OpenhabPersistenceData:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.data: dict[float, int | float | str] = {}
 
     @classmethod

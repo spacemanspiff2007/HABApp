@@ -10,7 +10,7 @@ from .parameters import get_value as _get_value
 
 
 class BaseParameter:
-    def __init__(self, filename: str, *keys, default_value: typing.Any = 'ToDo'):
+    def __init__(self, filename: str, *keys, default_value: typing.Any = 'ToDo') -> None:
         """Class to dynamically access parameters which are loaded from file.
 
         :param filename: filename (without extension)
@@ -37,10 +37,10 @@ class Parameter(BaseParameter):
         """
         return _get_value(self._filename, *self._keys)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Parameter file: {self._filename}, keys: {self._keys}, value: {self.value}'
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.value)
 
     def __eq__(self, other):
@@ -116,13 +116,13 @@ class Parameter(BaseParameter):
         return self.value.__invert__()
 
     # built-in functions complex(), int() and float().
-    def __complex__(self):
+    def __complex__(self) -> complex:
         return self.value.__complex__()
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value.__int__()
 
-    def __float__(self):
+    def __float__(self) -> float:
         return self.value.__float__()
 
     # built-in function round() and math functions trunc(), floor() and ceil().
@@ -193,10 +193,10 @@ class DictParameter(BaseParameter):
             raise ValueError(f'Value "{value}" for {self.__class__.__name__} is not a dict! ({type(value)})')
         return value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<DictParameter file: {self._filename}, keys: {self._keys}, value: {self.value}'
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.value)
 
     def __eq__(self, other):
@@ -205,13 +205,13 @@ class DictParameter(BaseParameter):
     def __getitem__(self, item):
         return self.value[item]
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         return key in self.value
 
     def __iter__(self):
         return iter(self.value)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.value)
 
     def keys(self):
@@ -226,8 +226,8 @@ class DictParameter(BaseParameter):
     def get(self, item, default=None):
         return self.value.get(item, default)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:
         raise PermissionError('Parameter can not be changed!')
 
-    def __delitem__(self, key):
+    def __delitem__(self, key) -> None:
         raise PermissionError('Parameter can not be changed!')

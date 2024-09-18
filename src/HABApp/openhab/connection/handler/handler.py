@@ -19,14 +19,14 @@ from HABApp.openhab.errors import OpenhabCredentialsInvalidError, OpenhabDisconn
 class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
     request: aiohttp.ClientSession._request
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(name=CONNECTION_HANDLER_NAME)
         self.options: dict[str, Any] = {}
         self.read_only: bool = False
         self.online = False
         self.session: aiohttp.ClientSession | None = None
 
-    def update_cfg_general(self):
+    def update_cfg_general(self) -> None:
         self.read_only = CONFIG.openhab.general.listen_only
 
     async def on_setup(self, connection: OpenhabConnection):
@@ -71,10 +71,10 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
         )
         self.request = self.session._request
 
-    async def on_connected(self):
+    async def on_connected(self) -> None:
         self.online = True
 
-    async def on_disconnected(self, connection: OpenhabConnection):
+    async def on_disconnected(self, connection: OpenhabConnection) -> None:
         self.online = False
         connection.context = None
 

@@ -27,7 +27,7 @@ class MultiModeItem(Item):
         item._default_value = default_value
         return item
 
-    def __init__(self, name: str, initial_value=None, default_value=MISSING):
+    def __init__(self, name: str, initial_value=None, default_value=MISSING) -> None:
         super().__init__(name=name, initial_value=initial_value)
 
         self.__values_by_prio: dict[int, HINT_BASE_MODE] = {}
@@ -143,7 +143,7 @@ class MultiModeItem(Item):
 
         return new_value
 
-    def _on_item_removed(self):
+    def _on_item_removed(self) -> None:
         for p, mode in self.all_modes():
             mode.cancel()
 

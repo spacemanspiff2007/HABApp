@@ -2,7 +2,7 @@ from typing import Any, Final
 
 
 class ComplexEventValue:
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         self.value: Any = value
 
 
@@ -15,11 +15,11 @@ class ValueUpdateEvent:
     name: str
     value: Any
 
-    def __init__(self, name: str, value: Any):
+    def __init__(self, name: str, value: Any) -> None:
         self.name: Final = name
         self.value: Final = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
 
 
@@ -34,12 +34,12 @@ class ValueChangeEvent:
     value: Any
     old_value: Any
 
-    def __init__(self, name: str, value: Any, old_value: Any):
+    def __init__(self, name: str, value: Any, old_value: Any) -> None:
         self.name: Final = name
         self.value: Final = value
         self.old_value: Final = old_value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
 
@@ -52,11 +52,11 @@ class ItemNoChangeEvent:
     name: str
     seconds: int | float
 
-    def __init__(self, name: str, seconds: int | float):
+    def __init__(self, name: str, seconds: int | float) -> None:
         self.name: Final = name
         self.seconds: Final = seconds
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'
 
 
@@ -68,9 +68,9 @@ class ItemNoUpdateEvent:
     name: str
     seconds: int | float
 
-    def __init__(self, name: str, seconds: int | float):
+    def __init__(self, name: str, seconds: int | float) -> None:
         self.name: Final = name
         self.seconds: Final = seconds
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'

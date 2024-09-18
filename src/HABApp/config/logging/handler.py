@@ -10,7 +10,7 @@ class MidnightRotatingFileHandler(RotatingFileHandler):
     then rotates the file
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.last_check: date = datetime.now().date()
 
@@ -27,7 +27,7 @@ class CompressedMidnightRotatingFileHandler(MidnightRotatingFileHandler):
 
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.namer = self.compressed_namer
         self.rotator = self.compressed_rotator
         super().__init__(*args, **kwargs)
@@ -35,7 +35,7 @@ class CompressedMidnightRotatingFileHandler(MidnightRotatingFileHandler):
     def compressed_namer(self, default_name: str) -> str:
         return default_name + '.gz'
 
-    def compressed_rotator(self, source: str, dest: str):
+    def compressed_rotator(self, source: str, dest: str) -> None:
         src = Path(source)
         with src.open('rb') as f_in, gzip.open(dest, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)

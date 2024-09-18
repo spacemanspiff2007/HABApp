@@ -23,17 +23,17 @@ Items = uses_item_registry()
 
 class SseEventListenerPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
         self.task: Final = SingleTask(self.sse_task, name='SSE Task')
 
-    async def on_connected(self):
+    async def on_connected(self) -> None:
         self.task.start()
 
-    async def on_disconnected(self):
+    async def on_disconnected(self) -> None:
         await self.task.cancel_wait()
 
-    async def sse_task(self):
+    async def sse_task(self) -> None:
         try:
             with AsyncContext('SSE'):
                 # cache so we don't have to look up every event

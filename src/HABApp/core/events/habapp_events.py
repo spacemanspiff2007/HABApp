@@ -2,10 +2,10 @@ from typing import Final
 
 
 class __FileEventBase:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name: str = name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} filename: {self.name}>'
 
 
@@ -30,12 +30,12 @@ class HABAppException:
     :ivar str traceback: traceback
     :ivar Exception exception: Exception
     """
-    def __init__(self, func_name: str, exception: Exception, traceback: str):
+    def __init__(self, func_name: str, exception: Exception, traceback: str) -> None:
         self.func_name: str = func_name
         self.exception: Exception = exception
         self.traceback: str = traceback
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} func_name: {self.func_name}, exception: {self.exception}>'
 
     def to_str(self) -> str:
@@ -49,9 +49,9 @@ class HABAppConnectionStateEvent:
     :ivar str connection: name of the connection
     :ivar str state: state of the connection
     """
-    def __init__(self, connection: str, state: str):
+    def __init__(self, connection: str, state: str) -> None:
         self.connection: Final = connection
         self.state: Final = state
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} connection: {self.connection:s}, state: {self.state:s}>'

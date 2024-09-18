@@ -10,10 +10,10 @@ from .bench_oh import OpenhabBenchRule
 
 
 class BenchFile(RuleFile):
-    def __init__(self, rule_manager):
+    def __init__(self, rule_manager) -> None:
         super().__init__(rule_manager, 'BenchmarkFile', path=Path('BenchmarkFile'))
 
-    def create_rules(self, created_rules: list):
+    def create_rules(self, created_rules: list) -> None:
         hook = HABAppRuleHook(created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
         hook.in_dict(globals())
 

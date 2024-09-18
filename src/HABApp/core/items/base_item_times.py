@@ -15,7 +15,7 @@ WATCH_OBJ = TypeVar('WATCH_OBJ', bound=BaseWatch)
 class ItemTimes(Generic[WATCH_OBJ]):
     WATCH: type[ItemNoUpdateWatch] | type[ItemNoChangeWatch]
 
-    def __init__(self, name: str, instant: Instant):
+    def __init__(self, name: str, instant: Instant) -> None:
         self.name: str = name
         self.instant: Instant = instant
         self.tasks: list[WATCH_OBJ] = []

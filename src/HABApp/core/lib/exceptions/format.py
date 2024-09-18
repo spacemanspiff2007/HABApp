@@ -8,7 +8,7 @@ from .const import SEPARATOR_NEW_FRAME
 from .format_frame import format_frame_info
 
 
-def append_short_traceback(tb: list[str], e: Exception | tuple[Any, Any, Any]):
+def append_short_traceback(tb: list[str], e: Exception | tuple[Any, Any, Any]) -> None:
     for line in _format_exception(*e) if isinstance(e, tuple) else _format_exception(type(e), e, e.__traceback__):
         for sub_lines in line.splitlines():
             tb.append(sub_lines.rstrip())

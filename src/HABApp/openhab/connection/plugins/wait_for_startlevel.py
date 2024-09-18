@@ -13,7 +13,7 @@ from HABApp.openhab.connection.handler.func_async import async_get_system_info
 
 class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
 
     async def on_connected(self, context: OpenhabContext, connection: OpenhabConnection):

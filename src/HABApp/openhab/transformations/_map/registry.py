@@ -9,7 +9,7 @@ from HABApp.openhab.transformations.base import TransformationFactoryBase, Trans
 
 class MapTransformationRegistry(TransformationRegistryBase):
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(name)
         self.objs: dict[str, tuple[dict, Any]] = {}
 

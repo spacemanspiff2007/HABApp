@@ -18,7 +18,7 @@ Items = uses_item_registry()
 
 class BrokenLinksPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
         self.do_run = True
 

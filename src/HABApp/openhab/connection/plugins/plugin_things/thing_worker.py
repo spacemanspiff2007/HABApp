@@ -1,5 +1,4 @@
 import itertools
-from typing import List
 
 from HABApp.core.logger import HABAppError
 from HABApp.openhab.definitions.helpers.log_table import Table
@@ -8,7 +7,7 @@ from ._log import log_cfg as log
 from .thing_config import ThingConfigChanger
 
 
-def show_config_overview(cfgs: List[ThingConfigChanger], all_params):
+def show_config_overview(cfgs: list[ThingConfigChanger], all_params) -> None:
     t = Table(heading='Current configuration')
     c_p = t.add_column('Parameter')
     c_s = [t.add_column(c.uid, alias=':'.join(c.uid.split(':')[-2:]) if ':' in c.uid else None) for c in cfgs]

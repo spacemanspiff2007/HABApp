@@ -16,7 +16,7 @@ DEBOUNCE_TIME: float = 0.6
 
 class AggregatingAsyncEventHandler(FileSystemEventHandler):
     def __init__(self, folder: Path, func: Callable[[list[Path]], Awaitable[Any]], filter: EventFilterBase,
-                 watch_subfolders: bool = False):
+                 watch_subfolders: bool = False) -> None:
         super().__init__(folder, filter, watch_subfolders=watch_subfolders)
 
         self.func = func
@@ -25,7 +25,7 @@ class AggregatingAsyncEventHandler(FileSystemEventHandler):
         self.last_event: float = 0
 
     @ignore_exception
-    def file_changed(self, dst: str):
+    def file_changed(self, dst: str) -> None:
         # Map from thread to async
         run_coroutine_threadsafe(self._event_waiter(Path(dst)), loop=HABApp.core.const.loop)
 
@@ -49,7 +49,7 @@ class AggregatingAsyncEventHandler(FileSystemEventHandler):
         with AsyncContext('FileWatcherEvent'):
             await self.func(HABApp.core.lib.sort_files(files))
 
-    async def trigger_all(self):
+    async def trigger_all(self) -> None:
         files = HABApp.core.lib.list_files(self.folder, self.filter, self.watch_subfolders)
         with AsyncContext('FileWatcherAll'):
             await self.func(files)

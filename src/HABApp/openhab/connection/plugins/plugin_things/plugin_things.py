@@ -35,7 +35,7 @@ class DuplicateItemError(Exception):
 
 class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.created_items: dict[str, set[str]] = {}
         self.do_cleanup = PendingFuture(self.clean_items, 120)
@@ -73,7 +73,7 @@ class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
         await self.watcher.trigger_all()
 
     @HABApp.core.wrapper.ignore_exception
-    async def clean_items(self):
+    async def clean_items(self) -> None:
         items = set()
         for s in self.created_items.values():
             items.update(s)

@@ -7,7 +7,7 @@ from typing import Final
 class _MissingType(Enum):
     MISSING = object()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Missing>'
 
 

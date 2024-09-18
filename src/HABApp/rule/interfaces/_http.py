@@ -10,7 +10,7 @@ from HABApp.core.const.json import dump_json
 CLIENT: aiohttp.ClientSession | None = None
 
 
-async def create_client():
+async def create_client() -> None:
     global CLIENT
     assert CLIENT is None
 

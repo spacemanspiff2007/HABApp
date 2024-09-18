@@ -43,7 +43,7 @@ def wrap_func(func: HINT_FUNC_SYNC | TYPE_FUNC_ASYNC,
 SYNC_CLS: type[WrappedThreadFunction] | type[WrappedSyncFunction]
 
 
-def setup():
+def setup() -> None:
     global SYNC_CLS
 
     if not THREAD_POOL.enabled:

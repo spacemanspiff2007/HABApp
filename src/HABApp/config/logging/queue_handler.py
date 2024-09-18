@@ -18,7 +18,7 @@ LOCK = Lock()
 class HABAppQueueHandler:
     FLUSH_DELAY: float = CONFIG.habapp.logging.flush_every
 
-    def __init__(self, queue: SimpleQueue, handler_name: str, thread_name: str):
+    def __init__(self, queue: SimpleQueue, handler_name: str, thread_name: str) -> None:
         self._handler: logging.Handler | None = None
         self._handler_name: Final = handler_name
         self._queue: Final = queue
@@ -37,7 +37,7 @@ class HABAppQueueHandler:
 
         thread.start()
 
-    def signal_stop(self):
+    def signal_stop(self) -> None:
         self._queue.put_nowait(None)
 
     def stop(self) -> None:
@@ -48,7 +48,7 @@ class HABAppQueueHandler:
         self.signal_stop()
         thread.join()
 
-    def _worker(self):
+    def _worker(self) -> None:
         try:
             log.debug(f'{self._name} thread running')
 

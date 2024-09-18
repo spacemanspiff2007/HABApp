@@ -29,7 +29,7 @@ class OpenhabItem(BaseValueItem):
 
     def __init__(self, name: str, initial_value: Any = None,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()):
+                 metadata: Mapping[str, MetaData] = Map()) -> None:
         super().__init__(name, initial_value)
         self.label: str | None = label
         self.tags: frozenset[str] = tags
@@ -48,14 +48,14 @@ class OpenhabItem(BaseValueItem):
     def _state_from_oh_str(state: str):
         raise NotImplementedError()
 
-    def oh_send_command(self, value: Any = MISSING):
+    def oh_send_command(self, value: Any = MISSING) -> None:
         """Send a command to the openHAB item
 
         :param value: (optional) value to be sent. If not specified the current item value will be used.
         """
         send_command(self.name, self.value if value is MISSING else value)
 
-    def oh_post_update(self, value: Any = MISSING):
+    def oh_post_update(self, value: Any = MISSING) -> None:
         """Post an update to the openHAB item
 
         :param value: (optional) value to be posted. If not specified the current item value will be used.

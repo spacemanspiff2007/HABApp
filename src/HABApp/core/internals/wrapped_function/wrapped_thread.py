@@ -27,7 +27,7 @@ POOL_INFO: set[PoolFunc] = set()
 POOL_LOCK = Lock()
 
 
-def create_thread_pool(count: int):
+def create_thread_pool(count: int) -> None:
     global POOL, POOL_THREADS
     assert isinstance(count, int) and count > 0
 
@@ -62,7 +62,7 @@ HINT_FUNC_SYNC = Callable[..., Any]
 
 class PoolFunc(ContextProvidingObj):
     def __init__(self, parent: WrappedThreadFunction, func_obj: HINT_FUNC_SYNC, func_args: tuple[Any, ...],
-                 func_kwargs: dict[str, Any], context: Context | None = None, **kwargs):
+                 func_kwargs: dict[str, Any], context: Context | None = None, **kwargs) -> None:
         super().__init__(context=context, **kwargs)
         self.parent: Final = parent
         self.func_obj: Final = func_obj
@@ -77,7 +77,7 @@ class PoolFunc(ContextProvidingObj):
         # thread info
         self.usage_high = 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} high: {self.usage_high:d}/{POOL_THREADS:d}>'
 
     def run(self):
@@ -137,7 +137,7 @@ class WrappedThreadFunction(WrappedFunctionBase):
                  warn_too_long=True,
                  name: str | None = None,
                  logger: logging.Logger | None = None,
-                 context: Context | None = None):
+                 context: Context | None = None) -> None:
 
         super().__init__(name=name, func=func, logger=logger, context=context)
         assert callable(func)
@@ -152,7 +152,7 @@ class WrappedThreadFunction(WrappedFunctionBase):
         return POOL.submit(pool_func.run)
 
     @override
-    async def async_run(self, *args, **kwargs):
+    async def async_run(self, *args, **kwargs) -> None:
 
         token = async_context.set('WrappedThreadFunction')
 

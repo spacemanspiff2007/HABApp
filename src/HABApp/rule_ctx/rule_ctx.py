@@ -14,7 +14,7 @@ log = logging.getLogger('HABApp.Rule')
 
 
 class HABAppRuleContext(Context):
-    def __init__(self, rule: 'HABApp.rule.Rule'):
+    def __init__(self, rule: 'HABApp.rule.Rule') -> None:
         super().__init__()
         self.rule: HABApp.rule.Rule | None = rule
 
@@ -29,7 +29,7 @@ class HABAppRuleContext(Context):
         event_bus.remove_listener(listener)
         return listener
 
-    def unload_rule(self):
+    def unload_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             rule = self.rule
 
@@ -51,7 +51,7 @@ class HABAppRuleContext(Context):
             # user implementation
             rule.on_rule_removed()
 
-    def check_rule(self):
+    def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             # We need items if we want to run the test
             if item_registry.get_items():

@@ -22,13 +22,13 @@ from HABApp.runtime import shutdown
 
 class Runtime:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config: HABApp.config.Config = None
 
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
-    async def start(self, config_folder: Path):
+    async def start(self, config_folder: Path) -> None:
         try:
             token = async_context.set('HABApp startup')
 

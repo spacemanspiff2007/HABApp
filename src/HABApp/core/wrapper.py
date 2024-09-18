@@ -7,6 +7,7 @@ from logging import Logger
 
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
+from types import TracebackType
 
 from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
 from HABApp.core.const.topics import TOPIC_WARNINGS as TOPIC_WARNINGS
@@ -21,7 +22,7 @@ post_event = uses_post_event()
 
 
 def process_exception(func: Callable | str, e: Exception,
-                      do_print=False, logger: logging.Logger = log):
+                      do_print=False, logger: logging.Logger = log) -> None:
     lines = format_exception(e)
 
     func_name = func if isinstance(func, str) else func.__name__
@@ -90,7 +91,7 @@ def ignore_exception(func):
 
 class ExceptionToHABApp:
     def __init__(self, logger: Logger | None = None, log_level: int = logging.ERROR,
-                 ignore_exception: bool = True):
+                 ignore_exception: bool = True) -> None:
         self.log: Logger | None = logger
         self.log_level = log_level
         self.ignore_exception: bool = ignore_exception
@@ -99,10 +100,10 @@ class ExceptionToHABApp:
 
         self.proc_tb: typing.Callable[[list], list] | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.raised_exception = False
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None):
         # no exception -> we exit gracefully
         if exc_type is None and exc_val is None:
             return True
