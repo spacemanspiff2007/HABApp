@@ -1,5 +1,4 @@
 import re
-from typing import Tuple
 
 
 LIMIT_REGEX = re.compile(
@@ -13,7 +12,7 @@ LIMIT_REGEX = re.compile(
 )
 
 
-def parse_limit(text: str) -> Tuple[int, int]:
+def parse_limit(text: str) -> tuple[int, int]:
     if not isinstance(text, str) or not (m := LIMIT_REGEX.fullmatch(text)):
         msg = f'Invalid limit string: "{text:s}"'
         raise ValueError(msg)

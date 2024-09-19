@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 from urllib.parse import quote as quote_url
 
 from HABApp.core.const.json import decode_struct
@@ -82,7 +82,7 @@ async def async_get_items() -> list[ItemResp]:
     resp = await get('/rest/items', params={'metadata': '.+'})
     body = await resp.read()
 
-    return decode_struct(body, type=List[ItemResp])
+    return decode_struct(body, type=list[ItemResp])
 
 
 async def async_get_item(item: str | ItemRegistryItem) -> ItemResp | None:
@@ -102,7 +102,7 @@ async def async_get_all_items_state() -> list[ShortItemResp]:
     resp = await get('/rest/items', params={'fields': 'name,state,type'})
     body = await resp.read()
 
-    return decode_struct(body, type=List[ShortItemResp])
+    return decode_struct(body, type=list[ShortItemResp])
 
 
 async def async_item_exists(item: str | ItemRegistryItem) -> bool:
@@ -203,7 +203,7 @@ async def async_get_things() -> list[ThingResp]:
     resp = await get('/rest/things')
     body = await resp.read()
 
-    return decode_struct(body, type=List[ThingResp])
+    return decode_struct(body, type=list[ThingResp])
 
 
 async def async_get_thing(thing: str | ItemRegistryItem) -> ThingResp:
@@ -284,7 +284,7 @@ async def async_get_links() -> list[ItemChannelLinkResp]:
         raise LinkRequestError('Unexpected error')
 
     body = await resp.read()
-    return decode_struct(body, type=List[ItemChannelLinkResp])
+    return decode_struct(body, type=list[ItemChannelLinkResp])
 
 
 def __get_item_link_url(item: str | ItemRegistryItem, channel: str) -> str:
@@ -363,7 +363,7 @@ async def async_get_transformations() -> list[TransformationResp]:
         raise TransformationsRequestError()
 
     body = await resp.read()
-    return decode_struct(body, type=List[TransformationResp])
+    return decode_struct(body, type=list[TransformationResp])
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -375,7 +375,7 @@ async def async_get_persistence_services() -> list[PersistenceServiceResp]:
         raise PersistenceRequestError()
 
     body = await resp.read()
-    return decode_struct(body, type=List[PersistenceServiceResp])
+    return decode_struct(body, type=list[PersistenceServiceResp])
 
 
 async def async_get_persistence_data(item: str | ItemRegistryItem, persistence: str | None,

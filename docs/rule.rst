@@ -231,6 +231,14 @@ Another very useful function is ``self.run.countdown`` as it can simplify many r
    * - :meth:`~HABAppJobBuilder.at`
      - Run the callback when a trigger fires.
 
+Scheduler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: HABAppJobBuilder
+   :members:
+   :inherited-members:
+
+
 Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. exec_code::
@@ -324,18 +332,12 @@ Example
     MyTriggerRule()
 
 
-Scheduler
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: HABAppJobBuilder
-   :members:
-   :inherited-members:
-
 Reoccuring Jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Reoccuring jobs are created with :meth:`~HABAppJobBuilder.at`.
-When the job is executed is described by Triggers. These triggers can be combined and/or restricted with filters.
+The point in time when the job is executed is described by Triggers.
+These triggers can be combined and/or restricted with filters.
 
 .. autoclass:: eascheduler.builder.triggers.TriggerBuilder
    :members:

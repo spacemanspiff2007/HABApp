@@ -1,7 +1,6 @@
 import logging
 from asyncio import sleep
 from pathlib import Path
-from typing import List, Tuple
 
 import pytest
 
@@ -30,7 +29,7 @@ class MockFile:
 class CfgObj:
     def __init__(self):
         self.properties = {}
-        self.operation: List[Tuple[str, str]] = []
+        self.operation: list[tuple[str, str]] = []
 
         class TestFile(HABAppFile):
             LOGGER = logging.getLogger('test')

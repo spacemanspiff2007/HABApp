@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -7,8 +6,8 @@ from HABApp.core.const import yml
 
 
 class FileProperties(BaseModel):
-    depends_on: List[str] = Field(alias='depends on', default_factory=list)
-    reloads_on: List[str] = Field(alias='reloads on', default_factory=list)
+    depends_on: list[str] = Field(alias='depends on', default_factory=list)
+    reloads_on: list[str] = Field(alias='reloads on', default_factory=list)
 
     model_config = ConfigDict(extra='forbid', populate_by_name=True)
 

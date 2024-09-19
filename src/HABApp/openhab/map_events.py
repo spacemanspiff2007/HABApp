@@ -1,5 +1,3 @@
-from typing import Dict, Type
-
 from HABApp.core.const.json import load_json
 
 from .events import (
@@ -43,7 +41,7 @@ EVENT_LIST = [
     ThingConfigStatusInfoEvent,
 ]
 
-_events: Dict[str, Type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
+_events: dict[str, type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
 _events['GroupItemStateChangedEvent'] = GroupStateChangedEvent       # Naming from openHAB is inconsistent here
 _events['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming from openHAB is inconsistent here
 _events['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming from openHAB is inconsistent here

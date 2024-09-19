@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 from stack_data import LINE_GAP, FrameInfo
 
@@ -50,7 +49,7 @@ def is_lib_file(name: str) -> bool:
     return False
 
 
-def format_frame_info(tb: List[str], frame_info: FrameInfo, is_last=False) -> bool:
+def format_frame_info(tb: list[str], frame_info: FrameInfo, is_last=False) -> bool:
     filename = frame_info.filename
 
     # always skip system and python libraries

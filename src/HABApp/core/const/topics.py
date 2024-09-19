@@ -1,4 +1,4 @@
-from typing import Final, Tuple
+from typing import Final
 
 
 TOPIC_INFOS: Final    = 'HABApp.Infos'
@@ -9,7 +9,7 @@ TOPIC_FILES: Final = 'HABApp.Files'
 TOPIC_CONNECTIONS: Final = 'HABApp.Connections'
 
 
-ALL_TOPICS: Tuple[str, ...] = (
+ALL_TOPICS: tuple[str, ...] = (
     TOPIC_INFOS, TOPIC_WARNINGS, TOPIC_ERRORS,
 
     TOPIC_FILES,
