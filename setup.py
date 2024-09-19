@@ -33,7 +33,7 @@ print()
 
 
 # When we run tox tests we don't have these files available, so we skip them
-readme = Path(__file__).with_name('readme.md')
+readme = THIS_FILE.with_name('readme.md')
 long_description = ''
 if readme.is_file():
     with readme.open('r', encoding='utf-8') as fh:
@@ -71,6 +71,7 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Home Automation'
     ],
