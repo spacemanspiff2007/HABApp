@@ -93,6 +93,10 @@ builtins-ignorelist = ["id", "input"]
     "PLR0913",  # Too many arguments in function definition ({c_args} > {max_args})
 ]
 
+"interface_*.py" = [
+    "F401"  # F401 [*] {name} imported but unused
+]
+
 [lint.isort]
 # https://docs.astral.sh/ruff/settings/#isort-lines-after-imports
 lines-after-imports = 2
