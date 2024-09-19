@@ -1,27 +1,36 @@
-import typing
+import re
 from pathlib import Path
 
 from setuptools import find_packages, setup
 
 
+THIS_FILE = Path(__file__)
+
 # Load version number without importing HABApp
 def load_version() -> str:
-    version: typing.Dict[str, str] = {}
-    with open('src/HABApp/__version__.py') as fp:
-        exec(fp.read(), version)
+    version: dict[str, str] = {}
+    exec((THIS_FILE.parent / 'src/HABApp/__version__.py').read_text(), version)
     assert version['__version__'], version
     return version['__version__']
 
 
-def load_req() -> typing.List[str]:
-    with open('requirements_setup.txt') as f:
-        return f.readlines()
+def load_req() -> list[str]:
+
+    lines = THIS_FILE.with_name('requirements_setup.txt').read_text().splitlines()
+    print(lines)
+
+    for i, line in enumerate(lines):
+        if m := re.search(r'([^/]+).git@\w', line):
+            lines[i] = f'{m.group(1):s} @ {line:s}'
+            print(f'Modified: {lines[i]}')
+    return lines
 
 
 __version__ = load_version()
 
 print(f'Version: {__version__}')
-print('')
+print()
+
 
 # When we run tox tests we don't have these files available, so we skip them
 readme = Path(__file__).with_name('readme.md')

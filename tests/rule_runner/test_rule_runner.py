@@ -50,11 +50,10 @@ assert len(calls) == 4
         proc.kill()
         stdout, stderr = proc.communicate()
 
-    print('')
-    print('Standard Output:', stdout)
-    print('Standard Error:', stderr)
-
     if err:
+        print('')
+        print('Standard Output:', stdout)
+        print('Standard Error:', stderr)
         pytest.fail('Error')
 
 
