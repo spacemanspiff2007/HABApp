@@ -175,7 +175,7 @@ All items have two additional timestamps set which can be used to simplify rule 
 .. exec_code::
 
     # ------------ hide: start ------------
-    from pendulum import DateTime
+    from whenever import Instant
     from HABApp.core.items import Item
     from rule_runner import SimpleRuleRunner
 
@@ -183,8 +183,8 @@ All items have two additional timestamps set which can be used to simplify rule 
     runner.set_up()
 
     item = Item.get_create_item('Item_Name', initial_value='old_value')
-    item._last_update.dt = DateTime(2022, 8, 20, 12, 16)
-    item._last_change.dt = DateTime(2022, 8, 20, 10, 30)
+    item._last_change.instant = Instant.from_utc(2024, 4, 30, 10, 30)
+    item._last_update.instant = Instant.from_utc(2024, 4, 30, 12, 16)
 
     # ------------ hide: stop -------------
     import HABApp
