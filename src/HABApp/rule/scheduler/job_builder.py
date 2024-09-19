@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import random
 import warnings
 from collections.abc import Callable, Hashable, Iterable, Mapping
@@ -22,10 +21,10 @@ from HABApp.rule.scheduler.job_ctrl import CountdownJobControl, DateTimeJobContr
 
 
 if TYPE_CHECKING:
+    import asyncio
+
     from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
     from HABApp.rule_ctx import HABAppRuleContext
-
-
 
 
 HINT_CB_P = ParamSpec('HINT_CB_P')
@@ -71,11 +70,11 @@ class AsyncHABAppScheduler(AsyncScheduler):
     def __init__(self, event_loop: asyncio.AbstractEventLoop | None = None) -> None:
         super().__init__(event_loop)
         self._timer_func = super()._set_timer
-        self._set_timer = lambda x: None
+        self._set_timer = lambda: None
 
     def disable_scheduler(self) -> None:
-        self._set_timer(None)
-        self._set_timer = lambda x: None
+        self._set_timer()
+        self._set_timer = lambda: None
 
     def enable_scheduler(self) -> None:
         self._set_timer = self._timer_func

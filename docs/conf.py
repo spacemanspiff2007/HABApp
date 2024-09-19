@@ -87,7 +87,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 
 # The master toctree document.
 master_doc = 'index'
@@ -295,7 +295,7 @@ def replace_node_contents(node: Node):
     replacement = TYPE_REPLACEMENTS.get(node_text)
 
     # https://www.sphinx-doc.org/en/master/extdev/nodes.html
-    if isinstance(node, desc_signature) and node.attributes.get('fullname', '').endswith('Item'):
+    if isinstance(node, desc_signature) and node.attributes.get('fullname', '').endswith(('Item', 'JobControl')):
         log(f'Removing constructor signature of {", ".join(node.attributes["ids"])}')
         assert len(node.children) == 3
         signature_node = node.children[2]

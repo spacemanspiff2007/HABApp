@@ -41,7 +41,7 @@ def _ensure_str_objs(objs: Iterable[HINT_EXEC_ARGS], key: str, enforce_abs=False
 
 
 def build_exec_params(*args: HINT_EXEC_ARGS,
-                      _capture_output=True,
+                      _capture_output: bool = True,
                       _additional_python_path: HINT_PYTHON_PATH = None,
                       **kwargs: Any) -> tuple[Iterable[str], dict[str, Any]]:
     # convenience for easy capturing

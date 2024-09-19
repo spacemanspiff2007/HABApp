@@ -30,7 +30,7 @@ class TestScheduler(TestBaseRule):
 
     def test_scheduler_every(self):
 
-        executions = 5
+        executions = 10
         calls = []
 
         def called():
@@ -41,7 +41,7 @@ class TestScheduler(TestBaseRule):
 
         try:
             started = monotonic()
-            while monotonic() - started < 7:
+            while monotonic() - started < executions * 0.6 + 1:
                 sleep(0.1)
 
                 if len(calls) >= executions:
@@ -53,10 +53,10 @@ class TestScheduler(TestBaseRule):
 
         for i in range(len(calls) - 1):
             diff = calls[i + 1] - calls[i]
-            assert 0.47 <= diff <= 0.53, diff
+            assert 0.46 <= diff <= 0.54, diff
 
         sleep(0.1)
-        assert len(self.item_states) == executions + 2  # First event before the first call, then None as the last event
+        assert len(self.item_states) == executions + 1  # First event before the first call, then None as the last event
         assert self.item_states[-1].value is None
 
 

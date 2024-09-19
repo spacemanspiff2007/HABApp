@@ -204,10 +204,12 @@ Example
     MyRule()
 
 
+.. py:currentmodule:: HABApp.rule.scheduler.job_builder
+
 Scheduler
 ------------------------------
 With the scheduler it is easy to call functions in the future or periodically.
-Do not use ``time.sleep`` but rather ``self.run.at``.
+Do not use ``time.sleep`` but rather ``self.run.once``.
 Another very useful function is ``self.run.countdown`` as it can simplify many rules!
 
 .. list-table::
@@ -217,55 +219,151 @@ Another very useful function is ``self.run.countdown`` as it can simplify many r
    * - Function
      - Description
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.soon`
+   * - :meth:`~HABAppJobBuilder.soon`
      - Run the callback as soon as possible (typically in the next second).
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.at`
-     - Run the callback in x seconds or at a specified time.
+   * - :meth:`~HABAppJobBuilder.once`
+     - Run the callback at a specified time.
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.countdown`
+   * - :meth:`~HABAppJobBuilder.countdown`
      - Run a function after a time has run down
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.every`
-     - Run a function periodically
+   * - :meth:`~HABAppJobBuilder.at`
+     - Run the callback when a trigger fires.
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.every_minute`
-     - Run a function every minute
+Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. exec_code::
+    :hide_output:
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.every_hour`
-     - Run a function every hour
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    runner = SimpleRuleRunner()
+    runner.set_up()
+    # ------------ hide: stop -------------
+    from HABApp import Rule
+    from HABApp.rule.scheduler import filter, trigger
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_every_day`
-     - Run a function at a specific time every day
+    class MyTriggerRule(Rule):
+        def __init__(self):
+            super().__init__()
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_workdays`
-     - Run a function at a specific time on workdays
+            # Run the function every day at 12
+            self.run.at(self.run.trigger.time('12:00:00'), self.dummy_func)
 
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_weekends`
-     - Run a function at a specific time on weekends
-
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_day_of_week`
-     - Run a function at a specific time on specific days of the week
-
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sun_dawn`
-     - Run a function on dawn
-
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sunrise`
-     - Run a function on sunrise
-
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sunset`
-     - Run a function on sunset
-
-   * - :meth:`~HABApp.rule.scheduler.HABAppSchedulerView.on_sun_dusk`
-     - Run a function on dusk
+            # ------------------------------------------------------------------------------
+            # The trigger and filter factories are available as a property on self.run,
+            # however they can also be used separately when imported
+            # This is exactly the same as above
+            self.run.at(trigger.time('12:00:00'), self.dummy_func)
 
 
-All functions return an instance of ScheduledCallbackBase
+            # ------------------------------------------------------------------------------
+            # It's possible to trigger on sun position
+            # ------------------------------------------------------------------------------
 
-.. autoclass:: HABApp.rule.scheduler.HABAppSchedulerView
+            # Run the function at sunrise
+            self.run.at(self.run.trigger.sunrise(), self.dummy_func)
+
+
+            # ------------------------------------------------------------------------------
+            # Filters can be used to restrict the trigger
+            # ------------------------------------------------------------------------------
+
+            # Run the function every workday at 12
+            self.run.at(
+                self.run.trigger.time('12:00:00').only_on(self.run.filter.weekdays('Mo-Fr')),
+                self.dummy_func
+            )
+
+
+            # ------------------------------------------------------------------------------
+            # Triggers offer operations which can shift the trigger time
+            # ------------------------------------------------------------------------------
+
+            # Run the function one hour after sunrise
+            self.run.at(self.run.trigger.sunrise().offset(3600), self.dummy_func)
+
+            # Run the function one hour after sunrise, but but earliest at 8
+            self.run.at(self.run.trigger.sunrise().offset(3600).earliest('08:00:00'), self.dummy_func)
+
+
+            # ------------------------------------------------------------------------------
+            # Triggers can be grouped together
+            # ------------------------------------------------------------------------------
+
+            # Run the function every workday at 12, but on the weekends at 8
+            self.run.at(
+                self.run.trigger.group(
+                    self.run.trigger.time('12:00:00').only_on(self.run.filter.weekdays('Mo-Fr')),
+                    self.run.trigger.time('08:00:00').only_on(self.run.filter.weekdays('Sa,So')),
+                ),
+                self.dummy_func
+            )
+
+
+            # ------------------------------------------------------------------------------
+            # Filters can be grouped together
+            # ------------------------------------------------------------------------------
+
+            # Run the function at the first Sunday of every month at 12
+            self.run.at(
+                self.run.trigger.time('12:00:00').only_on(
+                    self.run.filter.all(
+                        self.run.filter.weekdays('So'),
+                        self.run.filter.days('1-6')
+                    )
+                ),
+                self.dummy_func
+            )
+
+
+        def dummy_func():
+            pass
+
+    MyTriggerRule()
+
+
+Scheduler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: HABAppJobBuilder
    :members:
    :inherited-members:
 
+Reoccuring Jobs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Reoccuring jobs are created with :meth:`~HABAppJobBuilder.at`.
+When the job is executed is described by Triggers. These triggers can be combined and/or restricted with filters.
+
+.. autoclass:: eascheduler.builder.triggers.TriggerBuilder
+   :members:
+   :inherited-members:
+
+.. autoclass:: eascheduler.builder.triggers.TriggerObject
+   :members:
+   :inherited-members:
+
+.. autoclass:: eascheduler.builder.filters.FilterBuilder
+   :members:
+   :inherited-members:
+
+Job Control
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. autoclass:: OneTimeJobControl
+   :members:
+   :inherited-members:
+
+.. autoclass:: CountdownJobControl
+   :members:
+   :inherited-members:
+
+.. autoclass:: DateTimeJobControl
+   :members:
+   :inherited-members:
 
 
 
