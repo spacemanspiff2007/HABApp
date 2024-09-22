@@ -25,7 +25,7 @@ def suggest_rule_name(obj: object) -> str:
 class SyncScheduler:
     ALL = []
 
-    def __init__(self, event_loop=None):
+    def __init__(self, event_loop=None, enabled=True):
         SyncScheduler.ALL.append(self)
         self.jobs = []
 
@@ -38,10 +38,7 @@ class SyncScheduler:
     def remove_all(self):
         self.jobs.clear()
 
-    def enabled_scheduler(self):
-        pass
-
-    def disable_scheduler(self):
+    def set_enabled(self, enabled: bool):  # noqa: FBT001
         pass
 
 

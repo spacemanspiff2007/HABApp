@@ -3,11 +3,31 @@ from time import monotonic, sleep
 
 from HABAppTests import TestBaseRule, get_random_name
 
+from HABApp import Rule
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.items import Item
 
 
 log = logging.getLogger('HABApp.TestParameterFiles')
+
+
+class TestSchedulerCallLive(Rule):
+    """This rule is testing the Scheduler implementation"""
+
+    def __init__(self):
+        super().__init__()
+
+        self.sunrise = self.run.at(self.run.trigger.sunrise(), print, 'sunrise')
+        self.sunset = self.run.at(self.run.trigger.sunset(), print, 'sunset')
+
+        self.run.soon(self.show_times)
+
+    def show_times(self) -> None:
+        print(f'Sunrise: {self.sunrise.get_next_run()}')
+        print(f'Sunset : {self.sunset.get_next_run()}')
+
+
+TestSchedulerCallLive()
 
 
 class TestScheduler(TestBaseRule):
@@ -18,11 +38,8 @@ class TestScheduler(TestBaseRule):
 
         self.add_test('Test scheduler every', self.test_scheduler_every)
 
-        f = self.run.on_sunrise(print, 'sunrise')
-        print(f'Sunrise: {f.get_next_run()}')
-
-        f = self.run.on_sunset(print, 'sunset')
-        print(f'Sunset : {f.get_next_run()}')
+        self.run.at(self.run.trigger.sunrise(), print, 'sunrise')
+        self.run.at(self.run.trigger.sunset(), print, 'sunset')
 
         self.item = Item.get_create_item(get_random_name('HABApp'))
         self.item.listen_event(lambda x: self.item_states.append(x), ValueUpdateEventFilter())

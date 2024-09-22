@@ -42,7 +42,7 @@ class HABAppRuleContext(Context):
             rule = self.rule
 
             # Unload the scheduler
-            rule.run._scheduler.disable_scheduler()
+            rule.run._scheduler.set_enabled(False)
             rule.run._scheduler.remove_all()
             rule.run._habapp_ctx = None
 
@@ -81,7 +81,7 @@ class HABAppRuleContext(Context):
                                     f'self.listen_event in "{self.rule.rule_name}" may not work as intended.')
 
             # enable the scheduler
-            self.rule.run._scheduler.enable_scheduler()
+            self.rule.run._scheduler.set_enabled(True)
 
             # user implementation
             self.rule.on_rule_loaded()

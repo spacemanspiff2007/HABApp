@@ -6,10 +6,11 @@ from setuptools import find_packages, setup
 
 THIS_FILE = Path(__file__)
 
+
 # Load version number without importing HABApp
 def load_version() -> str:
     version: dict[str, str] = {}
-    exec((THIS_FILE.parent / 'src/HABApp/__version__.py').read_text(), version)
+    exec((THIS_FILE.parent / 'src/HABApp/__version__.py').read_text(), version)  # noqa: S102
     assert version['__version__'], version
     return version['__version__']
 

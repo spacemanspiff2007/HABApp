@@ -11,7 +11,7 @@ from eascheduler.builder.triggers import TriggerObject, _get_producer
 from eascheduler.executor import ExecutorBase
 from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
 from eascheduler.schedulers.async_scheduler import AsyncScheduler
-from typing_extensions import ParamSpec, override
+from typing_extensions import ParamSpec, Self, override
 
 from HABApp.core.asyncio import create_task_from_async, run_func_from_async
 from HABApp.core.const import loop
@@ -21,7 +21,6 @@ from HABApp.rule.scheduler.job_ctrl import CountdownJobControl, DateTimeJobContr
 
 
 if TYPE_CHECKING:
-    import asyncio
 
     from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
     from HABApp.rule_ctx import HABAppRuleContext
@@ -65,27 +64,15 @@ def wrapped_func_executor(func: Any, args: Iterable = (), kwargs: Mapping[str, A
 
 
 class AsyncHABAppScheduler(AsyncScheduler):
-    __slots__ = ('_timer_func', '_set_timer')
 
-    def __init__(self, event_loop: asyncio.AbstractEventLoop | None = None) -> None:
-        super().__init__(event_loop)
-        self._timer_func = super()._set_timer
-        self._set_timer = lambda: None
-
-    def disable_scheduler(self) -> None:
-        self._set_timer()
-        self._set_timer = lambda: None
-
-    def enable_scheduler(self) -> None:
-        self._set_timer = self._timer_func
-        if self.jobs:
-            self.update_job(self.jobs[0])
+    def set_enabled(self, enabled: bool) -> Self:  # noqa: FBT001
+        return run_func_from_async(super().set_enabled, enabled)
 
 
 class HABAppJobBuilder:
     def __init__(self, context: HABAppRuleContext) -> None:
         self._habapp_rule_ctx: Context = context
-        self._scheduler: Final = AsyncHABAppScheduler(event_loop=loop)
+        self._scheduler: Final = AsyncHABAppScheduler(event_loop=loop, enabled=False)
 
         self._builder: Final = JobBuilder(self._scheduler, wrapped_func_executor)
 
