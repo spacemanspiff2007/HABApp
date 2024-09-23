@@ -368,6 +368,51 @@ Job Control
    :inherited-members:
 
 
+Other scheduler related functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. py:currentmodule:: HABApp.rule.scheduler
+
+Other scheduler related functions are available under ``HABApp.rule.scheduler``.
+
+.. list-table::
+   :widths: auto
+   :header-rows: 1
+
+   * - Function
+     - Description
+
+   * - :meth:`~get_sun_position`
+     - Get azimuth and elevation of the sun.
+
+   * - :meth:`~is_holiday`
+     - Check if a date is a holiday.
+
+   * - :meth:`~add_holiday`
+     - Add a custom holiday
+
+   * - :meth:`~pop_holiday`
+     - Remove a holiday
+
+   * - :meth:`~get_holiday_name`
+     - Get the name of a holiday
+
+   * - :meth:`~get_holidays_by_name`
+     - Search holidays by name
+
+
+.. autofunction:: get_sun_position
+
+.. autofunction:: is_holiday
+
+.. autofunction:: add_holiday
+
+.. autofunction:: pop_holiday
+
+.. autofunction:: get_holiday_name
+
+.. autofunction:: get_holidays_by_name
+
 
 Other tools and scripts
 ------------------------------
