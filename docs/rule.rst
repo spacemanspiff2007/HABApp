@@ -319,7 +319,7 @@ Example
                 self.run.trigger.time('12:00:00').only_on(
                     self.run.filter.all(
                         self.run.filter.weekdays('So'),
-                        self.run.filter.days('1-6')
+                        self.run.filter.days('1-7')
                     )
                 ),
                 self.dummy_func

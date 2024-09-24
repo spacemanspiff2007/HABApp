@@ -128,6 +128,11 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             resp = await future
         except Exception as e:
             self.plugin_connection.process_exception(e, None)
+            if self.session.closed:
+                # We can not recover from a closed session so we shutdown
+                self.plugin_connection.log.error('Session closed!')
+                from HABApp.runtime.shutdown import request_shutdown
+                request_shutdown()
             raise OpenhabDisconnectedError() from None
 
         if (status := resp.status) < 300:
