@@ -3,6 +3,7 @@ from asyncio import iscoroutinefunction
 from collections.abc import Callable
 
 from HABApp.config import CONFIG
+from HABApp.core import shutdown
 from HABApp.core.internals import Context
 from HABApp.core.internals.wrapped_function.base import TYPE_WRAPPED_FUNC_OBJ
 from HABApp.core.internals.wrapped_function.wrapped_async import TYPE_FUNC_ASYNC, WrappedAsyncFunction
@@ -58,8 +59,7 @@ def setup() -> None:
         create_thread_pool(THREAD_POOL.threads)
 
         # this function can be called multiple times, so it's no problem if we register it more than once!
-        from HABApp.runtime import shutdown
-        shutdown.register_func(stop_thread_pool, msg='Stopping thread pool', last=True)
+        shutdown.register(stop_thread_pool, msg='Stopping thread pool', last=True)
 
 
 THREAD_POOL = CONFIG.habapp.thread_pool

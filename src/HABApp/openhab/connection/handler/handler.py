@@ -7,6 +7,7 @@ from aiohttp.client import ClientResponse, _RequestContextManager
 from aiohttp.hdrs import METH_DELETE, METH_GET, METH_POST, METH_PUT
 
 from HABApp.config import CONFIG
+from HABApp.core import shutdown
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
 from HABApp.core.connections.base_connection import AlreadyHandledException
@@ -131,8 +132,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             if self.session.closed:
                 # We can not recover from a closed session so we shutdown
                 self.plugin_connection.log.error('Session closed!')
-                from HABApp.runtime.shutdown import request_shutdown
-                request_shutdown()
+                shutdown.request()
             raise OpenhabDisconnectedError() from None
 
         if (status := resp.status) < 300:

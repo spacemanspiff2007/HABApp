@@ -6,6 +6,7 @@ from pathlib import Path
 
 import HABApp
 import HABApp.__cmd_args__ as cmd_args
+from HABApp.core import shutdown
 from HABApp.core.connections import Connections
 from HABApp.core.files.errors import AlreadyHandledFileError
 from HABApp.core.files.file import HABAppFile
@@ -16,7 +17,6 @@ from HABApp.core.internals.wrapped_function import run_function
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
 from HABApp.rule_manager.rule_file import RuleFile
-from HABApp.runtime import shutdown
 
 
 log = logging.getLogger('HABApp.Rules')
@@ -44,7 +44,7 @@ class RuleManager:
     async def setup(self):
 
         # shutdown
-        shutdown.register_func(self.shutdown, msg='Cancel rule schedulers')
+        shutdown.register(self.shutdown, msg='Cancel rule schedulers')
 
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
@@ -52,7 +52,7 @@ class RuleManager:
             ok = await run_function(file.load)
             if not ok:
                 log.error('Failed to load Benchmark!')
-                HABApp.runtime.shutdown.request_shutdown()
+                shutdown.request()
                 return None
             file.check_all_rules()
             return
@@ -80,7 +80,7 @@ class RuleManager:
             await sleep(1)
 
         # if we want to shut down we don't load the rules
-        if HABApp.runtime.shutdown.requested:
+        if shutdown.is_requested():
             return None
 
         # trigger event for every file
@@ -134,7 +134,7 @@ class RuleManager:
         path_str = str(path)
 
         # if we want to shut down we don't load the rules
-        if HABApp.runtime.shutdown.requested:
+        if shutdown.is_requested():
             log.debug(f'Skip load of {name:s} because of shutdown')
             return None
 

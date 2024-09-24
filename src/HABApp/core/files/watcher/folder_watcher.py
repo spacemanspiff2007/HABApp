@@ -5,6 +5,8 @@ from threading import Lock
 from watchdog.observers import Observer
 from watchdog.observers.api import ObservedWatch
 
+from HABApp.core import shutdown
+
 from .base_watcher import FileSystemEventHandler
 
 
@@ -26,9 +28,8 @@ def start():
     OBSERVER.start()
 
     # register for proper shutdown
-    from HABApp.runtime import shutdown
-    shutdown.register_func(OBSERVER.stop, msg='Stopping folder observer')
-    shutdown.register_func(OBSERVER.join, last=True, msg='Joining folder observer threads')
+    shutdown.register(OBSERVER.stop, msg='Stopping folder observer')
+    shutdown.register(OBSERVER.join, last=True, msg='Joining folder observer threads')
     return None
 
 

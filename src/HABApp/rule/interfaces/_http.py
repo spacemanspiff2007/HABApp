@@ -4,6 +4,7 @@ from typing import Any
 import aiohttp
 
 import HABApp
+from HABApp.core import shutdown
 from HABApp.core.const.json import dump_json
 
 
@@ -16,8 +17,7 @@ async def create_client() -> None:
 
     CLIENT = aiohttp.ClientSession(json_serialize=dump_json, loop=HABApp.core.const.loop)
 
-    from HABApp.runtime import shutdown
-    shutdown.register_func(CLIENT.close, msg='Closing generic http connection')
+    shutdown.register(CLIENT.close, msg='Closing generic http connection')
 
 
 def get(url: str, params: Mapping[str, str] | None = None, **kwargs: Any)\

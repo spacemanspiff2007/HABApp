@@ -31,7 +31,7 @@ def main() -> int | str:
             pass
 
         # Shutdown handler for graceful shutdown
-        HABApp.runtime.shutdown.register_signal_handler()
+        HABApp.core.shutdown.register_signal_handler()
 
         app = HABApp.runtime.Runtime()
         HABApp.core.const.loop.create_task(app.start(cfg_folder))

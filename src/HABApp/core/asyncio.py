@@ -3,18 +3,21 @@ from __future__ import annotations
 from asyncio import Future as _Future
 from asyncio import Task as _Task
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
-from collections.abc import Callable
-from collections.abc import Callable as _Callable
-from collections.abc import Coroutine as _Coroutine
 from contextvars import ContextVar as _ContextVar
 from contextvars import Token as _Token
-from types import TracebackType
+from typing import TYPE_CHECKING, Final
 from typing import Any as _Any
-from typing import Final
 from typing import ParamSpec as _ParamSpec
 from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
+
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from collections.abc import Callable as _Callable
+    from collections.abc import Coroutine as _Coroutine
+    from types import TracebackType
 
 
 async_context = _ContextVar('async_ctx')
@@ -95,8 +98,6 @@ def run_func_from_async(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwa
         return func(*args, **kwargs)
 
     future = _run_coroutine_threadsafe(_run_func_from_async_helper(func, *args, **kwargs), loop)
-    # Doc build fails if we enable this
-    # TODO: Fix the Rule Runner
     return future.result()
 
 

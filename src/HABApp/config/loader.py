@@ -46,7 +46,7 @@ def load_config(config_folder: Path) -> None:
     )
     HABApp.core.files.watcher.add_folder_watch(watcher)
 
-    HABApp.runtime.shutdown.register_func(stop_queue_handlers, last=True, msg='Stopping logging threads')
+    HABApp.core.shutdown.register(stop_queue_handlers, last=True, msg='Stopping logging threads')
     CONFIG.habapp.logging.subscribe_for_changes(set_flush_delay)
 
 

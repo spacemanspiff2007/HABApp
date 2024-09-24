@@ -1,5 +1,6 @@
 
 import HABApp
+from HABApp.core import shutdown
 from HABApp.core.const.topics import TOPIC_ERRORS
 
 
@@ -66,6 +67,6 @@ class BenchBaseRule(HABApp.Rule):
                 print(f' - {type(e.exception)}: {e.exception}')
 
         if self.next_rule is None:
-            HABApp.runtime.shutdown.request_shutdown()
+            shutdown.request()
         else:
             self.run.soon(self.next_rule.do_bench_start)
