@@ -1,11 +1,11 @@
 from collections.abc import Callable
-from typing import Optional, TypeVar
+from typing import Any, Optional, TypeVar
 
 from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBoundObjectIsAlreadyUnlinkedError
 
 
 class ContextBoundObj:
-    def __init__(self, parent_ctx: Optional['Context'], **kwargs) -> None:
+    def __init__(self, parent_ctx: Optional['Context'], **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._parent_ctx = parent_ctx
         if parent_ctx is not None:
@@ -53,6 +53,6 @@ class Context:
 
 
 class ContextProvidingObj:
-    def __init__(self, context: Context | None = None, **kwargs) -> None:
+    def __init__(self, context: Context | None = None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._habapp_ctx: Context = context
