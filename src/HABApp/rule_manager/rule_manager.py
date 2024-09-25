@@ -13,7 +13,7 @@ from HABApp.core.files.file import HABAppFile
 from HABApp.core.files.folders import add_folder as add_habapp_folder
 from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.internals import uses_item_registry
-from HABApp.core.internals.wrapped_function import run_function
+from HABApp.core.internals.wrapped_function import wrap_func
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
 from HABApp.rule_manager.rule_file import RuleFile
@@ -49,7 +49,7 @@ class RuleManager:
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
             self.files['bench'] = file = BenchFile(self)
-            ok = await run_function(file.load)
+            ok = await wrap_func(file.load).async_run()
             if not ok:
                 log.error('Failed to load Benchmark!')
                 shutdown.request()
@@ -125,7 +125,7 @@ class RuleManager:
             with self.__files_lock:
                 rule = self.files.pop(path_str)
 
-            await run_function(rule.unload)
+            await wrap_func(rule.unload).async_run()
         finally:
             if request_lock:
                 self.__load_lock.release()
@@ -154,7 +154,7 @@ class RuleManager:
             with self.__files_lock:
                 self.files[path_str] = file = RuleFile(self, name, path)
 
-            ok = await run_function(file.load)
+            ok = await wrap_func(file.load).async_run()
             if not ok:
                 self.files.pop(path_str)
                 log.warning(f'Failed to load {path_str}!')

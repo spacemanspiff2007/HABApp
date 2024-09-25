@@ -1,38 +1,38 @@
 import logging
+from collections.abc import Callable, Coroutine
+from typing import Any, Final
 
 from typing_extensions import override
 
 from HABApp.core.asyncio import async_context, create_task
-from HABApp.core.const.hints import TYPE_FUNC_ASYNC
 from HABApp.core.internals import Context
+from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
 
-from .base import WrappedFunctionBase
 
+class WrappedAsyncFunction(WrappedFunctionBase[P, R]):
 
-class WrappedAsyncFunction(WrappedFunctionBase):
-
-    def __init__(self, func: TYPE_FUNC_ASYNC,
+    def __init__(self, coro: Callable[P, Coroutine[Any, Any, R]],
                  name: str | None = None,
                  logger: logging.Logger | None = None,
                  context: Context | None = None) -> None:
 
-        super().__init__(name=name, func=func, logger=logger, context=context)
-        assert callable(func)
+        super().__init__(name=name, func=coro, logger=logger, context=context)
 
-        self.func = func
+        self.coro: Final = coro
 
     @override
-    def run(self, *args, **kwargs) -> None:
+    def run(self, *args: P.args, **kwargs: P.kwargs) -> None:
         create_task(self.async_run(*args, **kwargs), name=self.name)
 
     @override
-    async def async_run(self, *args, **kwargs) -> None:
+    async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
 
         token = async_context.set('WrappedAsyncFunction')
 
         try:
-            await self.func(*args, **kwargs)
+            return await self.coro(*args, **kwargs)
         except Exception as e:
             self.process_exception(e, *args, **kwargs)
+            return None
         finally:
             async_context.reset(token)

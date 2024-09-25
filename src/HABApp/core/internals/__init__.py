@@ -11,4 +11,4 @@ from .item_registry import ItemRegistry, ItemRegistryItem
 
 from .event_bus_listener import HINT_EVENT_BUS_LISTENER, EventBusListener, ContextBoundEventBusListener
 from .event_filter import EventFilterBase, HINT_EVENT_FILTER_OBJ
-from .wrapped_function import TYPE_WRAPPED_FUNC_OBJ, wrap_func
+from .wrapped_function import WrappedFunctionBase, wrap_func

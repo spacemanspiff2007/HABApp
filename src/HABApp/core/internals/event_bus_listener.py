@@ -2,18 +2,18 @@ from typing import TypeVar
 
 from HABApp.core.internals import HINT_EVENT_FILTER_OBJ, AutoContextBoundObj, Context, uses_event_bus
 from HABApp.core.internals.event_bus import EventBusBaseListener
-from HABApp.core.internals.wrapped_function import TYPE_WRAPPED_FUNC_OBJ, WrappedFunctionBase
+from HABApp.core.internals.wrapped_function import WrappedFunctionBase
 
 
 event_bus = uses_event_bus()
 
 
 class EventBusListener(EventBusBaseListener):
-    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: HINT_EVENT_FILTER_OBJ, **kwargs) -> None:
+    def __init__(self, topic: str, callback: WrappedFunctionBase, event_filter: HINT_EVENT_FILTER_OBJ, **kwargs) -> None:
         super().__init__(topic, **kwargs)
 
         assert isinstance(callback, WrappedFunctionBase)
-        self.func: TYPE_WRAPPED_FUNC_OBJ = callback
+        self.func: WrappedFunctionBase = callback
         self.filter: HINT_EVENT_FILTER_OBJ = event_filter
 
     def notify_listeners(self, event) -> None:
@@ -32,12 +32,12 @@ HINT_EVENT_BUS_LISTENER = TypeVar('HINT_EVENT_BUS_LISTENER', bound=EventBusListe
 
 
 class ContextBoundEventBusListener(EventBusListener, AutoContextBoundObj):
-    def __init__(self, topic: str, callback: TYPE_WRAPPED_FUNC_OBJ, event_filter: HINT_EVENT_FILTER_OBJ,
+    def __init__(self, topic: str, callback: WrappedFunctionBase, event_filter: HINT_EVENT_FILTER_OBJ,
                  parent_ctx: Context | None = None) -> None:
         super().__init__(topic=topic, callback=callback, event_filter=event_filter, parent_ctx=parent_ctx)
 
         assert isinstance(callback, WrappedFunctionBase)
-        self.func: TYPE_WRAPPED_FUNC_OBJ = callback
+        self.func: WrappedFunctionBase = callback
         self.filter: HINT_EVENT_FILTER_OBJ = event_filter
 
     def notify_listeners(self, event) -> None:

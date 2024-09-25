@@ -1,27 +1,26 @@
 import logging
 from asyncio import iscoroutinefunction
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
+from typing import Any
 
 from HABApp.config import CONFIG
 from HABApp.core import shutdown
 from HABApp.core.internals import Context
-from HABApp.core.internals.wrapped_function.base import TYPE_WRAPPED_FUNC_OBJ
-from HABApp.core.internals.wrapped_function.wrapped_async import TYPE_FUNC_ASYNC, WrappedAsyncFunction
+from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
+from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction
 from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunction
 from HABApp.core.internals.wrapped_function.wrapped_thread import (
-    HINT_FUNC_SYNC,
     WrappedThreadFunction,
     create_thread_pool,
-    run_in_thread_pool,
     stop_thread_pool,
 )
 
 
-def wrap_func(func: HINT_FUNC_SYNC | TYPE_FUNC_ASYNC,
+def wrap_func(func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
               warn_too_long=True,
               name: str | None = None,
               logger: logging.Logger | None = None,
-              context: Context | None = None) -> TYPE_WRAPPED_FUNC_OBJ:
+              context: Context | None = None) -> WrappedFunctionBase[P, R]:
 
     # Check that it's actually a callable, so we fail fast and not when we try to run the function.
     # Some users pass the result of the function call (e.g. func()) by accident
@@ -52,22 +51,16 @@ def setup() -> None:
 
         # In case of hot reload
         stop_thread_pool()
-    else:
-        SYNC_CLS = WrappedThreadFunction
+        return None
 
-        # create thread pool
-        create_thread_pool(THREAD_POOL.threads)
+    SYNC_CLS = WrappedThreadFunction
 
-        # this function can be called multiple times, so it's no problem if we register it more than once!
-        shutdown.register(stop_thread_pool, msg='Stopping thread pool', last=True)
+    # create thread pool
+    create_thread_pool(THREAD_POOL.threads)
+
+    # this function can be called multiple times, so it's no problem if we register it more than once!
+    shutdown.register(stop_thread_pool, msg='Stopping thread pool', last=True)
 
 
 THREAD_POOL = CONFIG.habapp.thread_pool
 THREAD_POOL.subscribe_for_changes(setup)
-
-
-async def run_function(func: Callable):
-    if not THREAD_POOL.enabled:
-        return func()
-
-    return await run_in_thread_pool(func)
