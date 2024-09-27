@@ -28,7 +28,8 @@ class HABAppQueueHandler:
     def start(self) -> None:
         with LOCK:
             if self._thread is not None:
-                raise RuntimeError('Thread can only be started once!')
+                msg = 'Thread can only be started once!'
+                raise RuntimeError(msg)
 
             # resolve handler
             self._handler = logging._handlers[self._handler_name]

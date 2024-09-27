@@ -2,6 +2,7 @@ import logging
 import logging.config
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
+from queue import Queue
 from typing import Any
 
 from easyconfig.yaml import yaml_safe as _yaml_safe
@@ -9,6 +10,7 @@ from easyconfig.yaml import yaml_safe as _yaml_safe
 import HABApp
 from HABApp.config.config import CONFIG
 from HABApp.config.errors import AbsolutePathExpected
+from HABApp.core.const.const import PYTHON_312, PYTHON_313
 
 from .buffered_logger import BufferedLogger
 from .queue_handler import HABAppQueueHandler, SimpleQueue
@@ -150,7 +152,13 @@ def inject_log_buffer(cfg: dict, log: BufferedLogger):
     q_handlers: list[HABAppQueueHandler] = []
 
     for handler_name, buffered_handler_name in buffered_handlers.items():
-        q: SimpleQueue = SimpleQueue()
+        # https://github.com/python/cpython/issues/124653
+        if PYTHON_313:
+            q: SimpleQueue = SimpleQueue()
+        elif PYTHON_312:
+            q = Queue()
+        else:
+            q: SimpleQueue = SimpleQueue()
         handler_cfg[buffered_handler_name] = {'class': 'logging.handlers.QueueHandler', 'queue': q}
 
         qh = HABAppQueueHandler(q, handler_name, f'LogBuffer{handler_name:s}')
