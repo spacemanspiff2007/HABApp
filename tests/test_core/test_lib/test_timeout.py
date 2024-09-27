@@ -14,7 +14,7 @@ def time(monkeypatch) -> MockedMonotonic:
     return m
 
 
-def assert_remaining(t: Timeout, time: float | None):
+def assert_remaining(t: Timeout, time: float | None) -> None:
     if time is None:
         assert t.remaining_or_none() is None
         with pytest.raises(TimeoutNotRunningError):
@@ -25,7 +25,7 @@ def assert_remaining(t: Timeout, time: float | None):
         assert abs(t.remaining_or_none() - time) < 0.000_000_1
 
 
-def test_timeout_init(time):
+def test_timeout_init(time) -> None:
 
     t = Timeout(5, start=False)
     with pytest.raises(TimeoutNotRunningError):
@@ -42,7 +42,7 @@ def test_timeout_init(time):
     assert_remaining(t, 5)
 
 
-def test_running_expired(time):
+def test_running_expired(time) -> None:
     t = Timeout(5)
     assert t.is_running()
     assert not t.is_running_and_expired()
@@ -72,7 +72,7 @@ def test_running_expired(time):
     assert_remaining(t, None)
 
 
-def test_start_stop_reset(time):
+def test_start_stop_reset(time) -> None:
     t = Timeout(5, start=False)
     assert not t.is_running()
     assert_remaining(t, None)
@@ -108,7 +108,7 @@ def test_start_stop_reset(time):
     assert_remaining(t, 7)
 
 
-def test_repr(time):
+def test_repr(time) -> None:
     assert str(Timeout(5, start=False)) == '<Timeout 5.0s>'
     assert str(Timeout(10, start=False)) == '<Timeout 10s>'
     assert str(Timeout(100, start=False)) == '<Timeout 100s>'

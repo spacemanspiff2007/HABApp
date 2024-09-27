@@ -4,7 +4,7 @@ from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
 from HABApp.openhab.items import SwitchItem
 
 
-def test_switch_item_bool():
+def test_switch_item_bool() -> None:
     with pytest.raises(ItemValueIsNoneError):
         assert SwitchItem('test')
 
@@ -12,7 +12,7 @@ def test_switch_item_bool():
     assert SwitchItem('test', 'ON')
 
 
-def test_switch_set_value():
+def test_switch_set_value() -> None:
     SwitchItem('').set_value(None)
     SwitchItem('').set_value('ON')
     SwitchItem('').set_value('OFF')

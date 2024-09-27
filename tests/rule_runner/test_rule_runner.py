@@ -7,7 +7,7 @@ import HABApp.core.lib.exceptions.format
 
 
 @pytest.mark.no_internals
-def test_doc_run():
+def test_doc_run() -> None:
     code = '''
 calls = []
 
@@ -58,7 +58,7 @@ assert len(calls) == 4
 
 
 @pytest.mark.no_internals()
-def test_doc_run_exception(monkeypatch):
+def test_doc_run_exception(monkeypatch) -> None:
     """Check that the RuleRunner propagates exceptions which happen during exception formatting"""
 
     class MyException(Exception):
@@ -74,11 +74,11 @@ def test_doc_run_exception(monkeypatch):
     runner.set_up()
 
     class MyFirstRule(HABApp.Rule):
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__()
             self.run.soon(self.say_something)
 
-        def say_something(self):
+        def say_something(self) -> None:
             1 / 0
 
     MyFirstRule()

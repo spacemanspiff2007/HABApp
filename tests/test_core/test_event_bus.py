@@ -9,7 +9,7 @@ class TestEvent:
     pass
 
 
-def test_repr(sync_worker):
+def test_repr(sync_worker) -> None:
     f = wrap_func(lambda x: x)
 
     listener = EventBusListener('test_name', f, NoEventFilter())
@@ -19,11 +19,11 @@ def test_repr(sync_worker):
     assert listener.describe() == '"test_name" (filter=EventFilter(type=ValueUpdateEvent, value=test1))'
 
 
-def test_str_event(sync_worker):
+def test_str_event(sync_worker) -> None:
     event_history = []
     eb = EventBus()
 
-    def append_event(event):
+    def append_event(event) -> None:
         event_history.append(event)
     func = wrap_func(append_event)
 
@@ -34,12 +34,12 @@ def test_str_event(sync_worker):
     assert event_history == ['str_event']
 
 
-def test_multiple_events(sync_worker):
+def test_multiple_events(sync_worker) -> None:
     event_history = []
     eb = EventBus()
     target = ['str_event', TestEvent(), 'str_event2']
 
-    def append_event(event):
+    def append_event(event) -> None:
         event_history.append(event)
 
     listener = EventBusListener(
@@ -53,7 +53,7 @@ def test_multiple_events(sync_worker):
     assert event_history == target
 
 
-def test_complex_event_unpack(sync_worker):
+def test_complex_event_unpack(sync_worker) -> None:
     """Test that the ComplexEventValue get properly unpacked"""
     m = MagicMock()
     assert not m.called

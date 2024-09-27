@@ -9,11 +9,11 @@ from HABApp.openhab.items import DatetimeItem, NumberItem, StringItem
 
 class ChangeItemType(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.add_test('change_item', self.change_item)
 
-    def change_item(self):
+    def change_item(self) -> None:
         with OpenhabTmpItem('Number') as tmpitem:
             NumberItem.get_item(tmpitem.name)
 

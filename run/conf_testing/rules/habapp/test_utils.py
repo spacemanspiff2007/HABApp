@@ -13,13 +13,13 @@ log = logging.getLogger('HABApp.Tests.MultiMode')
 class TestSwitchMode(TestBaseRule):
     """This rule is testing the Parameter implementation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.add_test('SwitchItemValueMode', self.test_sw_mode)
         self.add_test('SwitchItemValueMode inverted', self.test_sw_mode_inverted)
 
-    def test_sw_mode(self):
+    def test_sw_mode(self) -> None:
         mm = MultiModeItem.get_create_item(get_random_name('HABApp'))
 
         with OpenhabTmpItem('Switch') as switch, ItemWaiter(OpenhabItem.get_item(switch.name)) as waiter:
@@ -44,7 +44,7 @@ class TestSwitchMode(TestBaseRule):
 
         HABApp.core.Items.pop_item(mm.name)
 
-    def test_sw_mode_inverted(self):
+    def test_sw_mode_inverted(self) -> None:
         mm = MultiModeItem.get_create_item(get_random_name('HABApp'))
 
         with OpenhabTmpItem('Switch') as switch, ItemWaiter(OpenhabItem.get_item(switch.name)) as waiter:

@@ -19,14 +19,14 @@ class MyStringIO(StringIO):
 
 class MockFile:
 
-    def __init__(self, path: str, data: str = ''):
+    def __init__(self, path: str, data: str = '') -> None:
         super().__init__()
 
         self.path = Path(path)
         self.data: str = data
         self.warn_on_delete = True
 
-    def __set_data(self, val: str):
+    def __set_data(self, val: str) -> None:
         self.data = val
 
     def is_file(self) -> bool:

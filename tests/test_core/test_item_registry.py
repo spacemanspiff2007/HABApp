@@ -2,7 +2,7 @@ from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
 
 
-def test_basics():
+def test_basics() -> None:
     item_name = 'test'
 
     ir = ItemRegistry()

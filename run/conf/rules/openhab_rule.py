@@ -6,7 +6,7 @@ from HABApp.openhab.items import ContactItem, DatetimeItem, SwitchItem
 
 class MyOpenhabRule(HABApp.Rule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # get items
@@ -25,11 +25,11 @@ class MyOpenhabRule(HABApp.Rule):
         # Trigger on item commands
         test_switch.listen_event(self.item_command, ItemCommandEvent)
 
-    def item_state_update(self, event):
+    def item_state_update(self, event) -> None:
         assert isinstance(event, ValueUpdateEvent)
         print(f'{event}')
 
-    def item_state_change(self, event):
+    def item_state_change(self, event) -> None:
         assert isinstance(event, ValueChangeEvent)
         print(f'{event}')
 
@@ -41,7 +41,7 @@ class MyOpenhabRule(HABApp.Rule):
         if switch_item.is_on():
             switch_item.off()
 
-    def item_command(self, event):
+    def item_command(self, event) -> None:
         assert isinstance(event, ItemCommandEvent)
         print( f'{event}')
 

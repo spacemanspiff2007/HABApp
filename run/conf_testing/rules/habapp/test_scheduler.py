@@ -14,7 +14,7 @@ log = logging.getLogger('HABApp.TestParameterFiles')
 class TestSchedulerCallLive(Rule):
     """This rule is testing the Scheduler implementation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.sunrise = self.run.at(self.run.trigger.sunrise(), print, 'sunrise')
@@ -33,7 +33,7 @@ TestSchedulerCallLive()
 class TestScheduler(TestBaseRule):
     """This rule is testing the Scheduler implementation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.add_test('Test scheduler every', self.test_scheduler_every)
@@ -45,12 +45,12 @@ class TestScheduler(TestBaseRule):
         self.item.listen_event(lambda x: self.item_states.append(x), ValueUpdateEventFilter())
         self.item_states = []
 
-    def test_scheduler_every(self):
+    def test_scheduler_every(self) -> None:
 
         executions = 10
         calls = []
 
-        def called():
+        def called() -> None:
             calls.append(monotonic())
 
         job = self.run.every(None, 0.5, called)

@@ -5,7 +5,7 @@ from HABApp.openhab.errors import SendCommandNotSupported
 from HABApp.openhab.items import ContactItem
 
 
-def test_send_command():
+def test_send_command() -> None:
     c = ContactItem('item_name')
 
     with pytest.raises(SendCommandNotSupported) as e:
@@ -14,7 +14,7 @@ def test_send_command():
     assert str(e.value) == 'ContactItem does not support send command! See openHAB documentation for details.'
 
 
-def test_switch_set_value():
+def test_switch_set_value() -> None:
     ContactItem('').set_value(None)
     ContactItem('').set_value('OPEN')
     ContactItem('').set_value('CLOSED')

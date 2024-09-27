@@ -15,16 +15,16 @@ class ItemTests:
     def get_create_item(self) -> Item:
         return self.ITEM_CLASS.get_create_item(name='test_name')
 
-    def test_item_params(self):
+    def test_item_params(self) -> None:
         assert self.ITEM_CLASS is not None
         assert self.ITEM_VALUES is not None
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         item = self.get_item()
         assert repr(item)
         assert str(item)
 
-    def test_factories(self, ir: ItemRegistry):
+    def test_factories(self, ir: ItemRegistry) -> None:
         assert not ir.item_exists(self.get_item())
 
         obj = self.get_create_item()
@@ -33,7 +33,7 @@ class ItemTests:
         obj2 = self.ITEM_CLASS.get_item(name=obj.name)
         assert obj is obj2
 
-    def test_var_names(self):
+    def test_var_names(self) -> None:
         values = self.ITEM_VALUES
         item = self.get_item()
         # assert item.value is None, f'{item.value} ({type(item.value)})'
@@ -44,7 +44,7 @@ class ItemTests:
         item.post_value(values[0])
         item.get_value(default_value='asdf')
 
-    def test_time_value_update(self):
+    def test_time_value_update(self) -> None:
         instant = Instant.from_utc(2001, 1, 1, hour=1)
 
         for value in self.ITEM_VALUES:
@@ -58,7 +58,7 @@ class ItemTests:
                 assert item._last_update.instant == instant
                 assert item._last_change.instant == instant.subtract(seconds=5)
 
-    def test_time_value_change(self):
+    def test_time_value_change(self) -> None:
         item = self.get_item()
         instant = Instant.from_utc(2001, 1, 1, hour=1)
 
@@ -69,7 +69,7 @@ class ItemTests:
                 assert item._last_update.instant == instant
                 assert item._last_change.instant == instant
 
-    def test_post_if(self):
+    def test_post_if(self) -> None:
         i = self.get_item()
         assert i.post_value_if(0, is_=None)
         assert i.post_value_if(1, eq=0)

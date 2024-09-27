@@ -5,15 +5,15 @@ from HABApp.config.logging.config import _yaml_safe
 from HABApp.config.platform_defaults import get_log_folder
 
 
-def test_defaults():
+def test_defaults() -> None:
     assert None is get_log_folder()
     assert Path('/log') == get_log_folder(Path('/log'))
 
 
-def test_valid_yml(monkeypatch):
+def test_valid_yml(monkeypatch) -> None:
     """ensure we create valid yml files"""
 
-    def ensure_key(key, obj):
+    def ensure_key(key, obj) -> None:
         if isinstance(obj, dict):
             for k, v in obj.items():
                 ensure_key(k, v)

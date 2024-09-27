@@ -6,7 +6,7 @@ from HABAppTests.test_rule.test_case import TestResult, TestResultStatus
 
 
 class TestCase:
-    def __init__(self, name: str, func: Callable, args=[], kwargs={}):
+    def __init__(self, name: str, func: Callable, args=[], kwargs={}) -> None:
         self.name = name
         self.func = func
         self.args = args

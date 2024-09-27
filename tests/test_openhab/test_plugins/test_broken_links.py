@@ -35,7 +35,7 @@ async def _mock_links() -> list[ItemChannelLinkResp]:
     ]
 
 
-async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs):
+async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(plugin_module, 'async_get_things', _mock_things)
     monkeypatch.setattr(plugin_module, 'async_get_links', _mock_links)
 

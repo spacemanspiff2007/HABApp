@@ -3,7 +3,7 @@ from HABApp.openhab.item_to_reg import MEMBERS, get_members
 from HABApp.openhab.items import StringItem
 
 
-def test_get_members(monkeypatch, clean_objs, ir: ItemRegistry):
+def test_get_members(monkeypatch, clean_objs, ir: ItemRegistry) -> None:
     a = ir.add_item(StringItem('a', 1))
     b = ir.add_item(StringItem('b', 'asdf'))
     c = ir.add_item(StringItem('c', (1, 2)))

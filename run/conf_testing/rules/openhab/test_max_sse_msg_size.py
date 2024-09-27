@@ -12,11 +12,11 @@ log = logging.getLogger('HABApp.Tests')
 class TestMaxImageSize(TestBaseRule):
     """This rule is testing the OpenHAB item types by calling functions and checking values"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.add_test('Test Image Size', self.test_img_size)
 
-    def test_img_size(self):
+    def test_img_size(self) -> None:
 
         with OpenhabTmpItem('Image') as item, ItemWaiter(OpenhabItem.get_item(item.name)) as item_waiter, \
                 EventWaiter(item.name, ItemStateChangedEventFilter()) as event_waiter:

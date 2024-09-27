@@ -10,7 +10,7 @@ from HABApp.openhab.map_items import _items as item_dict
 
 
 @pytest.mark.parametrize('cls', [cls for cls in item_dict.values() if issubclass(cls, OnOffCommand)])
-def test_OnOff(cls):
+def test_OnOff(cls) -> None:
     c = cls('item_name')
     assert not c.is_on()
     if not __version__.startswith('24.09.0'):
@@ -27,7 +27,7 @@ def test_OnOff(cls):
 
 
 @pytest.mark.parametrize('cls', [cls for cls in item_dict.values() if issubclass(cls, UpDownCommand)])
-def test_UpDown(cls):
+def test_UpDown(cls) -> None:
     c = cls('item_name')
     c.set_value(UpDownValue('UP'))
     assert c.is_up()
@@ -40,7 +40,7 @@ def test_UpDown(cls):
 
 
 @pytest.mark.parametrize('cls', (ContactItem, ))
-def test_OpenClosed(cls: typing.Type[ContactItem]):
+def test_OpenClosed(cls: typing.Type[ContactItem]) -> None:
     c = cls('item_name')
     assert not c.is_closed()
     assert not c.is_open()

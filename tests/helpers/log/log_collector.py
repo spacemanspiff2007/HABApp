@@ -16,7 +16,7 @@ ALL_PYTEST_PHASES = ('setup', 'call', 'teardown')
 
 
 class LogCollector:
-    def __init__(self, caplog: LogCaptureFixture, level: int = logging.WARNING):
+    def __init__(self, caplog: LogCaptureFixture, level: int = logging.WARNING) -> None:
         self.caplog: Final = caplog
 
         self.level_nr: int = level
@@ -72,13 +72,13 @@ class LogCollector:
     def add_expected(self,
                      name: Iterable[str] | str | None,
                      level: Iterable[str | int] | str | int,
-                     msg: Iterable[str] | str):
+                     msg: Iterable[str] | str) -> None:
         self.rec_expected.extend(create_matcher(name, level, msg))
 
     def add_ignored(self,
                     name: Iterable[str] | str | None,
                     level: Iterable[str | int] | str | int,
-                    msg: Iterable[str] | str):
+                    msg: Iterable[str] | str) -> None:
         self.rec_ignored.extend(create_matcher(name, level, msg))
 
     def update(self) -> Self:
@@ -122,7 +122,7 @@ class LogCollector:
             for rec in self.res_records
         ]
 
-    def assert_ok(self):
+    def assert_ok(self) -> None:
         self.update()
 
         missing = []
@@ -142,7 +142,7 @@ class LogCollector:
                 pytest.fail(reason='Error in log:\n' + '\n'.join(self.get_messages()))
 
 
-def test_cap_warning(test_logs):
+def test_cap_warning(test_logs) -> None:
 
     logging.getLogger('TEST').warning('WARNING')
 

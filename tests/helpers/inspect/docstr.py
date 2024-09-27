@@ -54,7 +54,7 @@ def get_ivars_from_docstring(cls_obj: type[object], correct_hints: dict[str, Any
     return ret
 
 
-def test_ivar_redefinition():
+def test_ivar_redefinition() -> None:
     class Parent:
         """:ivar str a:"""
 

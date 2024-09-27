@@ -19,12 +19,12 @@ except Exception as e:
 class TestParamFile(TestBaseRule):
     """This rule is testing the Parameter implementation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.add_test('ParamFile', self.test_param_file)
 
-    def test_param_file(self):
+    def test_param_file(self) -> None:
         p = HABApp.Parameter('param_file', 'key')
         assert p < 11
         assert p.value == 10

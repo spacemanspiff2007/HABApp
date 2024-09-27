@@ -12,12 +12,12 @@ from tests.helpers import TestEventBus
 
 
 @pytest.mark.ignore_log_errors()
-def test_exception(eb: TestEventBus):
+def test_exception(eb: TestEventBus) -> None:
     eb.allow_errors = True
     assert map_item('test', 'Number', 'asdf', 'my_label', frozenset(), frozenset(), {}) is None
 
 
-def test_metadata():
+def test_metadata() -> None:
     make_number = partial(map_item, 'test', 'Number', None, 'my_label', frozenset(), frozenset())
 
     item = make_number({'ns1': {'value': 'v1'}})
@@ -38,7 +38,7 @@ def test_metadata():
     assert item.metadata['ns2'].config == Map()
 
 
-def test_number_unit_of_measurement():
+def test_number_unit_of_measurement() -> None:
     make_item = partial(map_item, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}})
     metadata = Map(unit=MetaData('°C'))
     assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, metadata=metadata)
@@ -50,7 +50,7 @@ def test_number_unit_of_measurement():
     assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7, metadata=metadata)
 
 
-def test_datetime():
+def test_datetime() -> None:
 
     offset_str = SystemDateTime.now().format_common_iso()[-6:].replace(':', '')
 

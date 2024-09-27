@@ -13,21 +13,21 @@ from tests.helpers import LogCollector
 
 
 class MockFile:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name.split('/')[1]
 
-    def as_posix(self):
+    def as_posix(self) -> str:
         return f'/my_param/{self.name}'
 
-    def is_file(self):
+    def is_file(self) -> bool:
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<MockFile {self.name}>'
 
 
 class CfgObj:
-    def __init__(self):
+    def __init__(self) -> None:
         self.properties = {}
         self.operation: list[tuple[str, str]] = []
 
@@ -37,17 +37,17 @@ class CfgObj:
             UNLOAD_FUNC = self.unload_file
         self.cls = TestFile
 
-    async def load_file(self, name: str, path: Path):
+    async def load_file(self, name: str, path: Path) -> None:
         self.operation.append(('load', name))
 
-    async def unload_file(self, name: str, path: Path):
+    async def unload_file(self, name: str, path: Path) -> None:
         self.operation.append(('unload', name))
 
-    async def wait_complete(self):
+    async def wait_complete(self) -> None:
         while HABApp.core.files.manager.worker.TASK is not None:
             await sleep(0.05)
 
-    async def process_file(self, name: str):
+    async def process_file(self, name: str) -> None:
         await process_file(name, MockFile(name))
 
     def create_file(self, name, path) -> HABAppFile:
@@ -106,7 +106,7 @@ def cfg(monkeypatch):
 #     order.clear()
 
 
-async def test_reload_dep(cfg: CfgObj, caplog):
+async def test_reload_dep(cfg: CfgObj, caplog) -> None:
     cfg.properties['params/param1'] = FileProperties(depends_on=['params/param2'], reloads_on=['params/param2'])
     cfg.properties['params/param2'] = FileProperties()
 
@@ -133,7 +133,7 @@ async def test_reload_dep(cfg: CfgObj, caplog):
     cfg.operation.clear()
 
 
-async def test_missing_dependencies(cfg: CfgObj, test_logs: LogCollector):
+async def test_missing_dependencies(cfg: CfgObj, test_logs: LogCollector) -> None:
     cfg.properties['params/param1'] = FileProperties(depends_on=['params/param4', 'params/param5'])
     cfg.properties['params/param2'] = FileProperties(depends_on=['params/param4'])
     cfg.properties['params/param3'] = FileProperties()

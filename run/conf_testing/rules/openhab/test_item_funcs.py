@@ -29,7 +29,7 @@ class TestParam:
 class TestOpenhabItemFuncs(TestBaseRule):
     """This rule is testing the OpenHAB item types by calling functions and checking values"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.add_func_test(ContactItem, {TestParam('open', 'OPEN'), TestParam('closed', 'CLOSED')})
@@ -73,11 +73,11 @@ class TestOpenhabItemFuncs(TestBaseRule):
             }
         )
 
-    def add_func_test(self, cls, params: set):
+    def add_func_test(self, cls, params: set) -> None:
         # <class 'HABApp.openhab.items.switch_item.SwitchItem'> -> SwitchItem
         self.add_test(cls.__name__, self.test_func, cls, params)
 
-    def test_func(self, item_type, test_params):
+    def test_func(self, item_type, test_params) -> None:
 
         # create a nice name for the tmp item
         item_type = str(item_type).split('.')[-1][:-6]
@@ -114,7 +114,7 @@ TestOpenhabItemFuncs()
 
 class TestOpenhabItemConvenience(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         for name in ('oh_post_update', 'oh_send_command'):
@@ -125,7 +125,7 @@ class TestOpenhabItemConvenience(TestBaseRule):
 
         self.add_test('post_value_if', self.test_post_update_if)
 
-    def test_func(self, item_type, func_name, test_vals):
+    def test_func(self, item_type, func_name, test_vals) -> None:
 
         with OpenhabTmpItem(item_type) as tmpitem, ItemWaiter(OpenhabItem.get_item(tmpitem.name)) as waiter:
             for val in test_vals:
@@ -138,7 +138,7 @@ class TestOpenhabItemConvenience(TestBaseRule):
                 waiter.wait_for_state(val)
 
     @OpenhabTmpItem.create('Number', arg_name='oh_item')
-    def test_post_update_if(self, oh_item: OpenhabTmpItem):
+    def test_post_update_if(self, oh_item: OpenhabTmpItem) -> None:
         item = NumberItem.get_item(oh_item.name)
 
         with ItemWaiter(OpenhabItem.get_item(item.name)) as waiter:

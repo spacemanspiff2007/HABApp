@@ -14,12 +14,12 @@ log = logging.getLogger('HABApp.Tests.MultiMode')
 class TestNoWarningOnRuleUnload(TestBaseRule):
     """This rule tests that multiple listen/cancel commands don't create warnings on unload"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.add_test('CheckWarning', self.test_unload)
 
-    def test_unload(self):
+    def test_unload(self) -> None:
         item = Item.get_create_item(get_random_name('HABApp'))
 
         grp = EventListenerGroup().add_listener(item, self.cb, ValueChangeEventFilter())
@@ -40,7 +40,7 @@ class TestNoWarningOnRuleUnload(TestBaseRule):
         self.on_rule_unload = lambda: None
         self._habapp_ctx = HABAppRuleContext(self)
 
-    def cb(self, event):
+    def cb(self, event) -> None:
         pass
 
 

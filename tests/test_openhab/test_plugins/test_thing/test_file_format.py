@@ -4,14 +4,14 @@ from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserIt
 from tests.helpers import TestEventBus
 
 
-def test_cfg_optional():
+def test_cfg_optional() -> None:
     assert validate_cfg({
         'test': True,
         'filter': {},
     })
 
 
-def test_thing_cfg_types():
+def test_thing_cfg_types() -> None:
     assert validate_cfg({
         'test': True,
         'filter': {},
@@ -24,13 +24,13 @@ def test_thing_cfg_types():
 
 
 @pytest.mark.ignore_log_errors()
-def test_cfg_err(eb: TestEventBus):
+def test_cfg_err(eb: TestEventBus) -> None:
     eb.allow_errors = True
     assert None is validate_cfg({'test': True, 'filter1': {}}, 'filename')
     assert None is validate_cfg({'test': True, 'filter1': {}})
 
 
-def test_cfg_multiple_filters():
+def test_cfg_multiple_filters() -> None:
     a = validate_cfg({
         'test': True,
         'filter': {'thing_type': 'bla'},
@@ -49,7 +49,7 @@ def test_cfg_multiple_filters():
     assert str(a) == str(b)
 
 
-def test_cfg_item_builder():
+def test_cfg_item_builder() -> None:
     c = validate_cfg({
         'test': True,
         'filter': {},
@@ -73,7 +73,7 @@ def test_cfg_item_builder():
     assert a[0].name == 'replaced_uid'
 
 
-def test_item_cfg():
+def test_item_cfg() -> None:
 
     c = UserItemCfg.model_validate({
         'type': 'Switch',

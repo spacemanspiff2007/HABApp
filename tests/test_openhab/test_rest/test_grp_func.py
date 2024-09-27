@@ -5,7 +5,7 @@ from msgspec.json import decode
 from HABApp.openhab.definitions.rest.items import GroupFunctionResp
 
 
-def test_or():
+def test_or() -> None:
     _in = {
         'name': 'OR',
         'params': [
@@ -18,7 +18,7 @@ def test_or():
     assert o.params == ['ON', 'OFF']
 
 
-def test_eq():
+def test_eq() -> None:
     _in = {'name': 'EQUALITY'}
     o = decode(dumps(_in), type=GroupFunctionResp)
     assert o.name == 'EQUALITY'

@@ -10,16 +10,16 @@ from HABApp.core.internals import EventBus, EventBusListener, EventFilterBase, w
 class TestEventBus(EventBus):
     __test__ = False  # prevents this class from being collected by pytest
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.allow_errors = False
         self.errors = []
 
-    def listen_events(self, name: str, cb, filter: EventFilterBase):
+    def listen_events(self, name: str, cb, filter: EventFilterBase) -> None:
         listener = EventBusListener(name, wrap_func(cb, name=f'TestFunc for {name}'), filter)
         self.add_listener(listener)
 
-    def post_event(self, topic: str, event: Any):
+    def post_event(self, topic: str, event: Any) -> None:
         if not self.allow_errors:
             if topic == TOPIC_ERRORS or isinstance(event, HABAppException):
                 self.errors.append(event)

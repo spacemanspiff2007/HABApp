@@ -1,5 +1,6 @@
 import logging
 import time
+from types import TracebackType
 from typing import Any, TypeVar
 
 from HABApp.core.events.filter import EventFilter
@@ -23,7 +24,7 @@ EVENT_TYPE = TypeVar('EVENT_TYPE')
 
 class EventWaiter:
     def __init__(self, name: BaseValueItem | str,
-                 event_filter: HINT_EVENT_FILTER_OBJ, timeout=1):
+                 event_filter: HINT_EVENT_FILTER_OBJ, timeout=1) -> None:
         if isinstance(name, BaseValueItem):
             name = name.name
         assert isinstance(name, str)
@@ -41,12 +42,12 @@ class EventWaiter:
 
         self._received_events = []
 
-    def __process_event(self, event):
+    def __process_event(self, event) -> None:
         if isinstance(self.event_filter, EventFilter):
             assert isinstance(event, self.event_filter.event_class)
         self._received_events.append(event)
 
-    def clear(self):
+    def clear(self) -> None:
         self._received_events.clear()
 
     def wait_for_event(self, **kwargs) -> EVENT_TYPE:
@@ -79,7 +80,7 @@ class EventWaiter:
         get_current_context().add_event_listener(self.event_listener)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         get_current_context().remove_event_listener(self.event_listener)
 
     @staticmethod

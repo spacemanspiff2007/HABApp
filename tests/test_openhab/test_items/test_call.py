@@ -4,7 +4,7 @@ from HABApp.openhab.items import CallItem
 from HABApp.openhab.map_items import map_item
 
 
-def test_call_set_value():
+def test_call_set_value() -> None:
 
     call = CallItem('my_call_item')
     call.set_value('03018,2722720')
@@ -15,7 +15,7 @@ def test_call_set_value():
     assert call.value == ('a', 'b')
 
 
-def test_call_map():
+def test_call_map() -> None:
     call = map_item(
         'my_call_item', 'Call', 'my_value', label='l', tags=frozenset(), groups=frozenset(), metadata=None,)
     assert isinstance(call, CallItem)

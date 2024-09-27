@@ -1,5 +1,6 @@
 import logging
 import time
+from types import TracebackType
 
 from HABApp.core.items import BaseValueItem
 from HABAppTests.compare_values import get_equal_text
@@ -10,13 +11,13 @@ log = logging.getLogger('HABApp.Tests')
 
 
 class ItemWaiter:
-    def __init__(self, item, timeout=1):
+    def __init__(self, item, timeout=1) -> None:
         self.item = item
         assert isinstance(item, BaseValueItem), f'{item} is not an Item'
 
         self.timeout = timeout
 
-    def wait_for_attribs(self, **kwargs):
+    def wait_for_attribs(self, **kwargs) -> bool:
         start = time.time()
         end = start + self.timeout
 
@@ -45,5 +46,5 @@ class ItemWaiter:
     def __enter__(self) -> 'ItemWaiter':
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         pass

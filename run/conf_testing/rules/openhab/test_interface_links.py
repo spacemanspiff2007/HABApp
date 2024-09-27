@@ -5,7 +5,7 @@ from HABApp.openhab.items import Thing
 
 
 class TestOpenhabInterfaceLinks(TestBaseRule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.config.skip_on_failure = True
@@ -20,7 +20,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         self.add_test('link removal', self.test_remove_link)
         self.add_test('link update', self.test_update_link)
 
-    def __create_test_item(self):
+    def __create_test_item(self) -> None:
         self.openhab.create_item('Number', self.item_name)
 
     def set_up(self):
@@ -32,7 +32,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         if not self.openhab.item_exists(self.item_name):
             raise Exception('item could not be created')
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         try:
             self.oh.get_link(self.item_name, self.channel_uid)
             self.oh.remove_link(self.item_name, self.channel_uid)
@@ -48,7 +48,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
         return found_uid
 
-    def test_update_link(self):
+    def test_update_link(self) -> None:
         assert self.oh.create_link(self.item_name, self.channel_uid, {'profile': 'system:default'})
         assert self.oh.get_link(self.item_name, self.channel_uid)
 
@@ -58,7 +58,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         channel_link = self.oh.get_link(self.item_name, self.channel_uid)
         assert channel_link.configuration == new_cfg
 
-    def test_get_link(self):
+    def test_get_link(self) -> None:
         target = {'profile': 'system:default'}
         assert self.oh.create_link(self.item_name, self.channel_uid, target)
         link = self.oh.get_link(self.item_name, self.channel_uid)
@@ -67,7 +67,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         assert link.channel == self.channel_uid
         assert link.configuration == target
 
-    def test_remove_link(self):
+    def test_remove_link(self) -> None:
         assert self.oh.create_link(self.item_name, self.channel_uid, {'profile': 'system:default'})
         self.oh.remove_link(self.item_name, self.channel_uid)
         try:
@@ -76,7 +76,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         except LinkNotFoundError:
             pass
 
-    def test_link_existence(self):
+    def test_link_existence(self) -> None:
         assert self.oh.create_link(self.item_name, self.channel_uid, {'profile': 'system:default'})
         assert self.oh.get_link(self.item_name, self.channel_uid)
 
@@ -87,7 +87,7 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
         except LinkNotFoundError:
             pass
 
-    def test_create_link(self):
+    def test_create_link(self) -> None:
         assert self.oh.create_link(self.item_name, self.channel_uid, {'profile': 'system:default'})
 
 

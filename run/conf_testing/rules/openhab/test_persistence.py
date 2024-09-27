@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class TestPersistenceBase(TestBaseRule):
-    def __init__(self, service_name: str, item_name: str):
+    def __init__(self, service_name: str, item_name: str) -> None:
         super().__init__()
 
         self.config.skip_on_failure = True
@@ -23,7 +23,7 @@ class TestPersistenceBase(TestBaseRule):
 
         self.add_test(f'Persistence {service_name} available', self.test_service_available)
 
-    def set_up(self):
+    def set_up(self) -> None:
         i = NumberItem.get_item(self.item_name)
         if i.value is None:
             i.oh_post_update(0)
@@ -46,11 +46,11 @@ class TestPersistenceBase(TestBaseRule):
 
 class TestRRD4j(TestPersistenceBase):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('rrd4j', 'RRD4J_Item')
         self.add_test('RRD4J get', self.test_get)
 
-    def test_get(self):
+    def test_get(self) -> None:
         now = datetime.now()
         d = self.get_persistence_data(now - timedelta(seconds=60), now)
         assert d.get_data()
@@ -61,11 +61,11 @@ TestRRD4j()
 
 class TestMapDB(TestPersistenceBase):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('mapdb', 'RRD4J_Item')
         self.add_test('MapDB get', self.test_get)
 
-    def test_get(self):
+    def test_get(self) -> None:
         now = datetime.now()
         d = self.get_persistence_data(now - timedelta(seconds=60), now)
         assert d.get_data()
@@ -76,7 +76,7 @@ TestMapDB()
 
 class TestInMemory(TestPersistenceBase):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('inmemory', 'RRD4J_Item')
 
         if Connections.get('openhab').context.version >= (4, 1):
@@ -84,7 +84,7 @@ class TestInMemory(TestPersistenceBase):
         else:
             print('Skip "TestInMemory" because of no InMemoryDb')
 
-    def test_in_memory(self):
+    def test_in_memory(self) -> None:
         now = datetime.now().replace(microsecond=0)
         t1 = now - timedelta(milliseconds=100)
         t2 = now + timedelta(milliseconds=100)

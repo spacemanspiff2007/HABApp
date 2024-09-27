@@ -3,7 +3,7 @@ import pytest
 from HABApp.core.types.color import HSB, RGB
 
 
-def test_rgb():
+def test_rgb() -> None:
     rgb = RGB(1, 2, 3)
     assert rgb.r == rgb.red == 1
     assert rgb.g == rgb.green == 2
@@ -35,7 +35,7 @@ def test_rgb():
     assert rgb != RGB(1, 2, 9)
 
 
-def test_rgb_create():
+def test_rgb_create() -> None:
     for x in (-1, 256):
         with pytest.raises(ValueError):
             RGB(x, 2, 3)
@@ -45,7 +45,7 @@ def test_rgb_create():
             RGB(1, 2, x)
 
 
-def test_rgb_replace():
+def test_rgb_replace() -> None:
     rgb = RGB(1, 2, 3)
     assert rgb.replace(r=8) == RGB(8, 2, 3)
     assert rgb.replace(g=8) == RGB(1, 8, 3)
@@ -63,14 +63,14 @@ def test_rgb_replace():
         rgb.replace(b=1, blue=1)
 
 
-def test_rgb_hsb_compare():
+def test_rgb_hsb_compare() -> None:
     rgb = RGB(1, 2, 3)
     hsb = rgb.to_hsb()
     assert rgb == hsb
     assert hsb == rgb
 
 
-def test_hsb():
+def test_hsb() -> None:
     hsb = HSB(1, 2, 3)
     assert hsb.h == hsb.hue == 1
     assert hsb.s == hsb.saturation == 2
@@ -102,7 +102,7 @@ def test_hsb():
     assert hsb != HSB(1, 2, 9)
 
 
-def test_hsb_create():
+def test_hsb_create() -> None:
     with pytest.raises(ValueError):
         HSB(-1, 2, 3)
     with pytest.raises(ValueError):
@@ -119,7 +119,7 @@ def test_hsb_create():
         HSB(1, 2, 100.1)
 
 
-def test_hsb_replace():
+def test_hsb_replace() -> None:
     hsb = HSB(1, 2, 3)
     assert hsb.replace(h=8) == HSB(8, 2, 3)
     assert hsb.replace(s=8) == HSB(1, 8, 3)

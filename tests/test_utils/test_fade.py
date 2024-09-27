@@ -1,7 +1,7 @@
 from HABApp.util.fade.fade import Fade
 
 
-def test_setup():
+def test_setup() -> None:
     f = Fade().setup(0, 10, 10)
     assert f._fade_factor == 1
     assert f._step_duration == 1
@@ -31,7 +31,7 @@ def test_setup():
     assert f._step_duration == 2
 
 
-def test_values():
+def test_values() -> None:
     f = Fade().setup(0, 10, 5, now=10)
     assert f.get_value(11) == 2
     assert f.get_value(12) == 4

@@ -14,7 +14,7 @@ TESTS_RULES: typing.Dict[int, 'HABAppTests.TestBaseRule'] = {}
 
 
 class RuleID:
-    def __init__(self, id: int):
+    def __init__(self, id: int) -> None:
         self.__id = id
 
     def is_newest(self) -> bool:
@@ -23,7 +23,7 @@ class RuleID:
                 return False
             return True
 
-    def remove(self):
+    def remove(self) -> None:
         pop_test_rule(self.__id)
 
 
@@ -37,7 +37,7 @@ def get_next_id(rule) -> RuleID:
     return obj
 
 
-def pop_test_rule(id: int):
+def pop_test_rule(id: int) -> None:
     with LOCK:
         rule = TESTS_RULES.pop(id)
         rule._rule_status = TestRuleStatus.FINISHED

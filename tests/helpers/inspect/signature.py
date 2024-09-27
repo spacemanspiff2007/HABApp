@@ -3,7 +3,7 @@ import inspect
 import pytest
 
 
-def assert_same_signature(func_a, func_b):
+def assert_same_signature(func_a, func_b) -> bool:
     sig_a = inspect.signature(func_a)
     sig_b = inspect.signature(func_b)
     assert sig_a == sig_b, f'\n  {sig_a}\n  {sig_b}\n'
@@ -15,11 +15,11 @@ def assert_same_signature(func_a, func_b):
     return True
 
 
-def test_assert_same_signature():
+def test_assert_same_signature() -> None:
     def func1(a: int, b: str | None = None) -> float:
         """Doc1"""
 
-    def func1_no_ret(a: int, b: str | None = None):
+    def func1_no_ret(a: int, b: str | None = None) -> None:
         """Doc1"""
 
     def func1_diff_args(a: int, b: str = None) -> float:  # noqa: RUF013

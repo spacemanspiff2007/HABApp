@@ -28,7 +28,7 @@ from HABApp.openhab.interface_sync import (
 @pytest.mark.parametrize('func', [
     getattr(HABApp.openhab.interface_sync, i) for i in dir(HABApp.openhab.interface_sync) if i[0] != '_'
 ])
-def test_all_imported(func: Callable):
+def test_all_imported(func: Callable) -> None:
     assert func.__name__ in globals(), f'"{func.__name__}" not imported!'
 
 
@@ -50,7 +50,7 @@ def test_all_imported(func: Callable):
     (remove_link,           ('item', 'channel')),
     (create_link,           ('item', 'channel', {})),
 ))
-async def test_item_has_name(func, args):
+async def test_item_has_name(func, args) -> None:
     async_context.set('Test')
 
     if func not in (post_update, send_command):

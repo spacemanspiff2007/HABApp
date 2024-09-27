@@ -15,7 +15,7 @@ log = logging.getLogger('HABApp.Tests.MultiMode')
 class TestListenerGroup(TestBaseRule):
     """This rule is testing the Parameter implementation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.my_item1 = Item.get_create_item('EventGroupItem_1')
@@ -29,7 +29,7 @@ class TestListenerGroup(TestBaseRule):
 
         self.calls = []
 
-    def __callback(self, event):
+    def __callback(self, event) -> None:
         self.calls.append(event)
 
     def wait_for_cb(self, expected_len: int, min_time=None):
@@ -45,7 +45,7 @@ class TestListenerGroup(TestBaseRule):
                 raise TestCaseFailed('Timeout while waiting for calls!')
             time.sleep(0.01)
 
-    def test_basic(self):
+    def test_basic(self) -> None:
         self.calls.clear()
         self.grp.listen()
 
@@ -66,7 +66,7 @@ class TestListenerGroup(TestBaseRule):
         assert self.calls[0].value == 1
         assert self.calls[0].name == self.my_item2.name
 
-    def test_deactivate(self):
+    def test_deactivate(self) -> None:
         self.calls.clear()
         self.grp.listen()
 

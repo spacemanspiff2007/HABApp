@@ -2,7 +2,7 @@ from HABApp.core.const import MISSING
 from HABApp.core.lib.funcs import compare
 
 
-def test_compare_single():
+def test_compare_single() -> None:
     assert compare(1, eq=1)
     assert compare(1, equal=1)
 
@@ -33,12 +33,12 @@ def test_compare_single():
     assert not compare(None, is_not=None)
 
 
-def test_compare_multi():
+def test_compare_multi() -> None:
     assert compare(5, le=5, ge=7)
     assert compare(7, le=5, ge=7)
     assert not compare(6, le=5, ge=7)
 
 
-def test_compare_missing():
+def test_compare_missing() -> None:
     assert compare(5, le=5, ge=MISSING)
     assert not compare(7, le=5, ge=MISSING)

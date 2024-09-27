@@ -8,7 +8,7 @@ import HABApp.config.models
 from HABApp.config import CONFIG
 
 
-def test_sample_yaml(pytestconfig):
+def test_sample_yaml(pytestconfig) -> None:
     file = pytestconfig.rootpath / 'docs' / 'configuration.rst'
 
     all_cfgs = []
@@ -47,7 +47,7 @@ def test_sample_yaml(pytestconfig):
         CONFIG.load_config_dict(map)
 
 
-def test_config_documentation_complete(pytestconfig):
+def test_config_documentation_complete(pytestconfig) -> None:
     cfg_docs: Path = pytestconfig.rootpath / 'docs' / 'configuration.rst'
     cfg_model_dir: Path = pytestconfig.rootpath / 'src' / 'HABApp' / 'config' / 'models'
     assert cfg_model_dir.is_dir()

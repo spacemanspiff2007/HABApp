@@ -1,6 +1,7 @@
 import json
 import logging
 import pprint
+from types import TracebackType
 
 from pytest import MonkeyPatch
 
@@ -19,14 +20,14 @@ def shorten_url(url: str):
 
 
 class RestPatcher:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.logged_name = False
         self._log = logging.getLogger('HABApp.Rest')
 
         self.monkeypatch = MonkeyPatch()
 
-    def log(self, msg: str):
+    def log(self, msg: str) -> None:
         # Log name when we log the first message
         if not self.logged_name:
             self.logged_name = True
@@ -87,7 +88,7 @@ class RestPatcher:
             return to_wrap(_dict)
         return new_call
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         m = self.monkeypatch
 
         # event handler
@@ -104,6 +105,6 @@ class RestPatcher:
         m.setattr(module, 'put', self.wrap(getattr(module, 'put')))
         m.setattr(module, 'post', self.wrap(getattr(module, 'post')))
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         self.monkeypatch.undo()
         return False

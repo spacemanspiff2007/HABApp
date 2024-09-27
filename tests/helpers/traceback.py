@@ -15,7 +15,7 @@ def remove_dyn_parts_from_traceback(traceback: str) -> str:
     return traceback
 
 
-def test_remove_dyn_parts_from_traceback():
+def test_remove_dyn_parts_from_traceback() -> None:
 
     traceback = '''
 File "C:\\My\\Folder\\HABApp\\tests\\test_core\\test_lib\\test_format_traceback.py", line 19 in exec_func

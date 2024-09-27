@@ -5,7 +5,7 @@ import pytest
 from HABApp.rule.rule_hook import HABAppRuleHook
 
 
-def test_rule_hook_log(caplog):
+def test_rule_hook_log(caplog) -> None:
 
     class MyRule:
         pass

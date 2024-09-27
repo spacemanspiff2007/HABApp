@@ -43,7 +43,7 @@ def c():
         w2.cancel()
 
 
-def test_sec_timedelta(parent_rule, test_logs: LogCollector):
+def test_sec_timedelta(parent_rule, test_logs: LogCollector) -> None:
     a = UpdatedTime('test', Instant.now())
     w1 = a.add_watch(1)
 
@@ -60,12 +60,12 @@ def test_sec_timedelta(parent_rule, test_logs: LogCollector):
     test_logs.add_expected('HABApp', 'WARNING', 'Watcher ItemNoUpdateWatch (1s) for test has already been created')
 
 
-async def test_rem(parent_rule, u: UpdatedTime):
+async def test_rem(parent_rule, u: UpdatedTime) -> None:
     for t in u.tasks:
         t.cancel()
 
 
-async def test_cancel_running(parent_rule, u: UpdatedTime):
+async def test_cancel_running(parent_rule, u: UpdatedTime) -> None:
     u.set(Instant.now())
 
     w1 = u.tasks[0]
@@ -83,7 +83,7 @@ async def test_cancel_running(parent_rule, u: UpdatedTime):
     assert w2 not in u.tasks
 
 
-async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: EventBus):
+async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: EventBus) -> None:
     m = MagicMock()
     u.set(Instant.now())
     list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
@@ -112,7 +112,7 @@ async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: EventB
     list.cancel()
 
 
-async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: EventBus):
+async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: EventBus) -> None:
     m = MagicMock()
     c.set(Instant.now())
     list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
@@ -142,7 +142,7 @@ async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: EventB
     await asyncio.sleep(0.01)
 
 
-async def test_watcher_change_restore(parent_rule, ir: ItemRegistry):
+async def test_watcher_change_restore(parent_rule, ir: ItemRegistry) -> None:
     name = 'test_save_restore'
 
     item_a = Item(name)
@@ -161,7 +161,7 @@ async def test_watcher_change_restore(parent_rule, ir: ItemRegistry):
     ir.pop_item(name)
 
 
-async def test_watcher_update_restore(parent_rule, ir: ItemRegistry):
+async def test_watcher_update_restore(parent_rule, ir: ItemRegistry) -> None:
     name = 'test_save_restore'
 
     item_a = Item(name)
@@ -182,12 +182,12 @@ async def test_watcher_update_restore(parent_rule, ir: ItemRegistry):
 
 @pytest.mark.ignore_log_warnings()
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
-                                      sync_worker, eb: TestEventBus, ir: ItemRegistry):
+                                      sync_worker, eb: TestEventBus, ir: ItemRegistry) -> None:
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''
 
-    def get_log(event):
+    def get_log(event) -> None:
         nonlocal text_warning
         text_warning = event
 

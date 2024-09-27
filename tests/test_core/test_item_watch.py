@@ -10,7 +10,7 @@ from tests.helpers import LogCollector
 from tests.helpers.parent_rule import DummyRule
 
 
-async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector):
+async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector) -> None:
 
     i = Item('test')
     w1 = i.watch_change(5)
@@ -29,7 +29,7 @@ async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector):
 
 
 @pytest.mark.parametrize('method', ('watch_update', 'watch_change'))
-async def test_watch_update(parent_rule: DummyRule, sync_worker, caplog, method):
+async def test_watch_update(parent_rule: DummyRule, sync_worker, caplog, method) -> None:
     caplog.set_level(0)
     cb = MagicMock()
     cb.__name__ = 'MockName'

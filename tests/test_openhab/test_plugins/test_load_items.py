@@ -74,7 +74,7 @@ async def _mock_raise():
     raise ValueError()
 
 
-async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs):
+async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_items', _mock_get_all_items)
     monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_get_all_items_state)
     monkeypatch.setattr(load_items_module, 'async_get_things', _mock_get_empty)
@@ -94,7 +94,7 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs):
                            'Item ItemLength is a UoM item but "unit" is not found in item metadata')
 
 
-async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs):
+async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_items', _mock_get_empty)
     monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_raise)
 

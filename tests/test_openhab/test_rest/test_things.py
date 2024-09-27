@@ -5,7 +5,7 @@ from msgspec.json import decode
 from HABApp.openhab.definitions.rest.things import ThingResp
 
 
-def test_thing_summary():
+def test_thing_summary() -> None:
     _in = {
         'statusInfo': {
             'status': 'UNINITIALIZED',
@@ -28,7 +28,7 @@ def test_thing_summary():
     assert thing.status.detail == 'NONE'
 
 
-def test_thing_full():
+def test_thing_full() -> None:
     _in = {
         'channels': [
             {

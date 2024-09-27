@@ -23,7 +23,7 @@ pytestmark = pytest.mark.skipif(
 
 
 class ProcRule(Rule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.cb = Mock()
         self.cb.__name__ = 'mock_callback'
@@ -44,7 +44,7 @@ def rule(monkeypatch):
 
 
 @pytest.mark.no_internals()
-async def test_run_func_arg_errors(rule):
+async def test_run_func_arg_errors(rule) -> None:
     with pytest.raises(TypeError) as e:
         rule.execute_subprocess(rule.cb, sys.executable, 'asfd', 123)
     assert str(e.value) == 'args[2] is not of type str! "123" (int)'
@@ -58,7 +58,7 @@ async def test_run_func_arg_errors(rule):
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, 'OK', '')], [False, 'OK']])
 @pytest.mark.no_internals()
-async def test_run_func(rule, flag, result):
+async def test_run_func(rule, flag, result) -> None:
 
     await rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=True, raw_info=flag
@@ -69,7 +69,7 @@ async def test_run_func(rule, flag, result):
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
 @pytest.mark.no_internals()
-async def test_run_func_no_cap(rule, flag: bool, result):
+async def test_run_func_no_cap(rule, flag: bool, result) -> None:
     await rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False, raw_info=flag
     )
@@ -79,7 +79,7 @@ async def test_run_func_no_cap(rule, flag: bool, result):
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
 @pytest.mark.no_internals()
-async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector):
+async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector) -> None:
 
     task = rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import time; time.sleep(5)', capture_output=False, raw_info=flag
@@ -99,7 +99,7 @@ async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector):
 
 @pytest.mark.parametrize('flag', [True, False])
 @pytest.mark.no_internals()
-async def test_invalid_program(rule, test_logs, flag):
+async def test_invalid_program(rule, test_logs, flag) -> None:
     parent_dir = Path(__file__).parent
     await rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
 
@@ -115,7 +115,7 @@ async def test_invalid_program(rule, test_logs, flag):
 
 @pytest.mark.parametrize('raw_info', [True, False])
 @pytest.mark.no_internals()
-async def test_exec_python_file(rule, caplog, raw_info):
+async def test_exec_python_file(rule, caplog, raw_info) -> None:
     parent_dir = Path(__file__).parent
 
     await rule.execute_python(rule.cb, parent_dir / '__exec_python_file.py', capture_output=True, raw_info=raw_info)
@@ -134,7 +134,7 @@ async def test_exec_python_file(rule, caplog, raw_info):
 
 
 @pytest.mark.no_internals()
-async def test_exec_python_file_relative(rule):
+async def test_exec_python_file_relative(rule) -> None:
     parent_dir = Path(__file__).parent
 
     await rule.execute_python(rule.cb, '__exec_python_file.py', capture_output=True)
@@ -145,7 +145,7 @@ async def test_exec_python_file_relative(rule):
 
 
 @pytest.mark.no_internals()
-async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector):
+async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector) -> None:
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
 
@@ -162,7 +162,7 @@ async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector):
 
 
 @pytest.mark.no_internals()
-async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector):
+async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector) -> None:
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
     await rule.execute_python(rule.cb, file, 'exit_3', capture_output=True, additional_python_path=[folder])
@@ -178,7 +178,7 @@ async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector):
 
 @pytest.mark.parametrize('raw_info, result', [[True, FinishedProcessInfo(0, 'module ok', '')], [False, 'module ok']])
 @pytest.mark.no_internals()
-async def test_exec_python_module(rule, raw_info, result):
+async def test_exec_python_module(rule, raw_info, result) -> None:
     folder = Path(__file__).parent
     await rule.execute_python(
         rule.cb, '__exec_python_module', capture_output=True, additional_python_path=[folder], raw_info=raw_info)
@@ -187,7 +187,7 @@ async def test_exec_python_module(rule, raw_info, result):
 
 
 @pytest.mark.no_internals()
-def test_param_pythonpath(monkeypatch):
+def test_param_pythonpath(monkeypatch) -> None:
     monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__))
     folder = str(Path(__file__).parent)
 

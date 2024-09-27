@@ -35,7 +35,7 @@ def raise_err(func):
 
 
 @pytest.fixture(autouse=True)
-def show_errors(monkeypatch):
+def show_errors(monkeypatch) -> None:
     # Patch the wrapper so that we always raise the exception
     monkeypatch.setattr(HABApp.core.wrapper, 'ignore_exception', raise_err)
     monkeypatch.setattr(HABApp.core.wrapper, 'log_exception', raise_err)

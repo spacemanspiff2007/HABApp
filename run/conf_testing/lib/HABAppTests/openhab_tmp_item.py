@@ -1,5 +1,6 @@
 import time
 from functools import wraps
+from types import TracebackType
 
 import HABApp
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS
@@ -36,22 +37,23 @@ class OpenhabTmpItem:
             return new_func
         return decorator
 
-    def __init__(self, item_type: str, item_name: str | None = None):
+    def __init__(self, item_type: str, item_name: str | None = None) -> None:
         self.type: str = item_type
         self.name = get_random_name(item_type) if item_name is None else item_name
 
     def __enter__(self) -> HABApp.openhab.items.OpenhabItem:
         return self.create_item()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         self.remove()
+        return False
 
-    def remove(self):
+    def remove(self) -> None:
         HABApp.openhab.interface_sync.remove_item(self.name)
 
     def _create(self, label='', category='', tags: list[str] = [], groups: list[str] = [],
                 group_type: str = '', group_function: str = '',
-                group_function_params: list[str] = []):
+                group_function_params: list[str] = []) -> None:
         interface = HABApp.openhab.interface_sync
         interface.create_item(self.type, self.name, label=label, category=category,
                               tags=tags, groups=groups, group_type=group_type,
@@ -75,7 +77,7 @@ class OpenhabTmpItem:
         return HABApp.openhab.items.OpenhabItem.get_item(self.name)
 
     def modify(self, label='', category='', tags: list[str] = [], groups: list[str] = [],
-               group_type: str = '', group_function: str = '', group_function_params: list[str] = []):
+               group_type: str = '', group_function: str = '', group_function_params: list[str] = []) -> None:
 
         with EventWaiter(TOPIC_ITEMS, HABApp.core.events.EventFilter(HABApp.openhab.events.ItemUpdatedEvent)) as w:
 

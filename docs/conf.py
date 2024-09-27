@@ -26,7 +26,7 @@ sphinx_logger = sphinx.util.logging.getLogger('post')
 logger_lvl = logging.DEBUG if IS_RTD_BUILD or IS_CI else logging.INFO  # set level to DEBUG for CI
 
 
-def log(msg: str):
+def log(msg: str) -> None:
     sphinx_logger.log(logger_lvl, f'[POST] {msg:s}')
 
 
@@ -323,14 +323,14 @@ def replace_node_contents(node: Node):
     return matched_nodes
 
 
-def transform_desc(app, domain, objtype: str, contentnode):
+def transform_desc(app, domain, objtype: str, contentnode) -> None:
     # if objtype != 'pydantic_field':
     #     return None
 
     replace_node_contents(node=contentnode.parent)
 
 
-def setup(app):
+def setup(app) -> None:
     app.connect('object-description-transform', transform_desc)
 
 

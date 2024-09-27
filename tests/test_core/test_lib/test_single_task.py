@@ -4,11 +4,11 @@ from unittest.mock import Mock
 from HABApp.core.lib import SingleTask
 
 
-async def test_single_task_start():
+async def test_single_task_start() -> None:
 
     m = Mock()
 
-    async def cb():
+    async def cb() -> None:
         m()
 
     st = SingleTask(cb)

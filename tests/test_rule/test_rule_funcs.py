@@ -9,7 +9,7 @@ from ..rule_runner import SimpleRuleRunner
 
 
 @pytest.mark.no_internals()
-def test_unload_function():
+def test_unload_function() -> None:
 
     with SimpleRuleRunner():
         r = Rule()
@@ -21,7 +21,7 @@ def test_unload_function():
 
 @pytest.mark.ignore_log_errors()
 @pytest.mark.no_internals()
-def test_unload_function_exception(eb: TestEventBus):
+def test_unload_function_exception(eb: TestEventBus) -> None:
     eb.allow_errors = True
 
     with SimpleRuleRunner():
@@ -34,10 +34,10 @@ def test_unload_function_exception(eb: TestEventBus):
 
 
 @pytest.mark.no_internals()
-def test_repr():
+def test_repr() -> None:
     class Abc(Rule):
 
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__()
             self.rule_name = 'Abc'
 

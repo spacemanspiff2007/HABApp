@@ -5,7 +5,7 @@ from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
 
 
-def test_pop():
+def test_pop() -> None:
     ir = ItemRegistry()
     ir.add_item(Item('test'))
     assert ir.item_exists('test')
@@ -17,7 +17,7 @@ def test_pop():
     assert not ir.item_exists('test')
 
 
-def test_add():
+def test_add() -> None:
     ir = ItemRegistry()
     added = Item('test')
     ir.add_item(added)

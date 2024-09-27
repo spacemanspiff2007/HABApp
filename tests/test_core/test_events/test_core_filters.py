@@ -14,14 +14,14 @@ from HABApp.core.events.filter import (
 )
 
 
-def test_class_annotations():
+def test_class_annotations() -> None:
     """EventFilter relies on the class annotations, so we test that every event has those"""
 
     for cls in get_module_classes('HABApp.core.events.events', ('ComplexEventValue', 'AllEvents')).values():
         check_class_annotations(cls)
 
 
-def test_repr():
+def test_repr() -> None:
     assert NoEventFilter().describe() == 'NoEventFilter()'
 
     f = EventFilter(ValueUpdateEvent, value=1)
@@ -46,14 +46,14 @@ def test_repr():
     assert f.describe() == '(ValueChangeEventFilter(old_value=1) or ValueChangeEventFilter(value=2))'
 
 
-def test_exception_missing():
+def test_exception_missing() -> None:
     with pytest.raises(AttributeError) as e:
         EventFilter(ValueUpdateEvent, asdf=1)
 
     assert str(e.value) == 'Filter attribute "asdf" does not exist for "ValueUpdateEvent"'
 
 
-def test_all_events():
+def test_all_events() -> None:
     assert NoEventFilter().trigger(None) is True
     assert NoEventFilter().trigger('') is True
     assert NoEventFilter().trigger(False) is True
@@ -62,16 +62,16 @@ def test_all_events():
 
 
 class MyValueUpdateEvent(ValueUpdateEvent):
-    def __init__(self, name='asdf', value='asdf'):
+    def __init__(self, name='asdf', value='asdf') -> None:
         super().__init__(name, value)
 
 
 class MyValueChangeEvent(ValueChangeEvent):
-    def __init__(self, name='asdf', value: Any = 'asdf', old_value: Any = 'asdfasdf'):
+    def __init__(self, name='asdf', value: Any = 'asdf', old_value: Any = 'asdfasdf') -> None:
         super().__init__(name, value, old_value)
 
 
-def test_value_change_event_filter():
+def test_value_change_event_filter() -> None:
 
     f = ValueChangeEventFilter()
     assert f.trigger(MyValueUpdateEvent()) is False
@@ -89,7 +89,7 @@ def test_value_change_event_filter():
     assert f.trigger(MyValueChangeEvent(old_value=1)) is True
 
 
-def test_filter_groups_and():
+def test_filter_groups_and() -> None:
     f = AndFilterGroup(ValueChangeEventFilter(old_value=1), ValueChangeEventFilter(value=2))
     assert f.trigger(MyValueUpdateEvent()) is False
     assert f.trigger(MyValueChangeEvent()) is False
@@ -99,7 +99,7 @@ def test_filter_groups_and():
     assert f.trigger(MyValueChangeEvent(value=2, old_value=1)) is True
 
 
-def test_filter_groups_or():
+def test_filter_groups_or() -> None:
     f = OrFilterGroup(ValueChangeEventFilter(old_value=1), ValueChangeEventFilter(value=2))
     assert f.trigger(MyValueUpdateEvent()) is False
     assert f.trigger(MyValueChangeEvent()) is False

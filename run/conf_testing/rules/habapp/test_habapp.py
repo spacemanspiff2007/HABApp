@@ -15,12 +15,12 @@ from HABApp.core.items import Item
 
 class TestItemEvents(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.add_test('Item const', self.item_events, changes=False, secs=2, values=['MyVal', 'MyVal', 'MyVal'])
         self.add_test('Item change', self.item_events, changes=True, secs=2, values=['MyVal1', 'MyVal2', 'MyVal3'])
 
-    def check_event(self, event: ItemNoUpdateEvent):
+    def check_event(self, event: ItemNoUpdateEvent) -> None:
         assert event.name == self.watch_item.name, f'Wrong name: {event.name} != {self.watch_item.name}'
         assert event.seconds == self.secs, f'Wrong seconds: {event.seconds} != {self.secs}'
         dur = time.time() - self.ts_set - self.secs
@@ -50,7 +50,7 @@ class TestItemEvents(TestBaseRule):
             watcher.cancel()
         return None
 
-    def _run(self, values, filter):
+    def _run(self, values, filter) -> None:
         self.ts_set = 0
         for step, value in enumerate(values):
             if step:
@@ -67,13 +67,13 @@ TestItemEvents()
 class TestItemEventRestore(TestBaseRule):
     """Test that item listeners are properly restored when an item is removed and added again"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.add_test('const change', self.test_restore, change=True)
         self.add_test('const update', self.test_restore, change=False)
 
-    def test_restore(self, change=False):
+    def test_restore(self, change=False) -> None:
         item = HABApp.core.items.Item.get_create_item(get_random_name('HABApp'))
         timeout = 0.2
         (item.watch_change if change else item.watch_update)(timeout)
@@ -98,22 +98,22 @@ TestItemEventRestore()
 
 class TestItemListener(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.add_test('Item.listen_event', self.trigger_event)
 
-    def check_event(self, event: ValueUpdateEvent):
+    def check_event(self, event: ValueUpdateEvent) -> None:
         assert event.name == self.watch_item.name, f'Wrong name: {event.name} != {self.watch_item.name}'
         assert event.value == 123, f'Wrong value: {event.value} != 123'
 
-    def set_up(self):
+    def set_up(self) -> None:
         self.watch_item = Item.get_create_item(get_random_name('HABApp'))
         self.listener = self.watch_item.listen_event(self.check_event, ValueUpdateEventFilter())
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         self.listener.cancel()
 
-    def trigger_event(self):
+    def trigger_event(self) -> None:
         self.run.at(
             1, self.post_event, self.watch_item.name, ValueUpdateEvent(self.watch_item.name, 123)
         )

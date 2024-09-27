@@ -18,18 +18,18 @@ def cfg():
     FOLDERS.clear()
 
 
-def cmp(path: Path, name: str):
+def cmp(path: Path, name: str) -> None:
     assert get_name(path) == name
     assert get_path(name) == path
 
 
-def test_prefix_sort(cfg):
+def test_prefix_sort(cfg) -> None:
     assert get_prefixes() == ['params/', 'configs/', 'rules/']
     add_folder('params1/', Path('c:/HABApp/my_para1m/'), 50)
     assert get_prefixes() == ['params1/', 'params/', 'configs/', 'rules/']
 
 
-def test_from_path(cfg):
+def test_from_path(cfg) -> None:
     cmp(Path('c:/HABApp/my_rules/rule.py'),     'rules/rule.py')
     cmp(Path('c:/HABApp/my_config/params.yml'), 'configs/params.yml')
     cmp(Path('c:/HABApp/my_param/cfg.yml'),     'params/cfg.yml')
@@ -39,12 +39,12 @@ def test_from_path(cfg):
     cmp(Path('c:/HABApp/my_param/my_folder3/cfg.yml'),         'params/my_folder3/cfg.yml')
 
 
-def test_err(cfg):
+def test_err(cfg) -> None:
     with pytest.raises(ValueError):
         get_name(Path('c:/HABApp/rules/rule.py'))
 
 
-def test_mixed():
+def test_mixed() -> None:
     FOLDERS.clear()
     add_folder('rules/', Path('c:/HABApp/rules'), 1)
     add_folder('configs/', Path('c:/HABApp/rules/my_config'), 2)

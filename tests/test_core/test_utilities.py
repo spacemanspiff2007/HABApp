@@ -3,10 +3,10 @@ import asyncio
 from HABApp.core.lib import PendingFuture
 
 
-async def test_pending_future():
+async def test_pending_future() -> None:
     a = 0
 
-    async def b():
+    async def b() -> None:
         nonlocal a
         a += 1
 
@@ -28,10 +28,10 @@ async def test_pending_future():
     assert a == 1
 
 
-async def test_pending_future_cancel():
+async def test_pending_future_cancel() -> None:
     exception = None
 
-    async def b():
+    async def b() -> None:
         nonlocal exception
         try:
             await asyncio.sleep(200)

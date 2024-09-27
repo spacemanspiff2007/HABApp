@@ -2,7 +2,7 @@
 from HABApp.openhab.transformations._map.registry import MapTransformationRegistry
 
 
-def test_sort():
+def test_sort() -> None:
     m = MapTransformationRegistry(name='map')
     m.objs['test.map'] = ({}, None)
     m.objs['aa.map'] = ({}, None)

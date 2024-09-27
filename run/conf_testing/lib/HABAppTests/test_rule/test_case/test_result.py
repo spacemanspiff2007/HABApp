@@ -28,7 +28,7 @@ assert TestResultStatus.FAILED < TestResultStatus.ERROR
 
 
 class TestResult:
-    def __init__(self, cls_name: str, test_name: str, test_nr: str = ''):
+    def __init__(self, cls_name: str, test_name: str, test_nr: str = '') -> None:
         self.cls_name = cls_name
         self.test_name = test_name
         self.test_nr = test_nr
@@ -39,7 +39,7 @@ class TestResult:
     def is_set(self):
         return self.state != TestResultStatus.NOT_SET
 
-    def set_state(self, new_state: TestResultStatus):
+    def set_state(self, new_state: TestResultStatus) -> None:
         if self.state <= new_state:
             self.state = new_state
 
@@ -59,7 +59,7 @@ class TestResult:
         for line in HABApp.core.wrapper.format_exception(e):
             log.error(line)
 
-    def add_msg(self, msg: str):
+    def add_msg(self, msg: str) -> None:
         for line in msg.splitlines():
             self.msgs.append(line)
 

@@ -30,7 +30,7 @@ def get_status_event(status: str) -> ThingStatusInfoEvent:
     return event
 
 
-def test_thing_status_events(test_thing: Thing):
+def test_thing_status_events(test_thing: Thing) -> None:
 
     assert test_thing.status == 'UNINITIALIZED'
 
@@ -59,12 +59,12 @@ def test_thing_status_events(test_thing: Thing):
         assert test_thing._last_change.instant == instant3
 
 
-def test_thing_updated_event(test_thing: Thing):
+def test_thing_updated_event(test_thing: Thing) -> None:
 
     class MyThingUpdatedEvent(ThingUpdatedEvent):
         def __init__(self, name: str = '', thing_type: str = '', label: str = '', location='',
                      channels: list[dict[str, Any]] = [],
-                     configuration: dict[str, Any] = {}, properties: dict[str, str] = {}):
+                     configuration: dict[str, Any] = {}, properties: dict[str, str] = {}) -> None:
             super().__init__(name, thing_type, label, location, channels, configuration, properties)
 
     assert test_thing.properties == Map()
@@ -163,7 +163,7 @@ def test_thing_updated_event(test_thing: Thing):
         assert test_thing._last_change.instant == instant7
 
 
-def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Thing):
+def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Thing) -> None:
     monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
 
     ir.add_item(test_thing)
@@ -176,7 +176,7 @@ def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Th
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: Thing):
+def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: Thing) -> None:
     monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
 
     ir.add_item(test_thing)
@@ -189,7 +189,7 @@ def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: T
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry):
+def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry) -> None:
     monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
 
     name = 'AddedThing'

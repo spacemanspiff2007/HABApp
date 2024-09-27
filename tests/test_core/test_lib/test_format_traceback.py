@@ -26,7 +26,7 @@ def exec_func(func) -> str:
     return msg
 
 
-def func_obj_def_multilines():
+def func_obj_def_multilines() -> None:
     item = HABApp.core.items.Item
     a = [
         1,
@@ -88,7 +88,7 @@ class DummyModel(BaseModel):
 CONFIG = create_app_config(DummyModel())
 
 
-def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3):
+def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
     assert isinstance(a, str) or a is None, type(a)
     assert isinstance(b, str) or b is None, type(b)
     assert isinstance(c, (str, int)), type(c)
@@ -104,7 +104,7 @@ def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | i
 
 
 @pytest.mark.skipif(PYTHON_311, reason='Traceback Python 3.10')
-def test_exception_expression_remove_py310():
+def test_exception_expression_remove_py310() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
@@ -121,7 +121,7 @@ File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
 
 File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
 --------------------------------------------------------------------------------
-     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3):
+     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
       (...)
      94 |     assert isinstance(c, (str, int)), type(c)
      95 |     CONFIGURATION = '3'
@@ -150,11 +150,11 @@ ZeroDivisionError: division by zero'''
 
 
 @pytest.mark.skipif(not PYTHON_311, reason='New traceback from python 3.11')
-def test_exception_expression_remove():
+def test_exception_expression_remove() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
 --------------------------------------------------------------------------------
      19 | def exec_func(func) -> str:
      20 |     try:
@@ -165,9 +165,9 @@ File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
      func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_none
+File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
 --------------------------------------------------------------------------------
-     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3):
+     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
       (...)
      94 |     assert isinstance(c, (str, int)), type(c)
      95 |     CONFIGURATION = '3'
@@ -209,7 +209,7 @@ def test_habapp_regex(pytestconfig):
             raise ValueError(msg)
 
 
-def test_regex(pytestconfig):  # noqa: ARG001
+def test_regex(pytestconfig) -> None:  # noqa: ARG001
 
     assert not is_suppressed_habapp_file('/lib/habapp/asdf')
     assert not is_suppressed_habapp_file('/lib/HABApp/asdf')

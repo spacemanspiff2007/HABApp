@@ -2,7 +2,7 @@ from HABApp.openhab.item_to_reg import add_to_registry
 from HABApp.openhab.items import GroupItem, StringItem
 
 
-def test_item_group_members_sorted():
+def test_item_group_members_sorted() -> None:
     add_to_registry(StringItem('d_str', initial_value='val_9', groups=frozenset(['grp_1'])))
     add_to_registry(StringItem('a_str', groups=frozenset(['grp_1'])))
     add_to_registry(StringItem('b_str', groups=frozenset(['grp_1'])))

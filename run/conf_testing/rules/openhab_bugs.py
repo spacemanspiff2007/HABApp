@@ -16,11 +16,11 @@ from HABApp.openhab.connection_handler.func_async import (
 
 class BugLinks(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.add_test('delete item with link', self.create_meta)
 
-    def create_meta(self):
+    def create_meta(self) -> bool:
         astro_thing = find_astro_sun_thing()
         astro_channel = f'{astro_thing}:rise#start'
         name = get_random_name('DateTime')

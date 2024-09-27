@@ -1,7 +1,7 @@
 from HABApp.openhab.connection.plugins.plugin_things.filters import ThingFilter, apply_filters
 
 
-def test_thing_filter():
+def test_thing_filter() -> None:
     f = ThingFilter('thing_label', 'asdfasdf')
     assert f.matches({'label': 'ASDFASDF'}, True)
     assert f.matches({'label': 'ASDFASDF'}, False)
@@ -15,7 +15,7 @@ def test_thing_filter():
     assert f.matches({'label': 'asdf1234'}, False)
 
 
-def test_filters():
+def test_filters() -> None:
     data = [{'label': '1'}, {'label': '2'}, {'label': 'a'}, {'label': 'b'}, ]
     assert list(apply_filters([ThingFilter('thing_label', r'\d+')], data, True)) == [{'label': '1'}, {'label': '2'}]
     assert list(apply_filters([ThingFilter('thing_label', r'\d+')], data, False)) == [{'label': '1'}, {'label': '2'}]

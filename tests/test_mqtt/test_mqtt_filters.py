@@ -7,7 +7,7 @@ from HABApp.mqtt.events import (
 from tests.helpers.inspect import check_class_annotations, get_module_classes
 
 
-def test_class_annotations():
+def test_class_annotations() -> None:
     """EventFilter relies on the class annotations, so we test that every event has those"""
 
     exclude = ('MqttValueChangeEventFilter', 'MqttValueUpdateEventFilter')
@@ -15,7 +15,7 @@ def test_class_annotations():
         check_class_annotations(cls)
 
 
-def test_mqtt_filter():
+def test_mqtt_filter() -> None:
     f = MqttValueUpdateEventFilter(value=1)
     assert f.event_class is MqttValueUpdateEvent
     assert f.attr_name1 == 'value'

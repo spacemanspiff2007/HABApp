@@ -3,7 +3,7 @@ from msgspec import convert
 from HABApp.openhab.definitions.rest.items import CommandOptionResp, ItemResp, StateOptionResp
 
 
-def test_item_1():
+def test_item_1() -> None:
     _in = {
         'link': 'http://ip:port/rest/items/Item1Name',
         'state': 'CLOSED',
@@ -38,7 +38,7 @@ def test_item_1():
     assert item.groups == ['Group1', 'Group2']
 
 
-def test_item_2():
+def test_item_2() -> None:
     d1 = 'DASDING 98.9 (Euro-Hits)'
     d2 = 'SWR3 95.5 (Top 40/Pop)'
 
@@ -74,7 +74,7 @@ def test_item_2():
     assert desc.command_options == [CommandOptionResp('0', d1), CommandOptionResp('1', d2)]
 
 
-def test_group_item():
+def test_group_item() -> None:
     _in = {
         'members': [
             {

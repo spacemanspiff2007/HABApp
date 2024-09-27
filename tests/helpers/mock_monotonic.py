@@ -1,5 +1,5 @@
 class MockedMonotonic:
-    def __init__(self):
+    def __init__(self) -> None:
         self.time = 0
 
     def get_time(self):

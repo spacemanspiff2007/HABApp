@@ -21,7 +21,7 @@ from HABApp.mqtt.mqtt_payload import get_msg_payload
         (b'\x07\x07', '\x07\x07'),
     )
 )
-def test_value_cast(payload, expected):
+def test_value_cast(payload, expected) -> None:
     payload = payload.encode('utf-8') if not isinstance(payload, bytes) else payload
     msg = Message('test_topic', payload, None, None, None, None)
     assert get_msg_payload(msg) == ('test_topic', expected)
