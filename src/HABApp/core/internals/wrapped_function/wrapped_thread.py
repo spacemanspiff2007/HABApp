@@ -1,17 +1,12 @@
 from __future__ import annotations
 
-import io
-from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from cProfile import Profile
-from pstats import SortKey, Stats
 from threading import Lock
 from time import monotonic
 from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
-from HABApp.core.asyncio import async_context
 from HABApp.core.const import loop
 from HABApp.core.internals import Context, ContextProvidingObj
 from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase, default_logger
@@ -19,6 +14,7 @@ from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBas
 
 if TYPE_CHECKING:
     import logging
+    from collections.abc import Callable
 
 
 POOL: ThreadPoolExecutor | None = None
@@ -27,8 +23,10 @@ POOL_THREADS: int = 0
 
 def create_thread_pool(count: int) -> None:
     global POOL, POOL_THREADS
-    assert isinstance(count, int)
-    assert count > 0
+
+    if not isinstance(count, int) or count <= 0:
+        msg = 'Thread count must be a positive integer'
+        raise ValueError(msg)
 
     default_logger.debug(f'Starting thread pool with {count:d} threads!')
 
@@ -94,15 +92,11 @@ class PoolFunc(ContextProvidingObj):
                 parent.log.warning(f'Starting of {parent.name} took too long: {self.dur_start:.2f}s. '
                                    f'Maybe there are not enough threads?')
 
-            # start profiler
-            pr = Profile()
-            pr.enable()
+            # Profiler does not work
+            # https://github.com/python/cpython/issues/124656
 
             # Execute the function
             ret = self.func_obj(*self.func_args, **self.func_kwargs)
-
-            # disable profiler
-            pr.disable()
 
             # log warning if execution takes too long
             self.dur_run = monotonic() - ts_start
@@ -110,14 +104,6 @@ class PoolFunc(ContextProvidingObj):
             if parent.warn_too_long and self.dur_run > 0.8 and self.usage_high >= POOL_THREADS * 0.6:
                 parent.log.warning(f'{self.usage_high}/{POOL_THREADS} threads have been in use and '
                                    f'execution of {parent.name} took too long: {self.dur_run:.2f}s')
-
-                s = io.StringIO()
-                ps = Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
-                ps.print_stats(0.1)  # limit to output to 10% of the lines
-
-                for line in s.getvalue().splitlines()[4:]:  # skip the amount of calls and "Ordered by:"
-                    if line:
-                        parent.log.warning(line)
 
         except Exception as e:
             self.parent.process_exception(e, *self.func_args, **self.func_kwargs)
@@ -132,15 +118,15 @@ class PoolFunc(ContextProvidingObj):
 class WrappedThreadFunction(WrappedFunctionBase[P, R]):
 
     def __init__(self, func: Callable[P, R],
-                 warn_too_long=True,
+                 warn_too_long: bool = True,
                  name: str | None = None,
                  logger: logging.Logger | None = None,
                  context: Context | None = None) -> None:
 
         super().__init__(name=name, func=func, logger=logger, context=context)
 
-        self.func = func
-        self.warn_too_long: bool = warn_too_long
+        self.func: Final = func
+        self.warn_too_long: Final = warn_too_long
 
     @override
     def run(self, *args: P.args, **kwargs: P.kwargs) -> None:
@@ -152,10 +138,5 @@ class WrappedThreadFunction(WrappedFunctionBase[P, R]):
     @override
     async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
 
-        token = async_context.set('WrappedThreadFunction')
-
         pool_func = PoolFunc(self, self.func, args, kwargs, context=self._habapp_ctx)
-        ret = await loop.run_in_executor(POOL, pool_func.run)
-
-        async_context.reset(token)
-        return ret
+        return await loop.run_in_executor(POOL, pool_func.run)
