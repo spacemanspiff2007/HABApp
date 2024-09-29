@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 import warnings
 from collections.abc import Callable, Hashable, Iterable, Mapping
+from datetime import datetime as dt_datetime
 from typing import TYPE_CHECKING, Any, Final, TypeAlias
 
 from eascheduler.builder import FilterBuilder, JobBuilder, TriggerBuilder
@@ -179,6 +180,10 @@ class HABAppJobBuilder:
             'self.run.on_day_of_week is deprecated. Use self.run.at in combination with a trigger and a filter',
             DeprecationWarning, stacklevel=2
         )
+
+        if isinstance(time, dt_datetime):
+            time = time.time()
+
         return self.at(
             TriggerBuilder.time(time).only_at(FilterBuilder.weekdays(weekdays)),
             callback, *args, **kwargs
@@ -190,6 +195,10 @@ class HABAppJobBuilder:
             'self.run.on_every_day is deprecated. Use self.run.at in combination with a trigger',
             DeprecationWarning, stacklevel=2
         )
+
+        if isinstance(time, dt_datetime):
+            time = time.time()
+
         return self.at(
             TriggerBuilder.time(time),
             callback, *args, **kwargs
