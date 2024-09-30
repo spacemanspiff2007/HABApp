@@ -3,7 +3,7 @@ import logging
 import pprint
 from types import TracebackType
 
-from pytest import MonkeyPatch
+from pytest import MonkeyPatch  # noqa: PT013
 
 import HABApp.openhab.connection.handler
 import HABApp.openhab.connection.handler.func_async
@@ -11,7 +11,7 @@ import HABApp.openhab.process_events
 from HABApp.config import CONFIG
 
 
-def shorten_url(url: str):
+def shorten_url(url: str) -> str:
     url = str(url)
     cfg = CONFIG.openhab.connection.url
     if url.startswith(cfg):

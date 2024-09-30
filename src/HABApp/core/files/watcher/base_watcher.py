@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from watchdog.events import EVENT_TYPE_CLOSED as WD_EVENT_TYPE_CLOSED
+from watchdog.events import EVENT_TYPE_CLOSED_NO_WRITE as WD_EVENT_TYPE_CLOSED_NO_WRITE
 from watchdog.events import EVENT_TYPE_OPENED as WD_EVENT_TYPE_OPENED
 from watchdog.events import FileSystemEvent
 
@@ -44,7 +45,7 @@ class FileSystemEventHandler:
             return None
 
         # we don't process open and close events
-        if (e_type := event.event_type) == WD_EVENT_TYPE_OPENED or e_type == WD_EVENT_TYPE_CLOSED:
+        if event.event_type in (WD_EVENT_TYPE_OPENED, WD_EVENT_TYPE_CLOSED, WD_EVENT_TYPE_CLOSED_NO_WRITE):
             return None
 
         src = event.src_path
