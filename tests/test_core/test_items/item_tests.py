@@ -1,8 +1,10 @@
+import time
 
 from whenever import Instant, patch_current_time
 
 from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
+from HABApp.core.items.base_valueitem import datetime
 
 
 class ItemTests:
@@ -68,6 +70,29 @@ class ItemTests:
                 item.set_value(value)
                 assert item._last_update.instant == instant
                 assert item._last_change.instant == instant
+
+    def test_time_funcs(self):
+        item = self.get_item()
+        now1 = datetime.now()
+        time.sleep(0.000_001)
+
+        item.set_value(self.ITEM_VALUES[0])
+
+        # https://github.com/ariebovenberg/whenever/issues/171
+        time.sleep(0.000_001)
+        now2 = datetime.now()
+        time.sleep(0.000_001)
+
+        assert now1 < item.last_change < now2, f'\n{now1}\n{item.last_change}\n{now2}'
+        assert now1 < item.last_update
+
+        item.set_value(self.ITEM_VALUES[0])
+
+        time.sleep(0.000_001)
+        now3 = datetime.now()
+
+        assert now1 < item.last_change < now2
+        assert now2 < item.last_update < now3
 
     def test_post_if(self) -> None:
         i = self.get_item()

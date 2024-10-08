@@ -196,6 +196,73 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero'''
 
 
+def func_ir():
+
+    from HABApp.core.items import Item
+    Items = HABApp.core.Items
+
+    Items.add_item(Item('asdf'))
+    Items.get_item('1234')
+
+
+@pytest.fixture
+def _setup_ir(clean_objs, monkeypatch, ir, eb):
+
+    from HABApp.core.internals.proxy import ConstProxyObj
+    assert isinstance(HABApp.core.Items, ConstProxyObj)
+    assert isinstance(HABApp.core.EventBus, ConstProxyObj)
+
+    monkeypatch.setattr(HABApp.core, 'Items', ir)
+    monkeypatch.setattr(HABApp.core, 'EventBus', eb)
+
+    yield
+
+
+def test_skip_objs(_setup_ir):
+    log.setLevel(logging.WARNING)
+    msg = exec_func(func_ir)
+    assert msg == r'''
+File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+--------------------------------------------------------------------------------
+     19 | def exec_func(func) -> str:
+     20 |     try:
+-->  21 |         func()
+     22 |     except Exception as e:
+   ------------------------------------------------------------
+     e = ItemNotFoundException('Item 1234 does not exist!')
+     func = <function func_ir at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "test_core/test_lib/test_format_traceback.py", line 205 in func_ir
+--------------------------------------------------------------------------------
+     199 | def func_ir():
+     201 |     from HABApp.core.items import Item
+     202 |     Items = HABApp.core.Items
+     204 |     Items.add_item(Item('asdf'))
+-->  205 |     Items.get_item('1234')
+
+File "internals/item_registry/item_registry.py", line 30 in get_item
+--------------------------------------------------------------------------------
+     26 | def get_item(self, name: str) -> ItemRegistryItem:
+     27 |     try:
+     28 |         return self._items[name]
+     29 |     except KeyError:
+-->  30 |         raise ItemNotFoundException(name) from None
+   ------------------------------------------------------------
+     name = '1234'
+   ------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+    func()
+  File "test_core/test_lib/test_format_traceback.py", line 205, in func_ir
+    Items.get_item('1234')
+  File "internals/item_registry/item_registry.py", line 30, in get_item
+    raise ItemNotFoundException(name) from None
+HABApp.core.errors.ItemNotFoundException: Item 1234 does not exist!'''
+
+
 def test_habapp_regex(pytestconfig):
 
     files = tuple(str(f) for f in (Path(pytestconfig.rootpath) / 'src' / 'HABApp').glob('**/*'))

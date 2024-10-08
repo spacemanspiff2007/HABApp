@@ -47,7 +47,7 @@ class TestPersistenceBase(TestBaseRule):
 class TestRRD4j(TestPersistenceBase):
 
     def __init__(self) -> None:
-        super().__init__('rrd4j', 'RRD4J_Item')
+        super().__init__('rrd4j', 'RRD4jItem')
         self.add_test('RRD4J get', self.test_get)
 
     def test_get(self) -> None:
@@ -62,7 +62,7 @@ TestRRD4j()
 class TestMapDB(TestPersistenceBase):
 
     def __init__(self) -> None:
-        super().__init__('mapdb', 'RRD4J_Item')
+        super().__init__('mapdb', 'RRD4jItem')
         self.add_test('MapDB get', self.test_get)
 
     def test_get(self) -> None:
@@ -77,7 +77,7 @@ TestMapDB()
 class TestInMemory(TestPersistenceBase):
 
     def __init__(self) -> None:
-        super().__init__('inmemory', 'RRD4J_Item')
+        super().__init__('inmemory', 'InMemoryForecastItem')
 
         if Connections.get('openhab').context.version >= (4, 1):
             self.add_test('InMemory', self.test_in_memory)
@@ -85,17 +85,20 @@ class TestInMemory(TestPersistenceBase):
             print('Skip "TestInMemory" because of no InMemoryDb')
 
     def test_in_memory(self) -> None:
-        now = datetime.now().replace(microsecond=0)
-        t1 = now - timedelta(milliseconds=100)
-        t2 = now + timedelta(milliseconds=100)
+        now = datetime.now().replace(microsecond=0) + timedelta(seconds=1)
+        t1 = now + timedelta(milliseconds=100)
+        t2 = now + timedelta(milliseconds=200)
+        t3 = now + timedelta(milliseconds=300)
 
         self.set_persistence_data(t1, 5)
-        self.set_persistence_data(now, 6)
-        self.set_persistence_data(t2, 7)
-        value = self.get_persistence_data(now - timedelta(milliseconds=200), now + timedelta(milliseconds=200))
+        self.set_persistence_data(t2, 6)
+        self.set_persistence_data(t3, 7)
 
+        value = self.get_persistence_data(now - timedelta(milliseconds=1), t3 + timedelta(milliseconds=1))
         objs = value.get_data()
-        assert objs == {t1.timestamp(): 5, now.timestamp(): 6, t2.timestamp(): 7}
+
+        target = {t1.timestamp(): 5, t2.timestamp(): 6, t3.timestamp(): 7}
+        assert objs == target
 
 
 TestInMemory()

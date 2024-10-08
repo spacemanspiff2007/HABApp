@@ -3,11 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from HABApp.core.items import BaseValueItem
+from pydantic import BaseModel
+from whenever import Instant, LocalDateTime, OffsetDateTime, SystemDateTime, ZonedDateTime
+
 from HABApp.core.types import HSB, RGB
 
 
-def convert_to_oh_type(obj: Any, scientific_floats=False) -> str:
+def convert_to_oh_type(obj: Any, scientific_floats: bool = False) -> str:
     if isinstance(obj, (str, int, bool)):
         return str(obj)
 
@@ -25,11 +27,7 @@ def convert_to_oh_type(obj: Any, scientific_floats=False) -> str:
     if isinstance(obj, datetime):
         # Add timezone (if not yet defined) to string, then remote anything below ms.
         # 2018-11-19T09:47:38.284000+0100 -> 2018-11-19T09:47:38.284+0100
-        out = obj.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
-        return out
-
-    if isinstance(obj, (set, list, tuple, frozenset)):
-        return ','.join(map(str, obj))
+        return obj.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 
     if obj is None:
         return 'NULL'
@@ -41,13 +39,20 @@ def convert_to_oh_type(obj: Any, scientific_floats=False) -> str:
         # noinspection PyProtectedMember
         return f'{obj._hue:.2f},{obj._saturation:.2f},{obj._brightness:.2f}'
 
-    if isinstance(obj, BaseValueItem):
-        raise ValueError()
+    # https://whenever.readthedocs.io/en/latest/overview.html#iso-8601
+    if isinstance(obj, (Instant, LocalDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
+        return obj.format_common_iso()
 
-    return str(obj)
+    if isinstance(obj, (list, tuple, set, frozenset)):
+        return ','.join(convert_to_oh_type(x, scientific_floats=scientific_floats) for x in obj)
+
+    if isinstance(obj, BaseModel):
+        return obj.model_dump_json()
+
+    raise ValueError()
 
 
 def map_null_str(value: str) -> str | None:
-    if value == 'NULL' or value == 'UNDEF':
+    if value in ('NULL', 'UNDEF'):
         return None
     return value

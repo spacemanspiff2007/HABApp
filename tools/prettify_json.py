@@ -9,7 +9,7 @@ INCLUDE_CHANNELS = False
 to_prettify = ''
 
 
-def load_str(in_str):
+def load_str(in_str: str) -> str:
     if not isinstance(in_str, str):
         return in_str
 
@@ -18,8 +18,8 @@ def load_str(in_str):
     return in_str
 
 
-def load_obj(obj):
-    new_obj = load_str(obj)
+def load_obj(obj_str: str) -> object:
+    new_obj = load_str(obj_str)
     if isinstance(new_obj, list):
         for i, obj in enumerate(new_obj):
             new_obj[i] = load_obj(obj)

@@ -3,6 +3,7 @@ from typing import TypeVar
 
 from whenever import Instant
 
+from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.internals import (
     HINT_EVENT_BUS_LISTENER,
     HINT_EVENT_FILTER_OBJ,
@@ -13,7 +14,6 @@ from HABApp.core.internals import (
 from HABApp.core.internals.item_registry import ItemRegistryItem
 from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
 
-from ..const.hints import TYPE_EVENT_CALLBACK
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
 from .tmp_data import add_tmp_data as _add_tmp_data
 from .tmp_data import restore_tmp_data as _restore_tmp_data
@@ -50,14 +50,14 @@ class BaseItem(ItemRegistryItem):
         """
         :return: Timestamp of the last time when the item has been changed (read only)
         """
-        return self._last_change.instant.py_datetime()
+        return self._last_change.instant.to_system_tz().local().py_datetime()
 
     @property
     def last_update(self) -> dt_datetime:
         """
         :return: Timestamp of the last time when the item has been updated (read only)
         """
-        return self._last_update.instant.py_datetime()
+        return self._last_update.instant.to_system_tz().local().py_datetime()
 
     def __repr__(self) -> str:
         ret = ''

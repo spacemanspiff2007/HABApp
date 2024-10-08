@@ -1,13 +1,15 @@
 import asyncio
+from datetime import datetime
 
 from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
 from immutables import Map
+from whenever import Instant, OffsetDateTime, SystemDateTime
 
 from HABApp.core.const import loop
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.interface_async import async_get_items
-from HABApp.openhab.items import ColorItem, GroupItem, NumberItem, StringItem
+from HABApp.openhab.items import ColorItem, DatetimeItem, GroupItem, NumberItem, StringItem
 
 
 class OpenhabItems(TestBaseRule):
@@ -22,6 +24,7 @@ class OpenhabItems(TestBaseRule):
         self.add_test('TestColor', self.test_color)
         self.add_test('TestGroupFunction', self.test_group_func)
         self.add_test('TestSmallValues', self.test_small_float_values)
+        self.add_test('TestDateTimeValues', self.test_datetime_values)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -155,6 +158,20 @@ class OpenhabItems(TestBaseRule):
                 item.oh_send_command(cmd)
                 waiter.wait_for_state(tuple(target))
                 waiter.wait_for_attribs(hue=target[0], saturation=target[1], brightness=target[2])
+
+    @OpenhabTmpItem.create('DateTime', arg_name='tmp_item')
+    def test_datetime_values(self, tmp_item: OpenhabTmpItem) -> None:
+        item = DatetimeItem.get_item(tmp_item.name)
+
+        dt_system: SystemDateTime = SystemDateTime.now()
+        dt_instant: Instant = dt_system.instant()
+        dt_zoned: OffsetDateTime = dt_system.to_fixed_offset()
+        dt_datetime: datetime = dt_system.py_datetime()
+
+        for value in (dt_system, dt_instant, dt_zoned):
+            with ItemWaiter(item) as waiter:
+                item.oh_post_update(value)
+                waiter.wait_for_state(dt_datetime)
 
 
 OpenhabItems()

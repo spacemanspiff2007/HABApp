@@ -32,7 +32,8 @@ class OnOffCommand:
 class PercentCommand:
     def percent(self: _HasNameAttr, value: float) -> None:
         """Command to value (in percent)"""
-        assert 0 <= value <= 100, value
+        if not 0 <= value <= 100:  # noqa: PLR2004
+            raise ValueError()
         send_command(self.name, str(value))
 
 

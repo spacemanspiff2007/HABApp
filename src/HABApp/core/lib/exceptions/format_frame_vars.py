@@ -1,9 +1,10 @@
 import ast
 import datetime
+import importlib
 from collections.abc import Callable
 from inspect import isclass, ismodule
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from easyconfig.config_objs import ConfigObj
 from immutables import Map
@@ -48,6 +49,20 @@ def _filter_expressions(name: str, value: Any) -> bool:
     return False
 
 
+SKIPPED_OBJS: Final = (
+    'HABApp.core.Items',
+)
+
+
+def _skip_objs(name: str, value: Any) -> bool:
+    for dotted_path in SKIPPED_OBJS:
+        path = dotted_path.split('.')
+        obj = importlib.import_module('.'.join(path[:-1]))
+        if value is getattr(obj, path[-1]):
+            return True
+    return False
+
+
 SKIP_VARIABLE: tuple[Callable[[str, Any], bool], ...] = (
     # module imports
     lambda name, value: ismodule(value),
@@ -62,7 +77,7 @@ SKIP_VARIABLE: tuple[Callable[[str, Any], bool], ...] = (
     lambda name, value: isinstance(value, ConfigObj),
 
     # Expressions
-    _filter_expressions
+    _filter_expressions,
 )
 
 ORDER_VARIABLE: tuple[Callable[[Variable], bool], ...] = (
@@ -73,10 +88,7 @@ ORDER_VARIABLE: tuple[Callable[[Variable], bool], ...] = (
 def skip_variable(var: Variable) -> bool:
     name = var.name
     value = var.value
-    for func in SKIP_VARIABLE:
-        if func(name, value):
-            return True
-    return False
+    return any(func(name, value) for func in SKIP_VARIABLE)
 
 
 def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
@@ -84,7 +96,12 @@ def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
         return None
 
     # remove variables that shall not be printed
-    used_vars: list[Variable] = [v for v in stack_variables if not skip_variable(v)]
+    used_vars: set[Variable] = {v for v in stack_variables if not skip_variable(v)}
+
+    # remove objs and attributes
+    rem_obj_names = {v.name for v in used_vars if _skip_objs(v.name, v.value)}
+    rem_objs = {v for v in used_vars for rem_name in rem_obj_names if v.name.startswith(rem_name)}
+    used_vars -= rem_objs
 
     # attributes
     dotted_names: set[str] = {n.name.split('.')[0] for n in used_vars if '.' in n.name}

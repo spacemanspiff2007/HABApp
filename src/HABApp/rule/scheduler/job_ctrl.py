@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Final
 
 from eascheduler.job_control.base import BaseControl
 from typing_extensions import Self, override
+from whenever import Instant
 
 from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.internals import uses_item_registry
@@ -14,6 +15,7 @@ from HABApp.openhab.items import OpenhabItem
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_datetime
+    from datetime import timedelta as dt_timedelta
 
     from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
     from eascheduler.jobs.base import JobBase
@@ -72,6 +74,17 @@ class HABAppBaseControl(BaseControl):
             DeprecationWarning, stacklevel=2
         )
         return self.next_run_datetime
+
+    def remaining(self) -> dt_timedelta | None:
+
+        warnings.warn(
+            'job.remaining() is deprecated. Use job.next_run_datetime to get the next execution time or None or'
+            ' job.status to see if the job is running or not',
+            DeprecationWarning, stacklevel=2
+        )
+        if (nr := self._job.next_run) is None:
+            return None
+        return (Instant.now() - nr).py_timedelta()
 
 
 class CountdownJobControl(HABAppBaseControl):
