@@ -2,21 +2,22 @@ from __future__ import annotations
 
 import logging
 import threading
-from typing import TypeVar
+from typing import Final, TypeVar
 
 from HABApp.core.errors import ItemAlreadyExistsError, ItemNotFoundException
 from HABApp.core.internals.item_registry import ItemRegistryItem
 
 
-_HINT_ITEM_OBJ = TypeVar('_HINT_ITEM_OBJ', bound=ItemRegistryItem)
+ITEM_TYPE = TypeVar('ITEM_TYPE', bound=ItemRegistryItem)
 
 log = logging.getLogger('HABApp.Items')
 
 
+# noinspection PyProtectedMember
 class ItemRegistry:
     def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._items: dict[str, ItemRegistryItem] = {}
+        self._items: Final[dict[str, ItemRegistryItem]] = {}
 
     def item_exists(self, name: str | ItemRegistryItem) -> bool:
         if not isinstance(name, str):
@@ -35,8 +36,11 @@ class ItemRegistry:
     def get_item_names(self) -> tuple[str, ...]:
         return tuple(self._items.keys())
 
-    def add_item(self, item: _HINT_ITEM_OBJ) -> _HINT_ITEM_OBJ:
-        assert isinstance(item, ItemRegistryItem)
+    def add_item(self, item: ITEM_TYPE) -> ITEM_TYPE:
+        if not isinstance(item, ItemRegistryItem):
+            msg = f'Item must be of type {ItemRegistryItem.__name__} not {type(item)}'
+            raise TypeError(msg)
+
         name = item.name
 
         with self._lock:
@@ -55,7 +59,7 @@ class ItemRegistry:
         item._on_item_added()
         return item
 
-    def pop_item(self, name: str | _HINT_ITEM_OBJ) -> _HINT_ITEM_OBJ:
+    def pop_item(self, name: str | ITEM_TYPE) -> ITEM_TYPE:
         if not isinstance(name, str):
             name = name.name
 

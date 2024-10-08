@@ -166,7 +166,7 @@ class OpenhabItems(TestBaseRule):
         dt_system: SystemDateTime = SystemDateTime.now()
         dt_instant: Instant = dt_system.instant()
         dt_zoned: OffsetDateTime = dt_system.to_fixed_offset()
-        dt_datetime: datetime = dt_system.py_datetime()
+        dt_datetime: datetime = dt_system.local().py_datetime()
 
         for value in (dt_system, dt_instant, dt_zoned):
             with ItemWaiter(item) as waiter:
