@@ -9,6 +9,7 @@ from immutables import Map
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
+from HABApp.core.lib import InstantView
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import map_null_str
 from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
@@ -99,7 +100,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         log.info(f'Updated {items_len:d} Items')
 
-        created_items: dict[str, tuple[OpenhabItem, datetime]] = {
+        created_items: dict[str, tuple[OpenhabItem, InstantView]] = {
             i.name: (i, i.last_update) for i in Items.get_items() if isinstance(i, OpenhabItem)
         }
         context.created_items.update(created_items)

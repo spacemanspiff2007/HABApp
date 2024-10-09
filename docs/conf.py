@@ -123,7 +123,6 @@ html_theme_options = {
     'canonical_url': '',
     # 'analytics_id': 'UA-XXXXXXX-1',  # Provided by Google in your dashboard
     'logo_only': False,
-    'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
     # 'vcs_pageview_mode': '',
@@ -338,7 +337,8 @@ def setup(app) -> None:
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
 if IS_RTD_BUILD:
     intersphinx_mapping = {
-        'python': ('https://docs.python.org/3', None)
+        'python': ('https://docs.python.org/3', None),
+        'whenever': ('https://whenever.readthedocs.io/en/stable', None)
     }
 
 # Don't show warnings for missing python references since these are created via intersphinx during the RTD build

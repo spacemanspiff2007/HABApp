@@ -12,6 +12,7 @@ from HABApp.core.internals import (
     uses_item_registry,
 )
 from HABApp.core.internals.item_registry import ItemRegistryItem
+from HABApp.core.lib import InstantView
 from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
 
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
@@ -46,18 +47,18 @@ class BaseItem(ItemRegistryItem):
         self._last_update: UpdatedTime = UpdatedTime(self._name, _now)
 
     @property
-    def last_change(self) -> dt_datetime:
+    def last_change(self) -> InstantView:
         """
         :return: Timestamp of the last time when the item has been changed (read only)
         """
-        return self._last_change.instant.to_system_tz().local().py_datetime()
+        return InstantView(self._last_change.instant)
 
     @property
-    def last_update(self) -> dt_datetime:
+    def last_update(self) -> InstantView:
         """
         :return: Timestamp of the last time when the item has been updated (read only)
         """
-        return self._last_update.instant.to_system_tz().local().py_datetime()
+        return InstantView(self._last_update.instant)
 
     def __repr__(self) -> str:
         ret = ''

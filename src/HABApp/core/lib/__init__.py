@@ -7,3 +7,4 @@ from .exceptions import format_exception, HINT_EXCEPTION
 from .priority_list import PriorityList
 from .timeout import Timeout, TimeoutNotRunningError
 from .value_change import ValueChange
+from .instant_view import InstantView

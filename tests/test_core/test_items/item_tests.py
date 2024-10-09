@@ -73,23 +73,23 @@ class ItemTests:
 
     def test_time_funcs(self):
         item = self.get_item()
-        now1 = datetime.now()
+
+        now1 = Instant.now()
         time.sleep(0.000_001)
 
         item.set_value(self.ITEM_VALUES[0])
 
-        # https://github.com/ariebovenberg/whenever/issues/171
         time.sleep(0.000_001)
-        now2 = datetime.now()
+        now2 = Instant.now()
         time.sleep(0.000_001)
 
         assert now1 < item.last_change < now2, f'\n{now1}\n{item.last_change}\n{now2}'
-        assert now1 < item.last_update
+        assert now1 < item.last_update < now2, f'\n{now1}\n{item.last_update}\n{now2}'
 
         item.set_value(self.ITEM_VALUES[0])
 
         time.sleep(0.000_001)
-        now3 = datetime.now()
+        now3 = Instant.now()
 
         assert now1 < item.last_change < now2
         assert now2 < item.last_update < now3

@@ -24,3 +24,13 @@ ItemNoChangeWatch
    :members:
    :inherited-members:
    :member-order: groupwise
+
+
+
+InstantView
+======================================
+
+.. autoclass:: HABApp.core.lib.InstantView
+   :members:
+   :inherited-members:
+   :member-order: groupwise

@@ -8,7 +8,7 @@ import aiohttp
 import HABApp
 from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
 from HABApp.core.items.base_valueitem import datetime
-
+from HABApp.core.lib import InstantView
 
 if TYPE_CHECKING:
     from HABApp.openhab.items import OpenhabItem, Thing
@@ -23,8 +23,8 @@ class OpenhabContext:
     # true when we waited during connect
     waited_for_openhab: bool
 
-    created_items: dict[str, tuple[OpenhabItem, datetime]]
-    created_things: dict[str, tuple[Thing, datetime]]
+    created_items: dict[str, tuple[OpenhabItem, InstantView]]
+    created_things: dict[str, tuple[Thing, InstantView]]
 
     session: aiohttp.ClientSession
     session_options: dict[str, Any]
