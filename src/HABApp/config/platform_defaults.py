@@ -12,5 +12,5 @@ def get_log_folder(default: Path | None = None) -> Path | None:
     return default
 
 
-def is_openhabian():
+def is_openhabian() -> bool:
     return Path('/opt/openhabian').is_dir()

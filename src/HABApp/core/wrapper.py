@@ -9,8 +9,7 @@ from logging import Logger
 from sys import _getframe as sys_get_frame
 from types import TracebackType
 
-from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
-from HABApp.core.const.topics import TOPIC_WARNINGS as TOPIC_WARNINGS
+from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import uses_post_event
 from HABApp.core.lib import format_exception

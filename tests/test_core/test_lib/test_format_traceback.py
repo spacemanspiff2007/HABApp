@@ -241,13 +241,13 @@ File "test_core/test_lib/test_format_traceback.py", line 205 in func_ir
      204 |     Items.add_item(Item('asdf'))
 -->  205 |     Items.get_item('1234')
 
-File "internals/item_registry/item_registry.py", line 30 in get_item
+File "internals/item_registry/item_registry.py", line 31 in get_item
 --------------------------------------------------------------------------------
-     26 | def get_item(self, name: str) -> ItemRegistryItem:
-     27 |     try:
-     28 |         return self._items[name]
-     29 |     except KeyError:
--->  30 |         raise ItemNotFoundException(name) from None
+     27 | def get_item(self, name: str) -> ItemRegistryItem:
+     28 |     try:
+     29 |         return self._items[name]
+     30 |     except KeyError:
+-->  31 |         raise ItemNotFoundException(name) from None
    ------------------------------------------------------------
      name = '1234'
    ------------------------------------------------------------
@@ -258,7 +258,7 @@ Traceback (most recent call last):
     func()
   File "test_core/test_lib/test_format_traceback.py", line 205, in func_ir
     Items.get_item('1234')
-  File "internals/item_registry/item_registry.py", line 30, in get_item
+  File "internals/item_registry/item_registry.py", line 31, in get_item
     raise ItemNotFoundException(name) from None
 HABApp.core.errors.ItemNotFoundException: Item 1234 does not exist!'''
 

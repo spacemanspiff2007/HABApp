@@ -1,5 +1,7 @@
 import logging
-import typing
+from typing import Any
+
+from typing_extensions import Self
 
 from HABApp.core.const.topics import TOPIC_ERRORS as _T_ERRORS
 from HABApp.core.const.topics import TOPIC_INFOS as _T_INFOS
@@ -51,14 +53,14 @@ class HABAppLogger:
     _TOPIC: str
 
     def __init__(self, log: logging.Logger) -> None:
-        self.lines: typing.List[str] = []
+        self.lines: list[str] = []
         self.logger = log
 
-    def add(self, text: str, *args, **kwargs):
+    def add(self, text: str, *args: Any, **kwargs: Any) -> Self:
         self.lines.append(text.format(*args, **kwargs))
         return self
 
-    def add_exception(self, e: Exception, add_traceback: bool = False):
+    def add_exception(self, e: Exception, add_traceback: bool = False) -> Self:
         if not add_traceback:
             for line in str(e).splitlines():
                 self.lines.append(line)

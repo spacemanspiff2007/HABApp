@@ -62,15 +62,18 @@ async def config_files_changed(paths: list[Path]) -> None:
             load_logging_cfg(path)
 
 
-def load_habapp_cfg(do_print=False):
+def load_habapp_cfg(do_print=False) -> None:
+    def error(text: str) -> None:
+        if do_print:
+            print(text)
+        else:
+            log.error(text)
+
     try:
         CONFIG.load_config_file()
     except pydantic.ValidationError as e:
         for line in str(e).splitlines():
-            if do_print:
-                print(line)
-            else:
-                log.error(line)
+            error(line)
         raise InvalidConfigError from None
 
     # check if folders exist and print warnings, maybe because of missing permissions
@@ -81,6 +84,15 @@ def load_habapp_cfg(do_print=False):
 
     location = CONFIG.location
     eascheduler.set_location(location.latitude, location.longitude, location.elevation)
+
+    if not location.country:
+        log.warning('No country is set in the config file. Holidays will not be available.')
+    else:
+        try:
+            eascheduler.setup_holidays(location.country, location.subdivision if location.subdivision else None)
+        except Exception as e:
+            for line in str(e).splitlines():
+                error(line)
 
     log.debug('Loaded HABApp config')
 
