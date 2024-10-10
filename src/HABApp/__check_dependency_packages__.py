@@ -29,7 +29,7 @@ def get_dependencies() -> list[str]:
     ]
 
 
-def check_dependency_packages():
+def check_dependency_packages() -> None:
     """Imports all dependencies and reports failures"""
 
     missing: dict[str, ModuleNotFoundError] = {}

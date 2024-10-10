@@ -20,18 +20,32 @@ def test_repr(sync_worker) -> None:
 
 
 def test_str_event(sync_worker) -> None:
-    event_history = []
+    """Test simple event and add/remove"""
+    event_history1 = []
+    event_history2 = []
     eb = EventBus()
 
     def append_event(event) -> None:
-        event_history.append(event)
-    func = wrap_func(append_event)
+        event_history1.append(event)
+    func1 = wrap_func(append_event)
 
-    listener = EventBusListener('str_test', func, NoEventFilter())
-    eb.add_listener(listener)
+    def append_event2(event) -> None:
+        event_history2.append(event)
+    func2 = wrap_func(append_event2)
+
+    listener1 = EventBusListener('str_test', func1, NoEventFilter())
+    eb.add_listener(listener1)
+    listener2 = EventBusListener('str_test', func2, NoEventFilter())
+    eb.add_listener(listener2)
 
     eb.post_event('str_test', 'str_event')
-    assert event_history == ['str_event']
+    assert event_history1 == ['str_event']
+    assert event_history2 == ['str_event']
+
+    eb.remove_listener(listener1)
+    eb.post_event('str_test', 'str_event_2')
+    assert event_history1 == ['str_event']
+    assert event_history2 == ['str_event', 'str_event_2']
 
 
 def test_multiple_events(sync_worker) -> None:

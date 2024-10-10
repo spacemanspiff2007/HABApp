@@ -1,6 +1,6 @@
 import logging
 import threading
-from typing import Any, TypeVar
+from typing import Any
 
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.events import ComplexEventValue, ValueChangeEvent
@@ -11,15 +11,15 @@ from .base_listener import EventBusBaseListener
 event_log = logging.getLogger(TOPIC_EVENTS)
 habapp_log = logging.getLogger('HABApp')
 
-_TYPE_LISTENER = TypeVar('_TYPE_LISTENER', bound=EventBusBaseListener)
-
 
 class EventBus:
+    __slots__ = ('_lock', '_listeners')
+
     def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._listeners: dict[str, list[EventBusBaseListener]] = {}
+        self._listeners: dict[str, tuple[EventBusBaseListener, ...]] = {}
 
-    def post_event(self, topic: str, event: Any):
+    def post_event(self, topic: str, event: Any) -> None:
         assert isinstance(topic, str), type(topic)
 
         if not isinstance(event, str):
@@ -42,18 +42,21 @@ class EventBus:
             pass
 
         # Notify all listeners
-        listeners = self._listeners.get(topic, None)
-        if listeners is not None:
+        if (listeners := self._listeners.get(topic, None)) is not None:
             for listener in listeners:
                 listener.notify_listeners(event)
         return None
 
-    def add_listener(self, listener: _TYPE_LISTENER):
-        assert isinstance(listener, EventBusBaseListener)
-        assert isinstance(listener.topic, str) and listener.topic
+    def add_listener(self, listener: EventBusBaseListener) -> None:
+        if not isinstance(listener, EventBusBaseListener):
+            raise TypeError()
+        if not isinstance(topic := listener.topic, str):
+            raise TypeError()
+        if not topic:
+            raise ValueError()
 
         with self._lock:
-            item_listeners = self._listeners.setdefault(listener.topic, [])
+            item_listeners = self._listeners.get(topic, ())
 
             # don't add the same listener twice
             if listener in item_listeners:
@@ -61,16 +64,20 @@ class EventBus:
                 return None
 
             # add listener
-            item_listeners.append(listener)
+            self._listeners[topic] = item_listeners + (listener,)
             habapp_log.debug(f'Added event listener for {listener.describe()}')
             return None
 
-    def remove_listener(self, listener: _TYPE_LISTENER):
-        assert isinstance(listener, EventBusBaseListener)
-        assert isinstance(listener.topic, str) and listener.topic
+    def remove_listener(self, listener: EventBusBaseListener) -> None:
+        if not isinstance(listener, EventBusBaseListener):
+            raise TypeError()
+        if not isinstance(topic := listener.topic, str):
+            raise TypeError()
+        if not topic:
+            raise ValueError()
 
         with self._lock:
-            item_listeners = self._listeners.get(listener.topic, [])
+            item_listeners = self._listeners.get(listener.topic, ())
 
             # print warning if we try to remove it twice
             if listener not in item_listeners:
@@ -78,7 +85,7 @@ class EventBus:
                 return None
 
             # remove listener
-            item_listeners.remove(listener)
+            self._listeners[topic] = tuple(o for o in item_listeners if o is not listener)
             habapp_log.debug(f'Removed event listener for {listener.describe()}')
             return None
 

@@ -58,6 +58,9 @@ ignore = [
 
     # https://docs.astral.sh/ruff/rules/#refactor-r
     "PLR1711",  # Useless return statement at end of function
+
+    # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+    "RUF005",  # Consider {expression} instead of concatenation
 ]
 
 
