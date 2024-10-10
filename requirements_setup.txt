@@ -9,7 +9,7 @@ aiomqtt     == 2.3.0
 # eascheduler ==
 git+https://github.com/spacemanspiff2007/eascheduler.git@rework
 
-immutables  == 0.20
+immutables  == 0.21
 easyconfig  == 0.3.2
 stack_data  == 0.6.3
 colorama    == 0.4.6

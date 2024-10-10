@@ -17,25 +17,30 @@ def view():
 
 
 def test_methods(view: InstantView):
-    assert view < seconds(1)
-    assert not view < seconds(60)
-    assert view <= seconds(60)
-
-    assert view > seconds(61)
+    assert view > seconds(59)
     assert not view > seconds(60)
     assert view >= seconds(60)
 
+    assert view < seconds(61)
+    assert not view < seconds(60)
+    assert view <= seconds(60)
+
 
 def test_cmp_obj(view: InstantView):
-    assert view < TimeDelta(seconds=59)
-    assert view < dt_timedelta(seconds=59)
-    assert view < 'PT59S'
-    assert view < 59
+    assert view > TimeDelta(seconds=59)
+    assert view > dt_timedelta(seconds=59)
+    assert view > 'PT59S'
+    assert view > 59
 
 
 def test_cmp_funcs(view: InstantView):
     assert view.older_than(seconds=59)
+    assert view > 59
+    assert view >= 60
+
     assert view.newer_than(seconds=61)
+    assert view < 61
+    assert view <= 60
 
 
 def test_delta_funcs(view: InstantView):
@@ -51,4 +56,5 @@ def test_convert():
 
 def test_repr():
     view = InstantView(SystemDateTime(2021, 1, 2, 10, 11, 12).instant())
-    assert str(view) == 'InstantView(2021-01-02T10:11:12+01:00)'
+    # Cut the timezone away because we don't know where the test is running
+    assert str(view)[:-6] == 'InstantView(2021-01-02T10:11:12+'

@@ -90,16 +90,16 @@ class InstantView:
         return self._cmp(gt, obj, **kwargs)
 
     def __lt__(self, other: HINT_OBJ) -> bool:
-        return self._cmp(lt, other)
-
-    def __le__(self, other: HINT_OBJ) -> bool:
-        return self._cmp(le, other)
-
-    def __gt__(self, other: HINT_OBJ) -> bool:
         return self._cmp(gt, other)
 
-    def __ge__(self, other: HINT_OBJ) -> bool:
+    def __le__(self, other: HINT_OBJ) -> bool:
         return self._cmp(ge, other)
+
+    def __gt__(self, other: HINT_OBJ) -> bool:
+        return self._cmp(lt, other)
+
+    def __ge__(self, other: HINT_OBJ) -> bool:
+        return self._cmp(le, other)
 
     def __eq__(self, other: InstantView | Instant) -> bool:
         if isinstance(other, InstantView):
