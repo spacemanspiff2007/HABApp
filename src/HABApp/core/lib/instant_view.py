@@ -60,7 +60,10 @@ class InstantView:
             case str():
                 td = TimeDelta.parse_common_iso(obj)
             case Instant():
-                return op(self._instant, obj)
+                # If the compare the instant the logic is the other way around
+                # view > delta(3)    -> view older than 3 seconds
+                # view > instant(-3) -> view newer than 3 seconds
+                return {ge: le, gt: lt, le: ge, lt: gt}[op](self._instant, obj)
             case _:
                 msg = f'Invalid type: {type(obj).__name__}'
                 raise TypeError(msg)
