@@ -4,6 +4,7 @@ from faulthandler import dump_traceback
 from pathlib import Path
 
 import HABApp
+from HABApp.config.logging import rotate_file
 from HABApp.core.asyncio import create_task
 from HABApp.core.items.base_valueitem import datetime
 
@@ -12,7 +13,7 @@ def _get_file_path(nr: int) -> Path:
     assert nr >= 0  # noqa: S101
     log_dir = HABApp.CONFIG.directories.logging
     ctr = f'.{nr}' if nr else ''
-    return log_dir / f'HABApp_traceback{ctr:s}.log'
+    return log_dir / f'HABApp_traceback.log{ctr:s}'
 
 
 def setup_debug() -> None:
@@ -23,17 +24,7 @@ def setup_debug() -> None:
     file = _get_file_path(0)
     logging.getLogger('HABApp').info(f'Dumping traceback to {file}')
 
-    # rotate files
-    keep = 3
-    _get_file_path(keep).unlink(missing_ok=True)
-    for i in range(keep - 1, -1, -1):
-        src = _get_file_path(i)
-        if not src.is_file():
-            continue
-
-        dst = _get_file_path(i + 1)
-        dst.unlink(missing_ok=True)
-        src.rename(dst)
+    rotate_file(file, 3)
 
     task = create_task(
         dump_traceback_task(

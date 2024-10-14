@@ -1,8 +1,10 @@
 import gzip
 import shutil
 from datetime import date, datetime
+from logging import LogRecord
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import override
 
 
 class MidnightRotatingFileHandler(RotatingFileHandler):
@@ -14,7 +16,8 @@ class MidnightRotatingFileHandler(RotatingFileHandler):
         super().__init__(*args, **kwargs)
         self.last_check: date = datetime.now().date()
 
-    def shouldRollover(self, record):
+    @override
+    def shouldRollover(self, record: LogRecord) -> int:
         date = datetime.now().date()
         if date == self.last_check:
             return 0

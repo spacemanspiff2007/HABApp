@@ -8,11 +8,11 @@ import pydantic
 import HABApp
 from HABApp import __version__
 from HABApp.config.config import CONFIG
-from HABApp.config.logging import HABAppQueueHandler
+from HABApp.config.logging import HABAppQueueHandler, load_logging_file
 
 from .debug import setup_debug
 from .errors import AbsolutePathExpected, InvalidConfigError
-from .logging import create_default_logfile, get_logging_dict, inject_log_buffer, rotate_files
+from .logging import create_default_logfile, get_logging_dict
 from .logging.buffered_logger import BufferedLogger
 
 
@@ -111,17 +111,16 @@ def stop_queue_handlers() -> None:
         qh.stop()
 
 
-def load_logging_cfg(path: Path):
+def load_logging_cfg(path: Path) -> None:
+    # If the logging file gets accidentally deleted we do nothing
+    if (logging_yaml := load_logging_file(path)) is None:
+        return None
+
     # stop buffered handlers
     stop_queue_handlers()
 
     buf_log = BufferedLogger()
-    cfg = get_logging_dict(path, buf_log)
-
-    if CONFIG.habapp.logging.use_buffer:
-        q_handlers = inject_log_buffer(cfg, buf_log)
-    else:
-        q_handlers = []
+    cfg, q_handlers = get_logging_dict(logging_yaml, buf_log)
 
     # load prepared logging
     try:
@@ -130,8 +129,6 @@ def load_logging_cfg(path: Path):
         print(f'Error loading logging config: {e}')
         log.error(f'Error loading logging config: {e}')
         raise InvalidConfigError from None
-
-    rotate_files()
 
     # start buffered handlers
     for qh in q_handlers:

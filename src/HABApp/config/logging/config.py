@@ -1,73 +1,44 @@
 import logging
 import logging.config
-from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 from queue import Queue
 from typing import Any
 
 from easyconfig.yaml import yaml_safe as _yaml_safe
 
-import HABApp
 from HABApp.config.config import CONFIG
 from HABApp.config.errors import AbsolutePathExpected
+from HABApp.config.logging import rotate_file
 from HABApp.core.const.const import PYTHON_312, PYTHON_313
+from HABApp.core.const.log import TOPIC_EVENTS
 
 from .buffered_logger import BufferedLogger
 from .queue_handler import HABAppQueueHandler, SimpleQueue
 
 
-def remove_memory_handler_from_cfg(cfg: dict, log: BufferedLogger) -> None:
-    # find memory handlers
-    m_handlers = {}
-    for handler, handler_cfg in cfg.get('handlers', {}).items():
-        if handler_cfg.get('class', '') == 'logging.handlers.MemoryHandler':
-            log.error(f'"logging.handlers.MemoryHandler" is no longer required. Please remove from config ({handler})!')
-            if 'target' in handler_cfg:
-                m_handlers[handler] = handler_cfg['target']
-
-    # remove them from config
-    for h_name in m_handlers:
-        cfg['handlers'].pop(h_name)
-        log.warning(f'Removed {h_name:s} from handlers')
-
-    # replace handlers in logger with target
-    for logger_name, logger_cfg in cfg.get('loggers', {}).items():
-        logger_handlers = logger_cfg.get('handlers', [])
-        for i, logger_handler in enumerate(logger_handlers):
-            replacement_handler = m_handlers.get(logger_handler)
-            if replacement_handler is None:
-                continue
-            log.warning(f'Replaced {logger_handler} with {replacement_handler} for logger {logger_name}')
-            logger_handlers[i] = replacement_handler
-
-
-def get_logging_dict(path: Path, log: BufferedLogger) -> dict | None:
-    # config gets created on startup - if it gets deleted we do nothing here
-    if not path.is_file():
-        return None
-
-    with path.open('r', encoding='utf-8') as file:
-        cfg: dict[str, Any] = _yaml_safe.load(file)
+def fix_old_logger_location(handlers_cfg: dict, log: BufferedLogger) -> None:
+    src = 'HABApp.core.lib.handler.MidnightRotatingFileHandler'
+    dst = 'HABApp.config.logging.MidnightRotatingFileHandler'
 
     # fix filenames
-    for handler, handler_cfg in cfg.get('handlers', {}).items():
+    for handler, cfg in handlers_cfg.items():
         # migrate handler
-        if handler_cfg.get('class', '-') == 'HABApp.core.lib.handler.MidnightRotatingFileHandler':
-            dst = 'HABApp.config.logging.MidnightRotatingFileHandler'
-            handler_cfg['class'] = dst
-            log.warning(f'Replaced class for handler "{handler:s}" with {dst}')
+        if cfg.get('class', '-') == src:
+            cfg['class'] = dst
+            log.warning(f'Replaced class for handler "{handler:s}" with {dst:s}')
 
-        if 'filename' not in handler_cfg:
+
+def fix_log_filenames(handlers_cfg: dict) -> None:
+    for cfg in handlers_cfg.values():
+        if (filename := cfg.get('filename')) is None:
             continue
 
         # fix encoding for FileHandlers - we always log utf-8
-        if 'file' in handler_cfg.get('class', '').lower():
-            enc = handler_cfg.get('encoding', '')
-            if enc != 'utf-8':
-                handler_cfg['encoding'] = 'utf-8'
+        if 'file' in cfg.get('class', '').lower() and cfg.get('encoding', '') != 'utf-8':
+            cfg['encoding'] = 'utf-8'
 
         # make Filenames absolute path in the log folder if not specified
-        p = Path(handler_cfg['filename'])
+        p = Path(filename)
         if not p.is_absolute():
             # Our log folder ist not yet converted to path -> it is not loaded
             if not CONFIG.directories.logging.is_absolute():
@@ -75,65 +46,72 @@ def get_logging_dict(path: Path, log: BufferedLogger) -> dict | None:
 
             # Use defined parent folder
             p = (CONFIG.directories.logging / p).resolve()
-            handler_cfg['filename'] = str(p)
+            cfg['filename'] = str(p)
 
-    # remove memory handlers
-    remove_memory_handler_from_cfg(cfg, log)
 
-    # make file version optional for config file
-    if 'version' not in cfg:
-        cfg['version'] = 1
-    else:
-        log.warning('Entry "version" is no longer required in the logging configuration file')
+def remove_memory_handler_from_cfg(handlers_cfg: dict, loggers_cfg: dict, log: BufferedLogger) -> None:
+    # find memory handlers
+    memory_targets = {}
+    for handler, handler_cfg in handlers_cfg.items():
+        if handler_cfg.get('class', '') == 'logging.handlers.MemoryHandler':
+            log.error(f'"logging.handlers.MemoryHandler" is no longer required. Please remove from config ({handler})!')
+            if 'target' in handler_cfg:
+                memory_targets[handler] = handler_cfg['target']
 
-    # Allow the user to set his own logging levels (with aliases)
-    for level, alias in cfg.pop('levels', {}).items():
-        if not isinstance(level, int):
-            level = logging._nameToLevel[level]
-        logging.addLevelName(level, str(alias))
-        log.debug(f'Added custom Level "{alias!s}" ({level})')
+    # remove them from config
+    for h_name in memory_targets:
+        handlers_cfg.pop(h_name)
+        log.warning(f'Removed {h_name:s} from handlers')
 
+    # replace handlers in logger with target
+    for logger_name, logger_cfg in loggers_cfg.items():
+        logger_handlers = logger_cfg.get('handlers', [])
+        for i, logger_handler in enumerate(logger_handlers):
+            if (replacement_handler := memory_targets.get(logger_handler)) is None:
+                continue
+            log.warning(f'Replaced {logger_handler} with {replacement_handler} for logger {logger_name}')
+            logger_handlers[i] = replacement_handler
+
+
+def load_logging_file(path: Path) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+
+    with path.open('r', encoding='utf-8') as file:
+        cfg: dict[str, Any] = _yaml_safe.load(file)
     return cfg
 
 
-def rotate_files() -> None:
-    for wr in logging._handlerList:
-        handler = wr()  # weakref -> call it to get object
+def rotate_handler_files(handlers_cfg: dict) -> None:
+    for cfg in handlers_cfg.values():
+        if (filename := cfg.get('filename')) is None:
+            continue
+        if (backup_count := cfg.get('backupCount')) is None:
+            continue
+        file = Path(filename)
 
-        # only rotate these types
-        if not isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
+        # If the file is empty we do not rotate
+        if not file.is_file() or file.stat().st_size <= 10:  # noqa: PLR2004
             continue
 
-        # Rotate only if files have content
-        logfile = Path(handler.baseFilename)
-        if not logfile.is_file() or logfile.stat().st_size <= 10:
-            continue
-
-        try:
-            handler.acquire()
-            handler.flush()
-            handler.doRollover()
-        except Exception as e:
-            HABApp.core.wrapper.process_exception(rotate_files, e)
-        finally:
-            handler.release()
+        rotate_file(file, backup_count)
 
 
-def inject_log_buffer(cfg: dict, log: BufferedLogger):
-    from HABApp.core.const.log import TOPIC_EVENTS
-
-    handler_cfg = cfg.setdefault('handlers', {})
+def inject_queue_handler(handlers_cfg: dict, loggers_cfg: dict, log: BufferedLogger) -> list[HABAppQueueHandler]:
+    if not CONFIG.habapp.logging.use_buffer:
+        return []
 
     prefix = 'HABAppQueue_'
 
     # Check that the prefix is unique
-    for handler_name in handler_cfg:
+    for handler_name in handlers_cfg:
         if handler_name.startswith(prefix):
-            raise ValueError(f'Handler may not start with {prefix:s}')
+            msg = f'Handler may not start with {prefix:s}'
+            raise ValueError(msg)
 
     # replace the event logs with the buffered one
     buffered_handlers = {}
-    for log_name, log_cfg in cfg.get('loggers', {}).items():
+    for log_name, log_cfg in loggers_cfg.items():
         if not log_name.startswith(TOPIC_EVENTS):
             continue
         _handlers = {n: f'{prefix}{n}' for n in log_cfg['handlers']}
@@ -148,7 +126,6 @@ def inject_log_buffer(cfg: dict, log: BufferedLogger):
     if not buffered_handlers:
         return []
 
-    handler_cfg = cfg.setdefault('handlers', {})
     q_handlers: list[HABAppQueueHandler] = []
 
     for handler_name, buffered_handler_name in buffered_handlers.items():
@@ -159,9 +136,44 @@ def inject_log_buffer(cfg: dict, log: BufferedLogger):
             q = Queue()
         else:
             q: SimpleQueue = SimpleQueue()
-        handler_cfg[buffered_handler_name] = {'class': 'logging.handlers.QueueHandler', 'queue': q}
+        handlers_cfg[buffered_handler_name] = {'class': 'logging.handlers.QueueHandler', 'queue': q}
 
         qh = HABAppQueueHandler(q, handler_name, f'LogBuffer{handler_name:s}')
         q_handlers.append(qh)
 
     return q_handlers
+
+
+def process_custom_levels(cfg: dict[str, Any], log: BufferedLogger) -> None:
+    for level, alias in cfg.pop('levels', {}).items():
+        if not isinstance(level, int):
+            # noinspection PyProtectedMember
+            level = logging._nameToLevel[level]  # noqa: PLW2901
+        logging.addLevelName(level, str(alias))
+        log.debug(f'Added custom log level "{alias!s}" ({level})')
+
+
+def get_logging_dict(cfg: dict[str, Any] | None,
+                     log: BufferedLogger | logging.Logger) -> tuple[dict[str, Any], list[HABAppQueueHandler]]:
+
+    # make file version optional for config file
+    if 'version' in cfg:
+        log.warning('Entry "version" is no longer required in the logging configuration file')
+    else:
+        cfg['version'] = 1
+
+    handlers_cfg = cfg.get('handlers', {})
+    loggers_cfg = cfg.get('loggers', {})
+
+    fix_old_logger_location(handlers_cfg, log)
+    fix_log_filenames(handlers_cfg)
+    remove_memory_handler_from_cfg(handlers_cfg, loggers_cfg, log)
+
+    # Rotate files before opening the handlers
+    rotate_handler_files(handlers_cfg)
+
+    # Allow the user to set his own logging levels (with aliases)
+    process_custom_levels(cfg, log)
+
+    q_handler = inject_queue_handler(handlers_cfg, loggers_cfg, log)
+    return cfg, q_handler
