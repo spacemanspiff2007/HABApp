@@ -6,7 +6,7 @@ import signal
 import traceback
 from asyncio import iscoroutinefunction, sleep
 from dataclasses import dataclass
-from types import FunctionType, MethodType
+from types import BuiltinMethodType, FunctionType, MethodType
 from typing import TYPE_CHECKING
 
 from HABApp.core.asyncio import async_context, create_task
@@ -62,7 +62,7 @@ def register(func: Callable[[], Any], *, last: bool = False, msg: str = '') -> N
 
     if iscoroutinefunction(func):
         _REGISTERED += (ShutdownAwaitable(func=func, last=last, msg=msg), )
-    elif isinstance(func, (FunctionType, MethodType)):
+    elif isinstance(func, (FunctionType, MethodType, BuiltinMethodType)):
         _REGISTERED += (ShutdownFunction(func=func, last=last, msg=msg), )
     else:
         raise TypeError()
@@ -71,7 +71,10 @@ def register(func: Callable[[], Any], *, last: bool = False, msg: str = '') -> N
 async def _shutdown() -> None:
     global _REQUESTED
 
+    if _REQUESTED:
+        return None
     _REQUESTED = True
+
 
     async_context.set('Shutdown')
 

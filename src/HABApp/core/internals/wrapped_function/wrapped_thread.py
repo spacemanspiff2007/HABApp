@@ -72,7 +72,7 @@ class PoolFunc(ContextProvidingObj):
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} high: {self.usage_high:d}/{POOL_THREADS:d}>'
 
-    def run(self):
+    def run(self) -> Any:
         pool_lock: Final = POOL_LOCK
         pool_info: Final = POOL_INFO
         parent = self.parent

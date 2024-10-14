@@ -179,3 +179,10 @@ Logging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autopydantic_model:: LoggingConfig
+
+Debug
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autopydantic_model:: DumpTracebackConfig
+
+.. autopydantic_model:: DebugConfig

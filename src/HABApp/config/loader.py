@@ -10,6 +10,7 @@ from HABApp import __version__
 from HABApp.config.config import CONFIG
 from HABApp.config.logging import HABAppQueueHandler
 
+from .debug import setup_debug
 from .errors import AbsolutePathExpected, InvalidConfigError
 from .logging import create_default_logfile, get_logging_dict, inject_log_buffer, rotate_files
 from .logging.buffered_logger import BufferedLogger
@@ -38,6 +39,8 @@ def load_config(config_folder: Path) -> None:
 
     if not loaded_logging:
         load_logging_cfg(logging_cfg_path)
+
+    setup_debug()
 
     # Watch folders, so we can reload the config on the fly
     filter = HABApp.core.files.watcher.FileEndingFilter('.yml')

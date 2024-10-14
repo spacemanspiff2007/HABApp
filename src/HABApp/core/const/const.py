@@ -3,6 +3,8 @@ import time
 from enum import Enum
 from typing import Final
 
+from whenever import Instant
+
 
 class _MissingType(Enum):
     MISSING = object()
@@ -12,7 +14,8 @@ class _MissingType(Enum):
 
 
 MISSING: Final = _MissingType.MISSING
-STARTUP: Final = time.monotonic()
+STARTUP_MONOTONIC: Final = time.monotonic()
+STARTUP_INSTANT: Final = Instant.now()
 
 # Python Versions for feature control
 PYTHON_311: Final = sys.version_info >= (3, 11)

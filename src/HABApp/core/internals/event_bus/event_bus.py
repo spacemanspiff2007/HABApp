@@ -42,7 +42,7 @@ class EventBus:
             pass
 
         # Notify all listeners
-        if (listeners := self._listeners.get(topic, None)) is not None:
+        if (listeners := self._listeners.get(topic)) is not None:
             for listener in listeners:
                 listener.notify_listeners(event)
         return None
@@ -77,7 +77,7 @@ class EventBus:
             raise ValueError()
 
         with self._lock:
-            item_listeners = self._listeners.get(listener.topic, ())
+            item_listeners = self._listeners.get(topic, ())
 
             # print warning if we try to remove it twice
             if listener not in item_listeners:
