@@ -1,15 +1,14 @@
-
-line-length = 120
 indent-width = 4
+line-length  = 120
 
 target-version = "py310"
-src = ["src", "test"]
 
-
-extend-exclude = [
-    "__init__.py",
-    "src/__test_*.py"
+src = [
+    "src",
+    "tests"
 ]
+extend-exclude = ["src/__test_*.py"]
+
 
 [lint]
 select = ["ALL"]
@@ -65,18 +64,22 @@ ignore = [
 
 
 [format]
-# Use single quotes for non-triple-quoted strings.
 quote-style = "single"
 
 
 # https://docs.astral.sh/ruff/settings/#lintflake8-quotes
 [lint.flake8-quotes]
-inline-quotes = "single"
+inline-quotes    = "single"
 multiline-quotes = "single"
 
 
 [lint.flake8-builtins]
 builtins-ignorelist = ["id", "input"]
+
+
+# https://docs.astral.sh/ruff/settings/#lintisort
+[lint.isort]
+lines-after-imports = 2     # https://docs.astral.sh/ruff/settings/#lint_isort_lines-after-imports
 
 
 [lint.per-file-ignores]
@@ -86,8 +89,11 @@ builtins-ignorelist = ["id", "input"]
     "PTH118",   # `os.path.join()` should be replaced by `Path` with `/` operator
     "PTH100",   # `os.path.abspath()` should be replaced by `Path.resolve()`
 ]
+
 "setup.py" = ["PTH123"]
+
 "run/**" = ["INP001"]
+
 "tests/*" = [
     "ANN",  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
 
@@ -102,7 +108,3 @@ builtins-ignorelist = ["id", "input"]
 "interface_*.py" = [
     "F401"  # F401 [*] {name} imported but unused
 ]
-
-[lint.isort]
-# https://docs.astral.sh/ruff/settings/#isort-lines-after-imports
-lines-after-imports = 2

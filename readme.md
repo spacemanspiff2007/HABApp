@@ -132,6 +132,7 @@ This is a breaking change!
 
 Changelog:
 - Switched to new scheduler
+- Added ``ValueCommandEvent``. The openhab command event inherits from this event.
 
 Migration of rules:
 - Search for ``self.run.at`` and replace with ``self.run.once``

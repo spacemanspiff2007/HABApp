@@ -144,6 +144,11 @@ ValueChangeEventFilter
 .. autoclass:: HABApp.core.events.ValueChangeEventFilter
    :members:
 
+ValueCommandEventFilter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: HABApp.core.events.ValueCommandEventFilter
+   :members:
+
 AndFilterGroup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: HABApp.core.events.AndFilterGroup

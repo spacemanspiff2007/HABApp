@@ -2,7 +2,7 @@ from typing import Any, Final
 
 
 class ComplexEventValue:
-    def __init__(self, value) -> None:
+    def __init__(self, value: Any) -> None:
         self.value: Any = value
 
 
@@ -20,7 +20,7 @@ class ValueUpdateEvent:
         self.value: Final = value
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        return f'<{self.__class__.__name__} name: {self.name:s}, value: {self.value}>'
 
 
 class ValueChangeEvent:
@@ -40,7 +40,24 @@ class ValueChangeEvent:
         self.old_value: Final = old_value
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
+        return f'<{self.__class__.__name__} name: {self.name:s}, value: {self.value}, old_value: {self.old_value}>'
+
+
+class ValueCommandEvent:
+    """
+    :ivar str name:
+    :ivar Any value:
+    """
+
+    name: str
+    value: Any
+
+    def __init__(self, name: str, value: Any) -> None:
+        self.name: Final = name
+        self.value: Final = value
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} name: {self.name:s}, value: {self.value}>'
 
 
 class ItemNoChangeEvent:
@@ -57,7 +74,7 @@ class ItemNoChangeEvent:
         self.seconds: Final = seconds
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'
+        return f'<{self.__class__.__name__} name: {self.name:s}, seconds: {self.seconds}>'
 
 
 class ItemNoUpdateEvent:
@@ -73,4 +90,4 @@ class ItemNoUpdateEvent:
         self.seconds: Final = seconds
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, seconds: {self.seconds}>'
+        return f'<{self.__class__.__name__} name: {self.name:s}, seconds: {self.seconds}>'

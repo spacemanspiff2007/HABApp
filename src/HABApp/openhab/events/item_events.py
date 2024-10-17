@@ -43,19 +43,7 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
         return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
 
 
-class ItemCommandEvent(OpenhabEvent):
-    """
-    :ivar str name:
-    :ivar Any value:
-    """
-    name: str
-    value: Any
-
-    def __init__(self, name: str, value: Any) -> None:
-        super().__init__()
-
-        self.name: str = name
-        self.value: Any = value
+class ItemCommandEvent(OpenhabEvent, HABApp.core.events.ValueCommandEvent):
 
     @classmethod
     def from_dict(cls, topic: str, payload: dict):
