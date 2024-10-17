@@ -1,10 +1,12 @@
 import time
+from unittest.mock import MagicMock
 
 from whenever import Instant, patch_current_time
 
+from HABApp.core.events import NoEventFilter, ValueCommandEvent
 from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
-from HABApp.core.items.base_valueitem import datetime
+from tests.helpers import TestEventBus
 
 
 class ItemTests:
@@ -99,3 +101,19 @@ class ItemTests:
         assert i.post_value_if(0, is_=None)
         assert i.post_value_if(1, eq=0)
         assert not i.post_value_if(1, eq=0)
+
+    def test_post_command(self, sync_worker, eb: TestEventBus) -> None:
+        i = self.get_item()
+
+        mock = MagicMock()
+        eb.listen_events(i.name, mock, NoEventFilter())
+        mock.assert_not_called()
+
+        value = self.ITEM_VALUES[0]
+        i.command_value(value)
+        mock.assert_called()
+
+        update = mock.call_args_list[0][0][0]
+        assert isinstance(update, ValueCommandEvent)
+        assert update.name == i.name
+        assert update.value == value

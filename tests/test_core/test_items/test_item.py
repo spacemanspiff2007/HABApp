@@ -1,6 +1,5 @@
 from HABApp.core.items import Item
-
-from . import ItemTests
+from tests.test_core.test_items import ItemTests
 
 
 class TestItem(ItemTests):

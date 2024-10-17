@@ -3,6 +3,7 @@ from collections.abc import Mapping
 from typing import Any, NamedTuple
 
 from immutables import Map
+from typing_extensions import override
 
 from HABApp.core.const import MISSING
 from HABApp.core.items import BaseValueItem
@@ -54,6 +55,16 @@ class OpenhabItem(BaseValueItem):
         :param value: (optional) value to be sent. If not specified the current item value will be used.
         """
         send_command(self.name, self.value if value is MISSING else value)
+
+    # For the openhab items HABApp internal commands make not much sense
+    # so we send the commands to openHAB
+    @override
+    def command_value(self, value: Any) -> None:
+        """Send a command to the openHAB item, the same as oh_send_command
+
+        :param value: (optional) value to be sent. If not specified the current item value will be used.
+        """
+        send_command(self.name, value)
 
     def oh_post_update(self, value: Any = MISSING) -> None:
         """Post an update to the openHAB item

@@ -117,7 +117,8 @@ class TestOpenhabItemConvenience(TestBaseRule):
     def __init__(self) -> None:
         super().__init__()
 
-        for name in ('oh_post_update', 'oh_send_command'):
+        # oh_send_command and command_value is the same for openhab items
+        for name in ('oh_post_update', 'oh_send_command', 'command_value'):
             for k in get_openhab_test_types():
                 if name == 'oh_send_command' and k == 'Contact':
                     continue

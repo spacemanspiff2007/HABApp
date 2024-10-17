@@ -1,18 +1,18 @@
 import logging
-import typing
 from datetime import datetime
 from math import ceil, floor
+from typing import TYPE_CHECKING, Any
 
 from whenever import Instant
 
 from HABApp.core.const import MISSING
-from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.events import ValueChangeEvent, ValueCommandEvent, ValueUpdateEvent
 from HABApp.core.internals import uses_post_event
 from HABApp.core.items.base_item import BaseItem
 from HABApp.core.lib.funcs import compare as _compare
 
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     datetime = datetime
 
 
@@ -33,9 +33,9 @@ class BaseValueItem(BaseItem):
     def __init__(self, name: str, initial_value=None) -> None:
         super().__init__(name)
 
-        self.value: typing.Any = initial_value
+        self.value: Any = initial_value
 
-    def set_value(self, new_value) -> bool:
+    def set_value(self, new_value: Any) -> bool:
         """Set a new value without creating events on the event bus
 
         :param new_value: new value of the item
@@ -51,7 +51,7 @@ class BaseValueItem(BaseItem):
         self.value = new_value
         return state_changed
 
-    def post_value(self, new_value) -> bool:
+    def post_value(self, new_value: Any) -> bool:
         """Set a new value and post appropriate events on the HABApp event bus
         (``ValueUpdateEvent``, ``ValueChangeEvent``)
 
@@ -69,7 +69,16 @@ class BaseValueItem(BaseItem):
             )
         return state_changed
 
-    def post_value_if(self, new_value, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
+    def command_value(self, value: Any) -> None:
+        """Send a ``ValueCommandEvent`` for the item to the HABApp event bus. A ``ValueCommandEvent`` is typically
+        used to indicate that the item should change the value.
+        E.g. a command "ON" to a dimmer might result in a brightness value of 100%.
+
+        :param value: the commanded value
+        """
+        post_event(self._name, ValueCommandEvent(self._name, value))
+
+    def post_value_if(self, new_value: Any, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
                       lower_than=MISSING, lt=MISSING, lower_equal=MISSING, le=MISSING,
                       greater_than=MISSING, gt=MISSING, greater_equal=MISSING, ge=MISSING,
                       is_=MISSING, is_not=MISSING) -> bool:
@@ -103,7 +112,7 @@ class BaseValueItem(BaseItem):
             return True
         return False
 
-    def get_value(self, default_value=None) -> typing.Any:
+    def get_value(self, default_value=None) -> Any:
         """Return the value of the item. This is a helper function that returns a default
         in case the item value is None.
 
@@ -122,23 +131,23 @@ class BaseValueItem(BaseItem):
 
     # only support == and != operators by default
     # __ne__ delegates to __eq__ and inverts the result so this is not overloaded separately
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return self.value == other
 
     def __bool__(self) -> bool:
         return bool(self.value)
 
     # rich comparisons
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         return self.value < other
 
-    def __le__(self, other):
+    def __le__(self, other: Any) -> bool:
         return self.value <= other
 
-    def __ge__(self, other):
+    def __ge__(self, other: Any) -> bool:
         return self.value >= other
 
-    def __gt__(self, other):
+    def __gt__(self, other: Any) -> bool:
         return self.value > other
 
     # https://docs.python.org/3/reference/datamodel.html#emulating-numeric-types
