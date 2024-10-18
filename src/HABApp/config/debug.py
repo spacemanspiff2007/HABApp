@@ -1,53 +1,90 @@
+import faulthandler
 import logging
+import signal
 from asyncio import sleep
-from faulthandler import dump_traceback
-from pathlib import Path
+from datetime import datetime
+from typing import Final, TextIO
 
 import HABApp
 from HABApp.config.logging import rotate_file
 from HABApp.core.asyncio import create_task
-from HABApp.core.items.base_valueitem import datetime
+from HABApp.core.wrapper import log_exception
 
 
-def _get_file_path(nr: int) -> Path:
-    assert nr >= 0  # noqa: S101
-    log_dir = HABApp.CONFIG.directories.logging
-    ctr = f'.{nr}' if nr else ''
-    return log_dir / f'HABApp_traceback.log{ctr:s}'
+TRACEBACK_FILE: TextIO | None = None
 
 
 def setup_debug() -> None:
+    global TRACEBACK_FILE
+
     debug = HABApp.CONFIG.habapp.debug
-    if (dump_traceback_cfg := debug.dump_traceback) is None:
+    periodic_tb_cfg = debug.periodic_traceback
+    event_loop_cfg = debug.watch_event_loop
+    tb_on_shutdown_signal = debug.traceback_on_shutdown_signal
+
+    if not event_loop_cfg.enabled and not tb_on_shutdown_signal and not periodic_tb_cfg.enabled:
         return None
 
-    file = _get_file_path(0)
+    file: Final = HABApp.CONFIG.directories.logging / 'HABApp_traceback.log'
     logging.getLogger('HABApp').info(f'Dumping traceback to {file}')
 
     rotate_file(file, 3)
 
-    task = create_task(
-        dump_traceback_task(
-            file, int(dump_traceback_cfg.delay.total_seconds()), int(dump_traceback_cfg.interval.total_seconds())
-        ),
-        name='DumpTracebackTask'
-    )
+    TRACEBACK_FILE = file.open('a')
+    HABApp.core.shutdown.register(TRACEBACK_FILE.close, last=True, msg='Closing traceback file')
 
-    HABApp.core.shutdown.register(task.cancel, msg='Stopping traceback task')
+    if periodic_tb_cfg.enabled:
+        task = create_task(
+            dump_traceback_task(
+                int(periodic_tb_cfg.delay.total_seconds()),
+                int(periodic_tb_cfg.interval.total_seconds())
+            ),
+            name='DumpTracebackTask'
+        )
+        HABApp.core.shutdown.register(task.cancel, msg='Stopping traceback task')
+
+    if tb_on_shutdown_signal:
+        TRACEBACK_FILE.write('Dumping on shutdown signal\n')
+        TRACEBACK_FILE.flush()
+
+        faulthandler.register(signal.SIGINT, TRACEBACK_FILE, all_threads=True)
+        faulthandler.register(signal.SIGTERM, TRACEBACK_FILE, all_threads=True)
+
+    if event_loop_cfg.enabled:
+        task = create_task(
+            watch_event_loop_task(
+                sleep_secs=int(event_loop_cfg.reset_every.total_seconds()),
+                timeout_secs=int(event_loop_cfg.timeout.total_seconds()),
+            ),
+            name='WatchEventLoopTask'
+        )
+        HABApp.core.shutdown.register(task.cancel, msg='Stopping WatchEventLoopTask')
 
 
-async def dump_traceback_task(file: Path, delay: int, interval: int) -> None:
+@log_exception
+async def dump_traceback_task(delay: int, interval: int) -> None:
 
-    with file.open('a') as f:
-        f.write(f'Start: {datetime.now()}\n')
-        f.write(f'Delay: {delay:d}s Interval: {interval:d}s\n')
+    TRACEBACK_FILE.write('Dumping traceback:\n')
+    TRACEBACK_FILE.write(f'Start: {datetime.now()}\n')
+    TRACEBACK_FILE.write(f'Delay: {delay:d}s Interval: {interval:d}s\n')
+    TRACEBACK_FILE.flush()
 
     await sleep(delay)
 
     while True:
-        with file.open('a') as f:
-            f.write(f'\n{"-" * 80}\n')
-            f.write(f'{datetime.now()}\n\n')
-            dump_traceback(f, all_threads=True)
+        TRACEBACK_FILE.write(f'\n{"-" * 80}\n')
+        TRACEBACK_FILE.write(f'{datetime.now()}\n\n')
+        faulthandler.dump_traceback(TRACEBACK_FILE, all_threads=True)
 
         await sleep(interval)
+
+
+@log_exception
+async def watch_event_loop_task(sleep_secs: int, timeout_secs: int) -> None:
+
+    TRACEBACK_FILE.write(f'Watching event loop\nReset: {sleep_secs:d}s Timeout: {timeout_secs:d}s\n')
+    TRACEBACK_FILE.flush()
+
+    while True:
+        faulthandler.dump_traceback_later(timeout_secs, file=TRACEBACK_FILE, exit=True)
+        await sleep(sleep_secs)

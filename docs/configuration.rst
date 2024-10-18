@@ -182,7 +182,9 @@ Logging
 
 Debug
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autopydantic_model:: DumpTracebackConfig
-
 .. autopydantic_model:: DebugConfig
+
+.. autopydantic_model:: PeriodicTracebackDumpConfig
+
+.. autopydantic_model:: WatchEventLoopConfig
+

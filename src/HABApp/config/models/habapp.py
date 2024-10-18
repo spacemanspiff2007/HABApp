@@ -1,7 +1,8 @@
 from datetime import timedelta
 
 from easyconfig import BaseModel
-from pydantic import Field, conint
+from pydantic import Field, conint, model_validator
+from typing_extensions import Self
 
 
 class ThreadPoolConfig(BaseModel):
@@ -22,17 +23,55 @@ class LoggingConfig(BaseModel):
     '''Wait time in seconds before the buffer gets flushed again when it was empty'''
 
 
-class DumpTracebackConfig(BaseModel):
-    delay: timedelta = Field('PT5M', gt=timedelta(seconds=0))
-    '''Initial delay before starting to dump the traceback'''
+class PeriodicTracebackDumpConfig(BaseModel):
+    """Periodically dump the traceback of all currently running threads into a file"""
 
-    interval: timedelta = Field('PT1H', gt=timedelta(seconds=0))
-    '''Interval to dump the traceback'''
+    enabled: bool = Field(False, description='Enable or disable functionality')
+
+    delay: timedelta = Field('PT30M', gt=timedelta(seconds=0),
+                             description='Initial delay before the first traceback dump')
+
+    interval: timedelta = Field('PT1H', gt=timedelta(seconds=0),
+                                description='Interval to dump the traceback')
+
+
+class WatchEventLoopConfig(BaseModel):
+    """Watch the asyncio event loop. If the loop is blocked dump the traceback of all running threads
+    and shut down HABApp"""
+
+    enabled: bool = Field(False, description='Enable or disable functionality')
+
+    reset_every: timedelta = Field('PT1M', alias='reset every', gt=timedelta(seconds=0),
+                                   description='Reset interval for the timeout')
+
+    timeout: timedelta = Field('PT2M30S', gt=timedelta(seconds=0),
+                               description='Timeout after which HABApp will shut down')
+
+    @model_validator(mode='after')
+    def _check_values(self) -> Self:
+        # round to second
+        self.timeout = timedelta(seconds=round(self.timeout.total_seconds()))
+        self.reset_every = timedelta(seconds=round(self.reset_every.total_seconds()))
+
+        if self.timeout <= self.reset_every:
+            msg = f'Timeout must be greater than reset time! {self.timeout} > {self.reset_every}'
+            raise ValueError(msg)
+        return self
 
 
 class DebugConfig(BaseModel):
-    dump_traceback: DumpTracebackConfig | None = Field(None, alias='dump traceback')
-    '''Option to periodically dump the traceback of all currently running threads into a file'''
+    """Debugging options for HABApp"""
+
+    periodic_traceback: PeriodicTracebackDumpConfig = Field(
+        alias='periodic traceback', default_factory=PeriodicTracebackDumpConfig)
+
+    traceback_on_shutdown_signal: bool = Field(
+        False, alias='traceback on shutdown signal',
+        description='Dump the traceback of all currently running threads into a file when receiving a shutdown signal. '
+                    'Not available on Windows!'
+    )
+
+    watch_event_loop: WatchEventLoopConfig = Field(alias='watch event loop', default_factory=WatchEventLoopConfig)
 
 
 class HABAppConfig(BaseModel):

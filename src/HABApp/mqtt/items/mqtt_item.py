@@ -1,3 +1,6 @@
+from typing import Any
+
+from typing_extensions import override
 
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_get_item, uses_item_registry
@@ -45,3 +48,11 @@ class MqttItem(MqttBaseItem):
         """
 
         return publish(self.name, payload, qos=qos, retain=retain)
+
+    @override
+    def command_value(self, value: Any) -> None:
+        """Send a command to the topic, the same as publish
+
+        :param value: value to be sent
+        """
+        publish(self.name, value)

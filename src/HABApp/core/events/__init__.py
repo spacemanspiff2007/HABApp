@@ -13,5 +13,6 @@ from .filter import (
     NoEventFilter,
     OrFilterGroup,
     ValueChangeEventFilter,
+    ValueCommandEventFilter,
     ValueUpdateEventFilter,
 )

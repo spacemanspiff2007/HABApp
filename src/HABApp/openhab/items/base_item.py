@@ -62,7 +62,7 @@ class OpenhabItem(BaseValueItem):
     def command_value(self, value: Any) -> None:
         """Send a command to the openHAB item, the same as oh_send_command
 
-        :param value: (optional) value to be sent. If not specified the current item value will be used.
+        :param value: value to be sent
         """
         send_command(self.name, value)
 
