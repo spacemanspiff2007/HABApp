@@ -1,4 +1,3 @@
-from datetime import datetime as dt_datetime
 from typing import TypeVar
 
 from whenever import Instant
