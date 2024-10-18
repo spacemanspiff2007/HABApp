@@ -187,4 +187,3 @@ Debug
 .. autopydantic_model:: PeriodicTracebackDumpConfig
 
 .. autopydantic_model:: WatchEventLoopConfig
-

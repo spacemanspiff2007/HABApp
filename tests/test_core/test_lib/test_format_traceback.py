@@ -196,7 +196,7 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero'''
 
 
-def func_ir():
+def func_ir() -> None:
 
     from HABApp.core.items import Item
     Items = HABApp.core.Items
@@ -218,7 +218,7 @@ def _setup_ir(clean_objs, monkeypatch, ir, eb):
     yield
 
 
-def test_skip_objs(_setup_ir):
+def test_skip_objs(_setup_ir) -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_ir)
     assert msg == r'''
@@ -235,7 +235,7 @@ File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
 
 File "test_core/test_lib/test_format_traceback.py", line 205 in func_ir
 --------------------------------------------------------------------------------
-     199 | def func_ir():
+     199 | def func_ir() -> None:
      201 |     from HABApp.core.items import Item
      202 |     Items = HABApp.core.Items
      204 |     Items.add_item(Item('asdf'))

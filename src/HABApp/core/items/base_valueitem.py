@@ -78,7 +78,7 @@ class BaseValueItem(BaseItem):
         """
         post_event(self._name, ValueCommandEvent(self._name, value))
 
-    def post_value_if(self, new_value: Any, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
+    def post_value_if(self, new_value, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
                       lower_than=MISSING, lt=MISSING, lower_equal=MISSING, le=MISSING,
                       greater_than=MISSING, gt=MISSING, greater_equal=MISSING, ge=MISSING,
                       is_=MISSING, is_not=MISSING) -> bool:

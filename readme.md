@@ -137,7 +137,7 @@ Changelog:
 Migration of rules:
 - Search for ``self.run.at`` and replace with ``self.run.once``
 - ``item.last_update`` and ``item.last_change`` can now directly used to check if it's newer/older than a delta.
-  Replace ``item.last_update > datetime_obj`` with ``item.last_update > timedelta_obj`` or 
+  Replace ``item.last_update > datetime_obj`` with ``item.last_update > timedelta_obj`` or
   ``item.last_update.newer_than(minutes=10)``
 
 #### 24.08.1 (2024-08-02)

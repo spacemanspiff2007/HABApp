@@ -73,7 +73,7 @@ class ItemTests:
                 assert item._last_update.instant == instant
                 assert item._last_change.instant == instant
 
-    def test_time_funcs(self):
+    def test_time_funcs(self) -> None:
         item = self.get_item()
 
         now1 = Instant.now()

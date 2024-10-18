@@ -1,12 +1,13 @@
 import logging
 
 from HABApp.config.logging import get_logging_dict
-from HABApp.config.logging.config import remove_memory_handler_from_cfg, inject_queue_handler
+from HABApp.config.logging.config import inject_queue_handler, remove_memory_handler_from_cfg
+
 
 log = logging.getLogger('test')
 
 
-def test_add_version(test_logs):
+def test_add_version(test_logs) -> None:
     assert get_logging_dict({}, log)[0] == {'version': 1}
 
 
@@ -16,7 +17,7 @@ def get_unpack(log_dict):
     return value
 
 
-def test_fix_old_logger(test_logs):
+def test_fix_old_logger(test_logs) -> None:
     cfg = {'handlers': {'my_handler': {'class': 'HABApp.core.lib.handler.MidnightRotatingFileHandler'}}}
     dst = {'handlers': {'my_handler': {'class': 'HABApp.config.logging.MidnightRotatingFileHandler'}}}
     test_logs.add_expected(
@@ -27,7 +28,7 @@ def test_fix_old_logger(test_logs):
     assert get_unpack(cfg) == dst
 
 
-def test_remove_memory_handler(test_logs):
+def test_remove_memory_handler(test_logs) -> None:
     cfg = {
         'handlers': {
             'BufferEventFile': {'class': 'logging.handlers.MemoryHandler', 'target': 'EventFile'},
@@ -58,7 +59,7 @@ def test_remove_memory_handler(test_logs):
     test_logs.add_expected('test', logging.WARNING, 'Replaced BufferEventFile with EventFile for logger HABApp.EventBus')
 
 
-def test_inject_queue_handler():
+def test_inject_queue_handler() -> None:
     cfg = {
         'handlers': {
             'EventFile': {'class': 'logging.handlers.RotatingFileHandler', 'filename': 'events.log'},

@@ -7,10 +7,10 @@ import aiohttp
 
 import HABApp
 from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
-from HABApp.core.items.base_valueitem import datetime
-from HABApp.core.lib import InstantView
+
 
 if TYPE_CHECKING:
+    from HABApp.core.lib import InstantView
     from HABApp.openhab.items import OpenhabItem, Thing
 
 

@@ -9,7 +9,6 @@ from immutables import Map
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
-from HABApp.core.lib import InstantView
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import map_null_str
 from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
@@ -25,8 +24,7 @@ from HABApp.openhab.item_to_reg import (
 
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
+    from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.rest import ThingResp
 
 
