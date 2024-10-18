@@ -105,8 +105,8 @@ class SubscriptionHandler(MqttPlugin):
         # Unsubscribing has the corresponding handling, so we call that every time
         if not self.plugin_connection.has_errors:
             # subscription from config
-            for topic, qos in CONFIG.mqtt.subscribe.topics:
-                target[topic] = qos if qos is not None else default_qos
+            for topic, qos in CONFIG.mqtt.subscribe.get_topic_qos():
+                target[topic] = qos
             # runtime subscriptions overwrite the subscriptions from the config file
             for topic, qos in self.runtime_subs.items():
                 target[topic] = qos

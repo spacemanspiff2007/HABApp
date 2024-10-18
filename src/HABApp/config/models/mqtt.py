@@ -1,6 +1,7 @@
 import logging
 import random
 import string
+from collections.abc import Generator
 from pathlib import Path
 from typing import Literal
 
@@ -42,18 +43,14 @@ class Connection(BaseModel):
 
 class Subscribe(BaseModel):
     qos: QOS = Field(default=0, description='Default QoS for subscribing')
-    topics: tuple[tuple[str, QOS | None], ...] = Field(default=('#', ))
+    topics: tuple[str | tuple[str, QOS], ...] = Field(default=('#', 'topic/with/default/qos', ('topic/with/qos', 1)))
 
-    @pydantic.field_validator('topics', mode='before')
-    def parse_topics(cls, v):
-        if not isinstance(v, (list, tuple, set)):
-            raise ValueError('must be a list')
-        ret = []
-        for e in v:
-            if isinstance(e, str):
-                e = (e, None)
-            ret.append(tuple(e))
-        return tuple(ret)
+    def get_topic_qos(self) -> Generator[tuple[str, QOS], None, None]:
+        for obj in self.topics:
+            if isinstance(obj, str):
+                yield obj, self.qos
+            else:
+                yield obj
 
 
 class Publish(BaseModel):

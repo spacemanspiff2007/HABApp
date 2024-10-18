@@ -32,8 +32,10 @@ mqtt:
   subscribe:
     qos: 0   # Default QoS for subscribing
     topics:
-    - - '#'
-      - 
+    - '#'
+    - topic/with/default/qos
+    - - topic/with/qos
+      - 1
   publish:
     qos: 0         # Default QoS when publishing values
     retain: false  # Default retain flag when publishing values
