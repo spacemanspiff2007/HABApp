@@ -20,14 +20,14 @@ repos:
       - id: ruff
         name: ruff unused imports
         #  F401 [*] {name} imported but unused
-        args: [ "--select", "F401", "--extend-exclude", "**/__init__.py", "--fix"]
+        args: [ "--select", "F401,I001", "--extend-exclude", "__init__.py", "--fix"]
 
       - id: ruff
         #  I001 [*] Import block is un-sorted or un-formatted
         # UP035 [*] Import from {target} instead: {names}
         #  Q000 [*] Double quote found but single quotes preferred
         #  Q001 [*] Double quote multiline found but single quotes preferred
-        args: [ "--select", "I001,UP035,Q000,Q001", "--fix"]
+        args: [ "--select", "UP035,Q000,Q001", "--fix"]
 
 
   - repo: https://github.com/JelleZijlstra/autotyping
