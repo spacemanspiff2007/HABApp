@@ -20,7 +20,7 @@ repos:
       - id: ruff
         name: ruff unused imports
         #  F401 [*] {name} imported but unused
-        args: [ "--select", "F401", "--extend-exclude", "__init__.py", "--fix"]
+        args: [ "--select", "F401", "--extend-exclude", "**/__init__.py", "--fix"]
 
       - id: ruff
         #  I001 [*] Import block is un-sorted or un-formatted
