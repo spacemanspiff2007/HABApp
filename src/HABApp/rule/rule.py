@@ -15,10 +15,9 @@ import HABApp.util
 from HABApp.core.asyncio import create_task
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.internals import (
-    HINT_EVENT_BUS_LISTENER,
-    HINT_EVENT_FILTER_OBJ,
     ContextBoundEventBusListener,
     ContextProvidingObj,
+    EventBusListener,
     EventFilterBase,
     uses_item_registry,
     uses_post_event,
@@ -120,8 +119,8 @@ class Rule(ContextProvidingObj):
 
     def listen_event(self, name: HINT_ITEM_OBJ | str,
                      callback: TYPE_EVENT_CALLBACK,
-                     event_filter: HINT_EVENT_FILTER_OBJ | None = None
-                     ) -> HINT_EVENT_BUS_LISTENER:
+                     event_filter: EventFilterBase | None = None
+                     ) -> EventBusListener:
         """
         Register an event listener
 

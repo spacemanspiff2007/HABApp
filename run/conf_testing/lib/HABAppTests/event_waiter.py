@@ -5,7 +5,6 @@ from typing import Any, TypeVar
 
 from HABApp.core.events.filter import EventFilter
 from HABApp.core.internals import (
-    HINT_EVENT_FILTER_OBJ,
     EventBusListener,
     EventFilterBase,
     get_current_context,
@@ -24,7 +23,7 @@ EVENT_TYPE = TypeVar('EVENT_TYPE')
 
 class EventWaiter:
     def __init__(self, name: BaseValueItem | str,
-                 event_filter: HINT_EVENT_FILTER_OBJ, timeout=1) -> None:
+                 event_filter: EventFilterBase, timeout: float = 1) -> None:
         if isinstance(name, BaseValueItem):
             name = name.name
         assert isinstance(name, str)

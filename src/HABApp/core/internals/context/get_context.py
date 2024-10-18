@@ -1,13 +1,14 @@
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
-from types import FrameType
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from HABApp.core.errors import ContextNotFoundError, ContextNotSetError
 from HABApp.core.internals.context import Context, ContextBoundObj, ContextProvidingObj
 
 
 if TYPE_CHECKING:
+    from types import FrameType
+
     import HABApp
 
 
@@ -33,7 +34,7 @@ def get_current_context(obj: ContextProvidingObj | None = None) -> 'HABApp.rule_
 
 
 class AutoContextBoundObj(ContextBoundObj):
-    def __init__(self, parent_ctx: Optional['Context'] = None, **kwargs) -> None:
+    def __init__(self, parent_ctx: Optional['Context'] = None, **kwargs: Any) -> None:
         if parent_ctx is None:
             parent_ctx = get_current_context()
         super().__init__(parent_ctx=parent_ctx, **kwargs)

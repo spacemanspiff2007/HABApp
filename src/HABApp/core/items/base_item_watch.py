@@ -1,9 +1,9 @@
+from __future__ import annotations
+
 import logging
 import typing
 
-import HABApp
 from HABApp.core.asyncio import run_func_from_async
-from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.events import EventFilter, ItemNoChangeEvent, ItemNoUpdateEvent
 from HABApp.core.internals import (
     AutoContextBoundObj,
@@ -15,13 +15,18 @@ from HABApp.core.internals import (
 from HABApp.core.lib import PendingFuture
 
 
+if typing.TYPE_CHECKING:
+    import HABApp
+    from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
+
+
 log = logging.getLogger('HABApp')
 
 post_event = uses_post_event()
 
 
 class BaseWatch(AutoContextBoundObj):
-    EVENT: typing.Type[ItemNoUpdateEvent] | typing.Type[ItemNoChangeEvent]
+    EVENT: type[ItemNoUpdateEvent | ItemNoChangeEvent]
 
     def __init__(self, name: str, secs: int | float) -> None:
         super().__init__()
@@ -40,7 +45,7 @@ class BaseWatch(AutoContextBoundObj):
         self._ctx_unlink()
         run_func_from_async(self.__cancel_watch)
 
-    def listen_event(self, callback: TYPE_EVENT_CALLBACK) -> 'HABApp.core.base.HINT_EVENT_BUS_LISTENER':
+    def listen_event(self, callback: TYPE_EVENT_CALLBACK) -> HABApp.core.base.EventBusListener:
         """Listen to (only) the event that is emitted by this watcher"""
         context = get_current_context()
         return context.add_event_listener(

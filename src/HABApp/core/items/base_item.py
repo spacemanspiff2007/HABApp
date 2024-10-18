@@ -4,8 +4,8 @@ from whenever import Instant
 
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.internals import (
-    HINT_EVENT_BUS_LISTENER,
-    HINT_EVENT_FILTER_OBJ,
+    EventBusListener,
+    EventFilterBase,
     get_current_context,
     uses_get_item,
     uses_item_registry,
@@ -86,7 +86,7 @@ class BaseItem(ItemRegistryItem):
         return self._last_update.add_watch(secs)
 
     def listen_event(self, callback: TYPE_EVENT_CALLBACK,
-                     event_filter: HINT_EVENT_FILTER_OBJ | None = None) -> HINT_EVENT_BUS_LISTENER:
+                     event_filter: EventFilterBase | None = None) -> EventBusListener:
         """
         Register an event listener which listens to all event that the item receives
 

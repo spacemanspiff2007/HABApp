@@ -133,10 +133,12 @@ class TestOpenhabItemConvenience(TestBaseRule):
                 getattr(tmpitem, func_name)(val)
                 waiter.wait_for_state(val)
 
-            for val in test_vals:
-                tmpitem.set_value(val)
-                getattr(tmpitem, func_name)()
-                waiter.wait_for_state(val)
+            # only the openhab functions can be called without a value
+            if func_name.startswith('oh_'):
+                for val in test_vals:
+                    tmpitem.set_value(val)
+                    getattr(tmpitem, func_name)()
+                    waiter.wait_for_state(val)
 
     @OpenhabTmpItem.create('Number', arg_name='oh_item')
     def test_post_update_if(self, oh_item: OpenhabTmpItem) -> None:
