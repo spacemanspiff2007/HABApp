@@ -1,4 +1,3 @@
-import logging
 from time import monotonic, sleep
 
 from HABAppTests import TestBaseRule, get_random_name
@@ -6,9 +5,6 @@ from HABAppTests import TestBaseRule, get_random_name
 from HABApp import Rule
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.items import Item
-
-
-log = logging.getLogger('HABApp.TestParameterFiles')
 
 
 class TestSchedulerCallLive(Rule):
@@ -47,7 +43,7 @@ class TestScheduler(TestBaseRule):
 
     def test_scheduler_every(self) -> None:
 
-        executions = 10
+        self.item_states.clear()
         calls = []
 
         def called() -> None:
@@ -56,6 +52,7 @@ class TestScheduler(TestBaseRule):
         job = self.run.every(None, 0.5, called)
         job.to_item(self.item)
 
+        executions = 10
         try:
             started = monotonic()
             while monotonic() - started < executions * 0.6 + 1:

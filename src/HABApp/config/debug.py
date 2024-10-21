@@ -64,17 +64,19 @@ def setup_debug() -> None:
 @log_exception
 async def dump_traceback_task(delay: int, interval: int) -> None:
 
-    TRACEBACK_FILE.write('Dumping traceback:\n')
+    await sleep(0.2)
+    TRACEBACK_FILE.write('Dumping traceback\n')
     TRACEBACK_FILE.write(f'Start: {datetime.now()}\n')
     TRACEBACK_FILE.write(f'Delay: {delay:d}s Interval: {interval:d}s\n')
+    TRACEBACK_FILE.write(f'\n{"-" * 80}\n')
     TRACEBACK_FILE.flush()
 
     await sleep(delay)
 
     while True:
-        TRACEBACK_FILE.write(f'\n{"-" * 80}\n')
         TRACEBACK_FILE.write(f'{datetime.now()}\n\n')
         faulthandler.dump_traceback(TRACEBACK_FILE, all_threads=True)
+        TRACEBACK_FILE.write(f'\n{"-" * 80}\n')
 
         await sleep(interval)
 
@@ -82,7 +84,7 @@ async def dump_traceback_task(delay: int, interval: int) -> None:
 @log_exception
 async def watch_event_loop_task(sleep_secs: int, timeout_secs: int) -> None:
 
-    TRACEBACK_FILE.write(f'Watching event loop\nReset: {sleep_secs:d}s Timeout: {timeout_secs:d}s\n')
+    TRACEBACK_FILE.write(f'Watching event loop\nReset: {sleep_secs:d}s Timeout: {timeout_secs:d}s\n\n')
     TRACEBACK_FILE.flush()
 
     while True:
