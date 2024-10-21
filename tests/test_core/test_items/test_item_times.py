@@ -180,7 +180,7 @@ async def test_watcher_update_restore(parent_rule, ir: ItemRegistry) -> None:
     ir.pop_item(name)
 
 
-@pytest.mark.ignore_log_warnings()
+@pytest.mark.ignore_log_warnings
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
                                       sync_worker, eb: TestEventBus, ir: ItemRegistry) -> None:
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)

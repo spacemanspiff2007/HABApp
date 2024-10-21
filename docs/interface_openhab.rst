@@ -9,7 +9,7 @@ openHAB
 Additional configuration
 **************************************
 
-For optimal performance it is recommended to use Basic Auth (available from openHAB 3.1 M3 on).
+For optimal performance it is recommended to use Basic Auth.
 It can be enabled through GUI or through textual configuration.
 
 Textual configuration
@@ -28,6 +28,11 @@ GUI
 It can be enabled through the gui in ``settings`` -> ``API Security`` -> ``Allow Basic Authentication``.
 
 .. image:: /images/openhab_api_config.png
+
+
+OpenHAB user
+======================================
+In case an additional openHAB user or token is created for HABApp it has to have admin rights.
 
 
 .. _OPENHAB_ITEM_TYPES:

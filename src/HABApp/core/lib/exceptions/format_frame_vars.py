@@ -6,6 +6,7 @@ from inspect import isclass, ismodule
 from pathlib import Path
 from typing import Any, Final
 
+import whenever
 from easyconfig.config_objs import ConfigObj
 from immutables import Map
 from stack_data import Variable
@@ -20,6 +21,9 @@ SKIPPED_TYPES = (
     bool, bytearray, bytes, complex, dict, float, frozenset, int, list, memoryview, set, str, tuple, type(None),
     datetime.date, datetime.datetime, datetime.time, datetime.timedelta,
     Map, Path,
+    whenever.Instant,
+    whenever.SystemDateTime, whenever.LocalDateTime, whenever.ZonedDateTime, whenever.OffsetDateTime,
+    whenever.TimeDelta, whenever.DateDelta, whenever.DateTimeDelta
 )
 
 
@@ -27,7 +31,9 @@ def is_type_hint_or_type(value: Any) -> bool:
     if isinstance(value, tuple):
         return all(is_type_hint_or_type(obj) for obj in value)
 
-    if value in SKIPPED_TYPES:
+    # compare through identity since some objects override the equality operator.
+    # If we check with "value in SKIPPED_TYPES" we might get an exception because there the __eq__ operator is used
+    if any(value is o for o in SKIPPED_TYPES):
         return True
 
     # check if it's something from the typing module
