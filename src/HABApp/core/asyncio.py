@@ -97,9 +97,14 @@ def run_func_from_async(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwa
     if async_context.get(None) is not None:
         return func(*args, **kwargs)
 
+    # we are in a thread, that's why we can wait (and block) for the future
     future = _run_coroutine_threadsafe(_run_func_from_async_helper(func, *args, **kwargs), loop)
     return future.result()
 
 
 async def _run_func_from_async_helper(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
-    return func(*args, **kwargs)
+    token = async_context.set('run_func_from_async')
+    try:
+        return func(*args, **kwargs)
+    finally:
+        async_context.reset(token)
