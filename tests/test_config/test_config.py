@@ -1,6 +1,14 @@
+import logging
 import re
 
+import pytest
+from pydantic import ValidationError
+
 from HABApp import CONFIG
+from easyconfig.yaml import yaml_safe
+
+from HABApp.config.models.mqtt import Subscribe
+from tests.helpers import LogCollector
 
 
 def test_default_file() -> None:
@@ -55,3 +63,29 @@ openhab:
     item: HABApp_Ping  # Name of the Numberitem
     interval: 10       # Seconds between two pings
 '''
+
+
+def test_migrate(test_logs: LogCollector):
+    text = '''
+  subscribe:
+    qos: 0   # Default QoS for subscribing
+    topics:
+    - - '#'
+      - 
+  publish:
+    '''
+
+    obj = yaml_safe.load(text)
+    Subscribe.model_validate(obj['subscribe'])
+
+    test_logs.add_expected(
+        'HABApp.Config', logging.WARNING,
+        [
+            'Empty QoS is not longer allowed for subscribing to topics.',
+            'Specify QOS or remove empty entry, e.g from',
+            '  - - #',
+            '    - ',
+            'to',
+            '  - #',
+        ]
+    )

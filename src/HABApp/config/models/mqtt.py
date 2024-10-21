@@ -30,6 +30,7 @@ class Connection(BaseModel):
     password: str = ''
     tls: TLSSettings = Field(default_factory=TLSSettings)
 
+    # implemented 2024.02.0
     @pydantic.model_validator(mode='before')
     @classmethod
     def _migrate_client_id(cls, data):
@@ -51,6 +52,30 @@ class Subscribe(BaseModel):
                 yield obj, self.qos
             else:
                 yield obj
+
+    # Implemented 2024.11.0
+    @pydantic.model_validator(mode='before')
+    @classmethod
+    def _migrate_topics(cls, data):
+        if isinstance(data, dict) and (topics := data.get('topics', [])) is not None:
+            for i, topic_obj in enumerate(topics):
+                if not isinstance(topic_obj, list):
+                    continue
+                topic, qos = topic_obj
+                if qos is not None:
+                    continue
+
+                log = logging.getLogger('HABApp.Config')
+                log.warning('Empty QoS is not longer allowed for subscribing to topics.')
+                log.warning('Specify QOS or remove empty entry, e.g from')
+                log.warning(f'  - - {topic:s}')
+                log.warning('    - ')
+                log.warning('to')
+                log.warning(f'  - {topic:s}')
+
+                topics[i] = topic
+
+        return data
 
 
 class Publish(BaseModel):
