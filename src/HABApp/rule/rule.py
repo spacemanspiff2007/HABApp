@@ -23,7 +23,7 @@ from HABApp.core.internals import (
     uses_post_event,
     wrap_func,
 )
-from HABApp.core.items import HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseItem, BaseValueItem
+from HABApp.core.items import BaseItem, BaseValueItem
 from HABApp.rule import interfaces
 from HABApp.rule.scheduler.job_builder import HABAppJobBuilder as _HABAppJobBuilder
 
@@ -54,6 +54,9 @@ warnings.showwarning = send_warnings_to_log
 
 post_event = uses_post_event()
 item_registry = uses_item_registry()
+
+
+ITEM_TYPE = TypeVar('ITEM_TYPE', bound=BaseItem)
 
 
 class Rule(ContextProvidingObj):
@@ -103,7 +106,7 @@ class Rule(ContextProvidingObj):
 
         return f'<{cls_name}{" ".join(parts)}>'
 
-    def post_event(self, name: HINT_ITEM_OBJ | str, event: Any):
+    def post_event(self, name: BaseItem | str, event: Any):
         """
         Post an event to the event bus
 
@@ -117,7 +120,7 @@ class Rule(ContextProvidingObj):
             event
         )
 
-    def listen_event(self, name: HINT_ITEM_OBJ | str,
+    def listen_event(self, name: BaseItem | str,
                      callback: TYPE_EVENT_CALLBACK,
                      event_filter: EventFilterBase | None = None
                      ) -> EventBusListener:
@@ -138,7 +141,8 @@ class Rule(ContextProvidingObj):
         if event_filter is None:
             event_filter = HABApp.core.events.NoEventFilter()
         if not isinstance(event_filter, EventFilterBase):
-            raise ValueError(f'Argument event_filter must be an instance of event filter (is {event_filter})')
+            msg = f'Argument event_filter must be an instance of event filter (is {event_filter})'
+            raise ValueError(msg)
 
         listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
         return self._habapp_ctx.add_event_listener(listener)
@@ -256,13 +260,13 @@ class Rule(ContextProvidingObj):
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     @staticmethod
-    def get_items(type: tuple[HINT_TYPE_ITEM_OBJ, ...] | HINT_TYPE_ITEM_OBJ = None,
+    def get_items(type: tuple[type[ITEM_TYPE], ...] | type[ITEM_TYPE] | None = None,
                   name: str | Pattern[str] | None = None,
                   tags: str | Iterable[str] | None = None,
                   groups: str | Iterable[str] | None = None,
                   metadata: str | Pattern[str] | None = None,
                   metadata_value: str | Pattern[str] | None = None,
-                  ) -> list[HINT_ITEM_OBJ] | list[BaseItem]:
+                  ) -> list[ITEM_TYPE] | list[BaseItem]:
         """Search the HABApp item registry and return the found items.
 
         :param type: item has to be an instance of this class
@@ -293,7 +297,8 @@ class Rule(ContextProvidingObj):
             if type is None:
                 type = OpenhabItem
             if not issubclass(type, OpenhabItem):
-                raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its subclasses')
+                msg = 'Searching for tags, groups and metadata only works for OpenhabItem or its subclasses'
+                raise ValueError(msg)
 
         ret = []
         for item in item_registry.get_items():  # type: HABApp.core.items.BaseItem

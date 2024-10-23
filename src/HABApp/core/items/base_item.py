@@ -93,7 +93,7 @@ class BaseItem(ItemRegistryItem):
         :param callback: callback that accepts one parameter which will contain the event
         :param event_filter: Event filter. This is typically :class:`~HABApp.core.events.ValueUpdateEventFilter` or
             :class:`~HABApp.core.events.ValueChangeEventFilter` which will also trigger on changes/update from openhab
-            or mqtt. Additionally it can be an instance of :class:`~HABApp.core.events.EventFilter` which additionally
+            or mqtt. Additionally, it can be an instance of :class:`~HABApp.core.events.EventFilter` which additionally
             filters on the values of the event. It is also possible to group filters logically with, e.g.
             :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
@@ -108,8 +108,3 @@ class BaseItem(ItemRegistryItem):
         """This function gets automatically called when the item is removed from the item registry
         """
         _add_tmp_data(self)
-
-
-# Hints for functions that use an item class as an input parameter
-HINT_ITEM_OBJ = TypeVar('HINT_ITEM_OBJ', bound=BaseItem)
-HINT_TYPE_ITEM_OBJ = type[HINT_ITEM_OBJ]

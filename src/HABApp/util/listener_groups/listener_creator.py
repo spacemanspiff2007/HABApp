@@ -1,15 +1,15 @@
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Final
 
 from HABApp.core.events import EventFilter
 from HABApp.core.internals import EventBusListener
-from HABApp.core.items import HINT_ITEM_OBJ
+from HABApp.core.items import BaseItem
 
 
 class ListenerCreatorBase:
-    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any]) -> None:
-        self.item = item
-        self.callback = callback
+    def __init__(self, item: BaseItem, callback: Callable[[Any], Any]) -> None:
+        self.item: Final = item
+        self.callback: Final = callback
 
         self.listener: EventBusListener | None = None
         self.active = True
@@ -17,14 +17,14 @@ class ListenerCreatorBase:
     def create_listener(self) -> EventBusListener:
         raise NotImplementedError()
 
-    def listen(self):
+    def listen(self) -> None:
         if not self.active:
             return None
 
         if self.listener is None:
             self.listener = self.create_listener()
 
-    def cancel(self):
+    def cancel(self) -> None:
         if not self.active:
             return None
 
@@ -34,7 +34,7 @@ class ListenerCreatorBase:
 
 
 class EventListenerCreator(ListenerCreatorBase):
-    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], event_filter: EventFilter) -> None:
+    def __init__(self, item: BaseItem, callback: Callable[[Any], Any], event_filter: EventFilter) -> None:
         super().__init__(item, callback)
         self.event_filter = event_filter
 
@@ -43,7 +43,7 @@ class EventListenerCreator(ListenerCreatorBase):
 
 
 class NoUpdateEventListenerCreator(ListenerCreatorBase):
-    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: int | float) -> None:
+    def __init__(self, item: BaseItem, callback: Callable[[Any], Any], secs: int | float) -> None:
         super().__init__(item, callback)
         self.secs = secs
 
@@ -52,7 +52,7 @@ class NoUpdateEventListenerCreator(ListenerCreatorBase):
 
 
 class NoChangeEventListenerCreator(ListenerCreatorBase):
-    def __init__(self, item: HINT_ITEM_OBJ, callback: Callable[[Any], Any], secs: int | float) -> None:
+    def __init__(self, item: BaseItem, callback: Callable[[Any], Any], secs: int | float) -> None:
         super().__init__(item, callback)
         self.secs = secs
 

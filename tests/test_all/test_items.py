@@ -1,6 +1,6 @@
 import pytest
 
-from HABApp.core.items import HINT_TYPE_ITEM_OBJ, BaseValueItem
+from HABApp.core.items import BaseValueItem
 from HABApp.mqtt.items import MqttBaseItem
 from tests.helpers.inspect import get_module_classes
 
@@ -24,7 +24,7 @@ def get_item_classes(skip=()):
 
 
 @pytest.mark.parametrize('item_cls, default', get_item_classes())
-def test_create_item(item_cls: HINT_TYPE_ITEM_OBJ, default) -> None:
+def test_create_item(item_cls: type[BaseValueItem], default) -> None:
 
     # test normal create
     item = item_cls('item_name')
@@ -39,7 +39,7 @@ def test_create_item(item_cls: HINT_TYPE_ITEM_OBJ, default) -> None:
 
 @pytest.mark.parametrize(
     'item_cls, default', get_item_classes(skip=('openhab', 'MqttPairItem'),))
-def test_get_create_item(item_cls: HINT_TYPE_ITEM_OBJ, default) -> None:
+def test_get_create_item(item_cls: type[BaseValueItem], default) -> None:
 
     # test normal create
     item = item_cls.get_create_item('item_name')
