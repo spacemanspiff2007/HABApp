@@ -106,7 +106,7 @@ class Rule(ContextProvidingObj):
 
         return f'<{cls_name}{" ".join(parts)}>'
 
-    def post_event(self, name: BaseItem | str, event: Any):
+    def post_event(self, name: BaseItem | str, event: Any) -> None:
         """
         Post an event to the event bus
 
@@ -142,7 +142,7 @@ class Rule(ContextProvidingObj):
             event_filter = HABApp.core.events.NoEventFilter()
         if not isinstance(event_filter, EventFilterBase):
             msg = f'Argument event_filter must be an instance of event filter (is {event_filter})'
-            raise ValueError(msg)
+            raise TypeError(msg)
 
         listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
         return self._habapp_ctx.add_event_listener(listener)
