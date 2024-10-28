@@ -162,6 +162,39 @@ and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueChangeEvent`.
    :member-order: groupwise
 
 
+Mqtt util
+--------------------------------------
+
+MqttTopicInfo
+""""""""""""""""""""""""""""""""""""""
+
+.. autoclass:: HABApp.mqtt.util.MqttTopicInfo
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+.. exec_code::
+    :hide_output:
+
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().set_up()
+
+    import HABApp
+    from unittest.mock import MagicMock
+    HABApp.mqtt.util.topic_info.publish = MagicMock()
+    # ------------ hide: stop -------------
+    from HABApp.mqtt.util import MqttTopicInfo
+
+    topic = MqttTopicInfo('my/output/only/topic')
+    topic.publish('new_value')
+
+    topic_qos = MqttTopicInfo('my/output/only/topic', qos=2)
+    topic_qos.publish('new_value')
+
+    topic_qos_retain = topic_qos.replace(retain=True)
+    topic_qos_retain.publish('new_value')
+
 
 Example MQTT rule
 --------------------------------------
