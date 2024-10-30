@@ -1,1 +1,1 @@
-from .topic_info import MqttTopicInfo
+from .publish_options import MqttPublishOptions

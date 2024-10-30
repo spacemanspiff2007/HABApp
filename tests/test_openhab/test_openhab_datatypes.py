@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytest
+from whenever import SystemDateTime
 
 from HABApp.openhab.items import DatetimeItem, NumberItem
 from HABApp.openhab.map_values import map_openhab_values
@@ -38,12 +39,7 @@ def test_type_decimal(value: str, target: int) -> None:
 def __get_dt_parms():
 
     # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
-    now = datetime.now()
-    offset_secs = int(now.astimezone().tzinfo.utcoffset(now).total_seconds())
-    hours = offset_secs // 3600
-    minutes = (offset_secs - 3600 * hours) // 60
-    assert offset_secs - hours * 3600 - minutes * 60 == 0
-    offset_str = f'{hours:02d}:{minutes:02d}'
+    offset_str = SystemDateTime(2023, 6, 17).format_common_iso()[-5:].replace(':', '')
 
     return (
         pytest.param(f'2023-06-17T15:31:04.754673068+{offset_str}', datetime(2023, 6, 17, 15, 31, 4, 754673), id='T1'),
@@ -52,7 +48,7 @@ def __get_dt_parms():
     )
 
 
-@pytest.mark.parametrize('value, target', __get_dt_parms())
+@pytest.mark.parametrize(('value', 'target'), __get_dt_parms())
 def test_type_datetime(value: str, target: datetime) -> None:
     assert DatetimeItem._state_from_oh_str(value) == target
     assert map_openhab_values('DateTime', value) == target

@@ -120,7 +120,7 @@ class TestOpenhabItemConvenience(TestBaseRule):
         # oh_send_command and command_value is the same for openhab items
         for name in ('oh_post_update', 'oh_send_command', 'command_value'):
             for k in get_openhab_test_types():
-                if name == 'oh_send_command' and k == 'Contact':
+                if name in ('oh_send_command', 'command_value') and k == 'Contact':
                     continue
                 self.add_test(f'{k}.{name}', self.test_func, k, name, get_openhab_test_states(k))
 

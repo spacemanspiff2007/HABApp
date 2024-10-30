@@ -75,8 +75,8 @@ def map_item(name: str, type: str, value: str | None,
             return cls.from_oh(name, value, label=label, tags=tags, groups=groups, metadata=meta)
 
         msg = f'Unknown openHAB type: {type} for {name}'
-        raise ValueError(msg)
+        raise ValueError(msg)  # noqa: TRY301
 
     except Exception as e:
-        process_exception('map_items', e, logger=log)
+        process_exception(map_item, e, logger=log)
         return None

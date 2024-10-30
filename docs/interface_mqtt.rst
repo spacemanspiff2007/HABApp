@@ -165,10 +165,10 @@ and it will also trigger for :class:`~HABApp.mqtt.events.MqttValueChangeEvent`.
 Mqtt util
 --------------------------------------
 
-MqttTopicInfo
+MqttPublishOptions
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: HABApp.mqtt.util.MqttTopicInfo
+.. autoclass:: HABApp.mqtt.util.MqttPublishOptions
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -184,14 +184,15 @@ MqttTopicInfo
     from unittest.mock import MagicMock
     HABApp.mqtt.util.topic_info.publish = MagicMock()
     # ------------ hide: stop -------------
-    from HABApp.mqtt.util import MqttTopicInfo
+    from HABApp.mqtt.util import MqttPublishOptions
 
-    topic = MqttTopicInfo('my/output/only/topic')
+    topic = MqttPublishOptions('my/output/only/topic')
     topic.publish('new_value')
 
-    topic_qos = MqttTopicInfo('my/output/only/topic', qos=2)
+    topic_qos = MqttPublishOptions('my/output/only/topic', qos=2)
     topic_qos.publish('new_value')
 
+    # create new through replace command wich will use qos=2 and retain=True
     topic_qos_retain = topic_qos.replace(retain=True)
     topic_qos_retain.publish('new_value')
 

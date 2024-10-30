@@ -52,9 +52,11 @@ def test_number_unit_of_measurement() -> None:
 
 def test_datetime() -> None:
 
-    offset_str = SystemDateTime.now().format_common_iso()[-6:].replace(':', '')
+    # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
+    offset_str = SystemDateTime(2022, 6, 15).format_common_iso()[-6:].replace(':', '')
 
     def get_dt(value: str):
+        assert value.startswith('2022-06-15')   # Date must match with offset_str
         return map_item(
             'test1', 'DateTime', f'{value}{offset_str}', label='', tags=frozenset(), groups=frozenset(), metadata={})
 

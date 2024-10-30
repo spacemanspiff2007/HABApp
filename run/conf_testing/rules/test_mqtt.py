@@ -8,7 +8,7 @@ from HABApp.core.connections import Connections, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
-from HABApp.mqtt.util import MqttTopicInfo
+from HABApp.mqtt.util import MqttPublishOptions
 
 
 log = logging.getLogger('HABApp.MqttTestEvents')
@@ -91,7 +91,7 @@ class TestMQTTEvents(TestBaseRule):
         connection.advance_status_task.start_if_not_running()
 
     def test_mqtt_topic_info(self) -> None:
-        t = MqttTopicInfo('test/event_topic')
+        t = MqttPublishOptions('test/event_topic')
         with EventWaiter(t.topic, ValueUpdateEventFilter()) as waiter:
             t.publish('asdf')
             waiter.wait_for_event(value='asdf')
