@@ -149,7 +149,9 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero'''
 
 
-@pytest.mark.skipif(PYTHON_313, reason='New traceback from python 3.11 and 3.12')
+@pytest.mark.skipif(
+    PYTHON_313 or (not PYTHON_311 and not PYTHON_312 and not PYTHON_313),
+    reason='New traceback from python 3.11 and 3.12')
 def test_exception_expression_remove_py_311_312() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
