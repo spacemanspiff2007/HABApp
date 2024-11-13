@@ -1,5 +1,3 @@
-from msgspec import convert
-
 from HABApp.openhab.definitions.rest.items import CommandOptionResp, ItemResp, StateOptionResp
 
 
@@ -28,14 +26,14 @@ def test_item_1() -> None:
         'tags': ['Tag1'],
         'groupNames': ['Group1', 'Group2']
     }
-    item = convert(_in, type=ItemResp)
+    item = ItemResp.model_validate(_in)
 
     assert item.name == 'Item1Name'
     assert item.label == 'Item1Label'
     assert item.state == 'CLOSED'
     assert item.transformed_state == 'zu'
-    assert item.tags == ['Tag1']
-    assert item.groups == ['Group1', 'Group2']
+    assert item.tags == ('Tag1', )
+    assert item.groups == ('Group1', 'Group2')
 
 
 def test_item_2() -> None:
@@ -58,7 +56,8 @@ def test_item_2() -> None:
            'label': 'Senderliste',
            'category': None,
            'tags': [], 'groupNames': []}
-    item = convert(_in, type=ItemResp)
+
+    item = ItemResp.model_validate(_in)
 
     assert item.name == 'iSbPlayer_Favorit'
     assert item.label == 'Senderliste'
@@ -68,10 +67,10 @@ def test_item_2() -> None:
     desc = item.state_description
     assert desc.pattern == '%s'
     assert desc.read_only is False
-    assert desc.options == [StateOptionResp('0', d1), StateOptionResp('1', d2)]
+    assert desc.options == (StateOptionResp(value='0', label=d1), StateOptionResp(value='1', label=d2))
 
     desc = item.command_description
-    assert desc.command_options == [CommandOptionResp('0', d1), CommandOptionResp('1', d2)]
+    assert desc.command_options == (CommandOptionResp(command='0', label=d1), CommandOptionResp(command='1', label=d2))
 
 
 def test_group_item() -> None:
@@ -81,7 +80,7 @@ def test_group_item() -> None:
                 'link': 'http://ip:port/rest/items/christmasTree',
                 'state': '100',
                 'stateDescription': {
-                    'minimum': 0, 'maximum': 100, 'step': 1, 'pattern': '%d%%', 'readOnly': False, 'options': []
+                    'minimum': 0, 'maximum': 100, 'step': 1, 'pattern': '%d%%', 'readOnly': False, 'options': ()
                 },
                 'type': 'Dimmer',
                 'name': 'christmasTree',
@@ -93,13 +92,13 @@ def test_group_item() -> None:
             {
                 'link': 'http://ip:port/rest/items/frontgardenPower',
                 'state': 'OFF',
-                'stateDescription': {'pattern': '%s', 'readOnly': False, 'options': []},
+                'stateDescription': {'pattern': '%s', 'readOnly': False, 'options': ()},
                 'type': 'Switch',
                 'name': 'frontgardenPower',
                 'label': 'Outside Power',
                 'category': 'poweroutlet',
                 'tags': [],
-                'groupNames': ['Group1', 'Group2'],
+                'groupNames': ('Group1', 'Group2'),
             }
         ],
         'groupType': 'Switch',
@@ -122,10 +121,11 @@ def test_group_item() -> None:
             'ALL_TOPICS'
         ]
     }
-    item = convert(_in, type=ItemResp)
+
+    item = ItemResp.model_validate(_in)
 
     assert item.name == 'SwitchGroup'
     assert isinstance(item.members[0], ItemResp)
     assert item.members[0].name == 'christmasTree'
     assert item.group_function.name == 'OR'
-    assert item.group_function.params == ['ON', 'OFF']
+    assert item.group_function.params == ('ON', 'OFF')

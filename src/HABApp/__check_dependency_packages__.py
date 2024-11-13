@@ -23,7 +23,6 @@ def get_dependencies() -> list[str]:
         'ujson',
         'immutables',
         'javaproperties',
-        'msgspec',
 
         'typing-extensions',
     ]

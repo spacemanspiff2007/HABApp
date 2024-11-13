@@ -1,8 +1,6 @@
 from collections.abc import Callable
 from typing import Any
 
-import msgspec
-
 
 try:
     import ujson
@@ -12,7 +10,3 @@ except ImportError:
     import json
     load_json: Callable[[str], Any] = json.loads
     dump_json: Callable[[str], Any] = json.dumps
-
-
-decode_struct = msgspec.json.decode
-encode_struct = msgspec.json.encode

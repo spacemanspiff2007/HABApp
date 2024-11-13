@@ -1,14 +1,12 @@
 import logging
-from json import dumps
 
-import msgspec.json
 from whenever import Instant
 
 import HABApp.openhab.connection.plugins.load_items as load_items_module
 from HABApp.core.internals import ItemRegistry
 from HABApp.openhab.connection.connection import OpenhabContext
 from HABApp.openhab.connection.plugins import LoadOpenhabItemsPlugin
-from HABApp.openhab.definitions.rest import ItemResp, ShortItemResp, ThingResp
+from HABApp.openhab.definitions.rest import ItemRespList, ShortItemResp, ThingResp
 from HABApp.openhab.definitions.rest.things import ThingStatusResp
 from HABApp.openhab.items import Thing
 
@@ -56,13 +54,13 @@ async def _mock_get_all_items():
         },
     ]
 
-    return msgspec.json.decode(dumps(resp), type=list[ItemResp])
+    return ItemRespList.validate_python(resp)
 
 
 async def _mock_get_all_items_state():
     return [
-        ShortItemResp('Number:Length', 'ItemLength', '5 m'),
-        ShortItemResp('Number', 'ItemPlain', '3.14')
+        ShortItemResp(type='Number:Length', name='ItemLength', state='5 m'),
+        ShortItemResp(type='Number', name='ItemPlain', state='3.14')
     ]
 
 
@@ -106,14 +104,14 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_things', _mock_ret)
 
     t1 = ThingResp(
-        uid='thing_1', thing_type='thing_type_1', editable=True, status=ThingStatusResp(
-            status='ONLINE', detail='NONE', description=''
+        UID='thing_1', thingTypeUID='thing_type_1', editable=True, statusInfo=ThingStatusResp(
+            status='ONLINE', statusDetail='NONE', description=''
         )
     )
 
     t2 = ThingResp(
-        uid='thing_2', thing_type='thing_type_2', editable=True, status=ThingStatusResp(
-            status='OFFLINE', detail='NONE', description=''
+        UID='thing_2', thingTypeUID='thing_type_2', editable=True, statusInfo=ThingStatusResp(
+            status='OFFLINE', statusDetail='NONE', description=''
         )
     )
 

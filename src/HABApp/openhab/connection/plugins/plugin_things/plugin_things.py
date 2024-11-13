@@ -4,8 +4,6 @@ import time
 from pathlib import Path
 from typing import Any
 
-import msgspec
-
 import HABApp
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
@@ -81,7 +79,7 @@ class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     async def load_thing_data(self, always: bool) -> list[dict[str, Any]]:
         if always or not self.cache_cfg or time.time() - self.cache_ts > 20:
-            self.cache_cfg = [msgspec.to_builtins(k) for k in await HABApp.openhab.interface_async.async_get_things()]
+            self.cache_cfg = [k.model_dump(mode='json') for k in await HABApp.openhab.interface_async.async_get_things()]
             self.cache_ts = time.time()
         return self.cache_cfg
 
