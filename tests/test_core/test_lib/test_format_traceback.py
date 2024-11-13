@@ -305,8 +305,8 @@ File "internals/item_registry/item_registry.py", line 31 in get_item
 Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
     func()
-     ~~~~^^
-  File "test_core/test_lib/test_format_traceback.py", line 205, in func_ir
+    ~~~~^^
+  File "test_core/test_lib/test_format_traceback.py", line 253, in func_ir
     Items.get_item('1234')
      ~~~~~~~~~~~~~~^^^^^^^^
   File "internals/item_registry/item_registry.py", line 31, in get_item
