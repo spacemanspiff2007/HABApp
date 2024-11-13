@@ -63,14 +63,15 @@ openhab:
 
 
 def test_migrate(test_logs: LogCollector) -> None:
-    text = '''
-  subscribe:
-    qos: 0   # Default QoS for subscribing
-    topics:
-    - - '#'
-      - 
-  publish:
-    '''
+    text = (
+        '\n'
+        '  subscribe:\n'
+        '    qos: 0   # Default QoS for subscribing\n'
+        '    topics:\n'
+        "    - - '#'\n"
+        '      - \n'
+        '  publish:\n'
+    )
 
     obj = yaml_safe.load(text)
     Subscribe.model_validate(obj['subscribe'])
