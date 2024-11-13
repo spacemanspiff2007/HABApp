@@ -182,7 +182,7 @@ MqttPublishOptions
 
     import HABApp
     from unittest.mock import MagicMock
-    HABApp.mqtt.util.topic_info.publish = MagicMock()
+    HABApp.mqtt.util.publish_options.publish = MagicMock()
     # ------------ hide: stop -------------
     from HABApp.mqtt.util import MqttPublishOptions
 
