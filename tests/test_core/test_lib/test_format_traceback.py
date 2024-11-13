@@ -284,13 +284,13 @@ File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
      func = <function func_ir at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 253 in func_ir
+File "test_core/test_lib/test_format_traceback.py", line 255 in func_ir
 --------------------------------------------------------------------------------
-     247 | def func_ir() -> None:
-     249 |     from HABApp.core.items import Item
-     250 |     Items = HABApp.core.Items
-     252 |     Items.add_item(Item('asdf'))
--->  253 |     Items.get_item('1234')
+     297 | def func_ir() -> None:
+     250 |     from HABApp.core.items import Item
+     251 |     Items = HABApp.core.Items
+     253 |     Items.add_item(Item('asdf'))
+-->  254 |     Items.get_item('1234')
 
 File "internals/item_registry/item_registry.py", line 31 in get_item
 --------------------------------------------------------------------------------
@@ -308,7 +308,7 @@ Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
     func()
     ~~~~^^
-  File "test_core/test_lib/test_format_traceback.py", line 253, in func_ir
+  File "test_core/test_lib/test_format_traceback.py", line 254, in func_ir
     Items.get_item('1234')
     ~~~~~~~~~~~~~~^^^^^^^^
   File "internals/item_registry/item_registry.py", line 31, in get_item
