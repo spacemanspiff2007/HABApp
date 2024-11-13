@@ -1,14 +1,11 @@
 import logging
 import re
 
-import pytest
-from pydantic import ValidationError
+from easyconfig.yaml import yaml_safe
+from tests.helpers import LogCollector
 
 from HABApp import CONFIG
-from easyconfig.yaml import yaml_safe
-
 from HABApp.config.models.mqtt import Subscribe
-from tests.helpers import LogCollector
 
 
 def test_default_file() -> None:
@@ -65,7 +62,7 @@ openhab:
 '''
 
 
-def test_migrate(test_logs: LogCollector):
+def test_migrate(test_logs: LogCollector) -> None:
     text = '''
   subscribe:
     qos: 0   # Default QoS for subscribing

@@ -1,5 +1,3 @@
-from typing import TypeVar
-
 from whenever import Instant
 
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
