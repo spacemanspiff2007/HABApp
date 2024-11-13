@@ -6,7 +6,7 @@ from easyconfig import create_app_config
 from pydantic import BaseModel
 
 import HABApp
-from HABApp.core.const.const import PYTHON_311, PYTHON_313
+from HABApp.core.const.const import PYTHON_311, PYTHON_312, PYTHON_313
 from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.lib import format_exception
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_lib_file, is_suppressed_habapp_file
@@ -103,7 +103,7 @@ def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | i
     print(CONFIGURATION)
 
 
-@pytest.mark.skipif(PYTHON_311, reason='Traceback Python 3.10')
+@pytest.mark.skipif(PYTHON_311 or PYTHON_312 or PYTHON_313, reason='Traceback Python 3.10')
 def test_exception_expression_remove_py310() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
@@ -149,8 +149,8 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero'''
 
 
-@pytest.mark.skipif(PYTHON_313, reason='New traceback from python 3.11-3.13')
-def test_exception_expression_remove() -> None:
+@pytest.mark.skipif(not PYTHON_311 or not PYTHON_312, reason='New traceback from python 3.11 and 3.12')
+def test_exception_expression_remove_py_311_312() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
@@ -282,7 +282,7 @@ File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
      func = <function func_ir at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 205 in func_ir
+File "test_core/test_lib/test_format_traceback.py", line 253 in func_ir
 --------------------------------------------------------------------------------
      199 | def func_ir() -> None:
      201 |     from HABApp.core.items import Item
