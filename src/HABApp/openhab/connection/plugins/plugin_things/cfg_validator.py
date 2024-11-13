@@ -103,7 +103,7 @@ class UserItemCfg(BaseModel):
 
             # metadata is nested
             if k == 'metadata':
-                v[k] = {k: v.dict() for k, v in val.items()} if val is not None else {}
+                v[k] = {k: v.model_dump() for k, v in val.items()} if val is not None else {}
                 continue
 
             # resolve str wildcards
@@ -116,7 +116,8 @@ class UserItemCfg(BaseModel):
         # ensure a valid item name, otherwise the creation will definitely fail
         v['name'] = name = v['name'].replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue').replace(' ', '_')
         if not RE_VALID_NAME.fullmatch(name):
-            raise InvalidItemNameError(f'"{name}" is not a valid name for an item!\n   (created for {context})')
+            msg = f'"{name}" is not a valid name for an item!\n   (created for {context})'
+            raise InvalidItemNameError(msg)
         return UserItem(**v)
 
 
