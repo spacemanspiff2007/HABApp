@@ -287,8 +287,8 @@ File "test_core/test_lib/test_format_traceback.py", line 253 in func_ir
      247 | def func_ir() -> None:
      249 |     from HABApp.core.items import Item
      250 |     Items = HABApp.core.Items
-     251 |     Items.add_item(Item('asdf'))
--->  252 |     Items.get_item('1234')
+     252 |     Items.add_item(Item('asdf'))
+-->  253 |     Items.get_item('1234')
 
 File "internals/item_registry/item_registry.py", line 31 in get_item
 --------------------------------------------------------------------------------
