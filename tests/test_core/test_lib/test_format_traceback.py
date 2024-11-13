@@ -285,10 +285,10 @@ File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
 File "test_core/test_lib/test_format_traceback.py", line 253 in func_ir
 --------------------------------------------------------------------------------
      247 | def func_ir() -> None:
-     248 |     from HABApp.core.items import Item
-     249 |     Items = HABApp.core.Items
-     250 |     Items.add_item(Item('asdf'))
--->  251 |     Items.get_item('1234')
+     249 |     from HABApp.core.items import Item
+     250 |     Items = HABApp.core.Items
+     251 |     Items.add_item(Item('asdf'))
+-->  252 |     Items.get_item('1234')
 
 File "internals/item_registry/item_registry.py", line 31 in get_item
 --------------------------------------------------------------------------------
