@@ -237,7 +237,7 @@ File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_
 Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
     func()
-     ~~~~^^
+    ~~~~^^
   File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
     1 / 0
     ~~^~~
