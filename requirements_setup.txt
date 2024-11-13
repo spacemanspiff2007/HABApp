@@ -6,8 +6,7 @@ watchdog    == 5.0.3
 ujson       == 5.10.0
 aiomqtt     == 2.3.0
 
-# eascheduler ==
-git+https://github.com/spacemanspiff2007/eascheduler.git@rework
+eascheduler == 0.2.0
 
 immutables  == 0.21
 easyconfig  == 0.3.2
