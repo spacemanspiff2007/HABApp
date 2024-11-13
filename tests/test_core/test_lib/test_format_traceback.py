@@ -6,7 +6,7 @@ from easyconfig import create_app_config
 from pydantic import BaseModel
 
 import HABApp
-from HABApp.core.const.const import PYTHON_311
+from HABApp.core.const.const import PYTHON_311, PYTHON_313
 from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.lib import format_exception
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_lib_file, is_suppressed_habapp_file
@@ -149,7 +149,7 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero'''
 
 
-@pytest.mark.skipif(not PYTHON_311, reason='New traceback from python 3.11')
+@pytest.mark.skipif(PYTHON_313, reason='New traceback from python 3.11-3.13')
 def test_exception_expression_remove() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
@@ -196,6 +196,54 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero'''
 
 
+@pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
+def test_exception_expression_remove() -> None:
+    log.setLevel(logging.WARNING)
+    msg = exec_func(func_test_assert_none)
+    assert msg == r'''
+File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+--------------------------------------------------------------------------------
+     19 | def exec_func(func) -> str:
+     20 |     try:
+-->  21 |         func()
+     22 |     except Exception as e:
+   ------------------------------------------------------------
+     e = ZeroDivisionError('division by zero')
+     func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
+--------------------------------------------------------------------------------
+     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
+      (...)
+     94 |     assert isinstance(c, (str, int)), type(c)
+     95 |     CONFIGURATION = '3'
+     96 |     my_dict = {'key_a': 'val_a'}
+-->  97 |     1 / 0
+     98 |     log.error('Error message')
+   ------------------------------------------------------------
+     CONFIG.a = 3
+     a = None
+     b = None
+     c = 3
+     CONFIGURATION = '3'
+     log = <Logger TestLogger (WARNING)>
+     my_dict = {'key_a': 'val_a'}
+     my_dict['key_a'] = 'val_a'
+     CONFIG.a > 2 = True
+   ------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+    func()
+     ~~~~^^
+  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
+    1 / 0
+    ~~^~~
+ZeroDivisionError: division by zero'''
+
+
 def func_ir() -> None:
 
     from HABApp.core.items import Item
@@ -218,6 +266,7 @@ def _setup_ir(clean_objs, monkeypatch, ir, eb):
     yield
 
 
+@pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
 def test_skip_objs(_setup_ir) -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_ir)
@@ -256,8 +305,10 @@ File "internals/item_registry/item_registry.py", line 31 in get_item
 Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
     func()
+     ~~~~^^
   File "test_core/test_lib/test_format_traceback.py", line 205, in func_ir
     Items.get_item('1234')
+     ~~~~~~~~~~~~~~^^^^^^^^
   File "internals/item_registry/item_registry.py", line 31, in get_item
     raise ItemNotFoundException(name) from None
 HABApp.core.errors.ItemNotFoundException: Item 1234 does not exist!'''
