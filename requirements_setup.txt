@@ -1,4 +1,4 @@
-aiohttp     == 3.10.10
+aiohttp     == 3.11.2
 pydantic    == 2.9.2
 bidict      == 0.23.1
 watchdog    == 6.0.0
