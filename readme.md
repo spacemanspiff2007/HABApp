@@ -136,6 +136,10 @@ Changelog:
 
 Migration of rules:
 - Search for ``self.run.at`` and replace with ``self.run.once``
+- If you use job.offset, job.earliest, job.latest or job.jitter you have to rewrite the condition to the new syntax:
+  ``self.run.on_sunrise(self.my_function).offset(timedelta(hours=2))`` becomes
+  ``self.run.at(self.run.trigger.sunrise().offset(timedelta(hours=2)), self.my_function)``
+- All other scheduler functions will emit deprecation warnings with a hint how to rewrite them
 - ``item.last_update`` and ``item.last_change`` can now directly used to check if it's newer/older than a delta.
   Replace ``item.last_update > datetime_obj`` with ``item.last_update > timedelta_obj`` or
   ``item.last_update.newer_than(minutes=10)``

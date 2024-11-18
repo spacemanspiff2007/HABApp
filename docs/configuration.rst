@@ -28,10 +28,15 @@ Example
                         # (!) Attention (!):
                         # Don't create rule instances in files inside the lib folder! It will lead to strange behaviour.
 
+
     location:           # Specify the location where your HABApp instance is running
       latitude: 0.0     # The value is used to calculate the Sunrise/Sunset etc accordingly
       longitude: 0.0
       elevation: 0.0
+
+      country: DE       # ISO 3166-1 Alpha-2 country code - here Germany
+      subdivision: BER  # ISO 3166-2 Subdivision code or alias - here Berlin
+
 
     openhab:
         ping:
