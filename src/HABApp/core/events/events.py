@@ -62,7 +62,7 @@ class ValueCommandEvent:
 
 class ItemNoChangeEvent:
     """
-    :ivar str               name:
+    :ivar str name:
     :ivar int | float seconds:
     """
 

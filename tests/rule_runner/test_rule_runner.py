@@ -20,9 +20,9 @@ class MyFirstRule(HABApp.Rule):
     def __init__(self, my_parameter):
         super().__init__()
         self.param = my_parameter
-        self.run.soon(self.say_something)
+        self.run.soon(self.do_something)
 
-    def say_something(self):
+    def do_something(self):
         calls.append(self.param)
 
 # This is normal python code, so you can create Rule instances as you like
@@ -57,7 +57,7 @@ assert len(calls) == 4
         pytest.fail('Error')
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 def test_doc_run_exception(monkeypatch) -> None:
     """Check that the RuleRunner propagates exceptions which happen during exception formatting"""
 
@@ -76,9 +76,14 @@ def test_doc_run_exception(monkeypatch) -> None:
     class MyFirstRule(HABApp.Rule):
         def __init__(self) -> None:
             super().__init__()
-            self.run.soon(self.say_something)
+            self.run.soon(self.do_something)
 
-        def say_something(self) -> None:
+            j = self.run.at(self.run.trigger.sunrise(), lambda: 1/0)
+            j.pause()
+            j.resume()
+            j.cancel()
+
+        def do_something(self) -> None:
             1 / 0
 
     MyFirstRule()

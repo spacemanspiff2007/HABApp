@@ -33,8 +33,13 @@ class SyncScheduler:
     def add_job(self, job) -> None:
         self.jobs.append(job)
 
+    def update_job(self, job) -> None:
+        self.remove_job(job)
+        self.add_job(job)
+
     def remove_job(self, job) -> None:
-        self.jobs.remove(job)
+        if job in self.jobs:
+            self.jobs.remove(job)
 
     def remove_all(self) -> None:
         self.jobs.clear()
