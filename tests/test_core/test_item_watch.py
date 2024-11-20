@@ -23,7 +23,7 @@ async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector) -> 
     assert w1 is not w2
     w2.fut.cancel()
 
-    test_logs.add_ignored('HABApp', 'WARNING', 'Watcher ItemNoChangeWatch (5s) for test has already been created')
+    test_logs.add_ignored('HABApp', 'WARNING', 'Watcher ItemNoChangeWatch (5.0s) for test has already been created')
 
     await asyncio.sleep(0.01)
 

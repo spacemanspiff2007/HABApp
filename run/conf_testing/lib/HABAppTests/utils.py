@@ -50,6 +50,6 @@ def find_astro_sun_thing() -> str:
 
 
 def get_bytes_text(value):
-    if isinstance(value, bytes) and len(value) > 100 * 1024:
-        return b2a_hex(value[0:40]).decode() + ' ... ' + b2a_hex(value[-40:]).decode()
+    if isinstance(value, bytes) and len(value) > 300:
+        return b2a_hex(value[:40]).decode() + ' ... ' + b2a_hex(value[-40:]).decode()
     return value

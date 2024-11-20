@@ -1,3 +1,4 @@
+from eascheduler.builder.helper import HINT_POS_TIMEDELTA, get_pos_timedelta_secs
 from whenever import Instant
 
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
@@ -10,7 +11,6 @@ from HABApp.core.internals import (
 )
 from HABApp.core.internals.item_registry import ItemRegistryItem
 from HABApp.core.lib import InstantView
-from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF, get_positive_time_diff
 
 from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
 from .tmp_data import add_tmp_data as _add_tmp_data
@@ -63,24 +63,24 @@ class BaseItem(ItemRegistryItem):
             ret += f'{", " if ret else ""}{k}: {getattr(self, k)}'
         return f'<{self.__class__.__name__} {ret:s}>'
 
-    def watch_change(self, secs: TH_POSITIVE_TIME_DIFF) -> ItemNoChangeWatch:
+    def watch_change(self, secs: HINT_POS_TIMEDELTA) -> ItemNoChangeWatch:
         """Generate an event if the item does not change for a certain period of time.
         Has to be called from inside a rule function.
 
         :param secs: secs after which the event will occur, max 1 decimal digit for floats
         :return: The watch obj which can be used to cancel the watch
         """
-        secs = get_positive_time_diff(secs, round_digits=1)
+        secs = round(get_pos_timedelta_secs(secs), 1)
         return self._last_change.add_watch(secs)
 
-    def watch_update(self, secs: TH_POSITIVE_TIME_DIFF) -> ItemNoUpdateWatch:
+    def watch_update(self, secs: HINT_POS_TIMEDELTA) -> ItemNoUpdateWatch:
         """Generate an event if the item does not receive and update for a certain period of time.
         Has to be called from inside a rule function.
 
         :param secs: secs after which the event will occur, max 1 decimal digit for floats
         :return: The watch obj which can be used to cancel the watch
         """
-        secs = get_positive_time_diff(secs, round_digits=1)
+        secs = round(get_pos_timedelta_secs(secs), 1)
         return self._last_update.add_watch(secs)
 
     def listen_event(self, callback: TYPE_EVENT_CALLBACK,

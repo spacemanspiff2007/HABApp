@@ -32,6 +32,10 @@ def test_cmp_obj(view: InstantView) -> None:
     assert view > 'PT59S'
     assert view > 59
 
+    assert view < Instant.now()
+    assert view < InstantView.now()
+    assert view == Instant.now().subtract(minutes=1)
+
 
 def test_cmp_funcs(view: InstantView) -> None:
     assert view.older_than(seconds=59)
@@ -44,8 +48,15 @@ def test_cmp_funcs(view: InstantView) -> None:
 
 
 def test_delta_funcs(view: InstantView) -> None:
-    assert view.delta() == seconds(60)
+    assert view.delta_now() == seconds(60)
     assert view.py_timedelta() == dt_timedelta(seconds=60)
+
+    assert view.delta_now(Instant.now()) == seconds(60)
+    assert view.delta_now(InstantView.now()) == seconds(60)
+
+    with pytest.raises(ValueError) as e:
+        view.delta_now(Instant.now().subtract(minutes=2))
+    assert str(e.value) == 'Reference instant must be newer than the instant of the InstantView'
 
 
 def test_convert() -> None:

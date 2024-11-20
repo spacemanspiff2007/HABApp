@@ -35,10 +35,10 @@ async def cleanup_items(keep_items: set[str]):
     all_items = await async_get_items()
 
     to_delete: dict[str, HABAppThingPluginData] = {}
-    for cfg in filter(_filter_items, all_items):
+    for cfg in filter(_filter_items, all_items):    # type: ItemResp
         name = cfg.name
         if name not in keep_items:
-            to_delete[name] = cfg['metadata']['HABApp']
+            to_delete[name] = cfg.metadata['HABApp']
 
     if not to_delete:
         return None

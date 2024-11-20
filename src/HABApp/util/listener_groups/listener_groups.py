@@ -15,8 +15,9 @@ from .listener_creator import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
+    from eascheduler.builder.helper import HINT_POS_TIMEDELTA
+
     from HABApp.core.internals import EventFilterBase
-    from HABApp.core.lib.parameters import TH_POSITIVE_TIME_DIFF
 
 
 class ListenerCreatorNotFoundError(Exception):
@@ -130,7 +131,7 @@ class EventListenerGroup:
         return self
 
     def add_no_update_watcher(self, item: BaseItem | Iterable[BaseItem], callback: Callable[[Any], Any],
-                              seconds: TH_POSITIVE_TIME_DIFF, alias: str | None = None
+                              seconds: HINT_POS_TIMEDELTA, alias: str | None = None
                               ) -> EventListenerGroup:
         """Add an no update watcher to the group. On ``listen`` this will create a no update watcher and
          the corresponding event listener that will trigger the callback
@@ -146,7 +147,7 @@ class EventListenerGroup:
         return self
 
     def add_no_change_watcher(self, item: BaseItem | Iterable[BaseItem], callback: Callable[[Any], Any],
-                              seconds: TH_POSITIVE_TIME_DIFF, alias: str | None = None
+                              seconds: HINT_POS_TIMEDELTA, alias: str | None = None
                               ) -> EventListenerGroup:
         """Add a no change watcher to the group. On ``listen`` this will create a no change watcher and
          the corresponding event listener that will trigger the callback

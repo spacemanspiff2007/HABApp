@@ -5,7 +5,7 @@ watchdog    == 6.0.0
 ujson       == 5.10.0
 aiomqtt     == 2.3.0
 
-eascheduler == 0.2.0
+eascheduler == 0.2.1
 
 immutables  == 0.21
 easyconfig  == 0.3.2

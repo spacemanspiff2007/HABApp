@@ -12,31 +12,48 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-HINT_OBJ: TypeAlias = dt_timedelta | TimeDelta | int | str | Instant
-
-
 class InstantView:
-    __slots__ = ('_instant',)
+    __slots__ = ('_instant', )
 
     def __init__(self, instant: Instant) -> None:
         self._instant: Final = instant
 
-    def delta(self, now: Instant | None = None) -> TimeDelta:
-        """Return the delta between the instant and now
+    @classmethod
+    def now(cls) -> InstantView:
+        """Create a new instance with the current time"""
+        return cls(Instant.now())
 
-        :param now: optional instant to compare to
+    def delta_now(self, now: InstantView | Instant | None = None) -> TimeDelta:
+        """Return the delta between now and the instant.
+        The delta will be positive, e.g.
+        if the InstantView is from 5 seconds ago this will return a timedelta with 5 seconds.
+
+        :param now: optional instant to compare to instead of now, must be newer than the instant of the instant view
         """
 
-        if now is None:
-            now = Instant.now()
-        return now - self._instant
+        match now:
+            case None:
+                ref = Instant.now()
+            case InstantView():
+                ref = now._instant
+            case Instant():
+                ref = now
+            case _:
+                msg = f'Invalid type: {type(now).__name__}'
+                raise TypeError(msg)
 
-    def py_timedelta(self, now: Instant | None = None) -> dt_timedelta:
+        if ref < self._instant:
+            msg = f'Reference instant must be newer than the instant of the {self.__class__.__name__}'
+            raise ValueError(msg)
+
+        return ref - self._instant
+
+    def py_timedelta(self, now: InstantView | Instant | None = None) -> dt_timedelta:
         """Return the timedelta between the instant and now
 
         :param now: optional instant to compare to
         """
-        return self.delta(now).py_timedelta()
+        return self.delta_now(now).py_timedelta()
 
     def py_datetime(self) -> dt_datetime:
         """Return the datetime of the instant"""
@@ -46,6 +63,9 @@ class InstantView:
         return f'InstantView({self._instant.to_system_tz()})'
 
     def _cmp(self, op: Callable[[Any, Any], bool], obj: HINT_OBJ | None, **kwargs: float) -> bool:
+
+        td: TimeDelta | None = None
+
         match obj:
             case None:
                 if days := kwargs.get('days', 0):
@@ -59,14 +79,19 @@ class InstantView:
                 td = TimeDelta(seconds=obj)
             case str():
                 td = TimeDelta.parse_common_iso(obj)
-            case Instant():
+
+        if td is None:
+            if isinstance(obj, InstantView):
+                obj = obj._instant
+            if isinstance(obj, Instant):
                 # If the compare the instant the logic is the other way around
                 # view > delta(3)    -> view older than 3 seconds
-                # view > instant(-3) -> view newer than 3 seconds
+                # view > instant(-3) -> view newer than the instant 3 seconds ago
                 return {ge: le, gt: lt, le: ge, lt: gt}[op](self._instant, obj)
-            case _:
-                msg = f'Invalid type: {type(obj).__name__}'
-                raise TypeError(msg)
+
+        if td is None:
+            msg = f'Invalid type: {type(obj).__name__}'
+            raise TypeError(msg)
 
         if td <= TimeDelta.ZERO:
             msg = 'Delta must be positive since instant is in the past'
@@ -110,3 +135,6 @@ class InstantView:
         if isinstance(other, Instant):
             return self._instant == other
         return NotImplemented
+
+
+HINT_OBJ: TypeAlias = dt_timedelta | TimeDelta | int | str | Instant | InstantView
