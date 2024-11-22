@@ -56,7 +56,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     if not await self.sync_items(context):
                         break
                 else:
-                    log.warning(f'Item state sync failed!')
+                    log.warning('Item state sync failed!')
 
             if context.created_things:
                 for d in delays:
@@ -64,15 +64,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     if not await self.sync_things(context):
                         break
                 else:
-                    log.warning(f'Thing sync failed!')
-
-            if context.created_things:
-                for d in delays:
-                    await sleep(d)
-                    if not await self.sync_things(context):
-                        break
-                else:
-                    log.warning(f'Thing sync failed!')
+                    log.warning('Thing sync failed!')
 
     async def load_items(self, context: OpenhabContext) -> None:
         from HABApp.openhab.map_items import map_item
