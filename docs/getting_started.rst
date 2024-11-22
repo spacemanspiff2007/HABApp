@@ -194,7 +194,7 @@ It's possible to compare these values directly with deltas without having to do 
     # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
-    from HABApp.rule.scheduler import minutes, seconds
+    from HABApp.rule.scheduler import minutes, seconds, InstantView
 
     class TimestampRule(HABApp.Rule):
         def __init__(self):
@@ -202,7 +202,7 @@ It's possible to compare these values directly with deltas without having to do 
             # This item was created by another rule, that's why "get_item" is used
             self.my_item = Item.get_item('Item_Name')
 
-            # Access of timestamps
+            # Access of item timestamps
 
             # It's possible to compare directly with the most common (time-) deltas through the operator
             if self.my_item.last_update >= minutes(1):
@@ -213,6 +213,17 @@ It's possible to compare these values directly with deltas without having to do 
                 print('Item was changed in the last 1min 30s')
             if self.my_item.last_change.older_than(seconds(30)):
                 print('Item was changed before 30s')
+
+            # if you want to do calculations you can also get a delta
+            delta_to_now = self.my_item.last_change.delta_now()
+
+
+            # Instead of dealing with timestamps you can also have the same convenience
+            # for arbitrary timestamps by using an InstantView object
+            timestamp = InstantView.now()
+            assert timestamp.newer_than(minutes=1)
+            delta_to_now = timestamp.delta_now()
+
 
     TimestampRule()
 
