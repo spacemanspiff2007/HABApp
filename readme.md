@@ -127,7 +127,7 @@ MyOpenhabRule()
 ```
 
 # Changelog
-#### 24.XX.XX (2024-XX-XX)
+#### 24.11.0 (2024-11-22)
 This is a breaking change!
 
 Changelog:
