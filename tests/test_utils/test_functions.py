@@ -3,14 +3,14 @@ import pytest
 from HABApp.util.functions import hsb_to_rgb, max, min, rgb_to_hsb
 
 
-def test_none_remove():
+def test_none_remove() -> None:
     for func in (max, min):
         assert func(1, None) == 1
         assert func(None, None, default=2) == 2
         assert func([], default='asdf') == 'asdf'
 
 
-def test_min():
+def test_min() -> None:
     assert min(1, None) == 1
     assert min(2, 3, None) == 2
 
@@ -18,7 +18,7 @@ def test_min():
     assert min([2, 3, None]) == 2
 
 
-def test_max():
+def test_max() -> None:
     assert max(1, None) == 1
     assert max(2, 3, None) == 3
 
@@ -32,7 +32,7 @@ def test_max():
     ((128, 138,  33), ( 65.71,  76.09, 54.12)),
     ((  0,   0,   0), (     0,      0,     0)),
 ])
-def test_rgb_to_hsv(rgb, hsv):
+def test_rgb_to_hsv(rgb, hsv) -> None:
     assert hsv == rgb_to_hsb(*rgb)
 
 
@@ -43,5 +43,5 @@ def test_rgb_to_hsv(rgb, hsv):
     ((  0, 100, 100), (255,   0,   0)),
     ((  0,   0,   0), (  0,   0,   0)),
 ])
-def test_hsv_to_rgb(hsv, rgb):
+def test_hsv_to_rgb(hsv, rgb) -> None:
     assert rgb == hsb_to_rgb(*hsv)

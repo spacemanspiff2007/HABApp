@@ -1,24 +1,22 @@
-from typing import List
-
-from msgspec import Struct
+from pydantic import BaseModel, Field
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest/src/main/java/org/openhab/core/io/rest/internal/resources/beans/RootBean.java
 
 
-class RuntimeResp(Struct, rename='camel'):
+class RuntimeResp(BaseModel):
     version: str
-    build_string: str
+    build_string: str = Field(alias='buildString')
 
 
-class LinkResp(Struct):
+class LinkResp(BaseModel):
     type: str
     url: str
 
 
-class RootResp(Struct, rename='camel'):
+class RootResp(BaseModel):
     version: str
     locale: str
-    measurement_system: str
-    runtime_info: RuntimeResp
-    links: List[LinkResp]
+    measurement_system: str = Field(alias='measurementSystem')
+    runtime_info: RuntimeResp = Field(alias='runtimeInfo')
+    links: list[LinkResp]

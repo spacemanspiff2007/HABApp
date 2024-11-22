@@ -6,12 +6,12 @@ import pytest
 from HABApp import __cmd_args__
 
 
-def test_get_uptime():
+def test_get_uptime() -> None:
     __cmd_args__.get_uptime()
 
 
 @pytest.mark.parametrize('arg_name', ('-wos', '--wait_os_uptime'))
-def test_cmd_wait_uptime(monkeypatch, arg_name):
+def test_cmd_wait_uptime(monkeypatch, arg_name) -> None:
     td = timedelta(days=110 * 365)
 
     m = Mock()

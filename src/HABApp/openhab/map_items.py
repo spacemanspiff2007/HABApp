@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, FrozenSet, Optional
+from typing import Any
 
 from immutables import Map
 
@@ -26,7 +26,7 @@ from HABApp.openhab.items.base_item import HINT_TYPE_OPENHAB_ITEM, MetaData, Ope
 log = logging.getLogger('HABApp.openhab.items')
 
 
-_items: Dict[str, HINT_TYPE_OPENHAB_ITEM] = {
+_items: dict[str, HINT_TYPE_OPENHAB_ITEM] = {
     'String': StringItem,
     'Number': NumberItem,
     'Switch': SwitchItem,
@@ -43,10 +43,10 @@ _items: Dict[str, HINT_TYPE_OPENHAB_ITEM] = {
 }
 
 
-def map_item(name: str, type: str, value: Optional[str],
-             label: Optional[str], tags: FrozenSet[str],
-             groups: FrozenSet[str], metadata: Optional[Dict[str, Dict[str, Any]]]) -> \
-        Optional[OpenhabItem]:
+def map_item(name: str, type: str, value: str | None,
+             label: str | None, tags: frozenset[str],
+             groups: frozenset[str], metadata: dict[str, dict[str, Any]] | None) -> \
+        OpenhabItem | None:
     try:
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)
@@ -75,8 +75,8 @@ def map_item(name: str, type: str, value: Optional[str],
             return cls.from_oh(name, value, label=label, tags=tags, groups=groups, metadata=meta)
 
         msg = f'Unknown openHAB type: {type} for {name}'
-        raise ValueError(msg)
+        raise ValueError(msg)  # noqa: TRY301
 
     except Exception as e:
-        process_exception('map_items', e, logger=log)
+        process_exception(map_item, e, logger=log)
         return None

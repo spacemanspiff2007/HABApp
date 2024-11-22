@@ -11,29 +11,28 @@ import HABApp.parameters.parameter_files
 import HABApp.rule.interfaces._http
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core import Connections
+from HABApp.core import Connections, shutdown
 from HABApp.core.asyncio import async_context
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection as openhab_connection
-from HABApp.runtime import shutdown
 
 
 class Runtime:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config: HABApp.config.Config = None
 
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
-    async def start(self, config_folder: Path):
+    async def start(self, config_folder: Path) -> None:
         try:
             token = async_context.set('HABApp startup')
 
             # shutdown setup
-            shutdown.register_func(Connections.on_application_shutdown, msg='Shutting down connections')
+            shutdown.register(Connections.on_application_shutdown, msg='Shutting down connections')
 
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
@@ -75,8 +74,8 @@ class Runtime:
             async_context.reset(token)
 
         except HABApp.config.InvalidConfigError:
-            shutdown.request_shutdown()
+            shutdown.request()
         except Exception as e:
             process_exception('Runtime.start', e)
             await asyncio.sleep(1)  # Sleep so we can do a graceful shutdown
-            shutdown.request_shutdown()
+            shutdown.request()

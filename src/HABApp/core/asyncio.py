@@ -5,40 +5,39 @@ from asyncio import Task as _Task
 from asyncio import run_coroutine_threadsafe as _run_coroutine_threadsafe
 from contextvars import ContextVar as _ContextVar
 from contextvars import Token as _Token
+from typing import TYPE_CHECKING, Final
 from typing import Any as _Any
-from typing import Callable, Final
-from typing import Callable as _Callable
-from typing import Coroutine as _Coroutine
+from typing import ParamSpec as _ParamSpec
 from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
-from HABApp.core.const.const import PYTHON_310
 
 
-if PYTHON_310:
-    from typing import ParamSpec as _ParamSpec
-else:
-    from typing_extensions import ParamSpec as _ParamSpec
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from collections.abc import Callable as _Callable
+    from collections.abc import Coroutine as _Coroutine
+    from types import TracebackType
 
 
 async_context = _ContextVar('async_ctx')
 
 
 class AsyncContext:
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         self.value: Final = value
         self.token: _Token[str] | None = None
         self.parent: AsyncContext | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         assert self.token is None, self
         self.parent = async_context.get(None)
         self.token = async_context.set(self.value)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> None:
         async_context.reset(self.token)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         parent: str = ''
         if self.parent:
             parent = f'{self.parent} -> '
@@ -50,7 +49,7 @@ class AsyncContextError(Exception):
         super().__init__()
         self.func: _Callable = func
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'Function "{self.func.__name__}" may not be called from an async context!'
 
 
@@ -98,12 +97,14 @@ def run_func_from_async(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwa
     if async_context.get(None) is not None:
         return func(*args, **kwargs)
 
+    # we are in a thread, that's why we can wait (and block) for the future
     future = _run_coroutine_threadsafe(_run_func_from_async_helper(func, *args, **kwargs), loop)
-    return future
-    # Doc build fails if we enable this
-    # TODO: Fix the Rule Runner
-    # return future.result()
+    return future.result()
 
 
 async def _run_func_from_async_helper(func: Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
-    return func(*args, **kwargs)
+    token = async_context.set('run_func_from_async')
+    try:
+        return func(*args, **kwargs)
+    finally:
+        async_context.reset(token)

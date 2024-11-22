@@ -6,7 +6,7 @@ from HABApp.core.internals import ContextProvidingObj
 
 
 class DummyRule(ContextProvidingObj):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
         self.rule_name = 'DummyRule'
 

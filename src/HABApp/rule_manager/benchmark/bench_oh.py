@@ -18,7 +18,7 @@ class OpenhabBenchRule(BenchBaseRule):
 
     RTT_BENCH_MAX = 15
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.name_list = [f'BenchItem{k}' for k in range(300)]
@@ -47,18 +47,18 @@ class OpenhabBenchRule(BenchBaseRule):
             self.oh.remove_item(name)
         print('complete')
 
-    def set_up(self):
+    def set_up(self) -> None:
         self.cleanup()
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         self.cleanup()
 
-    def run_bench(self):
+    def run_bench(self) -> None:
         # These are the benchmarks
         self.bench_item_create()
         self.bench_rtt_time()
 
-    def bench_item_create(self):
+    def bench_item_create(self) -> None:
         print('Bench item operations ', end='')
 
         max_duration = 10   # how long should each bench take
@@ -107,7 +107,7 @@ class OpenhabBenchRule(BenchBaseRule):
         print('. done!\n')
         times.show()
 
-    def bench_rtt_time(self):
+    def bench_rtt_time(self) -> None:
         print('Bench item state update ', end='')
         self.bench_times_container = BenchContainer()
 
@@ -122,10 +122,10 @@ class OpenhabBenchRule(BenchBaseRule):
         print(' done!\n')
         self.bench_times_container.show()
 
-    def start_load(self):
+    def start_load(self) -> None:
 
         for i in range(10, 20):
-            def load_cb(event, item=self.name_list[i]):
+            def load_cb(event, item=self.name_list[i]) -> None:
                 self.openhab.post_update(item, str(random.randint(0, 99999999)))
 
             self.openhab.create_item('String', self.name_list[i], label='MyLabel')
@@ -134,12 +134,12 @@ class OpenhabBenchRule(BenchBaseRule):
             self.load_listener.append(listener)
             self.openhab.post_update(self.name_list[i], str(random.randint(0, 99999999)))
 
-    def stop_load(self):
+    def stop_load(self) -> None:
         for list in self.load_listener:
             list.cancel()
         self.load_listener.clear()
 
-    def run_rtt(self, test_name, do_async=False):
+    def run_rtt(self, test_name, do_async=False) -> None:
         self.item_name = self.name_list[0]
         self.openhab.create_item('String', self.item_name, label='MyLabel')
 
@@ -187,5 +187,5 @@ class OpenhabBenchRule(BenchBaseRule):
         self.time_sent = time.time()
         self.openhab.post_update(self.item_name, self.item_values[0])
 
-    async def a_proceed_item_val(self, event: ValueUpdateEvent):
+    async def a_proceed_item_val(self, event: ValueUpdateEvent) -> None:
         self.proceed_item_val(event)

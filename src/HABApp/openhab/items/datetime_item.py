@@ -1,13 +1,12 @@
+from collections.abc import Mapping
 from datetime import datetime
-from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional
+from typing import TYPE_CHECKING
 
 from HABApp.core.const.const import PYTHON_311
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
 
 if TYPE_CHECKING:
-    Optional = Optional
-    FrozenSet = FrozenSet
     Mapping = Mapping
     MetaData = MetaData
 
@@ -18,9 +17,9 @@ class DatetimeItem(OpenhabItem):
     :ivar str name: |oh_item_desc_name|
     :ivar datetime value: |oh_item_desc_value|
 
-    :ivar Optional[str] label: |oh_item_desc_label|
-    :ivar FrozenSet[str] tags: |oh_item_desc_tags|
-    :ivar FrozenSet[str] groups: |oh_item_desc_group|
+    :ivar str | None label: |oh_item_desc_label|
+    :ivar frozenset[str] tags: |oh_item_desc_tags|
+    :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 

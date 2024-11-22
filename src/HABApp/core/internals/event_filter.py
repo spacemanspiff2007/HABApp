@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any
 
 
 class EventFilterBase:
@@ -8,9 +8,5 @@ class EventFilterBase:
     def describe(self) -> str:
         raise NotImplementedError()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.describe()} at 0x{id(self):X}>'
-
-
-# Hints for functions that use an item class as an input parameter
-HINT_EVENT_FILTER_OBJ = TypeVar('HINT_EVENT_FILTER_OBJ', bound=EventFilterBase)

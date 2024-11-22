@@ -1,5 +1,4 @@
 import logging
-import typing
 
 import HABApp
 
@@ -28,9 +27,9 @@ class SwitchItemValueMode(ValueMode):
                  switch_item: 'HABApp.openhab.items.SwitchItem', invert_switch: bool = False,
                  # default kw-args from the base class
                  initial_value=None,
-                 logger: typing.Optional[logging.Logger] = None,
+                 logger: logging.Logger | None = None,
                  auto_disable_after=None, auto_disable_func=None,
-                 calc_value_func=None):
+                 calc_value_func=None) -> None:
         """
 
         :param name: Name of the mode
@@ -68,5 +67,5 @@ class SwitchItemValueMode(ValueMode):
         msg = 'Enabled is controlled through the switch item!'
         raise PermissionError(msg)
 
-    def __switch_changed(self, event):
+    def __switch_changed(self, event) -> None:
         self.__set_enable(event.value == ('ON' if not self.__invert_switch else 'OFF'))

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Final, Tuple, Union
+from typing import Any, Final
 
 from javaproperties import loads as load_map_file
 
@@ -9,11 +9,11 @@ from HABApp.openhab.transformations.base import TransformationFactoryBase, Trans
 
 class MapTransformationRegistry(TransformationRegistryBase):
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(name)
-        self.objs: Dict[str, Tuple[dict, Any]] = {}
+        self.objs: dict[str, tuple[dict, Any]] = {}
 
-    def get(self, name: str) -> Union[MapTransformation, MapTransformationWithDefault]:
+    def get(self, name: str) -> MapTransformation | MapTransformationWithDefault:
         try:
             data, default = self.objs[name]
         except KeyError:
@@ -24,7 +24,7 @@ class MapTransformationRegistry(TransformationRegistryBase):
         else:
             return MapTransformation(data, name=name)
 
-    def set(self, name: str, configuration: Dict[str, str]):
+    def set(self, name: str, configuration: dict[str, str]):
         data = load_map_file(configuration['function'])
         if not data:
             log.warning(f'Map transformation "{name:s}" is empty -> skipped!')
@@ -48,7 +48,7 @@ class MapTransformationRegistry(TransformationRegistryBase):
 MAP_REGISTRY: Final = MapTransformationRegistry('map')
 
 
-class MapTransformationFactory(TransformationFactoryBase[Dict[Union[str, int], Union[str, int]]]):
+class MapTransformationFactory(TransformationFactoryBase[dict[str | int, str | int]]):
     pass
 
 

@@ -185,6 +185,21 @@ This event gets emitted every time a value of an item changes
    :inherited-members:
 
 
+ValueCommandEvent
+======================================
+
+This event indicates that the item should change to a new value.
+
+.. inheritance-diagram:: HABApp.core.events.ValueCommandEvent
+   :parts: 1
+
+.. autoclass:: HABApp.core.events.ValueCommandEvent
+   :members:
+   :inherited-members:
+
+
+
+
 ItemNoUpdateEvent
 ======================================
 

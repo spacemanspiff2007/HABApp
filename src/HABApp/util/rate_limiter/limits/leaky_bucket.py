@@ -11,16 +11,16 @@ class LeakyBucketLimitInfo(BaseRateLimitInfo):
 
 
 class LeakyBucketLimit(BaseRateLimit):
-    def __init__(self, allowed: int, interval: int, hits: int = 0):
+    def __init__(self, allowed: int, interval: int, hits: int = 0) -> None:
         super().__init__(allowed, interval, hits)
 
         self.drop_interval: Final = interval / allowed
         self.next_drop: float = monotonic() + self.drop_interval
 
-    def repr_text(self):
+    def repr_text(self) -> str:
         return f'drop_interval={self.drop_interval:.1f}s'
 
-    def do_test_allow(self):
+    def do_test_allow(self) -> None:
 
         while self.next_drop <= monotonic():
             self.hits -= 1

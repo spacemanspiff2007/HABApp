@@ -7,7 +7,7 @@ from HABApp.mqtt.items import MqttItem
 
 
 class ExampleMqttTestRule(HABApp.Rule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.run.every(
@@ -20,11 +20,11 @@ class ExampleMqttTestRule(HABApp.Rule):
 
         self.listen_event('test/test', self.topic_updated, ValueUpdateEventFilter())
 
-    def publish_rand_value(self):
+    def publish_rand_value(self) -> None:
         print('test mqtt_publish')
         self.my_mqtt_item.publish(str(random.randint(0, 1000)))
 
-    def topic_updated(self, event):
+    def topic_updated(self, event) -> None:
         assert isinstance(event, ValueUpdateEvent), type(event)
         print( f'mqtt topic "test/test" updated to {event.value}')
 

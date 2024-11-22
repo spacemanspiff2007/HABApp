@@ -1,11 +1,7 @@
-from json import dumps
-
-from msgspec.json import decode
-
 from HABApp.openhab.definitions.rest.things import ThingResp
 
 
-def test_thing_summary():
+def test_thing_summary() -> None:
     _in = {
         'statusInfo': {
             'status': 'UNINITIALIZED',
@@ -17,7 +13,7 @@ def test_thing_summary():
         'thingTypeUID': 'astro:sun'
     }
 
-    thing = decode(dumps(_in), type=ThingResp)
+    thing = ThingResp.model_validate(_in)
 
     assert thing.editable is True
     assert thing.uid == 'astro:sun:d522ba4b56'
@@ -28,7 +24,7 @@ def test_thing_summary():
     assert thing.status.detail == 'NONE'
 
 
-def test_thing_full():
+def test_thing_full() -> None:
     _in = {
         'channels': [
             {
@@ -93,14 +89,14 @@ def test_thing_full():
         'thingTypeUID': 'astro:sun'
     }
 
-    thing = decode(dumps(_in), type=ThingResp)
+    thing = ThingResp.model_validate(_in)
 
     c0, c1, c2 = thing.channels
 
-    assert c0.linked_items == ['LinkedItem1', 'LinkedItem2']
+    assert c0.linked_items == ('LinkedItem1', 'LinkedItem2')
     assert c0.configuration == {'offset': 0}
 
-    assert c1.linked_items == []
+    assert c1.linked_items == ()
     assert c1.configuration == {}
 
     assert thing.status.status == 'UNINITIALIZED'

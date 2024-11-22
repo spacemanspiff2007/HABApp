@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from HABApp.core.internals.proxy.proxy_obj import create_proxy, replace_proxies
 

@@ -11,7 +11,7 @@ class ChannelTriggeredEvent(OpenhabEvent):
     event: str
     channel: str
 
-    def __init__(self, name: str = '', event: str = '', channel: str = ''):
+    def __init__(self, name: str = '', event: str = '', channel: str = '') -> None:
         super().__init__()
 
         self.name: str = name
@@ -22,7 +22,7 @@ class ChannelTriggeredEvent(OpenhabEvent):
     def from_dict(cls, topic: str, payload: dict):
         return cls(topic[17:-10], payload['event'], payload['channel'])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}, event: {self.event}>'
 
 
@@ -36,7 +36,7 @@ class ChannelDescriptionChangedEvent(OpenhabEvent):
     field: str
     value: str
 
-    def __init__(self, name: str = '', field: str = '', value: str = ''):
+    def __init__(self, name: str = '', field: str = '', value: str = '') -> None:
         super().__init__()
 
         self.name: str = name
@@ -47,5 +47,5 @@ class ChannelDescriptionChangedEvent(OpenhabEvent):
     def from_dict(cls, topic: str, payload: dict):
         return cls(topic[17:-19], payload['field'], payload['value'])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}, field: {self.field}>'

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import TypeAlias
 
 from aiomqtt import Client, MqttError
 
@@ -10,27 +10,22 @@ from HABApp.core.asyncio import AsyncContext
 from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.connections.base_plugin import BaseConnectionPluginConnectedTask
-from HABApp.core.const.const import PYTHON_310
 
 
 log = logging.getLogger('HABApp.mqtt.connection')
 
-if PYTHON_310:
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
-CONTEXT_TYPE: TypeAlias = Optional[Client]
+CONTEXT_TYPE: TypeAlias = Client | None
 
 
-def setup():
+def setup() -> None:
     config = HABApp.config.CONFIG.mqtt
 
     from HABApp.mqtt.connection.handler import CONNECTION_HANDLER
     from HABApp.mqtt.connection.publish import PUBLISH_HANDLER
     from HABApp.mqtt.connection.subscribe import SUBSCRIPTION_HANDLER
 
-    connection = Connections.add(MqttConnection())
+    connection = Connections.add(CONNECTION)
 
     connection.register_plugin(CONNECTION_HANDLER, 0)
     connection.register_plugin(SUBSCRIPTION_HANDLER, 10)
@@ -45,7 +40,7 @@ def setup():
 
 
 class MqttConnection(BaseConnection):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('mqtt')
         self.context: CONTEXT_TYPE = None
 
@@ -53,15 +48,18 @@ class MqttConnection(BaseConnection):
         return isinstance(e, MqttError)
 
 
+CONNECTION = MqttConnection()
+
+
 class MqttPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
 
-    def __init__(self, task_name: str):
+    def __init__(self, task_name: str) -> None:
         super().__init__(self._mqtt_wrap_task, task_name)
 
     async def mqtt_task(self):
         raise NotImplementedError()
 
-    async def _mqtt_wrap_task(self):
+    async def _mqtt_wrap_task(self) -> None:
 
         connection = self.plugin_connection
         log = connection.log

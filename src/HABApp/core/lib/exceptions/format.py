@@ -1,15 +1,6 @@
 from traceback import format_exception as _format_exception
 from types import TracebackType
-from typing import Any, List, Tuple, Type, Union
-
-from HABApp.core.const.const import PYTHON_310
-
-
-if PYTHON_310:
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
+from typing import Any, TypeAlias
 
 from stack_data import FrameInfo, Options
 
@@ -17,7 +8,7 @@ from .const import SEPARATOR_NEW_FRAME
 from .format_frame import format_frame_info
 
 
-def append_short_traceback(tb: List[str], e: Union[Exception, Tuple[Any, Any, Any]]):
+def append_short_traceback(tb: list[str], e: Exception | tuple[Any, Any, Any]) -> None:
     for line in _format_exception(*e) if isinstance(e, tuple) else _format_exception(type(e), e, e.__traceback__):
         for sub_lines in line.splitlines():
             tb.append(sub_lines.rstrip())
@@ -26,7 +17,7 @@ def append_short_traceback(tb: List[str], e: Union[Exception, Tuple[Any, Any, An
 DEFAULT_OPTIONS = Options(include_signature=True, max_lines_per_piece=5)
 
 
-def fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
+def fallback_format(e: Exception, existing_traceback: list[str]) -> list[str]:
     # in case something goes wrong while formatting the traceback
     # we still want to show at least a small error message!
     new_tb = [f'Error while formatting traceback: {e}']
@@ -43,11 +34,11 @@ def fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
     return new_tb
 
 
-HINT_EXCEPTION: TypeAlias = Union[Exception, Tuple[Type[Exception], Exception, TracebackType]]
+HINT_EXCEPTION: TypeAlias = Exception | tuple[type[Exception], Exception, TracebackType]
 
 
-def format_exception(e: HINT_EXCEPTION) -> List[str]:
-    tb: List[str] = []
+def format_exception(e: HINT_EXCEPTION) -> list[str]:
+    tb: list[str] = []
 
     try:
         all_frames = tuple(FrameInfo.stack_data(e[2] if isinstance(e, tuple) else e.__traceback__, DEFAULT_OPTIONS))

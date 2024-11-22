@@ -25,7 +25,7 @@ def cfg():
     })
 
 
-def test_zwave_cfg(cfg: ThingConfigChanger):
+def test_zwave_cfg(cfg: ThingConfigChanger) -> None:
     assert 1 in cfg
     assert 2 in cfg
     assert 10 in cfg
@@ -33,7 +33,7 @@ def test_zwave_cfg(cfg: ThingConfigChanger):
     assert 'Group1' in cfg
 
 
-def test_param_split(cfg: ThingConfigChanger):
+def test_param_split(cfg: ThingConfigChanger) -> None:
     assert 154 in cfg
     assert cfg.alias[154] == 'config_154_4'
 
@@ -50,7 +50,7 @@ def test_param_split(cfg: ThingConfigChanger):
     assert cfg.alias['154_000000FF'] == 'config_154_4_000000FF'
 
 
-def test_set_keys(cfg: ThingConfigChanger):
+def test_set_keys(cfg: ThingConfigChanger) -> None:
     cfg[1] = 5
     cfg['wakeup_interval'] = 7200
 
@@ -61,7 +61,7 @@ def test_set_keys(cfg: ThingConfigChanger):
         cfg['1'] = 7
 
 
-def test_set_wrong_type(cfg: ThingConfigChanger):
+def test_set_wrong_type(cfg: ThingConfigChanger) -> None:
     with raises(ValueError) as e:
         cfg[1] = 'asdf'
     assert str(e.value) == "Datatype of parameter '1' must be 'int' but is 'str': 'asdf'"
@@ -70,7 +70,7 @@ def test_set_wrong_type(cfg: ThingConfigChanger):
         cfg['Group1'] = 'asdf'
 
 
-def test_eval(cfg: ThingConfigChanger):
+def test_eval(cfg: ThingConfigChanger) -> None:
     # This resolves to the default
     cfg[100] = '$1 * 20 + $10'
     assert cfg.new == {}

@@ -5,6 +5,7 @@ import asyncio
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
+from HABApp.core import shutdown
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.lib import Timeout, ValueChange
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
@@ -13,7 +14,7 @@ from HABApp.openhab.connection.handler.func_async import async_get_system_info
 
 class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
 
     async def on_connected(self, context: OpenhabContext, connection: OpenhabConnection):
@@ -42,7 +43,7 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         sleep_secs = 1
 
-        while not HABApp.runtime.shutdown.requested:
+        while not shutdown.is_requested():
             await asyncio.sleep(sleep_secs)
             sleep_secs = 1
 
@@ -79,7 +80,7 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     timeout.start()
                     log.debug('Starting start level timeout')
 
-        if HABApp.runtime.shutdown.requested:
+        if shutdown.is_requested():
             return None
         log.info('openHAB startup complete')
 

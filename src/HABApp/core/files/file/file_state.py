@@ -17,5 +17,5 @@ class FileState(Enum):
     PENDING = auto()
     REMOVED = auto()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.name)

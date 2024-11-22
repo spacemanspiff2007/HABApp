@@ -22,10 +22,10 @@ class ValueMode(BaseMode):
     """
 
     def __init__(self, name: str,
-                 initial_value=None, enabled: typing.Optional[bool] = None, enable_on_value: bool = True,
-                 logger: typing.Optional[logging.Logger] = None,
+                 initial_value=None, enabled: bool | None = None, enable_on_value: bool = True,
+                 logger: logging.Logger | None = None,
                  auto_disable_after=None, auto_disable_func=None,
-                 calc_value_func=None):
+                 calc_value_func=None) -> None:
         """
 
         :param name: Name of the mode
@@ -60,10 +60,10 @@ class ValueMode(BaseMode):
         self.__enable_on_value: bool = enable_on_value
 
         assert isinstance(auto_disable_after, timedelta) or auto_disable_after is None, type(auto_disable_after)
-        self.auto_disable_after: typing.Optional[timedelta] = auto_disable_after
-        self.auto_disable_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], bool]] = auto_disable_func
+        self.auto_disable_after: timedelta | None = auto_disable_after
+        self.auto_disable_func: typing.Callable[[typing.Any, typing.Any], bool] | None = auto_disable_func
 
-        self.calc_value_func: typing.Optional[typing.Callable[[typing.Any, typing.Any], typing.Any]] = calc_value_func
+        self.calc_value_func: typing.Callable[[typing.Any, typing.Any], typing.Any] | None = calc_value_func
 
     @property
     def value(self):
@@ -77,7 +77,7 @@ class ValueMode(BaseMode):
 
     # we don't use the setter here because of stupid inheritance
     # https://gist.github.com/Susensio/979259559e2bebcd0273f1a95d7c1e79
-    def set_value(self, value, only_on_change: bool = False):
+    def set_value(self, value, only_on_change: bool = False) -> bool:
         """Set new value and recalculate overall value. If ``enable_on_value`` is set, setting a value will also
         enable the mode.
 
@@ -172,5 +172,5 @@ class ValueMode(BaseMode):
             return self.__value
         return self.calc_value_func(value_with_lower_priority, self.__value)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self.name} enabled: {self.__enabled}, value: {self.__value}>'

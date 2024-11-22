@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from asyncio import CancelledError
-from typing import TYPE_CHECKING, Callable, Final, Literal
+from collections.abc import Callable
+from types import TracebackType
+from typing import TYPE_CHECKING, Final, Literal
 
 import HABApp
 from HABApp.core.connections._definitions import ConnectionStatus, connection_log
@@ -21,14 +23,14 @@ class AlreadyHandledException(Exception):
 
 
 class HandleExceptionInConnection:
-    def __init__(self, connection: BaseConnection, func_name: Callable):
+    def __init__(self, connection: BaseConnection, func_name: Callable) -> None:
         self._connection: Final = connection
         self._func_name: Final = func_name
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None):
         # no exception -> we exit gracefully
         if exc_type is None and exc_val is None:
             return True
@@ -41,7 +43,7 @@ class HandleExceptionInConnection:
 
 
 class BaseConnection:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name: Final = name
         self.log: Final = connection_log.getChild(name)
         self.status: Final = StatusTransitions()
@@ -85,10 +87,10 @@ class BaseConnection:
     def handle_exception(self, func: Callable) -> HandleExceptionInConnection:
         return HandleExceptionInConnection(self, func)
 
-    def is_silent_exception(self, e: Exception):
+    def is_silent_exception(self, e: Exception) -> bool:
         return False
 
-    def process_exception(self, e: Exception, func: Callable | str | None):
+    def process_exception(self, e: Exception, func: Callable | str | None) -> None:
         self.set_error()
 
         if self.is_silent_exception(e):
@@ -134,7 +136,7 @@ class BaseConnection:
         self.log.debug(f'Added plugin {obj.plugin_name:s}')
         return self
 
-    def remove_plugin(self, obj: BaseConnectionPlugin):
+    def remove_plugin(self, obj: BaseConnectionPlugin) -> None:
         self.plugins.remove(obj)
         obj.plugin_connection = None
 
@@ -143,7 +145,7 @@ class BaseConnection:
             for to_rem in rem:
                 cb_list.remove(to_rem)
 
-    async def _task_next_status(self):
+    async def _task_next_status(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(logger=self.log):
 
             # if we are currently running stop the task
@@ -158,7 +160,7 @@ class BaseConnection:
 
         self.advance_status_task.task = None
 
-    async def _task_plugin(self):
+    async def _task_plugin(self) -> None:
         status = self.status
         status_enum = status.status
 
@@ -190,7 +192,7 @@ class BaseConnection:
         self.log.debug('Cleared error')
         self.status.error = False
 
-    def set_error(self):
+    def set_error(self) -> None:
         if self.status.error:
             self.log.debug('Error on connection status is already set')
         else:
@@ -198,15 +200,15 @@ class BaseConnection:
             self.log.debug('Set error on connection status')
         self.advance_status_task.start_if_not_running()
 
-    def status_from_setup_to_disabled(self):
+    def status_from_setup_to_disabled(self) -> None:
         self.status.from_setup_to_disabled()
         self.advance_status_task.start_if_not_running()
 
-    def status_from_connected_to_disconnected(self):
+    def status_from_connected_to_disconnected(self) -> None:
         self.status.from_connected_to_disconnected()
         self.advance_status_task.start_if_not_running()
 
-    def status_configuration_changed(self):
+    def status_configuration_changed(self) -> None:
         self.log.debug('Requesting setup')
         self.status.setup = True
         self.advance_status_task.start_if_not_running()
@@ -223,7 +225,7 @@ class BaseConnection:
 
         self.advance_status_task.start_if_not_running()
 
-    def application_startup_complete(self):
+    def application_startup_complete(self) -> None:
         self.log.debug('Overview')
         for status, objs in self.plugin_callbacks.items():
             if not objs:

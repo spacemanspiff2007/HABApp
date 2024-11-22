@@ -2,22 +2,28 @@ from __future__ import annotations
 
 import warnings
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 from urllib.parse import quote as quote_url
 
-from HABApp.core.const.json import decode_struct
 from HABApp.core.internals import ItemRegistryItem
 from HABApp.openhab.definitions.rest import (
     ItemChannelLinkResp,
+    ItemChannelLinkRespList,
     ItemHistoryResp,
     ItemResp,
+    ItemRespList,
     PersistenceServiceResp,
+    PersistenceServiceRespList,
     RootResp,
     ShortItemResp,
+    ShortItemRespList,
     SystemInfoRootResp,
     ThingResp,
+    ThingRespList,
     TransformationResp,
+    TransformationRespList,
 )
+from HABApp.openhab.definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from HABApp.openhab.errors import (
     ItemNotEditableError,
     ItemNotFoundError,
@@ -31,7 +37,6 @@ from HABApp.openhab.errors import (
     TransformationsRequestError,
 )
 
-from ...definitions.rest.habapp_data import get_api_vals, load_habapp_meta
 from . import convert_to_oh_type
 from .handler import delete, get, post, put
 
@@ -48,7 +53,7 @@ async def async_get_root() -> RootResp | None:
     if not (b := await resp.read()):
         return None
 
-    return decode_struct(b, type=RootResp)
+    return RootResp.model_validate_json(b)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -71,18 +76,18 @@ async def async_get_system_info():
     if not (b := await resp.read()):
         return None
 
-    return decode_struct(b, type=SystemInfoRootResp).system_info
+    return SystemInfoRootResp.model_validate_json(b).system_info
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # /items
 # ----------------------------------------------------------------------------------------------------------------------
-async def async_get_items() -> list[ItemResp]:
+async def async_get_items() -> tuple[ItemResp, ...]:
 
     resp = await get('/rest/items', params={'metadata': '.+'})
     body = await resp.read()
 
-    return decode_struct(body, type=List[ItemResp])
+    return ItemRespList.validate_json(body)
 
 
 async def async_get_item(item: str | ItemRegistryItem) -> ItemResp | None:
@@ -95,14 +100,14 @@ async def async_get_item(item: str | ItemRegistryItem) -> ItemResp | None:
 
     body = await resp.read()
 
-    return decode_struct(body, type=ItemResp)
+    return ItemResp.model_validate_json(body)
 
 
-async def async_get_all_items_state() -> list[ShortItemResp]:
+async def async_get_all_items_state() -> tuple[ShortItemResp, ...]:
     resp = await get('/rest/items', params={'fields': 'name,state,type'})
     body = await resp.read()
 
-    return decode_struct(body, type=List[ShortItemResp])
+    return ShortItemRespList.validate_json(body)
 
 
 async def async_item_exists(item: str | ItemRegistryItem) -> bool:
@@ -163,7 +168,7 @@ async def async_create_item(item_type: str, name: str,
     return ret.status < 300
 
 
-async def async_remove_metadata(item: str | ItemRegistryItem, namespace: str):
+async def async_remove_metadata(item: str | ItemRegistryItem, namespace: str) -> bool:
     # noinspection PyProtectedMember
     item = item if isinstance(item, str) else item._name
 
@@ -177,7 +182,7 @@ async def async_remove_metadata(item: str | ItemRegistryItem, namespace: str):
     return ret.status < 300
 
 
-async def async_set_metadata(item: str | ItemRegistryItem, namespace: str, value: str, config: dict):
+async def async_set_metadata(item: str | ItemRegistryItem, namespace: str, value: str, config: dict) -> bool:
     # noinspection PyProtectedMember
     item = item if isinstance(item, str) else item._name
 
@@ -191,7 +196,7 @@ async def async_set_metadata(item: str | ItemRegistryItem, namespace: str, value
 
     if ret.status == 404:
         raise ItemNotFoundError.from_name(item)
-    elif ret.status == 405:
+    if ret.status == 405:
         raise MetadataNotEditableError.create_text(item, namespace)
     return ret.status < 300
 
@@ -199,11 +204,11 @@ async def async_set_metadata(item: str | ItemRegistryItem, namespace: str, value
 # ----------------------------------------------------------------------------------------------------------------------
 # /things
 # ----------------------------------------------------------------------------------------------------------------------
-async def async_get_things() -> list[ThingResp]:
+async def async_get_things() -> tuple[ThingResp, ...]:
     resp = await get('/rest/things')
     body = await resp.read()
 
-    return decode_struct(body, type=List[ThingResp])
+    return ThingRespList.validate_json(body)
 
 
 async def async_get_thing(thing: str | ItemRegistryItem) -> ThingResp:
@@ -215,7 +220,7 @@ async def async_get_thing(thing: str | ItemRegistryItem) -> ThingResp:
         raise ThingNotFoundError.from_uid(thing)
 
     body = await resp.read()
-    return decode_struct(body, type=ThingResp)
+    return ThingResp.model_validate_json(body)
 
 
 async def async_set_thing_cfg(thing: str | ItemRegistryItem, cfg: dict[str, Any]):
@@ -259,7 +264,8 @@ async def async_set_thing_enabled(thing: str | ItemRegistryItem, enabled: bool):
 async def async_purge_links():
     resp = await post('/rest/purge')
     if resp.status != 200:
-        raise LinkRequestError('Unexpected error')
+        msg = 'Unexpected error'
+        raise LinkRequestError(msg)
 
 
 async def async_remove_obj_links(name: str | ItemRegistryItem) -> bool:
@@ -277,14 +283,15 @@ async def async_remove_obj_links(name: str | ItemRegistryItem) -> bool:
     return True
 
 
-async def async_get_links() -> list[ItemChannelLinkResp]:
+async def async_get_links() -> tuple[ItemChannelLinkResp, ...]:
 
     resp = await get('/rest/links')
     if resp.status != 200:
-        raise LinkRequestError('Unexpected error')
+        msg = 'Unexpected error'
+        raise LinkRequestError(msg)
 
     body = await resp.read()
-    return decode_struct(body, type=List[ItemChannelLinkResp])
+    return ItemChannelLinkRespList.validate_json(body)
 
 
 def __get_item_link_url(item: str | ItemRegistryItem, channel: str) -> str:
@@ -302,7 +309,7 @@ async def async_get_link(item: str | ItemRegistryItem, channel: str) -> ItemChan
     resp = await get(__get_item_link_url(item, channel), log_404=False)
     if resp.status == 200:
         body = await resp.read()
-        return decode_struct(body, type=ItemChannelLinkResp)
+        return ItemChannelLinkResp.model_validate_json(body)
 
     if resp.status == 404:
         raise LinkNotFoundError.from_names(item, channel)
@@ -357,25 +364,25 @@ async def async_remove_link(item: str | ItemRegistryItem, channel: str):
 # ----------------------------------------------------------------------------------------------------------------------
 # /transformations
 # ----------------------------------------------------------------------------------------------------------------------
-async def async_get_transformations() -> list[TransformationResp]:
+async def async_get_transformations() -> tuple[TransformationResp, ...]:
     resp = await get('/rest/transformations')
     if resp.status >= 300:
         raise TransformationsRequestError()
 
     body = await resp.read()
-    return decode_struct(body, type=List[TransformationResp])
+    return TransformationRespList.validate_json(body)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # /persistence
 # ----------------------------------------------------------------------------------------------------------------------
-async def async_get_persistence_services() -> list[PersistenceServiceResp]:
+async def async_get_persistence_services() -> tuple[PersistenceServiceResp, ...]:
     resp = await get('/rest/persistence')
     if resp.status >= 300:
         raise PersistenceRequestError()
 
     body = await resp.read()
-    return decode_struct(body, type=List[PersistenceServiceResp])
+    return PersistenceServiceRespList.validate_json(body)
 
 
 async def async_get_persistence_data(item: str | ItemRegistryItem, persistence: str | None,
@@ -399,7 +406,7 @@ async def async_get_persistence_data(item: str | ItemRegistryItem, persistence: 
         raise PersistenceRequestError()
 
     body = await resp.read()
-    return decode_struct(body, type=ItemHistoryResp)
+    return ItemHistoryResp.model_validate_json(body)
 
 
 async def async_set_persistence_data(item: str | ItemRegistryItem, persistence: str | None,

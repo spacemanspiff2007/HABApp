@@ -1,11 +1,10 @@
 import logging
-from typing import Generic, List, Type, TypeVar, Union
+from typing import Generic, TypeVar
 
-from pendulum import DateTime
+from whenever import Instant
 
 from HABApp.core.asyncio import run_func_from_async
-
-from .base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
+from HABApp.core.items.base_item_watch import BaseWatch, ItemNoChangeWatch, ItemNoUpdateWatch
 
 
 log = logging.getLogger('HABApp')
@@ -14,15 +13,15 @@ WATCH_OBJ = TypeVar('WATCH_OBJ', bound=BaseWatch)
 
 
 class ItemTimes(Generic[WATCH_OBJ]):
-    WATCH: Union[Type[ItemNoUpdateWatch], Type[ItemNoChangeWatch]]
+    WATCH: type[ItemNoUpdateWatch] | type[ItemNoChangeWatch]
 
-    def __init__(self, name: str, dt: DateTime):
+    def __init__(self, name: str, instant: Instant) -> None:
         self.name: str = name
-        self.dt: DateTime = dt
-        self.tasks: List[WATCH_OBJ] = []
+        self.instant: Instant = instant
+        self.tasks: list[WATCH_OBJ] = []
 
-    def set(self, dt: DateTime, events=True):
-        self.dt = dt
+    def set(self, instant: Instant, events=True):
+        self.instant = instant
         if not self.tasks:
             return
 
@@ -30,7 +29,7 @@ class ItemTimes(Generic[WATCH_OBJ]):
             run_func_from_async(self.__async_schedule_events)
         return None
 
-    def add_watch(self, secs: Union[int, float]) -> WATCH_OBJ:
+    def add_watch(self, secs: int | float) -> WATCH_OBJ:
         # don't add the watch two times
         for t in self.tasks:
             if not t.fut.is_canceled and t.fut.secs == secs:

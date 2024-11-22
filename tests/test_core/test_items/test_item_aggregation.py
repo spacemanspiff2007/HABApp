@@ -3,7 +3,7 @@ import asyncio
 from HABApp.core.items import AggregationItem, Item
 
 
-async def test_aggregation_item():
+async def test_aggregation_item() -> None:
     agg = AggregationItem.get_create_item('MyAggregation')
     src = Item.get_create_item('MySource')
 
@@ -13,7 +13,7 @@ async def test_aggregation_item():
     agg.aggregation_source(src)
     agg.aggregation_func(lambda x: (max(x), list(x)))
 
-    async def post_val(t, v):
+    async def post_val(t, v) -> None:
         await asyncio.sleep(t)
         src.post_value(v)
 
@@ -48,7 +48,7 @@ async def test_aggregation_item():
     assert agg.value == (2, [2])
 
 
-async def test_aggregation_item_cleanup():
+async def test_aggregation_item_cleanup() -> None:
     agg = AggregationItem.get_create_item('MyTestAggregation')
     src = Item.get_create_item('MyTestSource')
 
@@ -58,7 +58,7 @@ async def test_aggregation_item_cleanup():
     agg.aggregation_source(src)
     agg.aggregation_func(lambda x: list(x))
 
-    async def post_val(t, v):
+    async def post_val(t, v) -> None:
         await asyncio.sleep(t)
         src.post_value(v)
 

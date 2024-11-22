@@ -1,6 +1,6 @@
 from datetime import timedelta
 from time import time
-from typing import Optional, Union
+from typing import Union
 
 from HABApp.core.internals import AutoContextBoundObj, wrap_func
 
@@ -10,12 +10,12 @@ VAL_TYPE = Union[int, float]
 
 class FadeWorker(AutoContextBoundObj):
 
-    def __init__(self, parent: 'Fade', interval: float):
+    def __init__(self, parent: 'Fade', interval: float) -> None:
         super().__init__()
         self.parent: Fade = parent
         self.scheduler = self._parent_ctx.rule.run.every(None, interval, self.parent._scheduled_worker)
 
-    def cancel(self):
+    def cancel(self) -> None:
         self._ctx_unlink()
         self.scheduler.cancel()
         self.scheduler = None
@@ -35,7 +35,7 @@ class Fade:
     :ivar callback: Function with one argument that will be automatically called with the new values when the scheduled
                     fade runs
     """
-    def __init__(self, callback=None, min_value: VAL_TYPE = 0, max_value: VAL_TYPE = 100):
+    def __init__(self, callback=None, min_value: VAL_TYPE = 0, max_value: VAL_TYPE = 100) -> None:
         self.min_value = min_value
         self.max_value = max_value
 
@@ -46,13 +46,13 @@ class Fade:
         self._fade_factor = 0
         self._fade_finished = True
 
-        self._fade_worker: Optional[FadeWorker] = None
+        self._fade_worker: FadeWorker | None = None
         self.__callback = wrap_func(callback) if callback is not None else None
 
         self.value = 0
 
-    def setup(self, start_value: VAL_TYPE, stop_value: VAL_TYPE, duration: Union[int, float, timedelta],
-              min_step_duration: float = MIN_STEP_TIME, now: Optional[float] = None) -> 'Fade':
+    def setup(self, start_value: VAL_TYPE, stop_value: VAL_TYPE, duration: int | float | timedelta,
+              min_step_duration: float = MIN_STEP_TIME, now: float | None = None) -> 'Fade':
         """Calculates everything that is needed to fade a value
 
         :param start_value: Start value
@@ -87,7 +87,7 @@ class Fade:
         self._fade_finished = False
         return self
 
-    def get_value(self, now: Optional[float] = None) -> float:
+    def get_value(self, now: float | None = None) -> float:
         """Returns the current value. If the fade is finished it will always return the stop value.
 
         :param now: time.time() timestamp for which the value shall be returned. Can be used to sync multiple fades
@@ -121,7 +121,7 @@ class Fade:
         """True if the fade is finished"""
         return self._fade_finished
 
-    async def _scheduled_worker(self):
+    async def _scheduled_worker(self) -> None:
         self.get_value()
         if self._fade_finished:
             self.stop_fade()

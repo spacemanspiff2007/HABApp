@@ -1,6 +1,6 @@
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Dict, List
 
 import HABApp
 from HABAppTests.test_rule.test_case import TestCase, TestResult, TestResultStatus
@@ -13,7 +13,7 @@ log = logging.getLogger('HABApp.Tests')
 
 
 class TestConfig:
-    def __init__(self):
+    def __init__(self) -> None:
         self.skip_on_failure = False
         self.warning_is_error = False
 
@@ -21,11 +21,11 @@ class TestConfig:
 class TestBaseRule(HABApp.Rule):
     """This rule is testing the OpenHAB data types by posting values and checking the events"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._rule_status = TestRuleStatus.CREATED
         self._rule_id = get_next_id(self)
-        self._tests: Dict[str, TestCase] = {}
+        self._tests: dict[str, TestCase] = {}
 
         self.__warnings = []
         self.__errors = []
@@ -39,18 +39,18 @@ class TestBaseRule(HABApp.Rule):
         # we have to chain the rules later, because we register the rules only once we loaded successfully.
         self.run.at(2, self.__execute_run)
 
-    def on_rule_unload(self):
+    def on_rule_unload(self) -> None:
         self._rule_id.remove()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Overrides and test
-    def set_up(self):
+    def set_up(self) -> None:
         pass
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         pass
 
-    def add_test(self, name, func: Callable, *args, **kwargs):
+    def add_test(self, name, func: Callable, *args, **kwargs) -> None:
         tc = TestCase(name, func, args, kwargs)
         assert tc.name not in self._tests
         self._tests[tc.name] = tc
@@ -83,7 +83,7 @@ class TestBaseRule(HABApp.Rule):
         failed  = tuple(filter(lambda x: x.state is TestResultStatus.FAILED, ergs))
         error   = tuple(filter(lambda x: x.state is TestResultStatus.ERROR, ergs))
 
-        def plog(msg: str):
+        def plog(msg: str) -> None:
             print(msg)
             log.info(msg)
 
@@ -102,19 +102,19 @@ class TestBaseRule(HABApp.Rule):
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event from the worker
-    def __event_warning(self, event):
+    def __event_warning(self, event) -> None:
         self.__warnings.append(event)
 
-    def __event_error(self, event):
+    def __event_error(self, event) -> None:
         self.__errors.append(event)
 
-    def _worker_events_sub(self):
+    def _worker_events_sub(self) -> None:
         assert self.__sub_warning is None
         assert self.__sub_errors is None
         self.__sub_warning = self.listen_event(HABApp.core.const.topics.TOPIC_WARNINGS, self.__event_warning)
         self.__sub_errors = self.listen_event(HABApp.core.const.topics.TOPIC_ERRORS, self.__event_error)
 
-    def _worker_events_cancel(self):
+    def _worker_events_cancel(self) -> None:
         if self.__sub_warning is not None:
             self.__sub_warning.cancel()
         if self.__sub_errors is not None:
@@ -122,7 +122,7 @@ class TestBaseRule(HABApp.Rule):
 
     # ------------------------------------------------------------------------------------------------------------------
     # Test execution
-    def __exec_tc(self, res: TestResult, tc: TestCase):
+    def __exec_tc(self, res: TestResult, tc: TestCase) -> None:
         self.__warnings.clear()
         self.__errors.clear()
 
@@ -144,7 +144,7 @@ class TestBaseRule(HABApp.Rule):
 
         self.__worst_result = max(self.__worst_result, res.state)
 
-    def _run_tests(self) -> List[TestResult]:
+    def _run_tests(self) -> list[TestResult]:
         self._rule_status = TestRuleStatus.RUNNING
         self._worker_events_sub()
 
@@ -170,7 +170,7 @@ class TestBaseRule(HABApp.Rule):
         self._rule_status = TestRuleStatus.FINISHED
         return results
 
-    def __run_tests(self) -> List[TestResult]:
+    def __run_tests(self) -> list[TestResult]:
         count = len(self._tests)
         width = 1
         while count >= 10 ** width:

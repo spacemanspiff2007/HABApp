@@ -1,6 +1,6 @@
 import inspect
 from datetime import datetime
-from typing import Any, Optional, Tuple, Union
+from typing import Any
 
 import pytest
 
@@ -28,14 +28,14 @@ from ...helpers.inspect import assert_same_signature, check_class_annotations, g
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
-def test_argspec_from_oh(cls):
+def test_argspec_from_oh(cls) -> None:
     target_spec = inspect.getfullargspec(OpenhabItem.from_oh)
     current_spec = inspect.getfullargspec(cls.from_oh)
     assert current_spec == target_spec
 
 
 @pytest.mark.parametrize('cls', tuple(c for c in item_dict.values()) + (Thing, ))
-def test_set_name(cls):
+def test_set_name(cls) -> None:
 
     # test that we can set the name properly
     c = cls('asdf')
@@ -47,13 +47,13 @@ def test_set_name(cls):
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
-def test_conditional_function_call_signature(cls):
+def test_conditional_function_call_signature(cls) -> None:
     assert_same_signature(Item.post_value_if, cls.post_value_if)
     assert_same_signature(Item.post_value_if, cls.oh_post_update_if)
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
-def test_doc_ivar(cls):
+def test_doc_ivar(cls) -> None:
 
     correct_hints = {
         StringItem: {'value': str},
@@ -61,13 +61,13 @@ def test_doc_ivar(cls):
         ContactItem: {'value': str},
         PlayerItem: {'value': str},
 
-        NumberItem:        {'value': Union[int, float]},
-        RollershutterItem: {'value': Union[int, float]},
-        DimmerItem:        {'value': Union[int, float]},
+        NumberItem:        {'value': int | float},
+        RollershutterItem: {'value': int | float},
+        DimmerItem:        {'value': int | float},
 
-        ColorItem: {'value': Tuple[float, float, float]},
-        CallItem: {'value': Tuple[str, ...]},
-        LocationItem: {'value': Optional[Tuple[float, float, Optional[float]]]},
+        ColorItem: {'value': tuple[float, float, float]},
+        CallItem: {'value': tuple[str, ...]},
+        LocationItem: {'value': tuple[float, float, float | None] | None},
 
         DatetimeItem: {'value': datetime},
         ImageItem: {'value': bytes},

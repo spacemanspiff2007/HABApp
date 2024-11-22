@@ -1,5 +1,6 @@
 from asyncio import CancelledError, Task, current_task
-from typing import Any, Awaitable, Callable, Final, Optional
+from collections.abc import Awaitable, Callable
+from typing import Any, Final
 
 from HABApp.core.const import loop
 
@@ -8,19 +9,19 @@ _TASK_REFS = set()
 
 
 class SingleTask:
-    def __init__(self, coro: Callable[[], Awaitable[Any]], name: Optional[str] = None):
+    def __init__(self, coro: Callable[[], Awaitable[Any]], name: str | None = None) -> None:
         if name is None:
             name = f'{self.__class__.__name__}_{coro.__name__}'
 
         self.coro: Final = coro
         self.name: Final = name
-        self.task: Optional[Task] = None
+        self.task: Task | None = None
 
     @property
     def is_running(self) -> bool:
         return self.task is not None
 
-    def cancel(self) -> Optional[Task]:
+    def cancel(self) -> Task | None:
         if (task := self.task) is None:
             return None
 
@@ -33,7 +34,7 @@ class SingleTask:
         task.cancel()
         return task
 
-    async def cancel_wait(self):
+    async def cancel_wait(self) -> None:
         if task := self.cancel():
             try:
                 await task
@@ -61,7 +62,7 @@ class SingleTask:
         self.task = task = loop.create_task(self._task_wrap(), name=self.name)
         return task
 
-    async def _task_wrap(self):
+    async def _task_wrap(self) -> None:
         task = current_task(loop)
 
         # don't use try-finally because

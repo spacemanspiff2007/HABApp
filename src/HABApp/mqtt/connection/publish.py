@@ -1,5 +1,7 @@
 from asyncio import Queue
-from typing import Optional, Union
+from typing import Any
+
+from pydantic import BaseModel
 
 from HABApp.config import CONFIG
 from HABApp.config.models.mqtt import QOS
@@ -10,10 +12,13 @@ from HABApp.mqtt.connection.connection import MqttPlugin
 
 
 class PublishHandler(MqttPlugin):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(task_name='MqttPublish')
 
-    async def mqtt_task(self):
+    async def mqtt_task(self) -> None:
+        if CONFIG.mqtt.general.listen_only:
+            return None
+
         connection = self.plugin_connection
         with connection.handle_exception(self.mqtt_task):
             client = self.plugin_connection.context
@@ -34,27 +39,28 @@ class PublishHandler(MqttPlugin):
                 await client.publish(topic, value, qos, retain)
                 queue.task_done()
 
-    async def on_connected(self):
+    async def on_connected(self) -> None:
         global QUEUE
 
-        QUEUE = Queue()
+        if not CONFIG.mqtt.general.listen_only:
+            QUEUE = Queue()
         await super().on_connected()
 
-    async def on_disconnected(self):
+    async def on_disconnected(self) -> None:
         global QUEUE
 
         await super().on_disconnected()
         QUEUE = None
 
 
-QUEUE: Optional[Queue] = Queue()
+QUEUE: Queue | None = Queue()
 
 
 PUBLISH_HANDLER = PublishHandler()
 
 
-def async_publish(topic: Union[str, ItemRegistryItem], payload, qos: Optional[QOS] = None,
-                  retain: Optional[bool] = None):
+def async_publish(topic: str | ItemRegistryItem, payload: Any, qos: QOS | None = None,
+                  retain: bool | None = None) -> None:
     """
     Publish a value under a certain topic.
     If qos and/or retain is not set the value from the configuration file will be used.
@@ -71,13 +77,16 @@ def async_publish(topic: Union[str, ItemRegistryItem], payload, qos: Optional[QO
         topic = topic.name
 
     # convert these to string
-    if isinstance(payload, (dict, list, set, frozenset)):
+    if isinstance(payload, BaseModel):
+        payload = payload.model_dump_json()
+    elif isinstance(payload, (dict, list, set, frozenset)):
         payload = dump_json(payload)
 
     queue.put_nowait((topic, payload, qos, retain))
+    return None
 
 
-def publish(topic: Union[str, ItemRegistryItem], payload, qos: Optional[QOS] = None, retain: Optional[bool] = None):
+def publish(topic: str | ItemRegistryItem, payload: Any, qos: QOS | None = None, retain: bool | None = None) -> None:
     """
     Publish a value under a certain topic.
     If qos and/or retain is not set the value from the configuration file will be used.

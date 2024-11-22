@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import HABApp
 from HABApp.core.internals import AutoContextBoundObj
@@ -6,11 +6,11 @@ from HABApp.core.internals import AutoContextBoundObj
 
 class BaseMode(AutoContextBoundObj):
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__()
         self.name: str = name
 
-        self.__mode_lower_prio: Optional[BaseMode] = None
+        self.__mode_lower_prio: BaseMode | None = None
 
         self.parent: HABApp.util.multimode.MultiModeItem
 
@@ -19,14 +19,14 @@ class BaseMode(AutoContextBoundObj):
             self.parent = HABApp.util.multimode.MultiModeItem('TYPE_CHECKING')
         return
 
-    def _set_mode_lower_prio(self, mode_lower_prio):
+    def _set_mode_lower_prio(self, mode_lower_prio) -> None:
         assert isinstance(mode_lower_prio, BaseMode) or mode_lower_prio is None, type(mode_lower_prio)
         self.__lower_priority_mode = mode_lower_prio
 
     def calculate_value(self, lower_prio_value: Any) -> Any:
         raise NotImplementedError()
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Remove the mode from the parent ``MultiModeItem`` and stop processing it
         """
         self._ctx_unlink()

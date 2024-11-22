@@ -1,9 +1,12 @@
 import ast
 import datetime
+import importlib
+from collections.abc import Callable
 from inspect import isclass, ismodule
 from pathlib import Path
-from typing import Any, Callable, List, Set, Tuple
+from typing import Any, Final
 
+import whenever
 from easyconfig.config_objs import ConfigObj
 from immutables import Map
 from stack_data import Variable
@@ -18,6 +21,9 @@ SKIPPED_TYPES = (
     bool, bytearray, bytes, complex, dict, float, frozenset, int, list, memoryview, set, str, tuple, type(None),
     datetime.date, datetime.datetime, datetime.time, datetime.timedelta,
     Map, Path,
+    whenever.Instant,
+    whenever.SystemDateTime, whenever.LocalDateTime, whenever.ZonedDateTime, whenever.OffsetDateTime,
+    whenever.TimeDelta, whenever.DateDelta, whenever.DateTimeDelta
 )
 
 
@@ -25,7 +31,9 @@ def is_type_hint_or_type(value: Any) -> bool:
     if isinstance(value, tuple):
         return all(is_type_hint_or_type(obj) for obj in value)
 
-    if value in SKIPPED_TYPES:
+    # compare through identity since some objects override the equality operator.
+    # If we check with "value in SKIPPED_TYPES" we might get an exception because there the __eq__ operator is used
+    if any(value is o for o in SKIPPED_TYPES):
         return True
 
     # check if it's something from the typing module
@@ -47,7 +55,21 @@ def _filter_expressions(name: str, value: Any) -> bool:
     return False
 
 
-SKIP_VARIABLE: Tuple[Callable[[str, Any], bool], ...] = (
+SKIPPED_OBJS: Final = (
+    'HABApp.core.Items',
+)
+
+
+def _skip_objs(name: str, value: Any) -> bool:
+    for dotted_path in SKIPPED_OBJS:
+        path = dotted_path.split('.')
+        obj = importlib.import_module('.'.join(path[:-1]))
+        if value is getattr(obj, path[-1]):
+            return True
+    return False
+
+
+SKIP_VARIABLE: tuple[Callable[[str, Any], bool], ...] = (
     # module imports
     lambda name, value: ismodule(value),
 
@@ -61,10 +83,10 @@ SKIP_VARIABLE: Tuple[Callable[[str, Any], bool], ...] = (
     lambda name, value: isinstance(value, ConfigObj),
 
     # Expressions
-    _filter_expressions
+    _filter_expressions,
 )
 
-ORDER_VARIABLE: Tuple[Callable[[Variable], bool], ...] = (
+ORDER_VARIABLE: tuple[Callable[[Variable], bool], ...] = (
     lambda x: isclass(x.value),
 )
 
@@ -72,21 +94,23 @@ ORDER_VARIABLE: Tuple[Callable[[Variable], bool], ...] = (
 def skip_variable(var: Variable) -> bool:
     name = var.name
     value = var.value
-    for func in SKIP_VARIABLE:
-        if func(name, value):
-            return True
-    return False
+    return any(func(name, value) for func in SKIP_VARIABLE)
 
 
-def format_frame_variables(tb: List[str], stack_variables: List[Variable]):
+def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
     if not stack_variables:
         return None
 
     # remove variables that shall not be printed
-    used_vars: List[Variable] = [v for v in stack_variables if not skip_variable(v)]
+    used_vars: set[Variable] = {v for v in stack_variables if not skip_variable(v)}
+
+    # remove objs and attributes
+    rem_obj_names = {v.name for v in used_vars if _skip_objs(v.name, v.value)}
+    rem_objs = {v for v in used_vars for rem_name in rem_obj_names if v.name.startswith(rem_name)}
+    used_vars -= rem_objs
 
     # attributes
-    dotted_names: Set[str] = {n.name.split('.')[0] for n in used_vars if '.' in n.name}
+    dotted_names: set[str] = {n.name.split('.')[0] for n in used_vars if '.' in n.name}
 
     # Sort output
     used_vars = sorted(used_vars, key=lambda x: (

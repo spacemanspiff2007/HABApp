@@ -1,10 +1,11 @@
-from typing import Callable, Optional, Set, TypeVar
+from collections.abc import Callable
+from typing import Any, Optional, TypeVar
 
 from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBoundObjectIsAlreadyUnlinkedError
 
 
 class ContextBoundObj:
-    def __init__(self, parent_ctx: Optional['Context'], **kwargs):
+    def __init__(self, parent_ctx: Optional['Context'], **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._parent_ctx = parent_ctx
         if parent_ctx is not None:
@@ -30,14 +31,14 @@ HINT_CONTEXT_BOUND_OBJ = TypeVar('HINT_CONTEXT_BOUND_OBJ', bound=ContextBoundObj
 
 
 class Context:
-    def __init__(self):
-        self.objs: Set[ContextBoundObj] = set()
+    def __init__(self) -> None:
+        self.objs: set[ContextBoundObj] = set()
 
-    def add_obj(self, obj: ContextBoundObj):
+    def add_obj(self, obj: ContextBoundObj) -> None:
         assert isinstance(obj, ContextBoundObj)
         self.objs.add(obj)
 
-    def remove_obj(self, obj: ContextBoundObj):
+    def remove_obj(self, obj: ContextBoundObj) -> None:
         assert isinstance(obj, ContextBoundObj)
         self.objs.remove(obj)
 
@@ -47,11 +48,11 @@ class Context:
         obj._ctx_link(self)
         return obj
 
-    def get_callback_name(self, callback: Callable) -> Optional[str]:
+    def get_callback_name(self, callback: Callable) -> str | None:
         raise NotImplementedError()
 
 
 class ContextProvidingObj:
-    def __init__(self, context: Optional[Context] = None, **kwargs):
+    def __init__(self, context: Context | None = None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._habapp_ctx: Context = context

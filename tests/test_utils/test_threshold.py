@@ -5,13 +5,13 @@ from HABApp.util import Threshold
 
 class TestCases(unittest.TestCase):
 
-    def test_constructor(self):
+    def test_constructor(self) -> None:
         t = Threshold(10, 20)
         self.assertEqual(t.current_threshold, 20)
         t = Threshold(20, 10)
         self.assertEqual(t.current_threshold, 20)
 
-    def test_a(self):
+    def test_a(self) -> None:
         t = Threshold(10, 20)
 
         self.assertFalse( t < 19)
@@ -24,7 +24,7 @@ class TestCases(unittest.TestCase):
         self.assertFalse(t < 9)
         self.assertFalse(t < 19)
 
-    def test_b(self):
+    def test_b(self) -> None:
         t = Threshold(10, 20)
         self.assertEqual(t.current_threshold, 20)
 

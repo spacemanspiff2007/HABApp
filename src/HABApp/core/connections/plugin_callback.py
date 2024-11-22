@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from inspect import getmembers, iscoroutinefunction, signature
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 
 from ._definitions import ConnectionStatus
 

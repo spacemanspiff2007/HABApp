@@ -10,21 +10,21 @@ class FixedWindowElasticExpiryLimitInfo(BaseRateLimitInfo):
 
 
 class FixedWindowElasticExpiryLimit(BaseRateLimit):
-    def __init__(self, allowed: int, interval: int, hits: int = 0):
+    def __init__(self, allowed: int, interval: int, hits: int = 0) -> None:
         super().__init__(allowed, interval, hits)
 
         self.start: float = -1.0
         self.stop: float = -1.0
 
-    def repr_text(self):
+    def repr_text(self) -> str:
         return f'window={self.stop - self.start:.0f}s'
 
-    def do_test_allow(self):
+    def do_test_allow(self) -> None:
         if self.stop <= monotonic():
             self.hits = 0
             self.skips = 0
 
-    def do_allow(self):
+    def do_allow(self) -> None:
         now = monotonic()
 
         if self.stop <= now:
@@ -33,7 +33,7 @@ class FixedWindowElasticExpiryLimit(BaseRateLimit):
             self.start = now
             self.stop = now + self.interval
 
-    def do_deny(self):
+    def do_deny(self) -> None:
         self.stop = monotonic() + self.interval
 
     def info(self) -> FixedWindowElasticExpiryLimitInfo:

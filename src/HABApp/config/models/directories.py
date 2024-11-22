@@ -1,7 +1,6 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 from easyconfig import BaseModel
 from pydantic import Field, validator
@@ -19,13 +18,13 @@ class DirectoriesConfig(BaseModel):
     rules: Path = Field(Path('rules'), description='Folder from which the rule files will be loaded')
 
     # Optional Folders
-    param: Optional[Path] = Field(Path('params'), description='Folder from which the parameter files will be loaded')
-    config: Optional[Path] = Field(Path('config'), description='Folder from which configuration files '
+    param: Path | None = Field(Path('params'), description='Folder from which the parameter files will be loaded')
+    config: Path | None = Field(Path('config'), description='Folder from which configuration files '
                                                                '(e.g. for textual thing configuration) will be loaded')
-    lib: Optional[Path] = Field(Path('lib'), description='Folder where additional libraries can be placed')
+    lib: Path | None = Field(Path('lib'), description='Folder where additional libraries can be placed')
 
     @validator('*')
-    def ensure_folder(cls, value: Optional[Path]):
+    def ensure_folder(cls, value: Path | None):
         import HABApp.__cmd_args__
 
         if value is None:
@@ -43,7 +42,7 @@ class DirectoriesConfig(BaseModel):
 
         return value
 
-    def create_folders(self):
+    def create_folders(self) -> None:
 
         # create folder structure if it does not exist
         if not self.rules.is_dir():

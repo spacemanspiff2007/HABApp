@@ -12,17 +12,17 @@ post_event = uses_post_event()
 class ConnectionStateToEventBusPlugin(BaseConnectionPlugin):
     _DEFAULT_PRIORITY = 100_000
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
         self.__last_report = None
 
-    def __post_event(self, connection: BaseConnection):
+    def __post_event(self, connection: BaseConnection) -> None:
         if (status := connection.status.status.value) != self.__last_report:
             post_event(TOPIC_CONNECTIONS, HABAppConnectionStateEvent(connection.name, status))
             self.__last_report = status
 
-    async def on_online(self, connection: BaseConnection):
+    async def on_online(self, connection: BaseConnection) -> None:
         self.__post_event(connection)
 
-    async def on_disconnected(self, connection: BaseConnection):
+    async def on_disconnected(self, connection: BaseConnection) -> None:
         self.__post_event(connection)

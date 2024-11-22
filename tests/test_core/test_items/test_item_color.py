@@ -7,11 +7,11 @@ from HABApp.core.items import ColorItem
 from tests.helpers import TestEventBus
 
 
-def test_repr():
+def test_repr() -> None:
     str(ColorItem('test'))
 
 
-def test_init():
+def test_init() -> None:
     assert ColorItem('').hue == 0
     assert ColorItem('').saturation == 0
     assert ColorItem('').brightness == 0
@@ -33,7 +33,7 @@ def test_init():
         ((None, None, 60), (11.11, 22.22, 60)),
     ]
 )
-def test_set_func_vals(func_name, test_vals):
+def test_set_func_vals(func_name, test_vals) -> None:
     i = ColorItem('test', hue=11.11, saturation=22.22, brightness=33.33)
     assert i.hue == 11.11
     assert i.saturation == 22.22
@@ -50,7 +50,7 @@ def test_set_func_vals(func_name, test_vals):
     assert i.value == soll
 
 
-def test_set_func_tuple():
+def test_set_func_tuple() -> None:
     i = ColorItem('test')
     assert i.hue == 0
     assert i.saturation == 0
@@ -64,7 +64,7 @@ def test_set_func_tuple():
     assert i.value == (22, 33.3, 77)
 
 
-def test_rgb_to_hsv():
+def test_rgb_to_hsv() -> None:
     i = ColorItem('test')
     i.set_rgb(193, 25, 99)
 
@@ -74,12 +74,12 @@ def test_rgb_to_hsv():
     assert tuple(int(i) for i in i.value) == (333, 87, 75)
 
 
-def test_hsv_to_rgb():
+def test_hsv_to_rgb() -> None:
     i = ColorItem('test', 23, 44, 66)
     assert i.get_rgb() == (168, 123, 94)
 
 
-def test_post_update(sync_worker, eb: TestEventBus):
+def test_post_update(sync_worker, eb: TestEventBus) -> None:
     i = ColorItem('test', 23, 44, 66)
 
     mock = MagicMock()

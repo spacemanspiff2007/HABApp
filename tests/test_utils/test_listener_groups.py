@@ -11,7 +11,7 @@ from HABApp.util.listener_groups.listener_groups import EventListenerCreator, Li
 class PatchedBaseItem(BaseItem):
     NAME = 'PatchedBaseItem'
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(PatchedBaseItem.NAME)
 
     listener = Mock()
@@ -22,7 +22,7 @@ class PatchedBaseItem(BaseItem):
     watch_change = Mock(return_value=no_x_watch)
     watch_update = Mock(return_value=no_x_watch)
 
-    def reset(self):
+    def reset(self) -> None:
         self.listener.reset_mock()
         self.listen_event.reset_mock()
         self.no_x_watch.reset_mock()
@@ -36,7 +36,7 @@ def patched_item() -> BaseItem:
     return item
 
 
-def test_not_found():
+def test_not_found() -> None:
     msg = 'ListenerCreator for "asdf" not found!'
 
     g = EventListenerGroup()
@@ -59,13 +59,13 @@ def test_not_found():
 
 
 @pytest.mark.parametrize('func', ('add_listener', 'add_no_update_watcher', 'add_no_change_watcher'))
-def test_activate_deactivate(func):
+def test_activate_deactivate(func) -> None:
     g = EventListenerGroup()
     item = patched_item()
     cb = object()
     p1 = object()
 
-    def assert_called_once():
+    def assert_called_once() -> None:
         if func == 'add_listener':
             item.listen_event.assert_called_once_with(cb, p1)
         else:
@@ -96,7 +96,7 @@ def test_activate_deactivate(func):
     item.listener.cancel.assert_called_once_with()
 
 
-def test_activate():
+def test_activate() -> None:
     g = EventListenerGroup()
     g._items['a'] = m = Mock()
 
@@ -117,7 +117,7 @@ def test_activate():
     assert len(m.listen.mock_calls) == 2
 
 
-def test_listen_add(monkeypatch):
+def test_listen_add(monkeypatch) -> None:
     m = Mock()
     monkeypatch.setattr(
         HABApp.util.listener_groups.listener_groups, EventListenerCreator.__name__, Mock(return_value=m))

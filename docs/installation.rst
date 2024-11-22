@@ -120,6 +120,8 @@ If your installation is not done in "/opt/habapp/bin" replace accordingly as wel
     Type=simple
     User=openhab
     Group=openhab
+    Restart=on-failure
+    RestartSec=10min
     UMask=002
     ExecStart=/opt/habapp/bin/habapp -c PATH_TO_CONFIGURATION_FOLDER
 

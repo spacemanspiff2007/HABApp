@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 from HABApp.core.files.errors import AlreadyHandledFileError, CircularReferenceError, DependencyDoesNotExistError
 from HABApp.core.files.file.properties import FileProperties
@@ -20,7 +21,7 @@ class HABAppFile:
     LOAD_FUNC: Callable[[str, Path], Awaitable[Any]]
     UNLOAD_FUNC: Callable[[str, Path], Awaitable[Any]]
 
-    def __init__(self, name: str, path: Path, properties: FileProperties):
+    def __init__(self, name: str, path: Path, properties: FileProperties) -> None:
         self.name: str = name
         self.path: Path = path
 
@@ -28,7 +29,7 @@ class HABAppFile:
         self.properties: FileProperties = properties
         log.debug(f'{self.name} added')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self.name} state: {self.state}>'
 
     def set_state(self, new_state: FileState):
@@ -129,7 +130,7 @@ class HABAppFile:
         self.set_state(FileState.REMOVED)
         return None
 
-    def file_changed(self, file: HABAppFile):
+    def file_changed(self, file: HABAppFile) -> None:
         name = file.name
         if name in self.properties.reloads_on:
             self.set_state(FileState.PENDING)

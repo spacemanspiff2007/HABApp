@@ -1,5 +1,5 @@
 import typing
-from typing import ClassVar, List, Optional
+from typing import ClassVar
 
 from pydantic import BaseModel
 
@@ -9,8 +9,8 @@ from HABApp.openhab.definitions.rest import ItemResp
 class HABAppThingPluginData(BaseModel):
     obj_name: ClassVar[str] = 'ThingPlugin'
 
-    created_link: Optional[str] = None
-    created_ns: List[str] = []
+    created_link: str | None = None
+    created_ns: list[str] = []
 
 
 # keep this up to date
@@ -27,5 +27,5 @@ def load_habapp_meta(data: ItemResp) -> ItemResp:
     return data
 
 
-def get_api_vals(obj: typing.Union[HABAppThingPluginData]) -> typing.Tuple[str, dict]:
+def get_api_vals(obj: HABAppThingPluginData) -> typing.Tuple[str, dict]:
     return obj.obj_name, obj.model_dump(exclude_defaults=True)

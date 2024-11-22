@@ -1,21 +1,23 @@
-from typing import Optional
 
-from msgspec import Struct
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest/src/main/java/org/openhab/core/io/rest/internal/resources/beans/SystemInfoBean.java
 
 
-class SystemInfoResp(Struct, rename='camel', kw_only=True):
+class SystemInfoResp(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel)
+
     config_folder: str
     userdata_folder: str
-    log_folder: Optional[str] = None
-    java_version: Optional[str] = None
-    java_vendor: Optional[str] = None
-    java_vendor_version: Optional[str] = None
-    os_name: Optional[str] = None
-    os_version: Optional[str] = None
-    os_architecture: Optional[str] = None
+    log_folder: str | None = None
+    java_version: str | None = None
+    java_vendor: str | None = None
+    java_vendor_version: str | None = None
+    os_name: str | None = None
+    os_version: str | None = None
+    os_architecture: str | None = None
     available_processors: int
     free_memory: int
     total_memory: int
@@ -24,5 +26,5 @@ class SystemInfoResp(Struct, rename='camel', kw_only=True):
     uptime: int = -1    # TODO: remove default if we go OH4.1 only
 
 
-class SystemInfoRootResp(Struct, rename='camel'):
-    system_info: SystemInfoResp
+class SystemInfoRootResp(BaseModel):
+    system_info: SystemInfoResp = Field(alias='systemInfo')

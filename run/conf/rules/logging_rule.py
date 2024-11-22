@@ -8,7 +8,7 @@ log = logging.getLogger('MyRule')
 
 class MyLoggingRule(HABApp.Rule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # different levels are available

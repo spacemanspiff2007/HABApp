@@ -171,24 +171,30 @@ All items have two additional timestamps set which can be used to simplify rule 
 * The time when the item was last updated
 * The time when the item was last changed.
 
+It's possible to compare these values directly with deltas without having to do calculations withs timestamps
+
 
 .. exec_code::
 
     # ------------ hide: start ------------
-    from pendulum import DateTime
+    from whenever import Instant, patch_current_time
     from HABApp.core.items import Item
     from rule_runner import SimpleRuleRunner
 
     runner = SimpleRuleRunner()
     runner.set_up()
 
-    item = Item.get_create_item('Item_Name', initial_value='old_value')
-    item._last_update.dt = DateTime(2022, 8, 20, 12, 16)
-    item._last_change.dt = DateTime(2022, 8, 20, 10, 30)
+    item = Item.get_create_item('Item_Name', initial_value='value')
+    item._last_change.instant = Instant.from_utc(2024, 4, 30, 10, 30)
+    item._last_update.instant = Instant.from_utc(2024, 4, 30, 10, 31)
+
+    p = patch_current_time(item._last_update.instant.add(minutes=1), keep_ticking=False)
+    p.__enter__()
 
     # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item
+    from HABApp.rule.scheduler import minutes, seconds, InstantView
 
     class TimestampRule(HABApp.Rule):
         def __init__(self):
@@ -196,13 +202,33 @@ All items have two additional timestamps set which can be used to simplify rule 
             # This item was created by another rule, that's why "get_item" is used
             self.my_item = Item.get_item('Item_Name')
 
-            # Access of timestamps
-            print(f'Last update: {self.my_item.last_update}')
-            print(f'Last change: {self.my_item.last_change}')
+            # Access of item timestamps
+
+            # It's possible to compare directly with the most common (time-) deltas through the operator
+            if self.my_item.last_update >= minutes(1):
+                print('Item was updated in the last minute')
+
+            # There are also functions available which support both building the delta directly and using an object
+            if self.my_item.last_change.newer_than(minutes=2, seconds=30):
+                print('Item was changed in the last 1min 30s')
+            if self.my_item.last_change.older_than(seconds(30)):
+                print('Item was changed before 30s')
+
+            # if you want to do calculations you can also get a delta
+            delta_to_now = self.my_item.last_change.delta_now()
+
+
+            # Instead of dealing with timestamps you can also have the same convenience
+            # for arbitrary timestamps by using an InstantView object
+            timestamp = InstantView.now()
+            assert timestamp.newer_than(minutes=1)
+            delta_to_now = timestamp.delta_now()
+
 
     TimestampRule()
 
     # ------------ hide: start ------------
+    p.__exit__(None, None, None)
     runner.tear_down()
     # ------------ hide: stop -------------
 

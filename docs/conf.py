@@ -26,7 +26,7 @@ sphinx_logger = sphinx.util.logging.getLogger('post')
 logger_lvl = logging.DEBUG if IS_RTD_BUILD or IS_CI else logging.INFO  # set level to DEBUG for CI
 
 
-def log(msg: str):
+def log(msg: str) -> None:
     sphinx_logger.log(logger_lvl, f'[POST] {msg:s}')
 
 
@@ -87,7 +87,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 
 # The master toctree document.
 master_doc = 'index'
@@ -123,7 +123,6 @@ html_theme_options = {
     'canonical_url': '',
     # 'analytics_id': 'UA-XXXXXXX-1',  # Provided by Google in your dashboard
     'logo_only': False,
-    'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
     # 'vcs_pageview_mode': '',
@@ -233,7 +232,7 @@ nitpick_ignore = [
 
 nitpick_ignore_regex = [
     (re.compile(r'py:data|py:class'), re.compile(r'typing\..+')),
-    (re.compile(r'py:class'), re.compile(r'(?:datetime|pendulum|aiohttp|pathlib)\..+'))
+    (re.compile(r'py:class'), re.compile(r'(?:datetime|aiohttp|pathlib)\..+'))
 ]
 
 # -- Extension configuration -------------------------------------------------
@@ -295,7 +294,7 @@ def replace_node_contents(node: Node):
     replacement = TYPE_REPLACEMENTS.get(node_text)
 
     # https://www.sphinx-doc.org/en/master/extdev/nodes.html
-    if isinstance(node, desc_signature) and node.attributes.get('fullname', '').endswith('Item'):
+    if isinstance(node, desc_signature) and node.attributes.get('fullname', '').endswith(('Item', 'JobControl')):
         log(f'Removing constructor signature of {", ".join(node.attributes["ids"])}')
         assert len(node.children) == 3
         signature_node = node.children[2]
@@ -323,14 +322,14 @@ def replace_node_contents(node: Node):
     return matched_nodes
 
 
-def transform_desc(app, domain, objtype: str, contentnode):
+def transform_desc(app, domain, objtype: str, contentnode) -> None:
     # if objtype != 'pydantic_field':
     #     return None
 
     replace_node_contents(node=contentnode.parent)
 
 
-def setup(app):
+def setup(app) -> None:
     app.connect('object-description-transform', transform_desc)
 
 
@@ -338,7 +337,8 @@ def setup(app):
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
 if IS_RTD_BUILD:
     intersphinx_mapping = {
-        'python': ('https://docs.python.org/3', None)
+        'python': ('https://docs.python.org/3', None),
+        'whenever': ('https://whenever.readthedocs.io/en/stable', None)
     }
 
 # Don't show warnings for missing python references since these are created via intersphinx during the RTD build

@@ -1,10 +1,10 @@
 import logging
 from dataclasses import dataclass
 from logging import LogRecord
-from typing import Optional, Union
+from typing import Optional
 
 
-def get_log_level_no(level: Union[str, int]) -> int:
+def get_log_level_no(level: str | int) -> int:
     if isinstance(level, int):
         return level
 

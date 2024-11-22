@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any
 
 import HABApp
 from HABApp.config import CONFIG
@@ -21,7 +22,7 @@ SUBSCRIBE_CFG = CONFIG.mqtt.subscribe
 
 
 class SubscriptionHandler(MqttPlugin):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(task_name='MqttSubscribe')
         self.runtime_subs: dict[str, int] = {}
         self.subscribed_to: dict[str, int] = {}
@@ -29,7 +30,7 @@ class SubscriptionHandler(MqttPlugin):
         self.sub_task = SingleTask(self.apply_subscriptions, 'ApplySubscriptionsTask')
 
     async def interface_subscribe(self, topic_or_topics: str | Iterable[tuple[str, int | None]],
-                                  qos: QOS | None = None):
+                                  qos: QOS | None = None) -> None:
         """
         Subscribe to a MQTT topic. Note that subscriptions made this way are volatile and will only remain until
         the next restart.
@@ -49,7 +50,7 @@ class SubscriptionHandler(MqttPlugin):
         if self.plugin_connection.context is not None:
             await self.apply_subscriptions()
 
-    async def interface_unsubscribe(self, topic_or_topics: str | Iterable[str]):
+    async def interface_unsubscribe(self, topic_or_topics: str | Iterable[str]) -> None:
         """
         Unsubscribe from a MQTT topic
 
@@ -91,7 +92,7 @@ class SubscriptionHandler(MqttPlugin):
         for topic in topics:
             self.subscribed_to.pop(topic)
 
-    async def apply_subscriptions(self):
+    async def apply_subscriptions(self) -> None:
         log = self.plugin_connection.log
         default_qos = SUBSCRIBE_CFG.qos
 
@@ -104,8 +105,8 @@ class SubscriptionHandler(MqttPlugin):
         # Unsubscribing has the corresponding handling, so we call that every time
         if not self.plugin_connection.has_errors:
             # subscription from config
-            for topic, qos in CONFIG.mqtt.subscribe.topics:
-                target[topic] = qos if qos is not None else default_qos
+            for topic, qos in CONFIG.mqtt.subscribe.get_topic_qos():
+                target[topic] = qos
             # runtime subscriptions overwrite the subscriptions from the config file
             for topic, qos in self.runtime_subs.items():
                 target[topic] = qos
@@ -129,7 +130,7 @@ class SubscriptionHandler(MqttPlugin):
 
         log.debug('Subscriptions successfully updated')
 
-    async def on_connected(self):
+    async def on_connected(self) -> None:
         await super().on_connected()
 
         # Since we are freshly connected we have not yet subscribed to anything
@@ -140,7 +141,7 @@ class SubscriptionHandler(MqttPlugin):
         self.sub_task.start_if_not_running()
         await self.sub_task.wait()
 
-    async def on_disconnected(self):
+    async def on_disconnected(self) -> None:
         await super().on_disconnected()
         await self.sub_task.cancel_wait()
 
@@ -148,7 +149,7 @@ class SubscriptionHandler(MqttPlugin):
         if not self.plugin_connection.has_errors:
             await self.unsubscribe(None)
 
-    async def mqtt_task(self):
+    async def mqtt_task(self) -> None:
         client = self.plugin_connection.context
         assert client is not None
 
@@ -199,7 +200,7 @@ async_subscribe = SUBSCRIPTION_HANDLER.interface_subscribe
 async_unsubscribe = SUBSCRIPTION_HANDLER.interface_unsubscribe
 
 
-def subscribe(topic_or_topics: str | Iterable[tuple[str, int | None]], qos: QOS | None = None):
+def subscribe(topic_or_topics: str | Iterable[tuple[str, int | None]], qos: QOS | None = None) -> None:
     """
     Subscribe to a MQTT topic. Note that subscriptions made this way are volatile and will only remain until
     the next restart.
@@ -210,7 +211,7 @@ def subscribe(topic_or_topics: str | Iterable[tuple[str, int | None]], qos: QOS 
     run_func_from_async(async_subscribe(topic_or_topics, qos))
 
 
-def unsubscribe(topic_or_topics: str | Iterable[str]):
+def unsubscribe(topic_or_topics: str | Iterable[str]) -> None:
     """
     Unsubscribe from a MQTT topic
 

@@ -26,70 +26,11 @@ ItemNoChangeWatch
    :member-order: groupwise
 
 
-Scheduler
+
+InstantView
 ======================================
 
-
-OneTimeJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.OneTimeJob
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-CountdownJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.CountdownJob
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-ReoccurringJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.ReoccurringJob
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-DayOfWeekJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.DayOfWeekJob
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-DawnJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.DawnJob
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-SunriseJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.SunriseJob
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-SunsetJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.SunsetJob
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
-DuskJob
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.rule.scheduler.jobs.DuskJob
+.. autoclass:: HABApp.core.lib.InstantView
    :members:
    :inherited-members:
    :member-order: groupwise

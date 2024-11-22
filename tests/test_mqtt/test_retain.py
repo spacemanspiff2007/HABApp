@@ -3,7 +3,7 @@ from HABApp.mqtt.connection.subscribe import msg_to_event
 
 
 class MqttDummyMsg:
-    def __init__(self, topic='', payload='', retain=False):
+    def __init__(self, topic='', payload='', retain=False) -> None:
         self.topic = topic
         self._topic = topic.encode('utf-8')
         self.payload = payload.encode('utf-8')
@@ -11,7 +11,7 @@ class MqttDummyMsg:
         self.qos = 0
 
 
-async def test_retain_create(ir: ItemRegistry):
+async def test_retain_create(ir: ItemRegistry) -> None:
     topic = '/test/creation'
 
     assert not ir.item_exists(topic)

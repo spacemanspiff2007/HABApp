@@ -1,6 +1,7 @@
+from collections.abc import Callable
 from io import StringIO
 from pathlib import Path, PurePath
-from typing import Any, Callable, TextIO, Union
+from typing import Any, TextIO
 from warnings import warn
 
 
@@ -18,14 +19,14 @@ class MyStringIO(StringIO):
 
 class MockFile:
 
-    def __init__(self, path: str, data: str = ''):
+    def __init__(self, path: str, data: str = '') -> None:
         super().__init__()
 
         self.path = Path(path)
         self.data: str = data
         self.warn_on_delete = True
 
-    def __set_data(self, val: str):
+    def __set_data(self, val: str) -> None:
         self.data = val
 
     def is_file(self) -> bool:
@@ -34,12 +35,12 @@ class MockFile:
     def open(self, *args, **kwargs) -> TextIO:
         return MyStringIO(self.__set_data, self.data)
 
-    def rename(self, target: Union[str, PurePath]):
+    def rename(self, target: str | PurePath):
         if self.warn_on_delete:
             warn(f'Not supported for {self.__class__.__name__}!', UserWarning, stacklevel=2)
         return None
 
-    def replace(self, target: Union[str, PurePath]) -> None:
+    def replace(self, target: str | PurePath) -> None:
         if self.warn_on_delete:
             warn(f'Not supported for {self.__class__.__name__}!', UserWarning, stacklevel=2)
         return None

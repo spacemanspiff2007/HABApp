@@ -10,11 +10,11 @@ from HABApp.openhab.definitions.rest.habapp_data import HABAppThingPluginData
 
 class OpenhabMetaData(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.add_test('async', self.create_meta)
 
-    def create_meta(self):
+    def create_meta(self) -> None:
         with OpenhabTmpItem('String') as tmpitem:
             d = run_coro(async_get_item_with_habapp_meta(tmpitem.name))
             assert d.metadata['HABApp'] is None

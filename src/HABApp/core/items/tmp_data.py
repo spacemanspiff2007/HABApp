@@ -16,19 +16,19 @@ TMP_DATA: typing.Dict[str, 'TmpItemData'] = {}
 
 
 class TmpItemData:
-    def __init__(self):
+    def __init__(self) -> None:
         self.ts = datetime.now()
         self.update: typing.Set[BaseWatch] = set()
         self.change: typing.Set[BaseWatch] = set()
 
-    def add_tasks(self, update, change):
+    def add_tasks(self, update, change) -> None:
         self.ts = datetime.now()
         self.update.update(update)
         self.change.update(change)
 
         self.clean()
 
-    def clean(self):
+    def clean(self) -> None:
         # remove canceled
         for obj in (self.update, self.change):
             canceled = [k for k in obj if k.fut.is_canceled]
@@ -60,7 +60,7 @@ def restore_tmp_data(item: 'BaseItem'):
         item._last_change.tasks.append(t)
 
 
-async def clean_tmp_data():
+async def clean_tmp_data() -> None:
     now = datetime.now()
     diff_max = timedelta(seconds=CLEANUP.secs)
 

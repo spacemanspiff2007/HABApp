@@ -2,7 +2,7 @@ from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter impor
 from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter_builder import ValueFormatter
 
 
-def test_scope():
+def test_scope() -> None:
     assert FormatterScope(field_names=('a', 'd1')).get_lines() == []
 
     s = FormatterScope(field_names=('a', 'b', 'b1', 'c', 'd', 'd1'))
@@ -17,7 +17,7 @@ def test_scope():
     ]
 
 
-def test_scope_missing():
+def test_scope_missing() -> None:
     s = FormatterScope(field_names=('a', 'c'))
     s.lines = [
         {'a': ValueFormatter('val_1a'), 'c': ValueFormatter('val_1 __cc__'), },
@@ -30,7 +30,7 @@ def test_scope_missing():
     ]
 
 
-def test_scope_skip():
+def test_scope_skip() -> None:
     s = FormatterScope(field_names=('a', 'b', 'b1', 'c', 'd', 'd1'), skip_alignment=('b1', 'd', 'd1'))
     s.lines = [
         {'a': ValueFormatter('val_1a'), 'b': ValueFormatter('val_1_bbbbb'), 'b1': ValueFormatter('{'),
@@ -45,7 +45,7 @@ def test_scope_skip():
     ]
 
 
-def test_scope_min_width():
+def test_scope_min_width() -> None:
     s = FormatterScope(field_names=('a', 'b', 'b1', 'c', 'd', 'd1', ), min_width={'a': 15})
     s.lines = [
         {'a': ValueFormatter('val_1a'), 'b': ValueFormatter('val_1_bbbbb'), 'c': ValueFormatter('val_1 __cc__'), },

@@ -1,13 +1,12 @@
 import logging
 from pathlib import Path
-from typing import Optional, Union
 
 import pytest
 from easyconfig import create_app_config
 from pydantic import BaseModel
 
 import HABApp
-from HABApp.core.const.const import PYTHON_311
+from HABApp.core.const.const import PYTHON_311, PYTHON_312, PYTHON_313
 from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.lib import format_exception
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_lib_file, is_suppressed_habapp_file
@@ -27,7 +26,7 @@ def exec_func(func) -> str:
     return msg
 
 
-def func_obj_def_multilines():
+def func_obj_def_multilines() -> None:
     item = HABApp.core.items.Item
     a = [
         1,
@@ -89,7 +88,7 @@ class DummyModel(BaseModel):
 CONFIG = create_app_config(DummyModel())
 
 
-def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
+def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
     assert isinstance(a, str) or a is None, type(a)
     assert isinstance(b, str) or b is None, type(b)
     assert isinstance(c, (str, int)), type(c)
@@ -104,31 +103,31 @@ def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: U
     print(CONFIGURATION)
 
 
-@pytest.mark.skipif(PYTHON_311, reason='Traceback Python 3.10')
-def test_exception_expression_remove_py310():
+@pytest.mark.skipif(PYTHON_311 or PYTHON_312 or PYTHON_313, reason='Traceback Python 3.10')
+def test_exception_expression_remove_py310() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
 --------------------------------------------------------------------------------
-     20 | def exec_func(func) -> str:
-     21 |     try:
--->  22 |         func()
-     23 |     except Exception as e:
+     19 | def exec_func(func) -> str:
+     20 |     try:
+-->  21 |         func()
+     22 |     except Exception as e:
    ------------------------------------------------------------
      e = ZeroDivisionError('division by zero')
      func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_none
+File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
 --------------------------------------------------------------------------------
-     92 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
+     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
       (...)
-     95 |     assert isinstance(c, (str, int)), type(c)
-     96 |     CONFIGURATION = '3'
-     97 |     my_dict = {'key_a': 'val_a'}
--->  98 |     1 / 0
-     99 |     log.error('Error message')
+     94 |     assert isinstance(c, (str, int)), type(c)
+     95 |     CONFIGURATION = '3'
+     96 |     my_dict = {'key_a': 'val_a'}
+-->  97 |     1 / 0
+     98 |     log.error('Error message')
    ------------------------------------------------------------
      CONFIG.a = 3
      a = None
@@ -143,38 +142,40 @@ File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_
 
 --------------------------------------------------------------------------------
 Traceback (most recent call last):
-  File "test_core/test_lib/test_format_traceback.py", line 22, in exec_func
+  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
     func()
-  File "test_core/test_lib/test_format_traceback.py", line 98, in func_test_assert_none
+  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
     1 / 0
 ZeroDivisionError: division by zero'''
 
 
-@pytest.mark.skipif(not PYTHON_311, reason='New traceback from python 3.11')
-def test_exception_expression_remove():
+@pytest.mark.skipif(
+    PYTHON_313 or (not PYTHON_311 and not PYTHON_312 and not PYTHON_313),
+    reason='New traceback from python 3.11 and 3.12')
+def test_exception_expression_remove_py_311_312() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 22 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
 --------------------------------------------------------------------------------
-     20 | def exec_func(func) -> str:
-     21 |     try:
--->  22 |         func()
-     23 |     except Exception as e:
+     19 | def exec_func(func) -> str:
+     20 |     try:
+-->  21 |         func()
+     22 |     except Exception as e:
    ------------------------------------------------------------
      e = ZeroDivisionError('division by zero')
      func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_none
+File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
 --------------------------------------------------------------------------------
-     92 | def func_test_assert_none(a: Optional[str] = None, b: Optional[str] = None, c: Union[str, int] = 3):
+     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
       (...)
-     95 |     assert isinstance(c, (str, int)), type(c)
-     96 |     CONFIGURATION = '3'
-     97 |     my_dict = {'key_a': 'val_a'}
--->  98 |     1 / 0
-     99 |     log.error('Error message')
+     94 |     assert isinstance(c, (str, int)), type(c)
+     95 |     CONFIGURATION = '3'
+     96 |     my_dict = {'key_a': 'val_a'}
+-->  97 |     1 / 0
+     98 |     log.error('Error message')
    ------------------------------------------------------------
      CONFIG.a = 3
      a = None
@@ -189,12 +190,130 @@ File "test_core/test_lib/test_format_traceback.py", line 98 in func_test_assert_
 
 --------------------------------------------------------------------------------
 Traceback (most recent call last):
-  File "test_core/test_lib/test_format_traceback.py", line 22, in exec_func
+  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
     func()
-  File "test_core/test_lib/test_format_traceback.py", line 98, in func_test_assert_none
+  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
     1 / 0
     ~~^~~
 ZeroDivisionError: division by zero'''
+
+
+@pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
+def test_exception_expression_remove() -> None:
+    log.setLevel(logging.WARNING)
+    msg = exec_func(func_test_assert_none)
+    assert msg == r'''
+File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+--------------------------------------------------------------------------------
+     19 | def exec_func(func) -> str:
+     20 |     try:
+-->  21 |         func()
+     22 |     except Exception as e:
+   ------------------------------------------------------------
+     e = ZeroDivisionError('division by zero')
+     func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "test_core/test_lib/test_format_traceback.py", line 97 in func_test_assert_none
+--------------------------------------------------------------------------------
+     91 | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
+      (...)
+     94 |     assert isinstance(c, (str, int)), type(c)
+     95 |     CONFIGURATION = '3'
+     96 |     my_dict = {'key_a': 'val_a'}
+-->  97 |     1 / 0
+     98 |     log.error('Error message')
+   ------------------------------------------------------------
+     CONFIG.a = 3
+     a = None
+     b = None
+     c = 3
+     CONFIGURATION = '3'
+     log = <Logger TestLogger (WARNING)>
+     my_dict = {'key_a': 'val_a'}
+     my_dict['key_a'] = 'val_a'
+     CONFIG.a > 2 = True
+   ------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+    func()
+    ~~~~^^
+  File "test_core/test_lib/test_format_traceback.py", line 97, in func_test_assert_none
+    1 / 0
+    ~~^~~
+ZeroDivisionError: division by zero'''
+
+
+def func_ir() -> None:
+
+    from HABApp.core.items import Item
+    Items = HABApp.core.Items
+
+    Items.add_item(Item('asdf'))
+    Items.get_item('1234')
+
+
+@pytest.fixture
+def _setup_ir(clean_objs, monkeypatch, ir, eb):
+
+    from HABApp.core.internals.proxy import ConstProxyObj
+    assert isinstance(HABApp.core.Items, ConstProxyObj)
+    assert isinstance(HABApp.core.EventBus, ConstProxyObj)
+
+    monkeypatch.setattr(HABApp.core, 'Items', ir)
+    monkeypatch.setattr(HABApp.core, 'EventBus', eb)
+
+    yield
+
+
+@pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
+def test_skip_objs(_setup_ir) -> None:
+    log.setLevel(logging.WARNING)
+    msg = exec_func(func_ir)
+    assert msg == r'''
+File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+--------------------------------------------------------------------------------
+     19 | def exec_func(func) -> str:
+     20 |     try:
+-->  21 |         func()
+     22 |     except Exception as e:
+   ------------------------------------------------------------
+     e = ItemNotFoundException('Item 1234 does not exist!')
+     func = <function func_ir at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "test_core/test_lib/test_format_traceback.py", line 255 in func_ir
+--------------------------------------------------------------------------------
+     249 | def func_ir() -> None:
+     251 |     from HABApp.core.items import Item
+     252 |     Items = HABApp.core.Items
+     254 |     Items.add_item(Item('asdf'))
+-->  255 |     Items.get_item('1234')
+
+File "internals/item_registry/item_registry.py", line 31 in get_item
+--------------------------------------------------------------------------------
+     27 | def get_item(self, name: str) -> ItemRegistryItem:
+     28 |     try:
+     29 |         return self._items[name]
+     30 |     except KeyError:
+-->  31 |         raise ItemNotFoundException(name) from None
+   ------------------------------------------------------------
+     name = '1234'
+   ------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line 21, in exec_func
+    func()
+    ~~~~^^
+  File "test_core/test_lib/test_format_traceback.py", line 255, in func_ir
+    Items.get_item('1234')
+    ~~~~~~~~~~~~~~^^^^^^^^
+  File "internals/item_registry/item_registry.py", line 31, in get_item
+    raise ItemNotFoundException(name) from None
+HABApp.core.errors.ItemNotFoundException: Item 1234 does not exist!'''
 
 
 def test_habapp_regex(pytestconfig):
@@ -206,10 +325,11 @@ def test_habapp_regex(pytestconfig):
             if regex.search(file):
                 break
         else:
-            raise ValueError(f'Nothing matched for {regex}')
+            msg = f'Nothing matched for {regex}'
+            raise ValueError(msg)
 
 
-def test_regex(pytestconfig):
+def test_regex(pytestconfig) -> None:  # noqa: ARG001
 
     assert not is_suppressed_habapp_file('/lib/habapp/asdf')
     assert not is_suppressed_habapp_file('/lib/HABApp/asdf')

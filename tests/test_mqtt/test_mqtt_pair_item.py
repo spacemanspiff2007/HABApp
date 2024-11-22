@@ -3,7 +3,7 @@ import pytest
 from HABApp.mqtt.items.mqtt_pair_item import build_write_topic
 
 
-def test_name_build():
+def test_name_build() -> None:
 
     assert build_write_topic('zigbee2mqtt/my-bulb/XXX') == 'zigbee2mqtt/my-bulb/set/XXX'
 

@@ -4,7 +4,7 @@ from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
 from HABApp.openhab.items import DimmerItem
 
 
-def test_dimmer_item_bool():
+def test_dimmer_item_bool() -> None:
     with pytest.raises(ItemValueIsNoneError):
         assert not DimmerItem('asdf')
 
@@ -12,7 +12,7 @@ def test_dimmer_item_bool():
     assert DimmerItem('asdf', 1)
 
 
-def test_dimmer_set_value():
+def test_dimmer_set_value() -> None:
     DimmerItem('').set_value(None)
     DimmerItem('').set_value(0)
     DimmerItem('').set_value(100)

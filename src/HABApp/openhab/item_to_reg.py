@@ -77,7 +77,7 @@ def remove_from_registry(name: str):
 MEMBERS: dict[str, set[str]] = {}
 
 
-def fresh_item_sync():
+def fresh_item_sync() -> None:
     MEMBERS.clear()
 
 

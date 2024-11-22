@@ -1,1 +1,1 @@
-from .tests_all_items import ItemTests
+from .item_tests import ItemTests

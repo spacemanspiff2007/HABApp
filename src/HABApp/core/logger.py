@@ -1,5 +1,7 @@
 import logging
-import typing
+from typing import Any
+
+from typing_extensions import Self
 
 from HABApp.core.const.topics import TOPIC_ERRORS as _T_ERRORS
 from HABApp.core.const.topics import TOPIC_INFOS as _T_INFOS
@@ -11,7 +13,7 @@ from HABApp.core.lib import format_exception
 post_event = uses_post_event()
 
 
-def log_error(logger: logging.Logger, text: str):
+def log_error(logger: logging.Logger, text: str) -> None:
     if '\n' in text:
         for line in text.splitlines():
             logger.error(line)
@@ -22,7 +24,7 @@ def log_error(logger: logging.Logger, text: str):
     )
 
 
-def log_warning(logger: logging.Logger, text: str):
+def log_warning(logger: logging.Logger, text: str) -> None:
     if '\n' in text:
         for line in text.splitlines():
             logger.warning(line)
@@ -34,7 +36,7 @@ def log_warning(logger: logging.Logger, text: str):
     )
 
 
-def log_info(logger: logging.Logger, text: str):
+def log_info(logger: logging.Logger, text: str) -> None:
     if '\n' in text:
         for line in text.splitlines():
             logger.info(line)
@@ -50,15 +52,15 @@ class HABAppLogger:
     _LEVEL: int
     _TOPIC: str
 
-    def __init__(self, log: logging.Logger):
-        self.lines: typing.List[str] = []
+    def __init__(self, log: logging.Logger) -> None:
+        self.lines: list[str] = []
         self.logger = log
 
-    def add(self, text: str, *args, **kwargs):
+    def add(self, text: str, *args: Any, **kwargs: Any) -> Self:
         self.lines.append(text.format(*args, **kwargs))
         return self
 
-    def add_exception(self, e: Exception, add_traceback: bool = False):
+    def add_exception(self, e: Exception, add_traceback: bool = False) -> Self:
         if not add_traceback:
             for line in str(e).splitlines():
                 self.lines.append(line)
@@ -80,7 +82,7 @@ class HABAppLogger:
         self.lines.clear()
         return True
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.lines)
 
 

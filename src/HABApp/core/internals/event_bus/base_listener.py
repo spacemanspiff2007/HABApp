@@ -1,10 +1,16 @@
-class EventBusBaseListener:
-    def __init__(self, topic: str, **kwargs):
-        super().__init__(**kwargs)
-        assert isinstance(topic, str)
-        self.topic: str = topic
+from typing import Any, Final
 
-    def notify_listeners(self, event):
+
+class EventBusBaseListener:
+    def __init__(self, topic: str, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        if not isinstance(topic, str):
+            raise TypeError()
+        if not topic:
+            raise ValueError()
+        self.topic: Final = topic
+
+    def notify_listeners(self, event: Any) -> None:
         raise NotImplementedError()
 
     def describe(self) -> str:

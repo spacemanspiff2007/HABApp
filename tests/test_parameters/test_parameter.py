@@ -10,7 +10,7 @@ if typing.TYPE_CHECKING:
     params = params
 
 
-def test_int_operators(params: HABApp.parameters.parameters):
+def test_int_operators(params: HABApp.parameters.parameters) -> None:
     params.set_parameter_file('file', {'key': 5})
     p = Parameter('file', 'key')
     assert p == 5
@@ -28,7 +28,7 @@ def test_int_operators(params: HABApp.parameters.parameters):
     assert p > 4
 
 
-def test_float_operators(params: HABApp.parameters.parameters):
+def test_float_operators(params: HABApp.parameters.parameters) -> None:
     params.set_parameter_file('file', {'key': 5.5})
     p = Parameter('file', 'key')
 
@@ -38,7 +38,7 @@ def test_float_operators(params: HABApp.parameters.parameters):
     assert p > 4
 
 
-def test_arithmetic(params: HABApp.parameters.parameters):
+def test_arithmetic(params: HABApp.parameters.parameters) -> None:
     params.set_parameter_file('file', {'key': 1})
     p = Parameter('file', 'key')
 

@@ -1,6 +1,7 @@
 import operator as _operator
+from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, List
+from typing import TYPE_CHECKING
 
 from HABApp.core.const import MISSING
 
@@ -10,13 +11,13 @@ if TYPE_CHECKING:
 
 
 def list_files(folder: Path, file_filter: 'HABApp.core.files.watcher.file_watcher.EventFilterBase',
-               recursive: bool = False) -> List[Path]:
+               recursive: bool = False) -> list[Path]:
     # glob is much quicker than iter_dir()
     files = folder.glob('**/*' if recursive else '*')
     return sorted(filter(lambda x: file_filter.notify(str(x)), files), key=lambda x: x.relative_to(folder))
 
 
-def sort_files(files: Iterable[Path]) -> List[Path]:
+def sort_files(files: Iterable[Path]) -> list[Path]:
     return sorted(files)
 
 

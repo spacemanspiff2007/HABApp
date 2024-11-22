@@ -4,8 +4,6 @@ import time
 from pathlib import Path
 from typing import Any
 
-import msgspec
-
 import HABApp
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
@@ -35,7 +33,7 @@ class DuplicateItemError(Exception):
 
 class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.created_items: dict[str, set[str]] = {}
         self.do_cleanup = PendingFuture(self.clean_items, 120)
@@ -73,7 +71,7 @@ class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
         await self.watcher.trigger_all()
 
     @HABApp.core.wrapper.ignore_exception
-    async def clean_items(self):
+    async def clean_items(self) -> None:
         items = set()
         for s in self.created_items.values():
             items.update(s)
@@ -81,7 +79,7 @@ class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     async def load_thing_data(self, always: bool) -> list[dict[str, Any]]:
         if always or not self.cache_cfg or time.time() - self.cache_ts > 20:
-            self.cache_cfg = [msgspec.to_builtins(k) for k in await HABApp.openhab.interface_async.async_get_things()]
+            self.cache_cfg = [k.model_dump(mode='json') for k in await HABApp.openhab.interface_async.async_get_things()]
             self.cache_ts = time.time()
         return self.cache_cfg
 

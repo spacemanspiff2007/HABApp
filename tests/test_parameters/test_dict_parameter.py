@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
     params = params
 
 
-def test_operators(params: HABApp.parameters.parameters):
+def test_operators(params: HABApp.parameters.parameters) -> None:
     params.set_parameter_file('file', {'key': {1: 2, 3: 4}})
     p = DictParameter('file', 'key')
     assert p == {1: 2, 3: 4}
@@ -27,7 +27,7 @@ def test_operators(params: HABApp.parameters.parameters):
     assert [k for k in p] == [1, 3]
 
 
-def test_funcs(params: HABApp.parameters.parameters):
+def test_funcs(params: HABApp.parameters.parameters) -> None:
     params.set_parameter_file('file', {'key': {1: 2, 3: 4}})
     p = DictParameter('file', 'key')
 
@@ -41,7 +41,7 @@ def test_funcs(params: HABApp.parameters.parameters):
     assert p.get(5, 'asdf') == 'asdf'
 
 
-def test_exception(params: HABApp.parameters.parameters):
+def test_exception(params: HABApp.parameters.parameters) -> None:
     params.set_parameter_file('file', {'key': 'value'})
     p = DictParameter('file', 'key')
 

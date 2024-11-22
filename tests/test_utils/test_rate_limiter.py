@@ -33,7 +33,7 @@ def time(monkeypatch) -> MockedMonotonic:
         ('day', 24 * 3600), ('month', 30 * 24 * 3600), ('year', 365 * 24 * 3600)
     ]
 )
-def test_parse(unit: str, factor: int):
+def test_parse(unit: str, factor: int) -> None:
     assert parse_limit(f'  1   per   {unit}  ') == (1, factor)
     assert parse_limit(f'  1   /   {unit}  ') == (1, factor)
     assert parse_limit(f'3 per {unit}') == (3, factor)
@@ -48,7 +48,7 @@ def test_parse(unit: str, factor: int):
     assert str(e.value) == 'Invalid limit string: "asdf"'
 
 
-def test_parse_regex_all_units():
+def test_parse_regex_all_units() -> None:
     m = re.search(r'\(([^)]+)\)s\?', LIMIT_REGEX.pattern)
     values = m.group(1)
 
@@ -57,7 +57,7 @@ def test_parse_regex_all_units():
         parse_limit(f'1 in 3 {unit}s')
 
 
-def test_fixed_window(time):
+def test_fixed_window(time) -> None:
 
     limit = FixedWindowElasticExpiryLimit(5, 3)
     assert str(limit) == '<FixedWindowElasticExpiryLimit hits=0/5 interval=3s window=0s>'
@@ -84,7 +84,7 @@ def test_fixed_window(time):
     assert str(limit) == '<FixedWindowElasticExpiryLimit hits=1/5 interval=3s window=3s>'
 
 
-def test_leaky_bucket(time):
+def test_leaky_bucket(time) -> None:
     limit = LeakyBucketLimit(4, 2)
     assert str(limit) == '<LeakyBucketLimit hits=0/4 interval=2s drop_interval=0.5s>'
     for _ in range(10):
@@ -129,7 +129,7 @@ def test_leaky_bucket(time):
     assert limit.hits == 0
 
 
-def test_window_test_allow(time):
+def test_window_test_allow(time) -> None:
 
     limit = FixedWindowElasticExpiryLimit(5, 3)
     limit.hits = 5
@@ -142,7 +142,7 @@ def test_window_test_allow(time):
     assert not limit.hits
 
 
-def test_limiter_add(time):
+def test_limiter_add(time) -> None:
     limiter = Limiter('test')
     limiter.add_limit(3, 5).add_limit(3, 5).parse_limits('3 in 5s')
     assert len(limiter._limits) == 1
@@ -164,7 +164,7 @@ def test_limiter_add(time):
     assert str(e.value) == 'Parameter hits must be <= parameter allowed! 5 <= 3!'
 
 
-def test_fixed_window_info(time):
+def test_fixed_window_info(time) -> None:
     limit = FixedWindowElasticExpiryLimit(5, 3)
     Info = FixedWindowElasticExpiryLimitInfo
 
@@ -187,14 +187,14 @@ def test_fixed_window_info(time):
     assert limit.info() == Info(hits=0, skips=0, limit=5, time_remaining=3)
 
 
-def test_leaky_bucket_info(time):
+def test_leaky_bucket_info(time) -> None:
     limit = LeakyBucketLimit(2, 2)
     Info = LeakyBucketLimitInfo
 
     assert limit.info() == Info(hits=0, skips=0, limit=2, time_remaining=1)
 
 
-def test_registry(monkeypatch):
+def test_registry(monkeypatch) -> None:
     monkeypatch.setattr(registry_module, '_LIMITERS', {})
 
     obj = registry_module.RateLimiter('Test')
@@ -202,7 +202,7 @@ def test_registry(monkeypatch):
     assert obj is registry_module.RateLimiter('test')
 
 
-def test_limiter(time):
+def test_limiter(time) -> None:
 
     limiter = Limiter('Test')
     assert limiter.__repr__() == '<Limiter Test>'

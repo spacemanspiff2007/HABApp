@@ -7,7 +7,7 @@ from HABApp.openhab.connection.plugins.plugin_things.file_writer import ItemsFil
 
 
 class MyStringIO(io.StringIO):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.text = None
         self.exists = False
@@ -15,7 +15,7 @@ class MyStringIO(io.StringIO):
     def open(self, *args, **kwargs):
         return self
 
-    def close(self, *args, **kwargs):
+    def close(self, *args, **kwargs) -> None:
         self.text = self.getvalue()
         super().close(*args, **kwargs)
 
@@ -60,12 +60,12 @@ String  SoloName
     return ret.lstrip('\n')
 
 
-def test_writer_str():
+def test_writer_str() -> None:
     writer = ItemsFileWriter().add_items(get_test_objs())
     assert writer.generate() == get_result()
 
 
-def test_no_write():
+def test_no_write() -> None:
     file = MyStringIO(get_result())
     file.exists = True
 
@@ -73,7 +73,7 @@ def test_no_write():
     assert not writer.create_file(file)
 
 
-def test_write_no_exist():
+def test_write_no_exist() -> None:
     file = MyStringIO(get_result())
     file.exists = False
 
@@ -81,7 +81,7 @@ def test_write_no_exist():
     assert writer.create_file(file)
 
 
-def test_write_no_empty_file():
+def test_write_no_empty_file() -> None:
 
     writer = ItemsFileWriter().add_items([])
     assert not writer.create_file(None)

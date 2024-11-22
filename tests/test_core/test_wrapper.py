@@ -19,7 +19,7 @@ def p_mock(monkeypatch):
     return m
 
 
-def test_error_catch(p_mock):
+def test_error_catch(p_mock) -> None:
 
     p_mock.assert_not_called()
 
@@ -33,7 +33,7 @@ def test_error_catch(p_mock):
     assert p_mock.call_args[0][0] == HABApp.core.const.topics.TOPIC_WARNINGS
 
 
-def test_error_level(p_mock):
+def test_error_level(p_mock) -> None:
     with ExceptionToHABApp(log, logging.WARNING):
         1 / 0
     p_mock.assert_called_once()
@@ -48,18 +48,18 @@ def test_error_level(p_mock):
 
 
 @ignore_exception
-def func_a(_l):
+def func_a(_l) -> None:
     1 / 0
 
 
 @pytest.mark.ignore_log_errors()
-def test_func_wrapper(p_mock):
+def test_func_wrapper(p_mock) -> None:
     func_a(['asdf', 'asdf'])
 
 
 @pytest.mark.skip(reason='Behavior still unclear')
-def test_exception_format_included_files(p_mock):
-    async def test():
+def test_exception_format_included_files(p_mock) -> None:
+    async def test() -> None:
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(0.01)) as session:
             async with session.get('http://localhost:12345'):
                 pass

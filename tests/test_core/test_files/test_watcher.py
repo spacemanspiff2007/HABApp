@@ -11,7 +11,7 @@ from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.files.watcher.base_watcher import FileEndingFilter
 
 
-async def test_file_events(monkeypatch, sync_worker):
+async def test_file_events(monkeypatch, sync_worker) -> None:
 
     wait_time = 0.1
     monkeypatch.setattr(HABApp.core.files.watcher.file_watcher, 'DEBOUNCE_TIME', wait_time)
@@ -23,7 +23,7 @@ async def test_file_events(monkeypatch, sync_worker):
 
     ex = ThreadPoolExecutor(4)
 
-    def generate_events(count: int, name: str, sleep: float):
+    def generate_events(count: int, name: str, sleep: float) -> None:
         for _ in range(count):
             handler.dispatch(FileSystemEvent(name))
             time.sleep(sleep)

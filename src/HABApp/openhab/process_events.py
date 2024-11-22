@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 import HABApp
 import HABApp.core
@@ -106,7 +105,7 @@ def on_sse_event(event_dict: dict, oh_3: bool):
         return None
 
 
-async def item_event(event: Union[ItemAddedEvent, ItemUpdatedEvent]):
+async def item_event(event: ItemAddedEvent | ItemUpdatedEvent):
     try:
         from HABApp.openhab.map_items import map_item
 

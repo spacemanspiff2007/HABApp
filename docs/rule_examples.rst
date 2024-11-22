@@ -20,11 +20,17 @@ Get an even when the item is constant for 5 and for 10 seconds.
 .. exec_code::
 
     # ------------ hide: start ------------
-    import time, HABApp
+    from unittest.mock import Mock
+    import time, HABApp, eascheduler
     from rule_runner import SimpleRuleRunner
     runner = SimpleRuleRunner()
     runner.set_up()
-    HABApp.core.Items.add_item(HABApp.core.items.Item('test_watch'))
+
+    # We have no event loop running so this doesn't work. We patch it so this example doesn't raise an error
+    my_item = HABApp.core.items.Item('test_watch')
+    my_item.watch_change = lambda x: Mock(spec=HABApp.core.items.base_item_watch.ItemNoUpdateWatch)
+
+    HABApp.core.Items.add_item(my_item)
     # ------------ hide: stop -------------
     import HABApp
     from HABApp.core.items import Item

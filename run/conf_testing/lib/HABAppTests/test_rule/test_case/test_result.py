@@ -1,6 +1,5 @@
 import logging
 from enum import IntEnum, auto
-from typing import List, Optional
 
 import HABApp
 from HABAppTests.errors import TestCaseFailed, TestCaseWarning
@@ -29,18 +28,18 @@ assert TestResultStatus.FAILED < TestResultStatus.ERROR
 
 
 class TestResult:
-    def __init__(self, cls_name: str, test_name: str, test_nr: str = ''):
+    def __init__(self, cls_name: str, test_name: str, test_nr: str = '') -> None:
         self.cls_name = cls_name
         self.test_name = test_name
         self.test_nr = test_nr
 
         self.state = TestResultStatus.NOT_SET
-        self.msgs: List[str] = []
+        self.msgs: list[str] = []
 
     def is_set(self):
         return self.state != TestResultStatus.NOT_SET
 
-    def set_state(self, new_state: TestResultStatus):
+    def set_state(self, new_state: TestResultStatus) -> None:
         if self.state <= new_state:
             self.state = new_state
 
@@ -60,11 +59,11 @@ class TestResult:
         for line in HABApp.core.wrapper.format_exception(e):
             log.error(line)
 
-    def add_msg(self, msg: str):
+    def add_msg(self, msg: str) -> None:
         for line in msg.splitlines():
             self.msgs.append(line)
 
-    def log(self, name: Optional[str] = None):
+    def log(self, name: str | None = None):
         if name is None:
             name = f'{self.cls_name}.{self.test_name}'
         nr = f' {self.test_nr} ' if self.test_nr else ' '

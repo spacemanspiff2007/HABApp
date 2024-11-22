@@ -1,25 +1,25 @@
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 
 class Column:
     wrap: int = 80
 
-    def __init__(self, name: str, align: Optional[str] = None, alias: Optional[str] = None, wrap: Optional[int] = None):
+    def __init__(self, name: str, align: str | None = None, alias: str | None = None, wrap: int | None = None) -> None:
         self.name: str = name
-        self.alias: Optional[str] = alias
+        self.alias: str | None = alias
 
-        self.align: Optional[str] = align
+        self.align: str | None = align
         if wrap is not None:
             self.wrap = wrap
 
         self.width: int = len(name) if alias is None else len(alias)
-        self.entries: List[Tuple[Any, ...]] = []
+        self.entries: list[tuple[Any, ...]] = []
 
     def get_lines(self, pos: int) -> int:
         return len(self.entries[pos])
 
-    def format_entry(self, pos: int, lines: int) -> List[str]:
+    def format_entry(self, pos: int, lines: int) -> list[str]:
         ret = []
 
         objs = self.entries[pos]
@@ -35,7 +35,7 @@ class Column:
             ret.append(f.format(val))
         return ret
 
-    def add(self, val):
+    def add(self, val) -> None:
         _res = []
         if isinstance(val, (list, set, tuple)):
             _len = 0
@@ -55,25 +55,25 @@ class Column:
             self.width = max(self.width, len(str(k)))
         self.entries.append(tuple(_res))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name: {self.name}'
 
 
 class Table:
-    def __init__(self, heading: str = ''):
-        self.columns: Dict[str, Column] = OrderedDict()
+    def __init__(self, heading: str = '') -> None:
+        self.columns: dict[str, Column] = OrderedDict()
         self.heading: str = heading
 
-    def add_column(self, name: str, align: Optional[str] = None, alias: Optional[str] = None,
-                   wrap: Optional[int] = None) -> Column:
+    def add_column(self, name: str, align: str | None = None, alias: str | None = None,
+                   wrap: int | None = None) -> Column:
         self.columns[name] = c = Column(name, align, alias, wrap)
         return c
 
-    def add_dict(self, _in: dict):
+    def add_dict(self, _in: dict) -> None:
         for k, col in self.columns.items():
             col.add(_in[k])
 
-    def get_lines(self, sort_columns: List[Union[str, Column]] = None) -> List[str]:
+    def get_lines(self, sort_columns: list[str | Column] = None) -> list[str]:
         # check if all tables have the same length
         vals = list(self.columns.values())
         len1 = len(vals[0].entries)
@@ -117,7 +117,7 @@ class Table:
         for t, i in sorted(lines_dict.items()):
             lines = max(map(lambda x: x.get_lines(i), self.columns.values()))
 
-            grid = tuple(map(lambda x: x.format_entry(i, lines), self.columns.values()))  # type: Tuple[List[str], ...]
+            grid = tuple(map(lambda x: x.format_entry(i, lines), self.columns.values()))  # type: tuple[list[str], ...]
             for col_i in range(lines):
                 cols = [obj[col_i] for obj in grid]
                 ret.append('| ' + ' | '.join(cols) + ' |')

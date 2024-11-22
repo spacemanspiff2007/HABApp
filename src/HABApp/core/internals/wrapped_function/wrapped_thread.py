@@ -1,27 +1,32 @@
-import io
-import logging
+from __future__ import annotations
+
 from concurrent.futures import ThreadPoolExecutor
-from cProfile import Profile
-from pstats import SortKey, Stats
 from threading import Lock
 from time import monotonic
-from typing import Any, Callable, Dict, Final, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Final
+
+from typing_extensions import override
 
 from HABApp.core.const import loop
 from HABApp.core.internals import Context, ContextProvidingObj
+from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase, default_logger
 
-from .base import WrappedFunctionBase, default_logger
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Callable
 
 
-POOL: Optional[ThreadPoolExecutor] = None
+POOL: ThreadPoolExecutor | None = None
 POOL_THREADS: int = 0
-POOL_INFO: Set['PoolFunc'] = set()
-POOL_LOCK = Lock()
 
 
-def create_thread_pool(count: int):
+def create_thread_pool(count: int) -> None:
     global POOL, POOL_THREADS
-    assert isinstance(count, int) and count > 0
+
+    if not isinstance(count, int) or count <= 0:
+        msg = 'Thread count must be a positive integer'
+        raise ValueError(msg)
 
     default_logger.debug(f'Starting thread pool with {count:d} threads!')
 
@@ -30,27 +35,26 @@ def create_thread_pool(count: int):
     POOL = ThreadPoolExecutor(count, 'HabAppWorker')
 
 
-def stop_thread_pool():
+def stop_thread_pool() -> None:
     global POOL, POOL_THREADS
-    if POOL is not None:
-        POOL.shutdown()
-        POOL = None
-        POOL_THREADS = 0
-        default_logger.debug('Thread pool stopped!')
+
+    if (pool := POOL) is None:
+        return None
+
+    POOL_THREADS = 0
+    POOL = None
+
+    pool.shutdown()
+    default_logger.debug('Thread pool stopped!')
 
 
-async def run_in_thread_pool(func: Callable):
-    return await loop.run_in_executor(
-        POOL, func
-    )
-
-
-HINT_FUNC_SYNC = Callable[..., Any]
+POOL_INFO: Final[set[PoolFunc]] = set()
+POOL_LOCK: Final = Lock()
 
 
 class PoolFunc(ContextProvidingObj):
-    def __init__(self, parent: 'WrappedThreadFunction', func_obj: HINT_FUNC_SYNC, func_args: Tuple[Any, ...],
-                 func_kwargs: Dict[str, Any], context: Optional[Context] = None, **kwargs):
+    def __init__(self, parent: WrappedThreadFunction, func_obj: Callable[..., Any], func_args: tuple[Any, ...],
+                 func_kwargs: dict[str, Any], context: Context | None = None, **kwargs: Any) -> None:
         super().__init__(context=context, **kwargs)
         self.parent: Final = parent
         self.func_obj: Final = func_obj
@@ -58,43 +62,41 @@ class PoolFunc(ContextProvidingObj):
         self.func_kwargs: Final = func_kwargs
 
         # timing checks
-        self.submitted = monotonic()
-        self.dur_start = 0.0
-        self.dur_run = 0.0
+        self.submitted: float = monotonic()
+        self.dur_start: float = 0.0
+        self.dur_run: float = 0.0
 
         # thread info
-        self.usage_high = 0
+        self.usage_high: int = 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} high: {self.usage_high:d}/{POOL_THREADS:d}>'
 
-    def run(self):
+    def run(self) -> Any:
+        pool_lock: Final = POOL_LOCK
+        pool_info: Final = POOL_INFO
+        parent = self.parent
+
         try:
             ts_start = monotonic()
             self.dur_start = ts_start - self.submitted
 
-            with POOL_LOCK:
-                POOL_INFO.add(self)
-                count = len(POOL_INFO)
-                for info in POOL_INFO:
+            with pool_lock:
+                pool_info.add(self)
+                count = len(pool_info)
+                for info in pool_info:
                     info.usage_high = max(count, info.usage_high)
-
-            parent = self.parent
 
             # notify if we don't process quickly
             if self.dur_start > 0.05:
                 parent.log.warning(f'Starting of {parent.name} took too long: {self.dur_start:.2f}s. '
                                    f'Maybe there are not enough threads?')
 
-            # start profiler
-            pr = Profile()
-            pr.enable()
+            # Profiler does not work
+            # https://github.com/python/cpython/issues/124656
 
             # Execute the function
-            self.func_obj(*self.func_args, **self.func_kwargs)
-
-            # disable profiler
-            pr.disable()
+            ret = self.func_obj(*self.func_args, **self.func_kwargs)
 
             # log warning if execution takes too long
             self.dur_run = monotonic() - ts_start
@@ -103,37 +105,38 @@ class PoolFunc(ContextProvidingObj):
                 parent.log.warning(f'{self.usage_high}/{POOL_THREADS} threads have been in use and '
                                    f'execution of {parent.name} took too long: {self.dur_run:.2f}s')
 
-                s = io.StringIO()
-                ps = Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
-                ps.print_stats(0.1)  # limit to output to 10% of the lines
-
-                for line in s.getvalue().splitlines()[4:]:  # skip the amount of calls and "Ordered by:"
-                    if line:
-                        parent.log.warning(line)
-
         except Exception as e:
             self.parent.process_exception(e, *self.func_args, **self.func_kwargs)
             return None
+        else:
+            return ret
         finally:
-            with POOL_LOCK:
-                POOL_INFO.discard(self)
+            with pool_lock:
+                pool_info.discard(self)
 
 
-class WrappedThreadFunction(WrappedFunctionBase):
+class WrappedThreadFunction(WrappedFunctionBase[P, R]):
 
-    def __init__(self, func: HINT_FUNC_SYNC,
-                 warn_too_long=True,
-                 name: Optional[str] = None,
-                 logger: Optional[logging.Logger] = None,
-                 context: Optional[Context] = None):
+    def __init__(self, func: Callable[P, R],
+                 warn_too_long: bool = True,
+                 name: str | None = None,
+                 logger: logging.Logger | None = None,
+                 context: Context | None = None) -> None:
 
         super().__init__(name=name, func=func, logger=logger, context=context)
-        assert callable(func)
 
-        self.func = func
-        self.warn_too_long: bool = warn_too_long
+        self.func: Final = func
+        self.warn_too_long: Final = warn_too_long
 
-    def run(self, *args, **kwargs):
+    @override
+    def run(self, *args: P.args, **kwargs: P.kwargs) -> None:
         # we need to copy the context, so it's available when the function is run
         pool_func = PoolFunc(self, self.func, args, kwargs, context=self._habapp_ctx)
         POOL.submit(pool_func.run)
+        return None
+
+    @override
+    async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
+
+        pool_func = PoolFunc(self, self.func, args, kwargs, context=self._habapp_ctx)
+        return await loop.run_in_executor(POOL, pool_func.run)

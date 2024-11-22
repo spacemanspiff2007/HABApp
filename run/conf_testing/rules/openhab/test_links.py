@@ -6,18 +6,18 @@ from HABApp.openhab.connection.handler.func_async import async_get_link, async_g
 
 class OpenhabLinkApi(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.add_test('AllLinks', self.wrap_async, self.api_get_links)
 
-    def wrap_async(self, coro, *args, **kwargs):
+    def wrap_async(self, coro, *args, **kwargs) -> None:
         # create valid data
         run_coro(coro(*args, **kwargs))
 
-    def set_up(self):
+    def set_up(self) -> None:
         self.thing = self.openhab.get_thing(find_astro_sun_thing())
 
-    async def api_get_links(self):
+    async def api_get_links(self) -> None:
         objs = await async_get_links()
         assert objs
 

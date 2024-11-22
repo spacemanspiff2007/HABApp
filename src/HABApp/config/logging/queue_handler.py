@@ -2,7 +2,7 @@ import logging
 from queue import Empty, SimpleQueue
 from threading import Lock, Thread
 from time import sleep
-from typing import Final, Optional
+from typing import Final
 
 import HABApp
 
@@ -18,17 +18,18 @@ LOCK = Lock()
 class HABAppQueueHandler:
     FLUSH_DELAY: float = CONFIG.habapp.logging.flush_every
 
-    def __init__(self, queue: SimpleQueue, handler_name: str, thread_name: str):
-        self._handler: Optional[logging.Handler] = None
+    def __init__(self, queue: SimpleQueue, handler_name: str, thread_name: str) -> None:
+        self._handler: logging.Handler | None = None
         self._handler_name: Final = handler_name
         self._queue: Final = queue
         self._name: Final = thread_name
-        self._thread: Optional[Thread] = None
+        self._thread: Thread | None = None
 
     def start(self) -> None:
         with LOCK:
             if self._thread is not None:
-                raise RuntimeError('Thread can only be started once!')
+                msg = 'Thread can only be started once!'
+                raise RuntimeError(msg)
 
             # resolve handler
             self._handler = logging._handlers[self._handler_name]
@@ -37,7 +38,7 @@ class HABAppQueueHandler:
 
         thread.start()
 
-    def signal_stop(self):
+    def signal_stop(self) -> None:
         self._queue.put_nowait(None)
 
     def stop(self) -> None:
@@ -48,7 +49,7 @@ class HABAppQueueHandler:
         self.signal_stop()
         thread.join()
 
-    def _worker(self):
+    def _worker(self) -> None:
         try:
             log.debug(f'{self._name} thread running')
 

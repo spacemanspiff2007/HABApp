@@ -3,7 +3,6 @@ import ctypes
 import os
 import sys
 import time
-import typing
 from pathlib import Path
 
 
@@ -74,7 +73,7 @@ def parse_args(passed_args=None) -> argparse.Namespace:
     return args
 
 
-def find_config_folder(arg_config_path: typing.Optional[Path]) -> Path:
+def find_config_folder(arg_config_path: Path | None) -> Path:
     global CONFIG_FILE
 
     if arg_config_path is None:

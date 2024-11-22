@@ -10,7 +10,7 @@ from HABApp.openhab.events import (
 )
 
 
-def test_class_annotations():
+def test_class_annotations() -> None:
     """EventFilter relies on the class annotations, so we test that every event has those"""
 
     exclude = (
@@ -23,7 +23,7 @@ def test_class_annotations():
         )
 
 
-def test_oh_filters():
+def test_oh_filters() -> None:
 
     f = ItemStateUpdatedEventFilter(value=1)
     assert f.event_class is ItemStateUpdatedEvent

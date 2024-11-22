@@ -1,10 +1,8 @@
 from HABApp.core import const
 from HABApp.core import lib
 from HABApp.core import errors
-
-# isort: split
-
 from HABApp.core import asyncio
+from HABApp.core import shutdown
 
 # isort: split
 

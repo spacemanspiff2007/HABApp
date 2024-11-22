@@ -44,3 +44,16 @@ openhab:
   general:
     listen_only: false      # If True HABApp will not change anything on the openHAB instance.
     wait_for_openhab: true  # If True HABApp will wait for items from the openHAB instance before loading any rules on startup
+
+
+habapp:
+  debug:
+    watch event loop:
+      enabled: True
+      reset every: 10
+      timeout: 25
+
+    periodic traceback:
+        enabled: True
+        delay: 20
+        interval: 600

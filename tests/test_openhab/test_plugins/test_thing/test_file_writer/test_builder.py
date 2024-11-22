@@ -7,7 +7,7 @@ from HABApp.openhab.connection.plugins.plugin_things.file_writer.formatter_build
 )
 
 
-def test_value_formatter():
+def test_value_formatter() -> None:
     b = ValueFormatterBuilder('test', '"{:s}"')
 
     # obj access
@@ -25,7 +25,7 @@ def test_value_formatter():
     assert f.value == ''
 
 
-def test_multiple_value_formatter():
+def test_multiple_value_formatter() -> None:
     b = MultipleValueFormatterBuilder('test', '"{:s}"', '({:s})')
 
     class TestData1:
@@ -43,7 +43,7 @@ def test_multiple_value_formatter():
     assert f.len() == 0
 
 
-def test_link_formatter():
+def test_link_formatter() -> None:
     b = LinkFormatter()
 
     class TestData:
@@ -68,7 +68,7 @@ def test_link_formatter():
     assert f.value == ''
 
 
-def test_metadata_formatter():
+def test_metadata_formatter() -> None:
     b = MetadataFormatter()
 
     class TestData:

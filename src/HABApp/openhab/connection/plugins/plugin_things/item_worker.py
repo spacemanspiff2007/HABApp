@@ -1,4 +1,3 @@
-from typing import Dict, Set
 
 import HABApp
 from HABApp.openhab.connection.handler.func_async import (
@@ -19,7 +18,7 @@ from ._log import log_item as log
 from .cfg_validator import UserItem
 
 
-def _filter_items(i: ItemResp):
+def _filter_items(i: ItemResp) -> bool:
     if not i.editable:
         return False
 
@@ -32,14 +31,14 @@ def _filter_items(i: ItemResp):
     return True
 
 
-async def cleanup_items(keep_items: Set[str]):
+async def cleanup_items(keep_items: set[str]):
     all_items = await async_get_items()
 
-    to_delete: Dict[str, HABAppThingPluginData] = {}
-    for cfg in filter(_filter_items, all_items):
+    to_delete: dict[str, HABAppThingPluginData] = {}
+    for cfg in filter(_filter_items, all_items):    # type: ItemResp
         name = cfg.name
         if name not in keep_items:
-            to_delete[name] = cfg['metadata']['HABApp']
+            to_delete[name] = cfg.metadata['HABApp']
 
     if not to_delete:
         return None
@@ -49,7 +48,7 @@ async def cleanup_items(keep_items: Set[str]):
         await _remove_item(item, data)
 
 
-async def _remove_item(item: str, data: HABAppThingPluginData):
+async def _remove_item(item: str, data: HABAppThingPluginData) -> None:
     # remove created links
     if data.created_link is not None:
         log.debug(f'Removing link from {data.created_link} to {item}')

@@ -23,14 +23,12 @@ def get_dependencies() -> list[str]:
         'ujson',
         'immutables',
         'javaproperties',
-        'msgspec',
-        'pendulum',
 
         'typing-extensions',
     ]
 
 
-def check_dependency_packages():
+def check_dependency_packages() -> None:
     """Imports all dependencies and reports failures"""
 
     missing: dict[str, ModuleNotFoundError] = {}

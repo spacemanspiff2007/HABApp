@@ -4,7 +4,7 @@ from HABApp.openhab.connection.plugins.plugin_things.plugin_things import Textua
 from tests.helpers import LogCollector, MockFile, TestEventBus
 
 
-async def test_errors(test_logs: LogCollector, eb: TestEventBus):
+async def test_errors(test_logs: LogCollector, eb: TestEventBus) -> None:
     eb.allow_errors = True
 
     cfg = TextualThingConfigPlugin()

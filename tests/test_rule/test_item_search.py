@@ -7,7 +7,7 @@ from HABApp.openhab.items import OpenhabItem, SwitchItem
 from HABApp.openhab.items.base_item import MetaData
 
 
-def test_search_type(ir: ItemRegistry):
+def test_search_type(ir: ItemRegistry) -> None:
     item1 = BaseValueItem('item_1')
     item2 = Item('item_2')
 
@@ -23,7 +23,7 @@ def test_search_type(ir: ItemRegistry):
     assert Rule.get_items(type=Item) == [item2]
 
 
-def test_search_oh(ir: ItemRegistry):
+def test_search_oh(ir: ItemRegistry) -> None:
     item1 = OpenhabItem('oh_item_1', tags=frozenset(['tag1', 'tag2', 'tag3']),
                         groups=frozenset(['grp1', 'grp2']), metadata={'meta1': MetaData('meta_v1')})
     item2 = SwitchItem('oh_item_2', tags=frozenset(['tag1', 'tag2', 'tag4']),
@@ -56,12 +56,12 @@ def test_search_oh(ir: ItemRegistry):
     assert Rule.get_items(groups='grp1', metadata_value=r'meta_v\d') == [item1]
 
 
-def test_classcheck():
+def test_classcheck() -> None:
     with pytest.raises(ValueError):
         Rule.get_items(Item, tags='asdf')
 
 
-def test_search_name(ir: ItemRegistry):
+def test_search_name(ir: ItemRegistry) -> None:
     item1 = BaseValueItem('item_1a')
     item2 = Item('item_2a')
 

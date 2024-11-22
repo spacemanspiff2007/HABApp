@@ -3,7 +3,7 @@ from __future__ import annotations
 from HABApp.core.lib import ValueChange
 
 
-def test_change():
+def test_change() -> None:
     assert not ValueChange().changed
 
     c = ValueChange[int]()
@@ -22,7 +22,7 @@ def test_change():
         assert c.value == 2
 
 
-def test_missing():
+def test_missing() -> None:
     c = ValueChange[int]()
     assert c.set_value(1)
 
@@ -38,7 +38,7 @@ def test_missing():
     assert c.value == 1
 
 
-def test_repr():
+def test_repr() -> None:
     c = ValueChange[int]()
     assert str(c) == '<ValueChange value: <Missing> changed: False>'
 

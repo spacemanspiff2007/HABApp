@@ -2,8 +2,8 @@ from datetime import datetime
 from functools import partial
 
 import pytest
-from eascheduler.const import local_tz
 from immutables import Map
+from whenever import SystemDateTime
 
 from HABApp.openhab.items import DatetimeItem, NumberItem
 from HABApp.openhab.items.base_item import MetaData
@@ -12,12 +12,12 @@ from tests.helpers import TestEventBus
 
 
 @pytest.mark.ignore_log_errors()
-def test_exception(eb: TestEventBus):
+def test_exception(eb: TestEventBus) -> None:
     eb.allow_errors = True
     assert map_item('test', 'Number', 'asdf', 'my_label', frozenset(), frozenset(), {}) is None
 
 
-def test_metadata():
+def test_metadata() -> None:
     make_number = partial(map_item, 'test', 'Number', None, 'my_label', frozenset(), frozenset())
 
     item = make_number({'ns1': {'value': 'v1'}})
@@ -38,7 +38,7 @@ def test_metadata():
     assert item.metadata['ns2'].config == Map()
 
 
-def test_number_unit_of_measurement():
+def test_number_unit_of_measurement() -> None:
     make_item = partial(map_item, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}})
     metadata = Map(unit=MetaData('°C'))
     assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, metadata=metadata)
@@ -50,10 +50,13 @@ def test_number_unit_of_measurement():
     assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7, metadata=metadata)
 
 
-def test_datetime():
-    offset_str = datetime(2022, 6, 15, tzinfo=local_tz).isoformat()[-6:].replace(':', '')
+def test_datetime() -> None:
+
+    # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
+    offset_str = SystemDateTime(2022, 6, 15).format_common_iso()[-6:].replace(':', '')
 
     def get_dt(value: str):
+        assert value.startswith('2022-06-15')   # Date must match with offset_str
         return map_item(
             'test1', 'DateTime', f'{value}{offset_str}', label='', tags=frozenset(), groups=frozenset(), metadata={})
 

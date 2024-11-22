@@ -7,7 +7,7 @@ import HABApp.__check_dependency_packages__
 from HABApp import __version__
 
 
-def test_installation_check():
+def test_installation_check() -> None:
     re_name = re.compile(r'^([A-Za-z_-]{3,})')
     requirements = Path(__file__).parent.parent / 'requirements_setup.txt'
     assert requirements.is_file()
@@ -24,6 +24,6 @@ def test_installation_check():
     assert coded == found
 
 
-def test_version():
+def test_version() -> None:
     check = re.compile(VERSION_PATTERN, re.VERBOSE | re.IGNORECASE)
     assert check.fullmatch(__version__)

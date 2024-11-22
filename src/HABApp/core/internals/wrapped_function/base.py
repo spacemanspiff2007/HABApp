@@ -1,10 +1,16 @@
-import logging
-from typing import Callable, Optional, TypeVar
+from __future__ import annotations
 
-from HABApp.core.const.topics import TOPIC_ERRORS as TOPIC_ERRORS
+import logging
+from typing import TYPE_CHECKING, Any, Final, Generic, ParamSpec, TypeVar
+
+from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import Context, ContextProvidingObj, uses_event_bus
 from HABApp.core.lib import format_exception
+
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 default_logger = logging.getLogger('HABApp.Worker')
@@ -12,10 +18,14 @@ default_logger = logging.getLogger('HABApp.Worker')
 event_bus = uses_event_bus()
 
 
-class WrappedFunctionBase(ContextProvidingObj):
+P = ParamSpec('P')
+R = TypeVar('R')
 
-    def __init__(self, func: Callable, name: Optional[str] = None, logger: Optional[logging.Logger] = None,
-                 context: Optional[Context] = None):
+
+class WrappedFunctionBase(ContextProvidingObj, Generic[P, R]):
+
+    def __init__(self, func: Callable, name: str | None = None, logger: logging.Logger | None = None,
+                 context: Context | None = None) -> None:
 
         # Allow setting of the rule context
         super().__init__(context)
@@ -26,22 +36,23 @@ class WrappedFunctionBase(ContextProvidingObj):
                 name = self._habapp_ctx.get_callback_name(func)
             if name is None:
                 name = func.__name__
-        self.name: str = name
+        self.name: Final = name
 
         # Allow custom logger
-        self.log = default_logger
-        if logger:
-            self.log = logger
+        self.log: Final = default_logger if logger is None else logger
 
-    def run(self, *args, **kwargs):
+    def run(self, *args: P.args, **kwargs: P.kwargs) -> None:
         raise NotImplementedError()
 
-    def process_exception(self, e: Exception, *args, **kwargs):
+    async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
+        raise NotImplementedError()
+
+    def process_exception(self, e: Exception, *args: Any, **kwargs: Any) -> None:
 
         lines = format_exception(e)
 
         # Log Exception
-        self.log.error(f'Error in {self.name}: {e}')
+        self.log.error(f'Error in {self.name:s}: {e}')
         for line in lines:
             self.log.error(line)
 
@@ -51,6 +62,3 @@ class WrappedFunctionBase(ContextProvidingObj):
             event_bus.post_event(
                 TOPIC_ERRORS, HABAppException(func_name=self.name, exception=e, traceback='\n'.join(lines))
             )
-
-
-TYPE_WRAPPED_FUNC_OBJ = TypeVar('TYPE_WRAPPED_FUNC_OBJ', bound=WrappedFunctionBase)

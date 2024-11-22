@@ -3,7 +3,7 @@ from colorama import Fore, deinit, just_fix_windows_console
 from HABApp.__version__ import __version__
 
 
-def show_screen():
+def show_screen() -> None:
     text = r'''
   _   _    _    ____    _
  | | | |  / \  | __ )  / \   _ __  _ __

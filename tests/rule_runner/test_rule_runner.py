@@ -1,39 +1,64 @@
+import subprocess
+import sys
+
 import pytest
 
 import HABApp.core.lib.exceptions.format
 
 
-@pytest.mark.no_internals()
-def test_doc_run():
-    calls = []
+@pytest.mark.no_internals
+def test_doc_run() -> None:
+    code = '''
+calls = []
 
-    from tests import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-    import HABApp
+from tests import SimpleRuleRunner
+runner = SimpleRuleRunner()
+runner.set_up()
+import HABApp
 
-    class MyFirstRule(HABApp.Rule):
-        def __init__(self, my_parameter):
-            super().__init__()
-            self.param = my_parameter
-            self.run.soon(self.say_something)
+class MyFirstRule(HABApp.Rule):
+    def __init__(self, my_parameter):
+        super().__init__()
+        self.param = my_parameter
+        self.run.soon(self.do_something)
 
-        def say_something(self):
-            calls.append(self.param)
+    def do_something(self):
+        calls.append(self.param)
 
-    # This is normal python code, so you can create Rule instances as you like
-    for i in range(2):
-        MyFirstRule(i)
-    for t in ['Text 1', 'Text 2']:
-        MyFirstRule(t)
-    runner.process_events()
-    runner.tear_down()
+# This is normal python code, so you can create Rule instances as you like
+for i in range(2):
+    MyFirstRule(i)
+for t in ['Text 1', 'Text 2']:
+    MyFirstRule(t)
+runner.process_events()
+runner.tear_down()
 
-    assert len(calls) == 4
+assert len(calls) == 4
+'''
+
+    proc = subprocess.Popen(  # noqa: S603
+        [sys.executable, '-c', code.encode('utf-8')],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
+
+    err = 1
+
+    try:
+        stdout, stderr = proc.communicate(timeout=5)
+        err = 0
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout, stderr = proc.communicate()
+
+    if err:
+        print('')
+        print('Standard Output:', stdout)
+        print('Standard Error:', stderr)
+        pytest.fail('Error')
 
 
-@pytest.mark.no_internals()
-def test_doc_run_exception(monkeypatch):
+@pytest.mark.no_internals
+def test_doc_run_exception(monkeypatch) -> None:
     """Check that the RuleRunner propagates exceptions which happen during exception formatting"""
 
     class MyException(Exception):
@@ -49,11 +74,16 @@ def test_doc_run_exception(monkeypatch):
     runner.set_up()
 
     class MyFirstRule(HABApp.Rule):
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__()
-            self.run.soon(self.say_something)
+            self.run.soon(self.do_something)
 
-        def say_something(self):
+            j = self.run.at(self.run.trigger.sunrise(), lambda: 1/0)
+            j.pause()
+            j.resume()
+            j.cancel()
+
+        def do_something(self) -> None:
             1 / 0
 
     MyFirstRule()

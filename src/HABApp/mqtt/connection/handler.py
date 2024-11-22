@@ -15,7 +15,7 @@ Items = uses_item_registry()
 
 
 class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(name=CONNECTION_HANDLER_NAME)
 
     async def on_setup(self, connection: MqttConnection):
@@ -61,7 +61,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
             # clean_session=False
         )
 
-    async def on_connecting(self, connection: MqttConnection, context: CONTEXT_TYPE):
+    async def on_connecting(self, connection: MqttConnection, context: CONTEXT_TYPE) -> None:
         assert context is not None
 
         connection.log.info(f'Connecting to {context._hostname}:{context._port}')
@@ -69,7 +69,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
 
         connection.log.info('Connection successful')
 
-    async def on_disconnected(self, connection: MqttConnection, context: CONTEXT_TYPE):
+    async def on_disconnected(self, connection: MqttConnection, context: CONTEXT_TYPE) -> None:
         assert context is not None
 
         connection.log.info('Disconnected')

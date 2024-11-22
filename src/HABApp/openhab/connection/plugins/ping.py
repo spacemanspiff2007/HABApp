@@ -22,7 +22,7 @@ EventBus = uses_event_bus()
 
 class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
         self.task: Final = SingleTask(self.ping_worker, 'OhQueueWorker')
 
@@ -49,7 +49,7 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         self.task.start()
 
-    async def on_disconnected(self):
+    async def on_disconnected(self) -> None:
         await self.task.cancel_wait()
 
         if self.listener is not None:
@@ -66,7 +66,7 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
         if self.next_value is None:
             self.next_value = round((monotonic() - self.timestamp_sent) * 1000, 1)
 
-    async def ping_worker(self):
+    async def ping_worker(self) -> None:
         try:
             log.debug('Ping started')
 

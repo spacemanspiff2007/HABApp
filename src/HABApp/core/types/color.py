@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from colorsys import hsv_to_rgb as _hsv_to_rgb
 from colorsys import rgb_to_hsv as _rgb_to_hsv
-from typing import Optional, Tuple, Union
 
 from typing_extensions import Self
 
@@ -12,7 +13,7 @@ class ColorType:
 class RGB(ColorType):
     _RGB_MAX: int = 2 ** 8 - 1
 
-    def __init__(self, r: int, g: int, b: int):
+    def __init__(self, r: int, g: int, b: int) -> None:
         max_value = self._RGB_MAX
         if not 0 <= r <= max_value or not 0 <= g <= max_value or not 0 <= b <= max_value:
             raise ValueError()
@@ -51,8 +52,8 @@ class RGB(ColorType):
         """blue value"""
         return self._b
 
-    def replace(self, r: Optional[int] = None, g: Optional[int] = None, b: Optional[int] = None,
-                red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None) -> Self:
+    def replace(self, r: int | None = None, g: int | None = None, b: int | None = None,
+                red: int | None = None, green: int | None = None, blue: int | None = None) -> Self:
         """Create a new object with (optionally) replaced values.
 
         :param r: new red value
@@ -84,7 +85,7 @@ class RGB(ColorType):
             blue if blue is not None else self._b,
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._r:d}, {self._g:d}, {self._b})'
 
     def __eq__(self, other):
@@ -94,7 +95,7 @@ class RGB(ColorType):
             return self == self.__class__.from_hsb(other)
         return NotImplemented
 
-    def __getitem__(self, item: Union[int, str]) -> int:
+    def __getitem__(self, item: int | str) -> int:
         if isinstance(item, int):
             if item == 0:
                 return self._r
@@ -118,7 +119,7 @@ class RGB(ColorType):
     # ------------------------------------------------------------------------------------------------------------------
     # Conversions
     # ------------------------------------------------------------------------------------------------------------------
-    def to_hsb(self) -> 'HSB':
+    def to_hsb(self) -> HSB:
         """Create a new HSB object from this object
 
         :return: New HSB object
@@ -128,7 +129,7 @@ class RGB(ColorType):
         return HSB(h * HUE_FACTOR, s * PERCENT_FACTOR, v * PERCENT_FACTOR)
 
     @classmethod
-    def from_hsb(cls, obj: Union['HSB', Tuple[float, float, float]]) -> Self:
+    def from_hsb(cls, obj: HSB | tuple[float, float, float]) -> Self:
         """Return new Object from a HSB object for a hsb tuple
 
         :param obj: HSB object or tuple with HSB values
@@ -158,7 +159,7 @@ PERCENT_FACTOR = 100
 
 class HSB(ColorType):
 
-    def __init__(self, hue: float, saturation: float, brightness: float):
+    def __init__(self, hue: float, saturation: float, brightness: float) -> None:
         if not 0 <= hue <= HUE_FACTOR or not 0 <= saturation <= PERCENT_FACTOR or not 0 <= brightness <= PERCENT_FACTOR:
             raise ValueError()
 
@@ -196,9 +197,9 @@ class HSB(ColorType):
         """brightness value"""
         return self._brightness
 
-    def replace(self, h: Optional[float] = None, s: Optional[float] = None, b: Optional[float] = None,
-                hue: Optional[float] = None, saturation: Optional[float] = None,
-                brightness: Optional[float] = None) -> Self:
+    def replace(self, h: float | None = None, s: float | None = None, b: float | None = None,
+                hue: float | None = None, saturation: float | None = None,
+                brightness: float | None = None) -> Self:
         """Create a new object with (optionally) replaced values.
 
         :param h: New hue value
@@ -230,7 +231,7 @@ class HSB(ColorType):
             brightness if brightness is not None else self._brightness,
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._hue:.2f}, {self._saturation:.2f}, {self._brightness:.2f})'
 
     def __eq__(self, other):
@@ -240,7 +241,7 @@ class HSB(ColorType):
                 self._brightness == other._brightness
         return NotImplemented
 
-    def __getitem__(self, item: Union[int, str]) -> float:
+    def __getitem__(self, item: int | str) -> float:
         if isinstance(item, int):
             if item == 0:
                 return self._hue
@@ -272,7 +273,7 @@ class HSB(ColorType):
         return RGB.from_hsb(self)
 
     @classmethod
-    def from_rgb(cls, obj: Union[RGB, Tuple[int, int, int]]) -> Self:
+    def from_rgb(cls, obj: RGB | tuple[int, int, int]) -> Self:
         """Create an HSB object from an RGB object or an RGB tuple
 
         :param obj: HSB object or RGB tuple

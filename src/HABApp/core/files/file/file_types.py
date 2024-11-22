@@ -16,7 +16,7 @@ FILE_TYPES: dict[str, type[HABAppFile]] = {}
 log = logging.getLogger('HABApp.files')
 
 
-def register_file_type(prefix: str, cls: type[HABAppFile]):
+def register_file_type(prefix: str, cls: type[HABAppFile]) -> None:
     assert prefix not in FILE_TYPES
 
     assert cls.LOGGER

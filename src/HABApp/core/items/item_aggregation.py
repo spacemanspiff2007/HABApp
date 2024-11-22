@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import collections
 import time
@@ -8,7 +10,6 @@ import HABApp
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.events import EventFilter, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import (
-    HINT_EVENT_BUS_LISTENER,
     EventBusListener,
     uses_event_bus,
     uses_get_item,
@@ -27,7 +28,7 @@ event_bus = uses_event_bus()
 class AggregationItem(BaseValueItem):
 
     @classmethod
-    def get_create_item(cls, name: str):
+    def get_create_item(cls, name: str) -> AggregationItem:
         """Creates a new AggregationItem in HABApp and returns it or returns the
         already existing item with the given name
 
@@ -45,19 +46,19 @@ class AggregationItem(BaseValueItem):
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(name)
         self.__period: float = 0
         self.__aggregation_func: typing.Callable[[typing.Iterable], typing.Any] = lambda x: x
 
-        self._ts: typing.Deque[float] = collections.deque()
-        self._vals: typing.Deque[typing.Any] = collections.deque()
+        self._ts: collections.deque[float] = collections.deque()
+        self._vals: collections.deque[typing.Any] = collections.deque()
 
-        self.__listener: typing.Optional[HINT_EVENT_BUS_LISTENER] = None
+        self.__listener: EventBusListener | None = None
 
-        self.__task: typing.Optional[asyncio.Future] = None
+        self.__task: asyncio.Future | None = None
 
-    def aggregation_func(self, func: typing.Callable[[typing.Iterable], typing.Any]) -> 'AggregationItem':
+    def aggregation_func(self, func: typing.Callable[[typing.Iterable], typing.Any]) -> AggregationItem:
         """Set the function which will be used to aggregate all values. E.g. ``min`` or ``max``
 
         :param func: The function which takes an iterator an returns an aggregated value.
@@ -66,7 +67,7 @@ class AggregationItem(BaseValueItem):
         self.__aggregation_func = func
         return self
 
-    def aggregation_period(self, period: typing.Union[float, int, timedelta]) -> 'AggregationItem':
+    def aggregation_period(self, period: float | int | timedelta) -> AggregationItem:
         """Set the period in which the items will be aggregated
 
         :param period: period in seconds
@@ -84,8 +85,8 @@ class AggregationItem(BaseValueItem):
 
         return self
 
-    def aggregation_source(self, source: typing.Union[BaseValueItem, str],
-                           only_changes: bool = False) -> 'AggregationItem':
+    def aggregation_source(self, source: BaseValueItem | str,
+                           only_changes: bool = False) -> AggregationItem:
         """Set the source item which changes will be aggregated
 
         :param source: name or Item obj
@@ -105,7 +106,7 @@ class AggregationItem(BaseValueItem):
         event_bus.add_listener(self.__listener)
         return self
 
-    def _on_item_removed(self):
+    def _on_item_removed(self) -> None:
         super()._on_item_removed()
 
         if self.__listener is not None:

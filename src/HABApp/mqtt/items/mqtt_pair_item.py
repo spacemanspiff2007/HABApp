@@ -1,4 +1,3 @@
-from typing import Optional
 
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_item_registry
@@ -10,7 +9,7 @@ from . import MqttBaseItem
 Items = uses_item_registry()
 
 
-def build_write_topic(read_topic: str) -> Optional[str]:
+def build_write_topic(read_topic: str) -> str | None:
     parts = read_topic.split('/')
     if parts[0] == 'zigbee2mqtt':
         parts.insert(-1, 'set')
@@ -25,7 +24,7 @@ class MqttPairItem(MqttBaseItem):
     and a corresponding topic that is used to write values"""
 
     @classmethod
-    def get_create_item(cls, name: str, write_topic: Optional[str] = None, initial_value=None) -> 'MqttPairItem':
+    def get_create_item(cls, name: str, write_topic: str | None = None, initial_value=None) -> 'MqttPairItem':
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name.
         HABApp tries to automatically derive the write topic from the item name. In cases where this does not
         work it can be specified manually.
@@ -49,11 +48,11 @@ class MqttPairItem(MqttBaseItem):
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def __init__(self, name: str, initial_value=None, write_topic: Optional[str] = None):
+    def __init__(self, name: str, initial_value=None, write_topic: str | None = None) -> None:
         super().__init__(name, initial_value)
         self.write_topic: str = write_topic
 
-    def publish(self, payload, qos: Optional[int] = None, retain: Optional[bool] = None):
+    def publish(self, payload, qos: int | None = None, retain: bool | None = None):
         """
         Publish the payload under the write topic from the item.
 

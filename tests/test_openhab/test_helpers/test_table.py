@@ -1,7 +1,7 @@
 from HABApp.openhab.definitions.helpers.log_table import Column, Table
 
 
-def test_col():
+def test_col() -> None:
     col = Column('my heading', wrap=40)
     col.add(['asdf', 'def', '23456trhrethtre', 'ghdrhtrezertztre', 'adfsdsf'])
     assert col.get_lines(0) == 2
@@ -11,7 +11,7 @@ def test_col():
     ]
 
 
-def test_table():
+def test_table() -> None:
     table = Table('my heading')
     c1 = table.add_column('col1')
     c2 = table.add_column('col2')
@@ -49,7 +49,7 @@ def test_table():
     ]
 
 
-def test_wrap():
+def test_wrap() -> None:
     table = Table('my heading')
     c1 = table.add_column('col1')
     c2 = table.add_column('col2', wrap=20)

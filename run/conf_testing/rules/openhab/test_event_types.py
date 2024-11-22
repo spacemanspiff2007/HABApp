@@ -14,7 +14,7 @@ from HABApp.core.events import ValueUpdateEventFilter
 class TestOpenhabEventTypes(TestBaseRule):
     """This rule is testing the OpenHAB data types by posting values and checking the events"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # test the states
@@ -29,7 +29,7 @@ class TestOpenhabEventTypes(TestBaseRule):
         for name, unit in dimensions.items():
             self.add_test(f'Quantity {name} events', self.test_quantity_type_events, name, unit)
 
-    def test_events(self, item_type, test_values):
+    def test_events(self, item_type, test_values) -> None:
         item_name = f'{item_type}_value_test'
 
         with OpenhabTmpItem(item_type, item_name), EventWaiter(item_name, ValueUpdateEventFilter()) as waiter:
@@ -43,7 +43,7 @@ class TestOpenhabEventTypes(TestBaseRule):
                     self.openhab.send_command(item_name, value)
                     waiter.wait_for_event(value=value)
 
-    def test_quantity_type_events(self, dimension, unit):
+    def test_quantity_type_events(self, dimension, unit) -> None:
         item_name = f'{dimension}_event_test'
         with OpenhabTmpItem(f'Number:{dimension}', item_name) as item, \
                 EventWaiter(item_name, ValueUpdateEventFilter()) as event_waiter, \

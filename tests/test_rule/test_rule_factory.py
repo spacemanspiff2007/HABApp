@@ -4,7 +4,7 @@ from HABApp.rule import Rule, create_rule
 from tests import SimpleRuleRunner
 
 
-def test_rule_no_create():
+def test_rule_no_create() -> None:
     class MyRule(Rule):
         pass
 
@@ -12,7 +12,7 @@ def test_rule_no_create():
 
 
 @pytest.mark.no_internals()
-def test_rule_create():
+def test_rule_create() -> None:
     class MyRule(Rule):
         pass
 

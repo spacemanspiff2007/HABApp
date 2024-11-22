@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 import logging
-from typing import Callable, Optional
+from typing import TYPE_CHECKING, TypeVar
 
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
-from HABApp.core.internals import HINT_EVENT_BUS_LISTENER, Context, uses_event_bus, uses_item_registry
+from HABApp.core.internals import Context, EventBusListener, uses_event_bus, uses_item_registry
 from HABApp.core.internals.event_bus import EventBusBaseListener
+
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from HABApp import Rule
 
 
 event_bus = uses_event_bus()
@@ -13,28 +21,32 @@ item_registry = uses_item_registry()
 log = logging.getLogger('HABApp.Rule')
 
 
-class HABAppRuleContext(Context):
-    def __init__(self, rule: 'HABApp.rule.Rule'):
-        super().__init__()
-        self.rule: Optional[HABApp.rule.Rule] = rule
+TB = TypeVar('TB', bound=EventBusListener)
 
-    def get_callback_name(self, callback: Callable) -> Optional[str]:
+
+class HABAppRuleContext(Context):
+    def __init__(self, rule: Rule) -> None:
+        super().__init__()
+        self.rule: Rule | None = rule
+
+    def get_callback_name(self, callback: Callable) -> str | None:
         return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None
 
-    def add_event_listener(self, listener: HINT_EVENT_BUS_LISTENER) -> HINT_EVENT_BUS_LISTENER:
+    def add_event_listener(self, listener: TB) -> TB:
         event_bus.add_listener(listener)
         return listener
 
-    def remove_event_listener(self, listener: HINT_EVENT_BUS_LISTENER) -> HINT_EVENT_BUS_LISTENER:
+    def remove_event_listener(self, listener: TB) -> TB:
         event_bus.remove_listener(listener)
         return listener
 
-    def unload_rule(self):
+    def unload_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             rule = self.rule
 
             # Unload the scheduler
-            rule.run._scheduler.cancel_all()
+            rule.run._scheduler.set_enabled(False)
+            rule.run._scheduler.remove_all()
             rule.run._habapp_ctx = None
 
             # cancel things and set obj to None
@@ -51,7 +63,7 @@ class HABAppRuleContext(Context):
             # user implementation
             rule.on_rule_removed()
 
-    def check_rule(self):
+    def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             # We need items if we want to run the test
             if item_registry.get_items():
@@ -71,7 +83,7 @@ class HABAppRuleContext(Context):
                                     f'self.listen_event in "{self.rule.rule_name}" may not work as intended.')
 
             # enable the scheduler
-            self.rule.run._scheduler.resume()
+            self.rule.run._scheduler.set_enabled(True)
 
             # user implementation
             self.rule.on_rule_loaded()

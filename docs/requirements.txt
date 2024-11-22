@@ -1,7 +1,7 @@
 # Packages required to build the documentation
-sphinx                      == 7.4.7
-sphinx-autodoc-typehints    == 2.2.3
-sphinx_rtd_theme            == 2.0.0
-sphinx-exec-code            == 0.12
+sphinx                      == 8.1.3
+sphinx-autodoc-typehints    == 2.5.0
+sphinx_rtd_theme            == 3.0.2
+sphinx-exec-code            == 0.14
 autodoc_pydantic            == 2.2.0
 sphinx-copybutton           == 0.5.2

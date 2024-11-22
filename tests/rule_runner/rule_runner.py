@@ -1,11 +1,14 @@
-from typing import List
+import asyncio
+from types import TracebackType
 
+from astral import Observer
+from eascheduler.producers import prod_sun as prod_sun_module
 from pytest import MonkeyPatch
 
 import HABApp
 import HABApp.core.lib.exceptions.format
 import HABApp.rule.rule as rule_module
-import HABApp.rule.scheduler.habappschedulerview as ha_sched
+import HABApp.rule.scheduler.job_builder as job_builder_module
 from HABApp.core.asyncio import async_context
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
@@ -23,50 +26,65 @@ def suggest_rule_name(obj: object) -> str:
 class SyncScheduler:
     ALL = []
 
-    def __init__(self):
+    def __init__(self, event_loop=None, enabled=True) -> None:
         SyncScheduler.ALL.append(self)
         self.jobs = []
 
-    def add_job(self, job):
+    def add_job(self, job) -> None:
         self.jobs.append(job)
 
-    def remove_job(self, job):
-        self.jobs.remove(job)
+    def update_job(self, job) -> None:
+        self.remove_job(job)
+        self.add_job(job)
 
-    def cancel_all(self):
+    def remove_job(self, job) -> None:
+        if job in self.jobs:
+            self.jobs.remove(job)
+
+    def remove_all(self) -> None:
         self.jobs.clear()
 
-
-class DummyRuntime(Runtime):
-    def __init__(self):
+    def set_enabled(self, enabled: bool) -> None:  # noqa: FBT001
         pass
 
 
-def raising_fallback_format(e: Exception, existing_traceback: List[str]) -> List[str]:
+class DummyRuntime(Runtime):
+    def __init__(self) -> None:
+        pass
+
+
+def raising_fallback_format(e: Exception, existing_traceback: list[str]) -> list[str]:
     traceback = fallback_format(e, existing_traceback)
     traceback = traceback
     raise
 
 
 class SimpleRuleRunner:
-    def __init__(self):
+    def __init__(self) -> None:
         self.loaded_rules = []
 
         self.monkeypatch = MonkeyPatch()
         self.restore = []
+        self.ctx = asyncio.Future()
 
-    def submit(self, callback, *args, **kwargs):
+    def submit(self, callback, *args, **kwargs) -> None:
         # This executes the callback so we can not ignore exceptions
         callback(*args, **kwargs)
 
-    def set_up(self):
+    def set_up(self) -> None:
         # ensure that we call setup only once!
         assert isinstance(HABApp.core.Items, ConstProxyObj)
         assert isinstance(HABApp.core.EventBus, ConstProxyObj)
 
+        # prevent we're calling from asyncio - this works because we don't use threads
+        self.ctx = async_context.set('Rule Runner')
+
         ir = ItemRegistry()
         eb = EventBus()
         self.restore = setup_internals(ir, eb, final=False)
+
+        # Scheduler
+        self.monkeypatch.setattr(prod_sun_module, 'OBSERVER', Observer(52.51870523376821, 13.376072914752532, 10))
 
         # Overwrite
         self.monkeypatch.setattr(HABApp.core, 'EventBus', eb)
@@ -84,10 +102,9 @@ class SimpleRuleRunner:
         self.monkeypatch.setattr(HABApp.core.lib.exceptions.format, 'fallback_format', raising_fallback_format)
 
         # patch scheduler, so we run synchronous
-        self.monkeypatch.setattr(ha_sched, '_HABAppScheduler', SyncScheduler)
+        self.monkeypatch.setattr(job_builder_module, 'AsyncHABAppScheduler', SyncScheduler)
 
-    def tear_down(self):
-        ctx = async_context.set('Tear down test')
+    def tear_down(self) -> None:
 
         for rule in self.loaded_rules:
             rule._habapp_ctx.unload_rule()
@@ -95,20 +112,23 @@ class SimpleRuleRunner:
 
         # restore patched
         self.monkeypatch.undo()
-        async_context.reset(ctx)
+
+        # restore async context
+        async_context.reset(self.ctx)
+        self.ctx = None
 
         for r in self.restore:
             r.restore()
 
-    def process_events(self):
+    def process_events(self) -> None:
         for s in SyncScheduler.ALL:
             for job in s.jobs:
-                job._func.execute()
+                job.executor.execute()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.set_up()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         self.tear_down()
         # do not supress exception
         return False

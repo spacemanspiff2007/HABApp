@@ -25,7 +25,7 @@ import HABApp
 
 class TestOpenhabInterface(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.add_test('Interface item exists', self.test_item_exists)
@@ -44,11 +44,11 @@ class TestOpenhabInterface(TestBaseRule):
         self.add_test('Interface Metadata', self.test_metadata)
         self.add_test('Test async order', self.test_async_oder)
 
-    def test_item_exists(self):
+    def test_item_exists(self) -> None:
         assert not self.openhab.item_exists('item_which_does_not_exist')
         assert self.openhab.item_exists('TestString')
 
-    def test_item_create_delete(self):
+    def test_item_create_delete(self) -> None:
         test_defs = []
         for type in get_openhab_test_types():
             test_defs.append((type, get_random_name(type)))
@@ -63,7 +63,7 @@ class TestOpenhabInterface(TestBaseRule):
             self.openhab.remove_item(item_name)
             assert not self.openhab.item_exists(item_name)
 
-    def test_item_change_type(self):
+    def test_item_change_type(self) -> None:
         test_item = get_random_name('String')
         assert not self.openhab.item_exists(test_item)
 
@@ -85,7 +85,7 @@ class TestOpenhabInterface(TestBaseRule):
 
         self.openhab.remove_item(test_item)
 
-    def test_item_create_delete_group(self):
+    def test_item_create_delete_group(self) -> None:
         test_item = get_random_name('String')
         test_group = get_random_name('Group')
         assert not self.openhab.item_exists(test_item)
@@ -103,7 +103,7 @@ class TestOpenhabInterface(TestBaseRule):
         self.openhab.remove_item(test_group)
         self.openhab.remove_item(test_item)
 
-    def test_post_update(self, oh_type, values):
+    def test_post_update(self, oh_type, values) -> None:
         if isinstance(values, str):
             values = [values]
 
@@ -118,28 +118,28 @@ class TestOpenhabInterface(TestBaseRule):
                     waiter.wait_for_state(value)
 
     @OpenhabTmpItem.use('String')
-    def test_umlaute(self, item: OpenhabTmpItem):
+    def test_umlaute(self, item: OpenhabTmpItem) -> None:
         LABEL = 'äöß'
 
         self.openhab.create_item('String', item.name, label=LABEL)
         ret = self.openhab.get_item(item.name)
         assert ret.label == LABEL, f'"{LABEL}" != "{ret.label}"'
 
-    def test_openhab_item_not_found(self):
+    def test_openhab_item_not_found(self) -> None:
         test_item = get_random_name('String')
         assert self.openhab.get_item(test_item) is None
 
-    def test_item_definition(self):
+    def test_item_definition(self) -> None:
         self.openhab.get_item('TestGroupAVG')
         self.openhab.get_item('TestNumber')
         self.openhab.get_item('TestString')
 
-    def test_metadata(self):
+    def test_metadata(self) -> None:
         with OpenhabTmpItem('String') as item:
             self.openhab.set_metadata(item, 'MyNameSpace', 'MyValue', {'key': 'value'})
             self.openhab.remove_metadata(item, 'MyNameSpace')
 
-    def test_async_oder(self):
+    def test_async_oder(self) -> None:
         with OpenhabTmpItem('String', 'AsyncOrderTest') as item, ItemWaiter(item) as waiter:
             for _ in range(10):
                 for i in range(5):

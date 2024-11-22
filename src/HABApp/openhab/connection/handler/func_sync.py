@@ -91,7 +91,7 @@ def create_item(item_type: str, name: str,
     :return: True if item was created/updated
     """
 
-    def validate(_in):
+    def validate(_in) -> None:
         assert isinstance(_in, str), type(_in)
 
     # limit values to special entries and validate parameters

@@ -13,14 +13,14 @@ from HABApp.openhab.definitions.rest.things import ChannelResp, ThingStatusResp
 async def _mock_things() -> list[ThingResp]:
     return [
         ThingResp(
-            uid='thing_type:uid', thing_type='thing_type',
-            status=ThingStatusResp(status='ONLINE', detail='ONLINE'),
+            UID='thing_type:uid', thingTypeUID='thing_type',
+            statusInfo=ThingStatusResp(status='ONLINE', statusDetail='NONE'),
             editable=False,
             channels=[
-                ChannelResp(uid='thing_type:uid:channel1', id='channel1', channel_type='channel1_type',
-                            item_type='String', kind='STATE', linked_items=[]),
-                ChannelResp(uid='thing_type:uid:channel2', id='channel2', channel_type='channel2_type',
-                            item_type='String', kind='STATE', linked_items=[])
+                ChannelResp(uid='thing_type:uid:channel1', id='channel1', channelTypeUID='channel1_type',
+                            itemType='String', kind='STATE', linkedItems=[]),
+                ChannelResp(uid='thing_type:uid:channel2', id='channel2', channelTypeUID='channel2_type',
+                            itemType='String', kind='STATE', linkedItems=[])
             ]
         )
     ]
@@ -28,14 +28,14 @@ async def _mock_things() -> list[ThingResp]:
 
 async def _mock_links() -> list[ItemChannelLinkResp]:
     return [
-        ItemChannelLinkResp(item='item1', channel='thing_type:uid:channel1', editable=True),    # okay
-        ItemChannelLinkResp(item='item2', channel='thing_type:uid:channel1', editable=True),    # item does not exist
-        ItemChannelLinkResp(item='item1', channel='thing_type:uid:channel3', editable=True),    # channel does not exist
-        ItemChannelLinkResp(item='item1', channel='other_thing:uid:channel1', editable=True),   # thing does not exist
+        ItemChannelLinkResp(itemName='item1', channelUID='thing_type:uid:channel1', editable=True),    # okay
+        ItemChannelLinkResp(itemName='item2', channelUID='thing_type:uid:channel1', editable=True),    # item does not exist
+        ItemChannelLinkResp(itemName='item1', channelUID='thing_type:uid:channel3', editable=True),    # channel does not exist
+        ItemChannelLinkResp(itemName='item1', channelUID='other_thing:uid:channel1', editable=True),   # thing does not exist
     ]
 
 
-async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs):
+async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(plugin_module, 'async_get_things', _mock_things)
     monkeypatch.setattr(plugin_module, 'async_get_links', _mock_links)
 

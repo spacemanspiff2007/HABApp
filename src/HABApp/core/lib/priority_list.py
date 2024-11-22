@@ -1,20 +1,13 @@
 from __future__ import annotations
 
-from typing import Generic, Iterator, Literal, Tuple, TypeVar, Union
-
-from HABApp.core.const.const import PYTHON_310
-
-
-if PYTHON_310:
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+from collections.abc import Iterator
+from typing import Generic, Literal, TypeAlias, TypeVar
 
 
 T = TypeVar('T')
 
-T_PRIO: TypeAlias = Union[Literal['first', 'last'], int]
-T_ENTRY: TypeAlias = Tuple[T_PRIO, T]
+T_PRIO: TypeAlias = Literal['first', 'last'] | int
+T_ENTRY: TypeAlias = tuple[T_PRIO, T]
 
 
 def sort_func(obj: T_ENTRY):
@@ -26,10 +19,10 @@ def sort_func(obj: T_ENTRY):
 
 # TODO: Move this to the connection
 class PriorityList(Generic[T]):
-    def __init__(self):
+    def __init__(self) -> None:
         self._objs: list[T_ENTRY] = []
 
-    def append(self, obj: T, priority: T_PRIO):
+    def append(self, obj: T, priority: T_PRIO) -> None:
         for o in self._objs:
             assert o[0] != priority, priority
         self._objs.append((priority, obj))
@@ -49,5 +42,5 @@ class PriorityList(Generic[T]):
         for p, o in reversed(self._objs):
             yield o
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {list(self)}>'

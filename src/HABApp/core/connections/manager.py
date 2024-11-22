@@ -12,7 +12,7 @@ T = TypeVar('T', bound=BaseConnection)
 
 
 class ConnectionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.connections: dict[str, BaseConnection] = {}
 
     def add(self, connection: T) -> T:
@@ -31,19 +31,19 @@ class ConnectionManager:
             raise ValueError()
         self.connections.pop(name)
 
-    async def on_application_shutdown(self):
+    async def on_application_shutdown(self) -> None:
         for c in self.connections.values():
             c.on_application_shutdown()
 
         tasks = [t.advance_status_task.wait() for t in self.connections.values()]
         await asyncio.gather(*tasks)
 
-    def application_startup_complete(self):
+    def application_startup_complete(self) -> None:
         for c in self.connections.values():
             with HABApp.core.wrapper.ExceptionToHABApp(logger=c.log):
                 c.application_startup_complete()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__}>'
 
 

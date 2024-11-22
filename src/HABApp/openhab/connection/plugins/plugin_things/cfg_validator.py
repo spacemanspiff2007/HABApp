@@ -1,24 +1,18 @@
 import re
 import typing
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Annotated
 
 from pydantic import AfterValidator, ConfigDict, Field, TypeAdapter, ValidationError, field_validator
 from pydantic import BaseModel as _BaseModel
 
-from HABApp.core.const.const import PYTHON_310
 from HABApp.core.logger import HABAppError
 from HABApp.openhab.connection.plugins.plugin_things.filters import ChannelFilter, ThingFilter
 from HABApp.openhab.connection.plugins.plugin_things.str_builder import StrBuilder
 from HABApp.openhab.definitions import ITEM_TYPES
 
 from ._log import log
-
-
-if PYTHON_310:
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
 
 
 RE_VALID_NAME = re.compile(r'\w+')
@@ -30,12 +24,12 @@ class UserItem:
     name: str
     label: str
     icon: str
-    groups: List[str]
-    tags: List[str]
-    link: Optional[str]
-    metadata: Dict[str, Dict[str, Union[str, int, float]]]
+    groups: list[str]
+    tags: list[str]
+    link: str | None
+    metadata: dict[str, dict[str, str | int | float]]
 
-    def get_oh_cfg(self) -> Dict[str, Union[str, dict, list]]:
+    def get_oh_cfg(self) -> dict[str, str | dict | list]:
         ret = {}
         for k in self.__annotations__:
             if k in ('link', 'metadata'):
@@ -58,7 +52,7 @@ class BaseModel(_BaseModel):
 
 class MetadataCfg(BaseModel):
     value: str
-    config: Dict[str, typing.Any] = {}
+    config: dict[str, typing.Any] = {}
 
 
 def mk_str_builder(v: str) -> StrBuilder:
@@ -73,9 +67,9 @@ class UserItemCfg(BaseModel):
     name: TypeStrBuilder
     label: TypeStrBuilder = ''
     icon: TypeStrBuilder = ''
-    groups: List[TypeStrBuilder] = []
-    tags: List[TypeStrBuilder] = []
-    metadata: Optional[Dict[str, MetadataCfg]] = None
+    groups: list[TypeStrBuilder] = []
+    tags: list[TypeStrBuilder] = []
+    metadata: dict[str, MetadataCfg] | None = None
 
     @field_validator('type')
     def validate_item_type(cls, v):
@@ -109,7 +103,7 @@ class UserItemCfg(BaseModel):
 
             # metadata is nested
             if k == 'metadata':
-                v[k] = {k: v.dict() for k, v in val.items()} if val is not None else {}
+                v[k] = {k: v.model_dump() for k, v in val.items()} if val is not None else {}
                 continue
 
             # resolve str wildcards
@@ -122,13 +116,14 @@ class UserItemCfg(BaseModel):
         # ensure a valid item name, otherwise the creation will definitely fail
         v['name'] = name = v['name'].replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue').replace(' ', '_')
         if not RE_VALID_NAME.fullmatch(name):
-            raise InvalidItemNameError(f'"{name}" is not a valid name for an item!\n   (created for {context})')
+            msg = f'"{name}" is not a valid name for an item!\n   (created for {context})'
+            raise InvalidItemNameError(msg)
         return UserItem(**v)
 
 
 class UserChannelCfg(BaseModel):
-    filter: List[ChannelFilter]
-    link_items: List[UserItemCfg] = Field(default_factory=list, alias='link items')
+    filter: list[ChannelFilter]
+    link_items: list[UserItemCfg] = Field(default_factory=list, alias='link items')
 
     model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)
 
@@ -142,12 +137,12 @@ class UserChannelCfg(BaseModel):
 
 class UserThingCfg(BaseModel):
     test: bool
-    filter: List[ThingFilter]
+    filter: list[ThingFilter]
     # order of the type hint matters: int, str!
-    thing_config: Dict[Union[int, str], Union[int, float, str, List[str]]] = Field(alias='thing config',
+    thing_config: dict[int | str, int | float | str | list[str]] = Field(alias='thing config',
                                                                                    default_factory=dict)
-    create_items: List[UserItemCfg] = Field(alias='create items', default_factory=list)
-    channels: List[UserChannelCfg] = Field(default_factory=list)
+    create_items: list[UserItemCfg] = Field(alias='create items', default_factory=list)
+    channels: list[UserChannelCfg] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)
 
@@ -159,7 +154,7 @@ class UserThingCfg(BaseModel):
         return map(lambda x: x.get_item(context), self.create_items)
 
 
-def create_filters(cls, v: Union[List[Dict[str, str]], Dict[str, str]]):
+def create_filters(cls, v: list[dict[str, str]] | dict[str, str]):
     if isinstance(v, dict):
         v = [v]
     r = []
@@ -171,10 +166,10 @@ def create_filters(cls, v: Union[List[Dict[str, str]], Dict[str, str]]):
     return r
 
 
-def validate_cfg(_in, filename: Optional[str] = None) -> Optional[List[UserThingCfg]]:
+def validate_cfg(_in, filename: str | None = None) -> list[UserThingCfg] | None:
     try:
         if isinstance(_in, list):
-            return TypeAdapter(List[UserThingCfg]).validate_python(_in)
+            return TypeAdapter(list[UserThingCfg]).validate_python(_in)
         else:
             return [UserThingCfg.model_validate(_in)]
     except ValidationError as e:

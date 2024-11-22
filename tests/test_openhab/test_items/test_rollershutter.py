@@ -4,7 +4,7 @@ from HABApp.core.errors import InvalidItemValue
 from HABApp.openhab.items import RollershutterItem
 
 
-def test_dimmer_set_value():
+def test_dimmer_set_value() -> None:
     RollershutterItem('').set_value(None)
     RollershutterItem('').set_value(0)
     RollershutterItem('').set_value(100)

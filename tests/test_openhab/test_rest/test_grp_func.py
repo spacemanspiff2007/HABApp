@@ -1,11 +1,7 @@
-from json import dumps
-
-from msgspec.json import decode
-
 from HABApp.openhab.definitions.rest.items import GroupFunctionResp
 
 
-def test_or():
+def test_or() -> None:
     _in = {
         'name': 'OR',
         'params': [
@@ -13,13 +9,14 @@ def test_or():
             'OFF'
         ]
     }
-    o = decode(dumps(_in), type=GroupFunctionResp)
+
+    o = GroupFunctionResp.model_validate(_in)
     assert o.name == 'OR'
-    assert o.params == ['ON', 'OFF']
+    assert o.params == ('ON', 'OFF')
 
 
-def test_eq():
+def test_eq() -> None:
     _in = {'name': 'EQUALITY'}
-    o = decode(dumps(_in), type=GroupFunctionResp)
+    o = GroupFunctionResp.model_validate(_in)
     assert o.name == 'EQUALITY'
-    assert o.params == []
+    assert o.params == ()

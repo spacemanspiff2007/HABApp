@@ -1,22 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 import aiohttp
 
 import HABApp
 from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
-from HABApp.core.const.const import PYTHON_310
-from HABApp.core.items.base_valueitem import datetime
 
-
-if PYTHON_310:
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
 if TYPE_CHECKING:
+    from HABApp.core.lib import InstantView
     from HABApp.openhab.items import OpenhabItem, Thing
 
 
@@ -29,8 +23,8 @@ class OpenhabContext:
     # true when we waited during connect
     waited_for_openhab: bool
 
-    created_items: dict[str, tuple[OpenhabItem, datetime]]
-    created_things: dict[str, tuple[Thing, datetime]]
+    created_items: dict[str, tuple[OpenhabItem, InstantView]]
+    created_things: dict[str, tuple[Thing, InstantView]]
 
     session: aiohttp.ClientSession
     session_options: dict[str, Any]
@@ -46,10 +40,10 @@ class OpenhabContext:
         )
 
 
-CONTEXT_TYPE: TypeAlias = Optional[OpenhabContext]
+CONTEXT_TYPE: TypeAlias = OpenhabContext | None
 
 
-def setup():
+def setup() -> None:
     config = HABApp.config.CONFIG.openhab
 
     from HABApp.openhab.connection.handler import HANDLER as CONNECTION_HANDLER
@@ -89,7 +83,7 @@ def setup():
 
 
 class OpenhabConnection(BaseConnection):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('openhab')
         self.context: CONTEXT_TYPE = None
 

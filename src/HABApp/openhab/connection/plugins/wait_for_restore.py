@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 from asyncio import sleep
 
+from HABApp.core import shutdown
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import ValueChange
 from HABApp.core.lib.timeout import Timeout
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.items import OpenhabItem
-from HABApp.runtime import shutdown
 
 
 log = logging.getLogger('HABApp.openhab.startup')
@@ -39,7 +39,7 @@ class WaitForPersistenceRestore(BaseConnectionPlugin[OpenhabConnection]):
             log.debug('Some items are still None - waiting for initialisation')
 
             timeout = Timeout(4 * 60)
-            while not shutdown.requested and none_items.changed:
+            while not shutdown.is_requested() and none_items.changed:
                 await sleep(3)
 
                 # timeout so we start eventually

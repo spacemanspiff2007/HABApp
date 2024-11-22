@@ -7,6 +7,7 @@ from aiohttp.client import ClientResponse, _RequestContextManager
 from aiohttp.hdrs import METH_DELETE, METH_GET, METH_POST, METH_PUT
 
 from HABApp.config import CONFIG
+from HABApp.core import shutdown
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
 from HABApp.core.connections.base_connection import AlreadyHandledException
@@ -19,14 +20,14 @@ from HABApp.openhab.errors import OpenhabCredentialsInvalidError, OpenhabDisconn
 class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
     request: aiohttp.ClientSession._request
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(name=CONNECTION_HANDLER_NAME)
         self.options: dict[str, Any] = {}
         self.read_only: bool = False
         self.online = False
         self.session: aiohttp.ClientSession | None = None
 
-    def update_cfg_general(self):
+    def update_cfg_general(self) -> None:
         self.read_only = CONFIG.openhab.general.listen_only
 
     async def on_setup(self, connection: OpenhabConnection):
@@ -71,10 +72,10 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
         )
         self.request = self.session._request
 
-    async def on_connected(self):
+    async def on_connected(self) -> None:
         self.online = True
 
-    async def on_disconnected(self, connection: OpenhabConnection):
+    async def on_disconnected(self, connection: OpenhabConnection) -> None:
         self.online = False
         connection.context = None
 
@@ -128,6 +129,10 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             resp = await future
         except Exception as e:
             self.plugin_connection.process_exception(e, None)
+            if self.session.closed:
+                # We can not recover from a closed session so we shutdown
+                self.plugin_connection.log.error('Session closed!')
+                shutdown.request()
             raise OpenhabDisconnectedError() from None
 
         if (status := resp.status) < 300:

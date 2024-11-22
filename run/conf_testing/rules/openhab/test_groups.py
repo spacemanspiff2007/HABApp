@@ -7,7 +7,7 @@ from HABApp.openhab.items import GroupItem, SwitchItem
 
 class TestOpenhabGroupFunction(TestBaseRule):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.group = OpenhabTmpItem('Group')
@@ -17,17 +17,17 @@ class TestOpenhabGroupFunction(TestBaseRule):
         self.add_test('Group function', self.test_group_update)
         self.add_test('Group member change', self.add_item_to_grp)
 
-    def set_up(self):
+    def set_up(self) -> None:
         self.item1.create_item(groups=[self.group.name])
         self.item2.create_item(groups=[self.group.name])
         self.group.create_item(group_type='Switch', group_function='OR', group_function_params=['ON', 'OFF'])
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         self.item1.remove()
         self.item2.remove()
         self.group.remove()
 
-    def test_group_update(self):
+    def test_group_update(self) -> None:
         item1 = SwitchItem.get_item(self.item1.name)
         item2 = SwitchItem.get_item(self.item2.name)
         group = GroupItem.get_item(self.group.name)

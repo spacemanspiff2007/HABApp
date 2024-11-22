@@ -10,14 +10,14 @@ class TimeoutNotRunningError(Exception):
 class Timeout:
     __slots__ = ('_timeout', '_started')
 
-    def __init__(self, timeout: float, *, start: bool = True):
+    def __init__(self, timeout: float, *, start: bool = True) -> None:
         self._timeout: float = timeout
         if self._timeout <= 0:
             raise ValueError()
 
         self._started: float | None = None if not start else monotonic()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         decimals = 1 if self._timeout < 10 else 0
 

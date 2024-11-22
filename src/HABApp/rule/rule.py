@@ -2,8 +2,10 @@ import logging
 import re
 import sys
 import warnings
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Any, Callable, Final, Iterable, List, Literal, Optional, Pattern, Tuple, TypeVar, Union, overload
+from re import Pattern
+from typing import Any, Final, Literal, ParamSpec, TypeVar, overload
 
 import HABApp
 import HABApp.core
@@ -11,21 +13,19 @@ import HABApp.openhab
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core.asyncio import create_task
-from HABApp.core.const.const import PYTHON_310
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
 from HABApp.core.internals import (
-    HINT_EVENT_BUS_LISTENER,
-    HINT_EVENT_FILTER_OBJ,
     ContextBoundEventBusListener,
     ContextProvidingObj,
+    EventBusListener,
     EventFilterBase,
     uses_item_registry,
     uses_post_event,
     wrap_func,
 )
-from HABApp.core.items import HINT_ITEM_OBJ, HINT_TYPE_ITEM_OBJ, BaseItem, BaseValueItem
+from HABApp.core.items import BaseItem, BaseValueItem
 from HABApp.rule import interfaces
-from HABApp.rule.scheduler import HABAppSchedulerView as _HABAppSchedulerView
+from HABApp.rule.scheduler.job_builder import HABAppJobBuilder as _HABAppJobBuilder
 
 from .interfaces import async_subprocess_exec
 from .interfaces.rule_subprocess import (
@@ -38,17 +38,11 @@ from .interfaces.rule_subprocess import (
 from .rule_hook import get_rule_hook as _get_rule_hook
 
 
-if PYTHON_310:
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
-
-
 log = logging.getLogger('HABApp.Rule')
 
 
 # Func to log deprecation warnings
-def send_warnings_to_log(message, category, filename, lineno, file=None, line=None):
+def send_warnings_to_log(message, category, filename, lineno, file=None, line=None) -> None:
     log.warning(f'{filename}:{lineno}: {category.__name__}:{message}')
     return
 
@@ -62,9 +56,12 @@ post_event = uses_post_event()
 item_registry = uses_item_registry()
 
 
+ITEM_TYPE = TypeVar('ITEM_TYPE', bound=BaseItem)
+
+
 class Rule(ContextProvidingObj):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
 
         hook = _get_rule_hook()
@@ -74,7 +71,7 @@ class Rule(ContextProvidingObj):
         assert isinstance(self.__runtime, HABApp.runtime.Runtime)
 
         # scheduler
-        self.run: _HABAppSchedulerView = _HABAppSchedulerView(self._habapp_ctx)
+        self.run: Final = _HABAppJobBuilder(self._habapp_ctx)
 
         # suggest a rule name
         self.rule_name: str = hook.suggest_rule_name(self)
@@ -85,15 +82,15 @@ class Rule(ContextProvidingObj):
         self.oh: Final = HABApp.openhab.interface_sync
         self.openhab: Final = self.oh
 
-    def on_rule_loaded(self):
+    def on_rule_loaded(self) -> None:
         """Override this to implement logic that will be called when the rule and the file has been successfully loaded
         """
 
-    def on_rule_removed(self):
+    def on_rule_removed(self) -> None:
         """Override this to implement logic that will be called when the rule has been unloaded.
         """
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # empty string, so we have a space if we have more than one entry
         parts = ['']
 
@@ -109,7 +106,7 @@ class Rule(ContextProvidingObj):
 
         return f'<{cls_name}{" ".join(parts)}>'
 
-    def post_event(self, name: Union[HINT_ITEM_OBJ, str], event: Any):
+    def post_event(self, name: BaseItem | str, event: Any) -> None:
         """
         Post an event to the event bus
 
@@ -123,10 +120,10 @@ class Rule(ContextProvidingObj):
             event
         )
 
-    def listen_event(self, name: Union[HINT_ITEM_OBJ, str],
+    def listen_event(self, name: BaseItem | str,
                      callback: TYPE_EVENT_CALLBACK,
-                     event_filter: Optional[HINT_EVENT_FILTER_OBJ] = None
-                     ) -> HINT_EVENT_BUS_LISTENER:
+                     event_filter: EventFilterBase | None = None
+                     ) -> EventBusListener:
         """
         Register an event listener
 
@@ -144,7 +141,8 @@ class Rule(ContextProvidingObj):
         if event_filter is None:
             event_filter = HABApp.core.events.NoEventFilter()
         if not isinstance(event_filter, EventFilterBase):
-            raise ValueError(f'Argument event_filter must be an instance of event filter (is {event_filter})')
+            msg = f'Argument event_filter must be an instance of event filter (is {event_filter})'
+            raise TypeError(msg)
 
         listener = ContextBoundEventBusListener(name, cb, event_filter, parent_ctx=self._habapp_ctx)
         return self._habapp_ctx.add_event_listener(listener)
@@ -152,13 +150,13 @@ class Rule(ContextProvidingObj):
     @overload
     def execute_subprocess(self, callback: HINT_PROCESS_CB_SIMPLE, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                            additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                           raw_info: Literal[False], **kwargs):
+                           raw_info: Literal[False], **kwargs) -> None:
         ...
 
     @overload
     def execute_subprocess(self, callback: HINT_PROCESS_CB_FULL, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                            additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                           raw_info: Literal[True], **kwargs):
+                           raw_info: Literal[True], **kwargs) -> None:
         ...
 
     def execute_subprocess(self, callback, program: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
@@ -196,13 +194,13 @@ class Rule(ContextProvidingObj):
     @overload
     def execute_python(self, callback: HINT_PROCESS_CB_SIMPLE, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                        additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                       raw_info: Literal[False], **kwargs):
+                       raw_info: Literal[False], **kwargs) -> None:
         ...
 
     @overload
     def execute_python(self, callback: HINT_PROCESS_CB_FULL, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
                        additional_python_path: HINT_PYTHON_PATH = None, capture_output: bool = True,
-                       raw_info: Literal[True], **kwargs):
+                       raw_info: Literal[True], **kwargs) -> None:
         ...
 
     def execute_python(self, callback, module_or_package: HINT_EXEC_ARGS, *args: HINT_EXEC_ARGS,
@@ -257,18 +255,18 @@ class Rule(ContextProvidingObj):
                 cb.run, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
         )
 
-    def get_rule(self, rule_name: str) -> 'Union[Rule, List[Rule]]':
+    def get_rule(self, rule_name: str) -> 'Rule | list[Rule]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__runtime.rule_manager.get_rule(rule_name)
 
     @staticmethod
-    def get_items(type: Union[Tuple[HINT_TYPE_ITEM_OBJ, ...], HINT_TYPE_ITEM_OBJ] = None,
-                  name: Union[str, Pattern[str], None] = None,
-                  tags: Union[str, Iterable[str], None] = None,
-                  groups: Union[str, Iterable[str], None] = None,
-                  metadata: Union[str, Pattern[str], None] = None,
-                  metadata_value: Union[str, Pattern[str], None] = None,
-                  ) -> Union[List[HINT_ITEM_OBJ], List[BaseItem]]:
+    def get_items(type: tuple[type[ITEM_TYPE], ...] | type[ITEM_TYPE] | None = None,
+                  name: str | Pattern[str] | None = None,
+                  tags: str | Iterable[str] | None = None,
+                  groups: str | Iterable[str] | None = None,
+                  metadata: str | Pattern[str] | None = None,
+                  metadata_value: str | Pattern[str] | None = None,
+                  ) -> list[ITEM_TYPE] | list[BaseItem]:
         """Search the HABApp item registry and return the found items.
 
         :param type: item has to be an instance of this class
@@ -299,7 +297,8 @@ class Rule(ContextProvidingObj):
             if type is None:
                 type = OpenhabItem
             if not issubclass(type, OpenhabItem):
-                raise ValueError('Searching for tags, groups and metadata only works for OpenhabItem or its subclasses')
+                msg = 'Searching for tags, groups and metadata only works for OpenhabItem or its subclasses'
+                raise ValueError(msg)
 
         ret = []
         for item in item_registry.get_items():  # type: HABApp.core.items.BaseItem

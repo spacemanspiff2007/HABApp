@@ -1,6 +1,6 @@
 import re
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
 
 from HABApp.core.const.const import PYTHON_311
 from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserItem
@@ -33,8 +33,8 @@ def brackets_needed(obj: UserItem):
 
 
 class ItemsFileWriter:
-    def __init__(self):
-        self.items: List[UserItem] = []
+    def __init__(self) -> None:
+        self.items: list[UserItem] = []
 
     def add_item(self, obj) -> Self:
         self.items.append(obj)
@@ -44,9 +44,9 @@ class ItemsFileWriter:
         self.items.extend(objs)
         return self
 
-    def group_items(self) -> List[List[UserItem]]:
-        grouped_items: Dict[Optional[str], List[UserItem]] = {}
-        not_grouped: List[UserItem] = []
+    def group_items(self) -> list[list[UserItem]]:
+        grouped_items: dict[str | None, list[UserItem]] = {}
+        not_grouped: list[UserItem] = []
         for item in self.items:
             if m := RE_GROUP_NAMES.match(item.name):
                 grouped_items.setdefault(m.group(1), []).append(item)
@@ -97,7 +97,7 @@ class ItemsFileWriter:
 
         return '\n'.join(lines)
 
-    def create_file(self, file: Path):
+    def create_file(self, file: Path) -> bool:
 
         output = self.generate()
 

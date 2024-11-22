@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 from fastnumbers import try_real
 
@@ -11,8 +11,8 @@ OPTIONAL_DT = Optional[datetime]
 
 class OpenhabPersistenceData:
 
-    def __init__(self):
-        self.data: dict[float, Union[int, float, str]] = {}
+    def __init__(self) -> None:
+        self.data: dict[float, int | float | str] = {}
 
     @classmethod
     def from_resp(cls, data: ItemHistoryResp) -> 'OpenhabPersistenceData':
@@ -39,13 +39,13 @@ class OpenhabPersistenceData:
             ret[ts] = val
         return ret
 
-    def min(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> Optional[float]:
+    def min(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> float | None:
         return min(self.get_data(start_date, end_date).values(), default=None)
 
-    def max(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> Optional[float]:
+    def max(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> float | None:
         return max(self.get_data(start_date, end_date).values(), default=None)
 
-    def average(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> Optional[float]:
+    def average(self, start_date: OPTIONAL_DT = None, end_date: OPTIONAL_DT = None) -> float | None:
         values = list(self.get_data(start_date, end_date).values())
         ct = len(values)
         if ct == 0:
