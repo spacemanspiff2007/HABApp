@@ -127,6 +127,9 @@ MyOpenhabRule()
 ```
 
 # Changelog
+#### 24.11.1 (2024-11-25)
+Fixed an issue with the logging Queue
+
 #### 24.11.0 (2024-11-22)
 This is a breaking change!
 
