@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from types import BuiltinMethodType, FunctionType, MethodType
 from typing import TYPE_CHECKING
 
-from HABApp.core.asyncio import async_context, create_task
+from HABApp.core.asyncio import create_task
 from HABApp.core.const import loop
 
 
@@ -75,8 +75,6 @@ async def _shutdown() -> None:
         return None
     _REQUESTED = True
 
-
-    async_context.set('Shutdown')
 
     log = logging.getLogger('HABApp.Shutdown')
     log.debug('Requested shutdown')

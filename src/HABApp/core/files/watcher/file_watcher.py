@@ -5,7 +5,6 @@ from time import monotonic
 from typing import Any
 
 import HABApp
-from HABApp.core.asyncio import AsyncContext
 from HABApp.core.wrapper import ignore_exception
 
 from .base_watcher import EventFilterBase, FileSystemEventHandler
@@ -46,10 +45,8 @@ class AggregatingAsyncEventHandler(FileSystemEventHandler):
         self._files.clear()
 
         # process
-        with AsyncContext('FileWatcherEvent'):
-            await self.func(HABApp.core.lib.sort_files(files))
+        await self.func(HABApp.core.lib.sort_files(files))
 
     async def trigger_all(self) -> None:
         files = HABApp.core.lib.list_files(self.folder, self.filter, self.watch_subfolders)
-        with AsyncContext('FileWatcherAll'):
-            await self.func(files)
+        await self.func(files)

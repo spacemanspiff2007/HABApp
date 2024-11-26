@@ -12,7 +12,6 @@ import HABApp.rule.interfaces._http
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core import Connections, shutdown
-from HABApp.core.asyncio import async_context
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.wrapper import process_exception
@@ -29,8 +28,6 @@ class Runtime:
 
     async def start(self, config_folder: Path) -> None:
         try:
-            token = async_context.set('HABApp startup')
-
             # shutdown setup
             shutdown.register(Connections.on_application_shutdown, msg='Shutting down connections')
 
@@ -70,8 +67,6 @@ class Runtime:
             await self.rule_manager.setup()
 
             Connections.application_startup_complete()
-
-            async_context.reset(token)
 
         except HABApp.config.InvalidConfigError:
             shutdown.request()

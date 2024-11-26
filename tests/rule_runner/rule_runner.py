@@ -1,4 +1,3 @@
-import asyncio
 from types import TracebackType
 
 from astral import Observer
@@ -9,7 +8,6 @@ import HABApp
 import HABApp.core.lib.exceptions.format
 import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.job_builder as job_builder_module
-from HABApp.core.asyncio import async_context
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
@@ -65,7 +63,6 @@ class SimpleRuleRunner:
 
         self.monkeypatch = MonkeyPatch()
         self.restore = []
-        self.ctx = asyncio.Future()
 
     def submit(self, callback, *args, **kwargs) -> None:
         # This executes the callback so we can not ignore exceptions
@@ -75,9 +72,6 @@ class SimpleRuleRunner:
         # ensure that we call setup only once!
         assert isinstance(HABApp.core.Items, ConstProxyObj)
         assert isinstance(HABApp.core.EventBus, ConstProxyObj)
-
-        # prevent we're calling from asyncio - this works because we don't use threads
-        self.ctx = async_context.set('Rule Runner')
 
         ir = ItemRegistry()
         eb = EventBus()
@@ -112,10 +106,6 @@ class SimpleRuleRunner:
 
         # restore patched
         self.monkeypatch.undo()
-
-        # restore async context
-        async_context.reset(self.ctx)
-        self.ctx = None
 
         for r in self.restore:
             r.restore()

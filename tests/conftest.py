@@ -6,7 +6,6 @@ import typing
 import pytest
 
 import HABApp
-from HABApp.core.asyncio import async_context
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from tests.helpers import LogCollector, eb, get_dummy_cfg, params, parent_rule, sync_worker
 from tests.helpers.log.log_matcher import AsyncDebugWarningMatcher, LogLevelMatcher
@@ -52,11 +51,7 @@ def use_dummy_cfg(monkeypatch):
 
 @pytest.fixture(autouse=True, scope='session')
 def event_loop():
-    token = async_context.set('pytest')
-
     yield HABApp.core.const.loop
-
-    async_context.reset(token)
 
 
 @pytest.fixture()

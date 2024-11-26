@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
 from HABApp.openhab.definitions import OnOffValue
@@ -30,11 +30,12 @@ class SwitchItem(OpenhabItem, OnOffCommand):
 
     @staticmethod
     def _state_from_oh_str(state: str):
-        if state != ON and state != OFF:
-            raise ValueError(f'Invalid value for SwitchItem: {state}')
+        if state not in (ON, OFF):
+            msg = f'Invalid value for SwitchItem: {state}'
+            raise ValueError(msg)
         return state
 
-    def set_value(self, new_value) -> bool:
+    def set_value(self, new_value: str | None) -> bool:
 
         if isinstance(new_value, OnOffValue):
             new_value = new_value.value
@@ -66,7 +67,7 @@ class SwitchItem(OpenhabItem, OnOffCommand):
     def __str__(self) -> str:
         return str(self.value)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, SwitchItem):
             return self.value == other.value
         if isinstance(other, str):

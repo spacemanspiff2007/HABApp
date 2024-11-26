@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
+from HABApp.core.asyncio import thread_context
 from HABApp.core.const import loop
 from HABApp.core.internals import Context, ContextProvidingObj
 from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase, default_logger
@@ -21,6 +22,10 @@ POOL: ThreadPoolExecutor | None = None
 POOL_THREADS: int = 0
 
 
+def _initialize_thread() -> None:
+    thread_context.set('HABAppWorker')
+
+
 def create_thread_pool(count: int) -> None:
     global POOL, POOL_THREADS
 
@@ -32,7 +37,7 @@ def create_thread_pool(count: int) -> None:
 
     stop_thread_pool()
     POOL_THREADS = count
-    POOL = ThreadPoolExecutor(count, 'HabAppWorker')
+    POOL = ThreadPoolExecutor(count, 'HabAppWorker', initializer=_initialize_thread)
 
 
 def stop_thread_pool() -> None:
