@@ -1,7 +1,6 @@
 from asyncio import run_coroutine_threadsafe, sleep
 from collections.abc import Awaitable, Callable
 from pathlib import Path
-from time import monotonic
 from typing import Any
 
 import HABApp
@@ -21,7 +20,7 @@ class AggregatingAsyncEventHandler(FileSystemEventHandler):
         self.func = func
 
         self._files: set[Path] = set()
-        self.last_event: float = 0
+        self._event_obj: object = object()
 
     @ignore_exception
     def file_changed(self, dst: str) -> None:
@@ -30,14 +29,14 @@ class AggregatingAsyncEventHandler(FileSystemEventHandler):
 
     @ignore_exception
     async def _event_waiter(self, dst: Path):
-        self.last_event = ts = monotonic()
+        self._event_obj = event_obj = object()
         self._files.add(dst)
 
         # debounce time
         await sleep(DEBOUNCE_TIME)
 
         # check if a new event came
-        if self.last_event > ts:
+        if self._event_obj is not event_obj:
             return None
 
         # Copy Path so we're done here
