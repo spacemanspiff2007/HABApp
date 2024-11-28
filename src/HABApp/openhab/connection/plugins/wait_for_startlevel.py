@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 import HABApp
 import HABApp.core
@@ -30,6 +31,16 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
             # If openHAB is already running we have a fast exit path here
             if system_info.uptime >= oh_general.min_uptime and system_info.start_level >= oh_general.min_start_level:
                 context.waited_for_openhab = False
+
+                # Show a hint in case it's possible to increase the start level
+                # A higher start level means a more consistent startup and thus is more desirable
+                if system_info.start_level > oh_general.min_start_level:
+                    logging.getLogger('HABApp').info(
+                        f'Openhab reached start level {system_info.start_level:d} but HABApp only waits until '
+                        f'level {oh_general.min_start_level:d} is reached. '
+                        f'Consider increasing "min_start_level" in the HABApp configuration. '
+                    )
+
                 return None
 
         log = connection.log
