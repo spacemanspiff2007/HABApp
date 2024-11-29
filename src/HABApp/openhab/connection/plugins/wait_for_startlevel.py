@@ -6,6 +6,7 @@ import logging
 import HABApp
 import HABApp.core
 import HABApp.openhab.events
+from HABApp.config.models.openhab import General as OpenHABGeneralConfig
 from HABApp.core import shutdown
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.lib import Timeout, ValueChange
@@ -35,10 +36,14 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 # Show a hint in case it's possible to increase the start level
                 # A higher start level means a more consistent startup and thus is more desirable
                 if system_info.start_level > oh_general.min_start_level:
+                    _field_name_cfg = 'min_start_level'
+                    if (alias := OpenHABGeneralConfig.model_fields[_field_name_cfg].alias) is not None:
+                        _field_name_cfg = alias
+
                     logging.getLogger('HABApp').info(
                         f'Openhab reached start level {system_info.start_level:d} but HABApp only waits until '
                         f'level {oh_general.min_start_level:d} is reached. '
-                        f'Consider increasing "min_start_level" in the HABApp configuration. '
+                        f'Consider increasing "{_field_name_cfg:s}" in the HABApp configuration. '
                     )
 
                 return None
