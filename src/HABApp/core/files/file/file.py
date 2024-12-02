@@ -32,7 +32,7 @@ class HABAppFile:
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self.name} state: {self.state}>'
 
-    def set_state(self, new_state: FileState):
+    def set_state(self, new_state: FileState) -> None:
         if self.state is new_state:
             return None
 
@@ -40,7 +40,7 @@ class HABAppFile:
         log.debug(f'{self.name} changed to {self.state}')
         file_state_changed(self)
 
-    def _check_circ_refs(self, stack, prop: str):
+    def _check_circ_refs(self, stack, prop: str) -> None:
         c: list[str] = getattr(self.properties, prop)
         for f in c:
             _stack = stack + (f, )
@@ -51,7 +51,7 @@ class HABAppFile:
             if next_file is not None:
                 next_file._check_circ_refs(_stack, prop)
 
-    def _check_properties(self):
+    def _check_properties(self) -> None:
         # check dependencies
         mis = set(filter(lambda x: x not in FILES, self.properties.depends_on))
         if mis:
@@ -68,7 +68,7 @@ class HABAppFile:
             log.warning(f'File {self.path} reloads on file{"" if one else "s"} that '
                         f'do{"es" if one else ""}n\'t exist: {", ".join(sorted(mis))}')
 
-    def check_properties(self, log_msg: bool = False):
+    def check_properties(self, log_msg: bool = False) -> None:
         if self.state is not FileState.PENDING and self.state is not FileState.DEPENDENCIES_ERROR:
             return None
 
@@ -89,8 +89,9 @@ class HABAppFile:
 
         # Check if we can already load it
         self.set_state(FileState.DEPENDENCIES_OK if not self.properties.depends_on else FileState.DEPENDENCIES_MISSING)
+        return None
 
-    def check_dependencies(self):
+    def check_dependencies(self) -> None:
         if self.state is not FileState.DEPENDENCIES_MISSING:
             return None
 
@@ -104,7 +105,7 @@ class HABAppFile:
         self.set_state(FileState.DEPENDENCIES_OK)
         return None
 
-    async def load(self):
+    async def load(self) -> None:
         assert self.state is FileState.DEPENDENCIES_OK, self.state
 
         try:
@@ -118,7 +119,7 @@ class HABAppFile:
         self.set_state(FileState.LOADED)
         return None
 
-    async def unload(self):
+    async def unload(self) -> None:
         try:
             await self.__class__.UNLOAD_FUNC(self.name, self.path)
         except Exception as e:

@@ -88,7 +88,7 @@ class RGB(ColorType):
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._r:d}, {self._g:d}, {self._b})'
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return self._r == other._r and self._g == other._g and self._b == other._b
         if isinstance(other, HSB):
@@ -234,7 +234,7 @@ class HSB(ColorType):
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._hue:.2f}, {self._saturation:.2f}, {self._brightness:.2f})'
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return self._hue == other._hue and \
                 self._saturation == other._saturation and \
