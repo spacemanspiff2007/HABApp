@@ -9,7 +9,7 @@ import HABApp
 from HABApp.core.const.const import PYTHON_311, PYTHON_312, PYTHON_313
 from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.lib import format_exception
-from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_lib_file, is_suppressed_habapp_file
+from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_suppressed_habapp_file
 from tests.helpers.traceback import remove_dyn_parts_from_traceback
 
 
