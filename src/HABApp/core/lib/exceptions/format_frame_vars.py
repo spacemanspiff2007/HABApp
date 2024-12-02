@@ -55,7 +55,7 @@ def _filter_expressions(name: str, value: Any) -> bool:
     return False
 
 
-SKIPPED_OBJS: Final = (
+SKIPPED_OBJS: Final[tuple[str, ...]] = (
     'HABApp.core.Items',
 )
 
