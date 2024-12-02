@@ -234,7 +234,7 @@ def test_skip_objs(_setup_ir) -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_ir)
     assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
+File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 --------------------------------------------------------------------------------
      x | def exec_func(func) -> str:
      x |     try:
@@ -245,7 +245,7 @@ File "test_core/test_lib/test_format_traceback.py", line 21 in exec_func
      func = <function func_ir at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "test_core/test_lib/test_format_traceback.py", line 255 in func_ir
+File "test_core/test_lib/test_format_traceback.py", line x in func_ir
 --------------------------------------------------------------------------------
      x | def func_ir() -> None:
      x |     from HABApp.core.items import Item
@@ -253,7 +253,7 @@ File "test_core/test_lib/test_format_traceback.py", line 255 in func_ir
      x |     Items.add_item(Item('asdf'))
 -->  x |     Items.get_item('1234')
 
-File "internals/item_registry/item_registry.py", line 31 in get_item
+File "internals/item_registry/item_registry.py", line x in get_item
 --------------------------------------------------------------------------------
      x | def get_item(self, name: str) -> ItemRegistryItem:
      x |     try:
