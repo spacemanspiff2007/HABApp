@@ -89,7 +89,7 @@ def ignore_exception(func):
 
 
 class ExceptionToHABApp:
-    def __init__(self, logger: Logger | None = None, log_level: int = logging.ERROR,
+    def __init__(self, logger: Logger | None = None, log_level: int = logging.ERROR, *,
                  ignore_exception: bool = True) -> None:
         self.log: Logger | None = logger
         self.log_level = log_level
