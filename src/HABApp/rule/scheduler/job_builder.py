@@ -67,7 +67,7 @@ def wrapped_func_executor(func: Any, args: Iterable = (), kwargs: Mapping[str, A
 class AsyncHABAppScheduler(AsyncScheduler):
 
     @override
-    def set_enabled(self, enabled: bool) -> Self:  # noqa: FBT001
+    def set_enabled(self, enabled: bool) -> Self:
         return run_func_from_async(super().set_enabled, enabled)
 
 

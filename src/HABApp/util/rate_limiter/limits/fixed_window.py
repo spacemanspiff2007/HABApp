@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from time import monotonic
+from typing import override
 
 from .base import BaseRateLimit, BaseRateLimitInfo
 
@@ -16,14 +17,17 @@ class FixedWindowElasticExpiryLimit(BaseRateLimit):
         self.start: float = -1.0
         self.stop: float = -1.0
 
+    @override
     def repr_text(self) -> str:
         return f'window={self.stop - self.start:.0f}s'
 
+    @override
     def do_test_allow(self) -> None:
         if self.stop <= monotonic():
             self.hits = 0
             self.skips = 0
 
+    @override
     def do_allow(self) -> None:
         now = monotonic()
 
@@ -33,9 +37,11 @@ class FixedWindowElasticExpiryLimit(BaseRateLimit):
             self.start = now
             self.stop = now + self.interval
 
+    @override
     def do_deny(self) -> None:
         self.stop = monotonic() + self.interval
 
+    @override
     def info(self) -> FixedWindowElasticExpiryLimitInfo:
         self.do_test_allow()
 

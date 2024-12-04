@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from time import monotonic
-from typing import Final
+from typing import Final, override
 
 from .base import BaseRateLimit, BaseRateLimitInfo
 
@@ -17,9 +17,11 @@ class LeakyBucketLimit(BaseRateLimit):
         self.drop_interval: Final = interval / allowed
         self.next_drop: float = monotonic() + self.drop_interval
 
+    @override
     def repr_text(self) -> str:
         return f'drop_interval={self.drop_interval:.1f}s'
 
+    @override
     def do_test_allow(self) -> None:
 
         while self.next_drop <= monotonic():
@@ -38,6 +40,7 @@ class LeakyBucketLimit(BaseRateLimit):
     do_allow = do_test_allow
     do_deny = None
 
+    @override
     def info(self) -> LeakyBucketLimitInfo:
         self.do_test_allow()
 
