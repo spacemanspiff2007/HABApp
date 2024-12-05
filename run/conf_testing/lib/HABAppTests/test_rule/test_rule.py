@@ -1,12 +1,18 @@
 import logging
-from collections.abc import Callable
-from pathlib import Path
+from collections.abc import Callable, Coroutine
+from enum import Enum, auto
+from typing import Any, overload, Self
 
 import HABApp
 from HABAppTests.test_rule.test_case import TestCase, TestResult, TestResultStatus
+from HABAppTests.utils import get_file_path_of_obj
 
-from ._rule_ids import get_next_id, get_test_rules, test_rules_running
-from ._rule_status import TestRuleStatus
+
+class TestRuleStatus(Enum):
+    CREATED = auto()
+    PENDING = auto()
+    RUNNING = auto()
+    FINISHED = auto()
 
 
 log = logging.getLogger('HABApp.Tests')
@@ -19,181 +25,86 @@ class TestConfig:
 
 
 class TestBaseRule(HABApp.Rule):
-    """This rule is testing the OpenHAB data types by posting values and checking the events"""
-
     def __init__(self) -> None:
         super().__init__()
-        self._rule_status = TestRuleStatus.CREATED
-        self._rule_id = get_next_id(self)
-        self._tests: dict[str, TestCase] = {}
-
-        self.__warnings = []
-        self.__errors = []
-        self.__sub_warning = None
-        self.__sub_errors = None
 
         self.config = TestConfig()
+        self._rule_status = TestRuleStatus.CREATED
+        self._test_cases: dict[str, TestCase] = {}
 
-        self.__worst_result = TestResultStatus.PASSED
+    @overload
+    def set_up(self): ...
 
-        # we have to chain the rules later, because we register the rules only once we loaded successfully.
-        self.run.at(2, self.__execute_run)
+    @overload
+    async def set_up(self): ...
 
-    def on_rule_unload(self) -> None:
-        self._rule_id.remove()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Overrides and test
-    def set_up(self) -> None:
+    def set_up(self):
         pass
 
-    def tear_down(self) -> None:
+    @overload
+    def tear_down(self): ...
+
+    @overload
+    async def tear_down(self): ...
+
+    def tear_down(self):
         pass
 
-    def add_test(self, name, func: Callable, *args, **kwargs) -> None:
-        tc = TestCase(name, func, args, kwargs)
-        assert tc.name not in self._tests
-        self._tests[tc.name] = tc
+    def add_test(self, name: str, func: Callable | Callable[[...], Coroutine], *args: Any,
+                 setup_up: Callable | Callable[[...], Coroutine] | None = None,
+                 tear_down: Callable | Callable[[...], Coroutine] | None = None,
+                 **kwargs: Any) -> Self:
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Rule execution
-    def __execute_run(self):
-        if not self._rule_id.is_newest():
-            return None
+        tc = TestCase(name, func, args, kwargs, setup_up, tear_down)
+        assert tc.name not in self._test_cases
+        self._test_cases[tc.name] = tc
+        return self
 
-        # If we currently run a test wait until it is complete
-        if test_rules_running():
-            self.run.at(2, self.__execute_run)
-            return None
-
-        ergs = []
-        rules = get_test_rules()
-        for rule in rules:
-            # mark rules for execution
-            rule._rule_status = TestRuleStatus.PENDING
-        for rule in rules:
-            # It's possible that we unload a rule before it was run
-            if rule._rule_status is not TestRuleStatus.PENDING:
-                continue
-            ergs.extend(rule._run_tests())
-
-        skipped = tuple(filter(lambda x: x.state is TestResultStatus.SKIPPED, ergs))
-        passed  = tuple(filter(lambda x: x.state is TestResultStatus.PASSED, ergs))
-        warning = tuple(filter(lambda x: x.state is TestResultStatus.WARNING, ergs))
-        failed  = tuple(filter(lambda x: x.state is TestResultStatus.FAILED, ergs))
-        error   = tuple(filter(lambda x: x.state is TestResultStatus.ERROR, ergs))
-
-        def plog(msg: str) -> None:
-            print(msg)
-            log.info(msg)
-
-        parts = [f'{len(ergs)} executed', f'{len(passed)} passed']
-        if skipped:
-            parts.append(f'{len(skipped)} skipped')
-        if warning:
-            parts.append(f'{len(warning)} warning{"" if len(warning) == 1 else "s"}')
-        parts.append(f'{len(failed)} failed')
-        if error:
-            parts.append(f'{len(error)} error{"" if len(error) == 1 else "s"}')
-
-        plog('')
-        plog('-' * 120)
-        plog(', '.join(parts))
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Event from the worker
-    def __event_warning(self, event) -> None:
-        self.__warnings.append(event)
-
-    def __event_error(self, event) -> None:
-        self.__errors.append(event)
-
-    def _worker_events_sub(self) -> None:
-        assert self.__sub_warning is None
-        assert self.__sub_errors is None
-        self.__sub_warning = self.listen_event(HABApp.core.const.topics.TOPIC_WARNINGS, self.__event_warning)
-        self.__sub_errors = self.listen_event(HABApp.core.const.topics.TOPIC_ERRORS, self.__event_error)
-
-    def _worker_events_cancel(self) -> None:
-        if self.__sub_warning is not None:
-            self.__sub_warning.cancel()
-        if self.__sub_errors is not None:
-            self.__sub_errors.cancel()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Test execution
-    def __exec_tc(self, res: TestResult, tc: TestCase) -> None:
-        self.__warnings.clear()
-        self.__errors.clear()
-
-        tc.run(res)
-
-        if self.__warnings:
-            res.set_state(TestResultStatus.WARNING)
-            ct = len(self.__warnings)
-            msg = f'{ct} warning{"s" if ct != 1 else ""} in worker'
-            res.add_msg(msg)
-            self.__warnings.clear()
-
-        if self.__errors:
-            res.set_state(TestResultStatus.ERROR)
-            ct = len(self.__errors)
-            msg = f'{ct} error{"s" if ct != 1 else ""} in worker'
-            res.add_msg(msg)
-            self.__errors.clear()
-
-        self.__worst_result = max(self.__worst_result, res.state)
-
-    def _run_tests(self) -> list[TestResult]:
+    async def run_test_cases(self) -> list[TestResult]:
         self._rule_status = TestRuleStatus.RUNNING
-        self._worker_events_sub()
 
-        results = []
+        results: list[TestResult] = []
 
         # setup
         tc = TestCase('set_up', self.set_up)
         tr = TestResult(self.__class__.__name__, tc.name)
-        self.__exec_tc(tr, tc)
+        await tc.run(tr)
         if tr.state is not tr.state.PASSED:
             results.append(tr)
 
-        results.extend(self.__run_tests())
+        results.extend(await self._run_rule_tests())
 
         # tear down
-        tc = TestCase('tear_down', self.set_up)
+        tc = TestCase('tear_down', self.tear_down)
         tr = TestResult(self.__class__.__name__, tc.name)
-        self.__exec_tc(tr, tc)
+        await tc.run(tr)
         if tr.state is not tr.state.PASSED:
             results.append(tr)
 
-        self._worker_events_cancel()
         self._rule_status = TestRuleStatus.FINISHED
         return results
 
-    def __run_tests(self) -> list[TestResult]:
-        count = len(self._tests)
-        width = 1
-        while count >= 10 ** width:
-            width += 1
+    async def _run_rule_tests(self) -> list[TestResult]:
+        count = len(self._test_cases)
+        width = len(str(count))
 
         c_name = self.__class__.__name__
         results = [
-            TestResult(c_name, tc.name, f'{i + 1:{width}d}/{count}') for i, tc in enumerate(self._tests.values())
+            TestResult(c_name, tc.name, f'{i:{width}d}/{count}') for i, tc in enumerate(self._test_cases.values(), 1)
         ]
 
-        module_of_class = Path(self.__class__.__module__)
-        relative_path = module_of_class.relative_to(HABApp.CONFIG.directories.rules)
-
         log.info('')
-        log.info(f'Running {count} tests for {c_name}  (from "{relative_path}")')
+        log.info(
+            f'Running {count:d} test{"s" if count != 1 else ""} for {c_name:s}  (from "{get_file_path_of_obj(self)}")'
+        )
 
-        for res, tc in zip(results, self._tests.values()):
-            if self.config.skip_on_failure and self.__worst_result >= TestResultStatus.FAILED:
+        for res, tc in zip(results, self._test_cases.values(), strict=True):
+            if self.config.skip_on_failure and max(r.state for r in results) >= TestResultStatus.FAILED:
                 res.set_state(TestResultStatus.SKIPPED)
                 res.log()
                 continue
 
-            self.__exec_tc(res, tc)
+            await tc.run(res)
             res.log()
 
         return results

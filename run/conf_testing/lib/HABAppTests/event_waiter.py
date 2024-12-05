@@ -1,5 +1,8 @@
+import asyncio
 import logging
 import time
+from collections.abc import Generator
+from time import monotonic
 from types import TracebackType
 from typing import Any, TypeVar
 
@@ -18,8 +21,6 @@ from .compare_values import get_equal_text, get_value_text
 
 log = logging.getLogger('HABApp.Tests')
 
-EVENT_TYPE = TypeVar('EVENT_TYPE')
-
 
 class EventWaiter:
     def __init__(self, name: BaseValueItem | str,
@@ -29,61 +30,85 @@ class EventWaiter:
         assert isinstance(name, str)
         assert isinstance(event_filter, EventFilterBase)
 
-        self.name = name
-        self.event_filter = event_filter
-        self.timeout = timeout
+        self._name = name
+        self._event_filter = event_filter
+        self._timeout = timeout
 
-        self.event_listener = EventBusListener(
-            self.name,
+        self._event_listener = EventBusListener(
+            self._name,
             wrap_func(self.__process_event),
-            self.event_filter
+            self._event_filter
         )
 
         self._received_events = []
 
     def __process_event(self, event) -> None:
-        if isinstance(self.event_filter, EventFilter):
-            assert isinstance(event, self.event_filter.event_class)
+        if isinstance(self._event_filter, EventFilter):
+            assert isinstance(event, self._event_filter.event_class)
         self._received_events.append(event)
 
     def clear(self) -> None:
         self._received_events.clear()
 
-    def wait_for_event(self, **kwargs) -> EVENT_TYPE:
+    def _check_wait_event(self, attribs: dict[str, Any]) -> Generator[float, Any, Any]:
+        start = monotonic()
+        end = start + self._timeout
 
-        start = time.time()
-
-        while True:
-            time.sleep(0.02)
-
-            if time.time() > start + self.timeout:
-                expected_values = 'with ' + ', '.join([f'{__k}={__v}' for __k, __v in kwargs.items()]) if kwargs else ''
-                msg = f'Timeout while waiting for {self.event_filter.describe()} for {self.name} {expected_values}'
-                raise TestCaseFailed(msg)
+        while monotonic() < end:
+            yield 0.01
 
             if not self._received_events:
                 continue
 
             event = self._received_events.pop()
 
-            if kwargs:
-                if self.compare_event_value(event, kwargs):
+            if attribs:
+                if self.compare_event_value(event, attribs):
                     return event
                 continue
 
             return event
 
-        raise ValueError()
+        expected_values = 'with ' + ', '.join([f'{__k}={__v}' for __k, __v in attribs.items()]) if attribs else ''
+        msg = f'Timeout while waiting for {self._event_filter.describe()} for {self._name} {expected_values}'
+        raise TestCaseFailed(msg)
+
+    def wait_for_event(self, **kwargs: Any) -> Any:
+        gen = self._check_wait_event(kwargs)
+        try:
+            while True:
+                delay = next(gen)
+                time.sleep(delay)
+        except StopIteration as e:
+            event = e.value
+
+        if event is None:
+            raise ValueError()
+        return event
+
+    async def async_wait_for_event(self, **kwargs: Any) -> Any:
+        gen = self._check_wait_event(kwargs)
+        try:
+            while True:
+                delay = next(gen)
+                await asyncio.sleep(delay)
+        except StopIteration as e:
+            event = e.value
+
+        if event is None:
+            raise ValueError()
+        return event
 
     def __enter__(self) -> 'EventWaiter':
-        get_current_context().add_event_listener(self.event_listener)
+        get_current_context().add_event_listener(self._event_listener)
         return self
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
-        get_current_context().remove_event_listener(self.event_listener)
+    def __exit__(self, exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
+        get_current_context().remove_event_listener(self._event_listener)
 
     @staticmethod
-    def compare_event_value(event, kwargs: dict[str, Any]):
+    def compare_event_value(event: Any, kwargs: dict[str, Any]) -> bool:
         only_value = 'value' in kwargs and len(kwargs) == 1
         val_msg = []
 

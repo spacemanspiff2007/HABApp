@@ -1,8 +1,9 @@
 import logging
 from enum import IntEnum, auto
+from typing import Final
 
 import HABApp
-from HABAppTests.errors import TestCaseFailed, TestCaseWarning
+from HABAppTests.errors import TestCaseFailed
 
 
 log = logging.getLogger('HABApp.Tests')
@@ -29,29 +30,28 @@ assert TestResultStatus.FAILED < TestResultStatus.ERROR
 
 class TestResult:
     def __init__(self, cls_name: str, test_name: str, test_nr: str = '') -> None:
-        self.cls_name = cls_name
-        self.test_name = test_name
-        self.test_nr = test_nr
+        self.cls_name: Final = cls_name
+        self.test_name: Final = test_name
+        self.test_nr: Final = test_nr
 
         self.state = TestResultStatus.NOT_SET
-        self.msgs: list[str] = []
-
-    def is_set(self):
-        return self.state != TestResultStatus.NOT_SET
+        self.msgs: Final[list[str]] = []
 
     def set_state(self, new_state: TestResultStatus) -> None:
         if self.state <= new_state:
             self.state = new_state
 
-    def exception(self, e: Exception):
+    def exception(self, e: Exception) -> None:
         if isinstance(e, TestCaseFailed):
             self.set_state(TestResultStatus.FAILED)
             self.add_msg(e.msg)
             return None
-        if isinstance(e, TestCaseWarning):
-            self.set_state(TestResultStatus.WARNING)
-            self.add_msg(e.msg)
-            return None
+
+        # if isinstance(e, AssertionError):
+        #     self.set_state(TestResultStatus.FAILED)
+        #     self.add_msg(f'{e}')
+        #     self.add_msg(f'  {e.args}')
+        #     return None
 
         self.add_msg(f'Exception: {e}')
         self.state = TestResultStatus.ERROR
@@ -63,7 +63,7 @@ class TestResult:
         for line in msg.splitlines():
             self.msgs.append(line)
 
-    def log(self, name: str | None = None):
+    def log(self, name: str | None = None) -> None:
         if name is None:
             name = f'{self.cls_name}.{self.test_name}'
         nr = f' {self.test_nr} ' if self.test_nr else ' '
@@ -83,3 +83,4 @@ class TestResult:
         log_func(f'{prefix} {self.state.name.lower()}: {first_msg}')
         for msg in self.msgs[1:]:
             log_func(f'{"":8s}{msg}')
+        return None

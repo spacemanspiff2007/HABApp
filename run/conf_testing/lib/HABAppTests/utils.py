@@ -3,6 +3,7 @@ import random
 import string
 import typing
 from binascii import b2a_hex
+from pathlib import Path
 
 import HABApp
 from HABApp.openhab.items import Thing
@@ -16,28 +17,24 @@ __RAND_PREFIX = {
 
 
 def __get_fill_char(skip: str, upper=False) -> str:
-    skip += 'il'
+    skip += 'ilo'
     skip = skip.upper() if upper else skip.lower()
-    rnd = random.choice(string.ascii_uppercase if upper else string.ascii_lowercase)
-    while rnd in skip:
-        rnd = random.choice(string.ascii_uppercase if upper else string.ascii_lowercase)
+
+    letters = string.ascii_uppercase if upper else string.ascii_lowercase
+    while (rnd := random.choice(letters)) in skip:
+        pass
     return rnd
 
 
 def get_random_name(item_type: str) -> str:
     name = name_prev = __RAND_PREFIX[item_type.split(':')[0]]
 
-    for c in range(3):
+    for _ in range(3):
         name += __get_fill_char(name_prev, upper=True)
 
     while len(name) < 10:
         name += __get_fill_char(name_prev)
     return name
-
-
-def run_coro(coro: typing.Coroutine):
-    fut = asyncio.run_coroutine_threadsafe(coro, HABApp.core.const.loop)
-    return fut.result()
 
 
 def find_astro_sun_thing() -> str:
@@ -46,10 +43,15 @@ def find_astro_sun_thing() -> str:
         if isinstance(item, Thing) and item.name.startswith('astro:sun'):
             return item.name
 
-    raise ValueError('No astro thing found!')
+    msg = 'No astro thing found!'
+    raise ValueError(msg)
 
 
-def get_bytes_text(value):
-    if isinstance(value, bytes) and len(value) > 300:
-        return b2a_hex(value[:40]).decode() + ' ... ' + b2a_hex(value[-40:]).decode()
-    return value
+def get_file_path_of_obj(obj: typing.Any) -> str:
+    try:
+        module = obj.__module__
+    except AttributeError:
+        module = obj.__class__.__module__
+
+    module_of_class = Path(module)
+    return str(module_of_class.relative_to(HABApp.CONFIG.directories.rules))

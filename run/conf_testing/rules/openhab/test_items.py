@@ -1,15 +1,18 @@
-import asyncio
-from datetime import datetime
+
+from typing import TYPE_CHECKING
 
 from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
 from immutables import Map
 from whenever import Instant, OffsetDateTime, SystemDateTime
 
-from HABApp.core.const import loop
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.interface_async import async_get_items
 from HABApp.openhab.items import ColorItem, DatetimeItem, GroupItem, NumberItem, StringItem
+
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class OpenhabItems(TestBaseRule):
@@ -17,7 +20,8 @@ class OpenhabItems(TestBaseRule):
     def __init__(self) -> None:
         super().__init__()
 
-        self.add_test('ApiDoc', self.test_api)
+        self.add_test('Api', self.test_api)
+        self.add_test('AsyncApi', self.test_api_async)
         self.add_test('MemberTags', self.test_tags)
         self.add_test('MemberGroups', self.test_groups)
         self.add_test('TestExisting', self.test_existing)
@@ -68,7 +72,9 @@ class OpenhabItems(TestBaseRule):
         self.openhab.get_item(self.item_switch.name)
 
         self.openhab.get_item(self.item_group.name)
-        asyncio.run_coroutine_threadsafe(async_get_items(), loop).result()
+
+    async def test_api_async(self) -> None:
+        await async_get_items()
 
     @OpenhabTmpItem.create('Number', arg_name='tmp_item')
     def test_small_float_values(self, tmp_item: OpenhabTmpItem) -> None:

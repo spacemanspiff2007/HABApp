@@ -13,7 +13,7 @@ habapp_log = logging.getLogger('HABApp')
 
 
 class EventBus:
-    __slots__ = ('_lock', '_listeners')
+    __slots__ = ('_listeners', '_lock')
 
     def __init__(self) -> None:
         self._lock = threading.Lock()

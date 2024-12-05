@@ -1,7 +1,7 @@
+import asyncio
 import logging
-import time
 
-from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule, run_coro
+from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule
 
 import HABApp
 from HABApp.core.connections import Connections, ConnectionStatus
@@ -63,23 +63,24 @@ class TestMQTTEvents(TestBaseRule):
                 my_item.publish(data)
                 waiter.wait_for_state(data)
 
-    def test_mqtt_item_creation(self) -> None:
+    async def test_mqtt_item_creation(self) -> None:
         topic = 'mqtt/item/creation'
         assert HABApp.core.Items.item_exists(topic) is False
 
         self.mqtt.publish(topic, 'asdf')
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
         assert HABApp.core.Items.item_exists(topic) is False
 
         # We create the item only on retain
         self.mqtt.publish(topic, 'asdf', retain=True)
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
 
-        run_coro(self.trigger_reconnect())
+        await self.trigger_reconnect()
 
+        await asyncio.sleep(0.2)
         connection = Connections.get('mqtt')
         while not connection.is_online:
-            time.sleep(0.2)
+            await asyncio.sleep(0.2)
 
         assert HABApp.core.Items.item_exists(topic) is True
 

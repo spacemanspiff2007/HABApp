@@ -111,3 +111,8 @@ lines-after-imports = 2     # https://docs.astral.sh/ruff/settings/#lint_isort_l
 "interface_*.py" = [
     "F401"  # F401 [*] {name} imported but unused
 ]
+
+
+"run/*" = [
+    "S101"  # Use of assert detected
+]
