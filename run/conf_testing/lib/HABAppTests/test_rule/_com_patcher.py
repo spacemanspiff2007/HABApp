@@ -15,13 +15,27 @@ import HABApp.openhab.process_events
 from HABApp.config import CONFIG
 
 
+class PatcherName:
+    def __init__(self, header: str):
+        self.header = header
+        self.logged = False
+
+
 class BasePatcher:
-    def __init__(self, name: str, logger_name: str) -> None:
+    @staticmethod
+    def create_name(header: str) -> PatcherName:
+        return PatcherName(header)
+
+    def __init__(self, name: PatcherName, logger_name: str) -> None:
         self._log: Final = logging.getLogger('Com').getChild(logger_name)
         self.name: Final = name
         self.monkeypatch: Final = MonkeyPatch()
 
     def log(self, msg: str) -> None:
+        if not self.name.logged:
+            self._log.debug('')
+            self._log.debug(self.name.header)
+            self.name.logged = True
         self._log.debug(msg)
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
@@ -106,7 +120,7 @@ class SsePatcher(BasePatcher):
 
     def wrap_sse(self, to_wrap: Callable[[dict], Any]) -> Callable[[dict], Any]:
         def new_call(_dict: dict) -> Any:
-            self.log(f'{_dict}')
+            self.log(f'{"SSE":^6s} {_dict}')
             return to_wrap(_dict)
         return new_call
 
@@ -122,13 +136,13 @@ class MqttPatcher(BasePatcher):
 
     def wrap_msg(self, func: Callable[[str, Any, bool], Any]) -> Callable[[str, Any, bool], Any]:
         def new_call(topic: str, payload: Any, retain: bool) -> Any:
-            self.log(f'{"MSG":3s} {"R" if retain else " "}  {topic} {payload}')
+            self.log(f'{"MSG":^6s} {"R" if retain else " "}  {topic} {payload}')
             return func(topic, payload, retain)
         return new_call
 
     def pub_msg(self, func: Callable[[str, Any, int, bool], Any]) -> Callable[[str, Any, int, bool], Any]:
         async def wrapped_publish(topic: str, payload: Any, qos: int = 0, retain: bool = False) -> Any:
-            self.log(f'{"PUB":3s} {"R" if retain else " "}{qos:d} {topic} {payload}')
+            self.log(f'{"PUB":^6s} {"R" if retain else " "}{qos:d} {topic} {payload}')
             return await func(topic, payload, qos, retain)
         return wrapped_publish
 

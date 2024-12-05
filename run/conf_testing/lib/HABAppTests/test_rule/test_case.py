@@ -10,6 +10,7 @@ from HABApp.core.events import NoEventFilter
 from HABApp.core.internals import EventBusListener, wrap_func, WrappedFunctionBase
 from HABAppTests.test_rule._com_patcher import BasePatcher, MqttPatcher, RestPatcher, SsePatcher
 from HABAppTests.test_rule.test_result import TestResult, TestResultStatus
+from HABAppTests.utils import get_file_path_of_obj
 
 
 class TmpLogLevel:
@@ -101,11 +102,13 @@ class TestCase:
         async with ExecutionEventCatcher('warning', HABApp.core.const.topics.TOPIC_WARNINGS) as worker_warnings, \
                    ExecutionEventCatcher('error', HABApp.core.const.topics.TOPIC_ERRORS) as worker_errors:
 
-            name = f'{res.cls_name}.{res.test_name}'
+            try:
+                suffix = f' (from "{get_file_path_of_obj(self.func)}")'
+            except ValueError:
+                suffix = ''
 
+            name = RestPatcher.create_name(f'{res.cls_name:s}.{res.test_name:s}{suffix:s}')
             b = BasePatcher(name, 'TC')
-            b.log('')
-            b.log(name)
 
             try:
                 with RestPatcher(name), SsePatcher(name), MqttPatcher(name):
