@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from time import monotonic
 from typing import Final
 
@@ -6,6 +7,7 @@ from typing_extensions import override
 from .base import BaseRateLimit, BaseRateLimitInfo
 
 
+@dataclass
 class LeakyBucketLimitInfo(BaseRateLimitInfo):
     time_remaining: float  #: Time remaining until the next drop
 
