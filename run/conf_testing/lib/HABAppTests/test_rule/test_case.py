@@ -1,10 +1,10 @@
 import functools
 import logging
 from asyncio import sleep
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine, Sequence
 from inspect import iscoroutinefunction
-from typing import Optional, Type, Any, Final
-from collections.abc import Coroutine, Sequence
+from types import TracebackType
+from typing import Any, Final
 
 import HABApp
 from HABApp.core.events import NoEventFilter
@@ -12,7 +12,6 @@ from HABApp.core.internals import EventBusListener, WrappedFunctionBase, wrap_fu
 from HABAppTests.test_rule._com_patcher import BasePatcher, MqttPatcher, RestPatcher, SsePatcher
 from HABAppTests.test_rule.test_result import TestResult, TestResultStatus
 from HABAppTests.utils import get_file_path_of_obj
-from types import TracebackType
 
 
 class TmpLogLevel:
@@ -24,7 +23,7 @@ class TmpLogLevel:
         self.old = self.log.level
         self.log.setLevel(logging.INFO)
 
-    def __exit__(self, exc_type: Optional[Type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[TracebackType]) -> bool:
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         self.log.setLevel(self.old)
         return False
 
@@ -55,7 +54,7 @@ class ExecutionEventCatcher:
 
         return self
 
-    async def __aexit__(self, exc_type: Optional[Type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[TracebackType]) -> bool:
+    async def __aexit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
         if (ebl := self._listener) is not None:
             self._listener = None
             with TmpLogLevel('HABApp'):
