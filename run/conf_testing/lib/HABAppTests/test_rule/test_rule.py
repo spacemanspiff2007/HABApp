@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Callable, Coroutine
 from enum import Enum, auto
-from typing import Any, overload, Self
+from typing import Any, Self, overload
 
 import HABApp
 from HABAppTests.test_rule.test_case import TestCase, TestResult, TestResultStatus
@@ -33,21 +33,21 @@ class TestBaseRule(HABApp.Rule):
         self._test_cases: dict[str, TestCase] = {}
 
     @overload
-    def set_up(self): ...
+    def set_up(self) -> None: ...
 
     @overload
-    async def set_up(self): ...
+    async def set_up(self) -> None: ...
 
-    def set_up(self):
+    def set_up(self) -> None:
         pass
 
     @overload
-    def tear_down(self): ...
+    def tear_down(self) -> None: ...
 
     @overload
-    async def tear_down(self): ...
+    async def tear_down(self) -> None: ...
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         pass
 
     def add_test(self, name: str, func: Callable | Callable[[...], Coroutine], *args: Any,

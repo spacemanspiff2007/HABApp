@@ -16,7 +16,7 @@ from HABApp.config import CONFIG
 
 
 class PatcherName:
-    def __init__(self, header: str):
+    def __init__(self, header: str) -> None:
         self.header = header
         self.logged = False
 

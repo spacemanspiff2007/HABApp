@@ -4,7 +4,7 @@ import time
 from collections.abc import Generator
 from time import monotonic
 from types import TracebackType
-from typing import Any, TypeVar
+from typing import Any
 
 from HABApp.core.events.filter import EventFilter
 from HABApp.core.internals import (

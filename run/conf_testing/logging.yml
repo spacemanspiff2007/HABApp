@@ -79,4 +79,3 @@ loggers:
     handlers:
       - HABApp_com_file
     propagate: False
-
