@@ -99,9 +99,6 @@ class SimpleRuleRunner:
         self.monkeypatch.setattr(job_builder_module, 'AsyncHABAppScheduler', SyncScheduler)
 
     def tear_down(self) -> None:
-
-        for rule in self.loaded_rules:
-            rule._habapp_ctx.unload_rule()
         self.loaded_rules.clear()
 
         # restore patched

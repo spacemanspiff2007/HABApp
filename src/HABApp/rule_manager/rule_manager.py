@@ -125,7 +125,7 @@ class RuleManager:
             with self.__files_lock:
                 rule = self.files.pop(path_str)
 
-            await wrap_func(rule.unload).async_run()
+            await rule.unload()
         finally:
             if request_lock:
                 self.__load_lock.release()
@@ -165,6 +165,6 @@ class RuleManager:
         # Do simple checks which prevent errors
         await file.check_all_rules()
 
-    def shutdown(self) -> None:
+    async def shutdown(self) -> None:
         for f in self.files.values():
-            f.unload()
+            await f.unload()

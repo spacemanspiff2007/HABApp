@@ -40,7 +40,7 @@ class HABAppRuleContext(Context):
         event_bus.remove_listener(listener)
         return listener
 
-    def unload_rule(self) -> None:
+    async def unload_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             rule = self.rule
 
@@ -61,7 +61,7 @@ class HABAppRuleContext(Context):
             rule._habapp_rule_ctx = None
 
             # user implementation
-            rule.on_rule_removed()
+            await wrap_func(rule.on_rule_removed).async_run()
 
     async def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):

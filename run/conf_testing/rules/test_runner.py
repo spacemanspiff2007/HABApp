@@ -9,7 +9,11 @@ from HABApp.core.events.habapp_events import RequestFileUnloadEvent
 from HABApp.core.items import Item
 
 
-class TestRunnterImpl(TestRunnerRule):
+class TestRunnerImpl(TestRunnerRule):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._file_pos = 0
 
     async def tests_done(self, results: list[TestResult]) -> None:
         results.extend(
@@ -18,10 +22,30 @@ class TestRunnterImpl(TestRunnerRule):
 
         # show errors of HABApp.log
         log_file = CONFIG.directories.logging / 'HABApp.log'
-        errors = [line for line in log_file.read_text() if ' ERROR ' in line]
-        if errors:
+
+        seek = self._file_pos
+        self._file_pos = log_file.stat().st_size
+
+        with log_file.open('r') as f:
+            f.seek(seek)
+            text = f.read()
+
+        show = []
+        for line in text.splitlines():
+            if ' ERROR ' in line:
+                show.append(line)
+                continue
+
+            if ' WARNING ' in line:
+                if 'DeprecationWarning' in line or 'is a UoM item but "unit" is not found in item metadata' in line:
+                    continue
+                if 'Item type changed from' in line:
+                    continue
+                show.append(line)
+
+        if show:
             print('-' * 120)
-            for line in errors:
+            for line in show:
                 print(line)
             print('-' * 120)
             print()
@@ -29,15 +53,12 @@ class TestRunnterImpl(TestRunnerRule):
     async def test_lifecycle_methods(self) -> None:
         item = Item.get_item('RuleLifecycleMethods')
 
-        assert item.value == ['on_rule_loaded_thread', 'on_rule_loaded_task']
+        assert item.value[0:2] == ['on_rule_loaded_thread', 'on_rule_loaded_task']
 
         self.post_event(TOPIC_FILES, RequestFileUnloadEvent('rules/habapp/test_internals.py'))
         await asyncio.sleep(1)
 
-        assert item.value == [
-            'on_rule_loaded_thread', 'on_rule_loaded_task',
-            'on_rule_unloaded_thread', 'on_rule_unloaded_task'
-        ]
+        assert item.value[2:4] == ['on_rule_removed_thread', 'on_rule_removed_task']
 
 
-TestRunnterImpl()
+TestRunnerImpl()
