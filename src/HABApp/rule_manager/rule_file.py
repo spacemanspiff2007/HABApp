@@ -38,9 +38,9 @@ class RuleFile:
 
         return f'{name:s}.{found:d}' if found > 1 else f'{name:s}'
 
-    def check_all_rules(self) -> None:
+    async def check_all_rules(self) -> None:
         for rule in self.rules.values():  # type: HABApp.Rule
-            get_current_context(rule).check_rule()
+            await get_current_context(rule).check_rule()
 
     def unload(self):
 

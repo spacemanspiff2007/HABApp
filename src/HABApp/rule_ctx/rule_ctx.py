@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
-from HABApp.core.internals import Context, EventBusListener, uses_event_bus, uses_item_registry
+from HABApp.core.internals import Context, EventBusListener, uses_event_bus, uses_item_registry, wrap_func
 from HABApp.core.internals.event_bus import EventBusBaseListener
 
 
@@ -63,7 +63,7 @@ class HABAppRuleContext(Context):
             # user implementation
             rule.on_rule_removed()
 
-    def check_rule(self) -> None:
+    async def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             # We need items if we want to run the test
             if item_registry.get_items():
@@ -86,4 +86,4 @@ class HABAppRuleContext(Context):
             self.rule.run._scheduler.set_enabled(True)
 
             # user implementation
-            self.rule.on_rule_loaded()
+            await wrap_func(self.rule.on_rule_loaded).async_run()

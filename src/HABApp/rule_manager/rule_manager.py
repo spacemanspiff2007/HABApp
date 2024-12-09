@@ -54,7 +54,7 @@ class RuleManager:
                 log.error('Failed to load Benchmark!')
                 shutdown.request()
                 return None
-            file.check_all_rules()
+            await file.check_all_rules()
             return
 
         class HABAppRuleFile(HABAppFile):
@@ -163,7 +163,7 @@ class RuleManager:
         log.debug(f'File {name} successfully loaded!')
 
         # Do simple checks which prevent errors
-        file.check_all_rules()
+        await file.check_all_rules()
 
     def shutdown(self) -> None:
         for f in self.files.values():
