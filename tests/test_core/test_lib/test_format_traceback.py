@@ -277,6 +277,81 @@ Traceback (most recent call last):
 HABApp.core.errors.ItemNotFoundException: Item 1234 does not exist!'''
 
 
+def multiline_obj_name():
+
+    class MultilineRepr:
+        def __repr__(self):
+            return '<\nmulti\nline>'
+
+    instance = MultilineRepr()
+
+    a = []
+
+    assert a == [
+        1,
+        2
+    ]
+
+
+@pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
+def test_multile_statements() -> None:
+    log.setLevel(logging.WARNING)
+    msg = exec_func(multiline_obj_name)
+    print('\n\n-')
+    print(msg)
+    print('\n\n')
+    assert msg == r'''
+File "test_core/test_lib/test_format_traceback.py", line x in exec_func
+--------------------------------------------------------------------------------
+     x | def exec_func(func) -> str:
+     x |     try:
+-->  x |         func()
+     x |     except Exception as e:
+   ------------------------------------------------------------
+     e = AssertionError('assert [] == [1, 2]\n  \n  Right contains 2 more items, first extra item: 1\n  \n  Full diff:\n  + []\n  - [\n  -     1,\n  -     2,\n  - ]')
+     func = <function multiline_obj_name at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "test_core/test_lib/test_format_traceback.py", line x in multiline_obj_name
+--------------------------------------------------------------------------------
+     x | def multiline_obj_name():
+       (...)
+     x |             return '<\nmulti\nline>'
+     x |     instance = MultilineRepr()
+     x |     a = []
+-->  x |     assert a == [
+     x |         1,
+     x |         2
+     x |     ]
+   ------------------------------------------------------------
+     a = []
+     instance = <
+                multi
+                line>
+     a == [
+             1,
+             2
+         ] = False
+   ------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
+    func()
+  File "test_core/test_lib/test_format_traceback.py", line x, in multiline_obj_name
+    assert a == [
+AssertionError: assert [] == [1, 2]
+
+  Right contains 2 more items, first extra item: 1
+
+  Full diff:
+  + []
+  - [
+  -     1,
+  -     2,
+  - ]'''
+
+
 def test_habapp_regex(pytestconfig):
 
     files = tuple(str(f) for f in (Path(pytestconfig.rootpath) / 'src' / 'HABApp').glob('**/*'))

@@ -108,7 +108,7 @@ class TestCase:
             except ValueError:
                 suffix = ''
 
-            name = RestPatcher.create_name(f'{res.cls_name:s}.{res.test_name:s}{suffix:s}')
+            name = RestPatcher.create_name(f'{res.group_name:s}.{res.test_name:s}{suffix:s}')
             b = BasePatcher(name, 'TC')
 
             try:
@@ -148,3 +148,32 @@ class TestCase:
             res.add_msg(msg)
 
         return res
+
+
+log = logging.getLogger('HABApp.Tests')
+
+
+async def run_test_cases(test_cases: Sequence[TestCase], group_name: str, source: str | object, *,
+                         skip_on_failure: bool = False) -> list[TestResult]:
+    source_text = source if isinstance(source, str) else get_file_path_of_obj(source)
+
+    count = len(test_cases)
+    width = len(str(count))
+
+    results = [TestResult(group_name, tc.name, f'{i:{width}d}/{count}') for i, tc in enumerate(test_cases, 1)]
+
+    log.info('')
+    log.info(
+        f'Running {count:d} test{"s" if count != 1 else ""} for {group_name:s}  (from "{source_text:s}")'
+    )
+
+    for res, tc in zip(results, test_cases, strict=True):
+        if skip_on_failure and max(r.state for r in results) >= TestResultStatus.FAILED:
+            res.set_state(TestResultStatus.SKIPPED)
+            res.log()
+            continue
+
+        await tc.run(res)
+        res.log()
+
+    return results

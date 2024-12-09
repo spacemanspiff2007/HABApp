@@ -3,6 +3,8 @@ import logging
 import HABApp
 from HABApp.core import shutdown
 from HABApp.core.const.topics import TOPIC_FILES
+from HABApp.core.events import EventFilter
+from HABApp.core.events.habapp_events import RequestFileLoadEvent
 from HABApp.core.lib import SingleTask
 from HABApp.core.wrapper import ignore_exception
 from HABAppTests.test_rule.test_case import TestResult, TestResultStatus
@@ -17,7 +19,7 @@ class TestRunnerRule(HABApp.Rule):
     def __init__(self) -> None:
         super().__init__()
 
-        self.listen_event(TOPIC_FILES, self._file_event)
+        self.listen_event(TOPIC_FILES, self._file_event, EventFilter(event_class=RequestFileLoadEvent))
         self.countdown = self.run.countdown(3, self._files_const)
         self.countdown.reset()
 
@@ -45,6 +47,8 @@ class TestRunnerRule(HABApp.Rule):
         while (rule := self._get_next_rule()) is not None and not shutdown.is_requested():
             results.extend(await rule.run_test_cases())
 
+        await self.tests_done(results)
+
         skipped = tuple(x for x in results if x.state is TestResultStatus.SKIPPED)
         passed  = tuple(x for x in results if x.state is TestResultStatus.PASSED)
         warning = tuple(x for x in results if x.state is TestResultStatus.WARNING)
@@ -67,3 +71,6 @@ class TestRunnerRule(HABApp.Rule):
         plog('')
         plog('-' * 120)
         plog(', '.join(parts))
+
+    async def tests_done(self, results: list[TestResult]) -> None:
+        raise NotImplementedError()

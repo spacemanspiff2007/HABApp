@@ -4,8 +4,7 @@ from enum import Enum, auto
 from typing import Any, Self, overload
 
 import HABApp
-from HABAppTests.test_rule.test_case import TestCase, TestResult, TestResultStatus
-from HABAppTests.utils import get_file_path_of_obj
+from HABAppTests.test_rule.test_case import TestCase, TestResult, run_test_cases
 
 
 class TestRuleStatus(Enum):
@@ -72,7 +71,12 @@ class TestBaseRule(HABApp.Rule):
         if tr.state is not tr.state.PASSED:
             results.append(tr)
 
-        results.extend(await self._run_rule_tests())
+        results.extend(
+            await run_test_cases(
+                tuple(self._test_cases.values()), self.__class__.__name__, self,
+                skip_on_failure=self.config.skip_on_failure
+            )
+        )
 
         # tear down
         tc = TestCase('tear_down', self.tear_down)
@@ -82,29 +86,4 @@ class TestBaseRule(HABApp.Rule):
             results.append(tr)
 
         self._rule_status = TestRuleStatus.FINISHED
-        return results
-
-    async def _run_rule_tests(self) -> list[TestResult]:
-        count = len(self._test_cases)
-        width = len(str(count))
-
-        c_name = self.__class__.__name__
-        results = [
-            TestResult(c_name, tc.name, f'{i:{width}d}/{count}') for i, tc in enumerate(self._test_cases.values(), 1)
-        ]
-
-        log.info('')
-        log.info(
-            f'Running {count:d} test{"s" if count != 1 else ""} for {c_name:s}  (from "{get_file_path_of_obj(self)}")'
-        )
-
-        for res, tc in zip(results, self._test_cases.values(), strict=True):
-            if self.config.skip_on_failure and max(r.state for r in results) >= TestResultStatus.FAILED:
-                res.set_state(TestResultStatus.SKIPPED)
-                res.log()
-                continue
-
-            await tc.run(res)
-            res.log()
-
         return results

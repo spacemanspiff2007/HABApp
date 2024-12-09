@@ -6,6 +6,19 @@ from HABApp.core.asyncio import (
     run_func_from_async,
     thread_context,
 )
+from HABApp.core.items import Item
+
+
+def check_in_thread() -> None:
+    if thread_context.get() is None:
+        msg = 'Thread context not set!'
+        raise ValueError(msg)
+
+
+def check_in_task() -> None:
+    if thread_context.get(None) is not None:
+        msg = 'Thread context set!'
+        raise ValueError(msg)
 
 
 class TestThreadPool(Rule):
@@ -20,32 +33,20 @@ class TestThreadPool(Rule):
         self.run.soon(self.test_sync_calls)
         self.run.soon(self.test_async_calls)
 
-    @staticmethod
-    def check_in_thread() -> None:
-        if thread_context.get() is None:
-            msg = 'Thread context not set!'
-            raise ValueError(msg)
-
-    @staticmethod
-    def check_in_task() -> None:
-        if thread_context.get(None) is not None:
-            msg = 'Thread context set!'
-            raise ValueError(msg)
-
     def sync_func_task(self) -> int:
-        self.check_in_thread()
+        check_in_thread()
         return 7
 
     def sync_func_async(self) -> int:
-        self.check_in_task()
+        check_in_task()
         return 7
 
     async def async_func(self) -> int:
-        self.check_in_task()
+        check_in_task()
         return 7
 
     def test_sync_calls(self) -> None:
-        self.check_in_thread()
+        check_in_thread()
 
         f = create_task(self.async_func())
         assert f.result() == 7
@@ -57,7 +58,7 @@ class TestThreadPool(Rule):
         assert f == 7
 
     async def test_async_calls(self) -> None:
-        self.check_in_task()
+        check_in_task()
 
         f = create_task(self.async_func())
         assert await f == 7
@@ -70,3 +71,34 @@ class TestThreadPool(Rule):
 
 
 TestThreadPool()
+
+
+item = Item.get_create_item('RuleLifecycleMethods', initial_value=[])
+
+
+class TestRuleLifecycleThread(Rule):
+
+    def on_rule_loaded(self) -> None:
+        check_in_thread()
+        item.value.append('on_rule_loaded_thread')
+
+    def on_rule_removed(self) -> None:
+        check_in_thread()
+        item.value.append('on_rule_removed_thread')
+
+
+TestRuleLifecycleThread()
+
+
+class TestRuleLifecycleTask(Rule):
+
+    async def on_rule_loaded(self) -> None:
+        check_in_task()
+        item.value.append('on_rule_loaded_task')
+
+    async def on_rule_removed(self) -> None:
+        check_in_task()
+        item.value.append('on_rule_removed_task')
+
+
+TestRuleLifecycleTask()

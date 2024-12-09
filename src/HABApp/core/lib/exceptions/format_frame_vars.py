@@ -143,6 +143,18 @@ def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
     tb.append(SEPARATOR_VARIABLES)
 
     for name, value in variables.items():
-        tb.append(f'{" " * (PRE_INDENT + 1)}{name} = {value!r}')
+        # both name and value can be a multiline string
+        # -> try to format it nicely
+
+        name_lines = name.splitlines()
+        for line in name_lines[:-1]:
+            tb.append(f'{" " * (PRE_INDENT + 1):s}{line:s}')
+
+        last_name_line = name_lines[-1]
+        for nr, line in enumerate(repr(value).splitlines()):
+            if not nr:
+                tb.append(f'{" " * (PRE_INDENT + 1):s}{last_name_line:s} = {line}')
+            else:
+                tb.append(f'{" " * (PRE_INDENT + 1):s}{" " * len(last_name_line):s}   {line}')
 
     tb.append(SEPARATOR_VARIABLES)

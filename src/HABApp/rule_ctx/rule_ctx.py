@@ -66,7 +66,7 @@ class HABAppRuleContext(Context):
     async def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             # We need items if we want to run the test
-            if item_registry.get_items():
+            if item_registry:
 
                 # Check if we have a valid item for all listeners
                 for listener in self.objs:

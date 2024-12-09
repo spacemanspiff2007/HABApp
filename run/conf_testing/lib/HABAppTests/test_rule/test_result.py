@@ -30,7 +30,7 @@ assert TestResultStatus.FAILED < TestResultStatus.ERROR
 
 class TestResult:
     def __init__(self, cls_name: str, test_name: str, test_nr: str = '') -> None:
-        self.cls_name: Final = cls_name
+        self.group_name: Final = cls_name
         self.test_name: Final = test_name
         self.test_nr: Final = test_nr
 
@@ -65,7 +65,7 @@ class TestResult:
 
     def log(self, name: str | None = None) -> None:
         if name is None:
-            name = f'{self.cls_name}.{self.test_name}'
+            name = f'{self.group_name}.{self.test_name}'
         nr = f' {self.test_nr} ' if self.test_nr else ' '
         prefix = f'{nr}"{name}"'
 
