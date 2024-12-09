@@ -277,10 +277,10 @@ Traceback (most recent call last):
 HABApp.core.errors.ItemNotFoundException: Item 1234 does not exist!'''
 
 
-def multiline_obj_name():
+def multiline_obj_name() -> None:
 
     class MultilineRepr:
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<\nmulti\nline>'
 
     instance = MultilineRepr()
