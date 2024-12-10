@@ -21,8 +21,6 @@ from HABApp.openhab import connection as openhab_connection
 class Runtime:
 
     def __init__(self) -> None:
-        self.config: HABApp.config.Config = None
-
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 

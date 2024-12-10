@@ -1,4 +1,5 @@
-from types import TracebackType
+from inspect import getmembers
+from types import ModuleType, TracebackType
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
@@ -8,6 +9,7 @@ import HABApp
 import HABApp.core.lib.exceptions.format
 import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.job_builder as job_builder_module
+from HABApp.core.asyncio import loop
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
@@ -15,6 +17,20 @@ from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadF
 from HABApp.core.lib.exceptions.format import fallback_format
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
+from tests.helpers.inspect.habapp import habapp_modules
+
+
+def _get_loop_modules() -> tuple[ModuleType, ...]:
+    ret = []
+    for module in habapp_modules():
+        for name, obj in getmembers(module):
+            if obj is loop:
+                ret.append(module)
+                assert name == 'loop'
+    return tuple(ret)
+
+
+LOOP_MODULES = _get_loop_modules()
 
 
 def suggest_rule_name(obj: object) -> str:
@@ -115,7 +131,8 @@ class SimpleRuleRunner:
     def __enter__(self) -> None:
         self.set_up()
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None) -> bool:
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> bool:
         self.tear_down()
         # do not supress exception
         return False
