@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from inspect import getmembers, iscoroutinefunction, signature
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import Self
+
 from ._definitions import ConnectionStatus
 
 
@@ -54,9 +56,10 @@ class PluginCallbackHandler:
         return await self.coro(**kwargs)
 
     @staticmethod
-    def _get_coro_kwargs(plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]):
+    def _get_coro_kwargs(plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]) -> tuple[str, ...]:
         if not iscoroutinefunction(coro):
-            raise ValueError(f'Coroutine function expected for {plugin.plugin_name}.{coro.__name__}')
+            msg = f'Coroutine function expected for {plugin.plugin_name}.{coro.__name__}'
+            raise ValueError(msg)
 
         sig = signature(coro)
 
@@ -65,9 +68,10 @@ class PluginCallbackHandler:
             if name in ('connection', 'context'):
                 kwargs.append(name)
             else:
-                raise ValueError(f'Invalid parameter name "{name:s}" for {plugin.plugin_name}.{coro.__name__}')
+                msg = f'Invalid parameter name "{name:s}" for {plugin.plugin_name}.{coro.__name__}'
+                raise ValueError(msg)
         return tuple(kwargs)
 
     @classmethod
-    def create(cls, plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]):
+    def create(cls, plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]) -> Self:
         return cls(plugin, coro, cls._get_coro_kwargs(plugin, coro))
