@@ -83,11 +83,13 @@ class Rule(ContextProvidingObj):
         self.openhab: Final = self.oh
 
     def on_rule_loaded(self) -> None:
-        """Override this to implement logic that will be called when the rule and the file has been successfully loaded
+        """Override this to method to implement logic that will be called when
+        the rule and the file has been successfully loaded. Can be sync or async.
         """
 
     def on_rule_removed(self) -> None:
-        """Override this to implement logic that will be called when the rule has been unloaded.
+        """Override this method to implement logic that will be called when the rule has been unloaded.
+        Can be sync or async.
         """
 
     def __repr__(self) -> str:
