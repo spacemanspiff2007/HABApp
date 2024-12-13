@@ -1,4 +1,5 @@
 import logging
+import re
 import threading
 import typing
 from asyncio import sleep
@@ -9,10 +10,8 @@ import HABApp.__cmd_args__ as cmd_args
 from HABApp.core import shutdown
 from HABApp.core.connections import Connections
 from HABApp.core.files.errors import AlreadyHandledFileError
-from HABApp.core.files.file import HABAppFile
-from HABApp.core.files.folders import add_folder as add_habapp_folder
-from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.internals import uses_item_registry
+from HABApp.core.internals.proxy import uses_file_manager
 from HABApp.core.internals.wrapped_function import wrap_func
 from HABApp.core.logger import log_warning
 from HABApp.core.wrapper import log_exception
@@ -22,6 +21,7 @@ from HABApp.rule_manager.rule_file import RuleFile
 log = logging.getLogger('HABApp.Rules')
 
 item_registry = uses_item_registry()
+file_manager = uses_file_manager()
 
 
 class RuleManager:
@@ -35,11 +35,6 @@ class RuleManager:
         # serialize loading
         self.__load_lock = threading.Lock()
         self.__files_lock = threading.Lock()
-
-        # Processing
-        self.__process_last_sec = 60
-
-        self.watcher: AggregatingAsyncEventHandler | None = None
 
     async def setup(self):
 
@@ -55,17 +50,17 @@ class RuleManager:
                 shutdown.request()
                 return None
             await file.check_all_rules()
-            return
-
-        class HABAppRuleFile(HABAppFile):
-            LOGGER = log
-            LOAD_FUNC = self.request_file_load
-            UNLOAD_FUNC = self.request_file_unload
 
         path = HABApp.CONFIG.directories.rules
-        folder = add_habapp_folder('rules/', path, 0)
-        folder.add_file_type(HABAppRuleFile)
-        self.watcher = folder.add_watch('.py', True)
+        prefix = 'rules/'
+
+        file_manager.add_handler(
+            self.__class__.__name__, log, prefix=prefix,
+            on_load=self.request_file_load, on_unload=self.request_file_unload
+        )
+        file_manager.add_folder(
+            prefix, path, priority=0, pattern=re.compile(r'.py$', re.IGNORECASE), name='rules-python'
+        )
 
         # Initial loading of rules
         HABApp.core.internals.wrap_func(self.load_rules_on_startup, logger=log).run()
@@ -84,7 +79,7 @@ class RuleManager:
             return None
 
         # trigger event for every file
-        await self.watcher.trigger_all()
+        await file_manager.get_file_watcher().load_files(name_include=r'^rules.*$')
         return None
 
     @log_exception

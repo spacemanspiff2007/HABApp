@@ -1,7 +1,7 @@
 aiohttp     == 3.11.10
 pydantic    == 2.10.3
 bidict      == 0.23.1
-watchdog    == 6.0.0
+watchfiles  == 1.0.3
 ujson       == 5.10.0
 aiomqtt     == 2.3.0
 

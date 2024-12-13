@@ -19,7 +19,7 @@ def get_dependencies() -> list[str]:
         'pydantic',
         'stack_data',
         'voluptuous',
-        'watchdog',
+        'watchfiles',
         'ujson',
         'immutables',
         'javaproperties',

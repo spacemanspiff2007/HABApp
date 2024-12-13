@@ -5,10 +5,11 @@ from pathlib import Path
 import eascheduler
 import pydantic
 
-import HABApp
 from HABApp import __version__
 from HABApp.config.config import CONFIG
 from HABApp.config.logging import HABAppQueueHandler, load_logging_file
+from HABApp.core import shutdown
+from HABApp.core.internals.proxy.proxies import uses_file_manager
 
 from .debug import setup_debug
 from .errors import AbsolutePathExpected, InvalidConfigError
@@ -19,7 +20,10 @@ from .logging.buffered_logger import BufferedLogger
 log = logging.getLogger('HABApp.Config')
 
 
-def load_config(config_folder: Path) -> None:
+file_manager = uses_file_manager()
+
+
+def setup_habapp_configuration(config_folder: Path) -> None:
 
     CONFIG.set_file_path(config_folder / 'config.yml')
 
@@ -40,16 +44,14 @@ def load_config(config_folder: Path) -> None:
     if not loaded_logging:
         load_logging_cfg(logging_cfg_path)
 
+    shutdown.register(stop_queue_handlers, msg='Stop logging queue handlers', last=True)
+
     setup_debug()
 
-    # Watch folders, so we can reload the config on the fly
-    filter = HABApp.core.files.watcher.FileEndingFilter('.yml')
-    watcher = HABApp.core.files.watcher.AggregatingAsyncEventHandler(
-        config_folder, config_files_changed, filter, watch_subfolders=False
-    )
-    HABApp.core.files.watcher.add_folder_watch(watcher)
+    watcher = file_manager.get_file_watcher()
+    watcher.watch_file('config.log_file', config_file_changed, config_folder / 'logging.yml', habapp_internal=True)
+    watcher.watch_file('config.cfg_file', config_file_changed, config_folder / 'config.yml', habapp_internal=True)
 
-    HABApp.core.shutdown.register(stop_queue_handlers, last=True, msg='Stopping logging threads')
     CONFIG.habapp.logging.subscribe_for_changes(set_flush_delay)
 
 
@@ -57,12 +59,12 @@ def set_flush_delay() -> None:
     HABAppQueueHandler.FLUSH_DELAY = CONFIG.habapp.logging.flush_every
 
 
-async def config_files_changed(paths: list[Path]) -> None:
-    for path in paths:
-        if path.name == 'config.yml':
-            load_habapp_cfg()
-        if path.name == 'logging.yml':
-            load_logging_cfg(path)
+async def config_file_changed(path: str) -> None:
+    file = Path(path)
+    if file.name == 'config.yml':
+        load_habapp_cfg()
+    if file.name == 'logging.yml':
+        load_logging_cfg(file)
 
 
 def load_habapp_cfg(do_print=False) -> None:

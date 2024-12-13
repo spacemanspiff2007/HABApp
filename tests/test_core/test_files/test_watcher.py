@@ -1,40 +1,57 @@
-import asyncio
-import time
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
-from unittest.mock import AsyncMock
+import logging
+from pathlib import PurePath
+from typing import Self
 
-from watchdog.events import FileSystemEvent
+import pytest
+from watchfiles import Change
 
-import HABApp.core.files.watcher.file_watcher
-from HABApp.core.files.watcher import AggregatingAsyncEventHandler
-from HABApp.core.files.watcher.base_watcher import FileEndingFilter
+from HABApp.core.files import HABAppFileWatcher
+from HABApp.core.files import watcher as watcher_module
 
 
-async def test_file_events(monkeypatch, sync_worker) -> None:
+class MyPath(PurePath):
 
-    wait_time = 0.1
-    monkeypatch.setattr(HABApp.core.files.watcher.file_watcher, 'DEBOUNCE_TIME', wait_time)
+    def __init__(self, *args) -> None:
+        super().__init__(*args)
+        self._is_dir = False
+        self._is_file = False
 
-    m = AsyncMock()
-    handler = AggregatingAsyncEventHandler(Path('folder'), m, FileEndingFilter('.tmp'), False)
+    def is_dir(self) -> bool:
+        return self._is_dir
 
-    loop = asyncio.get_event_loop()
+    def is_file(self) -> bool:
+        return self._is_file
 
-    ex = ThreadPoolExecutor(4)
+    def set_is_dir(self, value: bool) -> Self:
+        self._is_dir = value
+        return self
 
-    def generate_events(count: int, name: str, sleep: float) -> None:
-        for _ in range(count):
-            handler.dispatch(FileSystemEvent(name))
-            time.sleep(sleep)
+    def set_is_file(self, value: bool) -> Self:
+        self._is_file = value
+        return self
 
-    await asyncio.gather(
-        loop.run_in_executor(ex, generate_events, 3, 'test/t1.tmp', wait_time),
-        loop.run_in_executor(ex, generate_events, 9, 'test/t2.tmp', wait_time / 2),
-        loop.run_in_executor(ex, generate_events, 18, 'test/t3.tmp', wait_time / 5),
-    )
-    ex.shutdown()
-    await asyncio.sleep(wait_time + 0.01)
 
-    m.assert_called_once()
-    assert set(*m.call_args[0]) == {Path('test/t1.tmp'), Path('test/t2.tmp'), Path('test/t3.tmp')}
+async def test_watcher(monkeypatch, test_logs) -> None:
+    logging.getLogger('HABApp.file.events').setLevel(0)
+    test_logs.set_min_level(0)
+
+    f = HABAppFileWatcher()
+    f._watcher_task = lambda: 'ReplacedTask'
+    monkeypatch.setattr(watcher_module, 'create_task_from_async', lambda x: x)
+
+    with pytest.raises(FileNotFoundError) as e:
+        f.add_path(MyPath('a/b/c'))
+    assert str(e.value) in ('Path a/b/c does not exist!', 'Path a\\b\\c does not exist')
+
+    async def coro(text: str):
+        raise ValueError()
+
+    f.watch_folder('folder1', coro, MyPath('my/folder/1').set_is_dir(True))
+
+    assert not f._watch_filter(Change.added, 'my/folder/2/file1')
+    assert not f._watch_filter(Change.added, 'my/folder/2/file1', dispatchers=f._dispatchers)
+
+    test_logs.add_expected('HABApp.file.events', 'DEBUG', 'Added dispatcher folder1')
+    test_logs.add_expected('HABApp.file.events', 'DEBUG', 'Watching my\\folder\\1')
+    test_logs.add_expected('HABApp.file.events', 'DEBUG', 'added my/folder/2/file1')
+    test_logs.assert_ok()

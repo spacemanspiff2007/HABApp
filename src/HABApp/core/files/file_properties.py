@@ -12,45 +12,37 @@ class FileProperties(BaseModel):
     model_config = ConfigDict(extra='forbid', populate_by_name=True)
 
 
-RE_START = re.compile(r'^#(\s*)HABApp\s*:', re.IGNORECASE)
+RE_START = re.compile(r'^(\s*#\s*)HABApp\s*:', re.IGNORECASE)
 
 
-def get_properties(_str: str) -> FileProperties:
+def get_file_properties(_str: str) -> FileProperties:
 
     cfg = []
     cut = 0
 
     # extract the property string
     for line in _str.splitlines():
-        line = line.strip()
-        if cut and not line:
+        line_strip = line.strip()
+        if cut and not line_strip:
             break
 
-        if not line:
+        if not line_strip:
             continue
 
         # break on first non-empty line that is not a comment
-        if line and not line.startswith('#'):
+        if line_strip and not line_strip.startswith('#'):
             break
 
         if not cut:
             # find out how much from the start we have to cut
-            m = RE_START.search(line)
-            if m:
-                cut = len(m.group(1)) + 1
+            if m := RE_START.search(line):
+                cut = m.end(1)
                 cfg.append(line[cut:].lower())
         else:
-            do_break = False
-            for i, c in enumerate(line):
-                if i > cut:
-                    break
-
-                if c not in ('#', ' ', '\t'):
-                    do_break = True
-                    break
-            if do_break:
+            # If we would cut away characters it's not the yaml definition any more
+            # Here it's cut + 1 because it must be indented
+            if line[:cut + 1].strip() not in ('', '#'):
                 break
-
             cfg.append(line[cut:])
 
     data = yml.load('\n'.join(cfg))

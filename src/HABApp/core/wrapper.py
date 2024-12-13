@@ -1,13 +1,13 @@
 import asyncio
 import functools
 import logging
-import typing
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from logging import Logger
 
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
 from types import TracebackType
+from typing import ParamSpec, TypeVar, overload
 
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
@@ -18,6 +18,10 @@ from HABApp.core.lib import format_exception
 log = logging.getLogger('HABApp')
 
 post_event = uses_post_event()
+
+
+T = TypeVar('T')  # the callable/awaitable return type
+P = ParamSpec('P')  # the callable parameters
 
 
 def process_exception(func: Callable | str, e: Exception,
@@ -39,9 +43,17 @@ def process_exception(func: Callable | str, e: Exception,
     post_event(TOPIC_ERRORS, HABAppException(func_name=func_name, exception=e, traceback='\n'.join(lines)))
 
 
+@overload
+def log_exception(func: Callable[P, T]) -> Callable[P, T]: ...
+
+
+@overload
+def log_exception(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T]]: ...
+
+
 def log_exception(func):
     # return async wrapper
-    if asyncio.iscoroutinefunction(func) or asyncio.iscoroutine(func):
+    if asyncio.iscoroutinefunction(func):
         @functools.wraps(func)
         async def a(*args, **kwargs):
             try:
@@ -65,9 +77,17 @@ def log_exception(func):
     return f
 
 
+@overload
+def ignore_exception(func: Callable[P, T]) -> Callable[P, T]: ...
+
+
+@overload
+def ignore_exception(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T]]: ...
+
+
 def ignore_exception(func):
     # return async wrapper
-    if asyncio.iscoroutinefunction(func) or asyncio.iscoroutine(func):
+    if asyncio.iscoroutinefunction(func):
         @functools.wraps(func)
         async def a(*args, **kwargs):
             try:
@@ -97,12 +117,14 @@ class ExceptionToHABApp:
 
         self.raised_exception = False
 
-        self.proc_tb: typing.Callable[[list], list] | None = None
+        self.proc_tb: Callable[[list], list] | None = None
 
     def __enter__(self) -> None:
         self.raised_exception = False
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
+                 exc_tb: TracebackType | None):
+
         # no exception -> we exit gracefully
         if exc_type is None and exc_val is None:
             return True

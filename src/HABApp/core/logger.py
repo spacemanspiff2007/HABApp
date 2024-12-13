@@ -19,6 +19,7 @@ def log_error(logger: logging.Logger, text: str) -> None:
             logger.error(line)
     else:
         logger.error(text)
+
     post_event(
         _T_ERRORS, text
     )

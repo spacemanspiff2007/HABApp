@@ -1,8 +1,5 @@
-from collections.abc import Iterable as _Iterable
-
-
 class CircularReferenceError(Exception):
-    def __init__(self, stack: _Iterable[str]) -> None:
+    def __init__(self, stack: tuple[str, ...]) -> None:
         self.stack = stack
 
     def __repr__(self) -> str:

@@ -6,6 +6,7 @@ import typing
 import pytest
 
 import HABApp
+from HABApp.core.files import FileManager
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from tests.helpers import LogCollector, eb, get_dummy_cfg, params, parent_rule, sync_worker
 from tests.helpers.log.log_matcher import AsyncDebugWarningMatcher, LogLevelMatcher
@@ -59,15 +60,20 @@ def ir():
     return ItemRegistry()
 
 
+@pytest.fixture()
+def file_manager():
+    return FileManager(None)
+
+
 @pytest.fixture(autouse=True)
-def clean_objs(ir: ItemRegistry, eb: EventBus, request):
+def clean_objs(ir: ItemRegistry, eb: EventBus, file_manager: FileManager, request):
     markers = request.node.own_markers
     for marker in markers:
         if marker.name == 'no_internals':
             yield None
             return None
 
-    restore = setup_internals(ir, eb, final=False)
+    restore = setup_internals(ir, eb, file_manager, final=False)
 
     yield
 

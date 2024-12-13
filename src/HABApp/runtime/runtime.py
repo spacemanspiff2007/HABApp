@@ -32,22 +32,24 @@ class Runtime:
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
-            # Start Folder watcher!
-            HABApp.core.files.watcher.start()
-
-            # Load config
-            HABApp.config.load_config(config_folder)
+            file_watcher = HABApp.core.files.HABAppFileWatcher()
+            shutdown.register(file_watcher.shutdown, msg='Shutdown file watcher')
 
             # replace proxy objects
             ir = HABApp.core.internals.ItemRegistry()
             eb = HABApp.core.internals.EventBus()
-            setup_internals(ir, eb)
+            file_manager = HABApp.core.files.FileManager(file_watcher)
+
+            setup_internals(ir, eb, file_manager)
             assert isinstance(HABApp.core.Items, ConstProxyObj)
             HABApp.core.Items = ir
             assert isinstance(HABApp.core.EventBus, ConstProxyObj)
             HABApp.core.EventBus = eb
 
-            await HABApp.core.files.setup()
+            file_manager.setup()
+
+            # Load config
+            HABApp.config.setup_habapp_configuration(config_folder)
 
             # generic HTTP
             await HABApp.rule.interfaces._http.create_client()

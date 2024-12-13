@@ -6,4 +6,4 @@ from .config import CONFIG
 
 # isort: split
 
-from .loader import load_config
+from .loader import setup_habapp_configuration

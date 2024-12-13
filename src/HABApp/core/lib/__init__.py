@@ -1,5 +1,4 @@
 from .exceptions import HINT_EXCEPTION, format_exception
-from .funcs import list_files, sort_files
 from .instant_view import InstantView
 from .pending_future import PendingFuture
 from .priority_list import PriorityList

@@ -87,7 +87,8 @@ class LogCollector:
 
         for phase in self.phases:
             if phase not in ALL_PYTEST_PHASES:
-                raise ValueError(f'Unknown pytest phase: {phase}')
+                msg = f'Unknown pytest phase: {phase}'
+                raise ValueError(msg)
 
             prev_rec = None
             for record in self.caplog.get_records(phase):

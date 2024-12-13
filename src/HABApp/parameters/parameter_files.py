@@ -1,10 +1,11 @@
 import logging
+import re
 import threading
 from pathlib import Path
 
 import HABApp
 from HABApp.core.files.file import HABAppFile
-from HABApp.core.files.folders import add_folder as add_habapp_folder
+from HABApp.core.internals.proxy import uses_file_manager
 
 from .parameters import get_parameter_file, remove_parameter_file, set_parameter_file
 
@@ -13,6 +14,8 @@ log = logging.getLogger('HABApp.RuleParameters')
 
 LOCK = threading.Lock()
 PARAM_PREFIX = 'params/'
+
+file_manager = uses_file_manager()
 
 
 async def load_file(name: str, path: Path) -> None:
@@ -59,10 +62,12 @@ async def setup_param_files() -> bool:
     if path is None:
         return False
 
-    folder = add_habapp_folder(PARAM_PREFIX, path, 100)
-    folder.add_file_type(HABAppParameterFile)
-    watcher = folder.add_watch('.yml')
-    await watcher.trigger_all()
+    prefix = 'params/'
+    file_manager.add_handler('ParamFiles', log, prefix=prefix, on_load=load_file, on_unload=unload_file)
+    file_manager.add_folder(
+        prefix, path, priority=100, pattern=re.compile(r'.yml$', re.IGNORECASE), name='rules-parameters'
+    )
+
     return True
 
 

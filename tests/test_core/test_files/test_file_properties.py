@@ -1,12 +1,11 @@
-import pytest
 
-from HABApp.core.files.file.file import FILES, CircularReferenceError, FileProperties, FileState, HABAppFile
-from HABApp.core.files.file.properties import get_properties as get_props
-from tests.helpers import LogCollector
+
+from HABApp.core.files.file_properties import get_file_properties as get_props
 
 
 def test_prop_case() -> None:
-    _in = '''# habapp:
+    _in = '''
+    # habapp:
     #   depends on:
     #    - my_Param.yml
     #   reloads on:
@@ -31,7 +30,8 @@ def test_prop_case() -> None:
 
 
 def test_prop_1() -> None:
-    _in = '''# HABApp:
+    _in = '''
+# HABApp:
 #   depends on:
 #    - my_Param.yml
 #
@@ -85,50 +85,3 @@ def test_prop_missing() -> None:
     p = get_props(_in)
     assert p.depends_on == []
     assert p.reloads_on == []
-
-
-def test_deps() -> None:
-    FILES.clear()
-    FILES['name1'] = f1 = HABAppFile('name1', 'path1', FileProperties(depends_on=['name2']))
-    FILES['name2'] = f2 = HABAppFile('name2', 'path2', FileProperties())
-
-    f1.check_properties()
-    f2.check_properties()
-
-    assert f1.state is FileState.DEPENDENCIES_MISSING
-    assert f2.state is FileState.DEPENDENCIES_OK
-
-    f2.state = FileState.LOADED
-    f1.check_dependencies()
-    assert f1.state is FileState.DEPENDENCIES_OK
-
-
-def test_reloads(test_logs: LogCollector) -> None:
-    FILES.clear()
-    FILES['name1'] = f1 = HABAppFile('name1', 'path1', FileProperties(reloads_on=['name2', 'asdf']))
-    FILES['name2'] = f2 = HABAppFile('name2', 'path2', FileProperties())
-
-    f1.check_properties()
-    assert f1.properties.reloads_on == ['name2', 'asdf']
-    assert f2.properties.reloads_on == []
-
-    test_logs.add_expected('HABApp.files', 'WARNING', "File path1 reloads on file that doesn't exist: asdf")
-
-
-def test_circ() -> None:
-    FILES.clear()
-    FILES['name1'] = f1 = HABAppFile('name1', 'path1', FileProperties(depends_on=['name2']))
-    FILES['name2'] = f2 = HABAppFile('name2', 'path2', FileProperties(depends_on=['name3']))
-    FILES['name3'] = f3 = HABAppFile('name3', 'path3', FileProperties(depends_on=['name1']))
-
-    with pytest.raises(CircularReferenceError) as e:
-        f1._check_circ_refs((f1.name,), 'depends_on')
-    assert e.value.stack == ('name1', 'name2', 'name3', 'name1')
-
-    with pytest.raises(CircularReferenceError) as e:
-        f2._check_circ_refs((f2.name,), 'depends_on')
-    assert e.value.stack == ('name2', 'name3', 'name1', 'name2',)
-
-    with pytest.raises(CircularReferenceError) as e:
-        f3._check_circ_refs((f3.name,), 'depends_on')
-    assert e.value.stack == ('name3', 'name1', 'name2', 'name3', )
