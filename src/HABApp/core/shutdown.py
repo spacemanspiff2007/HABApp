@@ -5,10 +5,10 @@ import logging.handlers
 import signal
 import traceback
 from asyncio import iscoroutinefunction, sleep
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from types import BuiltinMethodType, FunctionType, MethodType
 from typing import TYPE_CHECKING
-from collections.abc import Awaitable
 
 from HABApp.core.asyncio import create_task
 from HABApp.core.const import loop
