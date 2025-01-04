@@ -47,7 +47,9 @@ File properties
 ------------------------------
 For every HABApp file it is possible to specify some properties.
 The properties are specified as a comment (prefixed with ``#``) somewhere at the beginning of the file
-and are in the yml format. They keyword ``HABApp`` can be arbitrarily intended.
+and are in the yml format.
+Make sure **no empty line** is before the property definition in the file.
+They keyword ``HABApp`` can be arbitrarily intended.
 
 .. hint::
   File names are not absolute but relative with a folder specific prefix.
