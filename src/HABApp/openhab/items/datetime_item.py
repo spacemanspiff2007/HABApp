@@ -23,12 +23,20 @@ class DatetimeItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        # see implementation im map_values.py
-        if PYTHON_311:
+    if PYTHON_311:
+        @staticmethod
+        def _state_from_oh_str(state: str) -> datetime:
+            # see implementation im map_values.py
             dt = datetime.fromisoformat(state)
-        else:
+
+            # all datetime objs from openHAB have a timezone set so we can't easily compare them
+            # --> TypeError: can't compare offset-naive and offset-aware datetime
+            dt = dt.astimezone(tz=None)  # Changes datetime object so it uses system timezone
+            value = dt.replace(tzinfo=None)  # Removes timezone awareness
+            return value
+    else:
+        @staticmethod
+        def _state_from_oh_str(state: str) -> datetime:
             pos_dot = state.find('.')
             if (pos_plus := state.rfind('+')) == -1:
                 pos_plus = state.rfind('-')
@@ -36,8 +44,8 @@ class DatetimeItem(OpenhabItem):
                 state = state[:pos_dot + 7] + state[pos_plus:]
             dt = datetime.strptime(state, '%Y-%m-%dT%H:%M:%S.%f%z')
 
-        # all datetime objs from openHAB have a timezone set so we can't easily compare them
-        # --> TypeError: can't compare offset-naive and offset-aware datetime
-        dt = dt.astimezone(tz=None)  # Changes datetime object so it uses system timezone
-        value = dt.replace(tzinfo=None)  # Removes timezone awareness
-        return value
+            # all datetime objs from openHAB have a timezone set so we can't easily compare them
+            # --> TypeError: can't compare offset-naive and offset-aware datetime
+            dt = dt.astimezone(tz=None)  # Changes datetime object so it uses system timezone
+            value = dt.replace(tzinfo=None)  # Removes timezone awareness
+            return value
