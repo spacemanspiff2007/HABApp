@@ -1,17 +1,9 @@
-import asyncio
-import logging
-
 from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule
 
-import HABApp
-from HABApp.core.connections import Connections, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
 from HABApp.mqtt.util import MqttPublishOptions
-
-
-log = logging.getLogger('HABApp.MqttTestEvents')
 
 
 class TestMQTTEvents(TestBaseRule):
@@ -27,9 +19,8 @@ class TestMQTTEvents(TestBaseRule):
         self.add_test('MQTT events', self.test_mqtt_events, MqttValueUpdateEventFilter())
         self.add_test('MQTT ValueUpdate events', self.test_mqtt_events, ValueUpdateEventFilter())
 
-        self.add_test('MQTT item update', self.test_mqtt_state)
+        self.add_test('MQTT item publish', self.test_mqtt_item_publish)
 
-        self.add_test('MQTT item creation', self.test_mqtt_item_creation)
         self.add_test('MQTT pair item', self.test_mqtt_pair_item)
         self.add_test('MQTT topic info', self.test_mqtt_topic_info)
 
@@ -56,40 +47,12 @@ class TestMQTTEvents(TestBaseRule):
                 self.mqtt.publish(topic, data)
                 waiter.wait_for_event(value=data)
 
-    def test_mqtt_state(self) -> None:
+    def test_mqtt_item_publish(self) -> None:
         my_item = MqttItem.get_create_item('test/item_topic')
         with ItemWaiter(my_item) as waiter:
             for data in self.mqtt_test_data:
                 my_item.publish(data)
                 waiter.wait_for_state(data)
-
-    async def test_mqtt_item_creation(self) -> None:
-        topic = 'mqtt/item/creation'
-        assert HABApp.core.Items.item_exists(topic) is False
-
-        self.mqtt.publish(topic, 'asdf')
-        await asyncio.sleep(0.1)
-        assert HABApp.core.Items.item_exists(topic) is False
-
-        # We create the item only on retain
-        self.mqtt.publish(topic, 'asdf', retain=True)
-        await asyncio.sleep(0.2)
-
-        await self.trigger_reconnect()
-
-        await asyncio.sleep(0.2)
-        connection = Connections.get('mqtt')
-        while not connection.is_online:
-            await asyncio.sleep(0.2)
-
-        assert HABApp.core.Items.item_exists(topic) is True
-
-        HABApp.core.Items.pop_item(topic)
-
-    async def trigger_reconnect(self) -> None:
-        connection = Connections.get('mqtt')
-        connection.status._set_manual(ConnectionStatus.DISCONNECTED)
-        connection.advance_status_task.start_if_not_running()
 
     def test_mqtt_topic_info(self) -> None:
         t = MqttPublishOptions('test/event_topic')

@@ -1,5 +1,5 @@
 from .test_data import get_openhab_test_events, get_openhab_test_states, get_openhab_test_types
-from .utils import find_astro_sun_thing, get_random_name
+from .utils import find_astro_sun_thing, get_random_name, get_random_string
 
 
 # isort: split

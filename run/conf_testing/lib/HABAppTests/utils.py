@@ -35,6 +35,10 @@ def get_random_name(item_type: str) -> str:
     return name
 
 
+def get_random_string(length: int = 10) -> str:
+    return ''.join(random.choices(string.ascii_letters, k=length))
+
+
 def find_astro_sun_thing() -> str:
     items = HABApp.core.Items.get_items()
     for item in items:
