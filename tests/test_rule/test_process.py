@@ -43,7 +43,7 @@ def rule(monkeypatch):
     runner.tear_down()
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_run_func_arg_errors(rule) -> None:
     with pytest.raises(TypeError) as e:
         rule.execute_subprocess(rule.cb, sys.executable, 'asfd', 123)
@@ -57,7 +57,7 @@ async def test_run_func_arg_errors(rule) -> None:
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, 'OK', '')], [False, 'OK']])
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_run_func(rule, flag, result) -> None:
 
     await rule.execute_subprocess(
@@ -68,7 +68,7 @@ async def test_run_func(rule, flag, result) -> None:
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_run_func_no_cap(rule, flag: bool, result) -> None:
     await rule.execute_subprocess(
         rule.cb, sys.executable, '-c', 'import datetime; print("OK", end="")', capture_output=False, raw_info=flag
@@ -78,7 +78,7 @@ async def test_run_func_no_cap(rule, flag: bool, result) -> None:
 
 
 @pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector) -> None:
 
     task = rule.execute_subprocess(
@@ -98,7 +98,7 @@ async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector) -> N
 
 
 @pytest.mark.parametrize('flag', [True, False])
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_invalid_program(rule, test_logs, flag) -> None:
     parent_dir = Path(__file__).parent
     await rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
@@ -114,7 +114,7 @@ async def test_invalid_program(rule, test_logs, flag) -> None:
 
 
 @pytest.mark.parametrize('raw_info', [True, False])
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_exec_python_file(rule, caplog, raw_info) -> None:
     parent_dir = Path(__file__).parent
 
@@ -133,7 +133,7 @@ async def test_exec_python_file(rule, caplog, raw_info) -> None:
     assert _json['cwd'] == str(parent_dir)
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_exec_python_file_relative(rule) -> None:
     parent_dir = Path(__file__).parent
 
@@ -144,7 +144,7 @@ async def test_exec_python_file_relative(rule) -> None:
     assert _json['cwd'] == str(parent_dir)
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector) -> None:
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
@@ -161,7 +161,7 @@ async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector) -> N
     rule.cb.assert_not_called()
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector) -> None:
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
@@ -177,7 +177,7 @@ async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector) -> N
 
 
 @pytest.mark.parametrize('raw_info, result', [[True, FinishedProcessInfo(0, 'module ok', '')], [False, 'module ok']])
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 async def test_exec_python_module(rule, raw_info, result) -> None:
     folder = Path(__file__).parent
     await rule.execute_python(
@@ -186,7 +186,7 @@ async def test_exec_python_module(rule, raw_info, result) -> None:
     rule.cb.assert_called_once_with(result)
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 def test_param_pythonpath(monkeypatch) -> None:
     monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__))
     folder = str(Path(__file__).parent)

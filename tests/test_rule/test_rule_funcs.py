@@ -8,7 +8,7 @@ from tests.helpers import TestEventBus
 from ..rule_runner import SimpleRuleRunner
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 def test_unload_function() -> None:
 
     with SimpleRuleRunner():
@@ -19,8 +19,8 @@ def test_unload_function() -> None:
     assert m.called
 
 
-@pytest.mark.ignore_log_errors()
-@pytest.mark.no_internals()
+@pytest.mark.ignore_log_errors
+@pytest.mark.no_internals
 def test_unload_function_exception(eb: TestEventBus) -> None:
     eb.allow_errors = True
 
@@ -33,7 +33,7 @@ def test_unload_function_exception(eb: TestEventBus) -> None:
     assert m.called
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 def test_repr() -> None:
     class Abc(Rule):
 

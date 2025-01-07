@@ -23,7 +23,7 @@ def test_thing_cfg_types() -> None:
     })
 
 
-@pytest.mark.ignore_log_errors()
+@pytest.mark.ignore_log_errors
 def test_cfg_err(eb: TestEventBus) -> None:
     eb.allow_errors = True
     assert None is validate_cfg({'test': True, 'filter1': {}}, 'filename')

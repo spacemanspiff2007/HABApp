@@ -11,7 +11,7 @@ def test_rule_no_create() -> None:
     assert create_rule(MyRule) is None
 
 
-@pytest.mark.no_internals()
+@pytest.mark.no_internals
 def test_rule_create() -> None:
     class MyRule(Rule):
         pass
