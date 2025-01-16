@@ -4,7 +4,9 @@ from collections.abc import Generator
 from functools import wraps
 from time import monotonic
 from types import TracebackType
-from typing import Any, NotRequired, Self, TypedDict, Unpack
+from typing import Any, NotRequired, TypedDict, Unpack
+
+from typing_extensions import Self
 
 import HABApp
 from HABApp.core.asyncio import AsyncContextError, thread_context

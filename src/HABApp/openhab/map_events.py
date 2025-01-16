@@ -1,3 +1,5 @@
+from typing import Final
+
 from HABApp.core.const.json import load_json
 
 from .events import (
@@ -24,7 +26,7 @@ from .events import (
 )
 
 
-EVENT_LIST = [
+EVENT_LIST: Final = (
     # item events
     ItemStateEvent, ItemStateUpdatedEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,
     ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent,
@@ -39,7 +41,7 @@ EVENT_LIST = [
     ThingStatusInfoEvent, ThingStatusInfoChangedEvent,
     ThingFirmwareStatusInfoEvent,
     ThingConfigStatusInfoEvent,
-]
+)
 
 _events: dict[str, type[OpenhabEvent]] = {k.__name__: k for k in EVENT_LIST}
 _events['GroupItemStateChangedEvent'] = GroupStateChangedEvent       # Naming from openHAB is inconsistent here

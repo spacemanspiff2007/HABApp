@@ -1,13 +1,18 @@
-import typing
+from typing import override
 
-from HABApp.core.errors import ItemNotFoundException
+from typing_extensions import Self
+
+from HABApp.core.errors import (
+    InvalidItemValueError,
+    ItemNameNotOfTypeStrError,
+    ItemNotFoundException,
+    ItemValueIsNoneError,
+    WrongItemTypeError,
+)
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.items import BaseValueItem
-from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
+from HABApp.core.types import HSB, RGB
 
-
-HUE_FACTOR = 360
-PERCENT_FACTOR = 100
 
 item_registry = uses_item_registry()
 
@@ -15,109 +20,102 @@ item_registry = uses_item_registry()
 class ColorItem(BaseValueItem):
     """Item for dealing with color related values"""
 
-    def __init__(self, name: str, hue=0.0, saturation=0.0, brightness=0.0) -> None:
-        super().__init__(name=name, initial_value=(hue, saturation, brightness))
+    value: HSB | None
 
-        self.hue: float = min(max(0.0, hue), HUE_FACTOR)
-        self.saturation: float = min(max(0.0, saturation), PERCENT_FACTOR)
-        self.brightness: float = min(max(0.0, brightness), PERCENT_FACTOR)
+    @property
+    def hsb(self) -> HSB:
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v
 
-    def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
-        """Set the color value
+    @property
+    def hue(self) -> float:
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.hue
 
-        :param hue: hue (in °)
-        :param saturation: saturation (in %)
-        :param brightness: brightness (in %)
+    @property
+    def saturation(self) -> float:
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.saturation
+
+    @property
+    def brightness(self) -> float:
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.brightness
+
+    @override
+    def set_value(self, new_value: RGB | HSB | tuple[float, float, float]) -> bool:
+        """Set a new color value without creating events on the event bus
+
+        :param new_value: new value of the item
+        :return: True if state has changed
         """
 
-        # map tuples to variables
-        # when processing events instead of three values we get the tuple
-        if isinstance(hue, tuple):
-            hue, saturation, brightness = hue
+        if isinstance(new_value, HSB):
+            hsb = new_value
+        elif isinstance(new_value, RGB):
+            hsb = new_value.to_hsb()
+        elif isinstance(new_value, tuple):
+            # Convert tuple to HSB
+            hue, saturation, brightness = new_value
+            hsb = HSB(hue, saturation, brightness)
+        elif new_value is None:
+            hsb = None
+        else:
+            raise InvalidItemValueError.from_item(self, new_value)
 
-        # with None we use the already set value
-        self.hue = min(max(0.0, hue), HUE_FACTOR) if hue is not None else self.hue
-        self.saturation = min(max(0.0, saturation), PERCENT_FACTOR) if saturation is not None else self.saturation
-        self.brightness = min(max(0.0, brightness), PERCENT_FACTOR) if brightness is not None else self.brightness
+        return super().set_value(new_value=hsb)
 
-        return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
-
-    def post_value(self, hue=0.0, saturation=0.0, brightness=0.0) -> None:
-        """Set a new value and post appropriate events on the HABApp event bus
-        (``ValueUpdateEvent``, ``ValueChangeEvent``)
-
-        :param hue: hue (in °)
-        :param saturation: saturation (in %)
-        :param brightness: brightness (in %)
-        """
-        super().post_value(
-            # encapsulate in tuple !
-            (hue if hue is not None else self.hue,
-             saturation if saturation is not None else self.saturation,
-             brightness if brightness is not None else self.brightness)
-        )
-
-    def get_rgb(self, max_rgb_value=255) -> typing.Tuple[int, int, int]:
+    def get_rgb(self) -> RGB:
         """Return a rgb equivalent of the color
 
-        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
         :return: rgb tuple
         """
-        return hsb_to_rgb(self.hue, self.saturation, self.brightness, max_rgb_value=max_rgb_value)
-
-    def set_rgb(self, r, g, b, max_rgb_value=255, ndigits: int | None = 2) -> 'ColorItem':
-        """Set a rgb value
-
-        :param r: red value
-        :param g: green value
-        :param b: blue value
-        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
-        :param ndigits: Round the hsb values to the specified digits, None to disable rounding
-        :return: self
-        """
-        h, s, b = rgb_to_hsb(r, g, b, max_rgb_value=max_rgb_value, ndigits=ndigits)
-        self.set_value(h, s, b)
-        return self
-
-    def post_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
-        """Set a new rgb value and post appropriate events on the HABApp event bus
-        (``ValueUpdateEvent``, ``ValueChangeEvent``)
-
-        :param r: red value
-        :param g: green value
-        :param b: blue value
-        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
-        :return: self
-        """
-        self.set_rgb(r, g, b, max_rgb_value=max_rgb_value)
-        self.post_value(self.hue, self.saturation, self.brightness)
-        return self
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.to_rgb()
 
     def is_on(self) -> bool:
         """Return true if item is on"""
-        return self.brightness > 0
+        if self.value is None:
+            return False
+        return self.value.brightness > 0
 
     def is_off(self) -> bool:
         """Return true if item is off"""
-        return self.brightness <= 0
+        if self.value is None:
+            return False
+        return self.value.brightness <= 0
 
     def __repr__(self) -> str:
+        if self.value is None:
+            return '<Color None>'
         return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.brightness}%>'
 
     @classmethod
-    def get_create_item(cls, name: str, hue=0.0, saturation=0.0, brightness=0.0):
+    def get_create_item(cls, name: str,
+                        initial_value: RGB | HSB | tuple[float, float, float] | None = None) -> Self:
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 
         :param name: item name
         :param initial_value: state the item will have if it gets created
+        :param hue: hue (if initial_value is not used)
+        :param saturation: saturation (if initial_value is not used)
+        :param brightness: brightness (if initial_value is not used)
         :return: item
         """
-        assert isinstance(name, str), type(name)
+        if not isinstance(name, str):
+            raise ItemNameNotOfTypeStrError.from_value(name)
 
         try:
             item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = item_registry.add_item(cls(name, hue=hue, saturation=saturation, brightness=brightness))
+            item = item_registry.add_item(cls(name, initial_value))
 
-        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        if not isinstance(item, cls):
+            raise WrongItemTypeError.from_item(item, cls)
         return item
+

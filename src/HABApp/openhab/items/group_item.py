@@ -1,15 +1,27 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
 from HABApp.core.events import ComplexEventValue
+from HABApp.openhab.definitions import OpenHABDataType, UnDefType
 from HABApp.openhab.item_to_reg import get_members
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 
 
 if TYPE_CHECKING:
     Any = Any
     Mapping = Mapping
     MetaData = MetaData
+
+
+class LetEverythingPassType(OpenHABDataType):
+
+    @staticmethod
+    def to_oh_str(value: Any) -> str | None:
+        return value
+
+    @staticmethod
+    def from_oh_str(value: str) -> Any:
+        return value
 
 
 class GroupItem(OpenhabItem):
@@ -24,9 +36,9 @@ class GroupItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        return state
+    _update_to_oh: Final = ValueToOh('GroupItem', UnDefType, LetEverythingPassType)
+    _command_to_oh: Final = ValueToOh('GroupItem', LetEverythingPassType)
+    _state_from_oh_str = staticmethod(LetEverythingPassType.from_oh_str)
 
     def set_value(self, new_value) -> bool:
 

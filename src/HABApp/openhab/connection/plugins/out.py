@@ -7,7 +7,7 @@ from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import ItemRegistryItem
 from HABApp.core.lib import SingleTask
-from HABApp.core.logger import log_info, log_warning
+from HABApp.core.logger import log_error, log_info, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.connection.handler import convert_to_oh_type, post, put
 
@@ -19,7 +19,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         self.add: bool = False
 
-        self.queue: Queue[tuple[str | ItemRegistryItem, Any, bool]] = Queue()
+        self.queue: Queue[tuple[str, str, bool]] = Queue()
         self.task_worker: Final = SingleTask(self.queue_worker, 'OhQueueWorker')
         self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
 
@@ -71,20 +71,19 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
     async def queue_worker(self) -> None:
 
         queue: Final = self.queue
-        to_str: Final = convert_to_oh_type
-
-        scientific_floats = self.plugin_connection.context.is_oh41
 
         while True:
             try:
                 while True:
                     item, state, is_cmd = await queue.get()
 
-                    if not isinstance(item, str):
-                        item = item._name
-
+                    # this check should never be hit
                     if not isinstance(state, str):
-                        state = to_str(state, scientific_floats=scientific_floats)
+                        log_error(
+                            self.plugin_connection.log,
+                            f'Ignored invalid state for item {item:s}: "{state}" ({type(state)})'
+                        )
+                        continue
 
                     if is_cmd:
                         await post(f'/rest/items/{item:s}', data=state)
@@ -93,12 +92,20 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             except Exception as e:  # noqa: PERF203
                 self.plugin_connection.process_exception(e, 'Outgoing queue worker')
 
-    def async_post_update(self, item: str | ItemRegistryItem, state: Any):
+    def async_post_update(self, item: str | ItemRegistryItem, state: Any) -> None:
+        if not isinstance(item, str):
+            item = item.name
+        if not isinstance(state, str):
+            state = convert_to_oh_type(state)
         if not self.add:
             return None
         self.queue.put_nowait((item, state, False))
 
-    def async_send_command(self, item: str | ItemRegistryItem, state: Any):
+    def async_send_command(self, item: str | ItemRegistryItem, state: Any) -> None:
+        if not isinstance(item, str):
+            item = item.name
+        if not isinstance(state, str):
+            state = convert_to_oh_type(state)
         if not self.add:
             return None
         self.queue.put_nowait((item, state, True))
@@ -118,7 +125,7 @@ def post_update(item: str | ItemRegistryItem, state: Any) -> None:
     """
     assert isinstance(item, (str, ItemRegistryItem)), type(item)
 
-    run_func_from_async(async_post_update, item, state)
+    return run_func_from_async(async_post_update, item, state)
 
 
 def send_command(item: str | ItemRegistryItem, command: Any) -> None:
@@ -130,4 +137,4 @@ def send_command(item: str | ItemRegistryItem, command: Any) -> None:
     """
     assert isinstance(item, (str, ItemRegistryItem)), type(item)
 
-    run_func_from_async(async_send_command, item, command)
+    return run_func_from_async(async_send_command, item, command)

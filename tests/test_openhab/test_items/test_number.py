@@ -1,7 +1,7 @@
 import pytest
 from immutables import Map
 
-from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
+from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.openhab.items import NumberItem
 from HABApp.openhab.items.base_item import MetaData
 
@@ -24,5 +24,5 @@ def test_number_set_value() -> None:
     NumberItem('').set_value(1)
     NumberItem('').set_value(-3.3)
 
-    with pytest.raises(InvalidItemValue):
+    with pytest.raises(InvalidItemValueError):
         NumberItem('item_name').set_value('asdf')

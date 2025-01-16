@@ -4,7 +4,7 @@ from typing import Any
 from immutables import Map
 
 from HABApp.core.wrapper import process_exception
-from HABApp.openhab.definitions.values import QuantityValue
+from HABApp.openhab.definitions import QuantityType
 from HABApp.openhab.items import (
     CallItem,
     ColorItem,
@@ -63,7 +63,7 @@ def map_item(name: str, type: str, value: str | None,
             type, dimension = type.split(':')
             # if the item is not initialized its None and has no dimension
             if value is not None:
-                value, _ = QuantityValue.split_unit(value)
+                value, _ = QuantityType.from_oh_str(value)
 
             # Show warning
             # https://github.com/spacemanspiff2007/HABApp/issues/383

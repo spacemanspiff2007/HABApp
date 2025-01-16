@@ -10,7 +10,7 @@ from .docstr import get_ivars_from_docstring
 def check_class_annotations(cls: type[object],
                             correct_hints: dict[str, Any] | None = None,
                             init_alias: dict[str, str] | None = None, init_missing: Iterable[str] = (),
-                            annotations_missing=False):
+                            *, annotations_missing=False, ignore: Iterable[str] = ()) -> dict[str, Any]:
     """Ensure that the annotations match with the actual variables"""
 
     if correct_hints is None:
@@ -19,6 +19,10 @@ def check_class_annotations(cls: type[object],
     name = cls.__name__
 
     annotation_vars = get_type_hints(cls)
+    # ignore the specified annotations
+    for _name in ignore:
+        annotation_vars.pop(_name, None)
+
     docstr_vars = get_ivars_from_docstring(cls, correct_hints)
     init_vars = inspect.getfullargspec(cls).annotations
 

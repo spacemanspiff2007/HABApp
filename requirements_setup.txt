@@ -1,11 +1,11 @@
 aiohttp     == 3.11.11
-pydantic    == 2.10.4
+pydantic    == 2.10.5
 bidict      == 0.23.1
-watchfiles  == 1.0.3
+watchfiles  == 1.0.4
 ujson       == 5.10.0
 aiomqtt     == 2.3.0
 
-eascheduler == 0.2.1
+eascheduler == 0.2.2
 
 immutables  == 0.21
 easyconfig  == 0.4.0

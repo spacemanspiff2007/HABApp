@@ -23,10 +23,6 @@ class OpenhabCredentialsInvalidError(HABAppOpenhabError):
 # ----------------------------------------------------------------------------------------------------------------------
 # OpenHAB errors
 # ----------------------------------------------------------------------------------------------------------------------
-class SendCommandNotSupported(HABAppOpenhabError):
-    pass
-
-
 class ItemNotFoundError(HABAppOpenhabError):
 
     @classmethod

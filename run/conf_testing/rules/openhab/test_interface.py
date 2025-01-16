@@ -11,13 +11,14 @@
 # ----------------------------------------------------------------------------------------------------------------------
 import time
 
+from HABApp.openhab.events import ItemCommandEvent, ItemCommandEventFilter
 from HABAppTests import (
     ItemWaiter,
     OpenhabTmpItem,
     TestBaseRule,
     get_openhab_test_states,
-    get_openhab_test_types,
-    get_random_name,
+    get_openhab_item_names,
+    get_random_name, get_openhab_test_commands, EventWaiter,
 )
 
 import HABApp
@@ -35,8 +36,12 @@ class TestOpenhabInterface(TestBaseRule):
         self.add_test('Interface change type', self.test_item_change_type)
 
         # test the states
-        for oh_type in get_openhab_test_types():
-            self.add_test(f'post_update {oh_type}', self.test_post_update, oh_type, get_openhab_test_states(oh_type))
+        for oh_type in get_openhab_item_names():
+            self.add_test(
+                f'update and commands {oh_type}', self.test_post_update, oh_type,
+                get_openhab_test_states(oh_type, only_generic_states=True),
+                get_openhab_test_commands(oh_type, only_generic_commands=True)
+            )
 
         # test json post
         self.add_test('post_update (by_json)', self.test_umlaute)
@@ -50,7 +55,7 @@ class TestOpenhabInterface(TestBaseRule):
 
     def test_item_create_delete(self) -> None:
         test_defs = []
-        for type in get_openhab_test_types():
+        for type in get_openhab_item_names():
             test_defs.append((type, get_random_name(type)))
         # test_defs.append(('Number', 'HABApp_Ping'))
 
@@ -103,19 +108,17 @@ class TestOpenhabInterface(TestBaseRule):
         self.openhab.remove_item(test_group)
         self.openhab.remove_item(test_item)
 
-    def test_post_update(self, oh_type, values) -> None:
-        if isinstance(values, str):
-            values = [values]
+    def test_post_update(self, oh_type, post_updates, send_commands) -> None:
 
-        with OpenhabTmpItem(oh_type) as item, ItemWaiter(item) as waiter:
-            for value in values:
-                self.openhab.post_update(item, value)
-                waiter.wait_for_state(value)
-
-            for value in values:
-                if oh_type != 'Contact':
-                    self.openhab.send_command(item, value)
-                    waiter.wait_for_state(value)
+        with OpenhabTmpItem(oh_type) as item:
+            with ItemWaiter(item) as waiter:
+                for post_value, receive_value in post_updates:
+                    self.openhab.post_update(item, post_value)
+                    waiter.wait_for_state(receive_value)
+            with EventWaiter(item, ItemCommandEventFilter()) as waiter:
+                for post_command, receive_command in send_commands:
+                    self.openhab.send_command(item, post_command)
+                    waiter.wait_for_event(value=receive_command)
 
     @OpenhabTmpItem.use('String')
     def test_umlaute(self, item: OpenhabTmpItem) -> None:
@@ -143,7 +146,7 @@ class TestOpenhabInterface(TestBaseRule):
         with OpenhabTmpItem('String', 'AsyncOrderTest') as item, ItemWaiter(item) as waiter:
             for _ in range(10):
                 for i in range(5):
-                    item.oh_post_update(i)
+                    item.oh_post_update(str(i))
             waiter.wait_for_state('4')
 
 

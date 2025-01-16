@@ -54,7 +54,7 @@ def test_ItemStateUpdatedEvent() -> None:
                        'payload': '{"type":"Quantity","value":"9.5 °C"}', 'type': 'ItemStateUpdatedEvent'})
     assert isinstance(event, ItemStateUpdatedEvent)
     assert event.name == 'my_item_name'
-    assert event.value == QuantityValue('9.5 °C')
+    assert event.value == QuantityValue((9.5, '°C'))
 
     event = get_event({'topic': 'openhab/items/my_item_name/stateupdated',
                        'payload': '{"type":"Decimal","value":"9.5"}', 'type': 'ItemStateUpdatedEvent'})

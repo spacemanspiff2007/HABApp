@@ -8,7 +8,7 @@ from HABApp.openhab.map_values import map_openhab_values
 
 
 def test_type_none() -> None:
-    assert map_openhab_values('UnDef', '0') is None
+    assert map_openhab_values('UnDef', 'NULL') is None
     assert map_openhab_values('Number', 'NULL') is None
 
 
@@ -37,7 +37,6 @@ def test_type_decimal(value: str, target: int) -> None:
 
 
 def __get_dt_parms():
-
     # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
     offset_str = SystemDateTime(2023, 6, 17).format_common_iso()[-5:].replace(':', '')
 

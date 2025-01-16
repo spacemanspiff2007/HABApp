@@ -7,7 +7,7 @@ import typing
 from datetime import timedelta
 
 import HABApp
-from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
 from HABApp.core.events import EventFilter, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import (
     EventBusListener,
@@ -35,7 +35,8 @@ class AggregationItem(BaseValueItem):
         :param name: item name
         :return: item
         """
-        assert isinstance(name, str), type(name)
+        if not isinstance(name, str):
+            raise ItemNameNotOfTypeStrError.from_value(name)
 
         try:
             item = get_item(name)
@@ -43,8 +44,10 @@ class AggregationItem(BaseValueItem):
             item = cls(name)
             item_registry.add_item(item)
 
-        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        if not isinstance(item, cls):
+            raise WrongItemTypeError.from_item(item, cls)
         return item
+
 
     def __init__(self, name: str) -> None:
         super().__init__(name)

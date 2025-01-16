@@ -1,12 +1,22 @@
 import importlib
 import inspect
 import sys
+import types
 import typing
 from collections.abc import Callable, Iterable
 
 
-def get_module_classes(module_name: str, /, exclude: Iterable[str | type] | None = None, include_imported=True,
+def get_module_classes(module: str | types.ModuleType, /, exclude: Iterable[str | type] | None = None,
+                       include_imported=True,
                        subclass: None | type | tuple[type, ...] = None, include_subclass=True):
+
+    if isinstance(module, str):
+        importlib.import_module(module)
+        module_obj = sys.modules[module]
+    else:
+        module_obj = module
+
+    module_name = module_obj.__name__
 
     filters: list[Callable[[type], bool]] = [
         lambda x: inspect.isclass(x),
@@ -33,8 +43,7 @@ def get_module_classes(module_name: str, /, exclude: Iterable[str | type] | None
             sub_cmp = subclass if isinstance(subclass, tuple) else tuple([subclass])
             filters.append(lambda x: all(map(lambda cls_obj: x is not cls_obj, sub_cmp)))
 
-    importlib.import_module(module_name)
     return dict(inspect.getmembers(
-        sys.modules[module_name],
+        module_obj,
         lambda x: all(f(x) for f in filters)
     ))

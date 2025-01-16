@@ -1,16 +1,18 @@
 from collections.abc import Mapping
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from HABApp.core.const.const import PYTHON_311
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.openhab.definitions import DateTimeType, RefreshType, UnDefType
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 
 
 if TYPE_CHECKING:
+    datetime = datetime
     Mapping = Mapping
     MetaData = MetaData
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/DateTimeItem.java
 class DatetimeItem(OpenhabItem):
     """DateTimeItem which accepts and converts the data types from OpenHAB
 
@@ -23,29 +25,6 @@ class DatetimeItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    if PYTHON_311:
-        @staticmethod
-        def _state_from_oh_str(state: str) -> datetime:
-            # see implementation im map_values.py
-            dt = datetime.fromisoformat(state)
-
-            # all datetime objs from openHAB have a timezone set so we can't easily compare them
-            # --> TypeError: can't compare offset-naive and offset-aware datetime
-            dt = dt.astimezone(tz=None)  # Changes datetime object so it uses system timezone
-            value = dt.replace(tzinfo=None)  # Removes timezone awareness
-            return value
-    else:
-        @staticmethod
-        def _state_from_oh_str(state: str) -> datetime:
-            pos_dot = state.find('.')
-            if (pos_plus := state.rfind('+')) == -1:
-                pos_plus = state.rfind('-')
-            if pos_plus - pos_dot > 6:
-                state = state[:pos_dot + 7] + state[pos_plus:]
-            dt = datetime.strptime(state, '%Y-%m-%dT%H:%M:%S.%f%z')
-
-            # all datetime objs from openHAB have a timezone set so we can't easily compare them
-            # --> TypeError: can't compare offset-naive and offset-aware datetime
-            dt = dt.astimezone(tz=None)  # Changes datetime object so it uses system timezone
-            value = dt.replace(tzinfo=None)  # Removes timezone awareness
-            return value
+    _update_to_oh: Final = ValueToOh('DatetimeItem', DateTimeType, UnDefType)
+    _command_to_oh: Final = ValueToOh('DatetimeItem', DateTimeType, RefreshType)
+    _state_from_oh_str: Final = staticmethod(DateTimeType.from_oh_str)

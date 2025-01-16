@@ -1,128 +1,170 @@
-from base64 import b64decode
-from typing import Final
+from typing import Final, Literal, override
 
-from fastnumbers import real
+from typing_extensions import Self
 
 from HABApp.core.events import ComplexEventValue
+from HABApp.openhab.definitions import (
+    OnOffType,
+    OpenClosedType,
+    PercentType,
+    PointType,
+    QuantityType,
+    RawType,
+    UpDownType,
+)
 
 
-class OnOffValue(ComplexEventValue):
-    ON: Final = 'ON'
-    OFF: Final = 'OFF'
+class ComplexOhValue(ComplexEventValue):
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        raise NotImplementedError()
 
-    def __init__(self, value) -> None:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ComplexOhValue):
+            return NotImplemented
+        return self.value == other.value
+
+
+ON: Final = OnOffType.ON
+OFF: Final = OnOffType.OFF
+
+
+class OnOffValue(ComplexOhValue):
+    value: Literal['ON', 'OFF']
+
+    def __init__(self, value: Literal['ON', 'OFF']) -> None:
         super().__init__(value)
-        assert value == OnOffValue.ON or value == OnOffValue.OFF, f'{value} ({type(value)})'
-        self.on = value == 'ON'
+        self.is_on = value == ON
+        self.is_off = value == OFF
+
+    @override
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        return cls(OnOffType.from_oh_str(state))
 
     def __str__(self) -> str:
         return self.value
 
 
-class PercentValue(ComplexEventValue):
-    def __init__(self, value: str) -> None:
-        percent = float(value)
-        assert 0 <= percent <= 100, f'{percent} ({type(percent)})'
-        super().__init__(percent)
+class PercentValue(ComplexOhValue):
+    value: float
+
+    @override
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        return cls(PercentType.from_oh_str(state))
 
     def __str__(self) -> str:
         return f'{self.value}%'
 
 
-class OpenClosedValue(ComplexEventValue):
-    OPEN: Final = 'OPEN'
-    CLOSED: Final = 'CLOSED'
+OPEN: Final = OpenClosedType.OPEN
+CLOSED: Final = OpenClosedType.CLOSED
 
-    def __init__(self, value) -> None:
+
+class OpenClosedValue(ComplexOhValue):
+    value: Literal['OPEN', 'CLOSED']
+
+    def __init__(self, value: Literal['OPEN', 'CLOSED']) -> None:
         super().__init__(value)
-        assert value == OpenClosedValue.OPEN or value == OpenClosedValue.CLOSED, f'{value} ({type(value)})'
-        self.open = value == OpenClosedValue.OPEN
+        self.is_open = value == OPEN
+        self.is_closed = value == CLOSED
+
+    @override
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        return cls(OpenClosedType.from_oh_str(state))
 
     def __str__(self) -> str:
         return self.value
 
 
-class UpDownValue(ComplexEventValue):
-    UP = 'UP'
-    DOWN = 'DOWN'
+UP: Final = UpDownType.UP
+DOWN: Final = UpDownType.DOWN
 
-    def __init__(self, value) -> None:
+
+class UpDownValue(ComplexOhValue):
+    value: Literal['UP', 'DOWN']
+
+    def __init__(self, value: Literal['UP', 'DOWN']) -> None:
         super().__init__(value)
-        assert value == UpDownValue.UP or value == UpDownValue.DOWN, f'{value} ({type(value)})'
-        self.up = value == UpDownValue.UP
+        self.is_up = value == UpDownType.UP
+        self.is_down = value == UpDownType.DOWN
+
+    @override
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        return cls(UpDownType.from_oh_str(state))
 
     def __str__(self) -> str:
         return self.value
 
 
-class HSBValue(ComplexEventValue):
-    def __init__(self, value: str) -> None:
-        super().__init__(tuple(float(k) for k in value.split(',')))
+class PointValue(ComplexOhValue):
+    value: tuple[float, float, float | None]
+
+    @override
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        return cls(PointType.from_oh_str(state))
 
     def __str__(self) -> str:
-        return f'{self.value[0]}°,{self.value[1]}%,{self.value[2]}%'
+        a, b, c = self.value
+        return f'{a},{b},{c}' if c is not None else f'{a},{b}'
 
 
-class PointValue(ComplexEventValue):
-    def __init__(self, value: str) -> None:
-        ret = []
-        for k in value.split(','):
-            if k is None:
-                ret.append(k)
-            else:
-                ret.append(float(k))
-        super().__init__(tuple(ret))
+class QuantityValue(ComplexOhValue):
+    value: int | float
 
-    def __str__(self) -> str:
-        if len(self.value) == 2:
-            return f'{self.value[0]},{self.value[1]},'
-        else:
-            return f'{self.value[0]},{self.value[1]},{self.value[2]}'
+    def __init__(self, value: tuple[int | float, str]) -> None:
+        value, unit = value
+        super().__init__(value)
+        self.unit: Final = unit
 
-
-class QuantityValue(ComplexEventValue):
-
-    @staticmethod
-    def split_unit(value: str) -> tuple[str, str]:
-        p = value.rfind(' ')
-        # dimensionless has no unit
-        if p < 0:
-            return value, ''
-        val = value[0:p]
-        unit = value[p + 1:]
-        return val, unit
-
-    def __init__(self, value: str) -> None:
-        value, unit = QuantityValue.split_unit(value)
-        val = real(value)
-        super().__init__(val)
-        self.unit = unit
+    @override
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        return cls(QuantityType.from_oh_str(state))
 
     def __str__(self) -> str:
-        return f'{self.value} {self.unit}'
+        return f'{self.value} {self.unit:s}'
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, QuantityValue):
             return NotImplemented
         return self.value == other.value and self.unit == other.unit
 
 
-class RawValue(ComplexEventValue):
-    def __init__(self, value: str) -> None:
-        # The data is in this format
-        # data:image/png;base64,iVBORw0KGgo....
+class RawValue(ComplexOhValue):
+    value: bytes
 
-        # extract the contents from "data:"
-        sep_type = value.find(';')
-        self.type = value[5: sep_type]
+    def __init__(self, value: tuple[str, bytes]) -> None:
+        data_type, data_bytes = value
+        super().__init__(data_bytes)
+        self.type: Final = data_type
 
-        # this is our encoded payload
-        sep_enc = value.find(',', sep_type)
-        encoding = value[sep_type + 1: sep_enc]
-        assert encoding == 'base64', f'"{encoding}"'
-
-        # set the bytes as value
-        super().__init__(b64decode(value[sep_enc + 1:]))
+    @override
+    @classmethod
+    def from_oh_str(cls, state: str) -> Self:
+        return cls(RawType.from_oh_str(state))
 
     def __str__(self) -> str:
-        return f'{self.type}'
+        return f'{self.type:s}'
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, RawValue):
+            return self.value == other.value and self.type == other.type
+        if isinstance(other, bytes):
+            return self.value == other
+        return NotImplemented
+
+
+ALL_VALUES: Final[tuple[type[ComplexOhValue], ...]] = (
+    OnOffValue,
+    PercentValue,
+    OpenClosedValue,
+    UpDownValue,
+    PointValue,
+    QuantityValue,
+    RawValue
+)

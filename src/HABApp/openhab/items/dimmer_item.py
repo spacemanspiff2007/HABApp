@@ -1,13 +1,18 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from fastnumbers import real
-
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
+from HABApp.openhab.definitions import (
+    IncreaseDecreaseType,
+    OnOffType,
+    OnOffValue,
+    PercentType,
+    PercentValue,
+    RefreshType,
+    UnDefType,
+)
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
-
-from ...core.errors import InvalidItemValue, ItemValueIsNoneError
-from ..definitions import OnOffValue, PercentValue
 
 
 if TYPE_CHECKING:
@@ -15,6 +20,7 @@ if TYPE_CHECKING:
     MetaData = MetaData
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/DimmerItem.java
 class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
     """DimmerItem which accepts and converts the data types from OpenHAB
 
@@ -27,14 +33,14 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        return real(state)
+    _update_to_oh: Final = ValueToOh('DimmerItem', PercentType, OnOffType, UnDefType)
+    _command_to_oh: Final = ValueToOh('DimmerItem', PercentType, OnOffType, IncreaseDecreaseType, RefreshType)
+    _state_from_oh_str: Final = staticmethod(PercentType.from_oh_str)
 
     def set_value(self, new_value) -> bool:
 
         if isinstance(new_value, OnOffValue):
-            new_value = 100 if new_value.on else 0
+            new_value = 100 if new_value.is_on else 0
         elif isinstance(new_value, PercentValue):
             new_value = new_value.value
 
@@ -45,7 +51,7 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
         if new_value is None:
             return super().set_value(new_value)
 
-        raise InvalidItemValue.from_item(self, new_value)
+        raise InvalidItemValueError.from_item(self, new_value)
 
     def is_on(self) -> bool:
         """Test value against on-value"""

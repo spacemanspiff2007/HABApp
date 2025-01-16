@@ -5,6 +5,8 @@ from typing import Any
 import pytest
 
 from HABApp.core.items import Item
+from HABApp.core.types import HSB
+from HABApp.openhab.definitions import UnDefType
 from HABApp.openhab.items import (
     CallItem,
     ColorItem,
@@ -52,6 +54,26 @@ def test_conditional_function_call_signature(cls) -> None:
     assert_same_signature(Item.post_value_if, cls.oh_post_update_if)
 
 
+@pytest.mark.parametrize('cls', item_dict.values())
+def test_refresh_command(cls: type[OpenhabItem], sent_commands) -> None:
+    cls('name').oh_send_command('REFRESH')
+    sent_commands.assert_called_with('REFRESH')
+    cls('name').command_value('REFRESH')
+    sent_commands.assert_called_with('REFRESH')
+
+
+@pytest.mark.parametrize('cls', item_dict.values())
+def test_null_update(cls: type[OpenhabItem], posted_updates) -> None:
+    cls('name').oh_post_update(None)
+    posted_updates.assert_called_with(UnDefType.NULL)
+
+
+@pytest.mark.parametrize('cls', item_dict.values())
+def test_item_name_set_in_oh_value(cls: type[OpenhabItem]) -> None:
+    assert cls._update_to_oh._name == cls.__name__
+    assert cls._command_to_oh._name == cls.__name__
+
+
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
 def test_doc_ivar(cls) -> None:
 
@@ -65,9 +87,9 @@ def test_doc_ivar(cls) -> None:
         RollershutterItem: {'value': int | float},
         DimmerItem:        {'value': int | float},
 
-        ColorItem: {'value': tuple[float, float, float]},
+        ColorItem: {'value': HSB},
         CallItem: {'value': tuple[str, ...]},
-        LocationItem: {'value': tuple[float, float, float | None] | None},
+        LocationItem: {'value': tuple[float, float, float | None]},
 
         DatetimeItem: {'value': datetime},
         ImageItem: {'value': bytes},
@@ -78,29 +100,28 @@ def test_doc_ivar(cls) -> None:
     init_missing = {
         **{k: ('last_change', 'last_update') for k in correct_hints},
         ImageItem: ('image_type', 'last_change', 'last_update'),
-        ColorItem: ('value', 'last_change', 'last_update')
+        ColorItem: ('hue', 'saturation', 'brightness', 'last_change', 'last_update')
     }
 
     init_alias = {
         **{k: {'initial_value': 'value'} for k in correct_hints},
-        ColorItem: {'b': 'brightness', 'h': 'hue', 's': 'saturation'}
     }
 
     class_vars = check_class_annotations(
         cls, correct_hints.get(cls),
         init_alias=init_alias.get(cls), init_missing=init_missing.get(cls, []),
-        annotations_missing=True
+        annotations_missing=True, ignore=('_update_to_oh', '_command_to_oh', '_state_from_oh_str')
     )
 
     # test that the class has the corresponding attribute
-    obj = cls(name='test')
-    for name in class_vars:
-        assert hasattr(obj, name)
+    create_with = {'name': 'test'}
 
     if cls is ColorItem:
-        class_vars.pop('hue')
-        class_vars.pop('saturation')
-        class_vars.pop('brightness')
+        create_with['initial_value'] = HSB(0, 0, 0)
+
+    obj = cls(**create_with)
+    for name in class_vars:
+        assert hasattr(obj, name)
 
     if cls is ImageItem:
         class_vars.pop('image_type')

@@ -1,25 +1,33 @@
 from collections.abc import Mapping
+from typing import TYPE_CHECKING, Final, overload, override
 
-from immutables import Map
-
-from HABApp.core.lib import hsb_to_rgb, rgb_to_hsb
-from HABApp.openhab.definitions import HSBValue, OnOffValue, PercentValue
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
+from HABApp.core.types import HSB, RGB
+from HABApp.openhab.definitions import (
+    HSBType,
+    IncreaseDecreaseType,
+    OnOffType,
+    OnOffValue,
+    PercentType,
+    PercentValue,
+    RefreshType,
+    UnDefType,
+)
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 
 
-HUE_FACTOR = 360
-PERCENT_FACTOR = 100
+if TYPE_CHECKING:
+    Mapping = Mapping
+    MetaData = MetaData
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/ColorItem.java
 class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
     """ColorItem which accepts and converts the data types from OpenHAB
 
     :ivar str name: |oh_item_desc_name|
-    :ivar tuple[float, float, float] value: |oh_item_desc_value|
-    :ivar float hue: Hue part of the value
-    :ivar float saturation: Saturation part of the value
-    :ivar float brightness: Brightness part of the value
+    :ivar HSB value: |oh_item_desc_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
@@ -27,116 +35,94 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    def __init__(self, name: str, h: float = 0.0, s: float = 0.0, b: float = 0.0,
-                 label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()) -> None:
-        super().__init__(name=name, initial_value=(h, s, b), label=label, tags=tags, groups=groups, metadata=metadata)
+    _update_to_oh: Final = ValueToOh('ColorItem', HSBType, PercentType, OnOffType, UnDefType)
+    _command_to_oh: Final = ValueToOh('ColorItem', HSBType, PercentType, OnOffType, IncreaseDecreaseType, RefreshType)
+    _state_from_oh_str = staticmethod(HSBType.from_oh_str)
 
-        self.hue: float = min(max(0.0, h), HUE_FACTOR)
-        self.saturation: float = min(max(0.0, s), PERCENT_FACTOR)
-        self.brightness: float = min(max(0.0, b), PERCENT_FACTOR)
+    @property
+    def hsb(self) -> HSB:
+        """HSB value"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v
 
-    @staticmethod
-    def _state_from_oh_str(state: str) -> tuple[float, float, float]:
-        h, s, b = state.split(',')
-        return float(h), float(s), float(b)
+    @property
+    def hue(self) -> float:
+        """Hue part of the value"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.hue
 
-    @classmethod
-    def from_oh(cls, name: str, value=None, label: str | None = None, tags: frozenset[str] = frozenset(),
-                groups: frozenset[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
-        if value is None:
-            return cls(name, label=label, tags=tags, groups=groups, metadata=metadata)
-        return cls(
-            name, *cls._state_from_oh_str(value), label=label, tags=tags, groups=groups, metadata=metadata)
+    @property
+    def saturation(self) -> float:
+        """Saturation part of the value"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.saturation
 
-    def set_value(self, hue=0.0, saturation=0.0, brightness=0.0):
-        """Set the color value
+    @property
+    def brightness(self) -> float:
+        """Brightness part of the value"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.brightness
 
-        :param hue: hue (in °)
-        :param saturation: saturation (in %)
-        :param brightness: brightness (in %)
+    @override
+    def set_value(self, new_value: RGB | HSB | tuple[float, float, float] | OnOffValue | PercentValue) -> bool:
+        """Set a new color value without creating events on the event bus
+
+        :param new_value: new value of the item
+        :return: True if state has changed
         """
 
-        if isinstance(hue, OnOffValue):
-            brightness = 100 if hue.on else 0
-            saturation = None
-            hue = None
-        elif isinstance(hue, PercentValue):
-            brightness = hue.value
-            saturation = None
-            hue = None
-        elif isinstance(hue, HSBValue):
-            hue, saturation, brightness = hue.value
-        elif isinstance(hue, tuple):
+        if isinstance(new_value, HSB):
+            hsb = new_value
+        elif isinstance(new_value, OnOffValue):
+            hue = self.hue
+            saturation = self.saturation
+            brightness = 100 if new_value.is_on else 0
+            hsb = HSB(hue, saturation, brightness)
+        elif isinstance(new_value, PercentValue):
+            hue = self.hue
+            saturation = self.saturation
+            brightness = new_value.value
+            hsb = HSB(hue, saturation, brightness)
+        elif isinstance(new_value, RGB):
+            hsb = new_value.to_hsb()
+        elif isinstance(new_value, tuple):
             # map tuples to variables e.g. when calling post_value
             # when processing events instead of three values we get the tuple
-            hue, saturation, brightness = hue
+            hue, saturation, brightness = new_value
+            hsb = HSB(hue, saturation, brightness)
+        elif new_value is None:
+            hsb = None
+        else:
+            raise InvalidItemValueError.from_item(self, new_value)
 
-        # with None we use the already set value
-        self.hue = min(max(0.0, hue), HUE_FACTOR) if hue is not None else self.hue
-        self.saturation = min(max(0.0, saturation), PERCENT_FACTOR) if saturation is not None else self.saturation
-        self.brightness = min(max(0.0, brightness), PERCENT_FACTOR) if brightness is not None else self.brightness
+        return super().set_value(new_value=hsb)
 
-        return super().set_value(new_value=(self.hue, self.saturation, self.brightness))
-
-    def post_value(self, hue=0.0, saturation=0.0, brightness=0.0) -> None:
-        """Set a new value and post appropriate events on the HABApp event bus
-        (``ValueUpdateEvent``, ``ValueChangeEvent``)
-
-        :param hue: hue (in °)
-        :param saturation: saturation (in %)
-        :param brightness: brightness (in %)
-        """
-        super().post_value(
-            # encapsulate in tuple !
-            (hue if hue is not None else self.hue,
-             saturation if saturation is not None else self.saturation,
-             brightness if brightness is not None else self.brightness)
-        )
-
-    def get_rgb(self, max_rgb_value=255) -> tuple[int, int, int]:
+    def get_rgb(self) -> RGB:
         """Return a rgb equivalent of the color
 
-        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
         :return: rgb tuple
         """
-        return hsb_to_rgb(self.hue, self.saturation, self.brightness, max_rgb_value=max_rgb_value)
-
-    def set_rgb(self, r, g, b, max_rgb_value=255, ndigits: int | None = 2) -> 'ColorItem':
-        """Set a rgb value
-
-        :param r: red value
-        :param g: green value
-        :param b: blue value
-        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
-        :param ndigits: Round the hsb values to the specified digits, None to disable rounding
-        :return: self
-        """
-        h, s, b = rgb_to_hsb(r, g, b, max_rgb_value=max_rgb_value, ndigits=ndigits)
-        self.set_value(h, s, b)
-        return self
-
-    def post_rgb(self, r, g, b, max_rgb_value=255) -> 'ColorItem':
-        """Set a new rgb value and post appropriate events on the HABApp event bus
-        (``ValueUpdateEvent``, ``ValueChangeEvent``)
-
-        :param r: red value
-        :param g: green value
-        :param b: blue value
-        :param max_rgb_value: the max value for rgb, typically 255 (default) or 65.536
-        :return: self
-        """
-        self.set_rgb(r, g, b, max_rgb_value=max_rgb_value)
-        self.post_value(self.hue, self.saturation, self.brightness)
-        return self
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.to_rgb()
 
     def is_on(self) -> bool:
         """Return true if item is on"""
-        return self.brightness > 0
+        if self.value is None:
+            return False
+        return self.value.brightness > 0
 
     def is_off(self) -> bool:
         """Return true if item is off"""
-        return self.brightness <= 0
+        if self.value is None:
+            return False
+        return self.value.brightness <= 0
 
     def __repr__(self) -> str:
+        if self.value is None:
+            return '<Color None>'
         return f'<Color hue: {self.hue}°, saturation: {self.saturation}%, brightness: {self.brightness}%>'

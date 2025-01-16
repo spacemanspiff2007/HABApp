@@ -2,8 +2,8 @@ from binascii import b2a_hex
 
 
 def get_bytes_text(value: object) -> object:
-    if isinstance(value, bytes) and len(value) > 300:
-        return b2a_hex(value[:40]).decode() + ' ... ' + b2a_hex(value[-40:]).decode()
+    if isinstance(value, bytes) and len(value) > 100:
+        return b2a_hex(value[:20]).decode() + ' ... ' + b2a_hex(value[-20:]).decode()
     return value
 
 

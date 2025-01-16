@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from colorsys import hsv_to_rgb as _hsv_to_rgb
 from colorsys import rgb_to_hsv as _rgb_to_hsv
+from typing import Final
 
 from typing_extensions import Self
 
@@ -153,8 +154,8 @@ class RGB32(RGB):
     _RGB_MAX: int = 2 ** 32 - 1
 
 
-HUE_FACTOR = 360
-PERCENT_FACTOR = 100
+HUE_FACTOR: Final = 360
+PERCENT_FACTOR: Final = 100
 
 
 class HSB(ColorType):

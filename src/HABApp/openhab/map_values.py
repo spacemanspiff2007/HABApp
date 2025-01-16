@@ -1,75 +1,45 @@
-from datetime import datetime
+from typing import Final
 
-from fastnumbers import real
+from HABApp.openhab.definitions import ALL_TYPES, ALL_VALUES, ComplexOhValue, DecimalType, OpenHABDataType, UnDefType
 
-from HABApp.core.const.const import PYTHON_311
-from HABApp.openhab.definitions import (
-    HSBValue,
-    OnOffValue,
-    OpenClosedValue,
-    PercentValue,
-    QuantityValue,
-    RawValue,
-    UpDownValue,
-)
-from HABApp.openhab.definitions.values import PointValue
+
+_values: Final[dict[str, type[ComplexOhValue] | type[OpenHABDataType]]] = {}
+
+
+def _fill_values() -> None:
+    def _assign(classes: tuple[type[ComplexOhValue] | type[OpenHABDataType], ...], suffix: str) -> None:
+        for cls in classes:
+            name = cls.__name__
+            assert name.endswith(suffix)  # noqa: S101
+            name = name.removesuffix(suffix)
+            _values[name] = cls
+
+    _assign(ALL_TYPES, 'Type')
+    _assign(ALL_VALUES, 'Value')
+
+    # Somehow also we have number values
+    _values['Number'] = DecimalType
+
+
+_fill_values()
+del _fill_values
+
+NONE_VALUES: Final = (UnDefType.NULL, UnDefType.UNDEF)
 
 
 def map_openhab_values(openhab_type: str, openhab_value: str):
-    assert isinstance(openhab_type, str), type(openhab_type)
-    assert isinstance(openhab_value, str), type(openhab_value)
-
-    if openhab_type == 'UnDef' or openhab_value == 'NULL':
+    if openhab_value in NONE_VALUES:
         return None
 
-    if openhab_type == 'Number':
-        return int(openhab_value)
+    if not isinstance(openhab_type, str):
+        msg = f'Type must be a string, not {type(openhab_type)}'
+        raise TypeError(msg)
+    if not isinstance(openhab_value, str):
+        msg = f'Value must be a string, not {type(openhab_value)}'
+        raise TypeError(msg)
 
-    if openhab_type == 'Decimal':
-        return real(openhab_value)
+    if (cls := _values.get(openhab_type)) is None:
+        msg = f'Unknown type {openhab_type}'
+        raise ValueError(msg)
 
-    if openhab_type == 'String':
-        return openhab_value
-
-    if openhab_type == 'HSB':
-        return HSBValue(openhab_value)
-
-    if openhab_type == 'DateTime':
-        # see implementation im datetime_item.py
-        if PYTHON_311:
-            dt = datetime.fromisoformat(openhab_value)
-        else:
-            pos_dot = openhab_value.find('.')
-            pos_plus = openhab_value.find('+')
-            if pos_plus - pos_dot > 6:
-                openhab_value = openhab_value[:pos_dot + 7] + openhab_value[pos_plus:]
-            dt = datetime.strptime(openhab_value, '%Y-%m-%dT%H:%M:%S.%f%z')
-
-        # all datetimes from openHAB have a timezone set, so we can't easily compare them
-        # --> TypeError: can't compare offset-naive and offset-aware datetimes
-        dt = dt.astimezone(tz=None)   # Changes datetime object so it uses system timezone
-        dt = dt.replace(tzinfo=None)  # Removes timezone awareness
-        return dt
-
-    if openhab_type == 'OnOff':
-        return OnOffValue(openhab_value)
-
-    if openhab_type == 'OpenClosed':
-        return OpenClosedValue(openhab_value)
-
-    if openhab_type == 'UpDown':
-        return UpDownValue(openhab_value)
-
-    if openhab_type == 'Percent':
-        return PercentValue(openhab_value)
-
-    if openhab_type == 'Quantity':
-        return QuantityValue(openhab_value)
-
-    if openhab_type == 'Raw':
-        return RawValue(openhab_value)
-
-    if openhab_type == 'Point':
-        return PointValue(openhab_value)
-
-    return openhab_value
+    return cls.from_oh_str(openhab_value)

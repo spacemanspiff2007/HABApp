@@ -246,10 +246,9 @@ any internal item.
 
    import HABApp
    from HABApp.openhab.items import SwitchItem
-   from HABApp.openhab.definitions import OnOffValue
 
    item = SwitchItem('my_switch', 'ON')
    HABApp.core.Items.add_item(item)
 
-   item.set_value(OnOffValue.ON)    # without bus event
-   item.post_value(OnOffValue.OFF)  # with bus event
+   item.set_value('ON')    # without bus event
+   item.post_value('OFF')  # with bus event

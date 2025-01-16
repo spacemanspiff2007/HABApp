@@ -9,7 +9,7 @@ from HABApp.openhab.items import Thing
 
 __RAND_PREFIX = {
     'String': 'Str', 'Number': 'Num', 'Switch': 'Sw', 'Contact': 'Con', 'Dimmer': 'Dim', 'Rollershutter': 'Rol',
-    'Color': 'Col', 'DateTime': 'Dt', 'Location': 'Loc', 'Player': 'Pl', 'Group': 'Grp', 'Image': 'Img',
+    'Color': 'Col', 'DateTime': 'Dt', 'Location': 'Loc', 'Player': 'Pl', 'Group': 'Grp', 'Image': 'Img', 'Call': 'Call',
     'HABApp': 'Ha'
 }
 

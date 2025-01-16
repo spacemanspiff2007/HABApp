@@ -74,49 +74,6 @@ Created file:
 Changes in the file will be automatically picked up through :class:`~HABApp.parameters.Parameter`.
 
 
-Validation
-------------------------------
-Since parameters used to provide flexible configuration for automation classes they can get quite complex and
-error prone. Thus it is possible to provide a validator for a file which will check the files for constraints,
-missing keys etc. when the file is loaded.
-
-.. autofunction:: HABApp.parameters.set_file_validator
-
-Example
-
-.. exec_code::
-    :hide_output:
-
-    # ------------ hide: start ------------
-    from pathlib import Path
-
-    import HABApp
-    from HABApp.core.files.folders import add_folder
-    from HABApp.parameters.parameters import _PARAMETERS
-    from HABApp.parameters.parameter_files import PARAM_PREFIX
-
-    add_folder(PARAM_PREFIX, Path('/params'), 0)
-    _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
-    # ------------ hide: stop -------------
-    import HABApp
-    import voluptuous
-
-    # Validator can even and should be specified before loading rules
-
-    # allows a dict e.g. { 'key1': {'key2': '5}}
-    HABApp.parameters.set_file_validator('file1', {str: {str: int}})
-
-    # More complex example with an optional key:
-    validator = {
-        'Test': int,
-        'Key': {
-            'mandatory_key': str,
-            voluptuous.Optional('optional'): int
-        }
-    }
-    HABApp.parameters.set_file_validator('file1', validator)
-
-
 Create rules from Parameters
 ------------------------------
 Parameteres are not bound to rule instance and thus work everywhere in the rule file.

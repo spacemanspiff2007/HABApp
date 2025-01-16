@@ -1,11 +1,15 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from fastnumbers import real
-
-from HABApp.core.errors import InvalidItemValue, ItemValueIsNoneError
-from HABApp.openhab.definitions import QuantityValue
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
+from HABApp.openhab.definitions import (
+    DecimalType,
+    QuantityType,
+    QuantityValue,
+    RefreshType,
+    UnDefType,
+)
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 
 
 if TYPE_CHECKING:
@@ -13,6 +17,7 @@ if TYPE_CHECKING:
     Mapping = Mapping
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/NumberItem.java
 class NumberItem(OpenhabItem):
     """NumberItem which accepts and converts the data types from OpenHAB
 
@@ -25,16 +30,16 @@ class NumberItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
+    _update_to_oh: Final = ValueToOh('NumberItem', DecimalType, QuantityType, UnDefType)
+    _command_to_oh: Final = ValueToOh('NumberItem', DecimalType, QuantityType, RefreshType)
+    _state_from_oh_str: Final = staticmethod(DecimalType.from_oh_str)
+
     @property
     def unit(self) -> str | None:
         """Return the item unit if it is a "Unit of Measurement" item else None"""
         if (unit := self.metadata.get('unit')) is None:
             return None
         return unit.value
-
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        return real(state)
 
     def set_value(self, new_value) -> bool:
 
@@ -47,7 +52,7 @@ class NumberItem(OpenhabItem):
         if new_value is None:
             return super().set_value(new_value)
 
-        raise InvalidItemValue.from_item(self, new_value)
+        raise InvalidItemValueError.from_item(self, new_value)
 
     def __bool__(self) -> bool:
         if self.value is None:
