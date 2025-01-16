@@ -1,10 +1,9 @@
 import itertools
 from datetime import datetime
-from inspect import signature
+from inspect import isclass, signature
 from typing import Final
 
 import pytest
-from sphinx.util.inspect import isclass
 from whenever import SystemDateTime
 
 from HABApp.core.types import HSB, RGB
