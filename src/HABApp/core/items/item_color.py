@@ -1,6 +1,4 @@
-from typing import override
-
-from typing_extensions import Self
+from typing_extensions import Self, override
 
 from HABApp.core.errors import (
     InvalidItemValueError,

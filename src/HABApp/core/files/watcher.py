@@ -6,8 +6,9 @@ from asyncio import Event, Task
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 from re import Pattern
-from typing import Any, Final, override
+from typing import Any, Final
 
+from typing_extensions import override
 from watchfiles import Change, DefaultFilter, awatch
 
 from HABApp.core.asyncio import create_task_from_async

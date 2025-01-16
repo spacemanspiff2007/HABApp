@@ -1,6 +1,6 @@
-from typing import Final, Literal, override
+from typing import Final, Literal
 
-from typing_extensions import Self
+from typing_extensions import Self, override
 
 from HABApp.core.events import ComplexEventValue
 from HABApp.openhab.definitions import (

@@ -3,7 +3,8 @@ from __future__ import annotations
 import re
 from base64 import b64decode, b64encode
 from datetime import datetime
-from typing import Any, Final, Literal, override
+from typing import Any, Final, Literal
+from typing_extensions import override
 
 from fastnumbers import real
 from pydantic import BaseModel
