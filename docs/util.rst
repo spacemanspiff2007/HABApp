@@ -44,37 +44,6 @@ It behaves like the standard python function except that it will ignore ``None``
 
 .. autofunction:: HABApp.util.functions.max
 
-
-rgb_to_hsb
-^^^^^^^^^^^^^^^^^^
-
-Converts a rgb value to hsb color space
-
-.. exec_code::
-    :hide_output:
-
-    from HABApp.util.functions import rgb_to_hsb
-
-    print(rgb_to_hsb(224, 201, 219))
-
-.. autofunction:: HABApp.util.functions.rgb_to_hsb
-
-
-hsb_to_rgb
-^^^^^^^^^^^^^^^^^^
-
-Converts a hsb value to the rgb color space
-
-.. exec_code::
-    :hide_output:
-
-    from HABApp.util.functions import hsb_to_rgb
-
-    print(hsb_to_rgb(150, 40, 100))
-
-.. autofunction:: HABApp.util.functions.hsb_to_rgb
-
-
 .. _RATE_LIMITER:
 
 
