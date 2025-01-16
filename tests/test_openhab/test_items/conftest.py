@@ -4,13 +4,13 @@ from HABApp.openhab.items import base_item as base_item_module
 
 
 class ValueCollector:
-    def __init__(self):
+    def __init__(self) -> None:
         self.values = []
 
-    def __call__(self, name, value):
+    def __call__(self, name, value) -> None:
         self.values.append(value)
 
-    def assert_called_with(self, *values, clear=True):
+    def assert_called_with(self, *values, clear=True) -> None:
         if len(values) == 1 and len(self.values) == 1:
             assert self.values[0] == values[0]
 

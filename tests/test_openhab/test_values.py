@@ -8,7 +8,7 @@ from HABApp.openhab.definitions.values import ComplexOhValue
 from tests.helpers.inspect import get_module_classes
 
 
-def test_all_values():
+def test_all_values() -> None:
     classes = get_module_classes(
         values_module, subclass=ComplexOhValue, include_subclass=False)
 

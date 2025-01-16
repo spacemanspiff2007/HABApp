@@ -21,7 +21,7 @@ def test_switch_set_value() -> None:
         SwitchItem('item_name').set_value('asdf')
 
 
-def test_switch_post_update(posted_updates):
+def test_switch_post_update(posted_updates) -> None:
     sw = SwitchItem('')
 
     sw.oh_post_update('ON')

@@ -1,14 +1,14 @@
 import itertools
 from datetime import datetime
 from inspect import signature
-from typing import Final, Literal
+from typing import Final
 
 import pytest
 from sphinx.util.inspect import isclass
 from whenever import SystemDateTime
 
 from HABApp.core.types import HSB, RGB
-from HABApp.openhab.definitions import OpenHABDataType, RefreshType, UnDefType
+from HABApp.openhab.definitions import OpenHABDataType, UnDefType
 from HABApp.openhab.definitions import types as types_module
 from HABApp.openhab.definitions.types import (
     DateTimeType,
@@ -17,11 +17,13 @@ from HABApp.openhab.definitions.types import (
     PercentType,
     PointType,
     QuantityType,
+    RawType,
     RestrictedOpenHABDataType,
     StringListType,
-    StringType, RawType,
+    StringType,
 )
 from tests.helpers.inspect import get_module_classes
+
 
 ALL_TYPES: Final = tuple(
     cls for n in dir(types_module)
@@ -35,7 +37,7 @@ BASE_SIGNATURE: Final = frozenset(dir(RestrictedOpenHABDataType))
 
 
 @pytest.mark.parametrize('cls', (c for c in RESTRICTED_TYPES if c is not UnDefType))
-def test_restricted_types(cls: type[RestrictedOpenHABDataType]):
+def test_restricted_types(cls: type[RestrictedOpenHABDataType]) -> None:
     for value in cls.get_allowed_values():
         assert cls.from_oh_str(value) == value
         assert cls.to_oh_str(value) == value
@@ -50,14 +52,14 @@ def test_restricted_types(cls: type[RestrictedOpenHABDataType]):
     assert return_annotation in annotations
 
 
-def test_undef_type():
+def test_undef_type() -> None:
     for value in UnDefType.get_allowed_values():
         assert UnDefType.from_oh_str(value) is None
     assert UnDefType.to_oh_str(None) == UnDefType.NULL
 
 
 @pytest.mark.parametrize('cls', RESTRICTED_TYPES)
-def test_restricted_types_invalid(cls: type[RestrictedOpenHABDataType]):
+def test_restricted_types_invalid(cls: type[RestrictedOpenHABDataType]) -> None:
     # Error if we get the wrong value
     with pytest.raises(ValueError) as e:
         cls.from_oh_str('asdf')
@@ -343,7 +345,7 @@ def test_str_type_invalid() -> None:
 # Module constants
 # ----------------------------------------------------------------------------------------------------------------------
 
-def test_all_types():
+def test_all_types() -> None:
     classes = get_module_classes(
         types_module, subclass=(OpenHABDataType, RestrictedOpenHABDataType), include_subclass=False)
 

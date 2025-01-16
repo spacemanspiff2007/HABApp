@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final, overload, override
+from typing import TYPE_CHECKING, Final, override
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.core.types import HSB, RGB

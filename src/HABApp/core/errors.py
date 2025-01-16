@@ -1,4 +1,5 @@
 from typing import Any as _Any
+
 from typing_extensions import Self as _Self
 
 from HABApp.core.const.hints import HasNameAttr as _HasNameAttr

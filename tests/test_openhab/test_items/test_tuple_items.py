@@ -14,7 +14,7 @@ def test_call_set_value() -> None:
     assert call.value == ('a', 'b')
 
 
-def test_call_post_update(posted_updates):
+def test_call_post_update(posted_updates) -> None:
     call = CallItem('my_call_item')
 
     call.oh_post_update('asdf')
@@ -59,7 +59,7 @@ def test_location_set_value() -> None:
     assert call.value == (1, 2, 3.3)
 
 
-def test_location_post_update(posted_updates):
+def test_location_post_update(posted_updates) -> None:
     call = LocationItem('my_call_item')
 
     call.oh_post_update((132, 456))

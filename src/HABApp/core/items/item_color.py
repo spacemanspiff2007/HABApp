@@ -118,4 +118,3 @@ class ColorItem(BaseValueItem):
         if not isinstance(item, cls):
             raise WrongItemTypeError.from_item(item, cls)
         return item
-

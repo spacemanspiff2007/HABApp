@@ -1,4 +1,3 @@
-import time
 
 from HABAppTests import (
     EventWaiter,

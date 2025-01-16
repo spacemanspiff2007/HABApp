@@ -4,7 +4,7 @@ from HABApp.openhab.definitions import DecimalType, UnDefType
 from HABApp.openhab.items._converter import ValueToOh
 
 
-def test_converter():
+def test_converter() -> None:
     a = ValueToOh('Asdf', UnDefType)
     b = a.add_type('Sdfg', DecimalType)
 

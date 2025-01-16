@@ -11,17 +11,19 @@
 # ----------------------------------------------------------------------------------------------------------------------
 import time
 
-from HABApp.openhab.events import ItemCommandEvent, ItemCommandEventFilter
 from HABAppTests import (
+    EventWaiter,
     ItemWaiter,
     OpenhabTmpItem,
     TestBaseRule,
-    get_openhab_test_states,
     get_openhab_item_names,
-    get_random_name, get_openhab_test_commands, EventWaiter,
+    get_openhab_test_commands,
+    get_openhab_test_states,
+    get_random_name,
 )
 
 import HABApp
+from HABApp.openhab.events import ItemCommandEventFilter
 
 
 class TestOpenhabInterface(TestBaseRule):

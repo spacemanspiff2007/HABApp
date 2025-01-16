@@ -4,6 +4,7 @@ from HABApp.core.const.hints import HasNameAttr as _HasNameAttr
 from HABApp.openhab.definitions import OnOffType, UpDownType
 from HABApp.openhab.interface_sync import send_command
 
+
 ON: Final = OnOffType.ON
 OFF: Final = OnOffType.OFF
 UP: Final = UpDownType.UP

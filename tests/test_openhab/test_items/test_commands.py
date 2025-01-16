@@ -1,11 +1,9 @@
-import typing
 
 import pytest
 
-from HABApp import __version__
 from HABApp.core.types import HSB
-from HABApp.openhab.definitions import OnOffValue, OpenClosedValue, UpDownValue, OpenClosedType, UpDownType
-from HABApp.openhab.items import ContactItem, ColorItem
+from HABApp.openhab.definitions import OnOffValue, OpenClosedType, UpDownType, UpDownValue
+from HABApp.openhab.items import ColorItem, ContactItem
 from HABApp.openhab.items.commands import OnOffCommand, UpDownCommand
 from HABApp.openhab.map_items import _items as item_dict
 

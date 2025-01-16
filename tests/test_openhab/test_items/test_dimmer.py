@@ -22,7 +22,7 @@ def test_dimmer_set_value() -> None:
         DimmerItem('item_name').set_value('asdf')
 
 
-def test_switch_post_update(posted_updates):
+def test_switch_post_update(posted_updates) -> None:
     sw = DimmerItem('')
 
     sw.oh_post_update('ON')
