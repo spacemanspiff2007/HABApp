@@ -2,7 +2,7 @@ from typing import Final, Literal
 
 
 class RingCounterTracker:
-    """Class that tracks a ring counter value and only allows increasing values.
+    """Class that tracks a ring counter value and only allows increasing or decreasing values.
     """
 
     __slots__ = ('_ignore', '_is_increasing', '_last_value', '_max_value', '_min_value')

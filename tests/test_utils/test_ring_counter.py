@@ -103,8 +103,6 @@ def test_ring_counter_tracker_increase() -> None:
     assert values == set(range(-10, 11))
 
 
-
-
 def test_ring_counter_tracker_decrease() -> None:
     tracker = RingCounterTracker(100, direction='decreasing')
 

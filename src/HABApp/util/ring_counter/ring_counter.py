@@ -56,7 +56,10 @@ class RingCounter:
         return self._value
 
     def increase(self, value: int = 1) -> Self:
-        """Increase the value of the ring counter by the given value."""
+        """Increase the value of the ring counter by the given value.
+
+        :param value: How much to increase the value by.
+        """
         if value < 0:
             msg = 'Value must be >= 0'
             raise ValueError(msg)
@@ -69,7 +72,10 @@ class RingCounter:
         return self
 
     def decrease(self, value: int = 1) -> Self:
-        """Decrease the value of the ring counter by the given value."""
+        """Decrease the value of the ring counter by the given value.
+
+        :param value: How much to decrease the value by.
+        """
         if value < 0:
             msg = 'Value must be >= 0'
             raise ValueError(msg)
