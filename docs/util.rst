@@ -181,6 +181,82 @@ Documentation
    :inherited-members:
 
 
+Cyclic Counter Values
+------------------------------
+There are classes provided to produce and to track cyclic counter values
+
+Ring Counter
+^^^^^^^^^^^^^^^^^^
+Counter which can increase / decrease and will wrap around when reaching the maximum / minimum value.
+
+.. exec_code::
+
+    from HABApp.util import RingCounter
+
+    # Ring counter that allows 11 values (0..10)
+    RingCounter(10)
+    # Same as
+    RingCounter(0, 10)
+
+    c = RingCounter(2, 5, initial_value=2)
+    for _ in range(4):
+        c.increase()    # increase by 1
+        print(c.value)  # get the value through the property
+    for _ in range(4):
+        c += 1          # increase by 1
+        print(int(c))   # casting to int returns the current value
+
+    # Compare works out of the box
+    print(f'== 2: {c == 2}')
+    print(f'>= 2: {c >= 2}')
+
+
+Ring Counter Tracker
+^^^^^^^^^^^^^^^^^^^^
+
+Tracke which tracks a ring counter value and only allows increasing / decreasing values
+
+.. exec_code::
+    hide-output
+
+    from HABApp.util import RingCounterTracker
+
+    # Tracker that allows 101 values (0..100) with a 10 value ignore region
+    RingCounterTracker(100)
+    # Same as
+    c = RingCounterTracker(0, 100)
+
+    assert c.allow(50)          # First value is always allowed
+    assert not c.allow(50)      # Same value again is not allowed since it's not increasing
+    assert not c.allow(41)      # Value in the ignore region is not allowed
+    assert c.test_allow(40)     # Value out of the ignore region is allowed
+
+    assert c.allow(100)
+    assert c.allow(5)           # Value is allowed since it wraps around and is increasing
+    assert not c.allow(100)     # Ignore interval wraps properly around, too
+    assert not c.allow(97)
+    assert c.allow(96)          # Highest value out of the ignore interval is allowed again
+
+    # Compare works out of the box
+    print(f'== 5: {c == 5}')
+    print(f'>= 5: {c >= 5}')
+
+    # Last accepted value
+    print(f'Last value: {c.value:d}')
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: HABApp.util.RingCounter
+   :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.RingCounterTracker
+   :members:
+   :inherited-members:
+
+
 Statistics
 ------------------------------
 
