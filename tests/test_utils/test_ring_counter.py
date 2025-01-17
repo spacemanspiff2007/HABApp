@@ -3,7 +3,7 @@ import pytest
 from HABApp.util.ring_counter import RingCounter, RingCounterTracker
 
 
-def test_ring_counter():
+def test_ring_counter() -> None:
     c = RingCounter(10)
     assert c == 0
     assert c.size == 11
@@ -36,7 +36,7 @@ def test_ring_counter():
     assert c == 8
 
 
-def test_ring_counter_compare():
+def test_ring_counter_compare() -> None:
     c = RingCounter(10, initial_value=5)
     assert c == 5
 
@@ -48,7 +48,7 @@ def test_ring_counter_compare():
     assert c != 6
 
 
-def test_repr():
+def test_repr() -> None:
     assert str(RingCounter(10)) == 'RingCounter(value=0, min=0 max=10)'
     assert str(RingCounter(1, 3, initial_value=2)) == 'RingCounter(value=2, min=1 max=3)'
 
@@ -59,14 +59,14 @@ def test_repr():
 
 
 @pytest.mark.parametrize('direction', ('something', 'decreasing'))
-def test_ring_counter_init(direction):
+def test_ring_counter_init(direction) -> None:
     assert RingCounterTracker(100, direction=direction).allow(0)
     assert RingCounterTracker(100, direction=direction).allow(1)
     assert RingCounterTracker(100, direction=direction).allow(99)
     assert RingCounterTracker(100, direction=direction).allow(100)
 
 
-def test_ring_counter_tracker_increase():
+def test_ring_counter_tracker_increase() -> None:
     tracker = RingCounterTracker(100)
 
     ctr = RingCounter(100, initial_value=10)
@@ -105,7 +105,7 @@ def test_ring_counter_tracker_increase():
 
 
 
-def test_ring_counter_tracker_decrease():
+def test_ring_counter_tracker_decrease() -> None:
     tracker = RingCounterTracker(100, direction='decreasing')
 
     ctr = RingCounter(100, initial_value=20)
@@ -142,7 +142,7 @@ def test_ring_counter_tracker_decrease():
     assert values == set(range(20, 41))
 
 
-def test_ring_counter_tracker_compare():
+def test_ring_counter_tracker_compare() -> None:
     c = RingCounterTracker(100)
     c.allow(5)
     assert c == 5
