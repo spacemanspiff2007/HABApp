@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from inspect import getmembers, iscoroutinefunction, signature
 from typing import TYPE_CHECKING, Any
@@ -12,6 +11,8 @@ from ._definitions import ConnectionStatus
 
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
     from .base_connection import BaseConnection
     from .base_plugin import BaseConnectionPlugin
 
@@ -29,7 +30,8 @@ def get_plugin_callbacks(obj: BaseConnectionPlugin) -> list[tuple[ConnectionStat
             continue
 
         if (m := name_regex.fullmatch(m_name)) is None:
-            raise ValueError(f'Invalid name: {m_name} in {obj.plugin_name}')
+            msg = f'Invalid name: {m_name} in {obj.plugin_name}'
+            raise ValueError(msg)
 
         status = name_to_status[m.group(1)]
         cb = PluginCallbackHandler.create(obj, member)

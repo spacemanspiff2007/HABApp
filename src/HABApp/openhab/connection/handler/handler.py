@@ -180,7 +180,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             )
 
             # We created the queue so we can now start the queue-watcher
-            await self.task_watcher.start()
+            self.task_watcher.start()
 
         # during startup we get OpenhabCredentialsInvalidError even though credentials are correct
         except (OpenhabDisconnectedError, OpenhabCredentialsInvalidError):
@@ -192,7 +192,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
         connection.context = None
 
         await self.task_watcher.cancel_wait()
-        if context is not None and (out_queue := context.out_queue is not None):
+        if context is not None and (out_queue := context.out_queue) is not None:
             try:
                 while True:
                     out_queue.get_nowait()

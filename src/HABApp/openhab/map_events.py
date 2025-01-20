@@ -1,6 +1,6 @@
-from typing import Final
+from typing import Any, Final
 
-from HABApp.core.const.json import load_json
+from pydantic import BaseModel, ConfigDict, Json
 
 from .events import (
     ChannelDescriptionChangedEvent,
@@ -49,14 +49,21 @@ _events['FirmwareStatusInfoEvent'] = ThingFirmwareStatusInfoEvent    # Naming fr
 _events['ConfigStatusInfoEvent'] = ThingConfigStatusInfoEvent        # Naming from openHAB is inconsistent here
 
 
+class OpenHABEventModel(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    type: str
+    topic: str
+    payload: Json[dict[str, Any] | tuple[dict[str, Any], ...]]
+
+
 def get_event(_in_dict: dict) -> OpenhabEvent:
-    event_type: str = _in_dict['type']
-    topic: str = _in_dict['topic']
-    payload: dict = load_json(_in_dict['payload'])
+
+    m = OpenHABEventModel.model_validate(_in_dict)
 
     # Find event from implemented events
     try:
-        return _events[event_type].from_dict(topic, payload)
+        return _events[m.type].from_dict(m.topic, m.payload)
     except KeyError:
-        msg = f'Unknown Event: {event_type:s} for {_in_dict}'
+        msg = f'Unknown Event: {m.type:s} for {_in_dict}'
         raise ValueError(msg) from None
