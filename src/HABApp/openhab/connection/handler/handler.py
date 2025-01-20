@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from asyncio import Queue
-from typing import Any
+from asyncio import Queue, QueueEmpty, sleep
+from typing import Any, Final
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -13,6 +13,8 @@ from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.const.json import dump_json
+from HABApp.core.lib import SingleTask
+from HABApp.core.logger import log_info, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.errors import OpenhabCredentialsInvalidError, OpenhabDisconnectedError
 
@@ -28,10 +30,12 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
         self.online = False
         self.session: aiohttp.ClientSession | None = None
 
+        self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
+
     def update_cfg_general(self) -> None:
         self.read_only = CONFIG.openhab.general.listen_only
 
-    async def on_setup(self, connection: OpenhabConnection):
+    async def on_setup(self, connection: OpenhabConnection) -> None:
         log = self.plugin_connection.log
         config = CONFIG.openhab.connection
         url: str = config.url
@@ -76,11 +80,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
     async def on_connected(self) -> None:
         self.online = True
 
-    async def on_disconnected(self, connection: OpenhabConnection) -> None:
-        self.online = False
-        connection.context = None
-
-    async def on_shutdown(self):
+    async def on_shutdown(self) -> None:
         if self.session is None:
             return None
 
@@ -154,7 +154,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
 
         return resp
 
-    async def on_connecting(self, connection: OpenhabConnection):
+    async def on_connecting(self, connection: OpenhabConnection) -> None:
         from HABApp.openhab.connection.handler.func_async import async_get_root
 
         log = self.plugin_connection.log
@@ -179,14 +179,56 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
                 out_queue=Queue(), out_websockets=False
             )
 
+            # We created the queue so we can now start the queue-watcher
+            await self.task_watcher.start()
+
         # during startup we get OpenhabCredentialsInvalidError even though credentials are correct
         except (OpenhabDisconnectedError, OpenhabCredentialsInvalidError):
             connection.set_error()
             raise AlreadyHandledException() from None
 
+    async def on_disconnected(self, connection: OpenhabConnection, context: OpenhabContext) -> None:
+        self.online = False
+        connection.context = None
 
-HANDLER = ConnectionHandler()
-get = HANDLER.get
-post = HANDLER.post
-put = HANDLER.put
-delete = HANDLER.delete
+        await self.task_watcher.cancel_wait()
+        if context is not None and (out_queue := context.out_queue is not None):
+            try:
+                while True:
+                    out_queue.get_nowait()
+            except QueueEmpty:
+                pass
+
+    async def queue_watcher(self) -> None:
+        queue = self.plugin_connection.context.out_queue
+        log = self.plugin_connection.log
+        first_msg_at = 150
+
+        upper = first_msg_at
+        lower = -1
+        last_info_at = first_msg_at // 2
+
+        while True:
+            await sleep(10)
+            size = queue.qsize()
+
+            # small log msg
+            if size > upper:
+                upper = size * 2
+                lower = size // 2
+                log_warning(log, f'{size} messages in queue')
+            elif size < lower:
+                upper = max(size / 2, first_msg_at)
+                lower = size // 2
+                if lower <= last_info_at:
+                    lower = -1
+                    log_info(log, 'queue OK')
+                else:
+                    log_info(log, f'{size} messages in queue')
+
+
+HANDLER: Final = ConnectionHandler()
+get: Final = HANDLER.get
+post: Final = HANDLER.post
+put: Final = HANDLER.put
+delete: Final = HANDLER.delete

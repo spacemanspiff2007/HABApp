@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-from asyncio import Queue, QueueEmpty, sleep
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import ItemRegistryItem
 from HABApp.core.lib import SingleTask
-from HABApp.core.logger import log_error, log_info, log_warning
+from HABApp.core.logger import log_error
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import convert_to_oh_type, post, put
+
+
+if TYPE_CHECKING:
+    from asyncio import Queue
 
 
 class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
@@ -19,60 +22,15 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         self.queue: Queue[tuple[str, str, bool]] | None = None
         self.task_worker: Final = SingleTask(self.queue_worker, 'OhQueueWorker')
-        self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
-
-    @staticmethod
-    def _clear_queue(queue: Queue | None) -> None:
-        if queue is None:
-            return None
-
-        try:
-            while True:
-                queue.get_nowait()
-        except QueueEmpty:
-            pass
 
     async def on_connected(self, context: OpenhabContext) -> None:
         self.queue = context.out_queue
         self.task_worker.start()
-        self.task_watcher.start()
 
     async def on_disconnected(self) -> None:
-        queue = self.queue
         self.queue = None
-
         await self.task_worker.cancel_wait()
-        await self.task_watcher.cancel_wait()
-        self._clear_queue(queue)
 
-    async def queue_watcher(self) -> None:
-        queue: Final = self.queue
-        log = self.plugin_connection.log
-        first_msg_at = 150
-
-        upper = first_msg_at
-        lower = -1
-        last_info_at = first_msg_at // 2
-
-        while True:
-            await sleep(10)
-            size = queue.qsize()
-
-            # small log msg
-            if size > upper:
-                upper = size * 2
-                lower = size // 2
-                log_warning(log, f'{size} messages in queue')
-            elif size < lower:
-                upper = max(size / 2, first_msg_at)
-                lower = size // 2
-                if lower <= last_info_at:
-                    lower = -1
-                    log_info(log, 'queue OK')
-                else:
-                    log_info(log, f'{size} messages in queue')
-
-    # noinspection PyProtectedMember
     async def queue_worker(self) -> None:
 
         queue: Final = self.queue
