@@ -37,7 +37,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         self.task_worker.start()
         self.task_watcher.start()
 
-    async def on_disconnected(self, context: OpenhabContext) -> None:
+    async def on_disconnected(self) -> None:
         queue = self.queue
         self.queue = None
 
