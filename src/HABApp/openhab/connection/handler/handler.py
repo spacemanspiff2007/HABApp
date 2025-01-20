@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from asyncio import Queue
 from typing import Any
 
 import aiohttp
@@ -169,12 +170,14 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             log.info(f'Connected {"read only " if self.read_only else ""}to OpenHAB '
                      f'version {info.version:s} ({info.build_string:s})')
 
-            vers = tuple(map(int, info.version.split('.')[:3]))
+            vers = tuple(int(_v) for _v in info.version.split('.')[:3])
             if vers < (3, 3):
                 log.warning('HABApp requires at least openHAB version 3.3!')
 
             connection.context = OpenhabContext.new_context(
-                version=vers, session=self.session, session_options=self.options)
+                version=vers, session=self.session, session_options=self.options,
+                out_queue=Queue(), out_websockets=False
+            )
 
         # during startup we get OpenhabCredentialsInvalidError even though credentials are correct
         except (OpenhabDisconnectedError, OpenhabCredentialsInvalidError):

@@ -8,7 +8,7 @@ from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import ItemRegistryItem
 from HABApp.core.lib import SingleTask
 from HABApp.core.logger import log_error, log_info, log_warning
-from HABApp.openhab.connection.connection import OpenhabConnection
+from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import convert_to_oh_type, post, put
 
 
@@ -17,31 +17,36 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
     def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
 
-        self.add: bool = False
-
-        self.queue: Queue[tuple[str, str, bool]] = Queue()
+        self.queue: Queue[tuple[str, str, bool]] | None = None
         self.task_worker: Final = SingleTask(self.queue_worker, 'OhQueueWorker')
         self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
 
-    async def _clear_queue(self) -> None:
+    @staticmethod
+    def _clear_queue(queue: Queue | None) -> None:
+        if queue is None:
+            return None
+
         try:
             while True:
-                self.queue.get_nowait()
+                queue.get_nowait()
         except QueueEmpty:
             pass
 
-    async def on_connected(self) -> None:
-        self.add = True
+    async def on_connected(self, context: OpenhabContext) -> None:
+        self.queue = context.out_queue
         self.task_worker.start()
         self.task_watcher.start()
 
-    async def on_disconnected(self) -> None:
-        self.add = False
+    async def on_disconnected(self, context: OpenhabContext) -> None:
+        queue = self.queue
+        self.queue = None
+
         await self.task_worker.cancel_wait()
         await self.task_watcher.cancel_wait()
-        await self._clear_queue()
+        self._clear_queue(queue)
 
     async def queue_watcher(self) -> None:
+        queue: Final = self.queue
         log = self.plugin_connection.log
         first_msg_at = 150
 
@@ -51,7 +56,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         while True:
             await sleep(10)
-            size = self.queue.qsize()
+            size = queue.qsize()
 
             # small log msg
             if size > upper:
@@ -97,18 +102,18 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             item = item.name
         if not isinstance(state, str):
             state = convert_to_oh_type(state)
-        if not self.add:
+        if (queue := self.queue) is None:
             return None
-        self.queue.put_nowait((item, state, False))
+        queue.put_nowait((item, state, False))
 
     def async_send_command(self, item: str | ItemRegistryItem, state: Any) -> None:
         if not isinstance(item, str):
             item = item.name
         if not isinstance(state, str):
             state = convert_to_oh_type(state)
-        if not self.add:
+        if (queue := self.queue) is None:
             return None
-        self.queue.put_nowait((item, state, True))
+        queue.put_nowait((item, state, True))
 
 
 OUTGOING_PLUGIN: Final = OutgoingCommandsPlugin()
@@ -123,7 +128,9 @@ def post_update(item: str | ItemRegistryItem, state: Any) -> None:
     :param item: item name or item
     :param state: new item state
     """
-    assert isinstance(item, (str, ItemRegistryItem)), type(item)
+    if not isinstance(item, (str, ItemRegistryItem)):
+        msg = f'Invalid item type: {type(item)}'
+        raise TypeError(msg)
 
     return run_func_from_async(async_post_update, item, state)
 
@@ -135,6 +142,8 @@ def send_command(item: str | ItemRegistryItem, command: Any) -> None:
     :param item: item name or item
     :param command: command
     """
-    assert isinstance(item, (str, ItemRegistryItem)), type(item)
+    if not isinstance(item, (str, ItemRegistryItem)):
+        msg = f'Invalid item type: {type(item)}'
+        raise TypeError(msg)
 
     return run_func_from_async(async_send_command, item, command)

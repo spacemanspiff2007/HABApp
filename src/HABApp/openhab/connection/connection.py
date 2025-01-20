@@ -10,6 +10,8 @@ from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connect
 
 
 if TYPE_CHECKING:
+    from asyncio import Queue
+
     from HABApp.core.lib import InstantView
     from HABApp.openhab.items import OpenhabItem, Thing
 
@@ -29,14 +31,19 @@ class OpenhabContext:
     session: aiohttp.ClientSession
     session_options: dict[str, Any]
 
+    out_queue: Queue[tuple[str, str, bool]]
+    out_websockets: bool
+
     @classmethod
-    def new_context(cls, version: tuple[int, int, int],
-                    session: aiohttp.ClientSession, session_options: dict[str, Any]):
+    def new_context(cls, *, version: tuple[int, int, int],
+                    session: aiohttp.ClientSession, session_options: dict[str, Any],
+                    out_queue: Queue[tuple[str, str, bool]], out_websockets: bool) -> OpenhabContext:
         return cls(
             version=version, is_oh3=version < (4, 0), is_oh41=version >= (4, 1),
             waited_for_openhab=False,
             created_items={}, created_things={},
             session=session, session_options=session_options,
+            out_queue=out_queue, out_websockets=out_websockets
         )
 
 
