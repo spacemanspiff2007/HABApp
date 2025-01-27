@@ -130,6 +130,7 @@ MyOpenhabRule()
 
 #### 24.11.1-DEV-1 (2024-XX-XX)
 - Updated thread pool and asyncio handling
+- Dropped support for OpenHAB 3
 
 #### 24.11.1 (2024-11-25)
 Fixed an issue with the logging Queue

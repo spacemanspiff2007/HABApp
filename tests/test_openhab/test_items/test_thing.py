@@ -172,7 +172,7 @@ def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Th
     event = get_status_event('REMOVING')
     assert test_thing.name == event.name
 
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event, oh_3=False)
     test_thing.process_event.assert_called_once_with(event)
 
 
@@ -185,7 +185,7 @@ def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: T
     event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label', '', channels=[], configuration={}, properties={})
     assert test_thing.name == event.name
 
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event, oh_3=False)
     test_thing.process_event.assert_called_once_with(event)
 
 
@@ -202,7 +202,7 @@ def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry) -> None:
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event, oh_3=False)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)
@@ -224,7 +224,7 @@ def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry) -> None:
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event, oh_3=False)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)

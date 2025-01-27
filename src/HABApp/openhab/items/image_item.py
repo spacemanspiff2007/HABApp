@@ -63,7 +63,7 @@ class ImageItem(OpenhabItem):
         # image/png
         self.image_type = image_type.removeprefix('image/')
         # bytes
-        return super().set_value(image_bytes)
+        return super().set_value((image_type, image_bytes))
 
     def oh_post_update(self, value: bytes = MISSING, image_type: str | None = None) -> None:
         """Post an update to an openHAB image with new image data. Image type is automatically detected,

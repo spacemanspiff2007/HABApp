@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import Queue, QueueEmpty, sleep
+from asyncio import Queue
 from typing import Any, Final
 
 import aiohttp
@@ -13,8 +13,6 @@ from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.const.json import dump_json
-from HABApp.core.lib import SingleTask
-from HABApp.core.logger import log_info, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.errors import OpenhabCredentialsInvalidError, OpenhabDisconnectedError
 
@@ -29,8 +27,6 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
         self.read_only: bool = False
         self.online = False
         self.session: aiohttp.ClientSession | None = None
-
-        self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
 
     def update_cfg_general(self) -> None:
         self.read_only = CONFIG.openhab.general.listen_only
@@ -171,60 +167,22 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
                      f'version {info.version:s} ({info.build_string:s})')
 
             vers = tuple(int(_v) for _v in info.version.split('.')[:3])
-            if vers < (3, 3):
-                log.warning('HABApp requires at least openHAB version 3.3!')
+            if vers < (4, 0):
+                log.error('HABApp requires at least openHAB version 4.0!')
 
             connection.context = OpenhabContext.new_context(
                 version=vers, session=self.session, session_options=self.options,
-                out_queue=Queue(), out_websockets=False
+                out_queue=Queue()
             )
-
-            # We created the queue so we can now start the queue-watcher
-            self.task_watcher.start()
 
         # during startup we get OpenhabCredentialsInvalidError even though credentials are correct
         except (OpenhabDisconnectedError, OpenhabCredentialsInvalidError):
             connection.set_error()
             raise AlreadyHandledException() from None
 
-    async def on_disconnected(self, connection: OpenhabConnection, context: OpenhabContext) -> None:
+    async def on_disconnected(self, connection: OpenhabConnection) -> None:
         self.online = False
         connection.context = None
-
-        await self.task_watcher.cancel_wait()
-        if context is not None and (out_queue := context.out_queue) is not None:
-            try:
-                while True:
-                    out_queue.get_nowait()
-            except QueueEmpty:
-                pass
-
-    async def queue_watcher(self) -> None:
-        queue = self.plugin_connection.context.out_queue
-        log = self.plugin_connection.log
-        first_msg_at = 150
-
-        upper = first_msg_at
-        lower = -1
-        last_info_at = first_msg_at // 2
-
-        while True:
-            await sleep(10)
-            size = queue.qsize()
-
-            # small log msg
-            if size > upper:
-                upper = size * 2
-                lower = size // 2
-                log_warning(log, f'{size} messages in queue')
-            elif size < lower:
-                upper = max(size / 2, first_msg_at)
-                lower = size // 2
-                if lower <= last_info_at:
-                    lower = -1
-                    log_info(log, 'queue OK')
-                else:
-                    log_info(log, f'{size} messages in queue')
 
 
 HANDLER: Final = ConnectionHandler()

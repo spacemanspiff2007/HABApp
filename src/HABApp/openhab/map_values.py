@@ -1,6 +1,7 @@
 from typing import Final
 
-from HABApp.openhab.definitions import ALL_TYPES, ALL_VALUES, ComplexOhValue, DecimalType, OpenHABDataType, UnDefType
+from HABApp.openhab.definitions.oh_types import ALL_TYPES, DecimalType, OpenHABDataType, UnDefType
+from HABApp.openhab.definitions.values import ALL_VALUES, ComplexOhValue
 
 
 _values: Final[dict[str, type[ComplexOhValue] | type[OpenHABDataType]]] = {}
@@ -26,17 +27,9 @@ del _fill_values
 
 NONE_VALUES: Final = (UnDefType.NULL, UnDefType.UNDEF)
 
-
 def map_openhab_values(openhab_type: str, openhab_value: str):
     if openhab_value in NONE_VALUES:
         return None
-
-    if not isinstance(openhab_type, str):
-        msg = f'Type must be a string, not {type(openhab_type)}'
-        raise TypeError(msg)
-    if not isinstance(openhab_value, str):
-        msg = f'Value must be a string, not {type(openhab_value)}'
-        raise TypeError(msg)
 
     if (cls := _values.get(openhab_type)) is None:
         msg = f'Unknown type {openhab_type}'

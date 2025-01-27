@@ -7,7 +7,7 @@ from HABApp.core.const import MISSING
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab import items as items_module
 from HABApp.openhab.definitions import UnDefType
-from HABApp.openhab.definitions.types import RestrictedOpenHABDataType
+from HABApp.openhab.definitions.oh_types import RestrictedOpenHABDataType
 from HABApp.openhab.items import OpenhabItem, Thing
 
 

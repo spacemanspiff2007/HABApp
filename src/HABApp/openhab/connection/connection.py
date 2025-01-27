@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 @dataclass
 class OpenhabContext:
     version: tuple[int, int, int]
-    is_oh3: bool
     is_oh41: bool
 
     # true when we waited during connect
@@ -32,18 +31,17 @@ class OpenhabContext:
     session_options: dict[str, Any]
 
     out_queue: Queue[tuple[str, str, bool]]
-    out_websockets: bool
 
     @classmethod
     def new_context(cls, *, version: tuple[int, int, int],
                     session: aiohttp.ClientSession, session_options: dict[str, Any],
-                    out_queue: Queue[tuple[str, str, bool]], out_websockets: bool) -> OpenhabContext:
+                    out_queue: Queue[tuple[str, str, bool]]) -> OpenhabContext:
         return cls(
-            version=version, is_oh3=version < (4, 0), is_oh41=version >= (4, 1),
+            version=version, is_oh41=version >= (4, 1),
             waited_for_openhab=False,
             created_items={}, created_things={},
             session=session, session_options=session_options,
-            out_queue=out_queue, out_websockets=out_websockets
+            out_queue=out_queue
         )
 
 
@@ -60,11 +58,11 @@ def setup() -> None:
         LoadOpenhabItemsPlugin,
         LoadTransformationsPlugin,
         PingPlugin,
-        SseEventListenerPlugin,
         TextualThingConfigPlugin,
         ThingOverviewPlugin,
         WaitForPersistenceRestore,
         WaitForStartlevelPlugin,
+        WebsocketPlugin,
     )
 
     connection = Connections.add(OpenhabConnection())
@@ -73,7 +71,7 @@ def setup() -> None:
     connection.register_plugin(WaitForStartlevelPlugin(), 0)
     connection.register_plugin(OUTGOING_PLUGIN, 10)
     connection.register_plugin(LoadOpenhabItemsPlugin('LoadItemsAndThings'), 20)
-    connection.register_plugin(SseEventListenerPlugin(), 30)
+    connection.register_plugin(WebsocketPlugin(), 30)
     connection.register_plugin(LoadOpenhabItemsPlugin('SyncItemsAndThings'), 40)
     connection.register_plugin(LoadTransformationsPlugin(), 50)
     connection.register_plugin(PingPlugin(), 100)
@@ -94,7 +92,7 @@ class OpenhabConnection(BaseConnection):
         super().__init__('openhab')
         self.context: CONTEXT_TYPE = None
 
-    def is_silent_exception(self, e: Exception):
+    def is_silent_exception(self, e: Exception) -> bool:
         return isinstance(e, (
             # https://docs.aiohttp.org/en/stable/client_reference.html#client-exceptions
             aiohttp.ClientError,

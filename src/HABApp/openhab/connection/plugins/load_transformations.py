@@ -14,11 +14,7 @@ Items = uses_item_registry()
 
 class LoadTransformationsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    async def on_connected(self, context: OpenhabContext):
-        if context.is_oh3:
-            log.info('Transformations are not supported on openHAB 3')
-            return None
-
+    async def on_connected(self) -> None:
         exception_handler = ExceptionToHABApp(logger=log)
 
         log.debug('Requesting transformations')

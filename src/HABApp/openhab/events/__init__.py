@@ -1,8 +1,33 @@
 from .base_event import OpenhabEvent
-from .item_events import ItemStateEvent, ItemStateUpdatedEvent, ItemStateChangedEvent, ItemCommandEvent, ItemAddedEvent,\
-    ItemUpdatedEvent, ItemRemovedEvent, ItemStatePredictedEvent, GroupStateUpdatedEvent, GroupStateChangedEvent
-from .channel_events import ChannelTriggeredEvent, ChannelDescriptionChangedEvent
-from .thing_events import ThingStatusInfoChangedEvent, ThingStatusInfoEvent, \
-    ThingFirmwareStatusInfoEvent, ThingAddedEvent, ThingRemovedEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent
-from .event_filters import ItemStateUpdatedEventFilter, ItemStateEventFilter, ItemStateChangedEventFilter, \
-    ItemCommandEventFilter
+from .channel_events import ChannelDescriptionChangedEvent, ChannelTriggeredEvent
+from .item_events import (
+    GroupStateChangedEvent,
+    GroupStateUpdatedEvent,
+    ItemAddedEvent,
+    ItemCommandEvent,
+    ItemRemovedEvent,
+    ItemStateChangedEvent,
+    ItemStateEvent,
+    ItemStatePredictedEvent,
+    ItemStateUpdatedEvent,
+    ItemUpdatedEvent,
+)
+from .thing_events import (
+    ThingAddedEvent,
+    ThingConfigStatusInfoEvent,
+    ThingFirmwareStatusInfoEvent,
+    ThingRemovedEvent,
+    ThingStatusInfoChangedEvent,
+    ThingStatusInfoEvent,
+    ThingUpdatedEvent,
+)
+
+
+# isort: split
+
+from .event_filters import (
+    ItemCommandEventFilter,
+    ItemStateChangedEventFilter,
+    ItemStateEventFilter,
+    ItemStateUpdatedEventFilter,
+)

@@ -36,9 +36,8 @@ class DirectoriesConfig(BaseModel):
             value = value.resolve()
 
         if value == HABApp.__cmd_args__.CONFIG_FILE:
-            raise ValueError(
-                f'Can not be the same as the path for the HABApp config! ({HABApp.__cmd_args__.CONFIG_FILE})'
-            )
+            msg = f'Can not be the same as the path for the HABApp config! ({HABApp.__cmd_args__.CONFIG_FILE})'
+            raise ValueError(msg)
 
         return value
 

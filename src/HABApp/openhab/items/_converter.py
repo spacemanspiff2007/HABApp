@@ -2,7 +2,7 @@ from typing import Any, Final
 
 from typing_extensions import Self
 
-from HABApp.openhab.definitions.types import OpenHABDataType
+from HABApp.openhab.definitions.oh_types import OpenHABDataType
 
 
 class ValueToOh:

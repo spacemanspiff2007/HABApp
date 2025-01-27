@@ -1,6 +1,5 @@
 from .items import GROUP_ITEM_FUNCTIONS, ITEM_DIMENSIONS, ITEM_TYPES
-from .things import ThingStatusDetailEnum, ThingStatusEnum
-from .types import (
+from .oh_types import (
     ALL_TYPES,
     DateTimeType,
     DecimalType,
@@ -23,6 +22,7 @@ from .types import (
     UnDefType,
     UpDownType,
 )
+from .things import ThingStatusDetailEnum, ThingStatusEnum
 from .values import (
     ALL_VALUES,
     ComplexOhValue,

@@ -9,7 +9,7 @@ from typing import Any, Final
 import HABApp
 from HABApp.core.events import NoEventFilter
 from HABApp.core.internals import EventBusListener, WrappedFunctionBase, wrap_func
-from HABAppTests.test_rule._com_patcher import BasePatcher, MqttPatcher, RestPatcher, SsePatcher
+from HABAppTests.test_rule._com_patcher import BasePatcher, MqttPatcher, RestPatcher, SsePatcher, WebsocketPatcher
 from HABAppTests.test_rule.test_result import TestResult, TestResultStatus
 from HABAppTests.utils import get_file_path_of_obj
 
@@ -112,7 +112,7 @@ class TestCase:
             b = BasePatcher(name, 'TC')
 
             try:
-                with RestPatcher(name), SsePatcher(name), MqttPatcher(name):
+                with RestPatcher(name), SsePatcher(name), MqttPatcher(name), WebsocketPatcher(name):
                     if s := self.set_up:
                         await tc_wrap_func(s, res).async_run()
                         await sleep(0.1)

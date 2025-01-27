@@ -5,6 +5,8 @@ from collections.abc import Callable
 from types import ModuleType, TracebackType
 from typing import Any, Final
 
+from libcst.matchers import TypeOf
+from pydantic import TypeAdapter
 from pytest import MonkeyPatch
 
 import HABApp.mqtt.connection.publish
@@ -127,6 +129,35 @@ class SsePatcher(BasePatcher):
     def __enter__(self) -> None:
         module = HABApp.openhab.process_events
         self.monkeypatch.setattr(module, 'get_event', self.wrap_sse(module.get_event))
+
+
+class WebsocketPatcher(BasePatcher):
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name, 'Wsocket')
+
+    def __enter__(self) -> None:
+
+        class WrappedAdapter:
+            @staticmethod
+            def validate_json(validate_input) -> Any:
+
+                # try to prettyfy the input so it's not the json in json event
+                msg = validate_input
+                try:
+                    new_msg = json.loads(msg)
+                    if isinstance(new_msg, dict) and (p := new_msg.get('payload')) is not None:
+                        new_msg['payload'] = json.loads(p)
+                        msg = json.dumps(new_msg)
+                except ValueError:
+                    pass
+
+                self.log(f'{"IN":^6s} {msg}')
+                return adapter.validate_json(validate_input)
+
+        module = HABApp.openhab.connection.plugins.websockets
+        adapter = module.OPENHAB_EVENT_TYPE_ADAPTER
+        self.monkeypatch.setattr(module, 'OPENHAB_EVENT_TYPE_ADAPTER', WrappedAdapter)
 
 
 class MqttPatcher(BasePatcher):

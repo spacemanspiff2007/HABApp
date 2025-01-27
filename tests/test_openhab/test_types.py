@@ -8,8 +8,8 @@ from whenever import SystemDateTime
 
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.definitions import OpenHABDataType, UnDefType
-from HABApp.openhab.definitions import types as types_module
-from HABApp.openhab.definitions.types import (
+from HABApp.openhab.definitions import oh_types as types_module
+from HABApp.openhab.definitions.oh_types import (
     DateTimeType,
     DecimalType,
     HSBType,

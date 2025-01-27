@@ -10,6 +10,7 @@ from HABApp.openhab.events import (
     GroupStateChangedEvent,
     GroupStateUpdatedEvent,
     ItemAddedEvent,
+    ItemRemovedEvent,
     ItemCommandEvent,
     ItemStateChangedEvent,
     ItemStateEvent,
@@ -141,6 +142,21 @@ def test_ItemUpdatedEvent() -> None:
     assert event.tags == frozenset(['tag1', 'tag5'])
     assert event.groups == frozenset(['abc', 'def'])
     assert str(event) == '<ItemUpdatedEvent name: NameUpdated, type: Switch, tags: {tag1, tag5}, groups: {abc, def}>'
+
+
+# noinspection PyPep8Naming
+def test_ItemRemovedEvent() -> None:
+    event = get_event({
+        'topic': 'openhab/items/SwDFRqncax/removed',
+        'payload': '{"type":"Switch","name":"SwDFRqncax","tags":[],"groupNames":["asdf"]}',
+        'type': 'ItemRemovedEvent'
+    })
+    assert isinstance(event, ItemRemovedEvent)
+    assert event.name == 'SwDFRqncax'
+    assert event.type == 'Switch'
+    assert event.label is None
+    assert event.tags == frozenset()
+    assert event.groups == frozenset(['asdf'])
 
 
 # noinspection PyPep8Naming
