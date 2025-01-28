@@ -61,7 +61,7 @@ class ImageItem(OpenhabItem):
             raise InvalidItemValueError.from_item(self, new_value)
 
         # image/png
-        self.image_type = image_type.removeprefix('image/')
+        self.image_type = image_type = image_type.removeprefix('image/')
         # bytes
         return super().set_value((image_type, image_bytes))
 

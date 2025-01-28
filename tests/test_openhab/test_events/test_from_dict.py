@@ -4,6 +4,7 @@ import inspect
 import pytest
 
 from HABApp.openhab.definitions import QuantityValue
+from HABApp.openhab.definitions.websockets import OPENHAB_EVENT_TYPE_ADAPTER
 from HABApp.openhab.events import (
     ChannelDescriptionChangedEvent,
     ChannelTriggeredEvent,
@@ -25,7 +26,11 @@ from HABApp.openhab.events import (
     ThingStatusInfoEvent,
     ThingUpdatedEvent,
 )
-from HABApp.openhab.map_events import EVENT_LIST, get_event
+import HABApp.openhab.events as events_module
+
+
+def get_event(obj: dict):
+    return OPENHAB_EVENT_TYPE_ADAPTER.validate_python(obj).to_event()
 
 
 # noinspection PyPep8Naming
@@ -119,8 +124,8 @@ def test_ItemAddedEvent2() -> None:
 def test_ItemUpdatedEvent() -> None:
     event = get_event({
         'topic': 'openhab/items/NameUpdated/updated',
-        'payload': '[{"type":"Switch","name":"Test","tags":[],"groupNames":[]},'
-                   '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
+        'payload': '[{"type":"Switch","name":"NameUpdated","tags":[],"groupNames":[]},'
+                   '{"type":"Contact","name":"NameUpdated","tags":[],"groupNames":[]}]',
         'type': 'ItemUpdatedEvent'
     })
     assert isinstance(event, ItemUpdatedEvent)
@@ -132,8 +137,8 @@ def test_ItemUpdatedEvent() -> None:
 
     event = get_event({
         'topic': 'openhab/items/NameUpdated/updated',
-        'payload': '[{"type":"Switch","name":"Test","tags":["tag5","tag1"],"groupNames":["def","abc"]},'
-                   '{"type":"Contact","name":"Test","tags":[],"groupNames":[]}]',
+        'payload': '[{"type":"Switch","name":"NameUpdated","tags":["tag5","tag1"],"groupNames":["def","abc"]},'
+                   '{"type":"Contact","name":"NameUpdated","tags":[],"groupNames":[]}]',
         'type': 'ItemUpdatedEvent'
     })
     assert isinstance(event, ItemUpdatedEvent)
@@ -415,7 +420,8 @@ def test_thing_ConfigStatusInfoEvent() -> None:
     assert isinstance(event, ThingConfigStatusInfoEvent)
 
 
-@pytest.mark.parametrize('cls', [*EVENT_LIST])
+@pytest.mark.parametrize('cls', [
+    getattr(events_module, n) for n in dir(events_module) if n.endswith('Event') and n != 'OpenhabEvent'])
 def test_every_event_has_name(cls) -> None:
     # this test ensure that alle events have a name parameter
     assert 'name' in inspect.getfullargspec(cls).annotations

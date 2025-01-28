@@ -79,7 +79,7 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
 
     context = (
         OpenhabContext.new_context(
-            version=(1, 0, 0), session=None, session_options=None, out_queue=None, out_websockets=None)
+            version=(1, 0, 0), session=None, session_options=None, out_queue=None)
     )
 
     # initial item create
@@ -122,7 +122,7 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
 
     context = (
         OpenhabContext.new_context(
-            version=(1, 0, 0), session=None, session_options=None, out_queue=None, out_websockets=None)
+            version=(1, 0, 0), session=None, session_options=None, out_queue=None)
     )
 
     # initial thing create

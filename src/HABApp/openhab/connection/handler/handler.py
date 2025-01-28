@@ -69,7 +69,6 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             timeout=aiohttp.ClientTimeout(total=None),
             json_serialize=dump_json,
             auth=aiohttp.BasicAuth(user, password),
-            read_bufsize=int(config.buffer)
         )
         self.request = self.session._request
 

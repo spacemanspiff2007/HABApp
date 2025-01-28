@@ -27,7 +27,6 @@ from HABApp.openhab.item_to_reg import (
     remove_from_registry,
     remove_thing_from_registry,
 )
-from HABApp.openhab.map_events import get_event
 
 
 log = logging.getLogger('HABApp.openhab.items')

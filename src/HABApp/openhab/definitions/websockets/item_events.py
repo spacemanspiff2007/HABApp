@@ -84,7 +84,7 @@ class ItemCommandEvent(BaseEvent):
 class PredictedPayloadModel(BaseModel):
     type: str = Field(alias='predictedType')
     value: str = Field(alias='predictedValue')
-    is_confirmation: str = Field(alias='isConfirmation')
+    is_confirmation: bool = Field(alias='isConfirmation')
 
 
 class ItemStatePredictedEvent(BaseEvent):

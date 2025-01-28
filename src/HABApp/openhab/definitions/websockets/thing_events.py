@@ -40,7 +40,7 @@ class ThingStatusInfoChangedEvent(BaseEvent):
     def to_event(self) -> TargetThingStatusInfoChangedEvent:
         new, old = self.payload
         return TargetThingStatusInfoChangedEvent(
-            name=self.topic[15:-7],
+            name=self.topic[15:-14],
             status=new.status, detail=new.detail, description=new.description,
             old_status=old.status, old_detail=old.detail, old_description=old.description
         )
@@ -63,7 +63,7 @@ class ThingConfigStatusInfoEvent(BaseEvent):
     def to_event(self) -> TargetThingConfigStatusInfoEvent:
         messages = self.payload.messages
         return TargetThingConfigStatusInfoEvent(
-            name=self.topic[15:-14],
+            name=self.topic[15:-7],
             config_messages={m.parameter: m.type for m in messages}
         )
 
@@ -119,7 +119,7 @@ class ThingRemovedEvent(BaseEvent):
 
 class ThingFirmwareStatusInfoPayload(BaseModel):
     name: Any = Field(alias='thingUID')
-    status: str = Field(alias='firmwareStatus ')
+    status: str = Field(alias='firmwareStatus')
     version: Any | None = None
 
 

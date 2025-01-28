@@ -121,7 +121,7 @@ class ThingRegistryBaseEvent(OpenhabEvent):
     :ivar str type:
     :ivar str label:
     :ivar str location:
-    :ivar list[dict[str, Any]] channels:
+    :ivar tuple[dict[str, Any], ...] channels:
     :ivar dict[str, Any] configuration:
     :ivar dict[str, str] properties:
     """

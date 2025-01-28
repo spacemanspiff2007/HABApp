@@ -16,4 +16,5 @@ def test_image_load() -> None:
 
     assert isinstance(i, ImageItem)
     assert i.image_type == 'png'
-    assert isinstance(i.value, bytes)
+    assert i.value[0] == 'png'
+    assert isinstance(i.value[1], bytes)

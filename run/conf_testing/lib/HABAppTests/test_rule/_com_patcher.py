@@ -115,22 +115,6 @@ class RestPatcher(BasePatcher):
                 m.setattr(module, name, self.wrap_http(getattr(module, name)))
 
 
-class SsePatcher(BasePatcher):
-
-    def __init__(self, name: str) -> None:
-        super().__init__(name, 'SSE')
-
-    def wrap_sse(self, to_wrap: Callable[[dict], Any]) -> Callable[[dict], Any]:
-        def new_call(_dict: dict) -> Any:
-            self.log(f'{"SSE":^6s} {_dict}')
-            return to_wrap(_dict)
-        return new_call
-
-    def __enter__(self) -> None:
-        module = HABApp.openhab.process_events
-        self.monkeypatch.setattr(module, 'get_event', self.wrap_sse(module.get_event))
-
-
 class WebsocketPatcher(BasePatcher):
 
     def __init__(self, name: str) -> None:

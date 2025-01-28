@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from asyncio import TaskGroup, gather, sleep
+from asyncio import TaskGroup, sleep
 from base64 import b64encode
 from inspect import isclass
 from typing import Annotated, Final, get_args, get_origin
@@ -9,8 +9,9 @@ from typing import Annotated, Final, get_args, get_origin
 from aiohttp import BasicAuth, ClientError, ClientWebSocketResponse, WSMsgType
 from pydantic import ValidationError
 
+import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.const.json import dump_json, load_json
+from HABApp.core.const.json import dump_json
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
@@ -19,14 +20,10 @@ from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.definitions.websockets import (
     OPENHAB_EVENT_TYPE,
     OPENHAB_EVENT_TYPE_ADAPTER,
-    WebsocketHeartbeatEvent,
-    WebsocketRequestFailedEvent,
     WebsocketSendTypeFilter,
     WebsocketTopicEnum,
-    WebsocketTypeFilterEvent,
 )
 from HABApp.openhab.definitions.websockets.base import BaseModel
-from HABApp.openhab.events import OpenhabEvent
 from HABApp.openhab.process_events import on_openhab_event
 
 
@@ -96,7 +93,12 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
             session = self.plugin_connection.context.session
             token = self._build_token(session.auth)
 
-            async with session.ws_connect(f'/ws?accessToken={token:s}', autoping=False) as ws:
+            ws_cfg = HABApp.CONFIG.openhab.connection.websocket
+            max_msg_size = int(ws_cfg.max_msg_size)
+
+            async with session.ws_connect(
+                    f'/ws?accessToken={token:s}', autoping=False, max_msg_size=max_msg_size) as ws:
+
                 self._websocket = ws
                 try:
                     async with TaskGroup() as tg:
@@ -204,5 +206,5 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
             _on_openhab_event(event)
 
-        # We need to raise an Error otherwise the task group will not exit
+        # We need to raise an error otherwise the task group will not exit
         raise WebSocketClosedError()
