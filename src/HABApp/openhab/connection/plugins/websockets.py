@@ -4,12 +4,11 @@ import logging
 from asyncio import TaskGroup, gather, sleep
 from base64 import b64encode
 from inspect import isclass
-from typing import Final, Annotated
+from typing import Annotated, Final, get_args, get_origin
 
 from aiohttp import BasicAuth, ClientError, ClientWebSocketResponse, WSMsgType
 from pydantic import ValidationError
 
-from typing import get_args, get_origin
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.const.json import dump_json, load_json
 from HABApp.core.const.log import TOPIC_EVENTS
@@ -17,8 +16,15 @@ from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
 from HABApp.core.logger import HABAppError
 from HABApp.openhab.connection.connection import OpenhabConnection
-from HABApp.openhab.definitions.websockets import OPENHAB_EVENT_TYPE_ADAPTER, WebsocketHeartbeatEvent, \
-    WebsocketTypeFilterEvent, WebsocketRequestFailedEvent, WebsocketTopicEnum, OPENHAB_EVENT_TYPE
+from HABApp.openhab.definitions.websockets import (
+    OPENHAB_EVENT_TYPE,
+    OPENHAB_EVENT_TYPE_ADAPTER,
+    WebsocketHeartbeatEvent,
+    WebsocketRequestFailedEvent,
+    WebsocketSendTypeFilter,
+    WebsocketTopicEnum,
+    WebsocketTypeFilterEvent,
+)
 from HABApp.openhab.definitions.websockets.base import BaseModel
 from HABApp.openhab.events import OpenhabEvent
 from HABApp.openhab.process_events import on_openhab_event
@@ -144,13 +150,11 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
 
         names = self._get_type_names_from_adapter()
-        msg = WebsocketTypeFilterEvent(
-            type='WebSocketEvent', topic='openhab/websocket/filter/type', payload=dump_json(names),
-            source='HABApp', event_id='WebsocketTypeFilterMsg'
-        )
+        names = [n for n in names if n != 'ItemStateEvent']
+        msg = WebsocketSendTypeFilter(payload=names)
 
         log.debug(f'Send: {msg.model_dump_json(by_alias=True)}')
-        await ws.send_str(msg.model_dump_json(by_alias=True, round_trip=True))
+        await ws.send_str(msg.model_dump_json(by_alias=True))
 
 
         # Websocket constants
@@ -169,7 +173,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 log_events._log(DEBUG, data, ())
 
             try:
-                oh_event = OPENHAB_EVENT_TYPE_ADAPTER.validate_json(data)   # type: OPENHAB_EVENT_TYPE
+                oh_event = OPENHAB_EVENT_TYPE_ADAPTER.validate_json(data)
             except ValidationError as e:
                 HABAppError(log).add(f'Input: {data:s}').add_exception(e).dump()
                 continue
@@ -196,8 +200,9 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 case 'ItemTimeSeriesUpdatedEvent' | 'ItemTimeSeriesEvent':
                     continue
 
-            event: OpenhabEvent = oh_event.to_event()
+            event = oh_event.to_event()
 
             _on_openhab_event(event)
 
+        # We need to raise an Error otherwise the task group will not exit
         raise WebSocketClosedError()

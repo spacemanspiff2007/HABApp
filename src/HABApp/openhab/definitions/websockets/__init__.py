@@ -6,6 +6,7 @@ from .all_events import (
 from .websocket_events import (
     WebsocketHeartbeatEvent,
     WebsocketRequestFailedEvent,
+    WebsocketSendTypeFilter,
     WebsocketTopicEnum,
     WebsocketTypeFilterEvent,
 )

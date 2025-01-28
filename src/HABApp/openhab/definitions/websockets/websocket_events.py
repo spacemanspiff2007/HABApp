@@ -4,7 +4,7 @@ from pydantic import Field, Json
 
 from HABApp.core.const.const import StrEnum
 
-from .base import BaseEvent
+from .base import SERIALIZE_TO_JSON_STR, BaseEvent, BaseOutEvent
 
 
 class WebsocketTopicEnum(StrEnum):
@@ -38,3 +38,12 @@ WebsocketEventType = Annotated[
     WebsocketTypeFilterEvent,
     Field(discriminator='topic')
 ]
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Outgoing events
+# ----------------------------------------------------------------------------------------------------------------------
+class WebsocketSendTypeFilter(BaseOutEvent):
+    type: Literal['WebSocketEvent'] = 'WebSocketEvent'
+    topic: Literal[WebsocketTopicEnum.TYPE_FILTER] = WebsocketTopicEnum.TYPE_FILTER
+    payload: Annotated[list[str], SERIALIZE_TO_JSON_STR]
