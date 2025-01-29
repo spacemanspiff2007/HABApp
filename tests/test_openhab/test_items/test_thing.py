@@ -163,9 +163,7 @@ def test_thing_updated_event(test_thing: Thing) -> None:
         assert test_thing._last_change.instant == instant7
 
 
-def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Thing) -> None:
-    monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
-
+def test_thing_called_status_event(ir: ItemRegistry, test_thing: Thing) -> None:
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
@@ -176,9 +174,7 @@ def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Th
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: Thing) -> None:
-    monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
-
+def test_thing_called_updated_event(ir: ItemRegistry, test_thing: Thing) -> None:
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
@@ -189,9 +185,7 @@ def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: T
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry) -> None:
-    monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
-
+def test_thing_handler_add_event(ir: ItemRegistry) -> None:
     name = 'AddedThing'
     type = 'thing:type'
     label = 'my_label'

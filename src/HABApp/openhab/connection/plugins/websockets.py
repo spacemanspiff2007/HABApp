@@ -61,7 +61,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         # basic auth
         return b64encode(f'{login}:{password}'.encode()).decode()
 
-    async def _websocket_ping(self) -> None:
+    async def _websocket_ping(self, ping_interval: float) -> None:
         log = self.plugin_connection.log
         log.debug('Websocket ping task started')
 
@@ -76,7 +76,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         try:
             while True:
-                await sleep(7)
+                await sleep(ping_interval)
 
                 if (ws := self._websocket) is None:
                     reason = ' (is None)'
@@ -95,6 +95,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
             ws_cfg = HABApp.CONFIG.openhab.connection.websocket
             max_msg_size = int(ws_cfg.max_msg_size)
+            ping_interval = ws_cfg.ping_interval
 
             async with session.ws_connect(
                     f'/ws?accessToken={token:s}', autoping=False, max_msg_size=max_msg_size) as ws:
@@ -102,7 +103,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 self._websocket = ws
                 try:
                     async with TaskGroup() as tg:
-                        tg.create_task(self._websocket_ping())
+                        tg.create_task(self._websocket_ping(ping_interval))
                         tg.create_task(self._websocket_events())
                 finally:
                     self._websocket = None
@@ -140,6 +141,41 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         return sorted(names)
 
+    async def _setup_websocket_filter(self, ws: ClientWebSocketResponse, log: logging.Logger) -> None:
+        # setup event type filter
+        filter_cfg = HABApp.CONFIG.openhab.connection.websocket.event_filter
+        supported_event_names = set(self._get_type_names_from_adapter())
+
+        names: set[str] = set()
+        if filter_cfg.event_type.is_auto():
+            names.update(supported_event_names)
+
+            # We ignore the ItemStateEvent because we will process the ItemStateUpdatedEvent
+            # which has the correct value type for the item
+            names.discard('ItemStateEvent')
+
+            # https://github.com/spacemanspiff2007/HABApp/issues/437
+            # https://github.com/spacemanspiff2007/HABApp/issues/449
+            # openHAB will automatically restore the future states of the item
+            # which means we can safely ignore these events because we will see the ItemStateUpdatedEvent
+            names.discard('ItemTimeSeriesUpdatedEvent')
+            names.discard('ItemTimeSeriesEvent')
+
+        elif filter_cfg.event_type.is_config():
+            names.update(filter_cfg.types_allowed)
+            if invalid := (names - supported_event_names):
+                log.warning(
+                    f'Invalid event type name{"s" if len(invalid) != 1 else ""} '
+                    f'in filter config: {", ".join(sorted(invalid))}')
+                names -= invalid
+
+        if names:
+            msg = WebsocketSendTypeFilter(payload=sorted(names))
+            log.debug(f'Send: {msg.model_dump_json(by_alias=True)}')
+            await ws.send_str(msg.model_dump_json(by_alias=True))
+
+        return None
+
     async def _websocket_events(self) -> None:
         if (ws := self._websocket) is None:
             return None
@@ -150,14 +186,8 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         log_events = logging.getLogger(f'{TOPIC_EVENTS}.openhab')
         DEBUG = logging.DEBUG
 
-
-        names = self._get_type_names_from_adapter()
-        names = [n for n in names if n != 'ItemStateEvent']
-        msg = WebsocketSendTypeFilter(payload=names)
-
-        log.debug(f'Send: {msg.model_dump_json(by_alias=True)}')
-        await ws.send_str(msg.model_dump_json(by_alias=True))
-
+        # Setup event filter
+        await self._setup_websocket_filter(ws, log)
 
         # Websocket constants
         ws_type_text = WSMsgType.TEXT
@@ -180,30 +210,17 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 HABAppError(log).add(f'Input: {data:s}').add_exception(e).dump()
                 continue
 
-            match oh_event.type:
-                # We ignore the ItemStateEvent because we will process the ItemStateUpdatedEvent
-                # which has the correct value type
-                case 'ItemStateEvent':
+            # Websocket events are not processed by the event bus
+            if oh_event.type == 'WebSocketEvent':
+                if oh_event.topic == topic_heartbeat:
                     continue
-
-                case 'WebSocketEvent':
-                    if oh_event.topic == topic_heartbeat:
-                        continue
-                    if oh_event.type == topic_error:
-                        continue
-                    log.debug(f'Receive: {data}')
-                    log.debug(str(oh_event))
+                if oh_event.type == topic_error:
                     continue
-
-                # # https://github.com/spacemanspiff2007/HABApp/issues/437
-                # # https://github.com/spacemanspiff2007/HABApp/issues/449
-                # # openHAB will automatically restore the future states of the item
-                # # which means we can safely ignore these events because we will see the ItemStateUpdatedEvent
-                case 'ItemTimeSeriesUpdatedEvent' | 'ItemTimeSeriesEvent':
-                    continue
+                log.debug(f'Receive: {data}')
+                log.debug(str(oh_event))
+                continue
 
             event = oh_event.to_event()
-
             _on_openhab_event(event)
 
         # We need to raise an error otherwise the task group will not exit

@@ -157,6 +157,11 @@ Connection
 
 .. autopydantic_model:: Connection
 
+.. autopydantic_model:: Websocket
+
+.. autopydantic_model:: WebsocketEventFilter
+
+
 Ping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
