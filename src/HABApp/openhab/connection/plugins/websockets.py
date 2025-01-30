@@ -220,7 +220,12 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 log.debug(str(oh_event))
                 continue
 
-            event = oh_event.to_event()
+            try:
+                event = oh_event.to_event()
+            except ValueError as e:
+                HABAppError(log).add(f'Input: {data:s}').add(f'{e} ({type(e)}').dump()
+                continue
+
             _on_openhab_event(event)
 
         # We need to raise an error otherwise the task group will not exit

@@ -12,6 +12,8 @@ class ColorType:
 
 
 class RGB(ColorType):
+    __slots__ = ('_r', '_g', '_b')  # noqa: RUF023
+
     _RGB_MAX: int = 2 ** 8 - 1
 
     def __init__(self, r: int, g: int, b: int) -> None:
@@ -159,6 +161,7 @@ PERCENT_FACTOR: Final = 100
 
 
 class HSB(ColorType):
+    __slots__ = ('_hue', '_saturation', '_brightness')  # noqa: RUF023
 
     def __init__(self, hue: float, saturation: float, brightness: float) -> None:
         if not 0 <= hue <= HUE_FACTOR or not 0 <= saturation <= PERCENT_FACTOR or not 0 <= brightness <= PERCENT_FACTOR:
