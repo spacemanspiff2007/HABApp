@@ -5,7 +5,7 @@ from pydantic import Field, Json
 from HABApp.core.const.const import StrEnum
 
 from .base import SERIALIZE_TO_JSON_STR, BaseEvent, BaseOutEvent
-from .item_value_types import ItemValueBase
+from .item_value_types import OpenHabValueType
 
 
 class WebsocketTopicEnum(StrEnum):
@@ -60,11 +60,10 @@ class WebsocketSendTypeFilter(BaseOutEvent):
 class ItemStateSendEvent(BaseOutEvent):
     type: Literal['ItemStateEvent'] = 'ItemStateEvent'
     topic: str
-    payload: Annotated[ItemValueBase, SERIALIZE_TO_JSON_STR]
+    payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
 
 
 class ItemCommandSendEvent(BaseOutEvent):
     type: Literal['ItemCommandEvent'] = 'ItemCommandEvent'
     topic: str
-    payload: Annotated[ItemValueBase, SERIALIZE_TO_JSON_STR]
-
+    payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]

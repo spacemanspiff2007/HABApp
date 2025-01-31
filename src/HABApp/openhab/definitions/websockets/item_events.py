@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, override
+from typing import Annotated, Literal, override
 
 from pydantic import Field, Json
 
@@ -16,12 +16,8 @@ from HABApp.openhab.events.item_events import ItemStateUpdatedEvent as TargetIte
 from HABApp.openhab.events.item_events import ItemUpdatedEvent as TargetItemUpdatedEvent
 from HABApp.openhab.map_values import map_openhab_values
 
-from .base import BaseEvent, BaseModel
-
-
-class ValuePayload(BaseModel):
-    type: str
-    value: str
+from .base import SERIALIZE_TO_JSON_STR, BaseEvent, BaseModel, BaseOutEvent
+from .item_value_types import OpenHabValueType, OpenHabValueTypeAdapter
 
 
 class ValueChangedPayload(BaseModel):
@@ -33,7 +29,7 @@ class ValueChangedPayload(BaseModel):
 
 class ItemStateEvent(BaseEvent):
     type: Literal['ItemStateEvent']
-    payload: Json[ValuePayload]
+    payload: Json[OpenHabValueType]
 
     @override
     def to_event(self) -> TargetItemStateEvent:
@@ -45,7 +41,7 @@ class ItemStateEvent(BaseEvent):
 
 class ItemStateUpdatedEvent(BaseEvent):
     type: Literal['ItemStateUpdatedEvent']
-    payload: Json[ValuePayload]
+    payload: Json[OpenHabValueType]
 
     @override
     def to_event(self) -> TargetItemStateUpdatedEvent:
@@ -62,6 +58,8 @@ class ItemStateChangedEvent(BaseEvent):
     @override
     def to_event(self) -> TargetItemStateChangedEvent:
         payload = self.payload
+        new = (ta := OpenHabValueTypeAdapter).validate_python({'type': payload.type, 'value': payload.value})
+        old = ta.validate_python({'type': payload.old_type, 'value': payload.old_value})
         return TargetItemStateChangedEvent(
             name=self.topic[14:-13],
             value=map_openhab_values(payload.type, payload.value),
@@ -71,7 +69,7 @@ class ItemStateChangedEvent(BaseEvent):
 
 class ItemCommandEvent(BaseEvent):
     type: Literal['ItemCommandEvent']
-    payload: Json[ValuePayload]
+    payload: Json[OpenHabValueType]
 
     @override
     def to_event(self) -> TargetItemCommandEvent:
@@ -101,7 +99,7 @@ class ItemStatePredictedEvent(BaseEvent):
 
 class GroupStateUpdatedEvent(BaseEvent):
     type: Literal['GroupStateUpdatedEvent']
-    payload: Json[ValuePayload]
+    payload: Json[OpenHabValueType]
 
     @override
     def to_event(self) -> TargetGroupStateUpdatedEvent:
@@ -120,6 +118,8 @@ class GroupStateChangedEvent(BaseEvent):
     def to_event(self) -> TargetGroupStateChangedEvent:
         parts = self.topic.split('/')
         payload = self.payload
+        new = (ta := OpenHabValueTypeAdapter).validate_python({'type': payload.type, 'value': payload.value})
+        old = ta.validate_python({'type': payload.old_type, 'value': payload.old_value})
         return TargetGroupStateChangedEvent(
             name=parts[2], item=parts[3],
             value=map_openhab_values(payload.type, payload.value),
@@ -184,3 +184,18 @@ class ItemRemovedEvent(BaseEvent):
         return TargetItemRemovedEvent(
             type=payload.type, name=payload.name, label=payload.label, tags=payload.tags, groups=payload.groups
         )
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Outgoing events
+# ----------------------------------------------------------------------------------------------------------------------
+class ItemStateSendEvent(BaseOutEvent):
+    type: Literal['ItemStateEvent'] = 'ItemStateEvent'
+    topic: str
+    payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
+
+
+class ItemCommandSendEvent(BaseOutEvent):
+    type: Literal['ItemCommandEvent'] = 'ItemCommandEvent'
+    topic: str
+    payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]

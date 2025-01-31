@@ -16,6 +16,7 @@ def get_dependencies() -> list[str]:
         'eascheduler',
         'easyconfig',
         'fastnumbers',
+        'geopy',
         'pydantic',
         'stack_data',
         'voluptuous',

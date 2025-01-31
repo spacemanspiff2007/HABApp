@@ -6,7 +6,7 @@ from HABApp.openhab.events import OpenhabEvent
 
 
 class BaseModel(_BaseModel):
-    model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
+    model_config = ConfigDict(extra='forbid', strict=True, frozen=True, validate_default=True, validate_assignment=True)
 
 
 class BaseEvent(BaseModel):
