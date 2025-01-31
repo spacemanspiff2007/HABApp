@@ -66,6 +66,17 @@ class Point:
         if isinstance(other, self.__class__):
             return (self._latitude == other._latitude and self._longitude == other._longitude and
                     self._elevation == other._elevation)
+
+        if isinstance(other, tuple):
+            # compare directly with tuple so we don't raise and exception
+            match len(other):
+                case 2:
+                    lat, long = other
+                    return self._latitude == lat and self._longitude == long and self._elevation is None
+                case 3:
+                    lat, long, elev = other
+                    return self._latitude == lat and self._longitude == long and self._elevation == elev
+
         return NotImplemented
 
     def __getitem__(self, item: int | str) -> float:
