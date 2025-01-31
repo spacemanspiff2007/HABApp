@@ -38,7 +38,7 @@ def msg_id() -> str:
 
 
 class BaseOutEvent(BaseModel):
-    model_config = ConfigDict(extra='forbid', strict=True, populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     topic: str
 

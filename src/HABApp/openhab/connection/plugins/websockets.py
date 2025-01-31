@@ -11,19 +11,19 @@ from pydantic import ValidationError
 
 import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.const.json import dump_json
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
-from HABApp.core.logger import HABAppError
+from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.definitions.websockets import (
     OPENHAB_EVENT_TYPE,
     OPENHAB_EVENT_TYPE_ADAPTER,
+    WebsocketHeartbeatEvent,
     WebsocketSendTypeFilter,
     WebsocketTopicEnum,
 )
-from HABApp.openhab.definitions.websockets.base import BaseModel
+from HABApp.openhab.definitions.websockets.base import BaseModel, BaseOutEvent
 from HABApp.openhab.process_events import on_openhab_event
 
 
@@ -42,11 +42,14 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         self._websocket: ClientWebSocketResponse | None = None
 
+        self._sent_events: Final[dict[str, BaseOutEvent]] = {}
+
     async def on_connected(self) -> None:
         self.task.start()
 
     async def on_disconnected(self) -> None:
         await self.task.cancel_wait()
+        self._sent_events.clear()
 
     @staticmethod
     def _build_token(auth: BasicAuth) -> str:
@@ -65,28 +68,39 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         log = self.plugin_connection.log
         log.debug('Websocket ping task started')
 
-        ping_text = dump_json({
-            'type': 'WebSocketEvent',
-            'topic': 'openhab/websocket/heartbeat',
-            'payload': 'PING',
-            'source': 'HABApp',
-        })
+        ping_text: Final = WebsocketHeartbeatEvent(
+            type='WebSocketEvent',
+            topic='openhab/websocket/heartbeat',
+            payload='PING',
+        ).model_dump_json(by_alias=True, exclude_none=True)
 
-        reason: str = ''
+        stop_reason: str = ''
+        msgs_last: frozenset[str] = frozenset()
 
         try:
             while True:
                 await sleep(ping_interval)
 
                 if (ws := self._websocket) is None:
-                    reason = ' (is None)'
+                    stop_reason = ' (is None)'
                     return None
                 await ws.send_str(ping_text)
+
+                # Remove stale events where we didn't get an answer
+                in_flight = frozenset(self._sent_events)
+                if to_remove := msgs_last & in_flight:
+                    wl = HABAppWarning(log).add(f'Removing events in flight since {ping_interval}s:')
+                    for msg in to_remove:
+                        obj = self._sent_events.pop(msg)
+                        wl.add(f' - {obj.model_dump_json(by_alias=True, exclude_none=True)}')
+                    wl.dump()
+                msgs_last = in_flight
+
         except Exception as e:
-            reason = f' {e} ({type(e)})'
+            stop_reason = f' {e} ({type(e)})'
             raise
         finally:
-            log.debug(f'Websocket ping task stopped{reason:s}')
+            log.debug(f'Websocket ping task stopped{stop_reason:s}')
 
     async def websockets_task(self) -> None:
         try:
@@ -184,7 +198,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         _on_openhab_event = on_openhab_event
         log = self.plugin_connection.log
         log_events = logging.getLogger(f'{TOPIC_EVENTS}.openhab')
-        DEBUG = logging.DEBUG
+        debug_lvl = logging.DEBUG
 
         # Setup event filter
         await self._setup_websocket_filter(ws, log)
@@ -201,8 +215,8 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 log.warning(f'Message with unexpected type received: {msg}')
                 continue
 
-            if log_events.isEnabledFor(DEBUG):
-                log_events._log(DEBUG, data, ())
+            if log_events.isEnabledFor(debug_lvl):
+                log_events._log(debug_lvl, data, ())
 
             try:
                 oh_event = OPENHAB_EVENT_TYPE_ADAPTER.validate_json(data)
@@ -215,10 +229,13 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 if oh_event.topic == topic_heartbeat:
                     continue
                 if oh_event.type == topic_error:
+                    HABAppError(log).add(f'Receive: {data}').add(f'{oh_event}').dump()
                     continue
                 log.debug(f'Receive: {data}')
                 log.debug(str(oh_event))
                 continue
+
+            print(oh_event)
 
             try:
                 event = oh_event.to_event()
