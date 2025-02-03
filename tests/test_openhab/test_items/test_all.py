@@ -100,7 +100,7 @@ def test_doc_ivar(cls) -> None:
 
     init_missing = {
         **{k: ('last_change', 'last_update') for k in correct_hints},
-        ImageItem: ('image_type', 'last_change', 'last_update'),
+        ImageItem: ('image_type', 'image_data', 'last_change', 'last_update'),
         ColorItem: ('hue', 'saturation', 'brightness', 'last_change', 'last_update')
     }
 
@@ -119,13 +119,12 @@ def test_doc_ivar(cls) -> None:
 
     if cls is ColorItem:
         create_with['initial_value'] = HSB(0, 0, 0)
+    if cls is ImageItem:
+        create_with['initial_value'] = RawType('image/png', b'\x01')
 
     obj = cls(**create_with)
     for name in class_vars:
         assert hasattr(obj, name)
-
-    if cls is ImageItem:
-        class_vars.pop('image_type')
 
     class_vars.pop('value')
 

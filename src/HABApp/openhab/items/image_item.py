@@ -1,12 +1,10 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Final
-
-from immutables import Map
+from typing import TYPE_CHECKING, Final
 
 from HABApp.core.const import MISSING
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.openhab.definitions import RawType as _RawType
-from HABApp.openhab.definitions import RawValue, RefreshType, UnDefType
+from HABApp.openhab.definitions import RefreshType, UnDefType
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 from HABApp.openhab.types import RawType
 
@@ -22,7 +20,6 @@ class ImageItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar RawType value: |oh_item_desc_value|
-    :ivar str | None image_type: image type (e.g. jpg or png)
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
