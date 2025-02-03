@@ -25,6 +25,7 @@ from HABApp.openhab.items import (
 )
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
+from HABApp.openhab.types import RawType
 
 from ...helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
 
@@ -92,7 +93,7 @@ def test_doc_ivar(cls) -> None:
         LocationItem: {'value': tuple[float, float, float | None]},
 
         DatetimeItem: {'value': datetime},
-        ImageItem: {'value': bytes},
+        ImageItem: {'value': RawType},
 
         GroupItem: {'value': Any}
     }

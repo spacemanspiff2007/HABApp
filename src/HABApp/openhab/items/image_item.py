@@ -4,9 +4,11 @@ from typing import TYPE_CHECKING, Any, Final
 from immutables import Map
 
 from HABApp.core.const import MISSING
-from HABApp.core.errors import InvalidItemValueError
-from HABApp.openhab.definitions import RawType, RawValue, RefreshType, UnDefType
+from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
+from HABApp.openhab.definitions import RawType as _RawType
+from HABApp.openhab.definitions import RawValue, RefreshType, UnDefType
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.types import RawType
 
 
 if TYPE_CHECKING:
@@ -19,7 +21,7 @@ class ImageItem(OpenhabItem):
     """ImageItem which accepts and converts the data types from OpenHAB
 
     :ivar str name: |oh_item_desc_name|
-    :ivar bytes value: |oh_item_desc_value|
+    :ivar RawType value: |oh_item_desc_value|
     :ivar str | None image_type: image type (e.g. jpg or png)
 
     :ivar str | None label: |oh_item_desc_label|
@@ -28,42 +30,39 @@ class ImageItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('ImageItem', RawType, UnDefType)
+    _update_to_oh: Final = ValueToOh('ImageItem', _RawType, UnDefType)
     _command_to_oh: Final = ValueToOh('ImageItem', RefreshType)
-    _state_from_oh_str: Final = staticmethod(RawType.from_oh_str)
+    _state_from_oh_str: Final = staticmethod(_RawType.from_oh_str)
 
-    def __init__(self, name: str, initial_value: Any = None,
-                 label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()) -> None:
-        super().__init__(name, None, label, tags, groups, metadata)
+    @property
+    def image_type(self) -> str:
+        """Image type (e.g. jpg or png)"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.type
 
-        # this item is unique because we also save the image type and thus have two states
-        self.image_type: str | None = None
+    @property
+    def image_bytes(self) -> bytes:
+        """Image bytes"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.data
 
-        # so we set all fields properly
-        if initial_value is not None:
-            self.set_value(initial_value)
+    def set_value(self, new_value: RawType | tuple[str, bytes] | None) -> bool:
 
-    def set_value(self, new_value: RawValue | tuple[str, bytes] | None) -> bool:
-
-        if isinstance(new_value, RawValue):
-            image_type = new_value.type
-            image_bytes = new_value.value
-        elif isinstance(new_value, tuple):
-            image_type, image_bytes = new_value
-        elif new_value is None:
-            self.image_type = None
+        if isinstance(new_value, RawType):
             return super().set_value(new_value)
-        else:
-            raise InvalidItemValueError.from_item(self, new_value)
 
-        if not image_type.startswith('image/') or not isinstance(image_bytes, bytes):
-            raise InvalidItemValueError.from_item(self, new_value)
+        if isinstance(new_value, tuple):
+            image_type, image_bytes = new_value
+            if not image_type.startswith('image/') or not isinstance(image_bytes, bytes):
+                raise InvalidItemValueError.from_item(self, new_value)
+            return super().set_value(RawType.create(image_type, image_bytes))
 
-        # image/png
-        self.image_type = image_type = image_type.removeprefix('image/')
-        # bytes
-        return super().set_value((image_type, image_bytes))
+        if new_value is None:
+            return super().set_value(new_value)
+
+        raise InvalidItemValueError.from_item(self, new_value)
 
     def oh_post_update(self, value: bytes = MISSING, image_type: str | None = None) -> None:
         """Post an update to an openHAB image with new image data. Image type is automatically detected,
