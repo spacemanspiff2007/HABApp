@@ -7,9 +7,9 @@ from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 
 
 if TYPE_CHECKING:
-    datetime = datetime
-    Mapping = Mapping
-    MetaData = MetaData
+    datetime = datetime     # noqa: PLW0127
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/DateTimeItem.java

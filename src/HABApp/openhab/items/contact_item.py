@@ -8,8 +8,8 @@ from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
 OPEN = OpenClosedType.OPEN

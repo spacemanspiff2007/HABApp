@@ -13,8 +13,8 @@ from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
 
 
 if TYPE_CHECKING:
-    MetaData = MetaData
-    Mapping = Mapping
+    MetaData = MetaData     # noqa: PLW0127
+    Mapping = Mapping       # noqa: PLW0127
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/NumberItem.java

@@ -20,8 +20,8 @@ from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/ColorItem.java

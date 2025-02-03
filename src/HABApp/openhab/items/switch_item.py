@@ -13,8 +13,8 @@ from HABApp.openhab.items.commands import OnOffCommand
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
 ON: Final = OnOffType.ON
