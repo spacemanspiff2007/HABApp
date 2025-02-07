@@ -31,7 +31,7 @@ class BenchBaseRule(HABApp.Rule):
         self.errors.clear()
         self.err_watcher = self.listen_event(TOPIC_ERRORS, self._err_event)
 
-        self.run.at(1, self.do_bench_run)
+        self.run.once(1, self.do_bench_run)
 
     def do_bench_run(self) -> None:
         try:

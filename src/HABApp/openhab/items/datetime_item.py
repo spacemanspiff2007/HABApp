@@ -2,8 +2,8 @@ from collections.abc import Mapping
 from datetime import datetime
 from typing import TYPE_CHECKING, Final
 
-from HABApp.openhab.definitions import DateTimeType, RefreshType, UnDefType
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.definitions.websockets.item_value_types import DateTimeTypeModel
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
@@ -25,6 +25,6 @@ class DatetimeItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('DatetimeItem', DateTimeType, UnDefType)
-    _command_to_oh: Final = ValueToOh('DatetimeItem', DateTimeType, RefreshType)
-    _state_from_oh_str: Final = staticmethod(DateTimeType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('DatetimeItem', DateTimeTypeModel, 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('DatetimeItem', DateTimeTypeModel, 'Refresh')
+    _state_from_oh_str: Final = staticmethod(DateTimeTypeModel.get_value_from_state)

@@ -5,8 +5,7 @@ from typing import Any
 import pytest
 
 from HABApp.core.items import Item
-from HABApp.core.types import HSB
-from HABApp.openhab.definitions import UnDefType
+from HABApp.core.types import HSB, Point
 from HABApp.openhab.items import (
     CallItem,
     ColorItem,
@@ -25,7 +24,7 @@ from HABApp.openhab.items import (
 )
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
-from HABApp.openhab.types import RawType
+from HABApp.openhab.types import RawType, StringList
 
 from ...helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
 
@@ -56,17 +55,17 @@ def test_conditional_function_call_signature(cls) -> None:
 
 
 @pytest.mark.parametrize('cls', item_dict.values())
-def test_refresh_command(cls: type[OpenhabItem], sent_commands) -> None:
+def test_refresh_command(cls: type[OpenhabItem], websocket_events) -> None:
     cls('name').oh_send_command('REFRESH')
-    sent_commands.assert_called_with('REFRESH')
+    websocket_events.assert_called_once('Refresh', 'REFRESH', event='command')
     cls('name').command_value('REFRESH')
-    sent_commands.assert_called_with('REFRESH')
+    websocket_events.assert_called_once('Refresh', 'REFRESH', event='command')
 
 
 @pytest.mark.parametrize('cls', item_dict.values())
-def test_null_update(cls: type[OpenhabItem], posted_updates) -> None:
+def test_null_update(cls: type[OpenhabItem], websocket_events) -> None:
     cls('name').oh_post_update(None)
-    posted_updates.assert_called_with(UnDefType.NULL)
+    websocket_events.assert_called_once('UnDef', 'NULL', event='update')
 
 
 @pytest.mark.parametrize('cls', item_dict.values())
@@ -89,8 +88,8 @@ def test_doc_ivar(cls) -> None:
         DimmerItem:        {'value': int | float},
 
         ColorItem: {'value': HSB},
-        CallItem: {'value': tuple[str, ...]},
-        LocationItem: {'value': tuple[float, float, float | None]},
+        CallItem: {'value': StringList},
+        LocationItem: {'value': Point},
 
         DatetimeItem: {'value': datetime},
         ImageItem: {'value': RawType},
@@ -120,13 +119,16 @@ def test_doc_ivar(cls) -> None:
     if cls is ColorItem:
         create_with['initial_value'] = HSB(0, 0, 0)
     if cls is ImageItem:
-        create_with['initial_value'] = RawType('image/png', b'\x01')
+        create_with['initial_value'] = RawType.create('image/png', b'\x01')
 
     obj = cls(**create_with)
     for name in class_vars:
         assert hasattr(obj, name)
 
     class_vars.pop('value')
+
+    if cls is NumberItem:
+        class_vars.pop('dimension')
 
     # compare with base class so we have a consistent signature
     target_vars = get_ivars_from_docstring(OpenhabItem)

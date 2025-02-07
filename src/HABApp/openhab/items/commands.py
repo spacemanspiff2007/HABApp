@@ -1,14 +1,8 @@
-from typing import Final
-
 from HABApp.core.const.hints import HasNameAttr as _HasNameAttr
-from HABApp.openhab.definitions import OnOffType, UpDownType
-from HABApp.openhab.interface_sync import send_command
-
-
-ON: Final = OnOffType.ON
-OFF: Final = OnOffType.OFF
-UP: Final = UpDownType.UP
-DOWN: Final = UpDownType.DOWN
+from HABApp.core.errors import InvalidItemValueError
+from HABApp.openhab.connection.plugins import send_websocket_event
+from HABApp.openhab.definitions.websockets import ItemCommandSendEvent
+from HABApp.openhab.definitions.websockets.item_value_types import OnOffTypeModel, PercentTypeModel, UpDownTypeModel
 
 
 class OnOffCommand:
@@ -23,28 +17,41 @@ class OnOffCommand:
 
     def on(self: _HasNameAttr) -> None:
         """Command item on"""
-        send_command(self.name, ON)
+        send_websocket_event(
+            ItemCommandSendEvent.create(self.name, OnOffTypeModel(type='OnOff', value='ON'))
+        )
 
     def off(self: _HasNameAttr) -> None:
         """Command item off"""
-        send_command(self.name, OFF)
+        send_websocket_event(
+            ItemCommandSendEvent.create(self.name, OnOffTypeModel(type='OnOff', value='OFF'))
+        )
 
 
 class PercentCommand:
     def percent(self: _HasNameAttr, value: float) -> None:
         """Command to value (in percent)"""
-        send_command(self.name, self._command_to_oh.to_oh_str(value))
+        if not 0 <= value <= 100:
+            raise InvalidItemValueError.from_item(self, value)
+
+        send_websocket_event(
+            ItemCommandSendEvent.create(self.name, PercentTypeModel(type='Percent', value=str(value)))
+        )
 
 
 class UpDownCommand:
 
     def up(self: _HasNameAttr) -> None:
         """Command up"""
-        send_command(self.name, UP)
+        send_websocket_event(
+            ItemCommandSendEvent.create(self.name, UpDownTypeModel(type='UpDown', value='UP'))
+        )
 
     def down(self: _HasNameAttr) -> None:
         """Command down"""
-        send_command(self.name, DOWN)
+        send_websocket_event(
+            ItemCommandSendEvent.create(self.name, UpDownTypeModel(type='UpDown', value='DOWN'))
+        )
 
     def is_up(self: _HasNameAttr) -> bool:
         """Test value against on-value"""

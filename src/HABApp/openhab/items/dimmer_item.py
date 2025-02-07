@@ -2,16 +2,10 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Final
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
-from HABApp.openhab.definitions import (
-    IncreaseDecreaseType,
-    OnOffType,
-    OnOffValue,
-    PercentType,
-    PercentValue,
-    RefreshType,
-    UnDefType,
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    PercentTypeModel,
 )
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 
 
@@ -33,16 +27,11 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('DimmerItem', PercentType, OnOffType, UnDefType)
-    _command_to_oh: Final = ValueToOh('DimmerItem', PercentType, OnOffType, IncreaseDecreaseType, RefreshType)
-    _state_from_oh_str: Final = staticmethod(PercentType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('DimmerItem', PercentTypeModel, 'OnOff', 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('DimmerItem', PercentTypeModel, 'OnOff', 'IncreaseDecrease', 'Refresh')
+    _state_from_oh_str: Final = staticmethod(PercentTypeModel.get_value_from_state)
 
-    def set_value(self, new_value) -> bool:
-
-        if isinstance(new_value, OnOffValue):
-            new_value = 100 if new_value.is_on else 0
-        elif isinstance(new_value, PercentValue):
-            new_value = new_value.value
+    def set_value(self, new_value: float | None) -> bool:
 
         # Percent is 0 ... 100
         if isinstance(new_value, (int, float)) and (0 <= new_value <= 100):

@@ -2,16 +2,14 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Final
 
 from HABApp.core.errors import InvalidItemValueError
-from HABApp.openhab.definitions import (
-    PercentType,
-    PercentValue,
-    RefreshType,
-    StopMoveType,
-    UnDefType,
-    UpDownType,
-    UpDownValue,
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    PercentTypeModel,
+    RefreshTypeModel,
+    StopMoveTypeModel,
+    UnDefTypeModel,
+    UpDownTypeModel,
 )
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 from HABApp.openhab.items.commands import PercentCommand, UpDownCommand
 
 
@@ -33,16 +31,12 @@ class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('RollershutterItem', PercentType, UpDownType, UnDefType)
-    _command_to_oh: Final = ValueToOh('RollershutterItem', UpDownType, StopMoveType, PercentType, RefreshType)
-    _state_from_oh_str: Final = staticmethod(PercentType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('RollershutterItem', PercentTypeModel, UpDownTypeModel, UnDefTypeModel)
+    _command_to_oh: Final = OutgoingCommandEvent(
+        'RollershutterItem', UpDownTypeModel, StopMoveTypeModel, PercentTypeModel, RefreshTypeModel)
+    _state_from_oh_str: Final = staticmethod(PercentTypeModel.get_value_from_state)
 
     def set_value(self, new_value) -> bool:
-
-        if isinstance(new_value, UpDownValue):
-            new_value = 0 if new_value.is_up else 100
-        elif isinstance(new_value, PercentValue):
-            new_value = new_value.value
 
         # Position is 0 ... 100
         if isinstance(new_value, (int, float)) and (0 <= new_value <= 100):

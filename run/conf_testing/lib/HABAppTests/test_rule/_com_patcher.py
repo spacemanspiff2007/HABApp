@@ -122,26 +122,42 @@ class WebsocketPatcher(BasePatcher):
 
     def __enter__(self) -> None:
 
+        def prettify(text: str) -> str:
+            # try to prettyfy the input so it's not the json in json event
+            try:
+                new_msg = json.loads(text)
+                if isinstance(new_msg, dict) and (p := new_msg.get('payload')) is not None:
+                    new_msg['payload'] = json.loads(p)
+                    return json.dumps(new_msg)
+            except ValueError:
+                return text
+
         class WrappedAdapter:
             @staticmethod
             def validate_json(validate_input) -> Any:
-
-                # try to prettyfy the input so it's not the json in json event
-                msg = validate_input
-                try:
-                    new_msg = json.loads(msg)
-                    if isinstance(new_msg, dict) and (p := new_msg.get('payload')) is not None:
-                        new_msg['payload'] = json.loads(p)
-                        msg = json.dumps(new_msg)
-                except ValueError:
-                    pass
-
-                self.log(f'{"IN":^6s} {msg}')
+                self.log(f'{"IN":^6s} {prettify(validate_input):s}')
                 return adapter.validate_json(validate_input)
 
         module = HABApp.openhab.connection.plugins.websockets
         adapter = module.OPENHAB_EVENT_TYPE_ADAPTER
         self.monkeypatch.setattr(module, 'OPENHAB_EVENT_TYPE_ADAPTER', WrappedAdapter)
+
+        def log_send(func):
+            async def _sender(text):
+                self.log(f'{"OUT":^6s} {prettify(text):s}')
+                return await func(text)
+            return _sender
+
+        conn = HABApp.core.connections.Connections.get('openhab')
+        for p in conn.plugins:
+            if isinstance(p, module.WebsocketPlugin):
+                if p._websocket is not None:
+                    self.monkeypatch.setattr(p._websocket, 'send_str', log_send(p._websocket.send_str))
+                break
+        else:
+            msg = f'No websocket plugin found in {conn.plugins!r}'
+            raise ValueError(msg)
+
 
 
 class MqttPatcher(BasePatcher):

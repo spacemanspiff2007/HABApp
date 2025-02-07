@@ -2,7 +2,6 @@
 import pytest
 
 from HABApp.core.types import HSB
-from HABApp.openhab.definitions import OnOffValue, OpenClosedType, UpDownType, UpDownValue
 from HABApp.openhab.items import ColorItem, ContactItem
 from HABApp.openhab.items.commands import OnOffCommand, UpDownCommand
 from HABApp.openhab.map_items import _items as item_dict
@@ -16,12 +15,12 @@ def test_OnOff(cls) -> None:
 
     initial_value = None if cls is not ColorItem else HSB(0, 0, 0)
     c = cls('item_name', initial_value=initial_value)
-    c.set_value(OnOffValue('ON'))
+    c.set_value('ON')
     assert c.is_on()
     assert not c.is_off()
 
     c = cls('item_name', initial_value=initial_value)
-    c.set_value(OnOffValue('OFF'))
+    c.set_value('OFF')
     assert c.is_off()
     assert not c.is_on()
 
@@ -29,12 +28,12 @@ def test_OnOff(cls) -> None:
 @pytest.mark.parametrize('cls', [cls for cls in item_dict.values() if issubclass(cls, UpDownCommand)])
 def test_UpDown(cls) -> None:
     c = cls('item_name')
-    c.set_value(UpDownValue(UpDownType.UP))
+    c.set_value('UP')
     assert c.is_up()
     assert not c.is_down()
 
     c = cls('item_name')
-    c.set_value(UpDownValue(UpDownType.DOWN))
+    c.set_value('DOWN')
     assert not c.is_up()
     assert c.is_down()
 
@@ -45,11 +44,11 @@ def test_OpenClosed(cls: type[ContactItem]) -> None:
     assert not c.is_closed()
     assert not c.is_open()
 
-    c.set_value(OpenClosedType.OPEN)
+    c.set_value('OPEN')
     assert c.is_open()
     assert not c.is_closed()
 
     c = cls('item_name')
-    c.set_value(OpenClosedType.CLOSED)
+    c.set_value('CLOSED')
     assert c.is_closed()
     assert not c.is_open()

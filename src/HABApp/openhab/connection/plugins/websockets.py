@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from asyncio import TaskGroup, sleep
+from asyncio import Queue, TaskGroup, sleep
 from base64 import b64encode
 from inspect import isclass
 from typing import Annotated, Final, get_args, get_origin
@@ -15,7 +15,7 @@ from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
 from HABApp.core.logger import HABAppError, HABAppWarning
-from HABApp.openhab.connection.connection import OpenhabConnection
+from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.definitions.websockets import (
     OPENHAB_EVENT_TYPE,
     OPENHAB_EVENT_TYPE_ADAPTER,
@@ -41,10 +41,12 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         self.task: Final = SingleTask(self.websockets_task, name='WebsocketsEventsTask')
 
         self._websocket: ClientWebSocketResponse | None = None
+        self.queue: Queue[BaseOutEvent] | None = None
 
         self._sent_events: Final[dict[str, BaseOutEvent]] = {}
 
-    async def on_connected(self) -> None:
+    async def on_connected(self, context: OpenhabContext) -> None:
+        self.queue: Queue[BaseOutEvent] = context.out_queue
         self.task.start()
 
     async def on_disconnected(self) -> None:
@@ -63,6 +65,19 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         # basic auth
         return b64encode(f'{login}:{password}'.encode()).decode()
+
+    async def _websocket_sender(self, ws: ClientWebSocketResponse, queue: Queue[BaseOutEvent]) -> None:
+        while True:
+            try:
+                while True:
+                    event = await queue.get()
+                    text = event.model_dump_json(by_alias=True, exclude_none=True)
+                    if (key := event.event_id) is not None:
+                        self._sent_events[key] = event
+                    await ws.send_str(text)
+                    queue.task_done()
+            except Exception as e:  # noqa: PERF203
+                self.plugin_connection.process_exception(e, 'Outgoing queue worker')
 
     async def _websocket_ping(self, ping_interval: float) -> None:
         log = self.plugin_connection.log
@@ -117,6 +132,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 self._websocket = ws
                 try:
                     async with TaskGroup() as tg:
+                        tg.create_task(self._websocket_sender(ws, self.queue))
                         tg.create_task(self._websocket_ping(ping_interval))
                         tg.create_task(self._websocket_events())
                 finally:
@@ -205,11 +221,18 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         # Websocket constants
         ws_type_text = WSMsgType.TEXT
+        ws_type_close = WSMsgType.CLOSED
         topic_heartbeat = WebsocketTopicEnum.HEARTBEAT
         topic_error = WebsocketTopicEnum.REQUEST_FAILED
+        topic_success = WebsocketTopicEnum.REQUEST_SUCCESS
 
-        async for msg in ws:
+        while True:
+            msg = await ws.receive()
             msg_type, data, extra = msg
+
+            if msg_type == ws_type_close:
+                log.debug(f'Websocket closed: {ws.close_code} {extra}')
+                break
 
             if msg_type != ws_type_text:
                 log.warning(f'Message with unexpected type received: {msg}')
@@ -226,16 +249,29 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
             # Websocket events are not processed by the event bus
             if oh_event.type == 'WebSocketEvent':
-                if oh_event.topic == topic_heartbeat:
+                topic = oh_event.topic
+
+                # confirmation that the event was processed
+                if topic == topic_success:
+                    self._sent_events.pop(oh_event.event_id, None)
                     continue
-                if oh_event.type == topic_error:
-                    HABAppError(log).add(f'Receive: {data}').add(f'{oh_event}').dump()
+
+                # Error processing the sent event
+                if topic == topic_error:
+                    err_log = HABAppError(log)
+                    err_log.add('Request failed!')
+                    if (send_obj := self._sent_events.get(oh_event.event_id)) is not None:
+                        err_log.add(f'Sent    : {send_obj.model_dump_json(by_alias=True, exclude_none=True):s}')
+                    err_log.add(f'Received: {data}').add(f'{oh_event}').dump()
+                    self._sent_events.pop(oh_event.event_id, None)
                     continue
+
+                if topic == topic_heartbeat:
+                    continue
+
                 log.debug(f'Receive: {data}')
                 log.debug(str(oh_event))
                 continue
-
-            print(oh_event)
 
             try:
                 event = oh_event.to_event()

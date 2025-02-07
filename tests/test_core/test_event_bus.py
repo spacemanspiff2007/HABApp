@@ -1,6 +1,4 @@
-from unittest.mock import MagicMock
-
-from HABApp.core.events import ComplexEventValue, ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.events import ValueUpdateEvent
 from HABApp.core.events.filter import EventFilter, NoEventFilter, OrFilterGroup
 from HABApp.core.internals import EventBus, EventBusListener, wrap_func
 
@@ -65,28 +63,3 @@ def test_multiple_events(sync_worker) -> None:
         eb.post_event('test', k)
 
     assert event_history == target
-
-
-def test_complex_event_unpack(sync_worker) -> None:
-    """Test that the ComplexEventValue get properly unpacked"""
-    m = MagicMock()
-    assert not m.called
-    eb = EventBus()
-
-    listener = EventBusListener('test_complex', wrap_func(m, name='test'), NoEventFilter())
-    eb.add_listener(listener)
-
-    eb.post_event('test_complex', ValueUpdateEvent('test_complex', ComplexEventValue('ValOld')))
-    eb.post_event('test_complex',
-                  ValueChangeEvent('test_complex', ComplexEventValue('ValNew'), ComplexEventValue('ValOld')))
-
-    # assert that we have been called with exactly one arg
-    for k in m.call_args_list:
-        assert len(k[0]) == 1
-
-    arg0 = m.call_args_list[0][0][0]
-    arg1 = m.call_args_list[1][0][0]
-
-    # Events for first post_value
-    assert vars(arg0) == vars(ValueUpdateEvent('test_complex', 'ValOld'))
-    assert vars(arg1) == vars(ValueChangeEvent('test_complex', 'ValNew', 'ValOld'))

@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from asyncio import Queue
 
     from HABApp.core.lib import InstantView
+    from HABApp.openhab.definitions.websockets.base import BaseOutEvent
     from HABApp.openhab.items import OpenhabItem, Thing
 
 
@@ -30,12 +31,12 @@ class OpenhabContext:
     session: aiohttp.ClientSession
     session_options: dict[str, Any]
 
-    out_queue: Queue[tuple[str, str, bool]]
+    out_queue: Queue[BaseOutEvent]
 
     @classmethod
     def new_context(cls, *, version: tuple[int, int, int],
                     session: aiohttp.ClientSession, session_options: dict[str, Any],
-                    out_queue: Queue[tuple[str, str, bool]]) -> OpenhabContext:
+                    out_queue: Queue[BaseOutEvent]) -> OpenhabContext:
         return cls(
             version=version, is_oh41=version >= (4, 1),
             waited_for_openhab=False,
@@ -93,9 +94,14 @@ class OpenhabConnection(BaseConnection):
         self.context: CONTEXT_TYPE = None
 
     def is_silent_exception(self, e: Exception) -> bool:
+        from HABApp.openhab.connection.plugins.websockets import WebSocketClosedError
+
         return isinstance(e, (
             # https://docs.aiohttp.org/en/stable/client_reference.html#client-exceptions
             aiohttp.ClientError,
+
+            # Websocket exceptions
+            WebSocketClosedError,
 
             # aiohttp_sse_client Exceptions
             ConnectionRefusedError, ConnectionError, ConnectionAbortedError)

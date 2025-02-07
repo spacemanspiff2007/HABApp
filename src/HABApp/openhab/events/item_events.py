@@ -8,25 +8,31 @@ from .base_event import OpenhabEvent
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
+        return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
 
 
 class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
+        return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
 
 
 class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}, old_value: {self.old_value}>'
+        value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
+        old_value = f() if (f := getattr(old_value := self.old_value, '_value_str', None)) is not None \
+            else str(old_value)
+        return f'<{self.__class__.__name__} name: {self.name}, value: {value}, old_value: {old_value}>'
 
 
 class ItemCommandEvent(OpenhabEvent, HABApp.core.events.ValueCommandEvent):
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
+        return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
 
 
 class ItemAddedEvent(OpenhabEvent):
@@ -123,17 +129,21 @@ class ItemStatePredictedEvent(OpenhabEvent):
     """
     :ivar str name:
     :ivar Any value:
+    :ivar bool is_confirmation:
     """
     name: str
     value: Any
+    is_confirmation: bool
 
-    def __init__(self, name: str, value: Any) -> None:
+    def __init__(self, name: str, value: Any, is_confirmation: bool) -> None:  # noqa: FBT001
         super().__init__()
         self.name: Final = name
         self.value: Final = value
+        self.is_confirmation: Final = is_confirmation
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, value: {self.value}>'
+        return (f'<{self.__class__.__name__} name: {self.name}, value: {self.value} '
+                f'is_confirmation: {self.is_confirmation}>')
 
 
 class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
@@ -151,7 +161,8 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
         self.item: Final = item
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, item: {self.item}, value: {self.value}>'
+        value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
+        return f'<{self.__class__.__name__} name: {self.name}, item: {self.item}, value: {value}>'
 
 
 class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
@@ -171,5 +182,8 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
         self.item: Final = item
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} name: {self.name}, item: {self.item}, ' \
-               f'value: {self.value}, old_value: {self.old_value}>'
+        value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
+        old_value = f() if (f := getattr(old_value := self.old_value, '_value_str', None)) is not None \
+            else str(old_value)
+        return (f'<{self.__class__.__name__} name: {self.name}, '
+                f'item: {self.item}, value: {value}, old_value: {old_value}>')

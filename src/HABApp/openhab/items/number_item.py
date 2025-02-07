@@ -1,15 +1,14 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final, override
+
+from immutables import Map
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
-from HABApp.openhab.definitions import (
-    DecimalType,
-    QuantityType,
-    QuantityValue,
-    RefreshType,
-    UnDefType,
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    DecimalTypeModel,
+    QuantityTypeModel,
 )
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
@@ -23,16 +22,32 @@ class NumberItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar int | float value: |oh_item_desc_value|
-
+    :ivar str | None dimension: Dimension if it's a UoM item
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('NumberItem', DecimalType, QuantityType, UnDefType)
-    _command_to_oh: Final = ValueToOh('NumberItem', DecimalType, QuantityType, RefreshType)
-    _state_from_oh_str: Final = staticmethod(DecimalType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('NumberItem', DecimalTypeModel, QuantityTypeModel, 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('NumberItem', DecimalTypeModel, QuantityTypeModel, 'Refresh')
+
+    def __init__(self, name: str, initial_value: int | float = None, label: str | None = None,
+                 tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
+                 metadata: Mapping[str, MetaData] = Map(), dimension: str | None = None) -> None:
+        super().__init__(name, initial_value, label, tags, groups, metadata)
+        self.dimension: str | None = dimension
+
+    @override
+    def _update_item_definition(self, item: 'NumberItem') -> None:
+        super()._update_item_definition(item)
+        self.dimension = item.dimension
+
+    @staticmethod
+    def _state_from_oh_str(state: str) -> int | float:
+        if ' ' not in state:
+            return DecimalTypeModel.get_value_from_state(state)
+        return QuantityTypeModel.get_value_from_state(state)
 
     @property
     def unit(self) -> str | None:
@@ -41,10 +56,7 @@ class NumberItem(OpenhabItem):
             return None
         return unit.value
 
-    def set_value(self, new_value) -> bool:
-
-        if isinstance(new_value, QuantityValue):
-            return super().set_value(new_value.value)
+    def set_value(self, new_value: float | None) -> bool:
 
         if isinstance(new_value, (int, float)):
             return super().set_value(new_value)

@@ -5,6 +5,7 @@ from threading import Lock
 
 import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
+from HABApp.openhab.items import NumberItem
 
 from .bench_base import BenchBaseRule
 from .bench_times import BenchContainer, BenchTime
@@ -30,6 +31,7 @@ class OpenhabBenchRule(BenchBaseRule):
 
         self.item_values = deque()
         self.item_name = ''
+        self.item_obj: NumberItem | None = None
 
         self.load_listener = []
 
@@ -49,6 +51,7 @@ class OpenhabBenchRule(BenchBaseRule):
 
     def set_up(self) -> None:
         self.cleanup()
+        self.item_name = self.name_list[0]
 
     def tear_down(self) -> None:
         self.cleanup()
@@ -108,15 +111,36 @@ class OpenhabBenchRule(BenchBaseRule):
         times.show()
 
     def bench_rtt_time(self) -> None:
+        self.openhab.create_item('Number', self.item_name, label='MyLabel')
+        time.sleep(2)
+
         print('Bench item state update ', end='')
         self.bench_times_container = BenchContainer()
 
         self.run_rtt('rtt idle')
+        time.sleep(2)
         self.run_rtt('async rtt idle', do_async=True)
+        time.sleep(2)
+        self.item_obj = NumberItem.get_item(self.item_name)
+        self.run_rtt('rtt idle item')
+        time.sleep(2)
+        self.run_rtt('async rtt idle item', do_async=True)
+        time.sleep(2)
+
+        self.item_obj = None
 
         self.start_load()
         self.run_rtt('rtt load (+10x)')
+        time.sleep(2)
         self.run_rtt('async rtt load (+10x)', do_async=True)
+        self.stop_load()
+
+        self.item_obj = NumberItem.get_item(self.item_name)
+
+        self.start_load()
+        self.run_rtt('rtt load item (+10x)')
+        time.sleep(2)
+        self.run_rtt('async rtt load item (+10x)', do_async=True)
         self.stop_load()
 
         print(' done!\n')
@@ -125,26 +149,34 @@ class OpenhabBenchRule(BenchBaseRule):
     def start_load(self) -> None:
 
         for i in range(10, 20):
-            def load_cb(event, item=self.name_list[i]) -> None:
-                self.openhab.post_update(item, str(random.randint(0, 99999999)))
+            self.openhab.create_item('Number', self.name_list[i], label='MyLabel')
 
-            self.openhab.create_item('String', self.name_list[i], label='MyLabel')
+        time.sleep(1)
+
+        for i in range(10, 20):
+            if self.item_obj is None:
+                def load_cb(event, item: str = self.name_list[i]) -> None:
+                    self.openhab.post_update(item, str(random.randint(0, 99999999)))
+            else:
+                def load_cb(event, item: NumberItem = NumberItem.get_item(self.name_list[i])) -> None:  # noqa: B008
+                    item.oh_post_update(random.randint(0, 99999999))
+
             listener = self.listen_event(self.name_list[i], load_cb, ValueUpdateEventFilter())
-
             self.load_listener.append(listener)
+
+        # start
+        for i in range(10, 20):
             self.openhab.post_update(self.name_list[i], str(random.randint(0, 99999999)))
 
     def stop_load(self) -> None:
         for list in self.load_listener:
             list.cancel()
         self.load_listener.clear()
+        time.sleep(3)
 
-    def run_rtt(self, test_name, do_async=False) -> None:
-        self.item_name = self.name_list[0]
-        self.openhab.create_item('String', self.item_name, label='MyLabel')
-
-        for i in range(3000):
-            self.item_values.append(str(random.randint(0, 99999999)))
+    def run_rtt(self, test_name: str, do_async=False) -> None:
+        for _ in range(5_000):
+            self.item_values.append(random.randint(0, 99_999_999))
 
         listener = self.listen_event(
             self.item_name, self.proceed_item_val if not do_async else self.a_proceed_item_val, ValueUpdateEventFilter()
@@ -180,12 +212,17 @@ class OpenhabBenchRule(BenchBaseRule):
         # No items left -> stop benchmark
         try:
             self.item_values.popleft()
+            next_value = self.item_values[0]
         except IndexError:
             LOCK.release()
             return None
 
         self.time_sent = time.time()
-        self.openhab.post_update(self.item_name, self.item_values[0])
+
+        if self.item_obj is not None:
+            self.item_obj.oh_post_update(next_value)
+        else:
+            self.openhab.post_update(self.item_name, next_value)
 
     async def a_proceed_item_val(self, event: ValueUpdateEvent) -> None:
         self.proceed_item_val(event)

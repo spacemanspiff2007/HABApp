@@ -43,7 +43,7 @@ def check_class_annotations(cls: type[object],
 
     # if it's missing from init we just copy and paste it
     for var_name in init_missing:
-        assert var_name not in init_vars
+        assert var_name not in init_vars, f'{var_name} is in {init_vars}'
         for _hint_src in annotation_vars, docstr_vars:
             if var_hint := _hint_src.get(var_name):
                 init_vars[var_name] = var_hint

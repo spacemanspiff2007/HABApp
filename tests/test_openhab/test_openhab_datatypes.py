@@ -4,21 +4,11 @@ import pytest
 from whenever import SystemDateTime
 
 from HABApp.openhab.items import DatetimeItem, NumberItem
-from HABApp.openhab.map_values import map_openhab_values
-
-
-def test_type_none() -> None:
-    assert map_openhab_values('UnDef', 'NULL') is None
-    assert map_openhab_values('Number', 'NULL') is None
 
 
 @pytest.mark.parametrize('value, target', (('0', 0), ('-15', -15), ('55', 55), ))
 def test_type_number(value: str, target: int) -> None:
     ret = NumberItem._state_from_oh_str(value)
-    assert ret == target
-    assert isinstance(ret, int)
-
-    ret = map_openhab_values('Number', value)
     assert ret == target
     assert isinstance(ret, int)
 
@@ -28,10 +18,6 @@ def test_type_number(value: str, target: int) -> None:
 )
 def test_type_decimal(value: str, target: int) -> None:
     ret = NumberItem._state_from_oh_str(value)
-    assert ret == target
-    assert type(ret) is target.__class__
-
-    ret = map_openhab_values('Decimal', value)
     assert ret == target
     assert type(ret) is target.__class__
 
@@ -50,14 +36,3 @@ def __get_dt_parms():
 @pytest.mark.parametrize(('value', 'target'), __get_dt_parms())
 def test_type_datetime(value: str, target: datetime) -> None:
     assert DatetimeItem._state_from_oh_str(value) == target
-    assert map_openhab_values('DateTime', value) == target
-
-
-def test_quantity() -> None:
-    q = map_openhab_values('Quantity', '0.0 °C')
-    assert q.value == 0.0
-    assert q.unit == '°C'
-
-    q = map_openhab_values('Quantity', '22 W/m²')
-    assert q.value == 22
-    assert q.unit == 'W/m²'

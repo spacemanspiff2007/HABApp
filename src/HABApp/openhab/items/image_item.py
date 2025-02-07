@@ -3,9 +3,8 @@ from typing import TYPE_CHECKING, Final
 
 from HABApp.core.const import MISSING
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
-from HABApp.openhab.definitions import RawType as _RawType
-from HABApp.openhab.definitions import RefreshType, UnDefType
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 from HABApp.openhab.types import RawType
 
 
@@ -27,9 +26,9 @@ class ImageItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('ImageItem', _RawType, UnDefType)
-    _command_to_oh: Final = ValueToOh('ImageItem', RefreshType)
-    _state_from_oh_str: Final = staticmethod(_RawType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('ImageItem', 'Raw', 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('ImageItem', 'Refresh')
+    _state_from_oh_str: Final = staticmethod(RawTypeModel.get_value_from_state)
 
     @property
     def image_type(self) -> str:
@@ -61,24 +60,28 @@ class ImageItem(OpenhabItem):
 
         raise InvalidItemValueError.from_item(self, new_value)
 
-    def oh_post_update(self, value: bytes = MISSING, image_type: str | None = None) -> None:
+    def oh_post_update(self, value: bytes | None = MISSING, image_type: str | None = None) -> None:
         """Post an update to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param value: image data
         :param image_type: (optional) what kind of image, ``jpeg`` or ``png``
         """
-        if image_type is not None:
-            value = (value, image_type)
+        if value is MISSING:
+            value = self.value
+        elif isinstance(value, bytes):
+            value = RawType.create(data_type=image_type, data=value)
         return super().oh_post_update(value)
 
-    def oh_send_command(self, value: bytes = MISSING, image_type: str | None = None) -> None:
+    def oh_send_command(self, value: bytes | None = MISSING, image_type: str | None = None) -> None:
         """Send a command to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param value: image data
         :param image_type: (optional) what kind of image, ``jpeg`` or ``png``
         """
-        if image_type is not None:
-            value = (value, image_type)
+        if value is MISSING:
+            value = self.value
+        elif isinstance(value, bytes):
+            value = RawType.create(data_type=image_type, data=value)
         return super().oh_send_command(value)

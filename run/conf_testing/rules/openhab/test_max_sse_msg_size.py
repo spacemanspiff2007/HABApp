@@ -19,6 +19,7 @@ class TestMaxImageSize(TestBaseRule):
     def test_img_size(self) -> None:
 
         image = ImageItem.get_item('TestImage')
+        image.oh_post_update(None)
 
         with ItemWaiter(image) as item_waiter, \
                 EventWaiter(image.name, ItemStateChangedEventFilter()) as event_waiter:

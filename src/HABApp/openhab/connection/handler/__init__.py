@@ -1,4 +1,4 @@
-from .helper import map_null_str, convert_to_oh_type
+from .helper import map_null_str, convert_to_oh_str
 
 # isort: split
 

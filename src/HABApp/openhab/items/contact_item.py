@@ -2,18 +2,14 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Final
 
 from HABApp.core.errors import InvalidItemValueError
-from HABApp.openhab.definitions import OpenClosedType, OpenClosedValue, RefreshType, UnDefType
+from HABApp.openhab.definitions.websockets.item_value_types import OpenClosedTypeModel
 from HABApp.openhab.interface_sync import post_update
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
     Mapping = Mapping       # noqa: PLW0127
     MetaData = MetaData     # noqa: PLW0127
-
-
-OPEN = OpenClosedType.OPEN
-CLOSED = OpenClosedType.CLOSED
 
 
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/ContactItem.java
@@ -29,35 +25,32 @@ class ContactItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('ContactItem', OpenClosedType, UnDefType)
-    _command_to_oh: Final = ValueToOh('ContactItem', RefreshType)
-    _state_from_oh_str = staticmethod(OpenClosedType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('ContactItem', 'OpenClosed', 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('ContactItem', 'Refresh')
+    _state_from_oh_str = staticmethod(OpenClosedTypeModel.get_value_from_state)
 
     def set_value(self, new_value) -> bool:
 
-        if isinstance(new_value, OpenClosedValue):
-            new_value = new_value.value
-
-        if new_value not in (OPEN, CLOSED, None):
+        if new_value not in ('OPEN', 'CLOSED', None):
             raise InvalidItemValueError.from_item(self, new_value)
 
         return super().set_value(new_value)
 
     def is_open(self) -> bool:
         """Test value against open value"""
-        return self.value == OPEN
+        return self.value == 'OPEN'
 
     def is_closed(self) -> bool:
         """Test value against closed value"""
-        return self.value == CLOSED
+        return self.value == 'CLOSED'
 
     def open(self) -> None:
         """Post an update to the item with the open value"""
-        return post_update(self.name, OPEN)
+        return post_update(self.name, 'OPEN')
 
     def closed(self) -> None:
         """Post an update to the item with the closed value"""
-        return post_update(self.name, CLOSED)
+        return post_update(self.name, 'CLOSED')
 
     def __str__(self) -> str:
         return str(self.value)

@@ -1,6 +1,5 @@
 from . import habapp_events
 from .events import (
-    ComplexEventValue,
     ItemNoChangeEvent,
     ItemNoUpdateEvent,
     ValueChangeEvent,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import QueueEmpty, sleep
+from asyncio import Queue, QueueEmpty, sleep
 from typing import TYPE_CHECKING, Any, Final
 
 from HABApp.core.asyncio import run_func_from_async
@@ -9,11 +9,23 @@ from HABApp.core.internals import ItemRegistryItem
 from HABApp.core.lib import SingleTask
 from HABApp.core.logger import log_error, log_info, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
-from HABApp.openhab.connection.handler import convert_to_oh_type, post, put
+from HABApp.openhab.connection.handler import convert_to_oh_str, post, put
+from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent
+from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
 
 
 if TYPE_CHECKING:
-    from asyncio import Queue
+
+    from HABApp.openhab.definitions.websockets.base import BaseOutEvent
+
+
+def empty_queue(queue: Queue) -> None:
+    if queue is not None:
+        try:
+            while True:
+                queue.get_nowait()
+        except QueueEmpty:
+            pass
 
 
 class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
@@ -21,31 +33,37 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
     def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
 
-        self.queue: Queue[tuple[str, str, bool]] | None = None
-        self.task_worker: Final = SingleTask(self.queue_worker, 'OhQueueWorker')
-        self.task_watcher: Final = SingleTask(self.queue_watcher, 'OhQueueWatcher')
+        self.queue: Queue[BaseOutEvent] | None = None
+        self.http_queue: Queue[tuple[str, str, bool]] | None = None
+
+        self.task_http_worker: Final = SingleTask(self.http_queue_worker, 'OhHttpQueueWorker')
+        self.task_watcher_websocket: Final = SingleTask(self.websocket_queue_watcher, 'OhWebsocketQueueWatcher')
+        self.task_watcher_http: Final = SingleTask(self.http_queue_watcher, 'OhHttpQueueWatcher')
 
     async def on_connected(self, context: OpenhabContext) -> None:
-        self.queue = context.out_queue
-        self.task_worker.start()
+        self.queue: Queue[BaseOutEvent] = context.out_queue
+        self.http_queue: Queue[tuple[str, str, bool]] = Queue()
+
+        self.task_http_worker.start()
+        self.task_watcher_http.start()
+        self.task_http_worker.start()
 
     async def on_disconnected(self) -> None:
         queue = self.queue
         self.queue = None
+        http_queue = self.http_queue
+        self.http_queue = None
 
-        await self.task_worker.cancel_wait()
-        await self.task_watcher.cancel_wait()
+        await self.task_http_worker.cancel_wait()
+        await self.task_watcher_http.cancel_wait()
+        await self.task_http_worker.cancel_wait()
 
-        if queue is not None:
-            try:
-                while True:
-                    queue.get_nowait()
-            except QueueEmpty:
-                pass
+        empty_queue(queue)
+        empty_queue(http_queue)
 
-    async def queue_worker(self) -> None:
+    async def http_queue_worker(self) -> None:
 
-        queue: Final = self.queue
+        queue: Final = self.http_queue
 
         while True:
             try:
@@ -71,8 +89,8 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         if not isinstance(item, str):
             item = item.name
         if not isinstance(state, str):
-            state = convert_to_oh_type(state)
-        if (queue := self.queue) is None:
+            state = convert_to_oh_str(state)
+        if (queue := self.http_queue) is None:
             return None
         queue.put_nowait((item, state, False))
 
@@ -80,13 +98,37 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         if not isinstance(item, str):
             item = item.name
         if not isinstance(state, str):
-            state = convert_to_oh_type(state)
-        if (queue := self.queue) is None:
+            state = convert_to_oh_str(state)
+        if (queue := self.http_queue) is None:
             return None
         queue.put_nowait((item, state, True))
 
-    async def queue_watcher(self) -> None:
-        queue = self.plugin_connection.context.out_queue
+    def async_send_websocket_event(self, event: ItemStateSendEvent | ItemCommandSendEvent) -> None:
+        if not isinstance(event, (ItemStateSendEvent, ItemCommandSendEvent)):
+            msg = f'Invalid event type: {type(event)}'
+            raise TypeError(msg)
+
+        # Workaround for big message sizes
+        # https://github.com/openhab/openhab-core/issues/4587
+        if isinstance(event.payload, RawTypeModel):
+            if (http_queue := self.http_queue) is None:
+                return None
+            # 'openhab/items/<NAME>/<state|command>'
+            _, _, name, action = event.topic.split('/')
+            http_queue.put_nowait((name, event.payload.value, action == 'command'))
+            return None
+
+        if (queue := self.queue) is None:
+            return None
+        queue.put_nowait(event)
+
+    async def websocket_queue_watcher(self) -> None:
+        await self._queue_watcher(self.queue, 'websocket')
+
+    async def http_queue_watcher(self) -> None:
+        await self._queue_watcher(self.http_queue, 'http')
+
+    async def _queue_watcher(self, queue: Queue, name: str) -> None:
         log = self.plugin_connection.log
         first_msg_at = 150
 
@@ -102,7 +144,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             if size > upper:
                 upper = size * 2
                 lower = size // 2
-                log_warning(log, f'{size} messages in queue')
+                log_warning(log, f'{size} messages in {name:s} queue')
             elif size < lower:
                 upper = max(size / 2, first_msg_at)
                 lower = size // 2
@@ -110,12 +152,17 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     lower = -1
                     log_info(log, 'queue OK')
                 else:
-                    log_info(log, f'{size} messages in queue')
+                    log_info(log, f'{size} messages in {name:s} queue')
 
 
 OUTGOING_PLUGIN: Final = OutgoingCommandsPlugin()
 async_post_update: Final = OUTGOING_PLUGIN.async_post_update
 async_send_command: Final = OUTGOING_PLUGIN.async_send_command
+async_send_websocket_event: Final = OUTGOING_PLUGIN.async_send_websocket_event
+
+
+def send_websocket_event(event: ItemStateSendEvent | ItemCommandSendEvent) -> None:
+    return run_func_from_async(async_send_websocket_event, event)
 
 
 def post_update(item: str | ItemRegistryItem, state: Any) -> None:

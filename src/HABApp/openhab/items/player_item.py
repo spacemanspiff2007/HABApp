@@ -1,15 +1,12 @@
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Final
 
-from HABApp.openhab.definitions import (
-    NextPreviousType,
-    PlayPauseType,
-    RefreshType,
-    RewindFastforwardType,
-    StringType,
-    UnDefType,
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    PlayPauseTypeModel,
+    RewindFastforwardTypeModel,
+    StringTypeModel,
 )
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
@@ -30,6 +27,7 @@ class PlayerItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('PlayerItem', PlayPauseType, RewindFastforwardType, UnDefType)
-    _command_to_oh: Final = ValueToOh('PlayerItem', PlayPauseType, RewindFastforwardType, NextPreviousType, RefreshType)
-    _state_from_oh_str: Final = staticmethod(StringType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('PlayerItem', PlayPauseTypeModel, RewindFastforwardTypeModel, 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent(
+        'PlayerItem', 'PlayPause', 'RewindFastforward', 'NextPrevious', 'Refresh')
+    _state_from_oh_str: Final = staticmethod(StringTypeModel.get_value_from_state)

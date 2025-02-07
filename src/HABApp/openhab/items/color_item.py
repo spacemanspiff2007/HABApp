@@ -5,17 +5,15 @@ from typing_extensions import override
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.core.types import HSB, RGB
-from HABApp.openhab.definitions import (
-    HSBType,
-    IncreaseDecreaseType,
-    OnOffType,
-    OnOffValue,
-    PercentType,
-    PercentValue,
-    RefreshType,
-    UnDefType,
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    HSBTypeModel,
+    IncreaseDecreaseTypeModel,
+    OnOffTypeModel,
+    PercentTypeModel,
+    RefreshTypeModel,
+    UnDefTypeModel,
 )
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 
 
@@ -37,9 +35,10 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('ColorItem', HSBType, PercentType, OnOffType, UnDefType)
-    _command_to_oh: Final = ValueToOh('ColorItem', HSBType, PercentType, OnOffType, IncreaseDecreaseType, RefreshType)
-    _state_from_oh_str = staticmethod(HSBType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('ColorItem', HSBTypeModel, 'Percent', 'OnOff', 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent(
+        'ColorItem', HSBTypeModel, 'Percent', 'OnOff', 'IncreaseDecrease', 'Refresh')
+    _state_from_oh_str = staticmethod(HSBTypeModel.get_value_from_state)
 
     @property
     def hsb(self) -> HSB:
@@ -70,7 +69,7 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
         return v.brightness
 
     @override
-    def set_value(self, new_value: RGB | HSB | tuple[float, float, float] | OnOffValue | PercentValue) -> bool:
+    def set_value(self, new_value: RGB | HSB | tuple[float, float, float]) -> bool:
         """Set a new color value without creating events on the event bus
 
         :param new_value: new value of the item
@@ -79,16 +78,6 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
 
         if isinstance(new_value, HSB):
             hsb = new_value
-        elif isinstance(new_value, OnOffValue):
-            hue = self.hue
-            saturation = self.saturation
-            brightness = 100 if new_value.is_on else 0
-            hsb = HSB(hue, saturation, brightness)
-        elif isinstance(new_value, PercentValue):
-            hue = self.hue
-            saturation = self.saturation
-            brightness = new_value.value
-            hsb = HSB(hue, saturation, brightness)
         elif isinstance(new_value, RGB):
             hsb = new_value.to_hsb()
         elif isinstance(new_value, tuple):

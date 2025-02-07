@@ -21,11 +21,11 @@ def test_switch_set_value() -> None:
         SwitchItem('item_name').set_value('asdf')
 
 
-def test_switch_post_update(posted_updates) -> None:
+def test_switch_post_update(websocket_events) -> None:
     sw = SwitchItem('')
 
     sw.oh_post_update('ON')
-    posted_updates.assert_called_with('ON')
+    websocket_events.assert_called_once('OnOff', 'ON', event='update')
 
     sw.oh_post_update('OFF')
-    posted_updates.assert_called_with('OFF')
+    websocket_events.assert_called_once('OnOff', 'OFF', event='update')

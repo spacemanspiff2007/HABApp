@@ -1,12 +1,8 @@
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Final
 
-from HABApp.openhab.definitions import (
-    RefreshType,
-    StringType,
-    UnDefType,
-)
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.definitions.websockets.item_value_types import RefreshTypeModel, StringTypeModel, UnDefTypeModel
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
@@ -28,6 +24,6 @@ class StringItem(OpenhabItem):
     """
 
     # Undef has to become before StringType
-    _update_to_oh: Final = ValueToOh('StringItem', UnDefType, StringType)
-    _command_to_oh: Final = ValueToOh('StringItem', StringType, RefreshType)
-    _state_from_oh_str: Final = staticmethod(StringType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('StringItem', UnDefTypeModel, StringTypeModel)
+    _command_to_oh: Final = OutgoingCommandEvent('StringItem', RefreshTypeModel, StringTypeModel)
+    _state_from_oh_str: Final = staticmethod(StringTypeModel.get_value_from_state)

@@ -26,13 +26,15 @@ log = logging.getLogger('HABApp.openhab.items')
 Items = uses_item_registry()
 
 
-def add_to_registry(item: OpenhabItem, set_value=False):
+# noinspection PyProtectedMember
+def add_to_registry(item: OpenhabItem, *, set_value: bool = False) -> None:
     name = item.name
     for grp in item.groups:
         MEMBERS.setdefault(grp, set()).add(name)
 
     if not Items.item_exists(name):
-        return Items.add_item(item)
+        Items.add_item(item)
+        return None
 
     existing = Items.get_item(name)
     if isinstance(existing, item.__class__):
@@ -45,10 +47,7 @@ def add_to_registry(item: OpenhabItem, set_value=False):
             MEMBERS.get(grp, set()).discard(name)
 
         # same type - it was only an item update (e.g. label)!
-        existing.label    = item.label
-        existing.tags     = item.tags
-        existing.groups   = item.groups
-        existing.metadata = item.metadata
+        existing._update_item_definition(item)
         return None
 
     log_warning(log, f'Item type changed from {existing.__class__} to {item.__class__}')
@@ -59,16 +58,16 @@ def add_to_registry(item: OpenhabItem, set_value=False):
     return None
 
 
-def remove_from_registry(name: str):
+def remove_from_registry(name: str) -> None:
     if not Items.item_exists(name):
         return None
 
     item = Items.get_item(name)  # type: HABApp.openhab.items.OpenhabItem
     for grp in item.groups:
-        MEMBERS.get(grp, set()).discard(name)
-
-    if isinstance(item, HABApp.openhab.items.GroupItem):
-        MEMBERS.pop(name, None)
+        m = MEMBERS.get(grp, set())
+        m.discard(name)
+        if not m:
+            MEMBERS.pop(grp, None)
 
     Items.pop_item(name)
     return None
@@ -83,7 +82,7 @@ def fresh_item_sync() -> None:
 
 def get_members(group_name: str) -> tuple[OpenhabItem, ...]:
     ret = []
-    for name in MEMBERS.get(group_name, []):
+    for name in MEMBERS.get(group_name, ()):
         item = Items.get_item(name)  # type: OpenhabItem
         ret.append(item)
     return tuple(sorted(ret, key=lambda x: x.name))

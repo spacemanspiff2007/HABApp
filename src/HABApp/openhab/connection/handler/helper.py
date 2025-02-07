@@ -2,32 +2,28 @@ from __future__ import annotations
 
 from typing import Any
 
-from HABApp.openhab.definitions import (
-    DateTimeType,
-    HSBType,
-    PointType,
-    RawType,
-    RefreshType,
-    StringListType,
-    StringType,
-    UnDefType,
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    DateTimeTypeModel,
+    HSBTypeModel,
+    PointTypeModel,
+    RawTypeModel,
+    StringListTypeModel,
 )
 
 
-def convert_to_oh_type(value: Any) -> str:
+def convert_to_oh_str(value: Any) -> str:
     if isinstance(value, (str, int, float)):
         return str(value)
 
-    if isinstance(value, (list, tuple)):
-        # data types that accept lists and tuples need to be handled separately
-        # oder matters!
-        for t in (StringListType, PointType, HSBType, RawType):
-            if (send := t.to_oh_str(value)) is not None:
-                return send
+    for cls in (HSBTypeModel, DateTimeTypeModel, PointTypeModel, RawTypeModel, StringListTypeModel):
+        if (m := cls.from_value(value)) is not None:
+            return m.value
 
-    for t in (HSBType, DateTimeType, RefreshType, UnDefType, StringType, RawType):
-        if (send := t.to_oh_str(value)) is not None:
-            return send
+    if isinstance(value, (list, tuple)):
+        return StringListTypeModel.from_value([str(v) for v in value]).value
+
+    if value is None:
+        return 'NULL'
 
     raise ValueError()
 

@@ -37,7 +37,7 @@ from HABApp.openhab.errors import (
     TransformationsRequestError,
 )
 
-from . import convert_to_oh_type
+from . import convert_to_oh_str
 from .handler import delete, get, post, put
 
 
@@ -395,9 +395,9 @@ async def async_get_persistence_data(item: str | ItemRegistryItem, persistence: 
     if persistence:
         params['serviceId'] = persistence
     if start_time is not None:
-        params['starttime'] = convert_to_oh_type(start_time)
+        params['starttime'] = convert_to_oh_str(start_time)
     if end_time is not None:
-        params['endtime'] = convert_to_oh_type(end_time)
+        params['endtime'] = convert_to_oh_str(end_time)
     if not params:
         params = None
 
@@ -419,8 +419,8 @@ async def async_set_persistence_data(item: str | ItemRegistryItem, persistence: 
                   category=ResourceWarning)
 
     params = {
-        'time': convert_to_oh_type(time),
-        'state': convert_to_oh_type(state),
+        'time': convert_to_oh_str(time),
+        'state': convert_to_oh_str(state),
     }
     if persistence is not None:
         params['serviceId'] = persistence

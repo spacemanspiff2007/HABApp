@@ -1,30 +1,31 @@
 from immutables import Map
 
+from HABApp.core.types import Point
 from HABApp.openhab.items import CallItem, LocationItem
 from HABApp.openhab.map_items import map_item
 
 
 def test_call_set_value() -> None:
     call = CallItem('my_call_item')
-    call.set_value('03018,2722720')
-    assert call.value == ('03018', '2722720')
+    call.set_value(('03,018', '2722720'))
+    assert call.value == ('03,018', '2722720')
 
     call = CallItem('my_call_item')
     call.set_value(('a', 'b'))
     assert call.value == ('a', 'b')
 
 
-def test_call_post_update(posted_updates) -> None:
+def test_call_post_update(websocket_events) -> None:
     call = CallItem('my_call_item')
 
-    call.oh_post_update('asdf')
-    posted_updates.assert_called_with('asdf')
+    call.oh_post_update(('asdf', ))
+    websocket_events.assert_called_once('StringList', 'asdf', event='update')
 
     call.oh_post_update(('a', 'b'))
-    posted_updates.assert_called_with('a,b')
+    websocket_events.assert_called_once('StringList', 'a,b', event='update')
 
-    call.oh_post_update(['a', '0'])
-    posted_updates.assert_called_with('a,0')
+    call.oh_post_update(['a', '0,1'])
+    websocket_events.assert_called_once('StringList', r'a,0\,1', event='update')
 
 
 def test_call_map() -> None:
@@ -51,22 +52,22 @@ def test_call_map() -> None:
 
 def test_location_set_value() -> None:
     call = LocationItem('my_location_item')
-    call.set_value('103018,2722720')
-    assert call.value == (103018, 2722720, None)
+    call.set_value((-10, 20))
+    assert call.value == Point(-10, 20, None)
 
     call = LocationItem('my_location_item')
     call.set_value((1, 2, 3.3))
-    assert call.value == (1, 2, 3.3)
+    assert call.value == Point(1, 2, 3.3)
 
 
-def test_location_post_update(posted_updates) -> None:
+def test_location_post_update(websocket_events) -> None:
     call = LocationItem('my_call_item')
 
-    call.oh_post_update((132, 456))
-    posted_updates.assert_called_with('132,456')
+    call.oh_post_update((45, -60))
+    websocket_events.assert_called_once('Point', '45,-60', event='update')
 
-    call.oh_post_update((132, 456, 78.901))
-    posted_updates.assert_called_with('132,456,78.901')
+    call.oh_post_update((-30, 179, 78.901))
+    websocket_events.assert_called_once('Point', '-30,179,78.901', event='update')
 
 
 def test_location_map() -> None:

@@ -50,6 +50,7 @@ class RuleManager:
                 shutdown.request()
                 return None
             await file.check_all_rules()
+            return None
 
         path = HABApp.CONFIG.directories.rules
         prefix = 'rules/'

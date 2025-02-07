@@ -22,8 +22,8 @@ def test_dimmer_set_value() -> None:
         DimmerItem('item_name').set_value('asdf')
 
 
-def test_switch_post_update(posted_updates) -> None:
+def test_switch_post_update(websocket_events) -> None:
     sw = DimmerItem('')
 
     sw.oh_post_update('ON')
-    posted_updates.assert_called_with('ON')
+    websocket_events.assert_called_once('OnOff', 'ON', event='update')

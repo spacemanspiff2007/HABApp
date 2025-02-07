@@ -1,10 +1,9 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Final
 
-from HABApp.core.events import ComplexEventValue
-from HABApp.openhab.definitions import OpenHABDataType, UnDefType
+from HABApp.openhab.definitions.websockets.item_value_types import StringTypeModel, UnDefTypeModel
 from HABApp.openhab.item_to_reg import get_members
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, ValueToOh
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
@@ -12,17 +11,7 @@ if TYPE_CHECKING:
     MetaData = MetaData     # noqa: PLW0127
 
 
-class LetEverythingPassType(OpenHABDataType):
-
-    @staticmethod
-    def to_oh_str(value: Any) -> str | None:
-        return value
-
-    @staticmethod
-    def from_oh_str(value: str) -> Any:
-        return value
-
-
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/items/GroupItem.java
 class GroupItem(OpenhabItem):
     """GroupItem which accepts and converts the data types from OpenHAB
 
@@ -35,14 +24,11 @@ class GroupItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    _update_to_oh: Final = ValueToOh('GroupItem', UnDefType, LetEverythingPassType)
-    _command_to_oh: Final = ValueToOh('GroupItem', LetEverythingPassType)
-    _state_from_oh_str = staticmethod(LetEverythingPassType.from_oh_str)
+    _update_to_oh: Final = OutgoingStateEvent('GroupItem', 'UnDef', 'String')
+    _command_to_oh: Final = OutgoingCommandEvent('GroupItem', 'Refresh', 'String')
+    _state_from_oh_str = staticmethod(StringTypeModel.get_value_from_state)
 
     def set_value(self, new_value) -> bool:
-
-        if isinstance(new_value, ComplexEventValue):
-            new_value = new_value.value
         return super().set_value(new_value)
 
     @property

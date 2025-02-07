@@ -1,4 +1,3 @@
-
 from HABAppTests import (
     EventWaiter,
     ItemWaiter,
@@ -38,6 +37,7 @@ class TestOpenhabEventTypes(TestBaseRule):
         with (OpenhabTmpItem(item_type, item_name) as item,
               EventWaiter(item_name, ValueUpdateEventFilter()) as state_waiter,
               EventWaiter(item_name, ItemCommandEventFilter()) as command_waiter):
+
             for post_value, receive_value in test_states:
                 item.oh_post_update(post_value)
                 state_waiter.wait_for_event(value=receive_value)

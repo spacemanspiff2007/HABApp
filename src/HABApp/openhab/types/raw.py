@@ -40,11 +40,25 @@ class RawType:
         return NotImplemented
 
     @classmethod
-    def create(cls, type: str, data: bytes) -> Self:  # noqa: A002
+    def create(cls, data_type: str | None, data: bytes) -> Self:
+        if not isinstance(data, bytes):
+            msg = f'Invalid data type! Expected bytes, got {type(data)}'
+            raise TypeError(msg)
+
+        if data_type is None:
+            if data.startswith(b'\xFF\xD8\xFF'):
+                data_type = 'jpeg'
+            elif data.startswith(b'\x89\x50\x4E\x47'):
+                data_type = 'png'
+            elif data.startswith(b'\x47\x49\x46\x38'):
+                data_type = 'gif'
+            else:
+                msg = f'Unknown image type! File Signature: {data[:10].hex()}'
+                raise ValueError(msg)
 
         # Remove MIME type prefix for common image file types
         # https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
-        if type.endswith(('apng', 'avif', 'gif', 'jpeg', 'png', 'svg', 'webp', 'bmp', 'x-icon', 'tiff')):
-            type = type.removeprefix('image/')
+        if data_type.endswith(('apng', 'avif', 'gif', 'jpeg', 'png', 'svg', 'webp', 'bmp', 'x-icon', 'tiff')):
+            data_type = data_type.removeprefix('image/')
 
-        return cls(type, data)
+        return cls(data_type, data)

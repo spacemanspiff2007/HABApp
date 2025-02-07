@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Annotated, Literal, override
 
 from pydantic import Field, Json
+from typing_extensions import Self
 
 from HABApp.openhab.events.item_events import GroupStateChangedEvent as TargetGroupStateChangedEvent
 from HABApp.openhab.events.item_events import GroupStateUpdatedEvent as TargetGroupStateUpdatedEvent
@@ -14,7 +15,6 @@ from HABApp.openhab.events.item_events import ItemStateEvent as TargetItemStateE
 from HABApp.openhab.events.item_events import ItemStatePredictedEvent as TargetItemStatePredictedEvent
 from HABApp.openhab.events.item_events import ItemStateUpdatedEvent as TargetItemStateUpdatedEvent
 from HABApp.openhab.events.item_events import ItemUpdatedEvent as TargetItemUpdatedEvent
-from HABApp.openhab.map_values import map_openhab_values
 
 from .base import SERIALIZE_TO_JSON_STR, BaseEvent, BaseModel, BaseOutEvent
 from .item_value_types import OpenHabValueType, OpenHabValueTypeAdapter
@@ -35,7 +35,7 @@ class ItemStateEvent(BaseEvent):
     def to_event(self) -> TargetItemStateEvent:
         payload = self.payload
         return TargetItemStateEvent(
-            name=self.topic[14:-6], value=map_openhab_values(payload.type, payload.value)
+            name=self.topic[14:-6], value=payload.get_value()
         )
 
 
@@ -47,7 +47,7 @@ class ItemStateUpdatedEvent(BaseEvent):
     def to_event(self) -> TargetItemStateUpdatedEvent:
         payload = self.payload
         return TargetItemStateUpdatedEvent(
-            name=self.topic[14:-13], value=map_openhab_values(payload.type, payload.value)
+            name=self.topic[14:-13], value=payload.get_value()
         )
 
 
@@ -62,8 +62,8 @@ class ItemStateChangedEvent(BaseEvent):
         old = ta.validate_python({'type': payload.old_type, 'value': payload.old_value})
         return TargetItemStateChangedEvent(
             name=self.topic[14:-13],
-            value=map_openhab_values(payload.type, payload.value),
-            old_value=map_openhab_values(payload.old_type, payload.old_value)
+            value=new.get_value(),
+            old_value=old.get_value()
         )
 
 
@@ -75,7 +75,7 @@ class ItemCommandEvent(BaseEvent):
     def to_event(self) -> TargetItemCommandEvent:
         payload = self.payload
         return TargetItemCommandEvent(
-            name=self.topic[14:-8], value=map_openhab_values(payload.type, payload.value)
+            name=self.topic[14:-8], value=payload.get_value()
         )
 
 
@@ -92,8 +92,9 @@ class ItemStatePredictedEvent(BaseEvent):
     @override
     def to_event(self) -> TargetItemStatePredictedEvent:
         payload = self.payload
+        value = OpenHabValueTypeAdapter.validate_python({'type': payload.type, 'value': payload.value})
         return TargetItemStatePredictedEvent(
-            name=self.topic[14:-15], value=map_openhab_values(payload.type, payload.value)
+            name=self.topic[14:-15], value=value.get_value(), is_confirmation=payload.is_confirmation
         )
 
 
@@ -106,7 +107,7 @@ class GroupStateUpdatedEvent(BaseEvent):
         parts = self.topic.split('/')
         payload = self.payload
         return TargetGroupStateUpdatedEvent(
-            name=parts[2], item=parts[3], value=map_openhab_values(payload.type, payload.value)
+            name=parts[2], item=parts[3], value=payload.get_value()
         )
 
 
@@ -122,8 +123,8 @@ class GroupStateChangedEvent(BaseEvent):
         old = ta.validate_python({'type': payload.old_type, 'value': payload.old_value})
         return TargetGroupStateChangedEvent(
             name=parts[2], item=parts[3],
-            value=map_openhab_values(payload.type, payload.value),
-            old_value=map_openhab_values(payload.old_type, payload.old_value)
+            value=new.get_value(),
+            old_value=old.get_value()
         )
 
 
@@ -194,8 +195,20 @@ class ItemStateSendEvent(BaseOutEvent):
     topic: str
     payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
 
+    @classmethod
+    def create(cls, name: str, payload: OpenHabValueType) -> Self:
+        return cls(
+            type='ItemStateEvent', topic=f'openhab/items/{name:s}/state', payload=payload
+        )
+
 
 class ItemCommandSendEvent(BaseOutEvent):
     type: Literal['ItemCommandEvent'] = 'ItemCommandEvent'
     topic: str
     payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
+
+    @classmethod
+    def create(cls, name: str, payload: OpenHabValueType) -> Self:
+        return cls(
+            type='ItemCommandEvent', topic=f'openhab/items/{name:s}/command', payload=payload
+        )

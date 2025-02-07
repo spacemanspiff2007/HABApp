@@ -4,7 +4,6 @@ import inspect
 import pytest
 
 import HABApp.openhab.events as events_module
-from HABApp.openhab.definitions import QuantityValue
 from HABApp.openhab.definitions.websockets import OPENHAB_EVENT_TYPE_ADAPTER
 from HABApp.openhab.events import (
     ChannelDescriptionChangedEvent,
@@ -40,6 +39,7 @@ def test__ItemStateEvent() -> None:  # noqa: N802
     assert isinstance(event, ItemStateEvent)
     assert event.name == 'Ping'
     assert event.value == '1'
+    assert str(event) == '<ItemStateEvent name: Ping, value: 1>'
 
     event = get_event({'topic': 'openhab/items/my_item_name/state',
                        'payload': '{"type":"String","value":"NONE"}', 'type': 'ItemStateEvent'})
@@ -53,6 +53,13 @@ def test__ItemStateEvent() -> None:  # noqa: N802
     assert event.name == 'my_item_name'
     assert event.value is None
 
+    event = get_event({'topic': 'openhab/items/Ping/state', 'payload': '{"type":"Quantity","value":"7.5 °C"}',
+                       'type': 'ItemStateEvent'})
+    assert isinstance(event, ItemStateEvent)
+    assert event.name == 'Ping'
+    assert event.value == 7.5
+    assert str(event) == '<ItemStateEvent name: Ping, value: 7.5 °C>'
+
 
 # noinspection PyPep8Naming
 def test__ItemStateUpdatedEvent() -> None:  # noqa: N802
@@ -60,13 +67,16 @@ def test__ItemStateUpdatedEvent() -> None:  # noqa: N802
                        'payload': '{"type":"Quantity","value":"9.5 °C"}', 'type': 'ItemStateUpdatedEvent'})
     assert isinstance(event, ItemStateUpdatedEvent)
     assert event.name == 'my_item_name'
-    assert event.value == QuantityValue((9.5, '°C'))
+    assert event.value == 9.5
+    assert event.value.unit == '°C'
+    assert str(event) == '<ItemStateUpdatedEvent name: my_item_name, value: 9.5 °C>'
 
     event = get_event({'topic': 'openhab/items/my_item_name/stateupdated',
                        'payload': '{"type":"Decimal","value":"9.5"}', 'type': 'ItemStateUpdatedEvent'})
     assert isinstance(event, ItemStateUpdatedEvent)
     assert event.name == 'my_item_name'
     assert event.value == 9.5
+    assert str(event) == '<ItemStateUpdatedEvent name: my_item_name, value: 9.5>'
 
 
 # noinspection PyPep8Naming
@@ -76,6 +86,13 @@ def test__ItemCommandEvent() -> None:  # noqa: N802
     assert isinstance(event, ItemCommandEvent)
     assert event.name == 'Ping'
     assert event.value == '1'
+
+    event = get_event({'topic': 'openhab/items/Ping/command', 'payload': '{"type":"Quantity","value":"7.5 s"}',
+                       'type': 'ItemCommandEvent'})
+    assert isinstance(event, ItemCommandEvent)
+    assert event.name == 'Ping'
+    assert event.value == 7.5
+    assert str(event) == '<ItemCommandEvent name: Ping, value: 7.5 s>'
 
 
 # noinspection PyPep8Naming
@@ -183,7 +200,8 @@ def test__ItemStatePredictedEvent() -> None:  # noqa: N802
                        'type': 'ItemStatePredictedEvent'})
     assert isinstance(event, ItemStatePredictedEvent)
     assert event.name == 'Buero_Lampe_Vorne_W'
-    assert event.value.value == 10.0
+    assert event.value == 10
+    assert event.is_confirmation is False
 
 
 # noinspection PyPep8Naming
@@ -203,6 +221,21 @@ def test__ItemStateChangedEvent2() -> None:  # noqa: N802
     assert event.value == datetime.datetime(2018, 6, 21, 19, 47, 8)
     assert event.old_value == datetime.datetime(2017, 6, 20, 17, 46, 7)
 
+    _in = {
+        'topic': 'openhab/items/TestDateTimeTOGGLE/statechanged',
+        'payload': '{"type":"Quantity","value":"7.5 °C","oldType":"Quantity","oldValue":"9.5 °C"}',
+        'type': 'ItemStateChangedEvent'}
+
+    event = get_event(_in)
+
+    assert isinstance(event, ItemStateChangedEvent)
+    assert event.name == 'TestDateTimeTOGGLE'
+    assert event.value == 7.5
+    assert event.value.unit == '°C'
+    assert event.old_value == 9.5
+    assert event.old_value.unit == '°C'
+    assert str(event) == '<ItemStateChangedEvent name: TestDateTimeTOGGLE, value: 7.5 °C, old_value: 9.5 °C>'
+
 
 # noinspection PyPep8Naming
 def test__GroupStateUpdatedEvent() -> None:  # noqa: N802
@@ -215,7 +248,20 @@ def test__GroupStateUpdatedEvent() -> None:  # noqa: N802
     assert isinstance(event, GroupStateUpdatedEvent)
     assert event.name == 'GroupThatChanged'
     assert event.item == 'ItemThatCausedChange'
-    assert str(event.value) == 'ON'
+    assert event.value == 'ON'
+    assert str(event) == '<GroupStateUpdatedEvent name: GroupThatChanged, item: ItemThatCausedChange, value: ON>'
+
+    d = {
+        'topic': 'openhab/items/GroupThatChanged/ItemThatCausedChange/stateupdated',
+        'payload': '{"type":"Quantity","value":"7.5 °C"}',
+        'type': 'GroupStateUpdatedEvent'
+    }
+    event = get_event(d)
+    assert isinstance(event, GroupStateUpdatedEvent)
+    assert event.name == 'GroupThatChanged'
+    assert event.item == 'ItemThatCausedChange'
+    assert event.value == 7.5
+    assert str(event) == '<GroupStateUpdatedEvent name: GroupThatChanged, item: ItemThatCausedChange, value: 7.5 °C>'
 
 
 # noinspection PyPep8Naming
@@ -231,6 +277,24 @@ def test__GroupItemStateChangedEvent() -> None:  # noqa: N802
     assert event.item == 'TestNumber1'
     assert event.value == 16
     assert event.old_value == 15
+    assert str(event) == ('<GroupStateChangedEvent name: TestGroupAVG, item: TestNumber1, '
+                          'value: 16, old_value: 15>')
+
+    d = {
+        'topic': 'openhab/items/TestGroupAVG/TestNumber1/statechanged',
+        'payload': '{"type":"Quantity","value":"7.5 °C","oldType":"Quantity","oldValue":"9.5 °F"}',
+        'type': 'GroupItemStateChangedEvent'
+    }
+    event = get_event(d)
+    assert isinstance(event, GroupStateChangedEvent)
+    assert event.name == 'TestGroupAVG'
+    assert event.item == 'TestNumber1'
+    assert event.value == 7.5
+    assert event.value.unit == '°C'
+    assert event.old_value == 9.5
+    assert event.old_value.unit == '°F'
+    assert str(event) == ('<GroupStateChangedEvent name: TestGroupAVG, item: TestNumber1, '
+                          'value: 7.5 °C, old_value: 9.5 °F>')
 
 
 # noinspection PyPep8Naming

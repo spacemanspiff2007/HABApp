@@ -1,4 +1,5 @@
 # no external dependencies
+import HABApp.openhab.types
 import HABApp.openhab.errors
 import HABApp.openhab.events
 
