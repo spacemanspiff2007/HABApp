@@ -1,5 +1,5 @@
-aiohttp     == 3.11.11
-pydantic    == 2.10.5
+aiohttp     == 3.11.12
+pydantic    == 2.10.6
 bidict      == 0.23.1
 watchfiles  == 1.0.4
 ujson       == 5.10.0

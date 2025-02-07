@@ -21,7 +21,7 @@ class CallItem(OpenhabItem):
     """CallItem which accepts and converts the data types from OpenHAB
 
     :ivar str name: |oh_item_desc_name|
-    :ivar StringListType value: |oh_item_desc_value|
+    :ivar StringList value: |oh_item_desc_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
