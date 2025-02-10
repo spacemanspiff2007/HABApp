@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from asyncio import Queue, QueueEmpty, sleep
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.internals import ItemRegistryItem
+from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.internals import ItemRegistryItem, uses_get_item
 from HABApp.core.lib import SingleTask
 from HABApp.core.logger import log_error, log_info, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
@@ -15,8 +16,11 @@ from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
 
 
 if TYPE_CHECKING:
-
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
+    from HABApp.openhab.items import OpenhabItem
+
+
+get_item = uses_get_item()
 
 
 def empty_queue(queue: Queue) -> None:
@@ -165,29 +169,50 @@ def send_websocket_event(event: ItemStateSendEvent | ItemCommandSendEvent) -> No
     return run_func_from_async(async_send_websocket_event, event)
 
 
-def post_update(item: str | ItemRegistryItem, state: Any) -> None:
+def try_get_item(item: str | ItemRegistryItem) -> OpenhabItem | None:
+    item_name = item.name if isinstance(item, ItemRegistryItem) else item
+
+    if not isinstance(item_name, str):
+        msg = f'Invalid item type: {type(item)}'
+        raise TypeError(msg)
+
+    try:
+        item = get_item(item_name)
+    except ItemNotFoundException:
+        return None
+
+    return item
+
+
+def post_update(item: str | ItemRegistryItem, state: Any, *,
+                transport: Literal['http', 'websocket'] = 'websocket') -> None:
     """
     Post an update to the item
 
     :param item: item name or item
     :param state: new item state
+    :param transport: transport to use. Websocket is much faster but stricter concerning which types are accepted
     """
-    if not isinstance(item, (str, ItemRegistryItem)):
-        msg = f'Invalid item type: {type(item)}'
-        raise TypeError(msg)
 
-    return run_func_from_async(async_post_update, item, state)
+    # by default, we use the websocket connection because it's much faster
+    if transport != 'websocket' or (item_obj := try_get_item(item)) is None:
+        return run_func_from_async(async_post_update, item, state)
+
+    return item_obj.oh_post_update(state)
 
 
-def send_command(item: str | ItemRegistryItem, command: Any) -> None:
+def send_command(item: str | ItemRegistryItem, command: Any, *,
+                transport: Literal['http', 'websocket'] = 'websocket') -> None:
     """
     Send the specified command to the item
 
     :param item: item name or item
     :param command: command
+    :param transport: transport to use. Websocket is much faster but stricter concerning which types are accepted
     """
-    if not isinstance(item, (str, ItemRegistryItem)):
-        msg = f'Invalid item type: {type(item)}'
-        raise TypeError(msg)
 
-    return run_func_from_async(async_send_command, item, command)
+    # by default, we use the websocket connection because it's much faster
+    if transport != 'websocket' or (item_obj := try_get_item(item)) is None:
+        return run_func_from_async(async_send_command, item, command)
+
+    return item_obj.send_command(command)

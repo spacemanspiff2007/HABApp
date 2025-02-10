@@ -27,6 +27,7 @@ class ItemType(StrEnum):
 ITEM_TYPES: typing.Final = _get_str_enum_values(ItemType)
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/unit/Units.java
 class ItemDimensions(StrEnum):
     ACCELERATION = 'Acceleration'
     ANGLE = 'Angle'
@@ -71,6 +72,9 @@ class ItemDimensions(StrEnum):
 ITEM_DIMENSIONS: typing.Final = _get_str_enum_values(ItemDimensions)
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/types/ArithmeticGroupFunction.java
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/types/DateTimeGroupFunction.java
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/types/QuantityTypeArithmeticGroupFunction.java
 class GroupItemFunctions(StrEnum):
     AND = 'AND'
     AVG = 'AVG'
@@ -81,6 +85,7 @@ class GroupItemFunctions(StrEnum):
     NOR = 'NOR'
     OR = 'OR'
     SUM = 'SUM'
+    XOR = 'XOR'
 
 
 GROUP_ITEM_FUNCTIONS: typing.Final = _get_str_enum_values(GroupItemFunctions)

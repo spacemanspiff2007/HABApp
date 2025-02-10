@@ -20,7 +20,7 @@ def convert_to_oh_str(value: Any) -> str:
             return m.value
 
     if isinstance(value, (list, tuple)):
-        return StringListTypeModel.from_value([str(v) for v in value]).value
+        return StringListTypeModel.from_value(value).value
 
     if value is None:
         return 'NULL'

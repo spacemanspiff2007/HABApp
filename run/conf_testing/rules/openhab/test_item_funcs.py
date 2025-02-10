@@ -72,6 +72,7 @@ class TestOpenhabItemFuncs(TestBaseRule):
         item_name = f'{item_type}_item_test'
 
         with OpenhabTmpItem(item_type, item_name) as item, ItemWaiter(OpenhabItem.get_item(item_name)) as waiter:
+
             for test_param in test_params:
                 assert isinstance(test_param, TestParam)
 
