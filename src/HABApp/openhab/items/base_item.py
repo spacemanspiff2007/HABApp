@@ -76,7 +76,7 @@ class OpenhabItem(BaseValueItem):
 
         :param value: value to be sent
         """
-        send_websocket_event(self._command_to_oh.create_event(self._name, value))
+        self.oh_send_command(value)
 
     def oh_post_update(self, value: Any = MISSING) -> None:
         """Post an update to the openHAB item

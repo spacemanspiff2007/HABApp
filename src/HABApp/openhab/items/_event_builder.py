@@ -56,6 +56,9 @@ class OutgoingEventBase:
             if (r := t.from_value(value)) is not None:
                 return self._event.create(name, r)
 
+        if isinstance(value, ItemValueBase):
+            return self._event.create(name, value)
+
         msg = f"Invalid value: '{value}' ({type(value)}) for {self._name:s}"
         raise ValueError(msg)
 

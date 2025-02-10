@@ -2,9 +2,9 @@ from typing import Literal
 
 import pytest
 
+from HABApp.openhab import items as items_module
 from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent
 from HABApp.openhab.definitions.websockets import base as websocket_base_module
-from HABApp.openhab.items import base_item as base_item_module
 
 
 class ValueCollector:
@@ -27,8 +27,16 @@ class ValueCollector:
 
 @pytest.fixture
 def websocket_events(monkeypatch) -> ValueCollector:
+
+    patched_name = 'send_websocket_event'
     c = ValueCollector()
-    monkeypatch.setattr(base_item_module, 'send_websocket_event', c)
+
+    for name in dir(items_module):
+        if name.endswith('_item'):
+            _module = getattr(items_module, name)
+            if hasattr(_module, patched_name):
+                monkeypatch.setattr(_module, patched_name, c)
+
     return c
 
 

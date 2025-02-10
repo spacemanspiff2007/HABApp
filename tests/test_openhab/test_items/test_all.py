@@ -25,8 +25,7 @@ from HABApp.openhab.items import (
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
 from HABApp.openhab.types import RawType, StringList
-
-from ...helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
+from tests.helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
