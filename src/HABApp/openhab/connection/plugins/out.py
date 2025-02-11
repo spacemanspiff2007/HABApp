@@ -215,4 +215,4 @@ def send_command(item: str | ItemRegistryItem, command: Any, *,
     if transport != 'websocket' or (item_obj := try_get_item(item)) is None:
         return run_func_from_async(async_send_command, item, command)
 
-    return item_obj.send_command(command)
+    return item_obj.oh_send_command(command)

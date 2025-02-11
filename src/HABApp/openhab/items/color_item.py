@@ -103,15 +103,15 @@ class ColorItem(OpenhabItem, OnOffCommand, PercentCommand):
 
     def is_on(self) -> bool:
         """Return true if item is on"""
-        if self.value is None:
+        if (value := self.value) is None:
             return False
-        return self.value.brightness > 0
+        return value.brightness > 0
 
     def is_off(self) -> bool:
         """Return true if item is off"""
-        if self.value is None:
+        if (value := self.value) is None:
             return False
-        return self.value.brightness <= 0
+        return value.brightness <= 0
 
     def __repr__(self) -> str:
         if self.value is None:

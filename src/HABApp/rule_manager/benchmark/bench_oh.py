@@ -156,7 +156,7 @@ class OpenhabBenchRule(BenchBaseRule):
         for i in range(10, 20):
             if self.item_obj is None:
                 def load_cb(event, item: str = self.name_list[i]) -> None:
-                    self.openhab.post_update(item, str(random.randint(0, 99999999)))
+                    self.openhab.post_update(item, random.randint(0, 99999999), transport='http')
             else:
                 def load_cb(event, item: NumberItem = NumberItem.get_item(self.name_list[i])) -> None:  # noqa: B008
                     item.oh_post_update(random.randint(0, 99999999))
@@ -166,7 +166,7 @@ class OpenhabBenchRule(BenchBaseRule):
 
         # start
         for i in range(10, 20):
-            self.openhab.post_update(self.name_list[i], str(random.randint(0, 99999999)))
+            self.openhab.post_update(self.name_list[i], random.randint(0, 99999999))
 
     def stop_load(self) -> None:
         for list in self.load_listener:
@@ -222,7 +222,7 @@ class OpenhabBenchRule(BenchBaseRule):
         if self.item_obj is not None:
             self.item_obj.oh_post_update(next_value)
         else:
-            self.openhab.post_update(self.item_name, next_value)
+            self.openhab.post_update(self.item_name, next_value, transport='http')
 
     async def a_proceed_item_val(self, event: ValueUpdateEvent) -> None:
         self.proceed_item_val(event)

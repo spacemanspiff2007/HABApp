@@ -167,6 +167,14 @@ class HSBTypeModel(ItemValueBase):
         if isinstance(value, RGB):
             return cls.from_value(value.to_hsb())
 
+        if isinstance(value, (tuple, list)) and len(value) == 3:
+            if len(value) != 3 or not all(isinstance(v, (int, float)) for v in value):
+                return None
+            return cls(
+                type='HSB',
+                value=','.join(str(v) if isinstance(v, int) else f'{v:.2f}' for v in value)
+            )
+
         return None
 
 
@@ -341,6 +349,11 @@ class PointTypeModel(ItemValueBase):
             if c is not None:
                 return cls(type='Point', value=f'{a},{b},{c}')
             return cls(type='Point', value=f'{a},{b}')
+
+        if isinstance(value, (tuple, list)):
+            if len(value) not in (2, 3) or not all(isinstance(v, (int, float)) for v in value):
+                return None
+            return cls(type='Point', value=','.join(str(v) for v in value))
 
         return None
 

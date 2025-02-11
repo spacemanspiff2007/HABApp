@@ -56,12 +56,15 @@ class TestOpenhabEventTypes(TestBaseRule):
                 EventWaiter(item_name, ValueUpdateEventFilter()) as event_waiter, \
                 ItemWaiter(item) as item_waiter:
 
-            for state_send, state_receive in get_openhab_test_states('Number'):
-                if state_receive is None:
-                    continue
-                self.openhab.post_update(item_name, f'{state_send} {unit}'.strip())
-                event_waiter.wait_for_event(value=state_receive)
-                item_waiter.wait_for_state(state_receive)
+            for post_func in (item.oh_post_update, lambda x: self.openhab.post_update(item_name, x)):
+
+                for post_value, receive_value in get_openhab_test_states('Number'):
+                    if unit and post_value is not None:
+                        post_value = f'{post_value} {unit}'  # noqa: PLW2901
+
+                    post_func(post_value)
+                    event_waiter.wait_for_event(value=receive_value)
+                    item_waiter.wait_for_state(receive_value)
 
 
 TestOpenhabEventTypes()
