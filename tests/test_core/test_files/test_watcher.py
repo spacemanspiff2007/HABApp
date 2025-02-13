@@ -10,12 +10,10 @@ from HABApp.core.files import HABAppFileWatcher
 from HABApp.core.files import watcher as watcher_module
 
 
-class MyPath(PurePath):
-    if not PYTHON_312:
-        _flavour = type(PurePath())._flavour
+class MyPath(type(PurePath()) if not PYTHON_312 else PurePath):
 
-    def __init__(self, *args) -> None:
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._is_dir = False
         self._is_file = False
 
