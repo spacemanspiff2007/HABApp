@@ -30,17 +30,17 @@ class ProcRule(Rule):
 
 
 @pytest.fixture(scope='function')
-def rule(monkeypatch):
+async def rule(monkeypatch):
     monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__).with_name('config.yml'))
 
     runner = SimpleRuleRunner()
-    runner.set_up()
+    await runner.set_up()
 
     rule = ProcRule()
 
     yield rule
 
-    runner.tear_down()
+    await runner.tear_down()
 
 
 @pytest.mark.no_internals
