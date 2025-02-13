@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
+from HABApp.core.const.const import PYTHON_311
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
@@ -25,6 +26,12 @@ from HABApp.openhab.definitions.websockets import (
 )
 from HABApp.openhab.definitions.websockets.base import BaseModel, BaseOutEvent
 from HABApp.openhab.process_events import on_openhab_event
+
+
+if PYTHON_311:
+    from asyncio import TaskGroup
+else:
+    from taskgroup import TaskGroup
 
 
 class WebSocketClosedError(ClientError):
