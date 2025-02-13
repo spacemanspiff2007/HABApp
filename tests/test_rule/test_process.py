@@ -105,7 +105,7 @@ async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector) -> N
 async def test_invalid_program(rule, test_logs, flag, rule_runner) -> None:
     parent_dir = Path(__file__).parent
 
-    rule_runner.set_ignored_exceptions(FileNotFoundError)
+    rule_runner.set_ignored_exceptions(str)
 
     await rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
 

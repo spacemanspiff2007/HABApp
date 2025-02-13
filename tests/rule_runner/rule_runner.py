@@ -186,14 +186,20 @@ class SimpleRuleRunner:
         if self._errors:
             lines = []
             for obj in self._errors:
-                if not isinstance(obj, HABAppException):
-                    lines.append(f'Unknown error type: {type(obj)}')
-                    lines.extend(str(obj).splitlines())
-                    continue
+                if isinstance(obj, HABAppException):
+                    if (ign := self._ignored_exceptions) and isinstance(obj.exception, ign):
+                        continue
+                    lines.append(f'Error: {type(obj.exception)}')
+                    lines.extend(obj.to_str().splitlines())
+                elif isinstance(obj, str):
+                    if (ign := self._ignored_exceptions) and isinstance(obj, ign):
+                        continue
+                    lines.append(f'Error: {type(obj.exception)}')
+                    lines.extend(obj.to_str().splitlines())
 
-                if (ign := self._ignored_exceptions) and isinstance(obj.exception, ign):
-                    continue
-                lines.extend(obj.to_str().splitlines())
+                lines.append(f'Unknown error type: {type(obj)}')
+                lines.extend(str(obj).splitlines())
+                continue
 
             if lines:
                 lines.insert(0, 'Error during test!')
