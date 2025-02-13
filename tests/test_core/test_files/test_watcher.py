@@ -10,6 +10,10 @@ from HABApp.core.files import watcher as watcher_module
 
 
 class MyPath(PurePath):
+    try:
+        _flavour = PurePath._flavour
+    except AttributeError:
+        pass
 
     def __init__(self, *args) -> None:
         super().__init__(*args)

@@ -151,10 +151,11 @@ async def test_exec_python_file_relative(rule) -> None:
 
 
 @pytest.mark.no_internals
-async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector) -> None:
+async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector, rule_runner) -> None:
+    rule_runner.set_ignored_exceptions(str)
+
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
-
     await rule.execute_python(rule.cb, file, 'show_err', capture_output=True, additional_python_path=[folder])
 
     test_logs.add_expected(None, 'ERROR', [
@@ -168,7 +169,9 @@ async def test_exec_python_file_error_stderr(rule, test_logs: LogCollector) -> N
 
 
 @pytest.mark.no_internals
-async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector) -> None:
+async def test_exec_python_file_error_stdout(rule, test_logs: LogCollector, rule_runner) -> None:
+    rule_runner.set_ignored_exceptions(str)
+
     folder = Path(__file__).parent
     file = folder / '__exec_python_file.py'
     await rule.execute_python(rule.cb, file, 'exit_3', capture_output=True, additional_python_path=[folder])
