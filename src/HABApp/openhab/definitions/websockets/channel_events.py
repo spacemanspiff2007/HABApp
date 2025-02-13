@@ -1,6 +1,7 @@
-from typing import Literal, override
+from typing import Literal
 
 from pydantic import Field, Json
+from typing_extensions import override
 
 from HABApp.openhab.events import ChannelDescriptionChangedEvent as TargetChannelDescriptionChangedEvent
 from HABApp.openhab.events import ChannelTriggeredEvent as TargetChannelTriggeredEvent

@@ -1,6 +1,7 @@
-from typing import Any, Literal, override
+from typing import Any, Literal
 
 from pydantic import Field, Json
+from typing_extensions import override
 
 from HABApp.openhab.definitions import ThingStatusDetailEnum, ThingStatusEnum
 from HABApp.openhab.events.thing_events import ThingAddedEvent as TargetThingAddedEvent

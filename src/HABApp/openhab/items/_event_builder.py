@@ -1,6 +1,6 @@
-from typing import Any, Final, override
+from typing import Any, Final
 
-from typing_extensions import Self
+from typing_extensions import Self, override
 
 from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent, item_value_types
 from HABApp.openhab.definitions.websockets.base import BaseOutEvent
