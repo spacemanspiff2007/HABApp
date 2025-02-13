@@ -29,18 +29,21 @@ class ProcRule(Rule):
         self.cb.__name__ = 'mock_callback'
 
 
-@pytest.fixture(scope='function')
-async def rule(monkeypatch):
-    monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__).with_name('config.yml'))
-
+@pytest.fixture
+async def rule_runner():
     runner = SimpleRuleRunner()
     await runner.set_up()
 
-    rule = ProcRule()
-
-    yield rule
+    yield runner
 
     await runner.tear_down()
+
+
+@pytest.fixture
+async def rule(monkeypatch, rule_runner):
+    monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__).with_name('config.yml'))
+
+    return ProcRule()
 
 
 @pytest.mark.no_internals
@@ -99,8 +102,11 @@ async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector) -> N
 
 @pytest.mark.parametrize('flag', [True, False])
 @pytest.mark.no_internals
-async def test_invalid_program(rule, test_logs, flag) -> None:
+async def test_invalid_program(rule, test_logs, flag, rule_runner) -> None:
     parent_dir = Path(__file__).parent
+
+    rule_runner.set_ignored_exceptions(FileNotFoundError)
+
     await rule.execute_subprocess(rule.cb, 'ProgramThatDoesNotExist', capture_output=True, raw_info=flag)
 
     test_logs.add_expected(None, 'ERROR', [

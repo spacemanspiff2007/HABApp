@@ -128,6 +128,9 @@ class SimpleRuleRunner:
 
         self._ignored_exceptions: tuple[Exception, ...] = ignored_exceptions
 
+    def set_ignored_exceptions(self, *exceptions: type[Exception]) -> None:
+        self._ignored_exceptions = exceptions
+
     async def set_up(self) -> None:
         # ensure that we call setup only once!
         assert isinstance(HABApp.core.Items, ConstProxyObj)
