@@ -5,15 +5,14 @@ import pytest
 from typing_extensions import Self
 from watchfiles import Change
 
+from HABApp.core.const.const import PYTHON_312
 from HABApp.core.files import HABAppFileWatcher
 from HABApp.core.files import watcher as watcher_module
 
 
 class MyPath(PurePath):
-    try:
-        _flavour = PurePath._flavour
-    except AttributeError:
-        pass
+    if not PYTHON_312:
+        _flavour = type(PurePath())._flavour
 
     def __init__(self, *args) -> None:
         super().__init__(*args)
