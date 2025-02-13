@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import PurePath
 
 import pytest
@@ -54,6 +55,7 @@ async def test_watcher(monkeypatch, test_logs) -> None:
     assert not f._watch_filter(Change.added, 'my/folder/2/file1', dispatchers=f._dispatchers)
 
     test_logs.add_expected('HABApp.file.events', 'DEBUG', 'Added dispatcher folder1')
-    test_logs.add_expected('HABApp.file.events', 'DEBUG', 'Watching my\\folder\\1')
+    test_logs.add_expected(
+        'HABApp.file.events', 'DEBUG', 'Watching my\\folder\\1' if os.name == 'nt' else 'Watching my/folder/1')
     test_logs.add_expected('HABApp.file.events', 'DEBUG', 'added my/folder/2/file1')
     test_logs.assert_ok()
