@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from asyncio import Queue, TaskGroup, sleep
+from asyncio import Queue, sleep
 from base64 import b64encode
 from inspect import isclass
 from typing import Annotated, Final, get_args, get_origin
