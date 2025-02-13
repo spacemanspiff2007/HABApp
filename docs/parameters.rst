@@ -14,50 +14,50 @@ Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp
     :hide_output:
 
     # ------------ hide: start ------------
-    from HABApp.parameters.parameters import _PARAMETERS
-    _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
+    async def run():
+        import HABApp
+        from HABApp.parameters.parameters import _PARAMETERS
+        _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
 
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
     # ------------ hide: stop -------------
 
-    from HABApp import Rule, Parameter
-    from HABApp.core.events import ValueChangeEventFilter
+        from HABApp import Rule, Parameter
+        from HABApp.core.events import ValueChangeEventFilter
 
-    class MyRuleWithParameters(Rule):
-        def __init__(self):
-            super().__init__()
+        class MyRuleWithParameters(Rule):
+            def __init__(self):
+                super().__init__()
 
-            # construct parameter once, default_value can be anything
-            self.min_value = Parameter( 'param_file_testrule', 'min_value', default_value=10)
+                # construct parameter once, default_value can be anything
+                self.min_value = Parameter( 'param_file_testrule', 'min_value', default_value=10)
 
-            # deeper structuring is possible through specifying multiple keys
-            self.min_value_nested = Parameter(
-                'param_file_testrule',
-                'Rule A', 'subkey1', 'subkey2',
-                default_value=['a', 'b', 'c'] # defaults can also be dicts or lists
-            )
+                # deeper structuring is possible through specifying multiple keys
+                self.min_value_nested = Parameter(
+                    'param_file_testrule',
+                    'Rule A', 'subkey1', 'subkey2',
+                    default_value=['a', 'b', 'c'] # defaults can also be dicts or lists
+                )
 
-            self.listen_event('test_item', self.on_change_event, ValueChangeEventFilter())
+                self.listen_event('test_item', self.on_change_event, ValueChangeEventFilter())
 
-        def on_change_event(self, event):
+            def on_change_event(self, event):
 
-            # the parameter can be used like a normal variable, comparison works as expected
-            if self.min_value < event.value:
-                pass
+                # the parameter can be used like a normal variable, comparison works as expected
+                if self.min_value < event.value:
+                    pass
 
-            # The current value can be accessed through the value-property, but don't cache it!
-            current_value = self.min_value.value
+                # The current value can be accessed through the value-property, but don't cache it!
+                current_value = self.min_value.value
 
 
-    MyRuleWithParameters()
+        MyRuleWithParameters()
 
     # ------------ hide: start ------------
-    import HABApp
-    HABApp.core.EventBus.post_event('test_watch', HABApp.core.events.ValueChangeEvent('test_item', 5, 6))
-    runner.tear_down()
-    # ------------ hide: stop -------------
+        HABApp.core.EventBus.post_event('test_watch', HABApp.core.events.ValueChangeEvent('test_item', 5, 6))
+
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
+
 
 Created file:
 
@@ -95,29 +95,27 @@ Just add the "reloads on" entry to the file.
     :caption: rule
 
     # ------------ hide: start ------------
-    from HABApp.parameters.parameters import _PARAMETERS
-    _PARAMETERS['my_param'] = {'key1': {'v': 10}, 'key2': {'v': 12}}
+    async def run():
+        from HABApp.parameters.parameters import _PARAMETERS
+        _PARAMETERS['my_param'] = {'key1': {'v': 10}, 'key2': {'v': 12}}
 
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
     # ------------ hide: stop -------------
-    import HABApp
+        import HABApp
 
-    class MyRule(HABApp.Rule):
-        def __init__(self, k, v):
-            super().__init__()
+        class MyRule(HABApp.Rule):
+            def __init__(self, k, v):
+                super().__init__()
 
-            print(f'{k}: {v}')
+                print(f'{k}: {v}')
 
 
-    cfg = HABApp.DictParameter('my_param')    # this will get the file content
-    for k, v in cfg.items():
-        MyRule(k, v)
+        cfg = HABApp.DictParameter('my_param')    # this will get the file content
+        for k, v in cfg.items():
+            MyRule(k, v)
+
     # ------------ hide: start ------------
-    runner.tear_down()
-    # ------------ hide: stop -------------
-
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 
 Parameter classes

@@ -58,29 +58,30 @@ Mqtt items have an additional publish method which make interaction with the mqt
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().set_up()
-
-    import HABApp
-    from unittest.mock import MagicMock
-    HABApp.mqtt.items.mqtt_item.publish = MagicMock()
+    async def run():
+        import HABApp
+        from unittest.mock import MagicMock
+        HABApp.mqtt.items.mqtt_item.publish = MagicMock()
     # ------------ hide: stop -------------
 
 
-    from HABApp.mqtt.items import MqttItem
-    from HABApp.core.events import ValueChangeEvent
+        from HABApp.mqtt.items import MqttItem
+        from HABApp.core.events import ValueChangeEvent
 
-    # Messages with a retain flag will automatically create a corresponding item in HABApp.
-    # All other items have to be created manually
-    my_mqtt_item = MqttItem.get_create_item('test/topic')
+        # Messages with a retain flag will automatically create a corresponding item in HABApp.
+        # All other items have to be created manually
+        my_mqtt_item = MqttItem.get_create_item('test/topic')
 
-    # easy to publish values
-    my_mqtt_item.publish('new_value')
+        # easy to publish values
+        my_mqtt_item.publish('new_value')
 
-    # comparing the item to get the state works, too
-    if my_mqtt_item == 'test':
-        pass # do something
+        # comparing the item to get the state works, too
+        if my_mqtt_item == 'test':
+            pass # do something
 
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 MqttItem
 """"""""""""""""""""""""""""""""""""""
@@ -102,22 +103,23 @@ It is created on the topic that reports the state from the device.
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().set_up()
-
-    import HABApp
-    from unittest.mock import MagicMock
-    HABApp.mqtt.items.mqtt_pair_item.publish = MagicMock()
+    async def run():
+        import HABApp
+        from unittest.mock import MagicMock
+        HABApp.mqtt.items.mqtt_pair_item.publish = MagicMock()
     # ------------ hide: stop -------------
-    from HABApp.mqtt.items import MqttPairItem
+        from HABApp.mqtt.items import MqttPairItem
 
-    # MqttPairItem works out of the box with zigbee2mqtt
-    mqtt = MqttPairItem.get_create_item("zigbee2mqtt/my_bulb/brightness")
-    mqtt.publish("255")  # <-- will use the write topic
+        # MqttPairItem works out of the box with zigbee2mqtt
+        mqtt = MqttPairItem.get_create_item("zigbee2mqtt/my_bulb/brightness")
+        mqtt.publish("255")  # <-- will use the write topic
 
-    # equivalent to
-    mqtt = MqttPairItem.get_create_item("zigbee2mqtt/my_bulb/brightness", write_topic="zigbee2mqtt/my_bulb/set/brightness")
+        # equivalent to
+        mqtt = MqttPairItem.get_create_item("zigbee2mqtt/my_bulb/brightness", write_topic="zigbee2mqtt/my_bulb/set/brightness")
 
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 .. inheritance-diagram:: HABApp.mqtt.items.MqttPairItem
    :parts: 1
@@ -177,25 +179,28 @@ MqttPublishOptions
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().set_up()
+    async def run():
 
-    import HABApp
-    from unittest.mock import MagicMock
-    HABApp.mqtt.util.publish_options.publish = MagicMock()
+        import HABApp
+        from unittest.mock import MagicMock
+        HABApp.mqtt.util.publish_options.publish = MagicMock()
     # ------------ hide: stop -------------
-    from HABApp.mqtt.util import MqttPublishOptions
 
-    topic = MqttPublishOptions('my/output/only/topic')
-    topic.publish('new_value')
+        from HABApp.mqtt.util import MqttPublishOptions
 
-    topic_qos = MqttPublishOptions('my/output/only/topic', qos=2)
-    topic_qos.publish('new_value')
+        topic = MqttPublishOptions('my/output/only/topic')
+        topic.publish('new_value')
 
-    # create new through replace command wich will use qos=2 and retain=True
-    topic_qos_retain = topic_qos.replace(retain=True)
-    topic_qos_retain.publish('new_value')
+        topic_qos = MqttPublishOptions('my/output/only/topic', qos=2)
+        topic_qos.publish('new_value')
 
+        # create new through replace command wich will use qos=2 and retain=True
+        topic_qos_retain = topic_qos.replace(retain=True)
+        topic_qos_retain.publish('new_value')
+
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 Example MQTT rule
 --------------------------------------

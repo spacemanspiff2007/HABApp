@@ -20,53 +20,54 @@ Get an even when the item is constant for 5 and for 10 seconds.
 .. exec_code::
 
     # ------------ hide: start ------------
-    from unittest.mock import Mock
-    import time, HABApp, eascheduler
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
+    async def run():
 
-    # We have no event loop running so this doesn't work. We patch it so this example doesn't raise an error
-    my_item = HABApp.core.items.Item('test_watch')
-    my_item.watch_change = lambda x: Mock(spec=HABApp.core.items.base_item_watch.ItemNoUpdateWatch)
+        from unittest.mock import Mock
+        import time, HABApp, eascheduler
 
-    HABApp.core.Items.add_item(my_item)
-    # ------------ hide: stop -------------
-    import HABApp
-    from HABApp.core.items import Item
-    from HABApp.core.events import ItemNoChangeEvent, EventFilter
+        # We have no event loop running so this doesn't work. We patch it so this example doesn't raise an error
+        my_item = HABApp.core.items.Item('test_watch')
+        my_item.watch_change = lambda x: Mock(spec=HABApp.core.items.base_item_watch.ItemNoUpdateWatch)
 
-    class MyRule(HABApp.Rule):
-        def __init__(self):
-            super().__init__()
+        HABApp.core.Items.add_item(my_item)
+        # ------------ hide: stop -------------
+        import HABApp
+        from HABApp.core.items import Item
+        from HABApp.core.events import ItemNoChangeEvent, EventFilter
 
-            my_item = Item.get_item('test_watch')
+        class MyRule(HABApp.Rule):
+            def __init__(self):
+                super().__init__()
 
-            # Create an event when the item doesn't change for 5 secs and
-            # create a watcher for ItemNoChangeEvent with 5s const time
-            my_item.watch_change(5).listen_event(self.item_constant_5s)
+                my_item = Item.get_item('test_watch')
 
-            # Just create an event when the item doesn't change for 10 secs
-            my_item.watch_change(10)
+                # Create an event when the item doesn't change for 5 secs and
+                # create a watcher for ItemNoChangeEvent with 5s const time
+                my_item.watch_change(5).listen_event(self.item_constant_5s)
 
-            # Listen to all ItemNoChangeEvents for the item
-            my_item.listen_event(self.item_constant, EventFilter(ItemNoChangeEvent))
+                # Just create an event when the item doesn't change for 10 secs
+                my_item.watch_change(10)
 
-            # Set the item to a value to generate the ItemNoChangeEvent events
-            my_item.set_value('my_value')
+                # Listen to all ItemNoChangeEvents for the item
+                my_item.listen_event(self.item_constant, EventFilter(ItemNoChangeEvent))
 
-        def item_constant_5s(self, event):
-            print(f'Item 5s const: {event}')
+                # Set the item to a value to generate the ItemNoChangeEvent events
+                my_item.set_value('my_value')
 
-        def item_constant(self, event):
-            print(f'Item const: {event}')
+            def item_constant_5s(self, event):
+                print(f'Item 5s const: {event}')
 
-    MyRule()
+            def item_constant(self, event):
+                print(f'Item const: {event}')
+
+        MyRule()
+
     # ------------ hide: start ------------
-    HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 5))
-    HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 10))
-    runner.tear_down()
-    # ------------ hide: stop -------------
+        HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 5))
+        HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 10))
+
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 
 Turn something off after movement
@@ -78,45 +79,45 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
     :hide_output:
 
     # ------------ hide: start ------------
-    import time, HABApp
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-    from HABApp.core.items import Item
-    Item.get_create_item('movement_sensor1')
-    Item.get_create_item('movement_sensor2')
-    Item.get_create_item('my_device')
+    async def run():
+        import time, HABApp
+        from HABApp.core.items import Item
+        Item.get_create_item('movement_sensor1')
+        Item.get_create_item('movement_sensor2')
+        Item.get_create_item('my_device')
     # ------------ hide: stop -------------
-    import HABApp
-    from HABApp.core.items import Item
-    from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
+        import HABApp
+        from HABApp.core.items import Item
+        from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 
-    class MyCountdownRule(HABApp.Rule):
-        def __init__(self):
-            super().__init__()
+        class MyCountdownRule(HABApp.Rule):
+            def __init__(self):
+                super().__init__()
 
-            self.countdown = self.run.countdown(30, self.switch_off)
-            self.device = Item.get_item('my_device')
+                self.countdown = self.run.countdown(30, self.switch_off)
+                self.device = Item.get_item('my_device')
 
-            self.movement1 = Item.get_item('movement_sensor1')
-            self.movement1.listen_event(self.movement, ValueUpdateEventFilter())
+                self.movement1 = Item.get_item('movement_sensor1')
+                self.movement1.listen_event(self.movement, ValueUpdateEventFilter())
 
-            self.movement2 = Item.get_item('movement_sensor2')
-            self.movement2.listen_event(self.movement, ValueUpdateEventFilter())
+                self.movement2 = Item.get_item('movement_sensor2')
+                self.movement2.listen_event(self.movement, ValueUpdateEventFilter())
 
-        def movement(self, event: ValueUpdateEvent):
-            if self.device != 'ON':
-                self.device.post_value('ON')
+            def movement(self, event: ValueUpdateEvent):
+                if self.device != 'ON':
+                    self.device.post_value('ON')
 
-            self.countdown.reset()
+                self.countdown.reset()
 
-        def switch_off(self):
-            self.device.post_value('OFF')
+            def switch_off(self):
+                self.device.post_value('OFF')
 
-    MyCountdownRule()
+        MyCountdownRule()
+
     # ------------ hide: start ------------
-    runner.tear_down()
-    # ------------ hide: stop -------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
+
 
 Process Errors in Rules
 ------------------------------------------
@@ -129,56 +130,52 @@ It also uses the built in :ref:`rate limiter <RATE_LIMITER>` to limit the amount
 .. exec_code::
 
     # ------------ hide: start ------------
-    import datetime
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
+    async def run():
     # ------------ hide: stop -------------
 
-    import HABApp
-    from HABApp.core.events.habapp_events import HABAppException
-    from HABApp.core.events import EventFilter
-    from HABApp.util import RateLimiter
+        import HABApp
+        from HABApp.core.events.habapp_events import HABAppException
+        from HABApp.core.events import EventFilter
+        from HABApp.util import RateLimiter
 
 
-    # Set up rate limiter to limit the amount of notifications
-    LIMITER = RateLimiter('MyNotifications')
-    LIMITER.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
-    LIMITER.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+        # Set up rate limiter to limit the amount of notifications
+        LIMITER = RateLimiter('MyNotifications')
+        LIMITER.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
+        LIMITER.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
 
 
-    class NotifyOnError(HABApp.Rule):
-        def __init__(self):
-            super().__init__()
+        class NotifyOnError(HABApp.Rule):
+            def __init__(self):
+                super().__init__()
 
-            # Listen to all errors
-            self.listen_event('HABApp.Errors', self.on_error, EventFilter(HABAppException))
+                # Listen to all errors
+                self.listen_event('HABApp.Errors', self.on_error, EventFilter(HABAppException))
 
-        def on_error(self, error_event: HABAppException):
-            msg = error_event.to_str() if isinstance(error_event, HABAppException) else error_event
+            def on_error(self, error_event: HABAppException):
+                msg = error_event.to_str() if isinstance(error_event, HABAppException) else error_event
 
-            # use limiter
-            if not LIMITER.allow():
-                return None
+                # use limiter
+                if not LIMITER.allow():
+                    return None
 
-            # Replace this part with your notification logic
-            print('Error in rules:')
-            print(msg)
+                # Replace this part with your notification logic
+                print('Error in rules:')
+                print(msg)
 
-    NotifyOnError()
+        NotifyOnError()
 
 
-    # this is a faulty rule as an example. Do not create this part!
-    class FaultyRule(HABApp.Rule):
-        def __init__(self):
-            super().__init__()
-            self.run.soon(self.faulty_function)
+        # this is a faulty rule as an example. Do not create this part!
+        class FaultyRule(HABApp.Rule):
+            def __init__(self):
+                super().__init__()
+                self.run.soon(self.faulty_function)
 
-        def faulty_function(self):
-            1 / 0
-    FaultyRule()
+            def faulty_function(self):
+                1 / 0
+        FaultyRule()
 
     # ------------ hide: start ------------
-    runner.process_events()
-    runner.tear_down()
-    # ------------ hide: stop -------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run(), ignored_exceptions=(ZeroDivisionError,))

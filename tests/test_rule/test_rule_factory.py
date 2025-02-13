@@ -12,11 +12,11 @@ def test_rule_no_create() -> None:
 
 
 @pytest.mark.no_internals
-def test_rule_create() -> None:
+async def test_rule_create() -> None:
     class MyRule(Rule):
         pass
 
-    with SimpleRuleRunner():
+    async with SimpleRuleRunner():
         r = create_rule(MyRule)
 
     assert isinstance(r, MyRule)

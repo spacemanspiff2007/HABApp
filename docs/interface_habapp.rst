@@ -108,22 +108,24 @@ And since it is just like a normal item triggering on changes etc. is possible, 
     :hide_output:
 
     # ------------ hide: start ------------
+    async def run():
+    # ------------ hide: stop ------------
+
+        from HABApp.core.items import AggregationItem
+        my_agg = AggregationItem.get_create_item('MyAggregationItem')
+
+        # Connect the source item with the aggregation item
+        my_agg.aggregation_source('MyInputItem')
+
+        # Aggregate all changes in the last two hours
+        my_agg.aggregation_period(2 * 3600)
+
+        # Use max as an aggregation function
+        my_agg.aggregation_func(max)
+
+    # ------------ hide: start ------------
     from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().set_up()
-    # ------------ hide: stop -------------
-
-    from HABApp.core.items import AggregationItem
-    my_agg = AggregationItem.get_create_item('MyAggregationItem')
-
-    # Connect the source item with the aggregation item
-    my_agg.aggregation_source('MyInputItem')
-
-    # Aggregate all changes in the last two hours
-    my_agg.aggregation_period(2 * 3600)
-
-    # Use max as an aggregation function
-    my_agg.aggregation_func(max)
-
+    SimpleRuleRunner().run(run())
 
 The value of ``my_agg`` in the example will now always be the maximum of ``MyInputItem`` in the last two hours.
 It will automatically update and always reflect the latest changes of ``MyInputItem``.
