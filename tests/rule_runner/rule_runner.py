@@ -194,8 +194,8 @@ class SimpleRuleRunner:
                 elif isinstance(obj, str):
                     if (ign := self._ignored_exceptions) and isinstance(obj, ign):
                         continue
-                    lines.append(f'Error: {type(obj.exception)}')
-                    lines.extend(obj.to_str().splitlines())
+                    lines.append(f'Error: {type(obj)}')
+                    lines.extend(obj.splitlines())
 
                 lines.append(f'Unknown error type: {type(obj)}')
                 lines.extend(str(obj).splitlines())
