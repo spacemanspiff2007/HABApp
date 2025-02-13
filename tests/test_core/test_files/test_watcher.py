@@ -10,10 +10,10 @@ from HABApp.core.files import HABAppFileWatcher
 from HABApp.core.files import watcher as watcher_module
 
 
-class MyPath(type(PurePath()) if not PYTHON_312 else PurePath):
+class MyPath(PurePath):
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args) -> None:
+        super().__init__(*args)
         self._is_dir = False
         self._is_file = False
 
@@ -32,6 +32,7 @@ class MyPath(type(PurePath()) if not PYTHON_312 else PurePath):
         return self
 
 
+@pytest.mark.skipif(not PYTHON_312, reason='Subclassing Path requires Python 3.12!')
 async def test_watcher(monkeypatch, test_logs) -> None:
     logging.getLogger('HABApp.file.events').setLevel(0)
     test_logs.set_min_level(0)
