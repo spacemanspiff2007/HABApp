@@ -287,10 +287,11 @@ def multiline_obj_name() -> None:
 
     a = []
 
-    assert a == [
+    if not a == [
         1,
         2
-    ]
+    ]:
+        raise ValueError()
 
 
 @pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
@@ -308,26 +309,30 @@ File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 -->  x |         func()
      x |     except Exception as e:
    ------------------------------------------------------------
-     e = AssertionError('assert [] == [1, 2]\n  \n  Right contains 2 more items, first extra item: 1\n  Use -v to get more diff')
+     e = ValueError()
      func = <function multiline_obj_name at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
 File "test_core/test_lib/test_format_traceback.py", line x in multiline_obj_name
 --------------------------------------------------------------------------------
-     x | def multiline_obj_name():
+     x | def multiline_obj_name() -> None:
        (...)
-     x |             return '<\nmulti\nline>'
      x |     instance = MultilineRepr()
      x |     a = []
--->  x |     assert a == [
+     x |     if not a == [
      x |         1,
      x |         2
-     x |     ]
+     x |     ]:
+-->  x |         raise ValueError()
    ------------------------------------------------------------
      a = []
      instance = <
                 multi
                 line>
+     not a == [
+             1,
+             2
+         ] = True
      a == [
              1,
              2
@@ -339,17 +344,8 @@ Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
     func()
   File "test_core/test_lib/test_format_traceback.py", line x, in multiline_obj_name
-    assert a == [
-AssertionError: assert [] == [1, 2]
-
-  Right contains 2 more items, first extra item: 1
-
-  Full diff:
-  + []
-  - [
-  -     1,
-  -     2,
-  - ]'''
+    raise ValueError()
+ValueError'''
 
 
 def test_habapp_regex(pytestconfig):
