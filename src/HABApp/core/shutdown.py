@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from HABApp.core.asyncio import create_task
 from HABApp.core.const import loop
+from HABApp.core.lib.helper import get_obj_name
 
 
 if TYPE_CHECKING:
@@ -60,7 +61,7 @@ def register(func: Callable[[], Any | Awaitable[Any]], *, last: bool = False, ms
         raise TypeError()
 
     if not msg:
-        msg = f'{func.__module__}.{func.__name__}'
+        msg = f'{func.__module__}.{get_obj_name(func)}'
 
     for existing in _REGISTERED:
         if existing.func is func:

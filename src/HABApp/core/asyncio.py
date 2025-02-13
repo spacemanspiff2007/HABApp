@@ -10,6 +10,7 @@ from typing import ParamSpec as _ParamSpec
 from typing import TypeVar as _TypeVar
 
 from HABApp.core.const import loop
+from HABApp.core.lib.helper import get_obj_name
 
 
 if TYPE_CHECKING:
@@ -27,7 +28,7 @@ class AsyncContextError(Exception):
         self.func: _Callable = func
 
     def __str__(self) -> str:
-        return f'Function "{self.func.__name__}" may not be called from an async context!'
+        return f'Function "{get_obj_name(self.func)}" may not be called from an async context!'
 
 
 _tasks = set()

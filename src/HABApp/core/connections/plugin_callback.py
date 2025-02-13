@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
 
+from HABApp.core.lib import get_obj_name
+
 from ._definitions import ConnectionStatus
 
 
@@ -60,7 +62,7 @@ class PluginCallbackHandler:
     @staticmethod
     def _get_coro_kwargs(plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]) -> tuple[str, ...]:
         if not iscoroutinefunction(coro):
-            msg = f'Coroutine function expected for {plugin.plugin_name}.{coro.__name__}'
+            msg = f'Coroutine function expected for {plugin.plugin_name}.{get_obj_name(coro)}'
             raise ValueError(msg)
 
         sig = signature(coro)
@@ -70,7 +72,7 @@ class PluginCallbackHandler:
             if name in ('connection', 'context'):
                 kwargs.append(name)
             else:
-                msg = f'Invalid parameter name "{name:s}" for {plugin.plugin_name}.{coro.__name__}'
+                msg = f'Invalid parameter name "{name:s}" for {plugin.plugin_name}.{get_obj_name(coro)}'
                 raise ValueError(msg)
         return tuple(kwargs)
 

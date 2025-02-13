@@ -12,7 +12,7 @@ from typing import ParamSpec, TypeVar, overload
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import uses_post_event
-from HABApp.core.lib import format_exception
+from HABApp.core.lib import format_exception, get_obj_name
 
 
 log = logging.getLogger('HABApp')
@@ -28,7 +28,7 @@ def process_exception(func: Callable | str, e: Exception,
                       do_print=False, logger: logging.Logger = log) -> None:
     lines = format_exception(e)
 
-    func_name = func if isinstance(func, str) else func.__name__
+    func_name = func if isinstance(func, str) else get_obj_name(func)
 
     # log exception, since it is unexpected we push it to stdout, too
     if do_print:
