@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from typing_extensions import Self
 

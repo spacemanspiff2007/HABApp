@@ -1,4 +1,3 @@
-from datetime import timedelta
 from enum import Enum
 
 from easyconfig.models import BaseModel

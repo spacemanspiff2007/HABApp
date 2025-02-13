@@ -6,7 +6,6 @@ from HABApp.core.internals import AutoContextBoundObj
 
 
 if TYPE_CHECKING:
-    import HABApp
     from HABApp.util.multimode import MultiModeItem
 
 

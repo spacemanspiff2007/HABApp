@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Final, override
+from typing import TYPE_CHECKING, Final, override
 
 from immutables import Map
 

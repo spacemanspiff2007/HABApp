@@ -12,4 +12,3 @@ from .websocket_events import (
     WebsocketTopicEnum,
     WebsocketTypeFilterEvent,
 )
-

@@ -40,4 +40,3 @@ class LocationItem(OpenhabItem):
             return super().set_value(new_value)
 
         raise InvalidItemValueError.from_item(self, new_value)
-

@@ -5,8 +5,6 @@ from collections.abc import Callable
 from types import ModuleType, TracebackType
 from typing import Any, Final
 
-from libcst.matchers import TypeOf
-from pydantic import TypeAdapter
 from pytest import MonkeyPatch
 
 import HABApp.mqtt.connection.publish

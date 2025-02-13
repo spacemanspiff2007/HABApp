@@ -2,7 +2,7 @@ from HABApp.openhab.types import RawType, StringList
 from HABApp.openhab.types.quantity import QuantityFloat, QuantityInt
 
 
-def test_raw_text():
+def test_raw_text() -> None:
     t = RawType.create('image/png', b'\x01' + b'\x00' * 1_000 + b'\x02')
     assert str(t) == 'RawType(type=png data=0100000000..0000000002 (1.0kiB))'
 
@@ -11,7 +11,7 @@ def test_raw_text():
     assert str(t) == 'RawType(type=png data=0100000000..0000000002 (11kiB))'
 
 
-def test_raw():
+def test_raw() -> None:
 
     b = b'\x01\x02'
     t = RawType('image/png', b)
@@ -23,7 +23,7 @@ def test_raw():
     assert t == b
 
 
-def test_string_list():
+def test_string_list() -> None:
     a = StringList(('a', 'b'))
     assert a == ('a', 'b')
     assert a != ('a', 1)
@@ -34,7 +34,7 @@ def test_string_list():
     assert str(a) == "('a', 'b')"
 
 
-def test_quantity():
+def test_quantity() -> None:
     i = QuantityInt(1, 'asdf')
     assert i == 1
     assert i.unit == 'asdf'

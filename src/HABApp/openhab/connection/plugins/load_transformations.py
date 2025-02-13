@@ -3,7 +3,7 @@ from __future__ import annotations
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.wrapper import ExceptionToHABApp
-from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
+from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.connection.handler.func_async import async_get_transformations
 from HABApp.openhab.transformations._map import MAP_REGISTRY
 from HABApp.openhab.transformations.base import TransformationRegistryBase, log

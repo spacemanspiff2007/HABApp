@@ -14,7 +14,7 @@ class ValueCollector:
     def __call__(self, event: ItemCommandSendEvent | ItemStateSendEvent) -> None:
         self.values.append(event)
 
-    def assert_called_once(self, type: str, value: str, *, event: Literal['command', 'update'], clear: bool = True):
+    def assert_called_once(self, type: str, value: str, *, event: Literal['command', 'update'], clear: bool = True) -> None:
         assert len(self.values) == 1
         obj = self.values[0]
         assert isinstance(obj, {'command': ItemCommandSendEvent, 'update': ItemStateSendEvent}[event])
@@ -41,5 +41,5 @@ def websocket_events(monkeypatch) -> ValueCollector:
 
 
 @pytest.fixture(autouse=True)
-def patch_event_id(monkeypatch):
+def patch_event_id(monkeypatch) -> None:
     monkeypatch.setattr(websocket_base_module, 'MSG_CTR', 1)

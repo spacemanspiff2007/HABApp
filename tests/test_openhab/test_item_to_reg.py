@@ -55,4 +55,3 @@ def test_update(monkeypatch, clean_objs) -> None:
 
     assert a.label == 'asdf'
     assert a.dimension == 'length'
-

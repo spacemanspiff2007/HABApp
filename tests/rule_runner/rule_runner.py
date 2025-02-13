@@ -1,8 +1,8 @@
 import logging
-from collections.abc import Callable, Coroutine
+from collections.abc import Awaitable, Callable, Coroutine
 from concurrent.futures import Future
 from types import TracebackType
-from typing import Any, Awaitable, Final
+from typing import Any, Final
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
@@ -100,7 +100,7 @@ class AppendListener(EventBusBaseListener):
         super().__init__(topic)
         self.obj = obj
 
-    def notify_listeners(self, event):
+    def notify_listeners(self, event) -> None:
         self.obj.append(event)
 
     def describe(self) -> str:
@@ -216,7 +216,7 @@ class SimpleRuleRunner:
     def run(cls, coro: Awaitable, *,
             process_events: bool = True, ignored_exceptions: tuple[Exception, ...] = ()) -> None:
 
-        async def _run():
+        async def _run() -> None:
             async with cls(ignored_exceptions=ignored_exceptions) as obj:
                 await coro
                 if process_events:

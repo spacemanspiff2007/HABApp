@@ -62,7 +62,7 @@ def test_point_create() -> None:
     assert str(e.value) == 'Elevation must be int or float'
 
 
-def test_distance():
+def test_distance() -> None:
     # from https://geopy.readthedocs.io/en/latest/#module-geopy.distance
     a = Point(41.49008, -71.312796)
     b = Point(41.499498, -81.695391)
