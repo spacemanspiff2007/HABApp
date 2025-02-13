@@ -8,7 +8,7 @@ from typing_extensions import Self
 
 
 class ColorType:
-    pass
+    __slots__ = ()
 
 
 class RGB(ColorType):
