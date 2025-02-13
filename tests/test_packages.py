@@ -5,7 +5,6 @@ from packaging.version import VERSION_PATTERN
 
 import HABApp.__check_dependency_packages__
 from HABApp import __version__
-from HABApp.core.const.const import PYTHON_311
 
 
 def test_installation_check() -> None:
@@ -20,8 +19,8 @@ def test_installation_check() -> None:
             continue
         found.add(re_name.search(line).group(1))
 
-    if PYTHON_311:
-        found.remove('taskgroup')
+    # Backport only
+    found.remove('taskgroup')
 
     coded = set(HABApp.__check_dependency_packages__.get_dependencies())
 

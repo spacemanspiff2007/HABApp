@@ -294,7 +294,7 @@ def multiline_obj_name() -> None:
 
 
 @pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
-def test_multile_statements() -> None:
+def test_multiple_statements() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(multiline_obj_name)
     print('\n\n-')
@@ -308,7 +308,7 @@ File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 -->  x |         func()
      x |     except Exception as e:
    ------------------------------------------------------------
-     e = AssertionError('assert [] == [1, 2]\n  \n  Right contains 2 more items, first extra item: 1\n  \n  Full diff:\n  + []\n  - [\n  -     1,\n  -     2,\n  - ]')
+     e = AssertionError('assert [] == [1, 2]\n  \n  Right contains 2 more items, first extra item: 1\n  Use -v to get more diff')
      func = <function multiline_obj_name at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 

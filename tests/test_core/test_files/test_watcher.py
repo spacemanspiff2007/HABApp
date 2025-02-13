@@ -43,7 +43,7 @@ async def test_watcher(monkeypatch, test_logs) -> None:
 
     with pytest.raises(FileNotFoundError) as e:
         f.add_path(MyPath('a/b/c'))
-    assert str(e.value) in ('Path a/b/c does not exist!', 'Path a\\b\\c does not exist')
+    assert str(e.value) in ('Path a/b/c does not exist', 'Path a\\b\\c does not exist')
 
     async def coro(text: str):
         raise ValueError()
