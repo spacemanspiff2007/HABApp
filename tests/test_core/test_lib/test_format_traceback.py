@@ -343,6 +343,7 @@ File "test_core/test_lib/test_format_traceback.py", line x in multiline_obj_name
 Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
     func()
+    ~~~~^^
   File "test_core/test_lib/test_format_traceback.py", line x, in multiline_obj_name
     raise ValueError()
 ValueError'''
