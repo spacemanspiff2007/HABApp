@@ -99,13 +99,26 @@ class DateTimeTypeModel(ItemValueBase):
     # noinspection PyNestedDecorators
     @override
     @classmethod
-    def from_value(cls, value: datetime) -> Self | None:
+    def from_value(cls, value: datetime | Instant | LocalDateTime |
+                               ZonedDateTime | OffsetDateTime | SystemDateTime) -> Self | None:
         if isinstance(value, datetime):
             return cls(type='DateTime', value=value.isoformat())
 
         # https://whenever.readthedocs.io/en/latest/overview.html#iso-8601
         if isinstance(value, (Instant, LocalDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
             return cls(type='DateTime', value=value.format_common_iso())
+
+        if isinstance(value, str):
+            # try parsing through whenever types and datetime
+            for parse in (Instant.parse_common_iso, LocalDateTime.parse_common_iso, ZonedDateTime.parse_common_iso,
+                          OffsetDateTime.parse_common_iso, SystemDateTime.parse_common_iso, datetime.fromisoformat):
+                try:
+                    v = parse(value)
+                except ValueError:  # noqa: PERF203
+                    pass
+                else:
+                    return cls.from_value(v)
+
         return None
 
 
