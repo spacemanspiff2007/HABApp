@@ -26,6 +26,11 @@ file_manager = uses_file_manager()
 def setup_habapp_configuration(config_folder: Path) -> None:
 
     CONFIG.set_file_path(config_folder / 'config.yml')
+    preprocess = CONFIG.load_preprocess
+    preprocess.set_log_func(log.warning)
+    # old sse event handler config, remove 2026
+    preprocess.delete_entry(('openhab', 'connection', 'buffer'))
+    preprocess.delete_entry(('openhab', 'connection', 'topic filter'))
 
     logging_cfg_path = config_folder / 'logging.yml'
     create_default_logfile(logging_cfg_path)
