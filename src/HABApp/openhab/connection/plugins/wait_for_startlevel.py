@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import Final
 
 import HABApp
 import HABApp.core
@@ -19,19 +20,28 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
     def __init__(self, name: str | None = None) -> None:
         super().__init__(name)
 
-    async def on_connected(self, context: OpenhabContext, connection: OpenhabConnection):
+    async def on_connected(self, context: OpenhabContext, connection: OpenhabConnection) -> None:
         if not context.is_oh41:
             return await self.__on_connected_old(context, connection)
 
         return await self.__on_connected_new(context, connection)
 
-    async def __on_connected_new(self, context: OpenhabContext, connection: OpenhabConnection):
+    async def __on_connected_new(self, context: OpenhabContext, connection: OpenhabConnection) -> None:
+        log = connection.log
         oh_general = HABApp.CONFIG.openhab.general
+        start_level_reached_timeout: Final = 10 * 60
 
-        if (system_info := await async_get_system_info()) is not None:  # noqa: SIM102
+        if (system_info := await async_get_system_info()) is not None:
             # If openHAB is already running we have a fast exit path here
-            if system_info.uptime >= oh_general.min_uptime and system_info.start_level >= oh_general.min_start_level:
-                context.waited_for_openhab = False
+
+            uptime_skip_always = 2 * (oh_general.min_uptime + start_level_reached_timeout)
+            started_long_ago = system_info.uptime > uptime_skip_always
+            if started_long_ago:
+                log.debug(f'Uptime greater than {uptime_skip_always:d} secs, skipping start level check')
+
+            # If openHAB is already running we have a fast exit path here
+            if started_long_ago or (system_info.uptime >= oh_general.min_uptime and
+                                    system_info.start_level >= oh_general.min_start_level):
 
                 # Show a hint in case it's possible to increase the start level
                 # A higher start level means a more consistent startup and thus is more desirable
@@ -46,14 +56,14 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
                         f'Consider increasing "{_field_name_cfg:s}" in the HABApp configuration. '
                     )
 
+                context.waited_for_openhab = False
                 return None
 
-        log = connection.log
         log.info('Waiting for openHAB startup to be complete')
         context.waited_for_openhab = True
 
         timeout_start_at_level = 70
-        timeout = Timeout(10 * 60, start=False)
+        timeout = Timeout(start_level_reached_timeout, start=False)
 
         level_change: ValueChange[int] = ValueChange()
 
