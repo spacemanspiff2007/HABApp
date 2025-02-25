@@ -164,8 +164,9 @@ class HABAppFileWatcher:
         if dispatchers is not None:
             return any(dispatcher.allow(change, path) for dispatcher in dispatchers)
 
-        log.debug(f'{change.name:s} {path:s}')
-        return any(dispatcher.allow(change, path) for dispatcher in self._dispatchers)
+        process = any(dispatcher.allow(change, path) for dispatcher in self._dispatchers)
+        log.debug(f'{change.name:s} {path:s}{" (ignored)" if not process else ""}')
+        return process
 
     async def _watcher_task(self) -> None:
         delay = 1
