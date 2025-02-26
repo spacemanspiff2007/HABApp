@@ -69,8 +69,10 @@ class ThingConfigStatusInfoEvent(BaseEvent):
         )
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/dto/ThingDTO.java#L27
 class ThingRegistryPayload(BaseModel):
     name: str = Field(alias='UID')
+    bridge_name: str | None = Field(None, alias='bridgeUID')
     type: str = Field(alias='thingTypeUID')
     label: str = Field(alias='label')
     location: str = Field('', alias='location')
@@ -92,6 +94,7 @@ class ThingAddedEvent(BaseEvent):
         )
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.thing/src/main/java/org/openhab/core/thing/events/ThingUpdatedEvent.java
 class ThingUpdatedEvent(BaseEvent):
     type: Literal['ThingUpdatedEvent']
     payload: Json[tuple[ThingRegistryPayload, ThingRegistryPayload]]
