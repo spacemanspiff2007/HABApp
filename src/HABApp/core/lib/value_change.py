@@ -22,7 +22,7 @@ class ValueChange(Generic[T]):
             self.changed = False
             return self
 
-        if value is MISSING and current is not MISSING or value is not MISSING and current is MISSING:
+        if (value is MISSING and current is not MISSING) or (value is not MISSING and current is MISSING):
             self._value = value
             self.changed = True
             return self

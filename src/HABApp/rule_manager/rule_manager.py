@@ -1,6 +1,5 @@
 import logging
 import re
-import threading
 import typing
 from asyncio import sleep
 from pathlib import Path
@@ -31,10 +30,6 @@ class RuleManager:
         self.runtime = parent
 
         self.files: typing.Dict[str, RuleFile] = {}
-
-        # serialize loading
-        self.__load_lock = threading.Lock()
-        self.__files_lock = threading.Lock()
 
     async def setup(self):
 
@@ -103,30 +98,20 @@ class RuleManager:
             raise KeyError(f'No Rule with name "{rule_name}" found!')
         return found if len(found) > 1 else found[0]
 
-    async def request_file_unload(self, name: str, path: Path, request_lock=True):
+    async def request_file_unload(self, name: str, path: Path) -> None:
         path_str = str(path)
 
-        try:
-            if request_lock:
-                self.__load_lock.acquire()
+        # Only unload already loaded files
+        if path_str not in self.files:
+            log_warning(log, f'Rule file {path} is not yet loaded and therefore can not be unloaded')
+            return None
 
-            # Only unload already loaded files
-            with self.__files_lock:
-                already_loaded = path_str in self.files
-            if not already_loaded:
-                log_warning(log, f'Rule file {path} is not yet loaded and therefore can not be unloaded')
-                return None
+        log.debug(f'Removing file: {name}')
+        rule = self.files.pop(path_str)
 
-            log.debug(f'Removing file: {name}')
-            with self.__files_lock:
-                rule = self.files.pop(path_str)
+        await rule.unload()
 
-            await rule.unload()
-        finally:
-            if request_lock:
-                self.__load_lock.release()
-
-    async def request_file_load(self, name: str, path: Path):
+    async def request_file_load(self, name: str, path: Path) -> None:
         path_str = str(path)
 
         # if we want to shut down we don't load the rules
@@ -139,22 +124,14 @@ class RuleManager:
             log_warning(log, f'Rule file {name} ({path}) does not exist and can not be loaded!')
             return None
 
-        with self.__load_lock:
-            # Unload if we have already loaded
-            with self.__files_lock:
-                already_loaded = path_str in self.files
-            if already_loaded:
-                await self.request_file_unload(name, path, request_lock=False)
+        log.debug(f'Loading file: {name}')
+        self.files[path_str] = file = RuleFile(self, name, path)
 
-            log.debug(f'Loading file: {name}')
-            with self.__files_lock:
-                self.files[path_str] = file = RuleFile(self, name, path)
-
-            ok = await wrap_func(file.load).async_run()
-            if not ok:
-                self.files.pop(path_str)
-                log.warning(f'Failed to load {path_str}!')
-                raise AlreadyHandledFileError()
+        ok = await wrap_func(file.load).async_run()
+        if not ok:
+            self.files.pop(path_str)
+            log.warning(f'Failed to load {path_str}!')
+            raise AlreadyHandledFileError()
 
         log.debug(f'File {name} successfully loaded!')
 

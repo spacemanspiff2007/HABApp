@@ -64,7 +64,8 @@ class FileManager:
         self._task: Final = SingleTask(self._load_file_task, name='file load worker')
         self._watcher: Final = watcher
 
-    def add_folder(self, prefix: str, folder: Path, *, name: str, priority: int, pattern: Pattern | None = None) -> None:
+    def add_folder(self, prefix: str, folder: Path, *,
+                   name: str, priority: int, pattern: Pattern | None = None) -> None:
         self._file_names.add_folder(prefix, folder, priority=priority, pattern=pattern)
         if self._watcher is not None:
             self._watcher.watch_folder(name, self.file_watcher_event, folder)
@@ -114,50 +115,41 @@ class FileManager:
 
         return handlers[0]
 
-    async def _do_file_load(self, name: str, *, aquire_lock: bool = True) -> None:
-        if aquire_lock:
-            await self._lock.acquire()
+    async def _do_file_load(self, name: str) -> None:
+        if not (file := self.get_file(name)):
+            return None
 
-        try:
-            if not (file := self.get_file(name)):
-                return None
+        await file.load(self._get_file_handler(name), manager=self)
 
-            await file.load(self._get_file_handler(name), manager=self)
-        finally:
-            if aquire_lock:
-                self._lock.release()
+    async def _do_file_unload(self, name: str) -> None:
+        if not (file := self.get_file(name)):
+            return None
 
-    async def _do_file_unload(self, name: str, *, aquire_lock: bool = True) -> None:
-        if aquire_lock:
-            await self._lock.acquire()
+        await file.unload(self._get_file_handler(name), manager=self)
 
-        try:
-            if not (file := self.get_file(name)):
-                return None
-
-            await file.unload(self._get_file_handler(name), manager=self)
-
-            if file.can_be_removed():
-                self._files.pop(name)
-        finally:
-            if aquire_lock:
-                self._lock.release()
+        if file.can_be_removed():
+            self._files.pop(name)
 
     async def _load_file_task(self) -> None:
         try:
-            task_sleep = 0.3
+            task_sleep = 0.4
             task_alive = 15
 
             task_shutdown = False
             last_process = monotonic()
 
             files_count = ValueChange[int]()
+            files_count.set_value(-1)   # set to -1 so we wait at least one sleep cycle to aggregate events
 
             while True:
                 await sleep(0)
 
                 # wait until we have all files
-                while files_count.set_value(len(self._files)).changed:  # noqa: ASYNC110
+                while True:
+                    async with self._lock:
+                        files_changed = files_count.set_value(len(self._files)).changed
+                    if not files_changed:
+                        break
                     await sleep(task_sleep)
 
                 async with self._lock:
@@ -168,7 +160,7 @@ class FileManager:
 
                     if can_be_loaded := [f.name for f in self._files.values() if f.can_be_loaded()]:
                         name = next(self._file_names.get_names(can_be_loaded))
-                        await self._do_file_load(name, aquire_lock=False)
+                        await self._do_file_load(name)
                         last_process = monotonic()
 
                 if task_shutdown:
@@ -209,7 +201,7 @@ class FileManager:
         async with self._lock:
             # file already exists -> unload first
             if name in self._files:
-                await self._do_file_unload(name, aquire_lock=False)
+                await self._do_file_unload(name)
 
             self._files[name] = file
 
@@ -218,7 +210,8 @@ class FileManager:
             return None
 
         self._task.start_if_not_running()
-        await self._do_file_unload(event.name)
+        async with self._lock:
+            await self._do_file_unload(event.name)
         return None
 
     async def file_watcher_event(self, path: str) -> None:
