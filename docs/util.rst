@@ -403,8 +403,8 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
                 self.listeners = EventListenerGroup().add_listener(
                     [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEventFilter())
 
-                self.run.on_every_day(time(4), self.listen_sensors)
-                self.run.on_every_day(time(8), self.sensors_cancel)
+                self.run.at(self.run.trigger.time('04:00:00'), self.listen_sensors)
+                self.run.at(self.run.trigger.time('08:00:00'), self.sensors_cancel)
 
             def listen_sensors(self):
                 self.listeners.listen()

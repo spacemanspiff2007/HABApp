@@ -1,4 +1,5 @@
 import logging
+import warnings
 from collections.abc import Awaitable, Callable, Coroutine
 from concurrent.futures import Future
 from types import TracebackType
@@ -6,7 +7,7 @@ from typing import Any, Final
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
-from pytest import MonkeyPatch
+from pytest import MonkeyPatch  # noqa: PT013
 from typing_extensions import Self, override
 
 import HABApp
@@ -111,6 +112,10 @@ class ErrorEventReceivedError(Exception):
     pass
 
 
+class WarningReceivedError(Exception):
+    pass
+
+
 class SimpleRuleRunner:
     def __init__(self, ignored_exceptions: tuple[Exception, ...] = ()) -> None:
 
@@ -126,7 +131,12 @@ class SimpleRuleRunner:
         self._warnings = []
         self._errors = []
 
+        self._code_warnings = []
+
         self._ignored_exceptions: tuple[Exception, ...] = ignored_exceptions
+
+    def add_warning(self, message, category, filename, lineno, file=None, line=None) -> None:
+        self._code_warnings.append(f'{filename}:{lineno}: {category.__name__}:{message}')
 
     def set_ignored_exceptions(self, *exceptions: type[Exception]) -> None:
         self._ignored_exceptions = exceptions
@@ -167,6 +177,9 @@ class SimpleRuleRunner:
         # patch scheduler, so we run synchronous
         self.monkeypatch.setattr(job_builder_module, 'AsyncHABAppScheduler', SyncScheduler)
 
+        # catch warnings
+        self.monkeypatch.setattr(warnings, 'showwarning', self.add_warning)
+
     async def tear_down(self) -> None:
         for rule in self.loaded_rules:
             await rule._habapp_ctx.unload_rule()
@@ -205,6 +218,12 @@ class SimpleRuleRunner:
                 lines.insert(0, 'Error during test!')
                 msg = '\n'.join(lines)
                 raise ErrorEventReceivedError(msg)
+
+        if self._code_warnings:
+            lines = ['Code warnings:']
+            lines.extend(self._code_warnings)
+            msg = '\n'.join(lines)
+            raise WarningReceivedError(msg)
 
     def process_events(self) -> None:
         for s in SyncScheduler.ALL:
