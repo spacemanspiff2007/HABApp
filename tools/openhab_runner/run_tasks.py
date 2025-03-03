@@ -2,6 +2,7 @@ import logging
 import subprocess
 from collections.abc import Iterable
 from itertools import chain
+from types import TracebackType
 from typing import Any, Self
 
 from openhab_runner.models import RunConfig, TaskModel
@@ -50,7 +51,8 @@ class TaskHelper:
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         log.info('Stopping background tasks')
         self.stop_tasks()
         return None

@@ -10,7 +10,7 @@ asks which version should be started.
 It supports starting processes, configuring the JAVA version per openHAB instance,
 file synchronisation prior to starting openHAB and deleting logfiles.
 
-If no path to configuration file is provided a configuration file in the ``run`` 
+If no path to configuration file is provided a configuration file in the ``run``
 folder is created and/or used.
 
 Should be run in the HABApp venv:

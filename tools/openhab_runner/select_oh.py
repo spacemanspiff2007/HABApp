@@ -130,4 +130,3 @@ def build_run_config(config: InstallationConfig) -> RunConfig:
 
 def setup_openhab_runner() -> RunConfig:
     return build_run_config(select_openhab_version())
-
