@@ -4,7 +4,7 @@ This directory contains some helpful tools for working with HABApp and openHAB
 
 ## openhab_runner
 
-This is a tool that allows running openHAB.
+This is a tool that makes it easy to run openHAB.
 Different openHAB versions can be configured and a prompt in the beginning
 asks which version should be started.
 It supports starting processes, configuring the JAVA version per openHAB instance,
