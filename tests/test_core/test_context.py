@@ -24,7 +24,7 @@ async def test_error_msg() -> None:
     my_sync_func()
 
 
-async def run_in_thread(func: callable):
+async def run_in_thread(func: callable) -> None:
     t = Thread(target=func)
     t.start()
     while t.is_alive():
@@ -37,7 +37,7 @@ async def test_thread(caplog, eb: EventBus, monkeypatch) -> None:
 
     m = Mock()
 
-    async def coro():
+    async def coro() -> None:
         m(1)
 
     def nothing():
@@ -62,10 +62,10 @@ async def test_thread(caplog, eb: EventBus, monkeypatch) -> None:
     assert logs[1] == 'See https://habapp.readthedocs.io/en/latest/troubleshooting.html for more information.'
 
 
-async def test_thread_ok():
+async def test_thread_ok() -> None:
     m = Mock()
 
-    async def coro():
+    async def coro() -> None:
         m(1)
 
     @in_thread
