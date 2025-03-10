@@ -1,0 +1,9 @@
+Strategies {
+    // for rrd charts, we need a cron strategy
+    every30s : "0/30 * * * * ?"
+}
+
+Items {
+    // persist items on every change and every minute
+    gRRD4j* : strategy = everyChange, every30s, restoreOnStartup
+}

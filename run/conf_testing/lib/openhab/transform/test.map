@@ -1,0 +1,20 @@
+key=value
+1=ON
+0=OFF
+ON=1
+OFF=0
+white\ space=using escape
+=default
+
+
+ fruits                           apple, banana, pear, \
+                                  cantaloupe, watermelon, \
+                                  kiwi, mango
+
+
+ Truth1 = Beauty1
+  Truth2:Beauty2
+ Truth3                    :Beauty  3
+
+
+ cheeses
