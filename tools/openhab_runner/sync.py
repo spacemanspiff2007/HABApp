@@ -73,8 +73,8 @@ def sync_folder(src_dir: Path, dst_dir: Path, *, mode: SyncOptionEnum, test: boo
                 log.info(f'Creating directory {dst_obj}')
                 dst_obj.mkdir()
 
-            copied += sync_folder(src_obj, dst_obj, mode=mode, test=test)
-            continue
+        copied += sync_folder(src_obj, dst_obj, mode=mode, test=test)
+        continue
 
     return copied
 
