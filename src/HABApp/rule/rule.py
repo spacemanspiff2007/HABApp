@@ -47,6 +47,7 @@ def send_warnings_to_log(message, category, filename, lineno, file=None, line=No
     return
 
 
+
 # Setup deprecation warnings
 warnings.simplefilter('default')
 warnings.showwarning = send_warnings_to_log

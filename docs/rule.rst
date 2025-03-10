@@ -427,6 +427,7 @@ Other scheduler related functions are available under ``HABApp.rule.scheduler``.
 
 .. autofunction:: get_holidays_by_name
 
+.. _SUBPROCESS:
 
 Other tools and scripts
 ------------------------------

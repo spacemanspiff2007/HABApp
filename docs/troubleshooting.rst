@@ -69,7 +69,59 @@ Errors
 ValueError: Line is too long
 --------------------------------------
 
-The underlaying libraries of HABApp use a buffer to process each request and event from openHAB.
+The underlying libraries of HABApp use a buffer to process each request and event from openHAB.
 If the openHAB items contain images this buffer might be not enough and a ``ValueError: Line is too long``
 error will appear in the logs. See :ref:`the openHAB connection options<CONFIG_OPENHAB_CONNECTION>` on how to increase
 the buffer. The maximum image size that can be used without error is ~40% of the buffer size.
+This only applies to HABApp versions < 25 which use the SSE event handler.
+
+
+Thread usage detected but no thread marker "@in_thread" was used!
+-----------------------------------------------------------------
+
+This error appears when interaction with HABApp internals occur from a thread.
+Typically using own threads is not necessary and is **strongly** discouraged.
+Most of the time the scheduler and/or some rework of the logic can be used instead.
+For very long running scripts a subprocess can be used (see :ref:`subprocess <SUBPROCESS>`).
+
+If the thread is created by a 3rd party library (and thus no rework is possible)
+HABApp provides a ``in_thread`` decorator to mark the function accordingly.
+Additional benefit is proper tracebacks in case of Exception.
+
+.. exec_code::
+
+
+    # ------------ hide: start ------------
+    def library_function(cb):
+        pass
+
+    async def run():
+    # ------------ hide: stop -------------
+        from HABApp.rule import Rule, in_thread
+
+        class MyRule(Rule):
+            def __init__(self):
+                super().__init__()
+                # start library thread after startup
+                self.run.soon(self.startup)
+
+            def startup(self):
+                # There are to ways to mark a function as a thread function:
+                # 1. Use a wrapper in the function definition
+                library_function(self.runs_from_a_thread)
+                # 2. Wrap function when passing to the 3rd party library
+                library_function(in_thread(self.runs_also_from_a_thread))
+
+            @in_thread   # <-- this is the important part
+            def runs_from_a_thread(self):
+                pass
+
+            def runs_also_from_a_thread(self):
+                pass
+
+
+        MyRule()
+
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())

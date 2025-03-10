@@ -9,6 +9,7 @@ from sys import _getframe as sys_get_frame
 from types import TracebackType
 from typing import ParamSpec, TypeVar, overload
 
+from HABApp.core.asyncio import thread_context
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import uses_post_event
@@ -105,6 +106,25 @@ def ignore_exception(func):
         except Exception as e:
             process_exception(func, e)
             return None
+    return f
+
+
+def in_thread(func: Callable[P, T]) -> Callable[P, T]:
+    # async not allowed
+    if asyncio.iscoroutinefunction(func):
+        msg = 'Cannot use in_thread with async functions!'
+        raise ValueError(msg)
+
+    @functools.wraps(func)
+    def f(*args: P.args, **kwargs: P.kwargs) -> T:
+        ctx = thread_context.set('UserThread')
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            process_exception(func, e)
+            return None
+        finally:
+            thread_context.reset(ctx)
     return f
 
 

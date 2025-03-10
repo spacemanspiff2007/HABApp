@@ -95,7 +95,7 @@ def test_logs(caplog, request):
 
     yield c
 
-    additional_ignores: typing.List[LogLevelMatcher] = []
+    additional_ignores: list[LogLevelMatcher] = []
 
     markers = request.node.own_markers
     for marker in markers:

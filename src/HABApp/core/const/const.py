@@ -14,7 +14,6 @@ class _MissingType(Enum):
 
 
 MISSING: Final = _MissingType.MISSING
-STARTUP_MONOTONIC: Final = time.monotonic()
 STARTUP_INSTANT: Final = Instant.now()
 
 # Python Versions for feature control

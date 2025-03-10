@@ -114,7 +114,6 @@ class ConsecutiveMatcher(LogEntryMatcherBase):
         return f'<{self.__class__.__name__} matchers={self.matchers}>'
 
 
-
 def create_matcher(name: Iterable[str] | str | None,
                    level: Iterable[str | int] | str | int,
                    msg: Iterable[str] | str) -> list[LogEntryMatcher]:
