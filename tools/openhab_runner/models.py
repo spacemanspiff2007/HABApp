@@ -17,7 +17,7 @@ class LogConfig(BaseModel):
 
 class TaskModel(BaseModel):
     name: str
-    command: str
+    cmd: str
     args: list[str] | None = None
     env: dict[str, str] | None = None
     cwd: str | None = None
@@ -69,8 +69,8 @@ CONFIG = create_app_config(ConfigFileModel(test_sync=True), ConfigFileModel(
     sync=[SyncConfig(src='./conf_testing/lib/openhab', dst='./my/openhab/installation')],
     test_sync=True,
     tasks=LifeCycleTaskModel(
-        on_start=[TaskModel(name='start', command='start.sh')],
-        on_close=[TaskModel(name='stop', command='stop.sh')]
+        on_start=[TaskModel(name='start', cmd='start.sh')],
+        on_close=[TaskModel(name='stop', cmd='stop.sh')]
     ),
     installations=[
         InstallationConfig(

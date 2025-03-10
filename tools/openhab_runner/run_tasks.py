@@ -75,7 +75,7 @@ def stop_task(task: subprocess.Popen, name: str) -> None:
 
 
 def run_task(task: TaskModel) -> subprocess.Popen | None:
-    task_args = [task.command, *(args if (args := task.args) else [])]
+    task_args = [task.cmd, *(args if (args := task.args) else [])]
     log.info('')
     log.debug(f'Running {" ".join(task_args)}')
 

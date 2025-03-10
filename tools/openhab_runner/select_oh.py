@@ -62,7 +62,7 @@ def create_task(obj: TaskModel, placeholder: ConfigPlaceholder, env: dict[str, s
     ret['env'] = env
 
     t = TaskModel(**ret)
-    if not t.shell and not (p := Path(t.command)).is_file():
+    if not t.shell and not (p := Path(t.cmd)).is_file():
         msg = f'Command {p} not found!'
         raise FileNotFoundError(msg)
 
@@ -105,14 +105,14 @@ def build_run_config(config: InstallationConfig) -> RunConfig:
 
     tasks.on_start.insert(
         0, create_task(
-            TaskModel(name='java info', command='java.exe', args=['-version'], shell=True),
+            TaskModel(name='java info', cmd='java.exe', args=['-version'], shell=True),
             placeholder, env_vars
         )
     )
 
     oh_task = create_task(
         TaskModel(
-            name='openhab', command=str(oh_path), cwd='%openhab_root%', env=env_vars,
+            name='openhab', cmd=str(oh_path), cwd='%openhab_root%', env=env_vars,
             wait=False, new_console=True
         ),
         placeholder, env_vars
