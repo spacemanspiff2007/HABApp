@@ -17,8 +17,8 @@ Number  HABApp_Ping
 // Will be shown in the broken link detection
 //-------------------------------------------------------------------------------------------------
 
-Number      BrokenThing     { unit="W", channel="thing:that:does:not:exist:at:all"}
-Number      BrokenLink      { unit="W", channel="astro:sun:habapp-testing:channel-that-does-not-exist"}
+Number      BrokenThing     {channel="thing:that:does:not:exist:at:all"}
+Number      BrokenLink      {channel="astro:sun:habapp-testing:channel-that-does-not-exist"}
 
 
 //-------------------------------------------------------------------------------------------------
