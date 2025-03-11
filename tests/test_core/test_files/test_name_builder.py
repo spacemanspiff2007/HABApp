@@ -47,5 +47,3 @@ def test_get_names() -> None:
 
     assert list(f.get_names(files)) == target
     assert list(f.get_names(files, reverse=True)) == target[::-1]
-
-

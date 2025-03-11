@@ -14,7 +14,7 @@ from HABApp.core.const.topics import TOPIC_FILES
 from HABApp.core.files.file import HABAppFile
 from HABApp.core.files.file_properties import get_file_properties
 from HABApp.core.files.name_builder import FileNameBuilder
-from HABApp.core.lib import SingleTask, ValueChange
+from HABApp.core.lib import SingleTask
 
 
 if TYPE_CHECKING:
