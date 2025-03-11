@@ -211,7 +211,9 @@ class FileManager:
             properties = None
             HABApp.core.logger.log_error(log, str(e))
 
-        return HABAppFile(name, path, checksum, properties)
+        habapp_file = HABAppFile(name, path, checksum, properties)
+        log.debug(f'{habapp_file.name} created in state {habapp_file._state:s}')
+        return habapp_file
 
     async def event_load(self, event: RequestFileLoadEvent) -> None:
         if not self.__accept_event(event):
