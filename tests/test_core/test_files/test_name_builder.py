@@ -42,4 +42,10 @@ def test_get_names() -> None:
     f.add_folder('p1/', Path('fa1'), priority=1)
     f.add_folder('z2/', Path('fz2'), priority=2)
 
-    assert list(f.get_names(['p1/', 'z2/', 'z2/f', '???'])) == ['z2/', 'z2/f', 'p1/']
+    files = ['p1/', 'p1/a', 'p1/a', 'z2/', 'z2/f', 'z2/a', '???']
+    target = ['z2/', 'z2/a', 'z2/f', 'p1/', 'p1/a', 'p1/a']
+
+    assert list(f.get_names(files)) == target
+    assert list(f.get_names(files, reverse=True)) == target[::-1]
+
+

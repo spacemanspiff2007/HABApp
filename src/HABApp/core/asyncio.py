@@ -54,7 +54,8 @@ def thread_error_msg() -> None:
 
     if len(call_stack) > 1:
         error_msg.append('Call stack:')
-    error_msg.extend(f'{frame.filename:s}:{frame.lineno:d} {frame.function:s}' for frame in call_stack)
+    if call_stack:
+        error_msg.extend(f'{frame.filename:s}:{frame.lineno:d} {frame.function:s}' for frame in call_stack)
 
     log = logging.getLogger('HABApp')
     for line in error_msg:
@@ -68,7 +69,7 @@ def _in_thread() -> bool:
     thread_ctx = thread_context.get(None) is not None
     same_ident = get_ident() == thread_ident
 
-    # both markers point to asnyc
+    # both markers point to async
     if not thread_ctx and same_ident:
         return False
 

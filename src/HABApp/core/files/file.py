@@ -129,6 +129,11 @@ class HABAppFile:
     def can_be_removed(self) -> bool:
         return self._state is FileState.REMOVED
 
+    def can_be_unloaded(self) -> bool:
+        # If we are loaded we are either FAILED or LOADED.
+        # With failed the handler will have already unloaded the file
+        return self._state is FileState.LOADED
+
     async def load(self, handler: FileTypeHandler, manager: FileManager) -> None:
         if not self.can_be_loaded():
             msg = f'File {self.name} can not be loaded because current state is {self._state}!'

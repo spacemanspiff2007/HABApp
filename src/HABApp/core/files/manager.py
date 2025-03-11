@@ -59,10 +59,17 @@ class FileManager:
     def __init__(self, watcher: HABAppFileWatcher | None) -> None:
         self._lock = asyncio.Lock()
         self._files: Final[dict[str, HABAppFile]] = {}
+
+        self._files_request_load: Final[set[str]] = set()
+        self._files_request_unload: Final[set[str]] = set()
+
         self._file_names: Final = FileNameBuilder()
         self._file_handlers: tuple[FileTypeHandler, ...] = ()
+
         self._task: Final = SingleTask(self._load_file_task, name='file load worker')
         self._watcher: Final = watcher
+
+        self._event_received: bool = False
 
     def add_folder(self, prefix: str, folder: Path, *,
                    name: str, priority: int, pattern: Pattern | None = None) -> None:
@@ -118,13 +125,11 @@ class FileManager:
     async def _do_file_load(self, name: str) -> None:
         if not (file := self.get_file(name)):
             return None
-
         await file.load(self._get_file_handler(name), manager=self)
 
     async def _do_file_unload(self, name: str) -> None:
         if not (file := self.get_file(name)):
             return None
-
         await file.unload(self._get_file_handler(name), manager=self)
 
         if file.can_be_removed():
@@ -138,21 +143,40 @@ class FileManager:
             task_shutdown = False
             last_process = monotonic()
 
-            files_count = ValueChange[int]()
-            files_count.set_value(-1)   # set to -1 so we wait at least one sleep cycle to aggregate events
-
             while True:
                 await sleep(0)
 
-                # wait until we have all files
+                # wait to aggregate changes
                 while True:
                     async with self._lock:
-                        files_changed = files_count.set_value(len(self._files)).changed
-                    if not files_changed:
-                        break
+                        self._event_received = False
+
                     await sleep(task_sleep)
 
+                    async with self._lock:
+                        if not self._event_received:
+                            break
+
                 async with self._lock:
+                    # we first try to unload all files
+                    if self._files_request_unload:
+                        # unload order is reverse of load order, since we unload unconditionally we can
+                        unload_name = next(self._file_names.get_names(self._files_request_unload, reverse=True))
+                        self._files_request_unload.remove(unload_name)
+                        await self._do_file_unload(unload_name)
+                        continue
+
+                    # then we add all the files we want to load
+                    if self._files_request_load:
+                        load_name = next(self._file_names.get_names(self._files_request_load))
+                        if (existing := self.get_file(load_name)) and existing.can_be_unloaded():
+                            self._files_request_unload.add(load_name)
+                            continue
+                        self._files_request_load.remove(load_name)
+                        self._files[load_name] = self.__create_file(load_name)
+                        continue
+
+                    # Once we cleared all the queues the proper processing starts:
                     # check files for dependencies etc.
                     for file in self._files.values():
                         file.check_properties(self, log, log_msg=task_shutdown)
@@ -195,24 +219,19 @@ class FileManager:
 
         self._task.start_if_not_running()
 
-        name = event.name
-        file = self.__create_file(name)
-
         async with self._lock:
-            # file already exists -> unload first
-            if name in self._files:
-                await self._do_file_unload(name)
-
-            self._files[name] = file
+            self._event_received = True
+            self._files_request_load.add(event.name)
 
     async def event_unload(self, event: RequestFileUnloadEvent) -> None:
         if not self.__accept_event(event):
             return None
 
         self._task.start_if_not_running()
+
         async with self._lock:
-            await self._do_file_unload(event.name)
-        return None
+            self._event_received = True
+            self._files_request_unload.add(event.name)
 
     async def file_watcher_event(self, path: str) -> None:
         if not self._file_names.is_accepted_path(path):

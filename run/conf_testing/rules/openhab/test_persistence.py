@@ -35,7 +35,8 @@ class TestPersistenceBase(TestBaseRule):
             if cfg.id == self.service_name:
                 break
         else:
-            raise ValueError(f'Persistence service "{self.service_name}" not found!')
+            msg = f'Persistence service "{self.service_name}" not found!'
+            raise ValueError(msg)
 
     def set_persistence_data(self, time: datetime, state: Any):
         return self.openhab.set_persistence_data(self.item_name, self.service_name, time, state)

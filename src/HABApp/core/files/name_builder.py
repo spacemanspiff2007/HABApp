@@ -90,10 +90,11 @@ class FileNameBuilder:
             ret.extend((n, Path(p)) for p in paths if (n := b.create_name(p)) is not None)
         return ret
 
-    def get_names(self, names: Iterable[str]) -> Generator[str, None, None]:
+    def get_names(self, names: Iterable[str], *, reverse: bool = False) -> Generator[str, None, None]:
         """Get sorted names"""
-        names = sorted(names)
-        for b in self._builders:
+
+        names = sorted(names, reverse=reverse)
+        for b in self._builders if not reverse else reversed(self._builders):
             for name in names:
                 if b.matches_name(name):
                     yield name
