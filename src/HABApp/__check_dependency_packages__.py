@@ -19,7 +19,6 @@ def get_dependencies() -> list[str]:
         'geopy',
         'pydantic',
         'stack_data',
-        'voluptuous',
         'watchfiles',
         'ujson',
         'immutables',

@@ -15,8 +15,6 @@ fastnumbers == 5.1.1
 
 geopy == 2.4.1
 
-voluptuous == 0.15.2
-
 typing-extensions == 4.12.2
 
 aiohttp-sse-client == 0.2.1

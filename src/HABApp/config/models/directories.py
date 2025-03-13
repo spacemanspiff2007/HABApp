@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from easyconfig import BaseModel
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from HABApp.config.platform_defaults import get_log_folder
 
@@ -18,13 +18,13 @@ class DirectoriesConfig(BaseModel):
     rules: Path = Field(Path('rules'), description='Folder from which the rule files will be loaded')
 
     # Optional Folders
-    param: Path | None = Field(Path('params'), description='Folder from which the parameter files will be loaded')
+    params: Path | None = Field(Path('params'), description='Folder from which the parameter files will be loaded')
     config: Path | None = Field(Path('config'), description='Folder from which configuration files '
-                                                               '(e.g. for textual thing configuration) will be loaded')
+                                                             '(e.g. for textual thing configuration) will be loaded')
     lib: Path | None = Field(Path('lib'), description='Folder where additional libraries can be placed')
 
-    @validator('*')
-    def ensure_folder(cls, value: Path | None):
+    @field_validator('logging', 'rules', 'params', 'config', 'lib')
+    def ensure_folder(cls, value: Path | None) -> Path | None:
         import HABApp.__cmd_args__
 
         if value is None:
@@ -49,9 +49,9 @@ class DirectoriesConfig(BaseModel):
         if not self.logging.is_dir():
             self.logging.mkdir()
 
-        if not self.param.is_dir():
-            log.info(f'Parameters disabled! Folder {self.param} does not exist!')
-            self.param = None
+        if not self.params.is_dir():
+            log.info(f'Parameters disabled! Folder {self.params} does not exist!')
+            self.params = None
 
         if not self.config.is_dir():
             log.info(f'Manual thing configuration disabled! Folder {self.config} does not exist!')

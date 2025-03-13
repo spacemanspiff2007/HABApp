@@ -1,7 +1,7 @@
 import logging
 import re
-import threading
 from pathlib import Path
+from typing import Final
 
 import HABApp
 from HABApp.core.files.file import HABAppFile
@@ -12,43 +12,46 @@ from .parameters import get_parameter_file, remove_parameter_file, set_parameter
 
 log = logging.getLogger('HABApp.RuleParameters')
 
-LOCK = threading.Lock()
-PARAM_PREFIX = 'params/'
+PARAMS_PREFIX: Final = 'params/'
+PARAMS_SUFFIX: Final = '.yml'
 
 file_manager = uses_file_manager()
 
 
-async def load_file(name: str, path: Path) -> None:
-    with LOCK:  # serialize to get proper error messages
-        with path.open(mode='r', encoding='utf-8') as file:
-            data = HABApp.core.const.yml.load(file)
-        if data is None:
-            data = {}
-        set_parameter_file(path.stem, data)
+def get_user_name(name: str) -> str:
+    return name.removeprefix(PARAMS_PREFIX).removesuffix(PARAMS_SUFFIX)
 
-    log.debug(f'Loaded params from {name}!')
+
+async def load_file(name: str, path: Path) -> None:
+    with path.open(mode='r', encoding='utf-8') as file:
+        data = HABApp.core.const.yml.load(file)
+    if data is None:
+        data = {}
+
+    user_name = get_user_name(name)
+    set_parameter_file(user_name, data)
+
+    log.debug(f'Successfully loaded {name}!')
 
 
 async def unload_file(name: str, path: Path) -> None:
-    with LOCK:  # serialize to get proper error messages
-        remove_parameter_file(path.stem)
-
-    log.debug(f'Removed params from {path.name}!')
+    user_name = get_user_name(name)
+    remove_parameter_file(user_name)
+    log.debug(f'Removed {user_name}!')
 
 
 def save_file(file: str):
     assert isinstance(file, str), type(file)
-    path = HABApp.CONFIG.directories.param
+    path = HABApp.CONFIG.directories.params
     if path is None:
         msg = 'Parameter files are disabled! Configure a folder to use them!'
         raise ValueError(msg)
 
     filename = path / (file + '.yml')
 
-    with LOCK:  # serialize to get proper error messages
-        log.info(f'Updated {filename}')
-        with filename.open('w', encoding='utf-8') as outfile:
-            HABApp.core.const.yml.dump(get_parameter_file(file), outfile)
+    log.info(f'Updated {filename}')
+    with filename.open('w', encoding='utf-8') as outfile:
+        HABApp.core.const.yml.dump(get_parameter_file(file), outfile)
 
 
 class HABAppParameterFile(HABAppFile):
@@ -58,20 +61,15 @@ class HABAppParameterFile(HABAppFile):
 
 
 async def setup_param_files() -> bool:
-    path = HABApp.CONFIG.directories.param
+    path = HABApp.CONFIG.directories.params
     if path is None:
         return False
 
-    prefix = 'params/'
-    file_manager.add_handler('ParamFiles', log, prefix=prefix, on_load=load_file, on_unload=unload_file)
+    regex = re.escape(PARAMS_SUFFIX) + '$'
+
+    file_manager.add_handler('ParamFiles', log, prefix=PARAMS_PREFIX, on_load=load_file, on_unload=unload_file)
     file_manager.add_folder(
-        prefix, path, priority=100, pattern=re.compile(r'.yml$', re.IGNORECASE), name='rules-parameters'
+        PARAMS_PREFIX, path, priority=100, pattern=re.compile(regex, re.IGNORECASE), name='rules-parameters'
     )
 
     return True
-
-
-def reload_param_file(name: str) -> None:
-    name = f'{PARAM_PREFIX}{name}.yml'
-    path = HABApp.core.files.folders.get_path(name)
-    HABApp.core.asyncio.create_task(HABApp.core.files.manager.process_file(name, path))
