@@ -14,7 +14,7 @@ def test_default_file() -> None:
 directories:
   logging: log    # Folder where the logs will be written to
   rules: rules    # Folder from which the rule files will be loaded
-  param: params   # Folder from which the parameter files will be loaded
+  params: params  # Folder from which the parameter files will be loaded
   config: config  # Folder from which configuration files (e.g. for textual thing configuration) will be loaded
   lib: lib        # Folder where additional libraries can be placed
 location:
