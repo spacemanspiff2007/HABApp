@@ -88,7 +88,7 @@ Example
    #   depends on:
    #    - rules/rule_file.py
    #   reloads on:
-   #    - param/param_file.yml
+   #    - params/param_file.yml
 
    import HABApp
    ...
