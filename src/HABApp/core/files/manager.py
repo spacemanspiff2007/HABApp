@@ -162,6 +162,7 @@ class FileManager:
                         unload_name = next(self._file_names.get_names(self._files_request_unload, reverse=True))
                         self._files_request_unload.remove(unload_name)
                         await self._do_file_unload(unload_name)
+                        last_process = monotonic()
                         continue
 
                     # then we add all the files we want to load
@@ -172,6 +173,7 @@ class FileManager:
                             continue
                         self._files_request_load.remove(load_name)
                         self._files[load_name] = self.__create_file(load_name)
+                        last_process = monotonic()
                         continue
 
                     # Once we cleared all the queues the proper processing starts:
@@ -180,13 +182,23 @@ class FileManager:
                         file.check_properties(self, log, log_msg=task_shutdown)
                         file.check_dependencies(self)
 
+                    # unload pending files
+                    if unload_pending := [f.name for f in self._files.values() if f.state_unload_pending()]:
+                        name = next(self._file_names.get_names(unload_pending, reverse=True))
+                        await self._do_file_unload(name)
+                        last_process = monotonic()
+                        continue
+
+                    # load files
                     if can_be_loaded := [f.name for f in self._files.values() if f.can_be_loaded()]:
                         name = next(self._file_names.get_names(can_be_loaded))
                         await self._do_file_load(name)
                         last_process = monotonic()
+                        continue
 
                 if task_shutdown:
                     break
+                await sleep(0.1)
                 task_shutdown = monotonic() - last_process > task_alive
 
         except Exception as e:

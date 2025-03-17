@@ -26,6 +26,9 @@ class FileState(Enum):
 
     PROPERTIES_INVALID = auto()  # Properties could not be parsed
 
+    # if the file should be automatically unloaded
+    UNLOAD_PENDING = auto()
+
     # initial and last state
     PENDING = auto()
     REMOVED = auto()
@@ -126,6 +129,9 @@ class HABAppFile:
     def can_be_loaded(self) -> bool:
         return self._state is FileState.DEPENDENCIES_OK
 
+    def state_unload_pending(self) -> bool:
+        return self._state is FileState.UNLOAD_PENDING
+
     def can_be_removed(self) -> bool:
         return self._state is FileState.REMOVED
 
@@ -156,13 +162,23 @@ class HABAppFile:
         except Exception as e:
             if not isinstance(e, AlreadyHandledFileError):
                 process_exception(handler.on_unload, e, logger=handler.logger)
-            self.set_state(FileState.FAILED, manager)
+
+            if self._state is FileState.UNLOAD_PENDING:
+                self.set_state(FileState.PENDING, manager)
+            else:
+                self.set_state(FileState.FAILED, manager)
             return None
 
-        self.set_state(FileState.REMOVED, manager)
+        if self._state is FileState.UNLOAD_PENDING:
+            self.set_state(FileState.PENDING, manager)
+        else:
+            self.set_state(FileState.REMOVED, manager)
         return None
 
     def file_state_changed(self, file: HABAppFile, manager: FileManager) -> None:
         name = file.name
         if name in self.properties.reloads_on:
-            self.set_state(FileState.PENDING, manager)
+            if self.can_be_unloaded():
+                self.set_state(FileState.UNLOAD_PENDING, manager)
+            else:
+                self.set_state(FileState.PENDING, manager)
