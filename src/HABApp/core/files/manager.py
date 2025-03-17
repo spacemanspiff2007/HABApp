@@ -149,13 +149,11 @@ class FileManager:
                 # wait to aggregate changes
                 while True:
                     async with self._lock:
+                        if not self._event_received:
+                            break
                         self._event_received = False
 
                     await sleep(task_sleep)
-
-                    async with self._lock:
-                        if not self._event_received:
-                            break
 
                 async with self._lock:
                     # we first try to unload all files
