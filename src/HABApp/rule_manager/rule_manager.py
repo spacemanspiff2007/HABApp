@@ -75,7 +75,7 @@ class RuleManager:
             return None
 
         # trigger event for every file
-        await file_manager.get_file_watcher().load_files(name_include=r'^rules.*$')
+        await file_manager.get_file_watcher().load_files(dispatcher_name_include=r'^rules.*$')
         return None
 
     @log_exception

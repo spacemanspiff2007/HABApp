@@ -43,7 +43,7 @@ async def test_watcher(monkeypatch, test_logs) -> None:
     monkeypatch.setattr(watcher_module, 'create_task_from_async', lambda x: x)
 
     with pytest.raises(FileNotFoundError) as e:
-        f.add_path(MyPath('a/b/c'))
+        f._add_path(MyPath('a/b/c'))
     assert str(e.value) in ('Path a/b/c does not exist', 'Path a\\b\\c does not exist')
 
     async def coro(text: str):

@@ -117,7 +117,7 @@ class FileManager:
             raise ValueError(msg)
 
         if len(handlers) > 1:
-            msg = f'Multiple handlers matches for {name:s}: {", ".join(str(h) for h in handlers)}'
+            msg = f'Multiple handlers matched for {name:s}: {", ".join(str(h) for h in handlers)}'
             raise ValueError(msg)
 
         return handlers[0]
@@ -135,7 +135,7 @@ class FileManager:
         if file.can_be_removed():
             self._files.pop(name)
 
-    async def _load_file_task(self) -> None:
+    async def _load_file_task(self, *, keep_alive: bool = True) -> None:
         try:
             task_sleep = 0.4
             task_alive = 15
@@ -196,7 +196,7 @@ class FileManager:
                         last_process = monotonic()
                         continue
 
-                if task_shutdown:
+                if task_shutdown or not keep_alive:
                     break
                 await sleep(0.1)
                 task_shutdown = monotonic() - last_process > task_alive

@@ -24,13 +24,12 @@ class FileState(Enum):
     DEPENDENCIES_MISSING = auto()
     DEPENDENCIES_ERROR = auto()
 
-    PROPERTIES_INVALID = auto()  # Properties could not be parsed
-
     # if the file should be automatically unloaded
     UNLOAD_PENDING = auto()
 
-    # initial and last state
+    # initial and last states
     PENDING = auto()
+    PROPERTIES_INVALID = auto()  # Properties could not be parsed
     REMOVED = auto()
 
     def __str__(self) -> str:

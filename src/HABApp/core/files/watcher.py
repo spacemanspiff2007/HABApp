@@ -107,31 +107,29 @@ class HABAppFileWatcher:
 
         self._dispatchers = tuple(d for d in self._dispatchers if d is not dispatcher)
 
+    def watch_folder(self, name: str, coro: Callable[[str], Awaitable[Any]], folder: Path, *,
+                     habapp_internal: bool = False) -> FolderDispatcher:
+        return self._add_watcher(FolderDispatcher, name, coro, folder, habapp_internal=habapp_internal)
+
+    def watch_file(self, name: str, coro: Callable[[str], Awaitable[Any]], file: Path, *,
+                   habapp_internal: bool = False) -> FileDispatcher:
+        return self._add_watcher(FileDispatcher, name, coro, file, habapp_internal=habapp_internal)
+
     def __notify_task(self) -> None:
         if self._files_task is None:
             self._files_task = create_task_from_async(self._watcher_task())
         else:
             self._stop_event.set()
 
-    def watch_folder(self, name: str, coro: Callable[[str], Awaitable[Any]], folder: Path, *,
-                   habapp_internal: bool = False) -> FolderDispatcher:
-        d = FolderDispatcher(
-            name if not habapp_internal else f'{HABAPP_DISPATCHER_PREFIX}{name}', coro, folder.as_posix()
-        )
-        self.add_dispatcher(d)
-        self.add_path(folder)
+    def _add_watcher(self, cls: type[FileDispatcher] | type[FolderDispatcher], name: str,
+                     coro: Callable[[str], Awaitable[Any]], path: Path, *,
+                     habapp_internal: bool = False) -> FileDispatcher | FolderDispatcher:
+        d = cls(name if not habapp_internal else f'{HABAPP_DISPATCHER_PREFIX}{name}', coro, path.as_posix())
+        self._add_dispatcher(d)
+        self._add_path(path)
         return d
 
-    def watch_file(self, name: str, coro: Callable[[str], Awaitable[Any]], file: Path, *,
-                   habapp_internal: bool = False) -> FileDispatcher:
-        d = FileDispatcher(
-            name if not habapp_internal else f'{HABAPP_DISPATCHER_PREFIX}{name}', coro, file.as_posix()
-        )
-        self.add_dispatcher(d)
-        self.add_path(file)
-        return d
-
-    def add_dispatcher(self, dispatcher: FileWatcherDispatcherBase) -> None:
+    def _add_dispatcher(self, dispatcher: FileWatcherDispatcherBase) -> None:
         name = dispatcher.name.lower()
         for d in self._dispatchers:
             if d.name.lower() != name or d == dispatcher:
@@ -143,7 +141,7 @@ class HABAppFileWatcher:
         log.debug(f'Added dispatcher {dispatcher.name:s}')
         self.__notify_task()
 
-    def add_path(self, path: Path) -> None:
+    def _add_path(self, path: Path) -> None:
         if path.as_posix() in self._paths:
             return None
 
@@ -209,13 +207,15 @@ class HABAppFileWatcher:
             await task
         return None
 
-    async def load_files(self, name_include: Pattern | str | None = None, name_exclude: Pattern | str | None = None, *,
+    async def load_files(self, dispatcher_name_include: Pattern | str | None = None,
+                         dispatcher_name_exclude: Pattern | str | None = None,
+                         *,
                          exclude_habapp_config: bool = True) -> None:
 
-        if isinstance(name_include, str):
-            name_include = re.compile(f'^{name_include}$')
-        if isinstance(name_exclude, str):
-            name_exclude = re.compile(f'^{name_exclude}$')
+        if isinstance(dispatcher_name_include, str):
+            dispatcher_name_include = re.compile(dispatcher_name_include)
+        if isinstance(dispatcher_name_exclude, str):
+            dispatcher_name_exclude = re.compile(dispatcher_name_exclude)
 
         dispatchers = []
         for d in self._dispatchers:
@@ -228,9 +228,9 @@ class HABAppFileWatcher:
 
             if exclude_habapp_config and d.name.lower().startswith(HABAPP_DISPATCHER_PREFIX):
                 continue
-            if name_include is not None and not name_include.search(name):
+            if dispatcher_name_include is not None and not dispatcher_name_include.search(name):
                 continue
-            if name_exclude is not None and name_exclude.search(name):
+            if dispatcher_name_exclude is not None and dispatcher_name_exclude.search(name):
                 continue
             dispatchers.append(d)
 

@@ -1,6 +1,6 @@
 from collections.abc import Awaitable, Callable
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -115,3 +115,49 @@ async def test_unload(test_logs: LogCollector, file_manager) -> None:
     await file_manager._do_file_unload('name1')
     assert f._state is FileState.FAILED
     test_logs.assert_ok()
+
+
+async def test_reloads_on(test_logs: LogCollector, file_manager) -> None:
+
+    m_load = Mock()
+    m_unload = Mock()
+
+    step = 0
+
+    async def coro_on_load(name: str, path: Path) -> None:
+        nonlocal step
+
+        step += 1
+        m_load(name, step)
+
+    async def coro_on_unload(name: str, path: Path) -> None:
+        nonlocal step
+
+        step += 1
+        m_unload(name, step)
+
+    file_manager._files['n/name1'] = f1 = HABAppFile('n/name1', Path('path1'), b'ch1', FileProperties())
+    file_manager._files['n/name2'] = f2 = HABAppFile('n/name2', Path('path2'), b'ch2', FileProperties(reloads_on=['n/name1']))
+
+    file_manager.add_handler(
+        'myhandler', logger=file_manager_logger, prefix='n', on_load=coro_on_load, on_unload=coro_on_unload
+    )
+    file_manager._file_names.add_folder('n', Path('n'), priority=1)
+
+    f1._state = FileState.LOADED
+    f2._state = FileState.LOADED
+
+    await file_manager._do_file_unload('n/name1')
+    assert file_manager.get_file('n/name1') is None
+
+    assert f2._state is FileState.UNLOAD_PENDING
+
+    await file_manager._load_file_task(keep_alive=False)
+    assert f2._state is FileState.LOADED
+
+    m_unload.assert_has_calls((call('n/name1', 1), call('n/name2', 2)))
+    m_load.assert_called_once_with('n/name2', 3)
+
+    assert f2._state is FileState.LOADED
+
+    test_logs.add_expected('HABApp.files', 'WARNING', "File path2 reloads on file that doesn't exist: n/name1")
