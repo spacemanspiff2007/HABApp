@@ -174,8 +174,9 @@ class HABAppFileWatcher:
             try:
                 self._stop_event.clear()
                 log.debug('Starting file watcher')
-                async for changes in awatch(*self._paths, watch_filter=self._watch_filter, stop_event=self._stop_event):
-                    file_names = [Path(p).as_posix() for _, p in changes]
+                async for changes in awatch(*self._paths, debounce=120_000, step=1000,
+                                            watch_filter=self._watch_filter, stop_event=self._stop_event):
+                    file_names = sorted({Path(p).as_posix() for _, p in changes})
                     for dispatcher in self._dispatchers:
                         for path in file_names:
                             await dispatcher.dispatch(path)
