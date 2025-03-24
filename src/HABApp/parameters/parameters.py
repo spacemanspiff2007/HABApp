@@ -93,7 +93,7 @@ def get_value(file: str, *keys) -> typing.Any:
         param = _PARAMETERS[file]
     except KeyError:
         msg = f'File {file}.yml not found in params folder!'
-        raise FileNotFoundError(msg)
+        raise FileNotFoundError(msg) from None
 
     # lookup parameter
     for key in keys:
