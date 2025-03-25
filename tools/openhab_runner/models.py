@@ -66,7 +66,10 @@ class ConfigFileModel(BaseModel, AppConfigMixin):
 
 CONFIG = create_app_config(ConfigFileModel(test_sync=True), ConfigFileModel(
     logging=LogConfig(level='DEBUG'),
-    sync=[SyncConfig(src='./conf_testing/lib/openhab', dst='./my/openhab/installation')],
+    sync=[
+        SyncConfig(src='./conf_testing/lib/openhab', dst='%openhab_conf%'),
+        SyncConfig(src='./conf_testing/lib/openhab/services', dst='%openhab_conf%/services', mode='MERGE'),
+    ],
     test_sync=True,
     tasks=LifeCycleTaskModel(
         on_start=[TaskModel(name='start', cmd='start.sh')],
