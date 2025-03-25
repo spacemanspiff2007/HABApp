@@ -46,9 +46,20 @@ def copy_file(src: Path, dst: Path, test: bool) -> bool:
     return True
 
 
-def sync_folder(src_dir: Path, dst_dir: Path, *, mode: SyncOptionEnum, test: bool) -> int:
-    copied = 0
+def sync_folder(src_dir: Path, dst_dir: Path, *, mode: SyncOptionEnum, test: bool,
+                all_syncs: dict[tuple[Path, Path], RunFolderSyncConfig]) -> int:
+    original_mode = mode
 
+    # Allow different settings for a subfolder
+    if (sync_obj := all_syncs.get((src_dir, dst_dir))) is not None:
+        if sync_obj.is_done:
+            log.info(f'Sync from {src_dir} to {dst_dir} is already done')
+            return 0
+        if mode != sync_obj.mode:
+            log.debug(f'Changing sync mode from {mode.value} to {sync_obj.mode.value}')
+            mode = sync_obj.mode
+
+    copied = 0
     src_files: list[Path] = sorted(src_dir.iterdir())
 
     if mode != SyncOptionEnum.MERGE:
@@ -73,15 +84,24 @@ def sync_folder(src_dir: Path, dst_dir: Path, *, mode: SyncOptionEnum, test: boo
                 log.info(f'Creating directory {dst_obj}')
                 dst_obj.mkdir()
 
-        copied += sync_folder(src_obj, dst_obj, mode=mode, test=test)
+        copied += sync_folder(src_obj, dst_obj, mode=mode, test=test, all_syncs=all_syncs)
         continue
 
+    if sync_obj is not None:
+        sync_obj.is_done = True
+        if original_mode != mode:
+            log.debug(f'Sync with {mode.value} complete, continue with {original_mode.value}')
     return copied
 
 
 def sync_data(objs: Iterable[RunFolderSyncConfig], *, test: bool) -> None:
+    all_syncs = {(obj.src, obj.dst): obj for obj in objs}
+
     for obj in objs:
-        copied = sync_folder(obj.src, obj.dst, mode=obj.mode, test=test)
+        if obj.is_done:
+            continue
+
+        copied = sync_folder(obj.src, obj.dst, mode=obj.mode, test=test, all_syncs=all_syncs)
         log.debug(f'Copied {copied} file{"s" if copied != 1 else ""} from {obj.src} to {obj.dst}')
 
     return None

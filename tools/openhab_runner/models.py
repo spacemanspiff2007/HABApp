@@ -88,6 +88,8 @@ class RunFolderSyncConfig(BaseModel):
     dst: Path
     mode: SyncOptionEnum
 
+    is_done: bool = False
+
 
 class RunConfig(BaseModel):
     name: str
