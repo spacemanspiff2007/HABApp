@@ -35,8 +35,6 @@ ignore = [
     "UP038",    # Use X | Y in {} call instead of (X, Y)
 
     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
-    "ANN101",   # Missing type annotation for {name} in method
-    "ANN102",   # Missing type annotation for {name} in classmethod
     "ANN401",   # Dynamically typed expressions (typing.Any) are disallowed in {name}
 
     # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
@@ -110,9 +108,4 @@ lines-after-imports = 2     # https://docs.astral.sh/ruff/settings/#lint_isort_l
 
 "interface_*.py" = [
     "F401"  # F401 [*] {name} imported but unused
-]
-
-
-"run/*" = [
-    "S101"  # Use of assert detected
 ]
