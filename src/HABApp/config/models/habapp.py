@@ -1,38 +1,44 @@
 from datetime import timedelta
 
 from easyconfig import BaseModel
-from pydantic import Field, conint, model_validator
+from pydantic import Field, model_validator
 from typing_extensions import Self
 
 
 class ThreadPoolConfig(BaseModel):
-    enabled: bool = True
-    '''When the thread pool is disabled HABApp will become an asyncio application.
-    Use only if you have experience developing asyncio applications!
-    If the thread pool is disabled using blocking calls in functions can and will break HABApp'''
-
-    threads: conint(ge=1, le=32) = 10
-    '''Amount of threads to use for the executor'''
+    enabled: bool = Field(
+        True,
+        description='When the thread pool is disabled HABApp will become an asyncio application. '
+        'Use only if you have experience developing asyncio applications! '
+        'If the thread pool is disabled using blocking calls in functions can and will break HABApp',
+    )
+    threads: int = Field(10, ge=1, le=32, description='Amount of threads to use for the executor')
 
 
 class LoggingConfig(BaseModel):
-    use_buffer: bool = Field(True, alias='use buffer')
-    '''Automatically inject a buffer for the event log'''
-
-    flush_every: float = Field(0.5, alias='flush every', ge=0.1)
-    '''Wait time in seconds before the buffer gets flushed again when it was empty'''
+    use_buffer: bool = Field(True, alias='use buffer', description='Automatically inject a buffer for the event log')
+    flush_every: float = Field(
+        0.5,
+        alias='flush every',
+        ge=0.1,
+        description='Wait time in seconds before the buffer gets flushed again when it was empty',
+    )
 
 
 class PeriodicTracebackDumpConfig(BaseModel):
     """Periodically dump the traceback of all currently running threads into a file"""
 
     enabled: bool = Field(False, description='Enable or disable functionality')
-
-    delay: timedelta = Field('PT30M', gt=timedelta(seconds=0),
-                             description='Initial delay before the first traceback dump')
-
-    interval: timedelta = Field('PT1H', gt=timedelta(seconds=0),
-                                description='Interval to dump the traceback')
+    delay: timedelta = Field(
+        timedelta(minutes=30),  # PT30M,
+        gt=timedelta(seconds=0),
+        description='Initial delay before the first traceback dump',
+    )
+    interval: timedelta = Field(
+        timedelta(hours=1),  # PT1H
+        gt=timedelta(seconds=0),
+        description='Interval to dump the traceback',
+    )
 
 
 class WatchEventLoopConfig(BaseModel):
@@ -40,12 +46,17 @@ class WatchEventLoopConfig(BaseModel):
     and shut down HABApp"""
 
     enabled: bool = Field(False, description='Enable or disable functionality')
-
-    reset_every: timedelta = Field('PT1M', alias='reset every', gt=timedelta(seconds=0),
-                                   description='Reset interval for the timeout')
-
-    timeout: timedelta = Field('PT2M30S', gt=timedelta(seconds=0),
-                               description='Timeout after which HABApp will shut down')
+    reset_every: timedelta = Field(
+        timedelta(minutes=1),  # PT1M
+        alias='reset every',
+        gt=timedelta(seconds=0),
+        description='Reset interval for the timeout',
+    )
+    timeout: timedelta = Field(
+        timedelta(minutes=2, seconds=30),  # PT2M30
+        gt=timedelta(seconds=0),
+        description='Timeout after which HABApp will shut down',
+    )
 
     @model_validator(mode='after')
     def _check_values(self) -> Self:
@@ -63,12 +74,14 @@ class DebugConfig(BaseModel):
     """Debugging options for HABApp"""
 
     periodic_traceback: PeriodicTracebackDumpConfig = Field(
-        alias='periodic traceback', default_factory=PeriodicTracebackDumpConfig)
+        alias='periodic traceback', default_factory=PeriodicTracebackDumpConfig
+    )
 
     traceback_on_shutdown_signal: bool = Field(
-        False, alias='traceback on shutdown signal',
+        False,
+        alias='traceback on shutdown signal',
         description='Dump the traceback of all currently running threads into a file when receiving a shutdown signal. '
-                    'Not available on Windows!'
+        'Not available on Windows!',
     )
 
     watch_event_loop: WatchEventLoopConfig = Field(alias='watch event loop', default_factory=WatchEventLoopConfig)

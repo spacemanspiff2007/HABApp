@@ -1,5 +1,7 @@
 import logging
 
+from typing_extensions import Self
+
 
 class BufferedLogger:
     def __init__(self) -> None:
@@ -8,19 +10,19 @@ class BufferedLogger:
     def _log(self, lvl: int, msg: str) -> None:
         self._msgs.append((lvl, msg))
 
-    def debug(self, msg: str) -> 'BufferedLogger':
+    def debug(self, msg: str) -> Self:
         self._log(logging.DEBUG, msg)
         return self
 
-    def info(self, msg: str) -> 'BufferedLogger':
+    def info(self, msg: str) -> Self:
         self._log(logging.INFO, msg)
         return self
 
-    def warning(self, msg: str) -> 'BufferedLogger':
+    def warning(self, msg: str) -> Self:
         self._log(logging.WARNING, msg)
         return self
 
-    def error(self, msg: str) -> 'BufferedLogger':
+    def error(self, msg: str) -> Self:
         self._log(logging.ERROR, msg)
         return self
 

@@ -1,6 +1,7 @@
 from easyconfig import AppBaseModel
 from pydantic import Field
 
+from HABApp.config.easyconfig_extention import EasyConfigField
 from HABApp.config.models.directories import DirectoriesConfig
 from HABApp.config.models.habapp import HABAppConfig
 from HABApp.config.models.location import LocationConfig
@@ -15,4 +16,4 @@ class ApplicationConfig(AppBaseModel):
     location: LocationConfig = Field(default_factory=LocationConfig)
     mqtt: MqttConfig = Field(default_factory=MqttConfig)
     openhab: OpenhabConfig = Field(default_factory=OpenhabConfig)
-    habapp: HABAppConfig = Field(default_factory=HABAppConfig, in_file=False)
+    habapp: HABAppConfig = EasyConfigField(default_factory=HABAppConfig, in_file=False)

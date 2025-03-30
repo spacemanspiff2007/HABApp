@@ -31,6 +31,10 @@ def setup_debug() -> None:
     rotate_file(file, 3)
 
     TRACEBACK_FILE = file.open('a')
+
+    if not TRACEBACK_FILE:
+        raise OSError(f'Failed to open {file}')
+
     HABApp.core.shutdown.register(TRACEBACK_FILE.close, last=True, msg='Closing traceback file')
 
     if periodic_tb_cfg.enabled:
@@ -63,6 +67,8 @@ def setup_debug() -> None:
 
 @log_exception
 async def dump_traceback_task(delay: int, interval: int) -> None:
+    if TRACEBACK_FILE is None:
+        raise RuntimeError('TRACEBACK_FILE not set!')
 
     await sleep(0.2)
     TRACEBACK_FILE.write('Dumping traceback\n')
@@ -83,6 +89,8 @@ async def dump_traceback_task(delay: int, interval: int) -> None:
 
 @log_exception
 async def watch_event_loop_task(sleep_secs: int, timeout_secs: int) -> None:
+    if TRACEBACK_FILE is None:
+        raise RuntimeError('TRACEBACK_FILE not set!')
 
     TRACEBACK_FILE.write(f'Watching event loop\nReset: {sleep_secs:d}s Timeout: {timeout_secs:d}s\n\n')
     TRACEBACK_FILE.flush()

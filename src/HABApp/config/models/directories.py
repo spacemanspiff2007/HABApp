@@ -24,6 +24,7 @@ class DirectoriesConfig(BaseModel):
     lib: Path | None = Field(Path('lib'), description='Folder where additional libraries can be placed')
 
     @field_validator('logging', 'rules', 'params', 'config', 'lib')
+    @classmethod
     def ensure_folder(cls, value: Path | None) -> Path | None:
         import HABApp.__cmd_args__
 
@@ -32,8 +33,7 @@ class DirectoriesConfig(BaseModel):
 
         # only resolve if we have a path set
         if not value.is_absolute() and HABApp.__cmd_args__.CONFIG_FILE.name:
-            value = HABApp.__cmd_args__.CONFIG_FILE.parent / value
-            value = value.resolve()
+            value = (HABApp.__cmd_args__.CONFIG_FILE.parent / value).resolve()
 
         if value == HABApp.__cmd_args__.CONFIG_FILE:
             msg = f'Can not be the same as the path for the HABApp config! ({HABApp.__cmd_args__.CONFIG_FILE})'
@@ -49,11 +49,11 @@ class DirectoriesConfig(BaseModel):
         if not self.logging.is_dir():
             self.logging.mkdir()
 
-        if not self.params.is_dir():
+        if self.params is None or not self.params.is_dir():
             log.info(f'Parameters disabled! Folder {self.params} does not exist!')
             self.params = None
 
-        if not self.config.is_dir():
+        if self.config is None or not self.config.is_dir():
             log.info(f'Manual thing configuration disabled! Folder {self.config} does not exist!')
             self.config = None
 

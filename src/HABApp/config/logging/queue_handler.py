@@ -1,5 +1,5 @@
 import logging
-from queue import Empty, SimpleQueue
+from queue import Empty, SimpleQueue, Queue
 from threading import Lock, Thread
 from time import sleep
 from typing import Final
@@ -18,7 +18,7 @@ LOCK = Lock()
 class HABAppQueueHandler:
     FLUSH_DELAY: float = CONFIG.habapp.logging.flush_every
 
-    def __init__(self, queue: SimpleQueue, handler_name: str, thread_name: str) -> None:
+    def __init__(self, queue: SimpleQueue | Queue, handler_name: str, thread_name: str) -> None:
         self._handler: logging.Handler | None = None
         self._handler_name: Final = handler_name
         self._queue: Final = queue
@@ -32,7 +32,7 @@ class HABAppQueueHandler:
                 raise RuntimeError(msg)
 
             # resolve handler
-            self._handler = logging._handlers[self._handler_name]
+            self._handler = logging.getHandlerByName(self._handler_name)
 
             self._thread = thread = Thread(target=self._worker, name=f'HABApp_{self._name}')
 
@@ -76,8 +76,8 @@ class HABAppQueueHandler:
                 self._thread = None
 
     def process_queue(self) -> bool:
-        q = self._queue
-        handler = self._handler
+        if self._handler is None:
+            raise RuntimeError('Handler not set!')
 
         first_rec = True
 
@@ -92,10 +92,10 @@ class HABAppQueueHandler:
             while True:
                 if first_rec:
                     # first call is blocking
-                    rec = q.get()           # type: Optional[logging.LogRecord]
+                    rec: logging.LogRecord | None = self._queue.get()
                     first_rec = False
                 else:
-                    rec = q.get_nowait()    # type: Optional[logging.LogRecord]
+                    rec = self._queue.get_nowait()
 
                 if rec is None:
                     return True
@@ -109,13 +109,13 @@ class HABAppQueueHandler:
                         continue
 
                 # handle record
-                handler.handle(rec)
+                self._handler.handle(rec)
 
                 ctr -= 1
                 if ctr <= 0:
                     ctr = check_interval
                     if not skip_rem:
-                        q_size = q.qsize()
+                        q_size = self._queue.qsize()
                         if q_size > 1000:
                             skip_total = skip_rem = q_size - 750
 

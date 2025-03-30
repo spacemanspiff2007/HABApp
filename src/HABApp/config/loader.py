@@ -24,7 +24,6 @@ file_manager = uses_file_manager()
 
 
 def setup_habapp_configuration(config_folder: Path) -> None:
-
     CONFIG.set_file_path(config_folder / 'config.yml')
     preprocess = CONFIG.load_preprocess
     preprocess.set_log_func(log.warning)
@@ -74,7 +73,7 @@ async def config_file_changed(path: str) -> None:
         load_logging_cfg(file)
 
 
-def load_habapp_cfg(do_print=False) -> None:
+def load_habapp_cfg(do_print: bool = False) -> None:
     def error(text: str) -> None:
         if do_print:
             print(text)

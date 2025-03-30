@@ -132,11 +132,11 @@ def inject_queue_handler(handlers_cfg: dict, loggers_cfg: dict, log: BufferedLog
     for handler_name, buffered_handler_name in buffered_handlers.items():
         # https://github.com/python/cpython/issues/124653
         if PYTHON_313:
-            q: SimpleQueue = SimpleQueue() if sys.version_info[:3] > (3, 13, 0) else Queue()
+            q: SimpleQueue | Queue = SimpleQueue() if sys.version_info[:3] > (3, 13, 0) else Queue()
         elif PYTHON_312:
             q = SimpleQueue() if sys.version_info[:3] > (3, 12, 7) else Queue()
         else:
-            q: SimpleQueue = SimpleQueue()
+            q = SimpleQueue()
         handlers_cfg[buffered_handler_name] = {'class': 'logging.handlers.QueueHandler', 'queue': q}
 
         qh = HABAppQueueHandler(q, handler_name, f'LogBuffer{handler_name:s}')
@@ -154,8 +154,7 @@ def process_custom_levels(cfg: dict[str, Any], log: BufferedLogger) -> None:
         log.debug(f'Added custom log level "{alias!s}" ({level})')
 
 
-def get_logging_dict(cfg: dict[str, Any] | None,
-                     log: BufferedLogger | logging.Logger) -> tuple[dict[str, Any], list[HABAppQueueHandler]]:
+def get_logging_dict(cfg: dict[str, Any], log: BufferedLogger) -> tuple[dict[str, Any], list[HABAppQueueHandler]]:
 
     # make file version optional for config file
     if 'version' in cfg:

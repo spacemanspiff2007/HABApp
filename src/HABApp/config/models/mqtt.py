@@ -16,7 +16,7 @@ QOS = Literal[0, 1, 2]
 class TLSSettings(BaseModel):
     enabled: bool = Field(default=True, description='Enable TLS for the connection')
     ca_cert: Path = Field(
-        default='', description='Path to a CA certificate that will be treated as trusted', alias='ca cert')
+        default=Path(''), description='Path to a CA certificate that will be treated as trusted', alias='ca cert')
     insecure: bool = Field(
         default=False, description='Validate server hostname in server certificate')
 
@@ -33,7 +33,7 @@ class Connection(BaseModel):
     # implemented 2024.02.0
     @pydantic.model_validator(mode='before')
     @classmethod
-    def _migrate_client_id(cls, data):
+    def _migrate_client_id(cls, data: dict) -> dict:
         if isinstance(data, dict) and 'client_id' in data:
             log = logging.getLogger('HABApp.Config')
             log.warning('"client_id" in mqtt.connection has been renamed to "identifier"')
@@ -56,7 +56,7 @@ class Subscribe(BaseModel):
     # Implemented 2024.11.0
     @pydantic.model_validator(mode='before')
     @classmethod
-    def _migrate_topics(cls, data):
+    def _migrate_topics(cls, data: dict) -> dict:
         if isinstance(data, dict) and (topics := data.get('topics', [])) is not None:
             for i, topic_obj in enumerate(topics):
                 if not isinstance(topic_obj, list):
