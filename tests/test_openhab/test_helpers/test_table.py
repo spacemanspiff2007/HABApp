@@ -4,7 +4,7 @@ from HABApp.openhab.definitions.helpers.log_table import Column, Table
 def test_col() -> None:
     col = Column('my heading', wrap=40)
     col.add(['asdf', 'def', '23456trhrethtre', 'ghdrhtrezertztre', 'adfsdsf'])
-    assert col.get_lines(0) == 2
+    assert col.count_lines(0) == 2
     assert col.format_entry(0, 2) == [
         'asdf, def, 23456trhrethtre, ghdrhtrezertztre',
         'adfsdsf                                     '

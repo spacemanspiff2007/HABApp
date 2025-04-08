@@ -56,7 +56,7 @@ def log_exception(func):
     # return async wrapper
     if asyncio.iscoroutinefunction(func):
         @functools.wraps(func)
-        async def a(*args, **kwargs):
+        async def wrapped_coro(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
             except Exception as e:
@@ -64,10 +64,10 @@ def log_exception(func):
                 # re raise exception, since this is something we didn't anticipate
                 raise
 
-        return a
+        return wrapped_coro
 
     @functools.wraps(func)
-    def f(*args, **kwargs):
+    def wrapped_func(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except Exception as e:
@@ -75,7 +75,7 @@ def log_exception(func):
             # re raise exception, since this is something we didn't anticipate
             raise
 
-    return f
+    return wrapped_func
 
 
 @overload
@@ -90,23 +90,23 @@ def ignore_exception(func):
     # return async wrapper
     if asyncio.iscoroutinefunction(func):
         @functools.wraps(func)
-        async def a(*args, **kwargs):
+        async def wrapped_coro(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
             except Exception as e:
                 process_exception(func, e)
                 return None
 
-        return a
+        return wrapped_coro
 
     @functools.wraps(func)
-    def f(*args, **kwargs):
+    def wrapped_func(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except Exception as e:
             process_exception(func, e)
             return None
-    return f
+    return wrapped_func
 
 
 def in_thread(func: Callable[P, T]) -> Callable[P, T]:
