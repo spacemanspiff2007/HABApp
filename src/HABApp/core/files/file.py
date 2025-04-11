@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 from hashlib import blake2b
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Iterable
 
 from HABApp.core.files.errors import AlreadyHandledFileError, CircularReferenceError, DependencyDoesNotExistError
 from HABApp.core.files.file_properties import FileProperties
@@ -62,7 +62,7 @@ class HABAppFile:
         manager.file_state_changed(self, str(new_state))
 
     def _check_circ_refs(self, stack: tuple[str, ...], prop: str, manager: FileManager) -> None:
-        c: list[str] = getattr(self.properties, prop)
+        c: Iterable[str] = getattr(self.properties, prop)
         for f in c:
             _stack = stack + (f, )
             if f in stack:

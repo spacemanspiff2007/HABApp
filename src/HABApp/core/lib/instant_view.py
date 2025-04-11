@@ -68,7 +68,7 @@ class InstantView:
 
         match obj:
             case None:
-                if days := kwargs.get('days', 0):
+                if days := kwargs.pop('days', 0):
                     kwargs['hours'] = kwargs.get('hours', 0) + days * 24
                 td = TimeDelta(**kwargs)
             case TimeDelta():
