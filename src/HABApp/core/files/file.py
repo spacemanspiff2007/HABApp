@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 from hashlib import blake2b
-from typing import TYPE_CHECKING, Final, Iterable
+from typing import TYPE_CHECKING, Final
 
 from HABApp.core.files.errors import AlreadyHandledFileError, CircularReferenceError, DependencyDoesNotExistError
 from HABApp.core.files.file_properties import FileProperties
@@ -11,6 +11,7 @@ from HABApp.core.wrapper import process_exception
 
 if TYPE_CHECKING:
     import logging
+    from collections.abc import Iterable
     from pathlib import Path
 
     from HABApp.core.files.manager import FileManager, FileTypeHandler
