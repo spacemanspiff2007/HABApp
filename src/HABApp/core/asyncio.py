@@ -122,6 +122,8 @@ _P = _ParamSpec('_P')
 
 
 def run_func_from_async(func: _Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
+    """Runs a function from an async context"""
+
     # we already have an async context
     if not _in_thread():
         return func(*args, **kwargs)

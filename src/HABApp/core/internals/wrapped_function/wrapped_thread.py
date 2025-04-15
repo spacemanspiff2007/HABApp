@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
-from HABApp.core.asyncio import thread_context
+from HABApp.core.asyncio import run_func_from_async, thread_context
 from HABApp.core.const import loop
 from HABApp.core.internals import Context, ContextProvidingObj
 from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase, default_logger
@@ -111,7 +111,9 @@ class PoolFunc(ContextProvidingObj):
                                    f'execution of {parent.name} took too long: {self.dur_run:.2f}s')
 
         except Exception as e:
-            self.parent.process_exception(e, *self.func_args, **self.func_kwargs)
+            # Process and dump the exception traceback from a coroutine.
+            # That way we effectively serialize the logged tracebacks in case two exceptions happen at once
+            run_func_from_async(self.parent.process_exception, e, *self.func_args, **self.func_kwargs)
             return None
         else:
             return ret
