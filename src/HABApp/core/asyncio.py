@@ -134,8 +134,9 @@ def run_func_from_async(func: _Callable[_P, _T], *args: _P.args, **kwargs: _P.kw
 
 
 async def _async_execute_func(func: _Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
-    ctx = thread_context.set(None)
+    """Helper coroutine to execute a function from the event loop"""
 
+    ctx = thread_context.set(None)
     try:
         return func(*args, **kwargs)
     finally:
@@ -143,8 +144,9 @@ async def _async_execute_func(func: _Callable[_P, _T], *args: _P.args, **kwargs:
 
 
 async def _async_execute_awaitable(awaitable: _Awaitable[_T]) -> _T:
-    ctx = thread_context.set(None)
+    """Helper coroutine to execute a coroutine from the event loop and wait for the result"""
 
+    ctx = thread_context.set(None)
     try:
         return await awaitable
     finally:

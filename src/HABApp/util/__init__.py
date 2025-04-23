@@ -1,4 +1,5 @@
 from HABApp.util import functions, multimode
+from HABApp.util.cache import ExpiringCache
 from HABApp.util.fade import Fade
 from HABApp.util.listener_groups import EventListenerGroup
 from HABApp.util.rate_limiter import RateLimiter

@@ -257,6 +257,63 @@ Documentation
    :inherited-members:
 
 
+Expiring Cache
+------------------------------
+
+A small cache with an expiry time.
+Expired items can be explicitly flushed.
+If an item is expired the corresponding value is not returned.
+
+Example
+^^^^^^^^^^^^^^^^^^
+.. exec_code::
+
+    # ------------ hide: start ------------
+    from HABApp.util import ExpiringCache
+    # ------------ hide: stop -------------
+
+    cache = ExpiringCache(30)               # This is the same as
+    cache = ExpiringCache[str, str](30)     # this, however this writing provides a type hint:
+                                            # [str, str] means str as key and str as value
+
+    cache.flush()   # expired entries will be flushed
+
+    # access like a normal dict
+    cache['key'] = 'value'
+    a = cache['key']
+    a = cache.get('key')
+
+    # 30 secs later the entry is expired
+    # or it can be manually set to expired
+    cache.set_expired('key')
+
+    assert cache.is_expired('key')  # 'key' is expired
+    assert cache.in_cache('key')    # but it's still in the cache
+
+    # returns None because it's expired
+    assert cache.get('key') is None
+    try:
+        cache['key']    # <-- will raise key error because it's expired
+    except KeyError:
+        pass
+
+    # convenience which respects expiry
+    assert 'key' not in cache
+
+    # default is both used when item is expired or not in cache
+    assert cache.get('key', 'default') == 'default'
+    assert cache.get('???', 'default') == 'default'
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: HABApp.util.ExpiringCache
+   :members:
+   :inherited-members:
+
+
+
 Statistics
 ------------------------------
 

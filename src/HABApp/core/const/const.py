@@ -1,18 +1,20 @@
 import sys
 from enum import Enum
-from typing import Final
+from typing import Final, Literal, TypeAlias
 
 from whenever import Instant
 
 
 class _MissingType(Enum):
-    MISSING = object()
+    _MISSING = object()
 
     def __repr__(self) -> str:
         return '<Missing>'
 
 
-MISSING: Final = _MissingType.MISSING
+MISSING: Final = _MissingType._MISSING
+MISSING_TYPE: TypeAlias = Literal[_MissingType._MISSING]
+
 STARTUP_INSTANT: Final = Instant.now()
 
 # Python Versions for feature control
