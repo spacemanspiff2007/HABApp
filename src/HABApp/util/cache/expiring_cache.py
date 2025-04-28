@@ -1,6 +1,7 @@
 from collections.abc import Generator
-from typing import Final, Generic, Literal, Self, TypeVar, overload
+from typing import Final, Generic, Literal, TypeVar, overload
 
+from typing_extensions import Self
 from whenever import Instant, TimeDelta
 
 from HABApp.core.const import MISSING, MISSING_TYPE
