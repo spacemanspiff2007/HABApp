@@ -3,7 +3,7 @@ from HABAppTests import TestBaseRule
 from HABApp.openhab import transformations
 
 
-obj = transformations.map['de.map']
+obj = transformations.map['test.map']
 
 
 class OpenhabTransformations(TestBaseRule):
@@ -13,7 +13,7 @@ class OpenhabTransformations(TestBaseRule):
         self.add_test('TestMap', self.test_map)
 
     def test_map(self) -> None:
-        assert list(obj.keys())
+        assert obj['white space'] == 'using escape'
 
 
 OpenhabTransformations()

@@ -85,7 +85,7 @@ def build_run_config(config: InstallationConfig) -> RunConfig:
     # setup paths
     java_path = placeholder.get_folder_path(config.java, add_as='java_root')
     oh_path = placeholder.get_file_path('%openhab_root%/' + ('start.bat' if sys.platform == 'win32' else 'start.sh'))
-    oh_logs = placeholder.get_folder_path('%openhab_userdata%/logs', add_as='openhab_logs')
+    oh_logs = placeholder.get_folder_path('%openhab_userdata%/logs', add_as='openhab_logs', must_exist=False)
 
     # setup sync
     sync: list[RunFolderSyncConfig] = [

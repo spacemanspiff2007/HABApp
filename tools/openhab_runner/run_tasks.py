@@ -74,7 +74,7 @@ def stop_task(task: subprocess.Popen, name: str) -> None:
         log.info(f'Task {name:s} terminated')
 
 
-def run_task(task: TaskModel) -> subprocess.Popen | None:
+def run_task(task: TaskModel, *, capture_output: bool = False) -> subprocess.Popen | None:
     task_args = [task.cmd, *(args if (args := task.args) else [])]
     log.info('')
     log.debug(f'Running {" ".join(task_args)}')
@@ -95,6 +95,11 @@ def run_task(task: TaskModel) -> subprocess.Popen | None:
 
     if task.new_console or not task.wait:
         kwargs['creationflags'] = subprocess.CREATE_NEW_CONSOLE
+
+    if capture_output:
+        kwargs['stdout'] = subprocess.PIPE
+        kwargs['stderr'] = subprocess.PIPE
+        kwargs['text'] = True
 
     if not task.wait:
         return subprocess.Popen(task_args, **kwargs)  # noqa: S603
@@ -118,13 +123,16 @@ def run_task(task: TaskModel) -> subprocess.Popen | None:
 
 def run_openhab(runner: RunConfig) -> None:
     logs_log.debug('')
-    logs_log.debug('Removing log files')
-    for obj in runner.openhab_logs.iterdir():
-        if obj.is_file():
-            logs_log.debug(f'Removing {obj}')
-            obj.unlink()
+
+    if (log_dir := runner.openhab_logs).is_dir():
+        logs_log.debug('Removing log files')
+        for obj in log_dir.iterdir():
+            if obj.is_file():
+                logs_log.debug(f'Removing {obj}')
+                obj.unlink()
 
     oh_task = run_task(runner.openhab_task)
     log.info('Waiting for openHAB to exit')
     oh_task.communicate()
     log.debug(f'openHAB exited with {oh_task.returncode}')
+

@@ -1,7 +1,7 @@
 from enum import Enum
 
-from easyconfig.models import BaseModel
-from pydantic import AnyHttpUrl, ByteSize, Field, TypeAdapter, field_validator
+from easyconfig.models import BaseModel, Field
+from pydantic import AnyHttpUrl, ByteSize, TypeAdapter, field_validator
 
 
 class Ping(BaseModel):
