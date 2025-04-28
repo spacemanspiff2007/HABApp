@@ -105,7 +105,7 @@ class HABAppJobBuilder:
         """Create a job that runs once.
 
         :param instant: countdown time in seconds
-        :param coro_func: |param_scheduled_cb|
+        :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param job_id:
         :param kwargs: |param_scheduled_cb_kwargs|
@@ -123,7 +123,7 @@ class HABAppJobBuilder:
         """Create a job that will run when a provided trigger occurs.
 
         :param trigger:
-        :param coro_func: |param_scheduled_cb|
+        :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param job_id:
         :param kwargs: |param_scheduled_cb_kwargs|
