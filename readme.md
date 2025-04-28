@@ -128,15 +128,16 @@ MyOpenhabRule()
 
 # Changelog
 
-#### 24.11.1-DEV-1 (2024-XX-XX)
+#### 25.04.0 (2024-04-28)
 - Updated thread pool and asyncio handling
 - Dropped support for OpenHAB 3
 - Number item has a dimension property which is set if it's a UoM item
 - Added QuantityInt and QuantityFloat which is normal int/float but carries the unit in `.unit`
 - Added StringList
 - Use websockets for openHAB connection
-- Sending events and commands to openHAB is more strict and will raise an error if the value will not be accepted
+- Sending events and commands to openHAB is stricter and will raise an error if the value will not be accepted
 - Removed ComplexEventValue
+- `on_rule_loaded` and `on_rule_unloaded` can be both sync and async
 
 #### 24.11.1 (2024-11-25)
 Fixed an issue with the logging Queue
