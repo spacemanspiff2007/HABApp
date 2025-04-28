@@ -133,11 +133,14 @@ MyOpenhabRule()
 - Dropped support for OpenHAB 3
 - Number item has a dimension property which is set if it's a UoM item
 - Added QuantityInt and QuantityFloat which is normal int/float but carries the unit in `.unit`
+- Added Point datatype for dealing with coordinates
 - Added StringList
 - Use websockets for openHAB connection
 - Sending events and commands to openHAB is stricter and will raise an error if the value will not be accepted
 - Removed ComplexEventValue
+- Added RingCounter, RingCounterTracker and ExpiringCache to utils
 - `on_rule_loaded` and `on_rule_unloaded` can be both sync and async
+- Changed license to EUPL
 
 #### 24.11.1 (2024-11-25)
 Fixed an issue with the logging Queue
