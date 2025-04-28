@@ -6,7 +6,12 @@ from immutables import Map
 from javaproperties import loads as load_map_file
 
 from HABApp.openhab.errors import MapTransformationNotFound
-from HABApp.openhab.transformations._map.classes import MapTransformation, MapTransformationWithDefault
+from HABApp.openhab.transformations._map.classes import (
+    MapKeyType,
+    MapTransformation,
+    MapTransformationWithDefault,
+    MapValueType,
+)
 from HABApp.openhab.transformations.base import TransformationFactoryBase, TransformationRegistryBase, log
 
 
@@ -14,7 +19,7 @@ class MapTransformationRegistry(TransformationRegistryBase):
 
     def __init__(self, name: str) -> None:
         super().__init__(name)
-        self.objs: dict[str, tuple[Map[str | int, str | int], str | int]] = {}
+        self.objs: dict[str, tuple[Map[MapKeyType, MapValueType], MapValueType]] = {}
 
     def get(self, name: str) -> MapTransformation | MapTransformationWithDefault:
         try:
@@ -53,7 +58,7 @@ class MapTransformationRegistry(TransformationRegistryBase):
 MAP_REGISTRY: Final = MapTransformationRegistry('map')
 
 
-class MapTransformationFactory(TransformationFactoryBase[dict[str | int, str | int]]):
+class MapTransformationFactory(TransformationFactoryBase[dict[MapKeyType, MapValueType]]):
     pass
 
 
