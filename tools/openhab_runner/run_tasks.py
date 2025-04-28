@@ -135,4 +135,3 @@ def run_openhab(runner: RunConfig) -> None:
     log.info('Waiting for openHAB to exit')
     oh_task.communicate()
     log.debug(f'openHAB exited with {oh_task.returncode}')
-

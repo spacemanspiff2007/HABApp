@@ -29,7 +29,7 @@ The tool supports wildcards in the configuration file.
 All wildcards and the corresponding values are logged at startup.
 Relative paths are relative to the configuration file.
 
-It's possible do define global `sync` and `tasks` values which run always and 
+It's possible do define global `sync` and `tasks` values which run always and
 before the `sync` and `tasks` values for an installation.
 
 
@@ -40,7 +40,7 @@ Config which installations should be available. The name is shown in the prompt.
 Example:
 ````yaml
 - name: openhab 4.2
-  path: ./path/Openhab/Installations/4.2/   # <-- path to openHAB installation 
+  path: ./path/Openhab/Installations/4.2/   # <-- path to openHAB installation
   java: /path/to/Java/jdk17.0.6_10          # <-- path to java installation
 
   # --- optional and can be omitted, will only run when this installation is selected ---
