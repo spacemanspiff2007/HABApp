@@ -4,7 +4,7 @@ from typing import Any
 from HABApp.core.const import MISSING
 from HABApp.core.items import Item
 
-from .mode_base import HINT_BASE_MODE, BaseMode
+from .mode_base import BaseMode
 
 
 LOCK = Lock()
@@ -15,7 +15,7 @@ class MultiModeItem(Item):
     """
 
     @classmethod
-    def get_create_item(cls, name: str, initial_value=None, default_value=MISSING) -> 'MultiModeItem':
+    def get_create_item(cls, name: str, initial_value: Any =None, default_value: Any = MISSING) -> 'MultiModeItem':
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 
         :param name: item name
@@ -27,11 +27,11 @@ class MultiModeItem(Item):
         item._default_value = default_value
         return item
 
-    def __init__(self, name: str, initial_value=None, default_value=MISSING) -> None:
+    def __init__(self, name: str, initial_value: Any = None, default_value: Any = MISSING) -> None:
         super().__init__(name=name, initial_value=initial_value)
 
-        self.__values_by_prio: dict[int, HINT_BASE_MODE] = {}
-        self.__values_by_name: dict[str, HINT_BASE_MODE] = {}
+        self.__values_by_prio: dict[int, BaseMode] = {}
+        self.__values_by_name: dict[str, BaseMode] = {}
 
         self._default_value = default_value
 
@@ -51,14 +51,15 @@ class MultiModeItem(Item):
                 self.__values_by_prio.pop(prio)
                 return True
 
-        raise RuntimeError(f'Mode {name} is missing!')
+        msg = f'Mode {name} is missing!'
+        raise RuntimeError(msg)
 
     def __sort_modes(self):
         # sort by priority and make lower prio known to the mode
         modes = sorted(self.__values_by_prio.items())
         self.__values_by_prio.clear()
 
-        lower_mode: HINT_BASE_MODE | None = None
+        lower_mode: BaseMode | None = None
         for prio, mode in modes:
             self.__values_by_prio[prio] = mode
             mode._set_mode_lower_prio(lower_mode)
@@ -79,7 +80,7 @@ class MultiModeItem(Item):
             self.__sort_modes()
             return found
 
-    def add_mode(self, priority: int, mode: HINT_BASE_MODE) -> 'MultiModeItem':
+    def add_mode(self, priority: int, mode: BaseMode) -> 'MultiModeItem':
         """Add a new mode to the item, if it already exists it will be overwritten
 
         :param priority: priority of the mode
@@ -103,14 +104,14 @@ class MultiModeItem(Item):
             self.__sort_modes()
         return self
 
-    def all_modes(self) -> list[tuple[int, HINT_BASE_MODE]]:
+    def all_modes(self) -> list[tuple[int, BaseMode]]:
         """Returns a sorted list containing tuples with the priority and the mode
 
         :return: List with priorities and modes
         """
         return list(self.__values_by_prio.items())
 
-    def get_mode(self, name: str) -> HINT_BASE_MODE:
+    def get_mode(self, name: str) -> BaseMode:
         """Returns a created mode
 
         :param name: name of the mode (case insensitive)
@@ -144,7 +145,7 @@ class MultiModeItem(Item):
         return new_value
 
     def _on_item_removed(self) -> None:
-        for p, mode in self.all_modes():
+        for _, mode in self.all_modes():
             mode.cancel()
 
         super()._on_item_removed()

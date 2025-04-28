@@ -44,37 +44,6 @@ It behaves like the standard python function except that it will ignore ``None``
 
 .. autofunction:: HABApp.util.functions.max
 
-
-rgb_to_hsb
-^^^^^^^^^^^^^^^^^^
-
-Converts a rgb value to hsb color space
-
-.. exec_code::
-    :hide_output:
-
-    from HABApp.util.functions import rgb_to_hsb
-
-    print(rgb_to_hsb(224, 201, 219))
-
-.. autofunction:: HABApp.util.functions.rgb_to_hsb
-
-
-hsb_to_rgb
-^^^^^^^^^^^^^^^^^^
-
-Converts a hsb value to the rgb color space
-
-.. exec_code::
-    :hide_output:
-
-    from HABApp.util.functions import hsb_to_rgb
-
-    print(hsb_to_rgb(150, 40, 100))
-
-.. autofunction:: HABApp.util.functions.hsb_to_rgb
-
-
 .. _RATE_LIMITER:
 
 
@@ -212,6 +181,139 @@ Documentation
    :inherited-members:
 
 
+Cyclic Counter Values
+------------------------------
+There are classes provided to produce and to track cyclic counter values
+
+Ring Counter
+^^^^^^^^^^^^^^^^^^
+Counter which can increase / decrease and will wrap around when reaching the maximum / minimum value.
+
+.. exec_code::
+
+    from HABApp.util import RingCounter
+
+    # Ring counter that allows 11 values (0..10)
+    RingCounter(10)
+    # Same as
+    RingCounter(0, 10)
+
+    c = RingCounter(2, 5, initial_value=2)
+    for _ in range(4):
+        c.increase()    # increase by 1
+        print(c.value)  # get the value through the property
+    for _ in range(4):
+        c += 1          # increase by 1
+        print(int(c))   # casting to int returns the current value
+
+    # Compare works out of the box
+    print(f'== 2: {c == 2}')
+    print(f'>= 2: {c >= 2}')
+
+
+Ring Counter Tracker
+^^^^^^^^^^^^^^^^^^^^
+
+Tracke which tracks a ring counter value and only allows increasing / decreasing values
+
+.. exec_code::
+    hide-output
+
+    from HABApp.util import RingCounterTracker
+
+    # Tracker that allows 101 values (0..100) with a 10 value ignore region
+    RingCounterTracker(100)
+    # Same as
+    c = RingCounterTracker(0, 100)
+
+    assert c.allow(50)          # First value is always allowed
+    assert not c.allow(50)      # Same value again is not allowed since it's not increasing
+    assert not c.allow(41)      # Value in the ignore region is not allowed
+    assert c.test_allow(40)     # Value out of the ignore region is allowed
+
+    assert c.allow(100)
+    assert c.allow(5)           # Value is allowed since it wraps around and is increasing
+    assert not c.allow(100)     # Ignore interval wraps properly around, too
+    assert not c.allow(97)
+    assert c.allow(96)          # Highest value out of the ignore interval is allowed again
+
+    # Compare works out of the box
+    print(f'== 5: {c == 5}')
+    print(f'>= 5: {c >= 5}')
+
+    # Last accepted value
+    print(f'Last value: {c.value:d}')
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: HABApp.util.RingCounter
+   :members:
+   :inherited-members:
+
+.. autoclass:: HABApp.util.RingCounterTracker
+   :members:
+   :inherited-members:
+
+
+Expiring Cache
+------------------------------
+
+A small cache with an expiry time.
+Expired items can be explicitly flushed.
+If an item is expired the corresponding value is not returned.
+
+Example
+^^^^^^^^^^^^^^^^^^
+.. exec_code::
+
+    # ------------ hide: start ------------
+    from HABApp.util import ExpiringCache
+    # ------------ hide: stop -------------
+
+    cache = ExpiringCache(30)               # This is the same as
+    cache = ExpiringCache[str, str](30)     # this, however this writing provides a type hint:
+                                            # [str, str] means str as key and str as value
+
+    cache.flush()   # expired entries will be flushed
+
+    # access like a normal dict
+    cache['key'] = 'value'
+    a = cache['key']
+    a = cache.get('key')
+
+    # 30 secs later the entry is expired
+    # or it can be manually set to expired
+    cache.set_expired('key')
+
+    assert cache.is_expired('key')  # 'key' is expired
+    assert cache.in_cache('key')    # but it's still in the cache
+
+    # returns None because it's expired
+    assert cache.get('key') is None
+    try:
+        cache['key']    # <-- will raise key error because it's expired
+    except KeyError:
+        pass
+
+    # convenience which respects expiry
+    assert 'key' not in cache
+
+    # default is both used when item is expired or not in cache
+    assert cache.get('key', 'default') == 'default'
+    assert cache.get('???', 'default') == 'default'
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: HABApp.util.ExpiringCache
+   :members:
+   :inherited-members:
+
+
+
 Statistics
 ------------------------------
 
@@ -245,32 +347,34 @@ This example shows how to fade a Dimmer from 0 to 100 in 30 secs
 .. exec_code::
 
     # ------------ hide: start ------------
-    import HABApp
+    async def run():
+
+        import HABApp
+        HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+        # ------------ hide: stop -------------
+
+        from HABApp import Rule
+        from HABApp.openhab.items import DimmerItem
+        from HABApp.util import Fade
+
+        class FadeExample(Rule):
+            def __init__(self):
+                super().__init__()
+                self.dimmer = DimmerItem.get_item('Dimmer1')
+                self.fade = Fade(callback=self.fade_value)  # self.dimmer.percent would also be a good callback in this example
+
+                # Setup the fade and schedule its execution
+                # Fade from 0 to 100 in 30s
+                self.fade.setup(0, 100, 30).schedule_fade()
+
+            def fade_value(self, value):
+                self.dimmer.percent(value)
+
+        FadeExample()
+
+    # ------------ hide: start ------------
     from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-    HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
-    # ------------ hide: stop -------------
-
-    from HABApp import Rule
-    from HABApp.openhab.items import DimmerItem
-    from HABApp.util import Fade
-
-    class FadeExample(Rule):
-        def __init__(self):
-            super().__init__()
-            self.dimmer = DimmerItem.get_item('Dimmer1')
-            self.fade = Fade(callback=self.fade_value)  # self.dimmer.percent would also be a good callback in this example
-
-            # Setup the fade and schedule its execution
-            # Fade from 0 to 100 in 30s
-            self.fade.setup(0, 100, 30).schedule_fade()
-
-        def fade_value(self, value):
-            self.dimmer.percent(value)
-
-    FadeExample()
-
+    SimpleRuleRunner().run(run(), process_events=False)
 
 This example shows how to fade three values together (e.g. for an RGB strip)
 
@@ -278,35 +382,38 @@ This example shows how to fade three values together (e.g. for an RGB strip)
 .. exec_code::
 
     # ------------ hide: start ------------
-    import HABApp
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-    HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+    async def run():
+        import HABApp
+        HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
     # ------------ hide: stop -------------
 
-    from HABApp import Rule
-    from HABApp.openhab.items import DimmerItem
-    from HABApp.util import Fade
+        from HABApp import Rule
+        from HABApp.openhab.items import DimmerItem
+        from HABApp.util import Fade
 
-    class Fade3Example(Rule):
-        def __init__(self):
-            super().__init__()
-            self.fade1 = Fade(callback=self.fade_value)
-            self.fade2 = Fade()
-            self.fade3 = Fade()
+        class Fade3Example(Rule):
+            def __init__(self):
+                super().__init__()
+                self.fade1 = Fade(callback=self.fade_value)
+                self.fade2 = Fade()
+                self.fade3 = Fade()
 
-            # Setup the fades and schedule the execution of one fade where the value gets updated every sec
-            self.fade3.setup(0, 100, 30)
-            self.fade2.setup(0, 50, 30)
-            self.fade1.setup(0, 25, 30, min_step_duration=1).schedule_fade()
+                # Setup the fades and schedule the execution of one fade where the value gets updated every sec
+                self.fade3.setup(0, 100, 30)
+                self.fade2.setup(0, 50, 30)
+                self.fade1.setup(0, 25, 30, min_step_duration=1).schedule_fade()
 
-        def fade_value(self, value):
-            value1 = value
-            value2 = self.fade2.get_value()
-            value3 = self.fade3.get_value()
+            def fade_value(self, value):
+                value1 = value
+                value2 = self.fade2.get_value()
+                value3 = self.fade3.get_value()
 
-    Fade3Example()
+        Fade3Example()
+
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run(), process_events=False)
+
 
 Documentation
 ^^^^^^^^^^^^^^^^^^
@@ -328,47 +435,50 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
 .. exec_code::
 
     # ------------ hide: start ------------
-    import HABApp
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-    HABApp.core.Items.add_item(HABApp.openhab.items.SwitchItem('RoomLights'))
-    HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor1'))
-    HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor2'))
+    async def run():
+        import HABApp
+        HABApp.core.Items.add_item(HABApp.openhab.items.SwitchItem('RoomLights'))
+        HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor1'))
+        HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor2'))
     # ------------ hide: stop -------------
-    from datetime import time
+        from datetime import time
 
-    from HABApp import Rule
-    from HABApp.core.events import ValueChangeEventFilter
-    from HABApp.openhab.items import SwitchItem, NumberItem
-    from HABApp.util import EventListenerGroup
+        from HABApp import Rule
+        from HABApp.core.events import ValueChangeEventFilter
+        from HABApp.openhab.items import SwitchItem, NumberItem
+        from HABApp.util import EventListenerGroup
 
 
-    class EventListenerGroupExample(Rule):
-        def __init__(self):
-            super().__init__()
-            self.lights = SwitchItem.get_item('RoomLights')
-            self.sensor_move_1 = NumberItem.get_item('MovementSensor1')
-            self.sensor_move_2 = NumberItem.get_item('MovementSensor2')
+        class EventListenerGroupExample(Rule):
+            def __init__(self):
+                super().__init__()
+                self.lights = SwitchItem.get_item('RoomLights')
+                self.sensor_move_1 = NumberItem.get_item('MovementSensor1')
+                self.sensor_move_2 = NumberItem.get_item('MovementSensor2')
 
-            # use a list of items which will be subscribed with the same callback and event
-            self.listeners = EventListenerGroup().add_listener(
-                [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEventFilter())
+                # use a list of items which will be subscribed with the same callback and event
+                self.listeners = EventListenerGroup().add_listener(
+                    [self.sensor_move_1, self.sensor_move_2], self.sensor_changed, ValueChangeEventFilter())
 
-            self.run.on_every_day(time(4), self.listen_sensors)
-            self.run.on_every_day(time(8), self.sensors_cancel)
+                self.run.at(self.run.trigger.time('04:00:00'), self.listen_sensors)
+                self.run.at(self.run.trigger.time('08:00:00'), self.sensors_cancel)
 
-        def listen_sensors(self):
-            self.listeners.listen()
+            def listen_sensors(self):
+                self.listeners.listen()
 
-        def sensors_cancel(self):
-            self.listeners.cancel()
+            def sensors_cancel(self):
+                self.listeners.cancel()
 
-        def sensor_changed(self, event):
-            self.listeners.cancel()
-            self.lights.on()
+            def sensor_changed(self, event):
+                self.listeners.cancel()
+                self.lights.on()
 
-    EventListenerGroupExample()
+        EventListenerGroupExample()
+
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
+
 
 Documentation
 ^^^^^^^^^^^^^^^^^^
@@ -386,49 +496,49 @@ Basic Example
 .. exec_code::
 
     # ------------ hide: start ------------
-    import HABApp
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
+    async def run():
     # ------------ hide: stop -------------
-    import HABApp
-    from HABApp.core.events import ValueUpdateEventFilter
-    from HABApp.util.multimode import MultiModeItem, ValueMode
+        import HABApp
+        from HABApp.core.events import ValueUpdateEventFilter
+        from HABApp.util.multimode import MultiModeItem, ValueMode
 
-    class MyMultiModeItemTestRule(HABApp.Rule):
-        def __init__(self):
-            super().__init__()
+        class MyMultiModeItemTestRule(HABApp.Rule):
+            def __init__(self):
+                super().__init__()
 
-            # create a new MultiModeItem
-            item = MultiModeItem.get_create_item('MultiModeTestItem')
-            item.listen_event(self.item_update, ValueUpdateEventFilter())
+                # create a new MultiModeItem
+                item = MultiModeItem.get_create_item('MultiModeTestItem')
+                item.listen_event(self.item_update, ValueUpdateEventFilter())
 
-            # create two different modes which we will use and add them to the item
-            auto = ValueMode('Automatic', initial_value=5)
-            manu = ValueMode('Manual', initial_value=0)
-            # Add the auto mode with priority 0 and the manual mode with priority 10
-            item.add_mode(0, auto).add_mode(10, manu)
+                # create two different modes which we will use and add them to the item
+                auto = ValueMode('Automatic', initial_value=5)
+                manu = ValueMode('Manual', initial_value=0)
+                # Add the auto mode with priority 0 and the manual mode with priority 10
+                item.add_mode(0, auto).add_mode(10, manu)
 
-            # This shows how to enable/disable a mode and how to get a mode from the item
-            print('disable/enable the higher priority mode')
-            item.get_mode('manual').set_enabled(False)  # disable mode
-            item.get_mode('manual').set_value(11)       # setting a value will enable it again
+                # This shows how to enable/disable a mode and how to get a mode from the item
+                print('disable/enable the higher priority mode')
+                item.get_mode('manual').set_enabled(False)  # disable mode
+                item.get_mode('manual').set_value(11)       # setting a value will enable it again
 
-            # This shows that changes of the lower priority is only shown when
-            # the mode with the higher priority gets disabled
-            print('')
-            print('Set value of lower priority')
-            auto.set_value(55)
-            print('Disable higher priority')
-            manu.set_enabled(False)
+                # This shows that changes of the lower priority is only shown when
+                # the mode with the higher priority gets disabled
+                print('')
+                print('Set value of lower priority')
+                auto.set_value(55)
+                print('Disable higher priority')
+                manu.set_enabled(False)
 
-        def item_update(self, event):
-            print(f'State: {event.value}')
+            def item_update(self, event):
+                print(f'State: {event.value}')
 
-    MyMultiModeItemTestRule()
+        MyMultiModeItemTestRule()
+
     # ------------ hide: start ------------
-    runner.tear_down()
-    # ------------ hide: stop -------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
+
+
 
 Advanced Example
 ^^^^^^^^^^^^^^^^^^
@@ -446,77 +556,74 @@ Advanced Example
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-
-    import HABApp
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
+    async def run():
     # ------------ hide: stop -------------
-    import logging
-    import HABApp
-    from HABApp.core.events import ValueUpdateEventFilter
-    from HABApp.util.multimode import MultiModeItem, ValueMode
+        import logging
+        import HABApp
+        from HABApp.core.events import ValueUpdateEventFilter
+        from HABApp.util.multimode import MultiModeItem, ValueMode
 
-    class MyMultiModeItemTestRule(HABApp.Rule):
-        def __init__(self):
-            super().__init__()
+        class MyMultiModeItemTestRule(HABApp.Rule):
+            def __init__(self):
+                super().__init__()
 
-            # create a new MultiModeItem
-            item = MultiModeItem.get_create_item('MultiModeTestItem')
-            item.listen_event(self.item_update, ValueUpdateEventFilter())
+                # create a new MultiModeItem
+                item = MultiModeItem.get_create_item('MultiModeTestItem')
+                item.listen_event(self.item_update, ValueUpdateEventFilter())
 
-            # helper to print the heading so we have a nice output
-            def print_heading(_heading):
-                print('')
-                print('-' * 80)
-                print(_heading)
-                print('-' * 80)
-                for p, m in item.all_modes():
-                    print(f'Prio {p:2d}: {m}')
-                print('')
-
-
-            log = logging.getLogger('AdvancedMultiMode')
-
-            # create modes and add them
-            auto = ValueMode('Automatic', initial_value=5, logger=log)
-            manu = ValueMode('Manual', initial_value=10, logger=log)
-            item.add_mode(0, auto).add_mode(10, manu)
+                # helper to print the heading so we have a nice output
+                def print_heading(_heading):
+                    print('')
+                    print('-' * 80)
+                    print(_heading)
+                    print('-' * 80)
+                    for p, m in item.all_modes():
+                        print(f'Prio {p:2d}: {m}')
+                    print('')
 
 
-            # it is possible to automatically disable a mode
-            # this will disable the manual mode if the automatic mode
-            # sets a value greater equal manual mode
-            print_heading('Automatically disable mode')
+                log = logging.getLogger('AdvancedMultiMode')
 
-            # A custom function can also disable the mode:
-            manu.auto_disable_func = lambda low, own: low >= own
-
-            auto.set_value(11) # <-- manual now gets disabled because
-            auto.set_value(4)  #     the lower priority value is >= itself
+                # create modes and add them
+                auto = ValueMode('Automatic', initial_value=5, logger=log)
+                manu = ValueMode('Manual', initial_value=10, logger=log)
+                item.add_mode(0, auto).add_mode(10, manu)
 
 
-            # It is possible to use functions to calculate the new value for a mode.
-            # E.g. shutter control and the manual mode moves the shades. If it's dark the automatic
-            # mode closes the shutter again. This could be achieved by automatically disabling the
-            # manual mode or if the state should be remembered then the max function should be used
+                # it is possible to automatically disable a mode
+                # this will disable the manual mode if the automatic mode
+                # sets a value greater equal manual mode
+                print_heading('Automatically disable mode')
 
-            # create a move and use the max function for output calculation
-            manu = ValueMode('Manual', initial_value=5, logger=log, calc_value_func=max)
-            item.add_mode(10, manu)    # overwrite the earlier added mode
+                # A custom function can also disable the mode:
+                manu.auto_disable_func = lambda low, own: low >= own
 
-            print_heading('Use of functions')
+                auto.set_value(11) # <-- manual now gets disabled because
+                auto.set_value(4)  #     the lower priority value is >= itself
 
-            auto.set_value(7)   # manu uses max, so the value from auto is used
-            auto.set_value(3)
 
-        def item_update(self, event):
-            print(f'Item value: {event.value}')
+                # It is possible to use functions to calculate the new value for a mode.
+                # E.g. shutter control and the manual mode moves the shades. If it's dark the automatic
+                # mode closes the shutter again. This could be achieved by automatically disabling the
+                # manual mode or if the state should be remembered then the max function should be used
 
-    MyMultiModeItemTestRule()
+                # create a move and use the max function for output calculation
+                manu = ValueMode('Manual', initial_value=5, logger=log, calc_value_func=max)
+                item.add_mode(10, manu)    # overwrite the earlier added mode
+
+                print_heading('Use of functions')
+
+                auto.set_value(7)   # manu uses max, so the value from auto is used
+                auto.set_value(3)
+
+            def item_update(self, event):
+                print(f'Item value: {event.value}')
+
+        MyMultiModeItemTestRule()
+
     # ------------ hide: start ------------
-    runner.tear_down()
-    # ------------ hide: stop -------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 
 Example SwitchItemValueMode
@@ -527,48 +634,47 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
 .. exec_code::
 
     # ------------ hide: start ------------
-    import HABApp
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
+    async def run():
+        import HABApp
 
-    from HABApp.openhab.items import SwitchItem
-    HABApp.core.Items.add_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
+        from HABApp.openhab.items import SwitchItem
+        HABApp.core.Items.add_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
     # ------------ hide: stop -------------
-    import HABApp
-    from HABApp.openhab.items import SwitchItem
-    from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode, ValueMode
+        import HABApp
+        from HABApp.openhab.items import SwitchItem
+        from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode, ValueMode
 
-    class MyMultiModeItemTestRule(HABApp.Rule):
-        def __init__(self):
-            super().__init__()
+        class MyMultiModeItemTestRule(HABApp.Rule):
+            def __init__(self):
+                super().__init__()
 
-            # create a new MultiModeItem
-            item = MultiModeItem.get_create_item('MultiModeTestItem')
+                # create a new MultiModeItem
+                item = MultiModeItem.get_create_item('MultiModeTestItem')
 
-            # this switch allows to enable/disable the mode
-            switch = SwitchItem.get_item('Automatic_Enabled')
-            print(f'Switch is {switch}')
+                # this switch allows to enable/disable the mode
+                switch = SwitchItem.get_item('Automatic_Enabled')
+                print(f'Switch is {switch}')
 
-            # this is how the switch gets linked to the mode
-            # if the switch is on, the mode is on, too
-            mode = SwitchItemValueMode('Automatic', switch)
-            print(mode)
+                # this is how the switch gets linked to the mode
+                # if the switch is on, the mode is on, too
+                mode = SwitchItemValueMode('Automatic', switch)
+                print(mode)
 
-            # Use invert_switch if the desired behaviour is
-            # if the switch is off, the mode is on
-            mode = SwitchItemValueMode('AutomaticOff', switch, invert_switch=True)
-            print(mode)
+                # Use invert_switch if the desired behaviour is
+                # if the switch is off, the mode is on
+                mode = SwitchItemValueMode('AutomaticOff', switch, invert_switch=True)
+                print(mode)
 
-            # This shows how the SwitchItemValueMode can be used to disable any logic except for the manual mode.
-            # Now everything can be enabled/disabled from the openHAB sitemap
-            item.add_mode(100, mode)
-            item.add_mode(101, ValueMode('Manual'))
+                # This shows how the SwitchItemValueMode can be used to disable any logic except for the manual mode.
+                # Now everything can be enabled/disabled from the openHAB sitemap
+                item.add_mode(100, mode)
+                item.add_mode(101, ValueMode('Manual'))
 
-    MyMultiModeItemTestRule()
+        MyMultiModeItemTestRule()
+
     # ------------ hide: start ------------
-    runner.tear_down()
-    # ------------ hide: stop -------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 
 Documentation
@@ -579,11 +685,13 @@ MultiModeItem
 .. autoclass:: HABApp.util.multimode.MultiModeItem
    :members:
 
+
 ValueMode
 """""""""""""""""""""""""
 .. autoclass:: HABApp.util.multimode.ValueMode
    :members:
    :inherited-members:
+
 
 SwitchItemValueMode
 """""""""""""""""""""""""

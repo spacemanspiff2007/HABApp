@@ -77,7 +77,10 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_get_all_items_state)
     monkeypatch.setattr(load_items_module, 'async_get_things', _mock_get_empty)
 
-    context = OpenhabContext.new_context(version=(1, 0, 0), session=None, session_options=None,)
+    context = (
+        OpenhabContext.new_context(
+            version=(1, 0, 0), session=None, session_options=None, out_queue=None)
+    )
 
     # initial item create
     await LoadOpenhabItemsPlugin().on_connected(context)
@@ -117,7 +120,10 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
 
     things_resp = [t1, t2]
 
-    context = OpenhabContext.new_context(version=(1, 0, 0), session=None, session_options=None,)
+    context = (
+        OpenhabContext.new_context(
+            version=(1, 0, 0), session=None, session_options=None, out_queue=None)
+    )
 
     # initial thing create
     await LoadOpenhabItemsPlugin().on_connected(context)

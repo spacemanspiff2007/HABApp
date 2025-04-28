@@ -1,11 +1,6 @@
 from typing import Any, Final
 
 
-class ComplexEventValue:
-    def __init__(self, value: Any) -> None:
-        self.value: Any = value
-
-
 class ValueUpdateEvent:
     """
     :ivar str name:

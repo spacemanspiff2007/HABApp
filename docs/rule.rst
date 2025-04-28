@@ -30,15 +30,17 @@ using an IDE!
     :hide_output:
 
     # ------------ hide: start ------------
+    async def run():
+        # ------------ hide: stop ------------
+
+        from HABApp.core.items import Item
+        my_item = Item.get_create_item('MyItem', initial_value=5)   # This will create the item if it does not exist
+        my_item = Item.get_item('MyItem')                           # This will raise an exception if the item is not found
+        print(my_item)
+
+    # ------------ hide: start ------------
     from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().set_up()
-    # ------------ hide: stop ------------
-
-    from HABApp.core.items import Item
-    my_item = Item.get_create_item('MyItem', initial_value=5)   # This will create the item if it does not exist
-    my_item = Item.get_item('MyItem')                           # This will raise an exception if the item is not found
-    print(my_item)
-
+    SimpleRuleRunner().run(run())
 
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
@@ -49,23 +51,26 @@ It is possible to check the item value by comparing it
     :hide_output:
 
     # ------------ hide: start ------------
+    async def run():
+
+        from HABApp.core.items import Item
+        Item.get_create_item('MyItem', initial_value=5)
+        # ------------ hide: stop -------------
+
+        from HABApp.core.items import Item
+        my_item = Item.get_item('MyItem')
+
+        # this works
+        if my_item == 5:
+            pass    # do something
+
+        # and is the same as this
+        if my_item.value == 5:
+            pass    # do something
+
+    # ------------ hide: start ------------
     from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().set_up()
-
-    from HABApp.core.items import Item
-    Item.get_create_item('MyItem', initial_value=5)
-    # ------------ hide: stop -------------
-
-    from HABApp.core.items import Item
-    my_item = Item.get_item('MyItem')
-
-    # this works
-    if my_item == 5:
-        pass    # do something
-
-    # and is the same as this
-    if my_item.value == 5:
-        pass    # do something
+    SimpleRuleRunner().run(run())
 
 An overview over the item types can be found on :ref:`the HABApp item section <HABAPP_ITEM_TYPES>`,
 :ref:`the openHAB item section <OPENHAB_ITEM_TYPES>` and the :ref:`the mqtt item section <MQTT_ITEM_TYPES>`
@@ -88,35 +93,37 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
     :caption: Example
 
     # ------------ hide: start ------------
+    async def run():
+
+        import time, HABApp
+        HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
+        # ------------ hide: stop -------------
+        from HABApp import Rule
+        from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, ValueChangeEventFilter, ValueUpdateEventFilter
+        from HABApp.core.items import Item
+
+        class MyRule(Rule):
+            def __init__(self):
+                super().__init__()
+                self.listen_event('MyOpenhabItem', self.on_change, ValueChangeEventFilter())  # trigger only on ValueChangeEvent
+                self.listen_event('My/MQTT/Topic', self.on_update, ValueUpdateEventFilter())  # trigger only on ValueUpdateEvent
+
+                # If you already have an item you can and should use the more convenient method of the item
+                # to listen to the item events
+                my_item = Item.get_item('MyItem')
+                my_item.listen_event(self.on_change, ValueUpdateEventFilter())
+
+            def on_change(self, event: ValueChangeEvent):
+                assert isinstance(event, ValueChangeEvent), type(event)
+
+            def on_update(self, event: ValueUpdateEvent):
+                assert isinstance(event, ValueUpdateEvent), type(event)
+
+        MyRule()
+
+    # ------------ hide: start ------------
     from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-
-    import time, HABApp
-    HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
-    # ------------ hide: stop -------------
-    from HABApp import Rule
-    from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, ValueChangeEventFilter, ValueUpdateEventFilter
-    from HABApp.core.items import Item
-
-    class MyRule(Rule):
-        def __init__(self):
-            super().__init__()
-            self.listen_event('MyOpenhabItem', self.on_change, ValueChangeEventFilter())  # trigger only on ValueChangeEvent
-            self.listen_event('My/MQTT/Topic', self.on_update, ValueUpdateEventFilter())  # trigger only on ValueUpdateEvent
-
-            # If you already have an item you can and should use the more convenient method of the item
-            # to listen to the item events
-            my_item = Item.get_item('MyItem')
-            my_item.listen_event(self.on_change, ValueUpdateEventFilter())
-
-        def on_change(self, event: ValueChangeEvent):
-            assert isinstance(event, ValueChangeEvent), type(event)
-
-        def on_update(self, event: ValueUpdateEvent):
-            assert isinstance(event, ValueUpdateEvent), type(event)
-
-    MyRule()
+    SimpleRuleRunner().run(run())
 
 Additionally there is the possibility to filter not only on the event type but on the event values, too.
 This can be achieved by passing the value to the event filter.
@@ -167,47 +174,48 @@ Example
     :caption: Example
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
+    async def run():
 
-    import time, HABApp
-    HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
-    # ------------ hide: stop -------------
-    from HABApp import Rule
-    from HABApp.core.events import EventFilter, ValueUpdateEventFilter, ValueUpdateEvent, OrFilterGroup
-    from HABApp.core.items import Item
+        import time, HABApp
+        HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
+        # ------------ hide: stop -------------
+        from HABApp import Rule
+        from HABApp.core.events import EventFilter, ValueUpdateEventFilter, ValueUpdateEvent, OrFilterGroup
+        from HABApp.core.items import Item
 
-    class MyRule(Rule):
-        def __init__(self):
-            super().__init__()
-            my_item = Item.get_item('MyItem')
+        class MyRule(Rule):
+            def __init__(self):
+                super().__init__()
+                my_item = Item.get_item('MyItem')
 
-            # This will only call the callback for ValueUpdateEvents
-            my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter())
+                # This will only call the callback for ValueUpdateEvents
+                my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter())
 
-            # This will only call the callback for ValueUpdateEvents where the value==my_value
-            my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter(value='my_value'))
+                # This will only call the callback for ValueUpdateEvents where the value==my_value
+                my_item.listen_event(self.on_val_my_value, ValueUpdateEventFilter(value='my_value'))
 
-            # This is the same as above but with the generic filter
-            my_item.listen_event(self.on_val_my_value, EventFilter(ValueUpdateEvent, value='my_value'))
+                # This is the same as above but with the generic filter
+                my_item.listen_event(self.on_val_my_value, EventFilter(ValueUpdateEvent, value='my_value'))
 
-            # trigger if the value is 1 or 2 by using both filters with or
-            my_item.listen_event(
-                self.value_1_or_2,
-                OrFilterGroup(
-                    ValueUpdateEventFilter(value=1), ValueUpdateEventFilter(value=2)
+                # trigger if the value is 1 or 2 by using both filters with or
+                my_item.listen_event(
+                    self.value_1_or_2,
+                    OrFilterGroup(
+                        ValueUpdateEventFilter(value=1), ValueUpdateEventFilter(value=2)
+                    )
                 )
-            )
 
-        def on_val_my_value(self, event: ValueUpdateEvent):
-            assert isinstance(event, ValueUpdateEvent), type(event)
+            def on_val_my_value(self, event: ValueUpdateEvent):
+                assert isinstance(event, ValueUpdateEvent), type(event)
 
-        def value_1_or_2(self, event: ValueUpdateEvent):
-            assert isinstance(event, ValueUpdateEvent), type(event)
+            def value_1_or_2(self, event: ValueUpdateEvent):
+                assert isinstance(event, ValueUpdateEvent), type(event)
 
-    MyRule()
+        MyRule()
 
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 .. py:currentmodule:: HABApp.rule.scheduler.job_builder
 
@@ -250,92 +258,93 @@ Example
     :hide_output:
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-    # ------------ hide: stop -------------
-    from HABApp import Rule
-    from HABApp.rule.scheduler import filter, trigger
+    async def run():
+        # ------------ hide: stop -------------
+        from HABApp import Rule
+        from HABApp.rule.scheduler import filter, trigger
 
-    class MyTriggerRule(Rule):
-        def __init__(self):
-            super().__init__()
+        class MyTriggerRule(Rule):
+            def __init__(self):
+                super().__init__()
 
-            # Run the function every day at 12
-            self.run.at(self.run.trigger.time('12:00:00'), self.dummy_func)
+                # Run the function every day at 12
+                self.run.at(self.run.trigger.time('12:00:00'), self.dummy_func)
 
-            # ------------------------------------------------------------------------------
-            # The trigger and filter factories are available as a property on self.run,
-            # however they can also be used separately when imported
-            # This is exactly the same as above
-            self.run.at(trigger.time('12:00:00'), self.dummy_func)
+                # ------------------------------------------------------------------------------
+                # The trigger and filter factories are available as a property on self.run,
+                # however they can also be used separately when imported
+                # This is exactly the same as above
+                self.run.at(trigger.time('12:00:00'), self.dummy_func)
 
 
-            # ------------------------------------------------------------------------------
-            # It's possible to trigger on sun position
-            # ------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------
+                # It's possible to trigger on sun position
+                # ------------------------------------------------------------------------------
 
-            # Run the function at sunrise
-            self.run.at(self.run.trigger.sunrise(), self.dummy_func)
-
-
-            # ------------------------------------------------------------------------------
-            # Filters can be used to restrict the trigger
-            # ------------------------------------------------------------------------------
-
-            # Run the function every workday at 12
-            self.run.at(
-                self.run.trigger.time('12:00:00').only_on(self.run.filter.weekdays('Mo-Fr')),
-                self.dummy_func
-            )
+                # Run the function at sunrise
+                self.run.at(self.run.trigger.sunrise(), self.dummy_func)
 
 
-            # ------------------------------------------------------------------------------
-            # Triggers offer operations which can shift the trigger time
-            # ------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------
+                # Filters can be used to restrict the trigger
+                # ------------------------------------------------------------------------------
 
-            # Run the function one hour after sunrise
-            self.run.at(self.run.trigger.sunrise().offset(3600), self.dummy_func)
-
-            # Run the function one hour after sunrise, but but earliest at 8
-            self.run.at(self.run.trigger.sunrise().offset(3600).earliest('08:00:00'), self.dummy_func)
-
-
-            # ------------------------------------------------------------------------------
-            # Triggers can be grouped together
-            # ------------------------------------------------------------------------------
-
-            # Run the function every workday at 12, but on the weekends at 8
-            self.run.at(
-                self.run.trigger.group(
+                # Run the function every workday at 12
+                self.run.at(
                     self.run.trigger.time('12:00:00').only_on(self.run.filter.weekdays('Mo-Fr')),
-                    self.run.trigger.time('08:00:00').only_on(self.run.filter.weekdays('Sa,So')),
-                ),
-                self.dummy_func
-            )
+                    self.dummy_func
+                )
 
 
-            # ------------------------------------------------------------------------------
-            # Filters can be grouped together
-            # ------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------
+                # Triggers offer operations which can shift the trigger time
+                # ------------------------------------------------------------------------------
 
-            # Run the function at the first Sunday of every month at 12
-            self.run.at(
-                self.run.trigger.time('12:00:00').only_on(
-                    self.run.filter.all(
-                        self.run.filter.weekdays('So'),
-                        self.run.filter.days('1-7')
-                    )
-                ),
-                self.dummy_func
-            )
+                # Run the function one hour after sunrise
+                self.run.at(self.run.trigger.sunrise().offset(3600), self.dummy_func)
+
+                # Run the function one hour after sunrise, but but earliest at 8
+                self.run.at(self.run.trigger.sunrise().offset(3600).earliest('08:00:00'), self.dummy_func)
 
 
-        def dummy_func():
-            pass
+                # ------------------------------------------------------------------------------
+                # Triggers can be grouped together
+                # ------------------------------------------------------------------------------
 
-    MyTriggerRule()
+                # Run the function every workday at 12, but on the weekends at 8
+                self.run.at(
+                    self.run.trigger.group(
+                        self.run.trigger.time('12:00:00').only_on(self.run.filter.weekdays('Mo-Fr')),
+                        self.run.trigger.time('08:00:00').only_on(self.run.filter.weekdays('Sa,So')),
+                    ),
+                    self.dummy_func
+                )
 
+
+                # ------------------------------------------------------------------------------
+                # Filters can be grouped together
+                # ------------------------------------------------------------------------------
+
+                # Run the function at the first Sunday of every month at 12
+                self.run.at(
+                    self.run.trigger.time('12:00:00').only_on(
+                        self.run.filter.all(
+                            self.run.filter.weekdays('So'),
+                            self.run.filter.days('1-7')
+                        )
+                    ),
+                    self.dummy_func
+                )
+
+
+            def dummy_func(self):
+                pass
+
+        MyTriggerRule()
+
+    # ------------ hide: start ------------
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())
 
 Reoccuring Jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -418,6 +427,7 @@ Other scheduler related functions are available under ``HABApp.rule.scheduler``.
 
 .. autofunction:: get_holidays_by_name
 
+.. _SUBPROCESS:
 
 Other tools and scripts
 ------------------------------

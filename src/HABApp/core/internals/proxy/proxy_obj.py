@@ -56,7 +56,8 @@ class StartUpProxyObj(ProxyObjBase):
                 break
         else:
             file = self.globals.get('__file__', '?')
-            raise ValueError(f'"{self.to_replace_name}" should be replaced but was not found in {file}!')
+            msg = f'"{self.to_replace_name}" should be replaced but was not found in {file}!'
+            raise ValueError(msg)
 
         self.globals = None
         self.to_replace = None

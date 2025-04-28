@@ -7,22 +7,12 @@ from pydantic import BaseModel
 from whenever import Instant, LocalDateTime, OffsetDateTime, SystemDateTime, ZonedDateTime
 
 from HABApp.core.types import HSB, RGB
+from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
 
 
-def convert_to_oh_type(obj: Any, scientific_floats: bool = False) -> str:
-    if isinstance(obj, (str, int, bool)):
+def convert_to_oh_str(obj: Any) -> str:
+    if isinstance(obj, (str, int, float)):
         return str(obj)
-
-    if isinstance(obj, float):
-        if scientific_floats:
-            return str(obj)
-
-        v = str(obj)
-        if 'e-' not in v:
-            return v
-
-        v = f'{obj:.{int(v.split("e-", maxsplit=1)[1]) + 6}f}'
-        return v.rstrip('0')
 
     if isinstance(obj, datetime):
         # Add timezone (if not yet defined) to string, then remote anything below ms.
@@ -35,19 +25,22 @@ def convert_to_oh_type(obj: Any, scientific_floats: bool = False) -> str:
     if isinstance(obj, RGB):
         obj = obj.to_hsb()
 
+    if isinstance(obj, (list, tuple, set, frozenset)):
+        return ','.join(convert_to_oh_str(x) for x in obj)
+
+    if isinstance(obj, BaseModel):
+        return obj.model_dump_json()
+
     if isinstance(obj, HSB):
         # noinspection PyProtectedMember
         return f'{obj._hue:.2f},{obj._saturation:.2f},{obj._brightness:.2f}'
 
+    if isinstance(obj, bytes):
+        return RawTypeModel.from_value(obj).value
+
     # https://whenever.readthedocs.io/en/latest/overview.html#iso-8601
     if isinstance(obj, (Instant, LocalDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
         return obj.format_common_iso()
-
-    if isinstance(obj, (list, tuple, set, frozenset)):
-        return ','.join(convert_to_oh_type(x, scientific_floats=scientific_floats) for x in obj)
-
-    if isinstance(obj, BaseModel):
-        return obj.model_dump_json()
 
     raise ValueError()
 

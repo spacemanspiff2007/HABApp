@@ -12,7 +12,7 @@ from HABApp.core.internals import uses_item_registry
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import map_null_str
 from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
-from HABApp.openhab.definitions import QuantityValue
+from HABApp.openhab.definitions.websockets.item_value_types import QuantityTypeModel
 from HABApp.openhab.item_to_reg import (
     add_thing_to_registry,
     add_to_registry,
@@ -87,7 +87,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             # error
             if new_item is None:
                 continue
-            add_to_registry(new_item, True)
+            add_to_registry(new_item, set_value=True)
 
         # remove items which are no longer available
         ist = set(Items.get_item_names())
@@ -115,14 +115,13 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             if (new_state := map_null_str(item.state)) is None:
                 continue
 
-            # UoM item handling
-            if ':' in item.type:
-                new_state, _ = QuantityValue.split_unit(new_state)
-
             existing_item, existing_item_update = created_items[item.name]
 
-            # noinspection PyProtectedMember
-            new_value = existing_item._state_from_oh_str(new_state)
+            # UoM item handling
+            if item.type.startswith('Number:'):
+                new_value = QuantityTypeModel.get_value_from_state(new_state)
+            else:
+                new_value = existing_item._state_from_oh_str(new_state)
 
             if existing_item.value != new_value and existing_item.last_update == existing_item_update:
                 existing_item.value = new_value

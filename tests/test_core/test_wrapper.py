@@ -52,7 +52,7 @@ def func_a(_l) -> None:
     1 / 0
 
 
-@pytest.mark.ignore_log_errors()
+@pytest.mark.ignore_log_errors
 def test_func_wrapper(p_mock) -> None:
     func_a(['asdf', 'asdf'])
 

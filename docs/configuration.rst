@@ -22,7 +22,7 @@ Example
     directories:
         logging: log    # If the filename for the logfile in logging.yml is not absolute it will be placed in this directory
         rules: rules    # All *.py files in this folder (and subfolders) will be loaded. Load order will be alphabetical by path.
-        param: param    # Optional, this is the folder where the parameter files will be created and loaded from
+        params: params  # Optional, this is the folder where the parameter files will be created and loaded from
         config: config  # Folder from which configuration files for openHAB will be loaded
         lib: lib        # Custom modules, libraries and files can be placed there.
                         # (!) Attention (!):
@@ -156,6 +156,11 @@ Connection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autopydantic_model:: Connection
+
+.. autopydantic_model:: Websocket
+
+.. autopydantic_model:: WebsocketEventFilter
+
 
 Ping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

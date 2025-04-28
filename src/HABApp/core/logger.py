@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from typing_extensions import Self
 
@@ -19,6 +18,7 @@ def log_error(logger: logging.Logger, text: str) -> None:
             logger.error(line)
     else:
         logger.error(text)
+
     post_event(
         _T_ERRORS, text
     )
@@ -56,11 +56,11 @@ class HABAppLogger:
         self.lines: list[str] = []
         self.logger = log
 
-    def add(self, text: str, *args: Any, **kwargs: Any) -> Self:
-        self.lines.append(text.format(*args, **kwargs))
+    def add(self, text: str) -> Self:
+        self.lines.append(text)
         return self
 
-    def add_exception(self, e: Exception, add_traceback: bool = False) -> Self:
+    def add_exception(self, e: Exception, *, add_traceback: bool = False) -> Self:
         if not add_traceback:
             for line in str(e).splitlines():
                 self.lines.append(line)
@@ -74,7 +74,7 @@ class HABAppLogger:
 
         if self.logger.isEnabledFor(self._LEVEL):
             for line in self.lines:
-                self.logger._log(self._LEVEL, line, [])
+                self.logger._log(self._LEVEL, line, ())
 
         post_event(
             self._TOPIC, '\n'.join(self.lines)

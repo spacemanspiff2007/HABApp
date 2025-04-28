@@ -8,8 +8,6 @@ import HABApp
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.files.file import HABAppFile
-from HABApp.core.files.folders import add_folder as add_habapp_folder
-from HABApp.core.files.watcher import AggregatingAsyncEventHandler
 from HABApp.core.lib import PendingFuture
 from HABApp.core.logger import HABAppError, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection
@@ -47,6 +45,9 @@ class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
         path = HABApp.CONFIG.directories.config
         if path is None:
             return None
+
+        log.warning('TextualThingConfig deactivated')
+        return None
 
         if self.watcher is not None:
             return None

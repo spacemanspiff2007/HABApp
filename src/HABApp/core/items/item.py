@@ -1,4 +1,4 @@
-from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
 from HABApp.core.internals import uses_get_item, uses_item_registry
 from HABApp.core.items import BaseValueItem
 
@@ -18,7 +18,8 @@ class Item(BaseValueItem):
         :param initial_value: state the item will have if it gets created
         :return: The item
         """
-        assert isinstance(name, str), type(name)
+        if not isinstance(name, str):
+            raise ItemNameNotOfTypeStrError.from_value(name)
 
         try:
             item = get_item(name)
@@ -26,5 +27,6 @@ class Item(BaseValueItem):
             item = cls(name, initial_value)
             item_registry.add_item(item)
 
-        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        if not isinstance(item, cls):
+            raise WrongItemTypeError.from_item(item, cls)
         return item

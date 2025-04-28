@@ -58,7 +58,7 @@ assert len(calls) == 4
 
 
 @pytest.mark.no_internals
-def test_doc_run_exception(monkeypatch) -> None:
+async def test_doc_run_exception(monkeypatch) -> None:
     """Check that the RuleRunner propagates exceptions which happen during exception formatting"""
 
     class MyException(Exception):
@@ -71,7 +71,7 @@ def test_doc_run_exception(monkeypatch) -> None:
 
     from tests import SimpleRuleRunner
     runner = SimpleRuleRunner()
-    runner.set_up()
+    await runner.set_up()
 
     class MyFirstRule(HABApp.Rule):
         def __init__(self) -> None:
@@ -90,4 +90,4 @@ def test_doc_run_exception(monkeypatch) -> None:
 
     with pytest.raises(MyException):
         runner.process_events()
-    runner.tear_down()
+    await runner.tear_down()

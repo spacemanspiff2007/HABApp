@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
 import HABApp
 from HABApp.config import CONFIG
-from HABApp.core.asyncio import run_func_from_async
+from HABApp.core.asyncio import run_coro_from_thread
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_get_item, uses_item_registry, uses_post_event
 from HABApp.core.lib import SingleTask
@@ -16,6 +15,8 @@ from HABApp.mqtt.mqtt_payload import get_msg_payload
 
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from HABApp.config.models.mqtt import QOS
 
 SUBSCRIBE_CFG = CONFIG.mqtt.subscribe
@@ -169,7 +170,7 @@ get_item = uses_get_item()
 Items = uses_item_registry()
 
 
-def msg_to_event(topic: str, payload: Any, retain: bool):
+def msg_to_event(topic: str, payload: Any, retain: bool) -> None:
 
     _item = None    # type: HABApp.mqtt.items.MqttBaseItem | None
     try:
@@ -208,7 +209,7 @@ def subscribe(topic_or_topics: str | Iterable[tuple[str, int | None]], qos: QOS 
     :param topic_or_topics: MQTT topic or multiple topic qos pairs to subscribe to
     :param qos: QoS, can be 0, 1 or 2.  If not specified value from configuration file will be used.
     """
-    run_func_from_async(async_subscribe(topic_or_topics, qos))
+    run_coro_from_thread(async_subscribe(topic_or_topics, qos), calling=subscribe)
 
 
 def unsubscribe(topic_or_topics: str | Iterable[str]) -> None:
@@ -217,4 +218,4 @@ def unsubscribe(topic_or_topics: str | Iterable[str]) -> None:
 
     :param topic_or_topics: MQTT topic
     """
-    run_func_from_async(async_subscribe(topic_or_topics))
+    run_coro_from_thread(async_subscribe(topic_or_topics), calling=subscribe)

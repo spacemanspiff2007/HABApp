@@ -1,9 +1,11 @@
-from .errors import InvalidConfigError
+from HABApp.config.errors import InvalidConfigError
+
 
 # isort: split
 
-from .config import CONFIG
+from HABApp.config.config import CONFIG
+
 
 # isort: split
 
-from .loader import load_config
+from .loader import setup_habapp_configuration

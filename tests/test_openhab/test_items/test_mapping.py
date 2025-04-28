@@ -11,7 +11,7 @@ from HABApp.openhab.map_items import map_item
 from tests.helpers import TestEventBus
 
 
-@pytest.mark.ignore_log_errors()
+@pytest.mark.ignore_log_errors
 def test_exception(eb: TestEventBus) -> None:
     eb.allow_errors = True
     assert map_item('test', 'Number', 'asdf', 'my_label', frozenset(), frozenset(), {}) is None

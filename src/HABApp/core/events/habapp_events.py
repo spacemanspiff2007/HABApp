@@ -8,6 +8,9 @@ class __FileEventBase:
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} filename: {self.name}>'
 
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and self.name == other.name
+
 
 class RequestFileLoadEvent(__FileEventBase):
     """Request (re-) loading of the specified file

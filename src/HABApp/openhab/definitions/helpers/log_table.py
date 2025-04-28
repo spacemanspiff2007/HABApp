@@ -16,7 +16,7 @@ class Column:
         self.width: int = len(name) if alias is None else len(alias)
         self.entries: list[tuple[Any, ...]] = []
 
-    def get_lines(self, pos: int) -> int:
+    def count_lines(self, pos: int) -> int:
         return len(self.entries[pos])
 
     def format_entry(self, pos: int, lines: int) -> list[str]:
@@ -73,11 +73,11 @@ class Table:
         for k, col in self.columns.items():
             col.add(_in[k])
 
-    def get_lines(self, sort_columns: list[str | Column] = None) -> list[str]:
+    def get_lines(self, sort_columns: list[str | Column] | None = None) -> list[str]:
         # check if all tables have the same length
         vals = list(self.columns.values())
         len1 = len(vals[0].entries)
-        assert all(map(lambda x: len(x.entries) == len1, vals)), {k: len(v.entries) for k, v in self.columns.items()}
+        assert all(len(x.entries) == len1 for x in vals), {k: len(v.entries) for k, v in self.columns.items()}
 
         # We don't show the empty table
         if len1 <= 0:
@@ -88,15 +88,18 @@ class Table:
             lines_dict = {i: i for i in range(len1)}
         else:
             # Convert column names to columns
-            for i, e in enumerate(sort_columns):
-                if isinstance(e, str):
-                    sort_columns[i] = self.columns[e]
+            sort_cols: list[Column] = []
+            for name_or_obj in sort_columns:
+                if isinstance(name_or_obj, str):
+                    sort_cols.append(self.columns[name_or_obj])
+                else:
+                    sort_cols.append(name_or_obj)
 
             lines_dict = {}
             for i in range(len1):
-                lines_dict[tuple(c.entries[i] for c in sort_columns) + (i,)] = i
+                lines_dict[tuple(c.entries[i] for c in sort_cols) + (i,)] = i
 
-        line_sep = '+-' + '-+-'.join(map(lambda x: '-' * x.width, self.columns.values())) + '-+'
+        line_sep = '+-' + '-+-'.join('-' * x.width for x in self.columns.values()) + '-+'
 
         ret = []
         if self.heading:
@@ -114,10 +117,10 @@ class Table:
         ret.append(l1)
         ret.append(line_sep)
 
-        for t, i in sorted(lines_dict.items()):
-            lines = max(map(lambda x: x.get_lines(i), self.columns.values()))
+        for _, i in sorted(lines_dict.items()):
+            lines = max(x.count_lines(i) for x in self.columns.values())
 
-            grid = tuple(map(lambda x: x.format_entry(i, lines), self.columns.values()))  # type: tuple[list[str], ...]
+            grid = tuple(x.format_entry(i, lines) for x in self.columns.values())  # type: tuple[list[str], ...]
             for col_i in range(lines):
                 cols = [obj[col_i] for obj in grid]
                 ret.append('| ' + ' | '.join(cols) + ' |')

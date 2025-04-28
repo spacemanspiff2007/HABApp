@@ -1,7 +1,9 @@
 from eascheduler.builder.helper import HINT_POS_TIMEDELTA, get_pos_timedelta_secs
+from typing_extensions import Self
 from whenever import Instant
 
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
+from HABApp.core.errors import ItemNameNotOfTypeStrError, WrongItemTypeError
 from HABApp.core.internals import (
     EventBusListener,
     EventFilterBase,
@@ -26,14 +28,17 @@ class BaseItem(ItemRegistryItem):
     """
 
     @classmethod
-    def get_item(cls, name: str):
+    def get_item(cls, name: str) -> Self:
         """Returns an already existing item. If it does not exist or has a different item type an exception will occur.
 
         :param name: Name of the item
         """
-        assert isinstance(name, str), type(name)
+        if not isinstance(name, str):
+            raise ItemNameNotOfTypeStrError.from_value(name)
         item = get_item(name)
-        assert isinstance(item, cls), f'{cls} != {type(item)}'
+
+        if not isinstance(item, cls):
+            raise WrongItemTypeError.from_item(item, cls)
         return item
 
     def __init__(self, name: str) -> None:

@@ -5,7 +5,7 @@ from collections.abc import Callable
 
 from typing_extensions import override
 
-from HABApp.core.asyncio import async_context, create_task
+from HABApp.core.asyncio import create_task
 from HABApp.core.internals import Context
 from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
 
@@ -31,11 +31,8 @@ class WrappedSyncFunction(WrappedFunctionBase[P, R]):
     @override
     async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
 
-        token = async_context.set('WrappedSyncFunction')
-
         try:
             return self.func(*args, **kwargs)
         except Exception as e:
             self.process_exception(e, *args, **kwargs)
-        finally:
-            async_context.reset(token)
+            return None

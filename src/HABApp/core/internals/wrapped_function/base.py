@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Final, Generic, ParamSpec, TypeVar
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import Context, ContextProvidingObj, uses_event_bus
-from HABApp.core.lib import format_exception
+from HABApp.core.lib import format_exception, get_obj_name
 
 
 if TYPE_CHECKING:
@@ -35,8 +35,8 @@ class WrappedFunctionBase(ContextProvidingObj, Generic[P, R]):
             if self._habapp_ctx is not None:
                 name = self._habapp_ctx.get_callback_name(func)
             if name is None:
-                name = func.__name__
-        self.name: Final = name
+                name = get_obj_name(func)
+        self.name: Final[str] = name
 
         # Allow custom logger
         self.log: Final = default_logger if logger is None else logger

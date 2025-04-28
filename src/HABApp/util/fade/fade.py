@@ -3,6 +3,7 @@ from time import time
 from typing import Union
 
 from HABApp.core.internals import AutoContextBoundObj, wrap_func
+from HABApp.rule.scheduler import trigger
 
 
 VAL_TYPE = Union[int, float]
@@ -13,7 +14,7 @@ class FadeWorker(AutoContextBoundObj):
     def __init__(self, parent: 'Fade', interval: float) -> None:
         super().__init__()
         self.parent: Fade = parent
-        self.scheduler = self._parent_ctx.rule.run.every(None, interval, self.parent._scheduled_worker)
+        self.scheduler = self._parent_ctx.rule.run.at(trigger.interval(None, interval), self.parent._scheduled_worker)
 
     def cancel(self) -> None:
         self._ctx_unlink()

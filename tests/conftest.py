@@ -6,7 +6,7 @@ import typing
 import pytest
 
 import HABApp
-from HABApp.core.asyncio import async_context
+from HABApp.core.files import FileManager
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from tests.helpers import LogCollector, eb, get_dummy_cfg, params, parent_rule, sync_worker
 from tests.helpers.log.log_matcher import AsyncDebugWarningMatcher, LogLevelMatcher
@@ -52,11 +52,7 @@ def use_dummy_cfg(monkeypatch):
 
 @pytest.fixture(autouse=True, scope='session')
 def event_loop():
-    token = async_context.set('pytest')
-
     yield HABApp.core.const.loop
-
-    async_context.reset(token)
 
 
 @pytest.fixture()
@@ -64,15 +60,20 @@ def ir():
     return ItemRegistry()
 
 
+@pytest.fixture()
+def file_manager():
+    return FileManager(None)
+
+
 @pytest.fixture(autouse=True)
-def clean_objs(ir: ItemRegistry, eb: EventBus, request):
+def clean_objs(ir: ItemRegistry, eb: EventBus, file_manager: FileManager, request):
     markers = request.node.own_markers
     for marker in markers:
         if marker.name == 'no_internals':
             yield None
             return None
 
-    restore = setup_internals(ir, eb, final=False)
+    restore = setup_internals(ir, eb, file_manager, final=False)
 
     yield
 
@@ -94,7 +95,7 @@ def test_logs(caplog, request):
 
     yield c
 
-    additional_ignores: typing.List[LogLevelMatcher] = []
+    additional_ignores: list[LogLevelMatcher] = []
 
     markers = request.node.own_markers
     for marker in markers:

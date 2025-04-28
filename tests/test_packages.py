@@ -19,6 +19,9 @@ def test_installation_check() -> None:
             continue
         found.add(re_name.search(line).group(1))
 
+    # Backport only
+    found.remove('taskgroup')
+
     coded = set(HABApp.__check_dependency_packages__.get_dependencies())
 
     assert coded == found

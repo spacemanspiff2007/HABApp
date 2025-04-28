@@ -60,24 +60,26 @@ Example:
 .. exec_code::
 
     # ------------ hide: start ------------
+    async def run():
+
+        import HABApp
+        from HABApp.openhab.items import ContactItem, SwitchItem
+        HABApp.core.Items.add_item(ContactItem('MyContact', initial_value='OPEN'))
+        HABApp.core.Items.add_item(SwitchItem('MySwitch', initial_value='OFF'))
+        # ------------ hide: stop -------------
+        from HABApp.openhab.items import ContactItem, SwitchItem
+
+        my_contact = ContactItem.get_item('MyContact')
+        if my_contact.is_open():
+            print('Contact is open!')
+
+        my_switch = SwitchItem.get_item('MySwitch')
+        if my_switch.is_on():
+            my_switch.off()
+
+    # ------------ hide: start ------------
     from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().set_up()
-
-    import HABApp
-    from HABApp.openhab.items import ContactItem, SwitchItem
-    HABApp.core.Items.add_item(ContactItem('MyContact', initial_value='OPEN'))
-    HABApp.core.Items.add_item(SwitchItem('MySwitch', initial_value='OFF'))
-    # ------------ hide: stop -------------
-    from HABApp.openhab.items import ContactItem, SwitchItem
-
-    my_contact = ContactItem.get_item('MyContact')
-    if my_contact.is_open():
-        print('Contact is open!')
-
-    my_switch = SwitchItem.get_item('MySwitch')
-    if my_switch.is_on():
-        my_switch.off()
-
+    SimpleRuleRunner().run(run())
 
 NumberItem
 ======================================
@@ -961,34 +963,36 @@ for 60 seconds.
 .. exec_code::
 
     # ------------ hide: start ------------
-    import time, HABApp
-    from rule_runner import SimpleRuleRunner
-    runner = SimpleRuleRunner()
-    runner.set_up()
-    thing_item = HABApp.openhab.items.Thing('my:thing:uid')
-    HABApp.core.Items.add_item(thing_item)
+    async def run():
+
+        import time, HABApp
+        thing_item = HABApp.openhab.items.Thing('my:thing:uid')
+        HABApp.core.Items.add_item(thing_item)
     # ------------ hide: stop -------------
-    from HABApp import Rule
-    from HABApp.core.events import ItemNoChangeEvent
-    from HABApp.openhab.items import Thing
+
+        from HABApp import Rule
+        from HABApp.core.events import ItemNoChangeEvent
+        from HABApp.openhab.items import Thing
 
 
-    class CheckThing(Rule):
-        def __init__(self, name: str):
-            super().__init__()
+        class CheckThing(Rule):
+            def __init__(self, name: str):
+                super().__init__()
 
-            self.thing = Thing.get_item(name)
-            watcher = self.thing.watch_change(60)
-            watcher.listen_event(self.thing_no_change)
+                self.thing = Thing.get_item(name)
+                watcher = self.thing.watch_change(60)
+                watcher.listen_event(self.thing_no_change)
 
-        def thing_no_change(self, event: ItemNoChangeEvent):
-            print(f'Thing {event.name} constant for {event.seconds}')
-            print(f'Status: {self.thing.status}')
+            def thing_no_change(self, event: ItemNoChangeEvent):
+                print(f'Thing {event.name} constant for {event.seconds}')
+                print(f'Status: {self.thing.status}')
 
 
-    CheckThing('my:thing:uid')
+        CheckThing('my:thing:uid')
+
     # ------------ hide: start ------------
-    thing_item.status = 'ONLINE'
-    HABApp.core.EventBus.post_event('my:thing:uid', ItemNoChangeEvent('test_watch', 60))
-    runner.tear_down()
-    # ------------ hide: stop -------------
+        thing_item.status = 'ONLINE'
+        HABApp.core.EventBus.post_event('my:thing:uid', ItemNoChangeEvent('test_watch', 60))
+
+    from rule_runner import SimpleRuleRunner
+    SimpleRuleRunner().run(run())

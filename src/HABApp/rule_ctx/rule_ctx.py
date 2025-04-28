@@ -5,8 +5,9 @@ from typing import TYPE_CHECKING, TypeVar
 
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
-from HABApp.core.internals import Context, EventBusListener, uses_event_bus, uses_item_registry
+from HABApp.core.internals import Context, EventBusListener, uses_event_bus, uses_item_registry, wrap_func
 from HABApp.core.internals.event_bus import EventBusBaseListener
+from HABApp.core.lib import get_obj_name
 
 
 if TYPE_CHECKING:
@@ -30,7 +31,7 @@ class HABAppRuleContext(Context):
         self.rule: Rule | None = rule
 
     def get_callback_name(self, callback: Callable) -> str | None:
-        return f'{self.rule.rule_name}.{callback.__name__}' if self.rule.rule_name else None
+        return f'{self.rule.rule_name}.{get_obj_name(callback):s}' if self.rule.rule_name else None
 
     def add_event_listener(self, listener: TB) -> TB:
         event_bus.add_listener(listener)
@@ -40,7 +41,7 @@ class HABAppRuleContext(Context):
         event_bus.remove_listener(listener)
         return listener
 
-    def unload_rule(self) -> None:
+    async def unload_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             rule = self.rule
 
@@ -61,12 +62,12 @@ class HABAppRuleContext(Context):
             rule._habapp_rule_ctx = None
 
             # user implementation
-            rule.on_rule_removed()
+            await wrap_func(rule.on_rule_removed).async_run()
 
-    def check_rule(self) -> None:
+    async def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
             # We need items if we want to run the test
-            if item_registry.get_items():
+            if item_registry:
 
                 # Check if we have a valid item for all listeners
                 for listener in self.objs:
@@ -86,4 +87,4 @@ class HABAppRuleContext(Context):
             self.rule.run._scheduler.set_enabled(True)
 
             # user implementation
-            self.rule.on_rule_loaded()
+            await wrap_func(self.rule.on_rule_loaded).async_run()

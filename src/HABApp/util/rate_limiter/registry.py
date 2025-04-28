@@ -10,10 +10,10 @@ LOCK = Lock()
 _LIMITERS: dict[str, Limiter] = {}
 
 
-def RateLimiter(name: str) -> Limiter:
+def RateLimiter(name: str) -> Limiter:  # noqa: N802
     """Create a new rate limiter or return an already existing one with a given name.
 
-    :param name: case insensitive name of limiter
+    :param name: case-insensitive name of limiter
     :return: Rate limiter object
     """
 

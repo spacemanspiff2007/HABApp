@@ -1,20 +1,20 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from fastnumbers import real
-
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    PercentTypeModel,
+)
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
-
-from ...core.errors import InvalidItemValue, ItemValueIsNoneError
-from ..definitions import OnOffValue, PercentValue
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/DimmerItem.java
 class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
     """DimmerItem which accepts and converts the data types from OpenHAB
 
@@ -27,16 +27,11 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        return real(state)
+    _update_to_oh: Final = OutgoingStateEvent('DimmerItem', PercentTypeModel, 'OnOff', 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('DimmerItem', PercentTypeModel, 'OnOff', 'IncreaseDecrease', 'Refresh')
+    _state_from_oh_str: Final = staticmethod(PercentTypeModel.get_value_from_state)
 
-    def set_value(self, new_value) -> bool:
-
-        if isinstance(new_value, OnOffValue):
-            new_value = 100 if new_value.on else 0
-        elif isinstance(new_value, PercentValue):
-            new_value = new_value.value
+    def set_value(self, new_value: float | None) -> bool:
 
         # Percent is 0 ... 100
         if isinstance(new_value, (int, float)) and (0 <= new_value <= 100):
@@ -45,7 +40,7 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
         if new_value is None:
             return super().set_value(new_value)
 
-        raise InvalidItemValue.from_item(self, new_value)
+        raise InvalidItemValueError.from_item(self, new_value)
 
     def is_on(self) -> bool:
         """Test value against on-value"""

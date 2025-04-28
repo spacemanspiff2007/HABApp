@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import logging.handlers
 import signal
 import traceback
@@ -9,13 +8,17 @@ from dataclasses import dataclass
 from types import BuiltinMethodType, FunctionType, MethodType
 from typing import TYPE_CHECKING
 
-from HABApp.core.asyncio import async_context, create_task
+from HABApp.core.asyncio import create_task
 from HABApp.core.const import loop
+from HABApp.core.lib.helper import get_obj_name
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
+    from collections.abc import Awaitable, Callable
     from typing import Any, NoReturn
+
+
+log = logging.getLogger('HABApp.Shutdown')
 
 
 @dataclass(frozen=True)
@@ -37,18 +40,18 @@ class ShutdownFunction(ShutdownBase):
 
 @dataclass(frozen=True)
 class ShutdownAwaitable(ShutdownBase):
-    func: Callable[[], Coroutine[Any, Any, Any]]
+    func: Callable[[], Awaitable[Any]]
 
     async def run(self) -> None:
         await self.func()
 
 
-_REGISTERED: tuple[ShutdownBase, ...] = ()
+_REGISTERED: tuple[ShutdownFunction | ShutdownAwaitable, ...] = ()
 
 _REQUESTED: bool = False
 
 
-def register(func: Callable[[], Any], *, last: bool = False, msg: str = '') -> None:
+def register(func: Callable[[], Any | Awaitable[Any]], *, last: bool = False, msg: str = '') -> None:
     global _REGISTERED
 
     if last is not True and last is not False:
@@ -58,7 +61,18 @@ def register(func: Callable[[], Any], *, last: bool = False, msg: str = '') -> N
         raise TypeError()
 
     if not msg:
-        msg = f'{func.__module__}.{func.__name__}'
+        msg = f'{func.__module__}.{get_obj_name(func)}'
+
+    for existing in _REGISTERED:
+        if existing.func is func:
+            # If it's the same thing we don't call it multiple times
+            if existing.msg == msg and existing.last == last:
+                return None
+
+            log.warning(f'Function {func} is already registered with a different message!')
+            log.warning(f'  - {existing.msg:s}')
+            log.warning(f'  - {msg:s}')
+            return None
 
     if iscoroutinefunction(func):
         _REGISTERED += (ShutdownAwaitable(func=func, last=last, msg=msg), )
@@ -75,10 +89,6 @@ async def _shutdown() -> None:
         return None
     _REQUESTED = True
 
-
-    async_context.set('Shutdown')
-
-    log = logging.getLogger('HABApp.Shutdown')
     log.debug('Requested shutdown')
 
     objs = (

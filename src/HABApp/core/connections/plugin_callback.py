@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from inspect import getmembers, iscoroutinefunction, signature
 from typing import TYPE_CHECKING, Any
+
+from typing_extensions import Self
+
+from HABApp.core.lib import get_obj_name
 
 from ._definitions import ConnectionStatus
 
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
     from .base_connection import BaseConnection
     from .base_plugin import BaseConnectionPlugin
 
@@ -27,7 +32,8 @@ def get_plugin_callbacks(obj: BaseConnectionPlugin) -> list[tuple[ConnectionStat
             continue
 
         if (m := name_regex.fullmatch(m_name)) is None:
-            raise ValueError(f'Invalid name: {m_name} in {obj.plugin_name}')
+            msg = f'Invalid name: {m_name} in {obj.plugin_name}'
+            raise ValueError(msg)
 
         status = name_to_status[m.group(1)]
         cb = PluginCallbackHandler.create(obj, member)
@@ -54,9 +60,10 @@ class PluginCallbackHandler:
         return await self.coro(**kwargs)
 
     @staticmethod
-    def _get_coro_kwargs(plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]):
+    def _get_coro_kwargs(plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]) -> tuple[str, ...]:
         if not iscoroutinefunction(coro):
-            raise ValueError(f'Coroutine function expected for {plugin.plugin_name}.{coro.__name__}')
+            msg = f'Coroutine function expected for {plugin.plugin_name}.{get_obj_name(coro)}'
+            raise ValueError(msg)
 
         sig = signature(coro)
 
@@ -65,9 +72,10 @@ class PluginCallbackHandler:
             if name in ('connection', 'context'):
                 kwargs.append(name)
             else:
-                raise ValueError(f'Invalid parameter name "{name:s}" for {plugin.plugin_name}.{coro.__name__}')
+                msg = f'Invalid parameter name "{name:s}" for {plugin.plugin_name}.{get_obj_name(coro)}'
+                raise ValueError(msg)
         return tuple(kwargs)
 
     @classmethod
-    def create(cls, plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]):
+    def create(cls, plugin: BaseConnectionPlugin, coro: Callable[[...], Awaitable]) -> Self:
         return cls(plugin, coro, cls._get_coro_kwargs(plugin, coro))

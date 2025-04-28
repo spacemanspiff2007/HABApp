@@ -1,38 +1,24 @@
-from base64 import b64encode
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Final
 
-from immutables import Map
-
-from HABApp.openhab.definitions import RawValue
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.core.const import MISSING
+from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
+from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.types import RawType
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
-def _convert_bytes(data: bytes, img_type: str | None) -> str:
-    assert isinstance(data, bytes), type(data)
-
-    # try to automatically found out what kind of file we have
-    if img_type is None:
-        if data.startswith(b'\xFF\xD8\xFF'):
-            img_type = 'jpeg'
-        elif data.startswith(b'\x89\x50\x4E\x47'):
-            img_type = 'png'
-    assert img_type in ('jpeg', 'png'), f'Image type: "{img_type}", File Signature: {data[:10].hex()}'
-
-    return f'data:image/{img_type:s};base64,{b64encode(data).decode("ascii")}'
-
-
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/ImageItem.java
 class ImageItem(OpenhabItem):
     """ImageItem which accepts and converts the data types from OpenHAB
 
     :ivar str name: |oh_item_desc_name|
-    :ivar bytes value: |oh_item_desc_value|
-    :ivar str | None image_type: image type (e.g. jpg or png)
+    :ivar RawType value: |oh_item_desc_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
@@ -40,55 +26,62 @@ class ImageItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    def __init__(self, name: str, initial_value: Any = None, label: str | None = None,
-                 tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()) -> None:
-        super().__init__(name, initial_value, label, tags, groups, metadata)
+    _update_to_oh: Final = OutgoingStateEvent('ImageItem', 'Raw', 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('ImageItem', 'Refresh')
+    _state_from_oh_str: Final = staticmethod(RawTypeModel.get_value_from_state)
 
-        # this item is unique because we also save the image type and thus have two states
-        self.image_type: str | None = None
+    @property
+    def image_type(self) -> str:
+        """Image type (e.g. jpg or png)"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.type
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        return RawValue(state).value
+    @property
+    def image_bytes(self) -> bytes:
+        """Image bytes"""
+        if (v := self.value) is None:
+            raise ItemValueIsNoneError.from_item(self)
+        return v.data
 
-    @classmethod
-    def from_oh(cls, name: str, value=None, label: str | None = None, tags: frozenset[str] = frozenset(),
-                groups: frozenset[str] = frozenset(), metadata: Mapping[str, MetaData] = Map()):
+    def set_value(self, new_value: RawType | tuple[str, bytes] | None) -> bool:
 
-        c = cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata)
-        if value is not None:
-            c.set_value(RawValue(value))
-        return c
-
-    def set_value(self, new_value) -> bool:
-        assert isinstance(new_value, RawValue) or new_value is None, type(new_value)
-
-        if new_value is None:
-            self.image_type = None
+        if isinstance(new_value, RawType):
             return super().set_value(new_value)
 
-        # image/png
-        self.image_type = new_value.type
-        if self.image_type.startswith('image/'):
-            self.image_type = self.image_type[6:]
-        # bytes
-        return super().set_value(new_value.value)
+        if isinstance(new_value, tuple):
+            image_type, image_bytes = new_value
+            if not image_type.startswith('image/') or not isinstance(image_bytes, bytes):
+                raise InvalidItemValueError.from_item(self, new_value)
+            return super().set_value(RawType.create(image_type, image_bytes))
 
-    def oh_post_update(self, data: bytes, img_type: str | None = None):
+        if new_value is None:
+            return super().set_value(new_value)
+
+        raise InvalidItemValueError.from_item(self, new_value)
+
+    def oh_post_update(self, value: bytes | None = MISSING, image_type: str | None = None) -> None:
         """Post an update to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
-        :param data: image data
-        :param img_type: (optional) what kind of image, ``jpeg`` or ``png``
+        :param value: image data
+        :param image_type: (optional) what kind of image, ``jpeg`` or ``png``
         """
-        return super().oh_post_update(_convert_bytes(data, img_type))
+        if value is MISSING:
+            value = self.value
+        elif isinstance(value, bytes):
+            value = RawType.create(data_type=image_type, data=value)
+        return super().oh_post_update(value)
 
-    def oh_send_command(self, data: bytes, img_type: str | None = None):
+    def oh_send_command(self, value: bytes | None = MISSING, image_type: str | None = None) -> None:
         """Send a command to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
-        :param data: image data
-        :param img_type: (optional) what kind of image, ``jpeg`` or ``png``
+        :param value: image data
+        :param image_type: (optional) what kind of image, ``jpeg`` or ``png``
         """
-        return super().oh_send_command(_convert_bytes(data, img_type))
+        if value is MISSING:
+            value = self.value
+        elif isinstance(value, bytes):
+            value = RawType.create(data_type=image_type, data=value)
+        return super().oh_send_command(value)

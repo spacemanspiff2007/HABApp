@@ -1,0 +1,32 @@
+//-------------------------------------------------------------------------------------------------
+// Test items
+//-------------------------------------------------------------------------------------------------
+
+Group				TestGroup
+Group:Number:AVG 	TestGroupAVG
+
+
+String  TestString      "[%s]"      (TestGroup)  			        [TestTag]   {meta1="test" [key="value"]}
+Number	TestNumber	                (TestGroup, TestGroupAVG)
+Image	TestImage
+
+Number  HABApp_Ping
+
+
+//-------------------------------------------------------------------------------------------------
+// Will be shown in the broken link detection
+//-------------------------------------------------------------------------------------------------
+
+Number      BrokenThing     {channel="thing:that:does:not:exist:at:all"}
+Number      BrokenLink      {channel="astro:sun:habapp-testing:channel-that-does-not-exist"}
+
+
+//-------------------------------------------------------------------------------------------------
+// Items and groups for persistence testing
+//-------------------------------------------------------------------------------------------------
+
+Group	gRRD4j
+Number	RRD4jItem      (gRRD4j)
+
+Group	gInMemoryForecast
+Number	InMemoryForecastItem      (gInMemoryForecast)

@@ -4,7 +4,6 @@ from typing import Any
 from immutables import Map
 
 from HABApp.core.wrapper import process_exception
-from HABApp.openhab.definitions.values import QuantityValue
 from HABApp.openhab.items import (
     CallItem,
     ColorItem,
@@ -51,6 +50,8 @@ def map_item(name: str, type: str, value: str | None,
         assert isinstance(type, str)
         assert value is None or isinstance(value, str)
 
+        kwargs = {}
+
         # map Metadata
         if metadata is not None:
             meta = Map({k: MetaData(v['value'], Map(v.get('config', {}))) for k, v in metadata.items()})
@@ -59,11 +60,9 @@ def map_item(name: str, type: str, value: str | None,
 
         # Quantity types are like this: Number:Temperature and have a unit set: "12.3 °C".
         # We have to remove the dimension from the type and remove the unit from the value
-        if ':' in type:
+        if type.startswith('Number:'):
             type, dimension = type.split(':')
-            # if the item is not initialized its None and has no dimension
-            if value is not None:
-                value, _ = QuantityValue.split_unit(value)
+            kwargs['dimension'] = dimension
 
             # Show warning
             # https://github.com/spacemanspiff2007/HABApp/issues/383
@@ -72,7 +71,7 @@ def map_item(name: str, type: str, value: str | None,
 
         cls = _items.get(type)
         if cls is not None:
-            return cls.from_oh(name, value, label=label, tags=tags, groups=groups, metadata=meta)
+            return cls.from_oh(name, value, label=label, tags=tags, groups=groups, metadata=meta, **kwargs)
 
         msg = f'Unknown openHAB type: {type} for {name}'
         raise ValueError(msg)  # noqa: TRY301

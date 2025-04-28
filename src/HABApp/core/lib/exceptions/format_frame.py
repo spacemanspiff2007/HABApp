@@ -2,8 +2,9 @@ import re
 
 from stack_data import LINE_GAP, FrameInfo
 
-from .const import PRE_INDENT, SEPARATOR_NEW_FRAME
-from .format_frame_vars import format_frame_variables
+from HABApp.core.const.installation import HABAPP_MODULE_PATH, PYTHON_INSTALLATION_PATHS
+from HABApp.core.lib.exceptions.const import PRE_INDENT, SEPARATOR_NEW_FRAME
+from HABApp.core.lib.exceptions.format_frame_vars import format_frame_variables
 
 
 SUPPRESSED_HABAPP_PATHS = (
@@ -25,13 +26,6 @@ SUPPRESSED_HABAPP_PATHS = (
     re.compile(r'[/\\]HABApp[/\\]core[/\\]connections[/\\]'),
 )
 
-SUPPRESSED_PATHS = (
-    # Libraries of base installation
-    re.compile(r'[/\\](?:python\d\.\d+|python\d{2,3})[/\\](?:lib[/\\]|site-packages[/\\]|\w+\.py.*$)', re.IGNORECASE),
-    # Libraries in venv
-    re.compile(r'[/\\]lib[/\\]site-packages[/\\]', re.IGNORECASE),
-)
-
 
 def is_suppressed_habapp_file(name: str) -> bool:
     for r in SUPPRESSED_HABAPP_PATHS:
@@ -41,12 +35,10 @@ def is_suppressed_habapp_file(name: str) -> bool:
 
 
 def is_lib_file(name: str) -> bool:
-    for r in SUPPRESSED_PATHS:
-        if r.search(name):
-            if '/HABApp/' in name or '\\HABApp\\' in name:
-                continue
-            return True
-    return False
+    if name.startswith(HABAPP_MODULE_PATH):
+        return False
+
+    return bool(name.startswith(PYTHON_INSTALLATION_PATHS))
 
 
 def format_frame_info(tb: list[str], frame_info: FrameInfo, is_last=False) -> bool:

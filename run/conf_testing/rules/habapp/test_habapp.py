@@ -114,7 +114,7 @@ class TestItemListener(TestBaseRule):
         self.listener.cancel()
 
     def trigger_event(self) -> None:
-        self.run.at(
+        self.run.once(
             1, self.post_event, self.watch_item.name, ValueUpdateEvent(self.watch_item.name, 123)
         )
 

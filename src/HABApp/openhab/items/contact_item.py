@@ -1,24 +1,18 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Final
 
+from HABApp.core.errors import InvalidItemValueError
+from HABApp.openhab.definitions.websockets.item_value_types import OpenClosedTypeModel
 from HABApp.openhab.interface_sync import post_update
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
-
-from ...core.const import MISSING
-from ...core.errors import InvalidItemValue
-from ..definitions import OpenClosedValue
-from ..errors import SendCommandNotSupported
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
-OPEN = OpenClosedValue.OPEN
-CLOSED = OpenClosedValue.CLOSED
-
-
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/ContactItem.java
 class ContactItem(OpenhabItem):
     """ContactItem
 
@@ -31,41 +25,32 @@ class ContactItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        if state != OPEN and state != CLOSED:
-            raise ValueError(f'Invalid value for ContactItem: {state}')
-        return state
+    _update_to_oh: Final = OutgoingStateEvent('ContactItem', 'OpenClosed', 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('ContactItem', 'Refresh')
+    _state_from_oh_str = staticmethod(OpenClosedTypeModel.get_value_from_state)
 
     def set_value(self, new_value) -> bool:
 
-        if isinstance(new_value, OpenClosedValue):
-            new_value = new_value.value
-
-        if new_value not in (OPEN, CLOSED, None):
-            raise InvalidItemValue.from_item(self, new_value)
+        if new_value not in ('OPEN', 'CLOSED', None):
+            raise InvalidItemValueError.from_item(self, new_value)
 
         return super().set_value(new_value)
 
     def is_open(self) -> bool:
         """Test value against open value"""
-        return self.value == OPEN
+        return self.value == 'OPEN'
 
     def is_closed(self) -> bool:
         """Test value against closed value"""
-        return self.value == CLOSED
+        return self.value == 'CLOSED'
 
-    def oh_send_command(self, value: Any = MISSING):
-        msg = f'{self.__class__.__name__} does not support send command! See openHAB documentation for details.'
-        raise SendCommandNotSupported(msg)
-
-    def open(self):
+    def open(self) -> None:
         """Post an update to the item with the open value"""
-        return post_update(self.name, OPEN)
+        return post_update(self.name, 'OPEN')
 
-    def closed(self):
+    def closed(self) -> None:
         """Post an update to the item with the closed value"""
-        return post_update(self.name, CLOSED)
+        return post_update(self.name, 'CLOSED')
 
     def __str__(self) -> str:
         return str(self.value)

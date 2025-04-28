@@ -1,21 +1,27 @@
 import typing
 
-import voluptuous
+from pydantic import BaseModel
+
+from HABApp.core.const.topics import TOPIC_FILES
+from HABApp.core.events.habapp_events import RequestFileLoadEvent
+from HABApp.core.internals import uses_post_event
 
 
-_PARAMETERS: typing.Dict[str, dict] = {}
-_VALIDATORS: typing.Dict[str, voluptuous.Schema] = {}
+post_event = uses_post_event()
+
+_PARAMETERS: dict[str, dict | list | BaseModel] = {}
+_VALIDATORS: dict[str, BaseModel] = {}
 
 
-def remove_parameter_file(file):
-    return _PARAMETERS.pop(file)
+def remove_parameter_file(file) -> None:
+    _PARAMETERS.pop(file)
 
 
 def set_parameter_file(file: str, value) -> None:
     # validate the parameters, this will raise an exception
-    validator = _VALIDATORS.get(file)
-    if validator is not None:
-        value = validator(value)
+    if model := _VALIDATORS.get(file):
+        # validate and dump so we get the defaults
+        value = model.model_validate(value).model_dump()
 
     _PARAMETERS[file] = value
 
@@ -24,30 +30,34 @@ def get_parameter_file(file: str):
     return _PARAMETERS[file]
 
 
-def set_file_validator(filename: str, validator: typing.Any, allow_extra_keys=True) -> None:
+def set_file_validator(filename: str, model: BaseModel | None) -> None:
     """Add a validator for the parameter file. If the file is already loaded this will reload the file.
 
     :param filename: filename which shall be validated (without extension)
-    :param validator: Description of file content - see the library
+    :param model   : Description of file content - see the library
                       `voluptuous <https://github.com/alecthomas/voluptuous#show-me-an-example/>`_ for examples.
                       Use `None` to remove validator.
-    :param allow_extra_keys: Allow additional keys in the file structure
     """
 
     # Remove validator
-    if validator is None:
+    if model is None:
         _VALIDATORS.pop(filename, None)
-        return
+        return None
+
+    if not isinstance(model, BaseModel):
+        msg = f'Validator for {filename} must be an instance of BaseModel!'
+        raise TypeError(msg)
 
     # Set validator
-    old_validator = _VALIDATORS.get(filename)
-    _VALIDATORS[filename] = new_validator = voluptuous.Schema(
-        validator, required=True, extra=(voluptuous.ALLOW_EXTRA if allow_extra_keys else voluptuous.PREVENT_EXTRA)
-    )
+    old = _VALIDATORS.get(filename)
+    _VALIDATORS[filename] = model
 
-    # TODO: move this to file handling so we get the extension
-    if old_validator != new_validator:
-        reload_param_file(filename)
+    if old is not None and old.model_json_schema() == model.model_json_schema():
+        log.debug(f'Validator for {filename} did not change')
+        return None
+
+    log.debug(f'Validator for {filename} changed')
+    post_event(TOPIC_FILES, RequestFileLoadEvent(filename))
 
 
 def add_parameter(file: str, *keys, default_value):
@@ -82,7 +92,8 @@ def get_value(file: str, *keys) -> typing.Any:
     try:
         param = _PARAMETERS[file]
     except KeyError:
-        raise FileNotFoundError(f'File {file}.yml not found in params folder!')
+        msg = f'File {file}.yml not found in params folder!'
+        raise FileNotFoundError(msg) from None
 
     # lookup parameter
     for key in keys:
@@ -91,4 +102,4 @@ def get_value(file: str, *keys) -> typing.Any:
 
 
 # Import here to prevent cyclic imports
-from .parameter_files import reload_param_file, save_file  # noqa: E402
+from .parameter_files import log, save_file  # noqa: E402

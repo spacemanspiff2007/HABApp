@@ -10,7 +10,7 @@ from HABApp.core.internals import ItemRegistry
 from HABApp.openhab import process_events as process_events_module
 from HABApp.openhab.events import ThingAddedEvent, ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.items import Thing
-from HABApp.openhab.map_events import get_event
+from tests.test_openhab.test_events.test_from_dict import get_event
 
 
 @pytest.fixture(scope='function')
@@ -163,35 +163,29 @@ def test_thing_updated_event(test_thing: Thing) -> None:
         assert test_thing._last_change.instant == instant7
 
 
-def test_thing_called_status_event(monkeypatch, ir: ItemRegistry, test_thing: Thing) -> None:
-    monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
-
+def test_thing_called_status_event(ir: ItemRegistry, test_thing: Thing) -> None:
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
     event = get_status_event('REMOVING')
     assert test_thing.name == event.name
 
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event)
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_called_updated_event(monkeypatch, ir: ItemRegistry, test_thing: Thing) -> None:
-    monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
-
+def test_thing_called_updated_event(ir: ItemRegistry, test_thing: Thing) -> None:
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
     event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label', '', channels=[], configuration={}, properties={})
     assert test_thing.name == event.name
 
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event)
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry) -> None:
-    monkeypatch.setattr(process_events_module, 'get_event', lambda x: x)
-
+def test_thing_handler_add_event(ir: ItemRegistry) -> None:
     name = 'AddedThing'
     type = 'thing:type'
     label = 'my_label'
@@ -202,7 +196,7 @@ def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry) -> None:
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)
@@ -224,7 +218,7 @@ def test_thing_handler_add_event(monkeypatch, ir: ItemRegistry) -> None:
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
-    process_events_module.on_sse_event(event, oh_3=False)
+    process_events_module.on_openhab_event(event)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)

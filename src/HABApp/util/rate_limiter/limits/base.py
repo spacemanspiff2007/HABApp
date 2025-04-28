@@ -35,13 +35,13 @@ class BaseRateLimit:
             f'{self.repr_text():s}>'
         )
 
-    def do_test_allow(self):
+    def do_test_allow(self) -> None:
         raise NotImplementedError()
 
-    def do_allow(self):
+    def do_allow(self) -> None:
         raise NotImplementedError()
 
-    def do_deny(self):
+    def do_deny(self) -> None:
         raise NotImplementedError()
 
     def info(self) -> BaseRateLimitInfo:

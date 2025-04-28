@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 import HABApp.openhab.interface_sync
-from HABApp.core.asyncio import AsyncContextError, async_context
+from HABApp.core.asyncio import AsyncContextError
 from HABApp.openhab.interface_sync import (
     create_item,
     create_link,
@@ -51,7 +51,6 @@ def test_all_imported(func: Callable) -> None:
     (create_link,           ('item', 'channel', {})),
 ))
 async def test_item_has_name(func, args) -> None:
-    async_context.set('Test')
 
     if func not in (post_update, send_command):
         with pytest.raises(AsyncContextError) as e:

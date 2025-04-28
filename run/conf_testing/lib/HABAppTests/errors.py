@@ -1,8 +1,3 @@
-class TestCaseFailed(Exception):
-    def __init__(self, msg: str) -> None:
-        self.msg = msg
-
-
-class TestCaseWarning(Exception):
+class TestCaseFailed(Exception):  # noqa: N818
     def __init__(self, msg: str) -> None:
         self.msg = msg

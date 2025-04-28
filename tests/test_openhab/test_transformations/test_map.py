@@ -1,4 +1,5 @@
 import pytest
+from immutables import Map
 
 from HABApp.openhab.errors import MapTransformationError
 
@@ -36,7 +37,7 @@ white\\ space=using escape
 
     m = MapTransformationRegistry('map')
     m.set('testobj', {'function': file})
-    assert m.objs['testobj'] == ({'OFF': '0', 'ON': '1', 'white space': 'using escape'}, 'default')
+    assert m.objs['testobj'] == (Map({'OFF': '0', 'ON': '1', 'white space': 'using escape'}), 'default')
 
 
 def test_parse_file_int() -> None:
@@ -48,7 +49,7 @@ OFF=0
 
     m = MapTransformationRegistry('map')
     m.set('testobj', {'function': file})
-    assert m.objs['testobj'] == ({'OFF': 0, 'ON': 1}, 2)
+    assert m.objs['testobj'] == (Map({'OFF': 0, 'ON': 1}), 2)
 
 
 def test_parse_file_int_keys() -> None:
@@ -58,7 +59,7 @@ def test_parse_file_int_keys() -> None:
 '''
     m = MapTransformationRegistry('map')
     m.set('testobj', {'function': file})
-    assert m.objs['testobj'] == ({1: 'asdf', 2: 'qwer'}, None)
+    assert m.objs['testobj'] == (Map({1: 'asdf', 2: 'qwer'}), None)
 
 
 def test_parse_file_int_values() -> None:
@@ -68,4 +69,4 @@ def test_parse_file_int_values() -> None:
 '''
     m = MapTransformationRegistry('map')
     m.set('testobj', {'function': file})
-    assert m.objs['testobj'] == ({1: 6, 2: 7}, None)
+    assert m.objs['testobj'] == (Map({1: 6, 2: 7}), None)

@@ -42,9 +42,10 @@ def test_cmp_funcs(view: InstantView) -> None:
     assert view > 59
     assert view >= 60
 
-    assert view.newer_than(seconds=61)
-    assert view < 61
-    assert view <= 60
+    for name in ('seconds', 'minutes', 'hours', 'days'):
+        assert view.newer_than(**{name: 61})
+        assert view < 61
+        assert view <= 60
 
 
 def test_delta_funcs(view: InstantView) -> None:

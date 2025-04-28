@@ -3,7 +3,6 @@ import threading
 from typing import Any
 
 from HABApp.core.const.log import TOPIC_EVENTS
-from HABApp.core.events import ComplexEventValue, ValueChangeEvent
 
 from .base_listener import EventBusBaseListener
 
@@ -13,14 +12,16 @@ habapp_log = logging.getLogger('HABApp')
 
 
 class EventBus:
-    __slots__ = ('_lock', '_listeners')
+    __slots__ = ('_listeners', '_lock')
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._listeners: dict[str, tuple[EventBusBaseListener, ...]] = {}
 
     def post_event(self, topic: str, event: Any) -> None:
-        assert isinstance(topic, str), type(topic)
+        if not isinstance(topic, str):
+            msg = f'Topic must be a string! Got {type(topic)}'
+            raise TypeError(msg)
 
         if not isinstance(event, str):
             event_prv = str(event)
@@ -29,17 +30,6 @@ class EventBus:
             event_prv = "'" + event_prv.replace('\n', '\\n') + "'"
 
         event_log.info(f'{topic:>20s}: {event_prv}')
-
-        # Sometimes we have nested data structures which we need to set the value.
-        # Once the value in the item registry is updated the data structures provide no benefit thus
-        # we unpack the corresponding value
-        try:
-            if isinstance(event.value, ComplexEventValue):
-                event.value = event.value.value
-            if isinstance(event, ValueChangeEvent) and isinstance(event.old_value, ComplexEventValue):
-                event.old_value = event.old_value.value
-        except AttributeError:
-            pass
 
         # Notify all listeners
         if (listeners := self._listeners.get(topic)) is not None:

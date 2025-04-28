@@ -77,11 +77,11 @@ class StatusTransitions:
         return transitions.get(status)
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} {self.status} ' \
-               f'[{"x" if self.error else " "}] Error, ' \
-               f'[{"x" if self.setup else " "}] Setup>'
+        return (f'<{self.__class__.__name__} {self.status} '
+                f'[{"x" if self.error else " "}] Error, '
+                f'[{"x" if self.setup else " "}] Setup>')
 
-    def __eq__(self, other: ConnectionStatus):
+    def __eq__(self, other: ConnectionStatus) -> bool:
         if not isinstance(other, ConnectionStatus):
             return NotImplemented
         return self.status == other

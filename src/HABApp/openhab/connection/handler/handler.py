@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+from asyncio import Queue
+from typing import Any, Final
 
 import aiohttp
 from aiohttp.client import ClientResponse, _RequestContextManager
@@ -30,7 +31,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
     def update_cfg_general(self) -> None:
         self.read_only = CONFIG.openhab.general.listen_only
 
-    async def on_setup(self, connection: OpenhabConnection):
+    async def on_setup(self, connection: OpenhabConnection) -> None:
         log = self.plugin_connection.log
         config = CONFIG.openhab.connection
         url: str = config.url
@@ -68,18 +69,13 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             timeout=aiohttp.ClientTimeout(total=None),
             json_serialize=dump_json,
             auth=aiohttp.BasicAuth(user, password),
-            read_bufsize=int(config.buffer)
         )
         self.request = self.session._request
 
     async def on_connected(self) -> None:
         self.online = True
 
-    async def on_disconnected(self, connection: OpenhabConnection) -> None:
-        self.online = False
-        connection.context = None
-
-    async def on_shutdown(self):
+    async def on_shutdown(self) -> None:
         if self.session is None:
             return None
 
@@ -153,7 +149,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
 
         return resp
 
-    async def on_connecting(self, connection: OpenhabConnection):
+    async def on_connecting(self, connection: OpenhabConnection) -> None:
         from HABApp.openhab.connection.handler.func_async import async_get_root
 
         log = self.plugin_connection.log
@@ -169,21 +165,27 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             log.info(f'Connected {"read only " if self.read_only else ""}to OpenHAB '
                      f'version {info.version:s} ({info.build_string:s})')
 
-            vers = tuple(map(int, info.version.split('.')[:3]))
-            if vers < (3, 3):
-                log.warning('HABApp requires at least openHAB version 3.3!')
+            vers = tuple(int(_v) for _v in info.version.split('.')[:3])
+            if vers < (4, 0):
+                log.error('HABApp requires at least openHAB version 4.0!')
 
             connection.context = OpenhabContext.new_context(
-                version=vers, session=self.session, session_options=self.options)
+                version=vers, session=self.session, session_options=self.options,
+                out_queue=Queue()
+            )
 
         # during startup we get OpenhabCredentialsInvalidError even though credentials are correct
         except (OpenhabDisconnectedError, OpenhabCredentialsInvalidError):
             connection.set_error()
             raise AlreadyHandledException() from None
 
+    async def on_disconnected(self, connection: OpenhabConnection) -> None:
+        self.online = False
+        connection.context = None
 
-HANDLER = ConnectionHandler()
-get = HANDLER.get
-post = HANDLER.post
-put = HANDLER.put
-delete = HANDLER.delete
+
+HANDLER: Final = ConnectionHandler()
+get: Final = HANDLER.get
+post: Final = HANDLER.post
+put: Final = HANDLER.put
+delete: Final = HANDLER.delete

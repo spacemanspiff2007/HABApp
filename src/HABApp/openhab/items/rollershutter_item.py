@@ -1,19 +1,24 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from fastnumbers import real
-
-from HABApp.core.errors import InvalidItemValue
-from HABApp.openhab.definitions import PercentValue, UpDownValue
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.core.errors import InvalidItemValueError
+from HABApp.openhab.definitions.websockets.item_value_types import (
+    PercentTypeModel,
+    RefreshTypeModel,
+    StopMoveTypeModel,
+    UnDefTypeModel,
+    UpDownTypeModel,
+)
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 from HABApp.openhab.items.commands import PercentCommand, UpDownCommand
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/RollershutterItem.java
 class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
     """RollershutterItem which accepts and converts the data types from OpenHAB
 
@@ -26,16 +31,12 @@ class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        return real(state)
+    _update_to_oh: Final = OutgoingStateEvent('RollershutterItem', PercentTypeModel, UpDownTypeModel, UnDefTypeModel)
+    _command_to_oh: Final = OutgoingCommandEvent(
+        'RollershutterItem', UpDownTypeModel, StopMoveTypeModel, PercentTypeModel, RefreshTypeModel)
+    _state_from_oh_str: Final = staticmethod(PercentTypeModel.get_value_from_state)
 
     def set_value(self, new_value) -> bool:
-
-        if isinstance(new_value, UpDownValue):
-            new_value = 0 if new_value.up else 100
-        elif isinstance(new_value, PercentValue):
-            new_value = new_value.value
 
         # Position is 0 ... 100
         if isinstance(new_value, (int, float)) and (0 <= new_value <= 100):
@@ -44,7 +45,7 @@ class RollershutterItem(OpenhabItem, UpDownCommand, PercentCommand):
         if new_value is None:
             return super().set_value(new_value)
 
-        raise InvalidItemValue.from_item(self, new_value)
+        raise InvalidItemValueError.from_item(self, new_value)
 
     def is_up(self) -> bool:
         return self.value <= 0

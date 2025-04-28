@@ -38,11 +38,11 @@ class RuleFile:
 
         return f'{name:s}.{found:d}' if found > 1 else f'{name:s}'
 
-    def check_all_rules(self) -> None:
+    async def check_all_rules(self) -> None:
         for rule in self.rules.values():  # type: HABApp.Rule
-            get_current_context(rule).check_rule()
+            await get_current_context(rule).check_rule()
 
-    def unload(self):
+    async def unload(self) -> None:
 
         # If we don't have any rules we can not unload
         if not self.rules:
@@ -50,7 +50,7 @@ class RuleFile:
 
         # unload all registered callbacks
         for rule in self.rules.values():  # type: HABApp.Rule
-            get_current_context(rule).unload_rule()
+            await get_current_context(rule).unload_rule()
 
         log.debug(f'File {self.name} successfully unloaded!')
         return None

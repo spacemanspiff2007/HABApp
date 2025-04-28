@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 
 from HABApp.core.items import Item
+from HABApp.core.types import HSB, Point
 from HABApp.openhab.items import (
     CallItem,
     ColorItem,
@@ -23,8 +24,8 @@ from HABApp.openhab.items import (
 )
 from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
-
-from ...helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
+from HABApp.openhab.types import RawType, StringList
+from tests.helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
 
 
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
@@ -52,6 +53,26 @@ def test_conditional_function_call_signature(cls) -> None:
     assert_same_signature(Item.post_value_if, cls.oh_post_update_if)
 
 
+@pytest.mark.parametrize('cls', item_dict.values())
+def test_refresh_command(cls: type[OpenhabItem], websocket_events) -> None:
+    cls('name').oh_send_command('REFRESH')
+    websocket_events.assert_called_once('Refresh', 'REFRESH', event='command')
+    cls('name').command_value('REFRESH')
+    websocket_events.assert_called_once('Refresh', 'REFRESH', event='command')
+
+
+@pytest.mark.parametrize('cls', item_dict.values())
+def test_null_update(cls: type[OpenhabItem], websocket_events) -> None:
+    cls('name').oh_post_update(None)
+    websocket_events.assert_called_once('UnDef', 'NULL', event='update')
+
+
+@pytest.mark.parametrize('cls', item_dict.values())
+def test_item_name_set_in_oh_value(cls: type[OpenhabItem]) -> None:
+    assert cls._update_to_oh._name == cls.__name__
+    assert cls._command_to_oh._name == cls.__name__
+
+
 @pytest.mark.parametrize('cls', (c for c in item_dict.values()))
 def test_doc_ivar(cls) -> None:
 
@@ -65,47 +86,48 @@ def test_doc_ivar(cls) -> None:
         RollershutterItem: {'value': int | float},
         DimmerItem:        {'value': int | float},
 
-        ColorItem: {'value': tuple[float, float, float]},
-        CallItem: {'value': tuple[str, ...]},
-        LocationItem: {'value': tuple[float, float, float | None] | None},
+        ColorItem: {'value': HSB},
+        CallItem: {'value': StringList},
+        LocationItem: {'value': Point},
 
         DatetimeItem: {'value': datetime},
-        ImageItem: {'value': bytes},
+        ImageItem: {'value': RawType},
 
         GroupItem: {'value': Any}
     }
 
     init_missing = {
         **{k: ('last_change', 'last_update') for k in correct_hints},
-        ImageItem: ('image_type', 'last_change', 'last_update'),
-        ColorItem: ('value', 'last_change', 'last_update')
+        ImageItem: ('image_type', 'image_data', 'last_change', 'last_update'),
+        ColorItem: ('hue', 'saturation', 'brightness', 'last_change', 'last_update')
     }
 
     init_alias = {
         **{k: {'initial_value': 'value'} for k in correct_hints},
-        ColorItem: {'b': 'brightness', 'h': 'hue', 's': 'saturation'}
     }
 
     class_vars = check_class_annotations(
         cls, correct_hints.get(cls),
         init_alias=init_alias.get(cls), init_missing=init_missing.get(cls, []),
-        annotations_missing=True
+        annotations_missing=True, ignore=('_update_to_oh', '_command_to_oh', '_state_from_oh_str')
     )
 
     # test that the class has the corresponding attribute
-    obj = cls(name='test')
+    create_with = {'name': 'test'}
+
+    if cls is ColorItem:
+        create_with['initial_value'] = HSB(0, 0, 0)
+    if cls is ImageItem:
+        create_with['initial_value'] = RawType.create('image/png', b'\x01')
+
+    obj = cls(**create_with)
     for name in class_vars:
         assert hasattr(obj, name)
 
-    if cls is ColorItem:
-        class_vars.pop('hue')
-        class_vars.pop('saturation')
-        class_vars.pop('brightness')
-
-    if cls is ImageItem:
-        class_vars.pop('image_type')
-
     class_vars.pop('value')
+
+    if cls is NumberItem:
+        class_vars.pop('dimension')
 
     # compare with base class so we have a consistent signature
     target_vars = get_ivars_from_docstring(OpenhabItem)

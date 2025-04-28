@@ -14,7 +14,7 @@ from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
 from eascheduler.schedulers.async_scheduler import AsyncScheduler
 from typing_extensions import ParamSpec, Self, override
 
-from HABApp.core.asyncio import async_context, create_task_from_async, run_func_from_async
+from HABApp.core.asyncio import create_task_from_async, run_func_from_async
 from HABApp.core.const import loop
 from HABApp.core.internals import Context, wrap_func
 from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction
@@ -67,15 +67,7 @@ def wrapped_func_executor(func: Any, args: Iterable = (), kwargs: Mapping[str, A
 class AsyncHABAppScheduler(AsyncScheduler):
 
     @override
-    def run_jobs(self) -> None:
-        ctx = async_context.set('Scheduler')
-        try:
-            super().run_jobs()
-        finally:
-            async_context.reset(ctx)
-
-    @override
-    def set_enabled(self, enabled: bool) -> Self:  # noqa: FBT001
+    def set_enabled(self, enabled: bool) -> Self:
         return run_func_from_async(super().set_enabled, enabled)
 
 
@@ -113,7 +105,7 @@ class HABAppJobBuilder:
         """Create a job that runs once.
 
         :param instant: countdown time in seconds
-        :param coro_func: |param_scheduled_cb|
+        :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param job_id:
         :param kwargs: |param_scheduled_cb_kwargs|
@@ -131,7 +123,7 @@ class HABAppJobBuilder:
         """Create a job that will run when a provided trigger occurs.
 
         :param trigger:
-        :param coro_func: |param_scheduled_cb|
+        :param callback: |param_scheduled_cb|
         :param args: |param_scheduled_cb_args|
         :param job_id:
         :param kwargs: |param_scheduled_cb_kwargs|

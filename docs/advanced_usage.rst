@@ -88,7 +88,7 @@ Example
    #   depends on:
    #    - rules/rule_file.py
    #   reloads on:
-   #    - param/param_file.yml
+   #    - params/param_file.yml
 
    import HABApp
    ...
@@ -205,15 +205,18 @@ Add an openHAB mock item to the item registry
    :hide_output:
 
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
-   SimpleRuleRunner().set_up()
+   async def run():
    # ------------ hide: stop -------------
 
-   import HABApp
-   from HABApp.openhab.items import SwitchItem
+      import HABApp
+      from HABApp.openhab.items import SwitchItem
 
-   item = SwitchItem('my_switch', 'ON')
-   HABApp.core.Items.add_item(item)
+      item = SwitchItem('my_switch', 'ON')
+      HABApp.core.Items.add_item(item)
+
+   # ------------ hide: start ------------
+   from rule_runner import SimpleRuleRunner
+   SimpleRuleRunner().run(run())
 
 Remove the mock item from the registry:
 
@@ -221,15 +224,17 @@ Remove the mock item from the registry:
    :hide_output:
 
    # ------------ hide: start ------------
+   async def run():
+      import HABApp
+      from HABApp.openhab.items import SwitchItem
+      HABApp.core.Items.add_item(SwitchItem('my_switch', 'ON'))
+   # ------------ hide: stop -------------
+
+      HABApp.core.Items.pop_item('my_switch')
+
+   # ------------ hide: start ------------
    from rule_runner import SimpleRuleRunner
-   SimpleRuleRunner().set_up()
-
-   import HABApp
-   from HABApp.openhab.items import SwitchItem
-   HABApp.core.Items.add_item(SwitchItem('my_switch', 'ON'))
-    # ------------ hide: stop -------------
-
-   HABApp.core.Items.pop_item('my_switch')
+   SimpleRuleRunner().run(run())
 
 Note that there are some item methods that encapsulate communication with openhab
 (e.g.: ``SwitchItem.on(), SwitchItem.off(), and DimmerItem.percentage()``)
@@ -240,16 +245,18 @@ any internal item.
    :hide_output:
 
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
-   SimpleRuleRunner().set_up()
+   async def run():
    # ------------ hide: stop -------------
 
-   import HABApp
-   from HABApp.openhab.items import SwitchItem
-   from HABApp.openhab.definitions import OnOffValue
+      import HABApp
+      from HABApp.openhab.items import SwitchItem
 
-   item = SwitchItem('my_switch', 'ON')
-   HABApp.core.Items.add_item(item)
+      item = SwitchItem('my_switch', 'ON')
+      HABApp.core.Items.add_item(item)
 
-   item.set_value(OnOffValue.ON)    # without bus event
-   item.post_value(OnOffValue.OFF)  # with bus event
+      item.set_value('ON')    # without bus event
+      item.post_value('OFF')  # with bus event
+
+   # ------------ hide: start ------------
+   from rule_runner import SimpleRuleRunner
+   SimpleRuleRunner().run(run())

@@ -1,16 +1,18 @@
 from collections.abc import Mapping
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from HABApp.core.const.const import PYTHON_311
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+from HABApp.openhab.definitions.websockets.item_value_types import DateTimeTypeModel
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
 if TYPE_CHECKING:
-    Mapping = Mapping
-    MetaData = MetaData
+    datetime = datetime     # noqa: PLW0127
+    Mapping = Mapping       # noqa: PLW0127
+    MetaData = MetaData     # noqa: PLW0127
 
 
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/items/DateTimeItem.java
 class DatetimeItem(OpenhabItem):
     """DateTimeItem which accepts and converts the data types from OpenHAB
 
@@ -23,21 +25,6 @@ class DatetimeItem(OpenhabItem):
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
 
-    @staticmethod
-    def _state_from_oh_str(state: str):
-        # see implementation im map_values.py
-        if PYTHON_311:
-            dt = datetime.fromisoformat(state)
-        else:
-            pos_dot = state.find('.')
-            if (pos_plus := state.rfind('+')) == -1:
-                pos_plus = state.rfind('-')
-            if pos_plus - pos_dot > 6:
-                state = state[:pos_dot + 7] + state[pos_plus:]
-            dt = datetime.strptime(state, '%Y-%m-%dT%H:%M:%S.%f%z')
-
-        # all datetime objs from openHAB have a timezone set so we can't easily compare them
-        # --> TypeError: can't compare offset-naive and offset-aware datetime
-        dt = dt.astimezone(tz=None)  # Changes datetime object so it uses system timezone
-        value = dt.replace(tzinfo=None)  # Removes timezone awareness
-        return value
+    _update_to_oh: Final = OutgoingStateEvent('DatetimeItem', DateTimeTypeModel, 'UnDef')
+    _command_to_oh: Final = OutgoingCommandEvent('DatetimeItem', DateTimeTypeModel, 'Refresh')
+    _state_from_oh_str: Final = staticmethod(DateTimeTypeModel.get_value_from_state)

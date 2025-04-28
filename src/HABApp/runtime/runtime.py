@@ -12,7 +12,6 @@ import HABApp.rule.interfaces._http
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.core import Connections, shutdown
-from HABApp.core.asyncio import async_context
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.wrapper import process_exception
@@ -22,37 +21,35 @@ from HABApp.openhab import connection as openhab_connection
 class Runtime:
 
     def __init__(self) -> None:
-        self.config: HABApp.config.Config = None
-
         # Rule engine
         self.rule_manager: HABApp.rule_manager.RuleManager = None
 
     async def start(self, config_folder: Path) -> None:
         try:
-            token = async_context.set('HABApp startup')
-
             # shutdown setup
             shutdown.register(Connections.on_application_shutdown, msg='Shutting down connections')
 
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
-            # Start Folder watcher!
-            HABApp.core.files.watcher.start()
-
-            # Load config
-            HABApp.config.load_config(config_folder)
+            file_watcher = HABApp.core.files.HABAppFileWatcher()
+            shutdown.register(file_watcher.shutdown, msg='Shutdown file watcher')
 
             # replace proxy objects
             ir = HABApp.core.internals.ItemRegistry()
             eb = HABApp.core.internals.EventBus()
-            setup_internals(ir, eb)
+            file_manager = HABApp.core.files.FileManager(file_watcher)
+
+            setup_internals(ir, eb, file_manager)
             assert isinstance(HABApp.core.Items, ConstProxyObj)
             HABApp.core.Items = ir
             assert isinstance(HABApp.core.EventBus, ConstProxyObj)
             HABApp.core.EventBus = eb
 
-            await HABApp.core.files.setup()
+            file_manager.setup()
+
+            # Load config
+            HABApp.config.setup_habapp_configuration(config_folder)
 
             # generic HTTP
             await HABApp.rule.interfaces._http.create_client()
@@ -70,8 +67,6 @@ class Runtime:
             await self.rule_manager.setup()
 
             Connections.application_startup_complete()
-
-            async_context.reset(token)
 
         except HABApp.config.InvalidConfigError:
             shutdown.request()

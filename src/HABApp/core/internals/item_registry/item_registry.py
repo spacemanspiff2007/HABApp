@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import threading
-from typing import Final, TypeVar
+from typing import Final, TypeVar, overload
 
 from HABApp.core.errors import ItemAlreadyExistsError, ItemNotFoundException
 from HABApp.core.internals.item_registry import ItemRegistryItem
@@ -59,7 +59,15 @@ class ItemRegistry:
         item._on_item_added()
         return item
 
-    def pop_item(self, name: str | ITEM_TYPE) -> ITEM_TYPE:
+    @overload
+    def pop_item(self, name: ITEM_TYPE) -> ITEM_TYPE:
+        ...
+
+    @overload
+    def pop_item(self, name: str) -> ItemRegistryItem:
+        ...
+
+    def pop_item(self, name: str | ItemRegistryItem) -> ItemRegistryItem:
         if not isinstance(name, str):
             name = name.name
 
@@ -72,3 +80,9 @@ class ItemRegistry:
         log.debug(f'Removed {name} ({item.__class__.__name__})')
         item._on_item_removed()
         return item
+
+    def __bool__(self) -> bool:
+        return bool(self._items)
+
+    def __len__(self) -> int:
+        return len(self._items)

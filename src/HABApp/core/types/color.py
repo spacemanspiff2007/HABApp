@@ -2,15 +2,18 @@ from __future__ import annotations
 
 from colorsys import hsv_to_rgb as _hsv_to_rgb
 from colorsys import rgb_to_hsv as _rgb_to_hsv
+from typing import Final
 
 from typing_extensions import Self
 
 
 class ColorType:
-    pass
+    __slots__ = ()
 
 
 class RGB(ColorType):
+    __slots__ = ('_r', '_g', '_b')  # noqa: RUF023
+
     _RGB_MAX: int = 2 ** 8 - 1
 
     def __init__(self, r: int, g: int, b: int) -> None:
@@ -88,7 +91,7 @@ class RGB(ColorType):
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._r:d}, {self._g:d}, {self._b})'
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return self._r == other._r and self._g == other._g and self._b == other._b
         if isinstance(other, HSB):
@@ -153,11 +156,12 @@ class RGB32(RGB):
     _RGB_MAX: int = 2 ** 32 - 1
 
 
-HUE_FACTOR = 360
-PERCENT_FACTOR = 100
+HUE_FACTOR: Final = 360
+PERCENT_FACTOR: Final = 100
 
 
 class HSB(ColorType):
+    __slots__ = ('_hue', '_saturation', '_brightness')  # noqa: RUF023
 
     def __init__(self, hue: float, saturation: float, brightness: float) -> None:
         if not 0 <= hue <= HUE_FACTOR or not 0 <= saturation <= PERCENT_FACTOR or not 0 <= brightness <= PERCENT_FACTOR:
@@ -234,7 +238,7 @@ class HSB(ColorType):
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._hue:.2f}, {self._saturation:.2f}, {self._brightness:.2f})'
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return self._hue == other._hue and \
                 self._saturation == other._saturation and \

@@ -186,7 +186,7 @@ class BaseConnection:
 
         self.log.debug(f'Task {status_enum.value:s} done')
 
-    def clear_error(self):
+    def clear_error(self) -> None:
         if not self.status.error:
             return None
         self.log.debug('Cleared error')
@@ -213,7 +213,7 @@ class BaseConnection:
         self.status.setup = True
         self.advance_status_task.start_if_not_running()
 
-    def on_application_shutdown(self):
+    def on_application_shutdown(self) -> None:
         if self.status.shutdown:
             return None
 

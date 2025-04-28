@@ -1,27 +1,11 @@
 import operator as _operator
-from collections.abc import Iterable
-from pathlib import Path
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import Any, Final
 
 from HABApp.core.const import MISSING
 
 
-if TYPE_CHECKING:
-    import HABApp
-
-
-def list_files(folder: Path, file_filter: 'HABApp.core.files.watcher.file_watcher.EventFilterBase',
-               recursive: bool = False) -> list[Path]:
-    # glob is much quicker than iter_dir()
-    files = folder.glob('**/*' if recursive else '*')
-    return sorted(filter(lambda x: file_filter.notify(str(x)), files), key=lambda x: x.relative_to(folder))
-
-
-def sort_files(files: Iterable[Path]) -> list[Path]:
-    return sorted(files)
-
-
-CMP_OPS = {
+CMP_OPS: Final[dict[str, Callable[[Any, Any], bool]]] = {
     'lt': _operator.lt, 'lower_than': _operator.lt,
     'le': _operator.le, 'lower_equal': _operator.le,
     'eq': _operator.eq, 'equal': _operator.eq,
@@ -34,7 +18,7 @@ CMP_OPS = {
 }
 
 
-def compare(value, **kwargs) -> bool:
+def compare(value: Any, **kwargs) -> bool:
 
     for name, cmp_value in kwargs.items():
         if cmp_value is MISSING:

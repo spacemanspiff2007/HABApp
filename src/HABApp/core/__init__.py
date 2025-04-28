@@ -1,25 +1,22 @@
-from HABApp.core import const
-from HABApp.core import lib
-from HABApp.core import errors
-from HABApp.core import asyncio
-from HABApp.core import shutdown
+from HABApp.core import asyncio, const, errors, lib, shutdown, types
+
 
 # isort: split
 
 # The connection manager has no dependencies - that's why we can set it up before the internals
 from HABApp.core.connections import Connections
 
-# isort: split
-from HABApp.core import internals
 
-from HABApp.core import wrapper
-from HABApp.core import logger
+# isort: split
+from HABApp.core import internals, logger, wrapper
+
 
 # isort: split
 
 import HABApp.core.events
 import HABApp.core.files
 import HABApp.core.items
+
 
 # isort: split
 

@@ -18,6 +18,9 @@ def test_simple_key_creation(params: HABApp.parameters.parameters) -> None:
     Parameter('file', 'key2')
     assert params.get_parameter_file('file') == {'key': 'ToDo', 'key2': 'ToDo'}
 
+    Parameter('file2', 'key', default_value=123)
+    assert params.get_parameter_file('file2', ) == {'key': 123}
+
 
 def test_structured_key_creation(params: HABApp.parameters.parameters) -> None:
     Parameter('file', 'key1', 'key1')

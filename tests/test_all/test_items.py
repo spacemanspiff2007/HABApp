@@ -17,8 +17,6 @@ def get_item_classes(skip=()):
                 continue
 
             default = None
-            if name == 'ColorItem':
-                default = (0.0, 0.0, 0.0)
             classes.append(pytest.param(cls, default, id=f'{module_name}.{cls.__name__}'))
     return classes
 

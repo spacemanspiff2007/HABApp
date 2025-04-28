@@ -1,7 +1,7 @@
 formatters:
   HABApp_format:
     format: '[%(asctime)s] [%(name)25s] %(levelname)8s | %(message)s'
-  HABApp_REST:
+  HABApp_COM:
     format: '[%(asctime)s] [%(name)11s] %(levelname)8s | %(message)s'
 
 
@@ -33,13 +33,13 @@ handlers:
     formatter: HABApp_format
     level: DEBUG
 
-  HABApp_rest_file:
+  HABApp_com_file:
     class: logging.handlers.RotatingFileHandler
-    filename: 'test_rest.log'
+    filename: 'test_com.log'
     maxBytes: 10_485_760
     backupCount: 3
 
-    formatter: HABApp_REST
+    formatter: HABApp_COM
     level: DEBUG
 
 
@@ -74,8 +74,8 @@ loggers:
       - HABApp_test_file
     propagate: False
 
-  HABApp.Rest:
+  Com:
     level: DEBUG
     handlers:
-      - HABApp_rest_file
+      - HABApp_com_file
     propagate: False
