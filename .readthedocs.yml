@@ -28,5 +28,5 @@ python:
   install:
     - requirements: requirements_tests.txt  # We currently still need pytest for the rule runner
     - requirements: docs/requirements.txt
-    - method: setuptools
+    - method: pip
       path: .
