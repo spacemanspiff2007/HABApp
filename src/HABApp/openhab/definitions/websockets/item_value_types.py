@@ -374,7 +374,7 @@ class PointTypeModel(ItemValueBase):
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/types/QuantityType.java
 class QuantityTypeModel(ItemValueBase):
     type: Literal['Quantity']
-    value: str = Field(pattern=r'^-?\d+(\.\d+)?( [^ ]+)?$')
+    value: str = Field(pattern=r'^-?\d+(\.\d+)?([eE][+-]?\d+)?( [^ ]+)?$')
 
     @override
     def get_value(self) -> QuantityInt | QuantityFloat:
