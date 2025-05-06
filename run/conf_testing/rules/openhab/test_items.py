@@ -3,7 +3,7 @@ from immutables import Map
 
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.openhab.interface_async import async_get_items
-from HABApp.openhab.items import GroupItem, NumberItem, StringItem
+from HABApp.openhab.items import GroupItem, StringItem
 
 
 class OpenhabItems(TestBaseRule):
@@ -66,17 +66,24 @@ class OpenhabItems(TestBaseRule):
     async def test_api_async(self) -> None:
         await async_get_items()
 
-    @OpenhabTmpItem.create('Number', arg_name='tmp_item')
-    def test_small_float_values(self, tmp_item: OpenhabTmpItem) -> None:
+    def test_small_float_values(self) -> None:
         # https://github.com/spacemanspiff2007/HABApp/issues/425
-        item = NumberItem.get_item(tmp_item.name)
-        assert item.value is None
+        with OpenhabTmpItem('Number') as item:
+            assert item.value is None
+            for i in range(3, 19, 3):
+                with ItemWaiter(item) as waiter:
+                    value = 1 / 10 ** i
+                    item.oh_post_update(value)
+                    waiter.wait_for_state(value)
 
-        for i in range(3, 16, 3):
-            with ItemWaiter(item) as waiter:
-                value = 1 / 10 ** i
-                item.oh_post_update(value)
-                waiter.wait_for_state(value)
+        # https://github.com/spacemanspiff2007/HABApp/issues/485
+        with OpenhabTmpItem('Number:Length') as item:
+            assert item.value is None
+            for i in range(3, 19, 3):
+                with ItemWaiter(item) as waiter:
+                    value = 1 / 10 ** i
+                    item.oh_post_update(f'{value} m')
+                    waiter.wait_for_state(value)
 
     @OpenhabTmpItem.use('String', arg_name='oh_item')
     def test_tags(self, oh_item: OpenhabTmpItem) -> None:

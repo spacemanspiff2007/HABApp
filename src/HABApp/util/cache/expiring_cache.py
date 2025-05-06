@@ -19,7 +19,10 @@ class ExpiringCache(Generic[K, V]):
         self.set_expiry_time(expiry_time)
 
     def set_expiry_time(self, expiry_time: float | TimeDelta) -> None:
-        """Set the expiry time for cache entries."""
+        """Set the expiry time for cache entries.
+
+        :param expiry_time: expire duration
+        """
 
         if isinstance(expiry_time, (int, float)):
             expiry_time = TimeDelta(seconds=expiry_time)
@@ -48,7 +51,10 @@ class ExpiringCache(Generic[K, V]):
         return self
 
     def reset(self, key: K) -> Self:
-        """Reset the expiry time of a cache entry (if available)"""
+        """Reset the expiry time of a cache entry (if available)
+
+        :param key: key of entry
+        """
         if (obj := self._cache.get(key)) is None:
             return self
 
@@ -56,7 +62,10 @@ class ExpiringCache(Generic[K, V]):
         return self
 
     def set_expired(self, key: K) -> Self:
-        """Set a cache entry expired (if available)"""
+        """Set a cache entry expired (if available)
+
+        :param key: key of entry
+        """
         if (obj := self._cache.get(key)) is None:
             return self
 
@@ -64,12 +73,18 @@ class ExpiringCache(Generic[K, V]):
         return self
 
     def is_expired(self, key: K) -> bool:
-        """Check if a cache entry is expired"""
+        """Check if a cache entry is expired
+
+        :param key: key of entry
+        """
         value, instant = self._cache[key]
         return Instant.now() > instant + self._expiry_time
 
     def in_cache(self, key: K) -> bool:
-        """Check if a cache entry is in the cache"""
+        """Check if a cache entry is in the cache
+
+        :param key: key of entry
+        """
         return key in self._cache
 
     def __iter(self, mode: Literal['all', 'expired', 'not_expired']) -> Generator[tuple[K, V], None, None]:
@@ -90,7 +105,11 @@ class ExpiringCache(Generic[K, V]):
                 yield key, value
 
     def set(self, key: K, value: V) -> Self:
-        """Set a value in the cache"""
+        """Set a value in the cache
+
+        :param key: key
+        :param value: value
+        """
         self._cache[key] = (value, Instant.now())
         return self
 
@@ -106,7 +125,11 @@ class ExpiringCache(Generic[K, V]):
         ...
 
     def get(self, key: K, default: V | None = None) -> V | None:
-        """Get a value from the cache, or return the default value if not found or expired"""
+        """Get a value from the cache, or return the default value if not found or expired
+
+        :param key: key
+        :param default: default
+        """
         if (obj := self._cache.get(key)) is None:
             return default
 
@@ -129,7 +152,12 @@ class ExpiringCache(Generic[K, V]):
         ...
 
     def pop(self, key: K, default: V | None | MISSING_TYPE = MISSING) -> V | None:
-        """Get a value from the cache, or return the default value if not found or expired"""
+        """Get a value from the cache, or return the default value if not found or expired
+
+        :param key: key
+        :param default: optional default
+        :return:
+        """
         if (obj := self._cache.pop(key, MISSING)) is not MISSING:
             value, instant = obj
             if Instant.now() <= instant + self._expiry_time:

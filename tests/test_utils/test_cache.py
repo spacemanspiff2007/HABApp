@@ -6,7 +6,7 @@ from HABApp.util import ExpiringCache
 
 @pytest.fixture
 def clock():
-    with patch_current_time(SystemDateTime(2025, 1, 1, 12).instant(), keep_ticking=False) as t:
+    with patch_current_time(SystemDateTime(2025, 1, 1, 12).to_instant(), keep_ticking=False) as t:
         yield t
 
 

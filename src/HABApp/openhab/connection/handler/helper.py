@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel
-from whenever import Instant, LocalDateTime, OffsetDateTime, SystemDateTime, ZonedDateTime
+from whenever import Instant, OffsetDateTime, PlainDateTime, SystemDateTime, ZonedDateTime
 
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
@@ -39,7 +39,7 @@ def convert_to_oh_str(obj: Any) -> str:
         return RawTypeModel.from_value(obj).value
 
     # https://whenever.readthedocs.io/en/latest/overview.html#iso-8601
-    if isinstance(obj, (Instant, LocalDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
+    if isinstance(obj, (Instant, PlainDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
         return obj.format_common_iso()
 
     raise ValueError()

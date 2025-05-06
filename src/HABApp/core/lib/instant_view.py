@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from datetime import datetime as dt_datetime
-from datetime import timedelta as dt_timedelta
-from operator import ge, gt, le, lt
-from typing import TYPE_CHECKING, Any, Final, TypeAlias, overload
+from operator import gt, lt
+from typing import TYPE_CHECKING, Final, TypeAlias, overload
 
+from eascheduler.builder.helper import HINT_TIMEDELTA, get_timedelta
+from typing_extensions import Self
 from whenever import Instant, TimeDelta
 
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from datetime import datetime as dt_datetime
+    from datetime import timedelta as dt_timedelta
 
 
 class InstantView:
@@ -22,6 +24,36 @@ class InstantView:
     def now(cls) -> InstantView:
         """Create a new instance with the current time"""
         return cls(Instant.now())
+
+    def add(self, *, hours: float = 0, minutes: float = 0, seconds: float = 0,
+            milliseconds: float = 0, microseconds: float = 0, nanoseconds: int = 0) -> Self:
+        """Add time delta
+
+        :return: New instance
+        """
+        return self.__class__(self._instant + TimeDelta(
+            hours=hours,
+            minutes=minutes,
+            seconds=seconds,
+            milliseconds=milliseconds,
+            microseconds=microseconds,
+            nanoseconds=nanoseconds,
+        ))
+
+    def subtract(self, *, hours: float = 0, minutes: float = 0, seconds: float = 0,
+                 milliseconds: float = 0, microseconds: float = 0, nanoseconds: int = 0) -> Self:
+        """Subtract time delta from current instant
+
+        :return: New instance
+        """
+        return self.__class__(self._instant + TimeDelta(
+            hours=-hours,
+            minutes=-minutes,
+            seconds=-seconds,
+            milliseconds=-milliseconds,
+            microseconds=-microseconds,
+            nanoseconds=-nanoseconds,
+        ))
 
     def delta_now(self, now: InstantView | Instant | None = None) -> TimeDelta:
         """Return the delta between now and the instant.
@@ -57,41 +89,25 @@ class InstantView:
 
     def py_datetime(self) -> dt_datetime:
         """Return the datetime of the instant"""
-        return self._instant.to_system_tz().local().py_datetime()
+        return self._instant.to_system_tz().to_plain().py_datetime()
 
     def __repr__(self) -> str:
         return f'InstantView({self._instant.to_system_tz()})'
 
-    def _cmp(self, op: Callable[[Any, Any], bool], obj: HINT_OBJ | None, **kwargs: float) -> bool:
-
-        td: TimeDelta | None = None
+    def _cmp(self, op: Callable[[Instant, Instant], bool], obj: HINT_OBJ | None, *,
+             delta_kwargs: dict[str, float] | None = None) -> bool:
 
         match obj:
             case None:
-                if days := kwargs.pop('days', 0):
-                    kwargs['hours'] = kwargs.get('hours', 0) + days * 24
-                td = TimeDelta(**kwargs)
-            case TimeDelta():
-                td = obj
-            case dt_timedelta():
-                td = TimeDelta.from_py_timedelta(obj)
-            case int():
-                td = TimeDelta(seconds=obj)
-            case str():
-                td = TimeDelta.parse_common_iso(obj)
-
-        if td is None:
-            if isinstance(obj, InstantView):
-                obj = obj._instant
-            if isinstance(obj, Instant):
-                # If the compare the instant the logic is the other way around
-                # view > delta(3)    -> view older than 3 seconds
-                # view > instant(-3) -> view newer than the instant 3 seconds ago
-                return {ge: le, gt: lt, le: ge, lt: gt}[op](self._instant, obj)
-
-        if td is None:
-            msg = f'Invalid type: {type(obj).__name__}'
-            raise TypeError(msg)
+                if days := delta_kwargs.pop('days', 0):
+                    delta_kwargs['hours'] = delta_kwargs.get('hours', 0) + days * 24
+                td = TimeDelta(**delta_kwargs)
+            case InstantView():
+                return op(self._instant, obj._instant)
+            case Instant():
+                return op(self._instant, obj)
+            case _:
+                td = get_timedelta(obj)
 
         if td <= TimeDelta.ZERO:
             msg = 'Delta must be positive since instant is in the past'
@@ -100,34 +116,56 @@ class InstantView:
         return op(self._instant, Instant.now() - td)
 
     @overload
-    def older_than(self, *, days: float = 0, hours: float = 0, minutes: float = 0, seconds: float = 0) -> bool: ...
+    def older_than(self, *, days: float = 0, hours: float = 0, minutes: float = 0, seconds: float = 0,
+                   milliseconds: float = 0, microseconds: float = 0, nanoseconds: int = 0) -> bool: ...
+
     @overload
     def older_than(self, obj: HINT_OBJ) -> bool: ...
 
     def older_than(self, obj=None, **kwargs):
         """Check if the instant is older than the given value"""
-        return self._cmp(lt, obj, **kwargs)
+        return self._cmp(lt, obj, delta_kwargs=kwargs)
 
     @overload
-    def newer_than(self, *, days: float = 0, hours: float = 0, minutes: float = 0, seconds: float = 0) -> bool: ...
+    def newer_than(self, *, days: float = 0, hours: float = 0, minutes: float = 0, seconds: float = 0,
+                   milliseconds: float = 0, microseconds: float = 0, nanoseconds: int = 0) -> bool: ...
+
     @overload
     def newer_than(self, obj: HINT_OBJ) -> bool: ...
 
     def newer_than(self, obj=None, **kwargs):
         """Check if the instant is newer than the given value"""
-        return self._cmp(gt, obj, **kwargs)
+        return self._cmp(gt, obj, delta_kwargs=kwargs)
 
-    def __lt__(self, other: HINT_OBJ) -> bool:
-        return self._cmp(gt, other)
+    # ------------------------------------------------------------------------------------------------------------------
+    # Comparisons
+    def __lt__(self, other: InstantView | Instant) -> bool:
+        if isinstance(other, InstantView):
+            return self._instant < other._instant
+        if isinstance(other, Instant):
+            return self._instant < other
+        return NotImplemented
 
-    def __le__(self, other: HINT_OBJ) -> bool:
-        return self._cmp(ge, other)
+    def __le__(self, other: InstantView | Instant) -> bool:
+        if isinstance(other, InstantView):
+            return self._instant <= other._instant
+        if isinstance(other, Instant):
+            return self._instant <= other
+        return NotImplemented
 
-    def __gt__(self, other: HINT_OBJ) -> bool:
-        return self._cmp(lt, other)
+    def __gt__(self, other: InstantView | Instant) -> bool:
+        if isinstance(other, InstantView):
+            return self._instant > other._instant
+        if isinstance(other, Instant):
+            return self._instant > other
+        return NotImplemented
 
-    def __ge__(self, other: HINT_OBJ) -> bool:
-        return self._cmp(le, other)
+    def __ge__(self, other: InstantView | Instant) -> bool:
+        if isinstance(other, InstantView):
+            return self._instant >= other._instant
+        if isinstance(other, Instant):
+            return self._instant >= other
+        return NotImplemented
 
     def __eq__(self, other: InstantView | Instant) -> bool:
         if isinstance(other, InstantView):
@@ -136,5 +174,31 @@ class InstantView:
             return self._instant == other
         return NotImplemented
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Operations
+    def __add__(self, other: HINT_TIMEDELTA) -> Self:
+        """Add time delta to current instant
 
-HINT_OBJ: TypeAlias = dt_timedelta | TimeDelta | int | str | Instant | InstantView
+        :param other: time delta object
+        :return: New instance
+        """
+        try:
+            td = get_timedelta(other)
+        except TypeError:
+            return NotImplemented
+        return self.__class__(self._instant + td)
+
+    def __sub__(self, other: HINT_TIMEDELTA) -> Self:
+        """Subtract time delta from current instant
+
+        :param other: time delta object
+        :return: New instance
+        """
+        try:
+            td = get_timedelta(other)
+        except TypeError:
+            return NotImplemented
+        return self.__class__(self._instant - td)
+
+
+HINT_OBJ: TypeAlias = HINT_TIMEDELTA | Instant | InstantView

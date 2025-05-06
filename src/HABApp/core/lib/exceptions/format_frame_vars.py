@@ -22,7 +22,7 @@ SKIPPED_TYPES = (
     datetime.date, datetime.datetime, datetime.time, datetime.timedelta,
     Map, Path,
     whenever.Instant,
-    whenever.SystemDateTime, whenever.LocalDateTime, whenever.ZonedDateTime, whenever.OffsetDateTime,
+    whenever.SystemDateTime, whenever.PlainDateTime, whenever.ZonedDateTime, whenever.OffsetDateTime,
     whenever.TimeDelta, whenever.DateDelta, whenever.DateTimeDelta
 )
 
