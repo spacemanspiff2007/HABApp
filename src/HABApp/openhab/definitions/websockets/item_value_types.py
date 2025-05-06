@@ -8,7 +8,7 @@ from fastnumbers import real, try_int, try_real
 from pydantic import BaseModel as _BaseModel
 from pydantic import ConfigDict, Field, TypeAdapter
 from typing_extensions import Self, override
-from whenever import Instant, LocalDateTime, OffsetDateTime, SystemDateTime, ZonedDateTime
+from whenever import Instant, OffsetDateTime, PlainDateTime, SystemDateTime, ZonedDateTime
 
 from HABApp.core.types import HSB, RGB, Point
 from HABApp.openhab.types import RawType, StringList
@@ -86,7 +86,7 @@ class DateTimeTypeModel(ItemValueBase):
         value = self.value
         # Currently colon is not supported
         # https://github.com/ariebovenberg/whenever/issues/204
-        return OffsetDateTime.parse_common_iso(f'{value[:-2]:s}:{value[-2:]:s}').local().py_datetime()
+        return OffsetDateTime.parse_common_iso(f'{value[:-2]:s}:{value[-2:]:s}').to_plain().py_datetime()
 
     # noinspection PyNestedDecorators
     @override
@@ -99,18 +99,18 @@ class DateTimeTypeModel(ItemValueBase):
     # noinspection PyNestedDecorators
     @override
     @classmethod
-    def from_value(cls, value: datetime | Instant | LocalDateTime |
+    def from_value(cls, value: datetime | Instant | PlainDateTime |
                                ZonedDateTime | OffsetDateTime | SystemDateTime) -> Self | None:
         if isinstance(value, datetime):
             return cls(type='DateTime', value=value.isoformat())
 
         # https://whenever.readthedocs.io/en/latest/overview.html#iso-8601
-        if isinstance(value, (Instant, LocalDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
+        if isinstance(value, (Instant, PlainDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
             return cls(type='DateTime', value=value.format_common_iso())
 
         if isinstance(value, str):
             # try parsing through whenever types and datetime
-            for parse in (Instant.parse_common_iso, LocalDateTime.parse_common_iso, ZonedDateTime.parse_common_iso,
+            for parse in (Instant.parse_common_iso, PlainDateTime.parse_common_iso, ZonedDateTime.parse_common_iso,
                           OffsetDateTime.parse_common_iso, SystemDateTime.parse_common_iso, datetime.fromisoformat):
                 try:
                     v = parse(value)

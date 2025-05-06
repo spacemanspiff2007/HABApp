@@ -145,6 +145,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 finally:
                     self._websocket = None
 
+        # TODO: replace this with exception group as soon as 3.14 is available
         except Exception as e:
             self.plugin_connection.process_exception(e, self.websockets_task)
 
