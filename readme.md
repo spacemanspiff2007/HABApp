@@ -128,6 +128,11 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 25.05.0 (2024-05-06)
+- Fixed scientific handling of floats
+- Fixed InstantView
+- Updated dependencies
+
 #### 25.04.0 (2024-04-28)
 - Updated thread pool and asyncio handling
 - Dropped support for OpenHAB 3
