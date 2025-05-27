@@ -81,6 +81,16 @@ class HABAppJobBuilder:
         self.trigger: Final = TriggerBuilder
         self.filter: Final = FilterBuilder
 
+    def _create_countdown(self, secs: HINT_TIMEDELTA, callback: HINT_CB,
+                          *args: HINT_CB_P.args,
+                          job_id: Hashable | None = None, **kwargs: HINT_CB_P.kwargs) -> CountdownJobControl:
+
+        callback = wrap_func(callback, context=self._habapp_rule_ctx)
+
+        job = CountdownJob(wrapped_func_executor(callback, args, kwargs), get_pos_timedelta_secs(secs), job_id=job_id)
+        job.link_scheduler(self._scheduler)
+        return CountdownJobControl(job)
+
     def countdown(self, secs: HINT_TIMEDELTA, callback: HINT_CB,
                   *args: HINT_CB_P.args,
                   job_id: Hashable | None = None, **kwargs: HINT_CB_P.kwargs) -> CountdownJobControl:
@@ -93,11 +103,17 @@ class HABAppJobBuilder:
         :param kwargs: |param_scheduled_cb_kwargs|
         :return: Created job
         """
+        return run_func_from_async(self._create_countdown, secs, callback, *args, job_id=job_id, **kwargs)
+
+    def _create_once(self, instant: HINT_INSTANT, callback: HINT_CB,
+                     *args: HINT_CB_P.args,
+                     job_id: Hashable | None = None, **kwargs: HINT_CB_P.kwargs) -> OneTimeJobControl:
+
         callback = wrap_func(callback, context=self._habapp_rule_ctx)
 
-        job = CountdownJob(wrapped_func_executor(callback, args, kwargs), get_pos_timedelta_secs(secs), job_id=job_id)
-        run_func_from_async(job.link_scheduler, self._scheduler)
-        return CountdownJobControl(job)
+        job = OneTimeJob(wrapped_func_executor(callback, args, kwargs), get_instant(instant), job_id=job_id)
+        job.link_scheduler(self._scheduler)
+        return OneTimeJobControl(job)
 
     def once(self, instant: HINT_INSTANT, callback: HINT_CB,
              *args: HINT_CB_P.args,
@@ -111,11 +127,17 @@ class HABAppJobBuilder:
         :param kwargs: |param_scheduled_cb_kwargs|
         :return: Created job
         """
+        return run_func_from_async(self._create_once, instant, callback, *args, job_id=job_id, **kwargs)
+
+    def _create_at(self, trigger: TriggerObject, callback: HINT_CB,
+                   *args: HINT_CB_P.args,
+                   job_id: Hashable | None = None, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
+
         callback = wrap_func(callback, context=self._habapp_rule_ctx)
 
-        job = OneTimeJob(wrapped_func_executor(callback, args, kwargs), get_instant(instant), job_id=job_id)
-        run_func_from_async(job.link_scheduler, self._scheduler)
-        return OneTimeJobControl(job)
+        job = DateTimeJob(wrapped_func_executor(callback, args, kwargs), _get_producer(trigger), job_id=job_id)
+        job.link_scheduler(self._scheduler)
+        return DateTimeJobControl(job)
 
     def at(self, trigger: TriggerObject, callback: HINT_CB,
            *args: HINT_CB_P.args,
@@ -138,11 +160,7 @@ class HABAppJobBuilder:
             )
             return self.once(trigger, callback, *args, job_id=job_id, **kwargs)
 
-        callback = wrap_func(callback, context=self._habapp_rule_ctx)
-
-        job = DateTimeJob(wrapped_func_executor(callback, args, kwargs), _get_producer(trigger), job_id=job_id)
-        run_func_from_async(job.link_scheduler, self._scheduler)
-        return DateTimeJobControl(job)
+        return run_func_from_async(self._create_at, trigger, callback, *args, job_id=job_id, **kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # convenience functions
