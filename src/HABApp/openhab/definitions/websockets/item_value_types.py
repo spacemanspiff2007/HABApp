@@ -411,7 +411,7 @@ class QuantityTypeModel(ItemValueBase):
 # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/library/types/RawType.java
 class RawTypeModel(ItemValueBase):
     type: Literal['Raw']
-    value: str = Field(pattern=r'^data:image/[a-z_\-+.]+;base64,[A-Za-z0-9+/]*={0,2}$')
+    value: str = Field(pattern=r'^data:image/[a-z_+.-]+;base64,[A-Za-z0-9+/]*={0,2}$')
 
     @override
     def get_value(self) -> RawType:
