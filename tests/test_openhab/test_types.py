@@ -11,6 +11,24 @@ def test_raw_text() -> None:
     assert str(t) == 'RawType(type=png data=0100000000..0000000002 (11kiB))'
 
 
+def test_raw_image() -> None:
+    t = RawType.create('image/svg+xml', b'\x01' + b'\x00' * 1_000 + b'\x02')
+    assert str(t) == 'RawType(type=svg+xml data=0100000000..0000000002 (1.0kiB))'
+
+    b = b'\x01' + b'\x00' * 11_000 + b'\x02'
+    t = RawType.create('image/svg+xml', b)
+    assert str(t) == 'RawType(type=svg+xml data=0100000000..0000000002 (11kiB))'
+
+
+def test_raw_vendor_image() -> None:
+    t = RawType.create('image/vnd.clip', b'\x01' + b'\x00' * 1_000 + b'\x02')
+    assert str(t) == 'RawType(type=vnd.clip data=0100000000..0000000002 (1.0kiB))'
+
+    b = b'\x01' + b'\x00' * 11_000 + b'\x02'
+    t = RawType.create('image/vnd.clip', b)
+    assert str(t) == 'RawType(type=vnd.clip data=0100000000..0000000002 (11kiB))'
+
+
 def test_raw() -> None:
 
     b = b'\x01\x02'
