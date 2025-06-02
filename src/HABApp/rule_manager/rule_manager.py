@@ -95,7 +95,8 @@ class RuleManager:
 
         # if we want a special one throw error
         if not found:
-            raise KeyError(f'No Rule with name "{rule_name}" found!')
+            msg = f'No Rule with name "{rule_name}" found!'
+            raise KeyError(msg)
         return found if len(found) > 1 else found[0]
 
     async def request_file_unload(self, name: str, path: Path) -> None:
@@ -110,6 +111,7 @@ class RuleManager:
         rule = self.files.pop(path_str)
 
         await rule.unload()
+        return None
 
     async def request_file_load(self, name: str, path: Path) -> None:
         path_str = str(path)
@@ -125,9 +127,9 @@ class RuleManager:
             return None
 
         log.debug(f'Loading file: {name}')
-        self.files[path_str] = file = RuleFile(self, name, path)
+        self.files[path_str] = rule_file = RuleFile(self, name, path)
 
-        ok = await wrap_func(file.load).async_run()
+        ok = await rule_file.load()
         if not ok:
             self.files.pop(path_str)
             log.warning(f'Failed to load {path_str}!')
@@ -136,7 +138,8 @@ class RuleManager:
         log.debug(f'File {name} successfully loaded!')
 
         # Do simple checks which prevent errors
-        await file.check_all_rules()
+        await rule_file.check_all_rules()
+        return None
 
     async def shutdown(self) -> None:
         for f in self.files.values():
