@@ -6,7 +6,7 @@ import runpy
 from typing import TYPE_CHECKING
 
 import HABApp
-from HABApp.core.internals import get_current_context
+from HABApp.core.internals import get_current_context, wrap_func
 from HABApp.rule.rule_hook import HABAppRuleHook
 
 
@@ -80,7 +80,7 @@ class RuleFile:
         ign.proc_tb = self.__process_tc
 
         with ign:
-            self.create_rules(created_rules)
+            await wrap_func(self.create_rules).async_run(created_rules)
 
         if ign.raised_exception:
             # unload all rule instances which might have already been created otherwise they might
