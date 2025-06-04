@@ -58,7 +58,8 @@ class RawType:
 
         # Remove MIME type prefix for common image file types
         # https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
-        if data_type.endswith(('apng', 'avif', 'gif', 'jpeg', 'png', 'svg', 'webp', 'bmp', 'x-icon', 'tiff')):
+        if data_type.endswith(('apng', 'avif', 'gif', 'jpeg', 'png', 'svg', 'webp', 'bmp', 'x-icon', 'tiff', 'svg+xml',
+                               'vnd.clip', 'vnd.dxf', 'vnd.mix', 'vnd.dwg')):
             data_type = data_type.removeprefix('image/')
 
         return cls(data_type, data)
