@@ -128,6 +128,11 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 25.06.0 (2024-05-06)
+- Fixed RunInThePast issue
+- Fixed restriction for certain image types
+- Fixed issue when there is an error during rule load
+
 #### 25.05.0 (2024-05-06)
 - Fixed scientific handling of floats
 - Fixed InstantView
