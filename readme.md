@@ -128,17 +128,20 @@ MyOpenhabRule()
 
 # Changelog
 
-#### 25.06.0 (2024-05-06)
-- Fixed RunInThePast issue
+#### 25.06.1 (2025-06-04)
+- Fixed introcuded file load issue
+
+#### 25.06.0 (2025-06-04)
+- Fixed JobInThePast issue
 - Fixed restriction for certain image types
 - Fixed issue when there is an error during rule load
 
-#### 25.05.0 (2024-05-06)
+#### 25.05.0 (2025-05-06)
 - Fixed scientific handling of floats
 - Fixed InstantView
 - Updated dependencies
 
-#### 25.04.0 (2024-04-28)
+#### 25.04.0 (2025-04-28)
 - Updated thread pool and asyncio handling
 - Dropped support for OpenHAB 3
 - Number item has a dimension property which is set if it's a UoM item
