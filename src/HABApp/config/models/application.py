@@ -1,5 +1,4 @@
-from easyconfig import AppBaseModel
-from pydantic import Field
+from easyconfig import AppBaseModel, Field
 
 from HABApp.config.models.directories import DirectoriesConfig
 from HABApp.config.models.habapp import HABAppConfig
