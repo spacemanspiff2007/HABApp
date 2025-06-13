@@ -128,6 +128,9 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 25.06.2 (2025-06-13)
+- Updated dependencies
+
 #### 25.06.1 (2025-06-04)
 - Fixed introduced file load issue
 
