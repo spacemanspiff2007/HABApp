@@ -1,4 +1,4 @@
-aiohttp     == 3.12.12
+aiohttp     == 3.12.14
 pydantic    == 2.11.5
 bidict      == 0.23.1
 watchfiles  == 1.0.5
