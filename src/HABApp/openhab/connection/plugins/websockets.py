@@ -150,10 +150,10 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
             self.plugin_connection.process_exception(e, self.websockets_task)
 
     @staticmethod
-    def _get_type_names_from_adapter() -> list[str]:
+    def _get_event_type_names_from_union(union: type[BaseModel]) -> list[str]:
         names = set()
 
-        objs = [get_args(OPENHAB_EVENT_TYPE)[0]]
+        objs = [get_args(union)[0]]
 
         while objs:
             obj = objs.pop(0)
@@ -182,7 +182,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
     async def _setup_websocket_filter(self, ws: ClientWebSocketResponse, log: logging.Logger) -> None:
         # setup event type filter
         filter_cfg = HABApp.CONFIG.openhab.connection.websocket.event_filter
-        supported_event_names = set(self._get_type_names_from_adapter())
+        supported_event_names = set(self._get_event_type_names_from_union(OPENHAB_EVENT_TYPE))
 
         names: set[str] = set()
         if filter_cfg.event_type.is_auto():
