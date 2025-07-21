@@ -83,10 +83,7 @@ class DateTimeTypeModel(ItemValueBase):
 
     @override
     def get_value(self) -> datetime:
-        value = self.value
-        # Currently colon is not supported
-        # https://github.com/ariebovenberg/whenever/issues/204
-        return OffsetDateTime.parse_common_iso(f'{value[:-2]:s}:{value[-2:]:s}').to_plain().py_datetime()
+        return OffsetDateTime.parse_common_iso(self.value).to_plain().py_datetime()
 
     # noinspection PyNestedDecorators
     @override
