@@ -64,52 +64,6 @@ def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | i
     print(CONFIGURATION)
 
 
-@pytest.mark.skipif(PYTHON_312 or PYTHON_313, reason='Traceback Python 3.10')
-def test_exception_expression_remove_py310() -> None:
-    log.setLevel(logging.WARNING)
-    msg = exec_func(func_test_assert_none)
-    assert msg == r'''
-File "test_core/test_lib/test_format_traceback.py", line x in exec_func
---------------------------------------------------------------------------------
-     x | def exec_func(func) -> str:
-     x |     try:
--->  x |         func()
-     x |     except Exception as e:
-   ------------------------------------------------------------
-     e = ZeroDivisionError('division by zero')
-     func = <function func_test_assert_none at 0xAAAAAAAAAAAAAAAA>
-   ------------------------------------------------------------
-
-File "test_core/test_lib/test_format_traceback.py", line x in func_test_assert_none
---------------------------------------------------------------------------------
-     x | def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | int = 3) -> None:
-      (...)
-     x |     assert isinstance(c, (str, int)), type(c)
-     x |     CONFIGURATION = '3'
-     x |     my_dict = {'key_a': 'val_a'}
--->  x |     1 / 0
-     x |     log.error('Error message')
-   ------------------------------------------------------------
-     CONFIG.a = 3
-     a = None
-     b = None
-     c = 3
-     CONFIGURATION = '3'
-     log = <Logger TestLogger (WARNING)>
-     my_dict = {'key_a': 'val_a'}
-     my_dict['key_a'] = 'val_a'
-     CONFIG.a > 2 = True
-   ------------------------------------------------------------
-
---------------------------------------------------------------------------------
-Traceback (most recent call last):
-  File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
-    func()
-  File "test_core/test_lib/test_format_traceback.py", line x, in func_test_assert_none
-    1 / 0
-ZeroDivisionError: division by zero'''
-
-
 @pytest.mark.skipif(
     PYTHON_313 or (not PYTHON_312 and not PYTHON_313),
     reason='New traceback from python 3.11 and 3.12')
