@@ -1,7 +1,7 @@
-aiohttp     == 3.12.12
-pydantic    == 2.11.5
+aiohttp     == 3.12.14
+pydantic    == 2.11.7
 bidict      == 0.23.1
-watchfiles  == 1.0.5
+watchfiles  == 1.1.0
 ujson       == 5.10.0
 aiomqtt     == 2.4.0
 
@@ -15,7 +15,7 @@ fastnumbers == 5.1.1
 
 geopy == 2.4.1
 
-typing-extensions == 4.14.0
+typing-extensions == 4.14.1
 
 aiohttp-sse-client == 0.2.1
 

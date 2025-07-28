@@ -6,7 +6,8 @@ from HABApp.openhab.events import OpenhabEvent
 
 
 class BaseModel(_BaseModel):
-    model_config = ConfigDict(extra='forbid', strict=True, frozen=True, validate_default=True, validate_assignment=True)
+    # todo: change tos to strict
+    model_config = ConfigDict(extra='allow', strict=True, frozen=True, validate_default=True, validate_assignment=True)
 
 
 class BaseEvent(BaseModel):

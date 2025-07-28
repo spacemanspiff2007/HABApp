@@ -16,7 +16,8 @@ from HABApp.openhab.types.quantity import QuantityFloat, QuantityInt
 
 
 class BaseModel(_BaseModel):
-    model_config = ConfigDict(extra='forbid', strict=True, validate_default=True, validate_assignment=True)
+    # todo: change this back to strict
+    model_config = ConfigDict(extra='allow', strict=True, validate_default=True, validate_assignment=True)
 
 
 class ItemValueBase(BaseModel):
