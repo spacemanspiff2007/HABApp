@@ -18,7 +18,12 @@ class ExpiringCache(Generic[K, V]):
 
         self.set_expiry_time(expiry_time)
 
-    def set_expiry_time(self, expiry_time: float | TimeDelta) -> None:
+    def clear(self) -> Self:
+        """Clear the cache"""
+        self._cache.clear()
+        return self
+
+    def set_expiry_time(self, expiry_time: float | TimeDelta) -> Self:
         """Set the expiry time for cache entries.
 
         :param expiry_time: expire duration
@@ -35,6 +40,7 @@ class ExpiringCache(Generic[K, V]):
             raise ValueError(msg)
 
         self._expiry_time = expiry_time
+        return self
 
     def flush(self) -> Self:
         """Flush all expired entries out of the cache"""
@@ -103,6 +109,8 @@ class ExpiringCache(Generic[K, V]):
 
             if not is_expired:
                 yield key, value
+
+        return None
 
     def set(self, key: K, value: V) -> Self:
         """Set a value in the cache

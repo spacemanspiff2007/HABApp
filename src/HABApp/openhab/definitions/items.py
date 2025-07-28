@@ -1,10 +1,9 @@
 import typing
-from enum import Enum as _Enum
 
 from HABApp.core.const.const import StrEnum
 
 
-def _get_str_enum_values(obj: type[_Enum]) -> set[str]:
+def _get_str_enum_values(obj: type[StrEnum]) -> set[str]:
     return {_member.value for _member in obj}
 
 
