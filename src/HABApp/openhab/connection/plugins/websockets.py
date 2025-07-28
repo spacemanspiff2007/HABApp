@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from asyncio import Queue, sleep
+from asyncio import Queue, TaskGroup, sleep
 from base64 import b64encode
 from typing import Final
 
@@ -10,7 +10,6 @@ from pydantic import ValidationError
 
 import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.const.const import PYTHON_311
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
@@ -26,12 +25,6 @@ from HABApp.openhab.definitions.websockets import (
 )
 from HABApp.openhab.definitions.websockets.base import BaseOutEvent
 from HABApp.openhab.process_events import on_openhab_event
-
-
-if PYTHON_311:
-    from asyncio import TaskGroup
-else:
-    from taskgroup import TaskGroup
 
 
 class WebSocketClosedError(ClientError):

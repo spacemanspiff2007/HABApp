@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import re
 from re import Match, Pattern
-from typing import Any, Self, override
+from typing import Any, Self
 
 from pydantic import PrivateAttr
+from typing_extensions import override
 
 from ._base import BaseModel
 

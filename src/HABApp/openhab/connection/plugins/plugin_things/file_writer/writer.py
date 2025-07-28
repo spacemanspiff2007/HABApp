@@ -1,8 +1,8 @@
 import re
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Self
 
-from HABApp.core.const.const import PYTHON_311
 from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import UserItem
 
 from .formatter import FormatterScope
@@ -13,12 +13,6 @@ from .formatter_builder import (
     MultipleValueFormatterBuilder,
     ValueFormatterBuilder,
 )
-
-
-if not PYTHON_311:
-    from typing_extensions import Self
-else:
-    from typing import Self
 
 
 FIELD_ORDER = (

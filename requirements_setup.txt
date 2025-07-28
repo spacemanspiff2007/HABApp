@@ -20,6 +20,3 @@ typing-extensions == 4.14.1
 aiohttp-sse-client == 0.2.1
 
 javaproperties == 0.8.2
-
-# Backport of TaskGroup: https://pypi.org/project/taskgroup/
-taskgroup == 0.2.2; python_version < "3.11"
