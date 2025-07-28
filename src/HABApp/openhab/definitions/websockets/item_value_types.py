@@ -1,7 +1,9 @@
+# ruff: noqa: ERA001
+
 import re
 from base64 import b64decode, b64encode
 from datetime import datetime
-from typing import Annotated, Any, Literal
+from typing import Any, Final, Literal
 
 from fastnumbers import float as fast_float
 from fastnumbers import real, try_int, try_real
@@ -18,6 +20,15 @@ from HABApp.openhab.types.quantity import QuantityFloat, QuantityInt
 class BaseModel(_BaseModel):
     # todo: change this back to strict
     model_config = ConfigDict(extra='allow', strict=True, validate_default=True, validate_assignment=True)
+
+
+class LastUpdateMixin(BaseModel):
+    last_update: ZonedDateTime = Field(alias='lastStateUpdate')
+
+
+class LastChangeMixin(BaseModel):
+    last_update: ZonedDateTime = Field(alias='lastStateUpdate')
+    last_change: ZonedDateTime = Field(alias='lastStateChange')
 
 
 class ItemValueBase(BaseModel):
@@ -568,9 +579,37 @@ class UpDownTypeModel(ItemValueBase):
         return None
 
 
-OpenHabValueType = Annotated[
-    RefreshTypeModel |
-    UnDefTypeModel |
+# ----------------------------------------------------------------------------------------------------------------------
+# CodeGen
+# ----------------------------------------------------------------------------------------------------------------------
+# - select: {include: 'TypeModel$', name: type_models, exclude: 'LastUpdateTypeModel|LastChangeTypeModel'}
+# - union:
+#     select: {name: type_models}
+#     name: OpenHabValueType
+#     adapter: true
+#
+# - separator: LastUpdate Models
+# - mixins:
+#     select: {name: type_models}
+#     mixins: {include: ^LastUpdateMixin$}
+#     name: {search: '^(.+)TypeModel$', replace: '\g<1>LastUpdateTypeModel'}
+# - union:
+#     select: {include: 'LastUpdateTypeModel'}
+#     name: OpenHabEventValueLastUpdateType
+#     adapter: true
+#
+# - separator: LastChange Models
+# - mixins:
+#     select: {name: type_models}
+#     mixins: {include: ^LastChangeMixin}
+#     name: {search: '^(.+)TypeModel$', replace: '\g<1>LastChangeTypeModel'}
+# - union:
+#     select: {include: 'LastChangeTypeModel'}
+#     name: OpenHabEventValueLastChangeType
+#     adapter: true
+# ----------------------------------------------------------------------------------------------------------------------
+
+OpenHabValueType: Final = (
     DateTimeTypeModel |
     DecimalTypeModel |
     HSBTypeModel |
@@ -583,13 +622,222 @@ OpenHabValueType = Annotated[
     PointTypeModel |
     QuantityTypeModel |
     RawTypeModel |
+    RefreshTypeModel |
     RewindFastforwardTypeModel |
     StopMoveTypeModel |
     StringListTypeModel |
     StringTypeModel |
-    UpDownTypeModel,
-    Field(discriminator='type')
-]
+    UnDefTypeModel |
+    UpDownTypeModel
+)
+OPENHAB_VALUE_TYPE_ADAPTER: Final[TypeAdapter[OpenHabValueType]] = TypeAdapter(OpenHabValueType)
 
 
-OpenHabValueTypeAdapter = TypeAdapter[OpenHabValueType](OpenHabValueType)
+# ----------------------------------------------------------------------------------------------------------------------
+# LastUpdate Models
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+class DateTimeLastUpdateTypeModel(DateTimeTypeModel, LastUpdateMixin):
+    pass
+
+
+class DecimalLastUpdateTypeModel(DecimalTypeModel, LastUpdateMixin):
+    pass
+
+
+class HSBLastUpdateTypeModel(HSBTypeModel, LastUpdateMixin):
+    pass
+
+
+class IncreaseDecreaseLastUpdateTypeModel(IncreaseDecreaseTypeModel, LastUpdateMixin):
+    pass
+
+
+class NextPreviousLastUpdateTypeModel(NextPreviousTypeModel, LastUpdateMixin):
+    pass
+
+
+class OnOffLastUpdateTypeModel(OnOffTypeModel, LastUpdateMixin):
+    pass
+
+
+class OpenClosedLastUpdateTypeModel(OpenClosedTypeModel, LastUpdateMixin):
+    pass
+
+
+class PercentLastUpdateTypeModel(PercentTypeModel, LastUpdateMixin):
+    pass
+
+
+class PlayPauseLastUpdateTypeModel(PlayPauseTypeModel, LastUpdateMixin):
+    pass
+
+
+class PointLastUpdateTypeModel(PointTypeModel, LastUpdateMixin):
+    pass
+
+
+class QuantityLastUpdateTypeModel(QuantityTypeModel, LastUpdateMixin):
+    pass
+
+
+class RawLastUpdateTypeModel(RawTypeModel, LastUpdateMixin):
+    pass
+
+
+class RefreshLastUpdateTypeModel(RefreshTypeModel, LastUpdateMixin):
+    pass
+
+
+class RewindFastforwardLastUpdateTypeModel(RewindFastforwardTypeModel, LastUpdateMixin):
+    pass
+
+
+class StopMoveLastUpdateTypeModel(StopMoveTypeModel, LastUpdateMixin):
+    pass
+
+
+class StringListLastUpdateTypeModel(StringListTypeModel, LastUpdateMixin):
+    pass
+
+
+class StringLastUpdateTypeModel(StringTypeModel, LastUpdateMixin):
+    pass
+
+
+class UnDefLastUpdateTypeModel(UnDefTypeModel, LastUpdateMixin):
+    pass
+
+
+class UpDownLastUpdateTypeModel(UpDownTypeModel, LastUpdateMixin):
+    pass
+
+
+OpenHabEventValueLastUpdateType: Final = (
+    DateTimeLastUpdateTypeModel |
+    DecimalLastUpdateTypeModel |
+    HSBLastUpdateTypeModel |
+    IncreaseDecreaseLastUpdateTypeModel |
+    NextPreviousLastUpdateTypeModel |
+    OnOffLastUpdateTypeModel |
+    OpenClosedLastUpdateTypeModel |
+    PercentLastUpdateTypeModel |
+    PlayPauseLastUpdateTypeModel |
+    PointLastUpdateTypeModel |
+    QuantityLastUpdateTypeModel |
+    RawLastUpdateTypeModel |
+    RefreshLastUpdateTypeModel |
+    RewindFastforwardLastUpdateTypeModel |
+    StopMoveLastUpdateTypeModel |
+    StringLastUpdateTypeModel |
+    StringListLastUpdateTypeModel |
+    UnDefLastUpdateTypeModel |
+    UpDownLastUpdateTypeModel
+)
+OPENHAB_EVENT_VALUE_LAST_UPDATE_TYPE_ADAPTER: Final[TypeAdapter[OpenHabEventValueLastUpdateType]] = TypeAdapter(OpenHabEventValueLastUpdateType)  # noqa: E501
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# LastChange Models
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+class DateTimeLastChangeTypeModel(DateTimeTypeModel, LastChangeMixin):
+    pass
+
+
+class DecimalLastChangeTypeModel(DecimalTypeModel, LastChangeMixin):
+    pass
+
+
+class HSBLastChangeTypeModel(HSBTypeModel, LastChangeMixin):
+    pass
+
+
+class IncreaseDecreaseLastChangeTypeModel(IncreaseDecreaseTypeModel, LastChangeMixin):
+    pass
+
+
+class NextPreviousLastChangeTypeModel(NextPreviousTypeModel, LastChangeMixin):
+    pass
+
+
+class OnOffLastChangeTypeModel(OnOffTypeModel, LastChangeMixin):
+    pass
+
+
+class OpenClosedLastChangeTypeModel(OpenClosedTypeModel, LastChangeMixin):
+    pass
+
+
+class PercentLastChangeTypeModel(PercentTypeModel, LastChangeMixin):
+    pass
+
+
+class PlayPauseLastChangeTypeModel(PlayPauseTypeModel, LastChangeMixin):
+    pass
+
+
+class PointLastChangeTypeModel(PointTypeModel, LastChangeMixin):
+    pass
+
+
+class QuantityLastChangeTypeModel(QuantityTypeModel, LastChangeMixin):
+    pass
+
+
+class RawLastChangeTypeModel(RawTypeModel, LastChangeMixin):
+    pass
+
+
+class RefreshLastChangeTypeModel(RefreshTypeModel, LastChangeMixin):
+    pass
+
+
+class RewindFastforwardLastChangeTypeModel(RewindFastforwardTypeModel, LastChangeMixin):
+    pass
+
+
+class StopMoveLastChangeTypeModel(StopMoveTypeModel, LastChangeMixin):
+    pass
+
+
+class StringListLastChangeTypeModel(StringListTypeModel, LastChangeMixin):
+    pass
+
+
+class StringLastChangeTypeModel(StringTypeModel, LastChangeMixin):
+    pass
+
+
+class UnDefLastChangeTypeModel(UnDefTypeModel, LastChangeMixin):
+    pass
+
+
+class UpDownLastChangeTypeModel(UpDownTypeModel, LastChangeMixin):
+    pass
+
+
+OpenHabEventValueLastChangeType: Final = (
+    DateTimeLastChangeTypeModel |
+    DecimalLastChangeTypeModel |
+    HSBLastChangeTypeModel |
+    IncreaseDecreaseLastChangeTypeModel |
+    NextPreviousLastChangeTypeModel |
+    OnOffLastChangeTypeModel |
+    OpenClosedLastChangeTypeModel |
+    PercentLastChangeTypeModel |
+    PlayPauseLastChangeTypeModel |
+    PointLastChangeTypeModel |
+    QuantityLastChangeTypeModel |
+    RawLastChangeTypeModel |
+    RefreshLastChangeTypeModel |
+    RewindFastforwardLastChangeTypeModel |
+    StopMoveLastChangeTypeModel |
+    StringLastChangeTypeModel |
+    StringListLastChangeTypeModel |
+    UnDefLastChangeTypeModel |
+    UpDownLastChangeTypeModel
+)
+OPENHAB_EVENT_VALUE_LAST_CHANGE_TYPE_ADAPTER: Final[TypeAdapter[OpenHabEventValueLastChangeType]] = TypeAdapter(OpenHabEventValueLastChangeType)  # noqa: E501

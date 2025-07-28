@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Final
 
 from pydantic import Field, TypeAdapter
 
@@ -27,9 +27,18 @@ from .thing_events import (
 from .websocket_events import WebsocketEventType
 
 
-OPENHAB_EVENT_TYPE = Annotated[
-    ChannelTriggeredEvent |
+# ----------------------------------------------------------------------------------------------------------------------
+# CodeGen
+# - union:
+#     select: {include: 'Event$|WebsocketEventType$'}
+#     name: OpenHabEventType
+#     adapter: true
+#     discriminator: 'type'
+# ----------------------------------------------------------------------------------------------------------------------
+
+OpenHabEventType: Final = Annotated[
     ChannelDescriptionChangedEvent |
+    ChannelTriggeredEvent |
     GroupStateChangedEvent |
     GroupStateUpdatedEvent |
     ItemAddedEvent |
@@ -50,6 +59,4 @@ OPENHAB_EVENT_TYPE = Annotated[
     WebsocketEventType,
     Field(discriminator='type')
 ]
-
-
-OPENHAB_EVENT_TYPE_ADAPTER = TypeAdapter[OPENHAB_EVENT_TYPE](OPENHAB_EVENT_TYPE)
+OPENHAB_EVENT_TYPE_ADAPTER: Final[TypeAdapter[OpenHabEventType]] = TypeAdapter(OpenHabEventType)

@@ -63,6 +63,11 @@ def test__ItemStateEvent() -> None:  # noqa: N802
 
 # noinspection PyPep8Naming
 def test__ItemStateUpdatedEvent() -> None:  # noqa: N802
+    #[2025-07-21 08:06:01,931] [Com.Wsocket]    DEBUG |   IN   {"type": "ItemStateUpdatedEvent", "topic": "openhab/items/SwDBJchzjr/stateupdated", "payload": {"type": "OnOff", "value": "OFF", "lastStateUpdate": "2025-07-21T08:06:01.9177505+02:00[Europe/Berlin]"}}
+#   [2025-07-21 08:06:01,932] [Com.Wsocket]    DEBUG |   IN   {"type": "ItemStateChangedEvent", "topic": "openhab/items/SwDBJchzjr/statechanged", "payload": {"type": "OnOff", "value": "OFF", "oldType": "OnOff", "oldValue": "ON", "lastStateUpdate": "2025-07-21T08:06:01.9177505+02:00[Europe/Berlin]", "lastStateChange": "2025-07-21T08:06:01.9177505+02:00[Europe/Berlin]"}}
+
+
+
     event = get_event({'topic': 'openhab/items/my_item_name/stateupdated',
                        'payload': '{"type":"Quantity","value":"9.5 °C"}', 'type': 'ItemStateUpdatedEvent'})
     assert isinstance(event, ItemStateUpdatedEvent)
