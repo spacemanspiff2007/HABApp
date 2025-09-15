@@ -1,7 +1,7 @@
-from .base_item import BaseItem
-from .base_valueitem import BaseValueItem
+from .base_item import BaseItem as BaseItem
+from .base_valueitem import BaseValueItem as BaseValueItem
 
-# isort split
-from .item import Item
-from .item_aggregation import AggregationItem
-from .item_color import ColorItem
+# isort split – explicit re-exports so type checkers see them as public API
+from .item import Item as Item
+from .item_aggregation import AggregationItem as AggregationItem
+from .item_color import ColorItem as ColorItem

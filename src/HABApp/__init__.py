@@ -13,16 +13,13 @@ import HABApp.core
 # This holds only textual references to other objects so we can import this before everything else
 import HABApp.rule_ctx
 
-
 # Import the rest
 import HABApp.mqtt
 import HABApp.openhab
 import HABApp.rule
 import HABApp.runtime
-
-
 import HABApp.util
-from HABApp.rule import Rule
-from HABApp.parameters import Parameter, DictParameter
 
-from HABApp.config import CONFIG
+from HABApp.rule import Rule as Rule
+from HABApp.parameters import Parameter as Parameter, DictParameter as DictParameter
+from HABApp.config import CONFIG as CONFIG
