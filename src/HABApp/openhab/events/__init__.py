@@ -33,35 +33,3 @@ from .event_filters import (
     ItemStateEventFilter as ItemStateEventFilter,
     ItemStateUpdatedEventFilter as ItemStateUpdatedEventFilter,
 )
-
-__all__ = [
-    # base
-    "OpenhabEvent",
-    # channel events
-    "ChannelDescriptionChangedEvent",
-    "ChannelTriggeredEvent",
-    # item events
-    "GroupStateChangedEvent",
-    "GroupStateUpdatedEvent",
-    "ItemAddedEvent",
-    "ItemCommandEvent",
-    "ItemRemovedEvent",
-    "ItemStateChangedEvent",
-    "ItemStateEvent",
-    "ItemStatePredictedEvent",
-    "ItemStateUpdatedEvent",
-    "ItemUpdatedEvent",
-    # thing events
-    "ThingAddedEvent",
-    "ThingConfigStatusInfoEvent",
-    "ThingFirmwareStatusInfoEvent",
-    "ThingRemovedEvent",
-    "ThingStatusInfoChangedEvent",
-    "ThingStatusInfoEvent",
-    "ThingUpdatedEvent",
-    # filters
-    "ItemCommandEventFilter",
-    "ItemStateChangedEventFilter",
-    "ItemStateEventFilter",
-    "ItemStateUpdatedEventFilter",
-]
