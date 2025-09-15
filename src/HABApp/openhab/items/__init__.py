@@ -13,21 +13,3 @@ from .rollershutter_item import RollershutterItem as RollershutterItem
 from .string_item import StringItem as StringItem
 from .switch_item import SwitchItem as SwitchItem
 from .thing_item import Thing as Thing
-
-__all__ = [
-    "OpenhabItem",
-    "CallItem",
-    "ColorItem",
-    "ContactItem",
-    "DatetimeItem",
-    "DimmerItem",
-    "GroupItem",
-    "ImageItem",
-    "LocationItem",
-    "NumberItem",
-    "PlayerItem",
-    "RollershutterItem",
-    "StringItem",
-    "SwitchItem",
-    "Thing",
-]
