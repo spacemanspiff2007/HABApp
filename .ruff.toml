@@ -31,9 +31,6 @@ ignore = [
     # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
     "S311",     # Standard pseudo-random generators are not suitable for cryptographic purposes
 
-    # https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    "UP038",    # Use X | Y in {} call instead of (X, Y)
-
     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
     "ANN401",   # Dynamically typed expressions (typing.Any) are disallowed in {name}
 
@@ -104,6 +101,16 @@ lines-after-imports = 2     # https://docs.astral.sh/ruff/settings/#lint_isort_l
     # https://docs.astral.sh/ruff/rules/#refactor-r
     "PLR2004",  # Magic value used in comparison, consider replacing {value} with a constant variable
     "PLR0913",  # Too many arguments in function definition ({c_args} > {max_args})
+
+    # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
+    "FBT003",  # Boolean positional value in function call
+
+    # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+    "ARG001",  # Unused function argument {name}
+    "ARG002",  # Unused method argument {name}
+    "ARG003",  # Unused class method argument: {name}
+    "ARG004",  # Unused static method argument: {name}
+    "ARG005",  # Unused lambda argument: {name}
 ]
 
 "interface_*.py" = [
