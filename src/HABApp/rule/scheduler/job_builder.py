@@ -4,7 +4,7 @@ import random
 import warnings
 from collections.abc import Callable, Hashable, Iterable, Mapping
 from datetime import datetime as dt_datetime
-from typing import TYPE_CHECKING, Any, Final, TypeAlias
+from typing import TYPE_CHECKING, Any, Final, Self, TypeAlias
 
 from eascheduler.builder import FilterBuilder, JobBuilder, TriggerBuilder
 from eascheduler.builder.helper import HINT_INSTANT, HINT_TIMEDELTA, get_instant, get_pos_timedelta_secs
@@ -12,7 +12,7 @@ from eascheduler.builder.triggers import TriggerObject, _get_producer
 from eascheduler.executor import ExecutorBase
 from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
 from eascheduler.schedulers.async_scheduler import AsyncScheduler
-from typing_extensions import ParamSpec, Self, override
+from typing_extensions import ParamSpec, override
 
 from HABApp.core.asyncio import create_task_from_async, run_func_from_async
 from HABApp.core.const import loop

@@ -1,9 +1,9 @@
 import logging
 import os
 from pathlib import PurePath
+from typing import Self
 
 import pytest
-from typing_extensions import Self
 from watchfiles import Change
 
 from HABApp.core.const.const import PYTHON_312

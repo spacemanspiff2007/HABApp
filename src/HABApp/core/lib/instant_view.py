@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from operator import gt, lt
-from typing import TYPE_CHECKING, Final, TypeAlias, overload
+from typing import TYPE_CHECKING, Final, Self, TypeAlias, overload
 
 from eascheduler.builder.helper import HINT_TIMEDELTA, get_timedelta
-from typing_extensions import Self
 from whenever import Instant, TimeDelta
 
 

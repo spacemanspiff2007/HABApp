@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from colorsys import hsv_to_rgb as _hsv_to_rgb
 from colorsys import rgb_to_hsv as _rgb_to_hsv
-from typing import Final
-
-from typing_extensions import Self
+from typing import Final, Self
 
 
 class ColorType:

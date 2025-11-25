@@ -1,6 +1,4 @@
-from typing import Final
-
-from typing_extensions import Self
+from typing import Final, Self
 
 
 class RingCounter:

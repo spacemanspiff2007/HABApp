@@ -1,7 +1,7 @@
 indent-width = 4
 line-length  = 120
 
-target-version = "py310"
+target-version = "py311"
 
 src = [
     "src",
@@ -91,6 +91,10 @@ lines-after-imports = 2     # https://docs.astral.sh/ruff/settings/#lint_isort_l
 "setup.py" = ["PTH123"]
 
 "run/**" = ["INP001"]
+
+"__init__.py" = [
+    "F401"  # {name} imported but unused https://docs.astral.sh/ruff/rules/unused-import/
+]
 
 "tests/*" = [
     "ANN",  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann

@@ -1,9 +1,9 @@
 import datetime
 from collections.abc import Mapping
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Self
 
 from immutables import Map
-from typing_extensions import Self, override
+from typing_extensions import override
 
 from HABApp.core.const import MISSING
 from HABApp.core.items import BaseValueItem

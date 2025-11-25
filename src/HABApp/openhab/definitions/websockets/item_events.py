@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
 from pydantic import Field, Json
-from typing_extensions import Self, override
+from typing_extensions import override
 
 from HABApp.openhab.events.item_events import GroupStateChangedEvent as TargetGroupStateChangedEvent
 from HABApp.openhab.events.item_events import GroupStateUpdatedEvent as TargetGroupStateUpdatedEvent

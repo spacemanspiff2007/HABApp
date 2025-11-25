@@ -5,6 +5,7 @@ from whenever import hours, milliseconds, minutes, seconds
 
 from HABApp.core.lib import InstantView
 
+
 # Keep __all__ here: this module re-exports third-party symbols under public aliases (trigger/filter)
 # so from HABApp.rule.scheduler import trigger remains valid and pyright/pylance don’t warn.
 __all__ = [
