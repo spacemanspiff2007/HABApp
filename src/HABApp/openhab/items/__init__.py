@@ -1,15 +1,39 @@
-from .base_item import OpenhabItem as OpenhabItem
-from .call_item import CallItem as CallItem
-from .color_item import ColorItem as ColorItem
-from .contact_item import ContactItem as ContactItem
-from .datetime_item import DatetimeItem as DatetimeItem
-from .dimmer_item import DimmerItem as DimmerItem
-from .group_item import GroupItem as GroupItem
-from .image_item import ImageItem as ImageItem
-from .location_item import LocationItem as LocationItem
-from .number_item import NumberItem as NumberItem
-from .player_item import PlayerItem as PlayerItem
-from .rollershutter_item import RollershutterItem as RollershutterItem
-from .string_item import StringItem as StringItem
-from .switch_item import SwitchItem as SwitchItem
-from .thing_item import Thing as Thing
+from .base_item import OpenhabItem
+from .call_item import CallItem
+from .color_item import ColorItem
+from .contact_item import ContactItem
+from .datetime_item import DatetimeItem
+from .dimmer_item import DimmerItem
+from .group_item import GroupItem
+from .image_item import ImageItem
+from .location_item import LocationItem
+from .number_item import NumberItem
+from .player_item import PlayerItem
+from .rollershutter_item import RollershutterItem
+from .string_item import StringItem
+from .switch_item import SwitchItem
+from .thing_item import Thing
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# CodeGen
+# ----------------------------------------------------------------------------------------------------------------------
+# - all
+
+__all__ = (
+    'CallItem',
+    'ColorItem',
+    'ContactItem',
+    'DatetimeItem',
+    'DimmerItem',
+    'GroupItem',
+    'ImageItem',
+    'LocationItem',
+    'NumberItem',
+    'OpenhabItem',
+    'PlayerItem',
+    'RollershutterItem',
+    'StringItem',
+    'SwitchItem',
+    'Thing',
+)

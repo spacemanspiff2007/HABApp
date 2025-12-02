@@ -6,20 +6,23 @@ from whenever import hours, milliseconds, minutes, seconds
 from HABApp.core.lib import InstantView
 
 
-# Keep __all__ here: this module re-exports third-party symbols under public aliases (trigger/filter)
-# so from HABApp.rule.scheduler import trigger remains valid and pyright/pylance don’t warn.
-__all__ = [
-    'trigger',
-    'filter',
-    'hours',
-    'minutes',
-    'seconds',
-    'milliseconds',
+# ----------------------------------------------------------------------------------------------------------------------
+# CodeGen
+# ----------------------------------------------------------------------------------------------------------------------
+# - all
+
+__all__ = (
+    'InstantView',
     'add_holiday',
+    'filter',
     'get_holiday_name',
     'get_holidays_by_name',
     'get_sun_position',
+    'hours',
     'is_holiday',
+    'milliseconds',
+    'minutes',
     'pop_holiday',
-    'InstantView',
-]
+    'seconds',
+    'trigger',
+)
