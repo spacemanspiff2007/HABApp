@@ -1,3 +1,4 @@
+import re
 from collections.abc import Sequence
 from pathlib import Path
 from textwrap import dedent
@@ -124,6 +125,8 @@ class CodeGenFile:
         return self
 
     def create(self) -> Self:
+        if not self.blocks:
+            return self
 
         context = ModuleContext(self._module)
         new_blocks: list[str] = []
@@ -166,8 +169,13 @@ def generate_code(module: ModuleContext, instructions: InstructionTypeList) -> s
     return '\n'.join(lines)
 
 
-def run_code_generator(module: ModuleType) -> None:
+PATTERN_CODEGEN = re.compile(r'#\s*codegen$', re.IGNORECASE)
+
+
+def run_code_generator(module: ModuleType, *, optional: bool = False) -> None:
     path = Path(str(module.__file__))
 
-    CodeGenFile(module, path, path.read_text()).parse().create().update()
+    file_text = path.read_text()
+    if not optional or '# CodeGen' in file_text or PATTERN_CODEGEN.search(file_text):
+        CodeGenFile(module, path, file_text).parse().create().update()
     return None
