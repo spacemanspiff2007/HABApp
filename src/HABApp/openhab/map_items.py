@@ -74,7 +74,8 @@ def map_item(name: str, type: str, value: str | None,
             raise ValueError(msg)  # noqa: TRY301
 
         if value is not None:
-            value = cls._state_from_oh_str(value)
+            value = cls._state_from_oh_str_or_none(name, value, log.warning)
+
         return cls(name, value, label=label, tags=tags, groups=groups, metadata=meta, **kwargs)
 
     except Exception as e:

@@ -1,8 +1,9 @@
 import datetime
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any, NamedTuple
 
 from immutables import Map
+from pydantic import ValidationError
 from typing_extensions import override
 
 from HABApp.core.const import MISSING
@@ -51,6 +52,16 @@ class OpenhabItem(BaseValueItem):
     def _state_from_oh_str(state: str):
         """Gets called to convert the state if it is not None"""
         raise NotImplementedError()
+
+    @classmethod
+    def _state_from_oh_str_or_none(cls, name: str, value: str, log_func: Callable[[str], None] | None = None) -> Any:
+        """Gets called to convert the state if it is not None. If conversion fails None will be returned"""
+        try:
+            return cls._state_from_oh_str(value)
+        except ValidationError:
+            if log_func:
+                log_func(f'Invalid value for {cls.__name__:s} {name:s}: "{value}"! Using None instead')
+            return None
 
     def oh_send_command(self, value: Any = MISSING) -> None:
         """Send a command to the openHAB item

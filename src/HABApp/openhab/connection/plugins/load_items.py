@@ -121,7 +121,8 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             if item.type.startswith('Number:'):
                 new_value = QuantityTypeModel.get_value_from_state(new_state)
             else:
-                new_value = existing_item._state_from_oh_str(new_state)
+                if (new_value := existing_item._state_from_oh_str_or_none(item.name, new_state, log.debug)) is None:
+                    continue
 
             if existing_item.value != new_value and existing_item.last_update == existing_item_update:
                 existing_item.value = new_value
