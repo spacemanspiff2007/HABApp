@@ -3,8 +3,9 @@ from __future__ import annotations
 import logging.handlers
 import signal
 import traceback
-from asyncio import iscoroutinefunction, sleep
+from asyncio import sleep
 from dataclasses import dataclass
+from inspect import iscoroutinefunction
 from types import BuiltinMethodType, FunctionType, MethodType
 from typing import TYPE_CHECKING
 
