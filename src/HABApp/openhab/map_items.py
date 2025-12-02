@@ -69,12 +69,13 @@ def map_item(name: str, type: str, value: str | None,
             if 'unit' not in meta:
                 log.warning(f'Item {name:s} is a UoM item but "unit" is not found in item metadata')
 
-        cls = _items.get(type)
-        if cls is not None:
-            return cls.from_oh(name, value, label=label, tags=tags, groups=groups, metadata=meta, **kwargs)
+        if (cls := _items.get(type)) is None:
+            msg = f'Unknown openHAB type: {type} for {name}'
+            raise ValueError(msg)  # noqa: TRY301
 
-        msg = f'Unknown openHAB type: {type} for {name}'
-        raise ValueError(msg)  # noqa: TRY301
+        if value is not None:
+            value = cls._state_from_oh_str(value)
+        return cls(name, value, label=label, tags=tags, groups=groups, metadata=meta, **kwargs)
 
     except Exception as e:
         process_exception(map_item, e, logger=log)

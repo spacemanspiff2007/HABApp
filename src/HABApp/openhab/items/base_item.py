@@ -1,6 +1,6 @@
 import datetime
 from collections.abc import Mapping
-from typing import Any, NamedTuple, Self
+from typing import Any, NamedTuple
 
 from immutables import Map
 from typing_extensions import override
@@ -46,14 +46,6 @@ class OpenhabItem(BaseValueItem):
         self.tags = item.tags
         self.groups = item.groups
         self.metadata = item.metadata
-
-    @classmethod
-    def from_oh(cls, name: str, value: Any = None,
-                label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                metadata: Mapping[str, MetaData] = Map(), **kwargs: Any) -> Self:
-        if value is not None:
-            value = cls._state_from_oh_str(value)
-        return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata, **kwargs)
 
     @staticmethod
     def _state_from_oh_str(state: str):

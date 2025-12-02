@@ -1,4 +1,3 @@
-import inspect
 from datetime import datetime
 from typing import Any
 
@@ -26,13 +25,6 @@ from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
 from HABApp.openhab.types import RawType, StringList
 from tests.helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
-
-
-@pytest.mark.parametrize('cls', (c for c in item_dict.values()))
-def test_argspec_from_oh(cls) -> None:
-    target_spec = inspect.getfullargspec(OpenhabItem.from_oh)
-    current_spec = inspect.getfullargspec(cls.from_oh)
-    assert current_spec == target_spec
 
 
 @pytest.mark.parametrize('cls', tuple(c for c in item_dict.values()) + (Thing, ))
