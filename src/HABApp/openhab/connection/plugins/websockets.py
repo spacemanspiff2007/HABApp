@@ -194,7 +194,8 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         # Websocket constants
         ws_type_text = WSMsgType.TEXT
-        ws_type_close = WSMsgType.CLOSED
+        ws_type_closed = WSMsgType.CLOSED
+        ws_type_close = WSMsgType.CLOSE
         topic_heartbeat = WebsocketTopicEnum.HEARTBEAT
         topic_error = WebsocketTopicEnum.REQUEST_FAILED
         topic_success = WebsocketTopicEnum.REQUEST_SUCCESS
@@ -206,6 +207,10 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
             msg_type, data, extra = msg
 
             if msg_type == ws_type_close:
+                log.debug(f'Websocket close: {data} {extra}')
+                break
+
+            if msg_type == ws_type_closed:
                 log.debug(f'Websocket closed: {ws.close_code} {extra}')
                 break
 
