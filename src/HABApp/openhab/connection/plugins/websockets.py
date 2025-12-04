@@ -206,15 +206,15 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
             msg = await ws.receive()
             msg_type, data, extra = msg
 
-            if msg_type == ws_type_close:
-                log.debug(f'Websocket close: {data} {extra}')
-                break
-
-            if msg_type == ws_type_closed:
-                log.debug(f'Websocket closed: {ws.close_code} {extra}')
-                break
-
             if msg_type != ws_type_text:
+                if msg_type == ws_type_close:
+                    log.debug(f'Websocket close: {data} {extra}')
+                    continue
+
+                if msg_type == ws_type_closed:
+                    log.debug(f'Websocket closed: {ws.close_code} {extra}')
+                    break
+
                 log.warning(f'Message with unexpected type received: {msg}')
                 continue
 
