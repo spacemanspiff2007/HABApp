@@ -104,7 +104,10 @@ async def item_event(event: ItemAddedEvent | ItemUpdatedEvent) -> None:
         if (cfg := await HABApp.openhab.interface_async.async_get_item(name)) is None:
             return None
 
-        new_item = map_item(name, event.type, None, event.label, event.tags, event.groups, metadata=cfg.metadata)
+        new_item = map_item(
+            name, event.type, value=None, last_value=None,
+            label=event.label, tags=event.tags, groups=event.groups, metadata=cfg.metadata
+        )
         if new_item is None:
             return None
 

@@ -1,3 +1,4 @@
+from typing import Any
 
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_item_registry
@@ -24,7 +25,8 @@ class MqttPairItem(MqttBaseItem):
     and a corresponding topic that is used to write values"""
 
     @classmethod
-    def get_create_item(cls, name: str, write_topic: str | None = None, initial_value=None) -> 'MqttPairItem':
+    def get_create_item(cls, name: str, write_topic: str | None = None,
+                        initial_value: Any = None, last_value: Any = None) -> 'MqttPairItem':
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name.
         HABApp tries to automatically derive the write topic from the item name. In cases where this does not
         work it can be specified manually.
@@ -43,13 +45,16 @@ class MqttPairItem(MqttBaseItem):
         try:
             item = Items.get_item(name)
         except ItemNotFoundException:
-            item = Items.add_item(cls(name, write_topic=write_topic, initial_value=initial_value))
+            item = Items.add_item(
+                cls(name, write_topic=write_topic, initial_value=initial_value, last_value=last_value)
+            )
 
         assert isinstance(item, cls), f'{cls} != {type(item)}'
         return item
 
-    def __init__(self, name: str, initial_value=None, write_topic: str | None = None) -> None:
-        super().__init__(name, initial_value)
+    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
+                 write_topic: str | None = None) -> None:
+        super().__init__(name, initial_value, last_value)
         self.write_topic: str = write_topic
 
     def publish(self, payload, qos: int | None = None, retain: bool | None = None):

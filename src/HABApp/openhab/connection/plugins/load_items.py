@@ -80,8 +80,8 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         # add all items
         for item in items:
             new_item = map_item(
-                item.name, item.type, map_null_str(item.state), item.label,
-                frozenset(item.tags), frozenset(item.groups), item.metadata
+                item.name, item.type, map_null_str(item.state), map_null_str(item.last_state),
+                label=item.label, tags=frozenset(item.tags), groups=frozenset(item.groups), metadata=item.metadata
             )
 
             # error

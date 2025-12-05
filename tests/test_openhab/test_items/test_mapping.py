@@ -14,11 +14,11 @@ from tests.helpers import TestEventBus
 @pytest.mark.ignore_log_errors
 def test_exception(eb: TestEventBus) -> None:
     eb.allow_errors = True
-    assert map_item('test', 'Number', 'asdf', 'my_label', frozenset(), frozenset(), {}) is None
+    assert map_item('test', 'Number', 'asdf', None, 'my_label', frozenset(), frozenset(), {}) is None
 
 
 def test_metadata() -> None:
-    make_number = partial(map_item, 'test', 'Number', None, 'my_label', frozenset(), frozenset())
+    make_number = partial(map_item, 'test', 'Number', None, None, 'my_label', frozenset(), frozenset())
 
     item = make_number({'ns1': {'value': 'v1'}})
     assert isinstance(item.metadata, Map)
@@ -39,7 +39,9 @@ def test_metadata() -> None:
 
 
 def test_number_unit_of_measurement() -> None:
-    make_item = partial(map_item, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}})
+    make_item = partial(
+        map_item, last_value=None, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}}
+    )
     metadata = Map(unit=MetaData('°C'))
     assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, metadata=metadata)
     assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2, metadata=metadata)
@@ -58,7 +60,9 @@ def test_datetime() -> None:
     def get_dt(value: str):
         assert value.startswith('2022-06-15')   # Date must match with offset_str
         return map_item(
-            'test1', 'DateTime', f'{value}{offset_str}', label='', tags=frozenset(), groups=frozenset(), metadata={})
+            'test1', 'DateTime', f'{value}{offset_str}',
+            label='', tags=frozenset(), groups=frozenset(), metadata={}, last_value=None
+            )
 
     assert get_dt('2022-06-15T09:47:38.284') == datetime(2022, 6, 15,  9, 47, 38, 284000)
     assert get_dt('2022-06-15T09:21:43.043996') == datetime(2022, 6, 15,  9, 21, 43, 43996)

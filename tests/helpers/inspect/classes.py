@@ -32,7 +32,11 @@ def check_class_annotations(cls: type[object],
 
     # if we don't have annotations we can use the docstr vars
     if annotations_missing:
-        assert not annotation_vars
+        # check that the docstr vars match the correct hints
+        for _annotation_name, _annotation_type in annotation_vars.items():
+            assert docstr_vars[_annotation_name] == _annotation_type
+
+        # since the annotation vars are a subset we overwrite the annotation vars
         annotation_vars = docstr_vars.copy()
 
     if init_alias is not None:

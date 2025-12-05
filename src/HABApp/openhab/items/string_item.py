@@ -16,12 +16,15 @@ class StringItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar str value: |oh_item_desc_value|
+    :ivar str last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: str
+    last_value: str
 
     # Undef has to become before StringType
     _update_to_oh: Final = OutgoingStateEvent('StringItem', UnDefTypeModel, StringTypeModel)

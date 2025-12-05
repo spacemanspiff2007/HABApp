@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Literal
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.openhab.definitions.websockets.item_value_types import OnOffTypeModel, RefreshTypeModel, UnDefTypeModel
@@ -17,13 +17,16 @@ class SwitchItem(OpenhabItem, OnOffCommand):
     """SwitchItem which accepts and converts the data types from OpenHAB
 
     :ivar str name: |oh_item_desc_name|
-    :ivar str value: |oh_item_desc_value|
+    :ivar Literal['ON', 'OFF'] value: |oh_item_desc_value|
+    :ivar Literal['ON', 'OFF'] last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: Literal['ON', 'OFF']
+    last_value: Literal['ON', 'OFF']
 
     _update_to_oh: Final = OutgoingStateEvent('SwitchItem', OnOffTypeModel, UnDefTypeModel)
     _command_to_oh: Final = OutgoingCommandEvent('SwitchItem', OnOffTypeModel, RefreshTypeModel)

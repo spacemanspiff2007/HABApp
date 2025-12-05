@@ -30,10 +30,11 @@ class BaseValueItem(BaseItem):
     :ivar datetime last_update: Timestamp of the last time when the item has updated the value (read only)
     """
 
-    def __init__(self, name: str, initial_value=None) -> None:
+    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None) -> None:
         super().__init__(name)
 
         self.value: Any = initial_value
+        self.last_value: Any = last_value
 
     def set_value(self, new_value: Any) -> bool:
         """Set a new value without creating events on the event bus
@@ -41,13 +42,15 @@ class BaseValueItem(BaseItem):
         :param new_value: new value of the item
         :return: True if state has changed
         """
-        state_changed = self.value != new_value
+        current_value = self.value
+        state_changed = current_value != new_value
 
         _now = Instant.now()
         if state_changed:
             self._last_change.set(_now)
         self._last_update.set(_now)
 
+        self.last_value = current_value
         self.value = new_value
         return state_changed
 

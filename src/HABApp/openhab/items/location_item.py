@@ -18,12 +18,15 @@ class LocationItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar Point value: |oh_item_desc_value|
+    :ivar Point last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: Point
+    last_value: Point
 
     _update_to_oh: Final = OutgoingStateEvent('LocationItem', PointTypeModel, 'UnDef')
     _command_to_oh: Final = OutgoingCommandEvent('LocationItem', PointTypeModel, 'Refresh')

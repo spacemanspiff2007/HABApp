@@ -128,6 +128,10 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 25.12.0 (2025-XX-XX)
+- Added ``last_value`` to the item
+- Fixed an issue where openHAB was sending an invalid item state
+
 #### 25.07.0 (2025-07-28)
 - Support for OpenHAB 5.0
 - Updated dependencies

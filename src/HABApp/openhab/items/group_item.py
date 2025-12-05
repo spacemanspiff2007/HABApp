@@ -21,6 +21,7 @@ class GroupItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar Any value: |oh_item_desc_value|
+    :ivar Any last_value: |oh_item_desc_last_value|
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|

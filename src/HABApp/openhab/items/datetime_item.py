@@ -18,12 +18,15 @@ class DatetimeItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar datetime value: |oh_item_desc_value|
+    :ivar datetime last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: datetime
+    last_value: datetime
 
     _update_to_oh: Final = OutgoingStateEvent('DatetimeItem', DateTimeTypeModel, 'UnDef')
     _command_to_oh: Final = OutgoingCommandEvent('DatetimeItem', DateTimeTypeModel, 'Refresh')

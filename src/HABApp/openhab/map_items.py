@@ -42,7 +42,7 @@ _items: dict[str, HINT_TYPE_OPENHAB_ITEM] = {
 }
 
 
-def map_item(name: str, type: str, value: str | None,
+def map_item(name: str, type: str, value: str | None, last_value: str | None,
              label: str | None, tags: frozenset[str],
              groups: frozenset[str], metadata: dict[str, dict[str, Any]] | None) -> \
         OpenhabItem | None:
@@ -75,8 +75,13 @@ def map_item(name: str, type: str, value: str | None,
 
         if value is not None:
             value = cls._state_from_oh_str_or_none(name, value, log.warning)
+        if last_value is not None:
+            last_value = cls._state_from_oh_str_or_none(name, last_value, log.warning)
 
-        return cls(name, value, label=label, tags=tags, groups=groups, metadata=meta, **kwargs)
+        return cls(
+            name, initial_value=value, last_value=last_value,
+            label=label, tags=tags, groups=groups, metadata=meta, **kwargs
+        )
 
     except Exception as e:
         process_exception(map_item, e, logger=log)

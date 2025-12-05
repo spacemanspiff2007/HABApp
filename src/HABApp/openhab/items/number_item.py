@@ -23,20 +23,23 @@ class NumberItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar int | float value: |oh_item_desc_value|
+    :ivar int | float last_value: |oh_item_desc_last_value|
     :ivar str | None dimension: Dimension if it's a UoM item
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: int | float
+    last_value: int | float
 
     _update_to_oh: Final = OutgoingStateEvent('NumberItem', DecimalTypeModel, QuantityTypeModel, 'UnDef')
     _command_to_oh: Final = OutgoingCommandEvent('NumberItem', DecimalTypeModel, QuantityTypeModel, 'Refresh')
 
-    def __init__(self, name: str, initial_value: int | float = None, label: str | None = None,
-                 tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
+    def __init__(self, name: str, initial_value: int | float = None, last_value: int | float = None,
+                 label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map(), dimension: str | None = None) -> None:
-        super().__init__(name, initial_value, label, tags, groups, metadata)
+        super().__init__(name, initial_value, last_value, label, tags, groups, metadata)
         self.dimension: str | None = dimension
 
     @override

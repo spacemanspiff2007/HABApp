@@ -97,14 +97,13 @@ class ColorItem(BaseValueItem):
 
     @classmethod
     def get_create_item(cls, name: str,
-                        initial_value: RGB | HSB | tuple[float, float, float] | None = None) -> Self:
+                        initial_value: RGB | HSB | tuple[float, float, float] | None = None,
+                        last_value: RGB | HSB | tuple[float, float, float] | None = None) -> Self:
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 
         :param name: item name
-        :param initial_value: state the item will have if it gets created
-        :param hue: hue (if initial_value is not used)
-        :param saturation: saturation (if initial_value is not used)
-        :param brightness: brightness (if initial_value is not used)
+        :param initial_value: value the item will have if it gets created
+        :param last_value: last value the item will have if it gets created
         :return: item
         """
         if not isinstance(name, str):
@@ -113,7 +112,7 @@ class ColorItem(BaseValueItem):
         try:
             item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = item_registry.add_item(cls(name, initial_value))
+            item = item_registry.add_item(cls(name, initial_value, last_value))
 
         if not isinstance(item, cls):
             raise WrongItemTypeError.from_item(item, cls)

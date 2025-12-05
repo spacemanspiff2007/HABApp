@@ -24,6 +24,7 @@ class OpenhabItem(BaseValueItem):
 
     :ivar str name:
     :ivar Any value:
+    :ivar Any last_value:
     :ivar str | None label:
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
@@ -33,10 +34,10 @@ class OpenhabItem(BaseValueItem):
     _update_to_oh: OutgoingStateEvent
     _command_to_oh: OutgoingCommandEvent
 
-    def __init__(self, name: str, initial_value: Any = None,
+    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()) -> None:
-        super().__init__(name, initial_value)
+        super().__init__(name, initial_value=initial_value, last_value=last_value)
         self.label: str | None = label
         self.tags: frozenset[str] = tags
         self.groups: frozenset[str] = groups

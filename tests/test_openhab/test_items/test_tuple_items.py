@@ -30,9 +30,12 @@ def test_call_post_update(websocket_events) -> None:
 
 def test_call_map() -> None:
     call = map_item(
-        'my_call_item', 'Call', 'my_value', label='l', tags=frozenset(), groups=frozenset(), metadata=None,)
+        'my_call_item', 'Call', 'my_value', last_value='my_last_value',
+        label='l', tags=frozenset(), groups=frozenset(), metadata=None,
+    )
     assert isinstance(call, CallItem)
     assert call.value == ('my_value', )
+    assert call.last_value == ('my_last_value', )
 
     assert call.label == 'l'
     assert call.tags == frozenset()
@@ -40,7 +43,9 @@ def test_call_map() -> None:
     assert call.metadata == Map()
 
     i = map_item(
-        'my_call_item', 'Call', '03018,2722720', label='l', tags=frozenset(), groups=frozenset(), metadata=None,)
+        'my_call_item', 'Call', '03018,2722720', last_value=None,
+        label='l', tags=frozenset(), groups=frozenset(), metadata=None,
+    )
     assert isinstance(i, CallItem)
     assert i.value == ('03018', '2722720')
 
@@ -72,11 +77,12 @@ def test_location_post_update(websocket_events) -> None:
 
 def test_location_map() -> None:
     call = map_item(
-        'my_call_item', 'Location', '52.518705,13.376072', label='l',
-        tags=frozenset(), groups=frozenset(), metadata=None,
+        'my_call_item', 'Location', '52.518705,13.376072', last_value='52.5,13.3',
+        label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
     assert isinstance(call, LocationItem)
     assert call.value == (52.518705, 13.376072, None)
+    assert call.last_value == (52.5, 13.3, None)
 
     assert call.label == 'l'
     assert call.tags == frozenset()
@@ -84,8 +90,8 @@ def test_location_map() -> None:
     assert call.metadata == Map()
 
     i = map_item(
-        'my_call_item', 'Location', '52.518705,13.376072,43', label='l',
-        tags=frozenset(), groups=frozenset(), metadata=None,
+        'my_call_item', 'Location', '52.518705,13.376072,43', last_value=None,
+        label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
     assert isinstance(i, LocationItem)
     assert i.value == (52.518705, 13.376072, 43)

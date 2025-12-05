@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Literal
 
 from HABApp.core.errors import InvalidItemValueError
 from HABApp.openhab.definitions.websockets.item_value_types import OpenClosedTypeModel
@@ -17,13 +17,16 @@ class ContactItem(OpenhabItem):
     """ContactItem
 
     :ivar str name: |oh_item_desc_name|
-    :ivar str value: |oh_item_desc_value|
+    :ivar Literal['OPEN', 'CLOSED'] value: |oh_item_desc_value|
+    :ivar Literal['OPEN', 'CLOSED'] last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: Literal['OPEN', 'CLOSED']
+    last_value: Literal['OPEN', 'CLOSED']
 
     _update_to_oh: Final = OutgoingStateEvent('ContactItem', 'OpenClosed', 'UnDef')
     _command_to_oh: Final = OutgoingCommandEvent('ContactItem', 'Refresh')

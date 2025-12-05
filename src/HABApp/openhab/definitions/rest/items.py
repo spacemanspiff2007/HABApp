@@ -51,6 +51,7 @@ class ItemResp(BaseModel):
     # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/item/EnrichedItemDTO.java
     link: str | None = None
     state: str
+    last_state: str | None = Field(default=None, alias='lastState')
     transformed_state: str | None = Field(default=None, alias='transformedState')
     state_description: StateDescriptionResp | None = Field(default=None, alias='stateDescription')
     unit: str | None = Field(default=None, alias='unitSymbol')

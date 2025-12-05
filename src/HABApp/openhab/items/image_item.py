@@ -19,12 +19,15 @@ class ImageItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar RawType value: |oh_item_desc_value|
+    :ivar RawType last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: RawType
+    last_value: RawType
 
     _update_to_oh: Final = OutgoingStateEvent('ImageItem', 'Raw', 'UnDef')
     _command_to_oh: Final = OutgoingCommandEvent('ImageItem', 'Refresh')
