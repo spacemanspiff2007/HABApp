@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Final, Literal
+from typing import Final, Literal, Self
 
 from geopy.distance import distance
-from typing_extensions import Self
 
 
 class Point:

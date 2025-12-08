@@ -22,12 +22,15 @@ class CallItem(OpenhabItem):
 
     :ivar str name: |oh_item_desc_name|
     :ivar StringList value: |oh_item_desc_value|
+    :ivar StringList last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: StringList
+    last_value: StringList
 
     _update_to_oh: Final = OutgoingStateEvent('CallItem', 'StringList', 'UnDef')
     _command_to_oh: Final = OutgoingCommandEvent('CallItem', 'Refresh')

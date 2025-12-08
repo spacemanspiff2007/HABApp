@@ -1,12 +1,14 @@
 # no external dependencies
-import HABApp.openhab.types
 import HABApp.openhab.errors
 import HABApp.openhab.events
+import HABApp.openhab.types
+
 
 # isort: split
 
 import HABApp.openhab.interface_async
 import HABApp.openhab.interface_sync
+
 
 # isort: split
 

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import logging
+from enum import StrEnum
 from typing import Final
-
-from HABApp.core.const.const import StrEnum
 
 
 connection_log = logging.getLogger('HABApp.connection')

@@ -1,37 +1,30 @@
 from __future__ import annotations
 
 import logging
-from asyncio import Queue, sleep
+from asyncio import Queue, TaskGroup, sleep
 from base64 import b64encode
-from inspect import isclass
-from typing import Annotated, Final, get_args, get_origin
+from typing import Final
 
 from aiohttp import BasicAuth, ClientError, ClientWebSocketResponse, WSMsgType
 from pydantic import ValidationError
 
 import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.const.const import PYTHON_311
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
 from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
+from HABApp.openhab.definitions.helpers import get_discriminator_values_from_union
 from HABApp.openhab.definitions.websockets import (
-    OPENHAB_EVENT_TYPE,
     OPENHAB_EVENT_TYPE_ADAPTER,
+    OpenHabEventType,
     WebsocketHeartbeatEvent,
     WebsocketSendTypeFilter,
     WebsocketTopicEnum,
 )
-from HABApp.openhab.definitions.websockets.base import BaseModel, BaseOutEvent
+from HABApp.openhab.definitions.websockets.base import BaseOutEvent
 from HABApp.openhab.process_events import on_openhab_event
-
-
-if PYTHON_311:
-    from asyncio import TaskGroup
-else:
-    from taskgroup import TaskGroup
 
 
 class WebSocketClosedError(ClientError):
@@ -145,44 +138,16 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 finally:
                     self._websocket = None
 
-        # TODO: replace this with exception group as soon as 3.14 is available
-        except Exception as e:
-            self.plugin_connection.process_exception(e, self.websockets_task)
-
-    @staticmethod
-    def _get_event_type_names_from_union(union: type[BaseModel]) -> list[str]:
-        names = set()
-
-        objs = [get_args(union)[0]]
-
-        while objs:
-            obj = objs.pop(0)
-
-            if isclass(obj) and issubclass(obj, BaseModel):
-                literal = obj.model_fields['type'].annotation
-                literal_value = get_args(literal)
-                if len(literal_value) != 1:
-                    msg = f'Expected exactly one literal value for {literal!r}'
-                    raise ValueError(msg)
-                names.add(literal_value[0])
-                continue
-
-            if get_origin(obj) is Annotated:
-                objs.append(get_args(obj)[0])
-                continue
-
-            new = get_args(obj)
-            if not new:
-                msg = f'Expected args for {obj!r}'
-                raise ValueError(msg)
-            objs.extend(new)
-
-        return sorted(names)
+        except* Exception as e:
+            for exc in e.exceptions:
+                self.plugin_connection.process_exception(exc, self.websockets_task)
 
     async def _setup_websocket_filter(self, ws: ClientWebSocketResponse, log: logging.Logger) -> None:
         # setup event type filter
         filter_cfg = HABApp.CONFIG.openhab.connection.websocket.event_filter
-        supported_event_names = set(self._get_event_type_names_from_union(OPENHAB_EVENT_TYPE))
+        supported_event_names = set(
+            get_discriminator_values_from_union(OpenHabEventType, allow_multiple=('WebSocketEvent', ))
+        )
 
         names: set[str] = set()
         if filter_cfg.event_type.is_auto():
@@ -229,20 +194,27 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         # Websocket constants
         ws_type_text = WSMsgType.TEXT
-        ws_type_close = WSMsgType.CLOSED
+        ws_type_closed = WSMsgType.CLOSED
+        ws_type_close = WSMsgType.CLOSE
         topic_heartbeat = WebsocketTopicEnum.HEARTBEAT
         topic_error = WebsocketTopicEnum.REQUEST_FAILED
         topic_success = WebsocketTopicEnum.REQUEST_SUCCESS
+
+        oh_type_adapter = OPENHAB_EVENT_TYPE_ADAPTER
 
         while True:
             msg = await ws.receive()
             msg_type, data, extra = msg
 
-            if msg_type == ws_type_close:
-                log.debug(f'Websocket closed: {ws.close_code} {extra}')
-                break
-
             if msg_type != ws_type_text:
+                if msg_type == ws_type_close:
+                    log.debug(f'Websocket close: {data} {extra}')
+                    continue
+
+                if msg_type == ws_type_closed:
+                    log.debug(f'Websocket closed: {ws.close_code} {extra}')
+                    break
+
                 log.warning(f'Message with unexpected type received: {msg}')
                 continue
 
@@ -250,7 +222,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 log_events._log(debug_lvl, data, ())
 
             try:
-                oh_event = OPENHAB_EVENT_TYPE_ADAPTER.validate_json(data)
+                oh_event = oh_type_adapter.validate_json(data)
             except ValidationError as e:
                 HABAppError(log).add(f'Input: {data:s}').add_exception(e).dump()
                 continue

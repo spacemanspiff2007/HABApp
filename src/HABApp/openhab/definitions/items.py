@@ -1,6 +1,5 @@
 import typing
-
-from HABApp.core.const.const import StrEnum
+from enum import StrEnum
 
 
 def _get_str_enum_values(obj: type[StrEnum]) -> set[str]:

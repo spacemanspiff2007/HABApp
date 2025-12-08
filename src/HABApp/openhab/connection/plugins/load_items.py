@@ -80,8 +80,8 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         # add all items
         for item in items:
             new_item = map_item(
-                item.name, item.type, map_null_str(item.state), item.label,
-                frozenset(item.tags), frozenset(item.groups), item.metadata
+                item.name, item.type, map_null_str(item.state), map_null_str(item.last_state),
+                label=item.label, tags=frozenset(item.tags), groups=frozenset(item.groups), metadata=item.metadata
             )
 
             # error
@@ -121,7 +121,8 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             if item.type.startswith('Number:'):
                 new_value = QuantityTypeModel.get_value_from_state(new_state)
             else:
-                new_value = existing_item._state_from_oh_str(new_state)
+                if (new_value := existing_item._state_from_oh_str_or_none(item.name, new_state, log.debug)) is None:
+                    continue
 
             if existing_item.value != new_value and existing_item.last_update == existing_item_update:
                 existing_item.value = new_value

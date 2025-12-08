@@ -2,6 +2,7 @@ import asyncio
 import functools
 import logging
 import typing
+from inspect import iscoroutinefunction
 
 import pytest
 
@@ -21,7 +22,7 @@ if typing.TYPE_CHECKING:
 
 def raise_err(func):
     # return async wrapper
-    if asyncio.iscoroutinefunction(func) or asyncio.iscoroutine(func):
+    if iscoroutinefunction(func) or asyncio.iscoroutine(func):
         @functools.wraps(func)
         async def a(*args, **kwargs):
             return await func(*args, **kwargs)

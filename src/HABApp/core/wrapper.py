@@ -1,7 +1,7 @@
-import asyncio
 import functools
 import logging
 from collections.abc import Awaitable, Callable
+from inspect import iscoroutinefunction
 from logging import Logger
 
 # noinspection PyProtectedMember
@@ -54,7 +54,7 @@ def log_exception(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T]]:
 
 def log_exception(func):
     # return async wrapper
-    if asyncio.iscoroutinefunction(func):
+    if iscoroutinefunction(func):
         @functools.wraps(func)
         async def wrapped_coro(*args, **kwargs):
             try:
@@ -88,7 +88,7 @@ def ignore_exception(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T
 
 def ignore_exception(func):
     # return async wrapper
-    if asyncio.iscoroutinefunction(func):
+    if iscoroutinefunction(func):
         @functools.wraps(func)
         async def wrapped_coro(*args, **kwargs):
             try:
@@ -111,7 +111,7 @@ def ignore_exception(func):
 
 def in_thread(func: Callable[P, T]) -> Callable[P, T]:
     # async not allowed
-    if asyncio.iscoroutinefunction(func):
+    if iscoroutinefunction(func):
         msg = 'Cannot use in_thread with async functions!'
         raise ValueError(msg)
 

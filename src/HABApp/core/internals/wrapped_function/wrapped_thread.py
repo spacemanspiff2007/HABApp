@@ -51,6 +51,7 @@ def stop_thread_pool() -> None:
 
     pool.shutdown()
     default_logger.debug('Thread pool stopped!')
+    return None
 
 
 POOL_INFO: Final[set[PoolFunc]] = set()

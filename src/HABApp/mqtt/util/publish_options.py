@@ -1,6 +1,4 @@
-from typing import Any, Final
-
-from typing_extensions import Self
+from typing import Any, Final, Self
 
 from HABApp.mqtt.interface_sync import publish
 

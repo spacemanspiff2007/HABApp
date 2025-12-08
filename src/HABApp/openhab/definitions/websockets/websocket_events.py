@@ -1,18 +1,17 @@
+from enum import StrEnum
 from typing import Annotated, Literal
 
 from pydantic import Field, Json
-
-from HABApp.core.const.const import StrEnum
 
 from .base import SERIALIZE_TO_JSON_STR, BaseEvent, BaseOutEvent
 from .item_value_types import OpenHabValueType
 
 
 class WebsocketTopicEnum(StrEnum):
-    REQUEST_FAILED = 'openhab/websocket/response/failed'
+    REQUEST_FAILED  = 'openhab/websocket/response/failed'
     REQUEST_SUCCESS = 'openhab/websocket/response/success'
-    HEARTBEAT = 'openhab/websocket/heartbeat'
-    TYPE_FILTER = 'openhab/websocket/filter/type'
+    HEARTBEAT       = 'openhab/websocket/heartbeat'
+    TYPE_FILTER     = 'openhab/websocket/filter/type'
 
 
 class WebsocketBaseEvent(BaseEvent):

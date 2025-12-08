@@ -1,9 +1,7 @@
 import logging
 from collections.abc import Callable, Coroutine
 from enum import Enum, auto
-from typing import Any, overload
-
-from typing_extensions import Self
+from typing import Any, Self, overload
 
 import HABApp
 from HABAppTests.test_rule.test_case import TestCase, TestResult, run_test_cases

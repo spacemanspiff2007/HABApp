@@ -1,6 +1,6 @@
-import asyncio
 from asyncio import Task, create_task, run_coroutine_threadsafe, sleep
 from collections.abc import Awaitable, Callable
+from inspect import iscoroutinefunction
 from typing import Any
 
 from HABApp.core.const import loop
@@ -10,7 +10,7 @@ from HABApp.core.const import loop
 
 class PendingFuture:
     def __init__(self, future: Callable[[], Awaitable[Any]], secs: int | float) -> None:
-        assert asyncio.iscoroutinefunction(future), type(future)
+        assert iscoroutinefunction(future), type(future)
         if not isinstance(secs, (int, float)) or secs < 0:
             raise ValueError(f'Pending time must be int/float and >= 0! Is: {secs} ({type(secs)})')
 

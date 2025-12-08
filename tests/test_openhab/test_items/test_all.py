@@ -1,6 +1,5 @@
-import inspect
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 import pytest
 
@@ -26,13 +25,6 @@ from HABApp.openhab.items.base_item import OpenhabItem
 from HABApp.openhab.map_items import _items as item_dict
 from HABApp.openhab.types import RawType, StringList
 from tests.helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
-
-
-@pytest.mark.parametrize('cls', (c for c in item_dict.values()))
-def test_argspec_from_oh(cls) -> None:
-    target_spec = inspect.getfullargspec(OpenhabItem.from_oh)
-    current_spec = inspect.getfullargspec(cls.from_oh)
-    assert current_spec == target_spec
 
 
 @pytest.mark.parametrize('cls', tuple(c for c in item_dict.values()) + (Thing, ))
@@ -78,8 +70,8 @@ def test_doc_ivar(cls) -> None:
 
     correct_hints = {
         StringItem: {'value': str},
-        SwitchItem: {'value': str},
-        ContactItem: {'value': str},
+        SwitchItem: {'value': Literal['ON', 'OFF']},
+        ContactItem: {'value': Literal['OPEN', 'CLOSED']},
         PlayerItem: {'value': str},
 
         NumberItem:        {'value': int | float},
@@ -95,6 +87,10 @@ def test_doc_ivar(cls) -> None:
 
         GroupItem: {'value': Any}
     }
+
+    # last_value must have the same hint
+    for k, v in correct_hints.items():
+        v['last_value'] = v['value']
 
     init_missing = {
         **{k: ('last_change', 'last_update') for k in correct_hints},
@@ -125,6 +121,7 @@ def test_doc_ivar(cls) -> None:
         assert hasattr(obj, name)
 
     class_vars.pop('value')
+    class_vars.pop('last_value')
 
     if cls is NumberItem:
         class_vars.pop('dimension')
@@ -132,4 +129,5 @@ def test_doc_ivar(cls) -> None:
     # compare with base class so we have a consistent signature
     target_vars = get_ivars_from_docstring(OpenhabItem)
     target_vars.pop('value')
+    target_vars.pop('last_value')
     assert target_vars == class_vars

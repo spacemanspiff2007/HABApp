@@ -1,9 +1,9 @@
-from HABApp.openhab.connection.plugins import WebsocketPlugin
-from HABApp.openhab.definitions.websockets import OPENHAB_EVENT_TYPE
+from HABApp.openhab.definitions.helpers import get_discriminator_values_from_union
+from HABApp.openhab.definitions.websockets import OpenHabEventType
 
 
 def test_type_adapter() -> None:
-    res = WebsocketPlugin._get_event_type_names_from_union(OPENHAB_EVENT_TYPE)
+    res = get_discriminator_values_from_union(OpenHabEventType, allow_multiple=('WebSocketEvent', ))
     assert res == [
         'ChannelDescriptionChangedEvent',
         'ChannelTriggeredEvent',

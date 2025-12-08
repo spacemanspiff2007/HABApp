@@ -26,7 +26,10 @@ Number      BrokenLink      {channel="astro:sun:habapp-testing:channel-that-does
 //-------------------------------------------------------------------------------------------------
 
 Group	gRRD4j
-Number	RRD4jItem      (gRRD4j)
+Number	RRD4jItem       (gRRD4j)
 
-Group	gInMemoryForecast
-Number	InMemoryForecastItem      (gInMemoryForecast)
+Group	gMapDb
+Number	MapDbItem       (gMapDb)
+
+Group	gInMemory
+Number	InMemoryItem    (gInMemory)

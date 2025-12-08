@@ -1,13 +1,5 @@
 from collections.abc import Iterable
-from typing import Final, TypeVar
-
-from HABApp.core.const.const import PYTHON_311
-
-
-if not PYTHON_311:
-    from typing_extensions import Self
-else:
-    from typing import Self
+from typing import Final, Self, TypeVar
 
 
 class ValueFormatter:

@@ -1,1 +1,1 @@
-from .rule_runner import SimpleRuleRunner, ErrorEventReceivedError
+from .rule_runner import ErrorEventReceivedError, SimpleRuleRunner

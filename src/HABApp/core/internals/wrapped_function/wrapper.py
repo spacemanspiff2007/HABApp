@@ -1,6 +1,6 @@
 import logging
-from asyncio import iscoroutinefunction
 from collections.abc import Callable, Coroutine
+from inspect import iscoroutinefunction
 from typing import Any
 
 from HABApp.config import CONFIG

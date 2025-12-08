@@ -2,7 +2,7 @@ import logging
 
 import HABApp
 
-from . import ValueMode
+from .mode_value import ValueMode
 
 
 class SwitchItemValueMode(ValueMode):

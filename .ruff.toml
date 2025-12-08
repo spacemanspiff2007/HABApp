@@ -1,7 +1,7 @@
 indent-width = 4
 line-length  = 120
 
-target-version = "py310"
+target-version = "py311"
 
 src = [
     "src",
@@ -31,9 +31,6 @@ ignore = [
     # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
     "S311",     # Standard pseudo-random generators are not suitable for cryptographic purposes
 
-    # https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    "UP038",    # Use X | Y in {} call instead of (X, Y)
-
     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
     "ANN401",   # Dynamically typed expressions (typing.Any) are disallowed in {name}
 
@@ -60,7 +57,10 @@ ignore = [
     "RUF005",  # Consider {expression} instead of concatenation
 
     # https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
-    "PT007",  # Wrong values type in @pytest.mark.parametrize expected {values} of {row}
+    "PT007",  # Wrong values type in @pytest.mark.parametrize expected {values} of {row},
+
+    # https://docs.astral.sh/ruff/rules/#pep8-naming-n
+    "N999",  # Invalid module name: '{name}'
 ]
 
 
@@ -95,6 +95,10 @@ lines-after-imports = 2     # https://docs.astral.sh/ruff/settings/#lint_isort_l
 
 "run/**" = ["INP001"]
 
+"__init__.py" = [
+    "F401"  # {name} imported but unused https://docs.astral.sh/ruff/rules/unused-import/
+]
+
 "tests/*" = [
     "ANN",  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
 
@@ -104,6 +108,16 @@ lines-after-imports = 2     # https://docs.astral.sh/ruff/settings/#lint_isort_l
     # https://docs.astral.sh/ruff/rules/#refactor-r
     "PLR2004",  # Magic value used in comparison, consider replacing {value} with a constant variable
     "PLR0913",  # Too many arguments in function definition ({c_args} > {max_args})
+
+    # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
+    "FBT003",  # Boolean positional value in function call
+
+    # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+    "ARG001",  # Unused function argument {name}
+    "ARG002",  # Unused method argument {name}
+    "ARG003",  # Unused class method argument: {name}
+    "ARG004",  # Unused static method argument: {name}
+    "ARG005",  # Unused lambda argument: {name}
 ]
 
 "interface_*.py" = [

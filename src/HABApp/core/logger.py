@@ -1,6 +1,5 @@
 import logging
-
-from typing_extensions import Self
+from typing import Self
 
 from HABApp.core.const.topics import TOPIC_ERRORS as _T_ERRORS
 from HABApp.core.const.topics import TOPIC_INFOS as _T_INFOS

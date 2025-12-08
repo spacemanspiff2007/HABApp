@@ -1,25 +1,22 @@
-aiohttp     == 3.12.14
-pydantic    == 2.11.7
+aiohttp     == 3.13.2
+pydantic    == 2.12.5
 bidict      == 0.23.1
-watchfiles  == 1.1.0
-ujson       == 5.10.0
+watchfiles  == 1.1.1
+ujson       == 5.11.0
 aiomqtt     == 2.4.0
 
-eascheduler == 0.2.6
+eascheduler == 0.2.7
 
 immutables  == 0.21
-easyconfig  == 0.4.1
+easyconfig  == 0.4.2
 stack_data  == 0.6.3
 colorama    == 0.4.6
 fastnumbers == 5.1.1
 
 geopy == 2.4.1
 
-typing-extensions == 4.14.1
+typing-extensions == 4.15.0
 
 aiohttp-sse-client == 0.2.1
 
 javaproperties == 0.8.2
-
-# Backport of TaskGroup: https://pypi.org/project/taskgroup/
-taskgroup == 0.2.2; python_version < "3.11"

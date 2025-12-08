@@ -1,5 +1,6 @@
-from .context import Context, Context, ContextBoundObj, ContextProvidingObj
+from .context import Context, ContextBoundObj, ContextProvidingObj
+
 
 # isort: split
 
-from .get_context import get_current_context, AutoContextBoundObj
+from .get_context import AutoContextBoundObj, get_current_context

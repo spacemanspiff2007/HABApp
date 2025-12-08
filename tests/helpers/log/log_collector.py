@@ -2,11 +2,10 @@ import logging
 from collections.abc import Callable, Iterable
 from operator import eq as eq_func
 from operator import ge as ge_func
-from typing import Any, Final
+from typing import Any, Final, Self
 
 import pytest
 from pytest import LogCaptureFixture
-from typing_extensions import Self
 
 from .log_matcher import LogEntryMatcherBase, create_matcher
 from .log_utils import SimpleLogRecord

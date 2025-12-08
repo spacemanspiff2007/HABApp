@@ -1,5 +1,6 @@
+from typing import Self
+
 from eascheduler.builder.helper import HINT_POS_TIMEDELTA, get_pos_timedelta_secs
-from typing_extensions import Self
 from whenever import Instant
 
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK

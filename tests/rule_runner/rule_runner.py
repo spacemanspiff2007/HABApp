@@ -3,12 +3,12 @@ import warnings
 from collections.abc import Awaitable, Callable, Coroutine
 from concurrent.futures import Future
 from types import TracebackType
-from typing import Any, Final
+from typing import Any, Final, Self
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
 from pytest import MonkeyPatch  # noqa: PT013
-from typing_extensions import Self, override
+from typing_extensions import override
 
 import HABApp
 import HABApp.core.lib.exceptions.format

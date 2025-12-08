@@ -20,12 +20,15 @@ class DimmerItem(OpenhabItem, OnOffCommand, PercentCommand):
 
     :ivar str name: |oh_item_desc_name|
     :ivar int | float value: |oh_item_desc_value|
+    :ivar int | float last_value: |oh_item_desc_last_value|
 
     :ivar str | None label: |oh_item_desc_label|
     :ivar frozenset[str] tags: |oh_item_desc_tags|
     :ivar frozenset[str] groups: |oh_item_desc_group|
     :ivar Mapping[str, MetaData] metadata: |oh_item_desc_metadata|
     """
+    value: int | float
+    last_value: int | float
 
     _update_to_oh: Final = OutgoingStateEvent('DimmerItem', PercentTypeModel, 'OnOff', 'UnDef')
     _command_to_oh: Final = OutgoingCommandEvent('DimmerItem', PercentTypeModel, 'OnOff', 'IncreaseDecrease', 'Refresh')

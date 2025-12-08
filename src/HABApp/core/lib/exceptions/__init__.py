@@ -1,1 +1,1 @@
-from .format import format_exception, HINT_EXCEPTION
+from .format import HINT_EXCEPTION, format_exception

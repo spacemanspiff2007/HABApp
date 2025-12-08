@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Self
 
 from eascheduler.job_control.base import BaseControl
-from typing_extensions import Self, override
+from typing_extensions import override
 from whenever import Instant
 
 from HABApp.core.asyncio import run_func_from_async

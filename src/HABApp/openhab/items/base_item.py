@@ -1,9 +1,10 @@
 import datetime
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any, NamedTuple
 
 from immutables import Map
-from typing_extensions import Self, override
+from pydantic import ValidationError
+from typing_extensions import override
 
 from HABApp.core.const import MISSING
 from HABApp.core.items import BaseValueItem
@@ -23,6 +24,7 @@ class OpenhabItem(BaseValueItem):
 
     :ivar str name:
     :ivar Any value:
+    :ivar Any last_value:
     :ivar str | None label:
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
@@ -32,10 +34,10 @@ class OpenhabItem(BaseValueItem):
     _update_to_oh: OutgoingStateEvent
     _command_to_oh: OutgoingCommandEvent
 
-    def __init__(self, name: str, initial_value: Any = None,
+    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map()) -> None:
-        super().__init__(name, initial_value)
+        super().__init__(name, initial_value=initial_value, last_value=last_value)
         self.label: str | None = label
         self.tags: frozenset[str] = tags
         self.groups: frozenset[str] = groups
@@ -47,18 +49,20 @@ class OpenhabItem(BaseValueItem):
         self.groups = item.groups
         self.metadata = item.metadata
 
-    @classmethod
-    def from_oh(cls, name: str, value: Any = None,
-                label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                metadata: Mapping[str, MetaData] = Map(), **kwargs: Any) -> Self:
-        if value is not None:
-            value = cls._state_from_oh_str(value)
-        return cls(name, value, label=label, tags=tags, groups=groups, metadata=metadata, **kwargs)
-
     @staticmethod
     def _state_from_oh_str(state: str):
         """Gets called to convert the state if it is not None"""
         raise NotImplementedError()
+
+    @classmethod
+    def _state_from_oh_str_or_none(cls, name: str, value: str, log_func: Callable[[str], None] | None = None) -> Any:
+        """Gets called to convert the state if it is not None. If conversion fails None will be returned"""
+        try:
+            return cls._state_from_oh_str(value)
+        except ValidationError:
+            if log_func:
+                log_func(f'Invalid value for {cls.__name__:s} {name:s}: "{value}"! Using None instead')
+            return None
 
     def oh_send_command(self, value: Any = MISSING) -> None:
         """Send a command to the openHAB item
