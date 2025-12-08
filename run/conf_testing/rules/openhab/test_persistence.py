@@ -30,7 +30,7 @@ class TestPersistenceBase(TestBaseRule):
             ItemWaiter(self.item_name).wait_for_state(0)
         i.oh_post_update(int(i.value) + 1 if i.value < 10 else 0)
 
-    def test_service_available(self):
+    def test_service_available(self) -> None:
         for cfg in self.oh.get_persistence_services():
             if cfg.id == self.service_name:
                 break
@@ -38,7 +38,7 @@ class TestPersistenceBase(TestBaseRule):
             msg = f'Persistence service "{self.service_name}" not found!'
             raise ValueError(msg)
 
-    def set_persistence_data(self, time: datetime, state: Any):
+    def set_persistence_data(self, time: datetime, state: Any) -> None:
         return self.openhab.set_persistence_data(self.item_name, self.service_name, time, state)
 
     def get_persistence_data(self, start_time: datetime | None, end_time: datetime | None) -> OpenhabPersistenceData:
@@ -63,7 +63,7 @@ TestRRD4j()
 class TestMapDB(TestPersistenceBase):
 
     def __init__(self) -> None:
-        super().__init__('mapdb', 'RRD4jItem')
+        super().__init__('mapdb', 'MapDbItem')
         self.add_test('MapDB get', self.test_get)
 
     def test_get(self) -> None:
@@ -78,7 +78,7 @@ TestMapDB()
 class TestInMemory(TestPersistenceBase):
 
     def __init__(self) -> None:
-        super().__init__('inmemory', 'InMemoryForecastItem')
+        super().__init__('inmemory', 'InMemoryItem')
 
         if Connections.get('openhab').context.version >= (4, 1):
             self.add_test('InMemory', self.test_in_memory)

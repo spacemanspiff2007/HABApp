@@ -38,16 +38,10 @@ class TestOpenhabEventTypes(TestBaseRule):
               EventWaiter(item_name, ValueUpdateEventFilter()) as state_waiter,
               EventWaiter(item_name, ItemCommandEventFilter()) as command_waiter):
 
-            last_receive_value = None
+            # check that the event is properly received
             for post_value, receive_value in test_states:
                 item.oh_post_update(post_value)
                 state_waiter.wait_for_event(value=receive_value)
-
-                # check that the item has the correct value
-                assert item.value == receive_value
-                if last_receive_value is not None:
-                    assert item.last_value == last_receive_value
-                last_receive_value = receive_value
 
             # use oh_send_command to send commands
             for send_command, receive_value in test_commands:

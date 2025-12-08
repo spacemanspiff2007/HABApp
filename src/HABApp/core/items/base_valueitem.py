@@ -42,16 +42,18 @@ class BaseValueItem(BaseItem):
         :param new_value: new value of the item
         :return: True if state has changed
         """
+        _now = Instant.now()
+
         current_value = self.value
         state_changed = current_value != new_value
 
-        _now = Instant.now()
-        if state_changed:
-            self._last_change.set(_now)
+        self.value = new_value
         self._last_update.set(_now)
 
-        self.last_value = current_value
-        self.value = new_value
+        if state_changed:
+            self._last_change.set(_now)
+            self.last_value = current_value  # last value is only updated on value change
+
         return state_changed
 
     def post_value(self, new_value: Any) -> bool:

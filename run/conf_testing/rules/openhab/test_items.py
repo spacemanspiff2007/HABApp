@@ -3,7 +3,7 @@ from immutables import Map
 
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.openhab.interface_async import async_get_items
-from HABApp.openhab.items import GroupItem, StringItem
+from HABApp.openhab.items import GroupItem, NumberItem, StringItem
 
 
 class OpenhabItems(TestBaseRule):
@@ -19,6 +19,7 @@ class OpenhabItems(TestBaseRule):
         self.add_test('TestGroupFunction', self.test_group_func)
 
         self.add_test('TestSmallValues', self.test_small_float_values)
+        self.add_test('TestLastValue', self.test_last_value)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -145,6 +146,30 @@ class OpenhabItems(TestBaseRule):
             e.wait_for_event()
 
         assert grp_item.value == 'OFF'
+
+    @OpenhabTmpItem.create('Number', arg_name='tmp_item')
+    def test_last_value(self, tmp_item: OpenhabTmpItem) -> None:
+        item = NumberItem.get_item(tmp_item.name)
+
+        with EventWaiter(item.name, ValueUpdateEventFilter()) as e:
+
+            def _send_and_check(value: int | None, last_value: int | None) -> None:
+                item.oh_post_update(value)
+                e.wait_for_event()
+                assert item.value == value
+                assert item.last_value == last_value
+
+            for _ in range(3):
+                _send_and_check(1, None)
+
+            for _ in range(3):
+                _send_and_check(2, 1)
+
+            for _ in range(3):
+                _send_and_check(None, 2)
+
+            for _ in range(3):
+                _send_and_check(3, None)
 
 
 OpenhabItems()
