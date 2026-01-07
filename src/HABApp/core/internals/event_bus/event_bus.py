@@ -54,7 +54,7 @@ class EventBus:
                 return None
 
             # add listener
-            self._listeners[topic] = item_listeners + (listener,)
+            self._listeners[topic] = item_listeners + (listener, )
             habapp_log.debug(f'Added event listener for {listener.describe()}')
             return None
 

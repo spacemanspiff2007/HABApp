@@ -74,7 +74,7 @@ class ItemNoChangeEvent:
 
 class ItemNoUpdateEvent:
     """
-    :ivar str               name:
+    :ivar str name:
     :ivar int | float seconds:
     """
     name: str
