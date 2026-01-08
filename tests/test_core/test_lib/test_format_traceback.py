@@ -189,6 +189,9 @@ def _setup_ir(clean_objs, monkeypatch, ir, eb):
 def test_skip_objs(_setup_ir) -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_ir)
+    print('\n\n-')
+    print(msg)
+    print('\n\n')
     assert msg == r'''
 File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 --------------------------------------------------------------------------------
