@@ -8,6 +8,8 @@ from pydantic import BaseModel
 import HABApp
 from HABApp.core.const.const import PYTHON_312, PYTHON_313
 from HABApp.core.const.json import dump_json, load_json
+from HABApp.core.internals.item_registry import ItemRegistry
+from HABApp.core.items import Item
 from HABApp.core.lib import format_exception
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_suppressed_habapp_file
 from tests.helpers.traceback import remove_dyn_parts_from_traceback
@@ -255,7 +257,9 @@ def test_multiple_statements() -> None:
     print('\n\n-')
     print(msg)
     print('\n\n')
-    assert msg == r'''
+    assert (
+        msg
+        == r'''
 File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 --------------------------------------------------------------------------------
      x | def exec_func(func) -> str:
@@ -301,6 +305,68 @@ Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line x, in multiline_obj_name
     raise ValueError()
 ValueError'''
+    )
+
+
+def _test_item_registry() -> None:
+
+    ir = ItemRegistry()
+    ir.add_item(Item('asdf'))
+    ir.add_item(Item('1324'))
+    ir.get_item('45678')
+
+
+@pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
+def test_omit_items() -> None:
+    log.setLevel(logging.WARNING)
+    msg = exec_func(_test_item_registry)
+    print('\n\n-')
+    print(msg)
+    print('\n\n')
+    assert msg == r'''
+File "test_core/test_lib/test_format_traceback.py", line x in exec_func
+--------------------------------------------------------------------------------
+     x | def exec_func(func) -> str:
+     x |     try:
+-->  x |         func()
+     x |     except Exception as e:
+   ------------------------------------------------------------
+     e = ItemNotFoundException('Item 45678 does not exist!')
+     func = <function _test_item_registry at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "test_core/test_lib/test_format_traceback.py", line x in _test_item_registry
+--------------------------------------------------------------------------------
+     x | def _test_item_registry():
+     x |     ir = ItemRegistry()
+     x |     ir.add_item(Item('asdf'))
+     x |     ir.add_item(Item('1324'))
+-->  x |     ir.get_item('45678')
+   ------------------------------------------------------------
+     ir = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "internals/item_registry/item_registry.py", line x in get_item
+--------------------------------------------------------------------------------
+     x | def get_item(self, name: str) -> ItemRegistryItem:
+     x |     try:
+     x |         return self._items[name]
+     x |     except KeyError:
+-->  x |         raise ItemNotFoundException(name) from None
+   ------------------------------------------------------------
+     name = '45678'
+     self = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
+    func()
+  File "test_core/test_lib/test_format_traceback.py", line x, in _test_item_registry
+    ir.get_item('45678')
+  File "internals/item_registry/item_registry.py", line x, in get_item
+    raise ItemNotFoundException(name) from None
+HABApp.core.errors.ItemNotFoundException: Item 45678 does not exist!'''
 
 
 def test_habapp_regex(pytestconfig):

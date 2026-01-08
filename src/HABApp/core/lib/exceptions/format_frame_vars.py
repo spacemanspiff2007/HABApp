@@ -1,6 +1,5 @@
 import ast
 import datetime
-import importlib
 from collections.abc import Callable
 from inspect import isclass, ismodule
 from pathlib import Path
@@ -12,12 +11,11 @@ from immutables import Map
 from stack_data import Variable
 
 from HABApp.core.const.json import dump_json, load_json
-
-from .const import PRE_INDENT, SEPARATOR_VARIABLES
+from HABApp.core.lib.exceptions.const import PRE_INDENT, SEPARATOR_VARIABLES
 
 
 # don't show these types in the traceback
-SKIPPED_TYPES = (
+SKIPPED_TYPES: Final = (
     bool, bytearray, bytes, complex, dict, float, frozenset, int, list, memoryview, set, str, tuple, type(None),
     datetime.date, datetime.datetime, datetime.time, datetime.timedelta,
     Map, Path,
@@ -55,21 +53,22 @@ def _filter_expressions(name: str, value: Any) -> bool:
     return False
 
 
-SKIPPED_OBJS: Final[tuple[str, ...]] = (
-    'HABApp.core.Items',
-)
+def remove_instance_attributes(stack_variables: list[Variable]) -> list[Variable]:
+    from HABApp.core.internals.item_registry import ItemRegistry  # noqa: PLC0415
+
+    for var in stack_variables:
+        if isinstance(var.value, ItemRegistry):
+            break
+    else:
+        return stack_variables
+
+    name_attr = f'{var.name:s}.'
+
+    # remove all variables of instance
+    return [var for var in stack_variables if not var.name.startswith(name_attr)]
 
 
-def _skip_objs(name: str, value: Any) -> bool:
-    for dotted_path in SKIPPED_OBJS:
-        path = dotted_path.split('.')
-        obj = importlib.import_module('.'.join(path[:-1]))
-        if value is getattr(obj, path[-1]):
-            return True
-    return False
-
-
-SKIP_VARIABLE: tuple[Callable[[str, Any], bool], ...] = (
+SKIP_VARIABLE: Final[tuple[Callable[[str, Any], bool], ...]] = (
     # module imports
     lambda name, value: ismodule(value),
 
@@ -97,17 +96,15 @@ def skip_variable(var: Variable) -> bool:
     return any(func(name, value) for func in SKIP_VARIABLE)
 
 
-def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
+def format_frame_variables(tb: list[str], stack_variables: list[Variable]) -> None:
     if not stack_variables:
         return None
 
     # remove variables that shall not be printed
-    used_vars: set[Variable] = {v for v in stack_variables if not skip_variable(v)}
+    used_vars: list[Variable] = [v for v in stack_variables if not skip_variable(v)]
 
-    # remove objs and attributes
-    rem_obj_names = {v.name for v in used_vars if _skip_objs(v.name, v.value)}
-    rem_objs = {v for v in used_vars for rem_name in rem_obj_names if v.name.startswith(rem_name)}
-    used_vars -= rem_objs
+    # remove 'self' variable if we are in ItemRegistry methods
+    used_vars = remove_instance_attributes(used_vars)
 
     # attributes
     dotted_names: set[str] = {n.name.split('.')[0] for n in used_vars if '.' in n.name}
@@ -115,8 +112,7 @@ def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
     # Sort output
     used_vars = sorted(used_vars, key=lambda x: (
         isinstance(x.nodes[0], ast.Compare),                                        # Compare objects last
-        not any(map(
-            lambda y: x.name == y or x.name.startswith(y + '.'), dotted_names)),    # Classes with attributes
+        not any((x.name == y or x.name.startswith(y + '.') for y in dotted_names)), # Classes with attributes
         x.name.lower()                                                              # Name lowercase
     ))
 
@@ -158,3 +154,4 @@ def format_frame_variables(tb: list[str], stack_variables: list[Variable]):
                 tb.append(f'{" " * (PRE_INDENT + 1):s}{" " * len(last_name_line):s}   {line}')
 
     tb.append(SEPARATOR_VARIABLES)
+    return None
