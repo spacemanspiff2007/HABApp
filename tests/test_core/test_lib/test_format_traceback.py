@@ -211,6 +211,10 @@ File "test_core/test_lib/test_format_traceback.py", line x in func_ir
      x |     Items = HABApp.core.Items
      x |     Items.add_item(Item('asdf'))
 -->  x |     Items.get_item('1234')
+   ------------------------------------------------------------
+     HABApp.core.Items = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+     Items = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
 
 File "internals/item_registry/item_registry.py", line x in get_item
 --------------------------------------------------------------------------------
@@ -221,6 +225,7 @@ File "internals/item_registry/item_registry.py", line x in get_item
 -->  x |         raise ItemNotFoundException(name) from None
    ------------------------------------------------------------
      name = '1234'
+     self = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
 --------------------------------------------------------------------------------
