@@ -325,50 +325,50 @@ def test_omit_items() -> None:
     print('\n\n')
     assert msg == r'''
 File "test_core/test_lib/test_format_traceback.py", line x in exec_func
-  --------------------------------------------------------------------------------
-       x | def exec_func(func) -> str:
-       x |     try:
-  -->  x |         func()
-       x |     except Exception as e:
-     ------------------------------------------------------------
-       e = ItemNotFoundException('Item 45678 does not exist!')
-       func = <function _test_item_registry at 0xAAAAAAAAAAAAAAAA>
-     ------------------------------------------------------------
+--------------------------------------------------------------------------------
+     x | def exec_func(func) -> str:
+     x |     try:
+-->  x |         func()
+     x |     except Exception as e:
+   ------------------------------------------------------------
+     e = ItemNotFoundException('Item 45678 does not exist!')
+     func = <function _test_item_registry at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
 
-  File "test_core/test_lib/test_format_traceback.py", line x in _test_item_registry
-  --------------------------------------------------------------------------------
-       x | def _test_item_registry() -> None:
-       x |     ir = ItemRegistry()
-       x |     ir.add_item(Item('asdf'))
-       x |     ir.add_item(Item('1324'))
-  -->  x |     ir.get_item('45678')
-     ------------------------------------------------------------
-       ir = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
-     ------------------------------------------------------------
+File "test_core/test_lib/test_format_traceback.py", line x in _test_item_registry
+--------------------------------------------------------------------------------
+     x | def _test_item_registry() -> None:
+     x |     ir = ItemRegistry()
+     x |     ir.add_item(Item('asdf'))
+     x |     ir.add_item(Item('1324'))
+-->  x |     ir.get_item('45678')
+   ------------------------------------------------------------
+     ir = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
 
-  File "internals/item_registry/item_registry.py", line x in get_item
-  --------------------------------------------------------------------------------
-       x | def get_item(self, name: str) -> ItemRegistryItem:
-       x |     try:
-       x |         return self._items[name]
-       x |     except KeyError:
-  -->  x |         raise ItemNotFoundException(name) from None
-     ------------------------------------------------------------
-       name = '45678'
-       self = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
-     ------------------------------------------------------------
+File "internals/item_registry/item_registry.py", line x in get_item
+--------------------------------------------------------------------------------
+     x | def get_item(self, name: str) -> ItemRegistryItem:
+     x |     try:
+     x |         return self._items[name]
+     x |     except KeyError:
+-->  x |         raise ItemNotFoundException(name) from None
+   ------------------------------------------------------------
+     name = '45678'
+     self = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
 
-  --------------------------------------------------------------------------------
-  Traceback (most recent call last):
-    File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
-      func()
-      ~~~~^^
-    File "test_core/test_lib/test_format_traceback.py", line x, in _test_item_registry
-      ir.get_item('45678')
-      ~~~~~~~~~~~^^^^^^^^^
-    File "internals/item_registry/item_registry.py", line x, in get_item
-      raise ItemNotFoundException(name) from None
-  HABApp.core.errors.ItemNotFoundException: Item 45678 does not exist!'''
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
+    func()
+    ~~~~^^
+  File "test_core/test_lib/test_format_traceback.py", line x, in _test_item_registry
+    ir.get_item('45678')
+    ~~~~~~~~~~~^^^^^^^^^
+  File "internals/item_registry/item_registry.py", line x, in get_item
+    raise ItemNotFoundException(name) from None
+HABApp.core.errors.ItemNotFoundException: Item 45678 does not exist!'''
 
 
 def test_habapp_regex(pytestconfig):
