@@ -18,7 +18,7 @@ CMP_OPS: Final[dict[str, Callable[[Any, Any], bool]]] = {
 }
 
 
-def compare(value: Any, **kwargs) -> bool:
+def compare(value: Any, **kwargs: Any) -> bool:
 
     for name, cmp_value in kwargs.items():
         if cmp_value is MISSING:

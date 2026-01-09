@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from time import monotonic
+from typing import Self
 
 
 class TimeoutNotRunningError(Exception):
@@ -8,7 +9,7 @@ class TimeoutNotRunningError(Exception):
 
 
 class Timeout:
-    __slots__ = ('_timeout', '_started')
+    __slots__ = ('_started', '_timeout')
 
     def __init__(self, timeout: float, *, start: bool = True) -> None:
         self._timeout: float = timeout
@@ -29,24 +30,24 @@ class Timeout:
             time = self._timeout
         return f'<Timeout {time:.{decimals:d}f}/{self._timeout:.{decimals:d}f}s>'
 
-    def reset(self):
+    def reset(self) -> Self:
         """Reset the timeout if it is running"""
         if self._started is not None:
             self._started = monotonic()
         return self
 
-    def start(self):
+    def start(self) -> Self:
         """Start the timeout if it is not running"""
         if self._started is None:
             self._started = monotonic()
         return self
 
-    def stop(self):
+    def stop(self) -> Self:
         """Stop the timeout"""
         self._started = None
         return self
 
-    def set_timeout(self, timeout: float):
+    def set_timeout(self, timeout: float) -> Self:
         """Set the timeout
 
         :param timeout: Timeout in seconds
@@ -87,7 +88,7 @@ class Timeout:
         if self._started is None:
             raise TimeoutNotRunningError()
         remaining = self._timeout - (monotonic() - self._started)
-        return 0 if remaining <= 0 else remaining
+        return max(0, remaining)
 
     def remaining_or_none(self) -> float | None:
         """Return the remaining seconds. Raises an exception if the timeout is not running
@@ -97,4 +98,4 @@ class Timeout:
         if self._started is None:
             return None
         remaining = self._timeout - (monotonic() - self._started)
-        return 0 if remaining <= 0 else remaining
+        return max(0, remaining)
