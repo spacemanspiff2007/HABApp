@@ -31,6 +31,9 @@ def test_raw() -> None:
     assert t == RawType('image/png', b)
     assert t == b
 
+    # test hash
+    hash(t)
+
 
 def test_string_list() -> None:
     a = StringList(('a', 'b'))

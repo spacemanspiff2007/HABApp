@@ -70,6 +70,11 @@ def test_rgb_hsb_compare() -> None:
     assert hsb == rgb
 
 
+def test_hash() -> None:
+    hash(RGB(1, 2, 3))
+    hash(HSB(1, 2, 3))
+
+
 def test_hsb() -> None:
     hsb = HSB(1, 2, 3)
     assert hsb.h == hsb.hue == 1
