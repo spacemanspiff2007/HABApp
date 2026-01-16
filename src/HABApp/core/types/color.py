@@ -96,9 +96,6 @@ class RGB(ColorType):
             return self == self.__class__.from_hsb(other)
         return NotImplemented
 
-    def __hash__(self) -> int:
-        return hash((self._r, self._g, self._b))
-
     def __getitem__(self, item: int | str) -> int:
         if isinstance(item, int):
             if item == 0:
@@ -245,9 +242,6 @@ class HSB(ColorType):
                 self._saturation == other._saturation and \
                 self._brightness == other._brightness
         return NotImplemented
-
-    def __hash__(self) -> int:
-        return hash((self._hue, self._saturation, self._brightness))
 
     def __getitem__(self, item: int | str) -> float:
         if isinstance(item, int):

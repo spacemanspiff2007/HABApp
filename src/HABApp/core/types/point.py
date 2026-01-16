@@ -78,9 +78,6 @@ class Point:
 
         return NotImplemented
 
-    def __hash__(self) -> int:
-        return hash((self._latitude, self._longitude, self._elevation))
-
     def __getitem__(self, item: int | str) -> float:
         if isinstance(item, int):
             if item == 0:

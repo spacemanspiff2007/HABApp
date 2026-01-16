@@ -75,8 +75,3 @@ def test_distance() -> None:
     b = Point(52.986881, 10.109257)
     assert round(a.distance(b), 3) == 226.623
     assert round(a.distance(b, unit='m'), 0) == 226_623
-
-
-def test_hash() -> None:
-    hash(Point(41.49008, -71.312796))
-    hash(Point(41.49008, -71.312796, 100))

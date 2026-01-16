@@ -37,9 +37,6 @@ class RawType:
             return self._data == other
         return NotImplemented
 
-    def __hash__(self) -> int:
-        return hash((self._type, self._data))
-
     @classmethod
     def create(cls, data_type: str | None, data: bytes) -> Self:
         if not isinstance(data, bytes):
