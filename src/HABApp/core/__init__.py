@@ -1,4 +1,4 @@
-from HABApp.core import asyncio, const, errors, lib, shutdown, types
+from HABApp.core import asyncio, const, errors, lib, provider, shutdown, types
 
 
 # isort: split
