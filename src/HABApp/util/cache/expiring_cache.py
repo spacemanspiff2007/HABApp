@@ -82,7 +82,7 @@ class ExpiringCache(Generic[K, V]):
 
         :param key: key of entry
         """
-        value, instant = self._cache[key]
+        _, instant = self._cache[key]
         return Instant.now() > instant + self._expiry_time
 
     def in_cache(self, key: K) -> bool:

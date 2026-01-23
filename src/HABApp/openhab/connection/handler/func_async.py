@@ -127,7 +127,7 @@ async def async_remove_item(item: str | ItemRegistryItem):
 
     if ret.status == 404:
         raise ItemNotFoundError.from_name(item)
-    elif ret.status == 405:
+    if ret.status == 405:
         raise ItemNotEditableError.from_name(item)
     return ret.status < 300
 
@@ -177,7 +177,7 @@ async def async_remove_metadata(item: str | ItemRegistryItem, namespace: str) ->
 
     if ret.status == 404:
         raise ItemNotFoundError.from_name(item)
-    elif ret.status == 405:
+    if ret.status == 405:
         raise MetadataNotEditableError.create_text(item, namespace)
     return ret.status < 300
 
@@ -232,10 +232,11 @@ async def async_set_thing_cfg(thing: str | ItemRegistryItem, cfg: dict[str, Any]
 
     if ret.status == 404:
         raise ThingNotFoundError.from_uid(thing)
-    elif ret.status == 409:
+    if ret.status == 409:
         raise ThingNotEditableError.from_uid(thing)
-    elif ret.status >= 300:
-        raise ValueError('Something went wrong')
+    if ret.status >= 300:
+        msg = 'Something went wrong'
+        raise ValueError(msg)
 
     return ret.status
 
