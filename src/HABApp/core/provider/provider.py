@@ -33,14 +33,25 @@ class ObjFactory:
 
         if self.type == FactoryType.CALLABLE:
             return factory(*args, **kwargs)
+
         if self.type == FactoryType.COROUTINE:
             return await factory(*args, **kwargs)
+
         if self.type == FactoryType.SYNC_GENERATOR:
             self._close_obj = gen = factory(*args, **kwargs)
             return next(gen)
+
         if self.type == FactoryType.ASYNC_GENERATOR:
             self._close_obj = agen = factory(*args, **kwargs)
             return await agen.__anext__()
+
+        if self.type == FactoryType.SYNC_CONTEXT_MANAGER:
+            self._close_obj = obj = factory(*args, **kwargs)
+            return obj.__enter__()
+
+        if self.type == FactoryType.ASYNC_CONTEXT_MANAGER:
+            self._close_obj = obj = factory(*args, **kwargs)
+            return await obj.__aenter__()
 
         msg = f'Unsupported factory type: {self.type}'
         raise TypeError(msg)
@@ -50,30 +61,36 @@ class ObjFactory:
             return None
 
         if self.type == FactoryType.SYNC_GENERATOR:
-            try:
+            try:  # noqa: SIM105
                 self._close_obj.send(exception)
             except StopIteration:
                 pass
         elif self.type == FactoryType.ASYNC_GENERATOR:
-            try:
+            try:  # noqa: SIM105
                 await self._close_obj.asend(exception)
             except StopAsyncIteration:
                 pass
+        elif self.type == FactoryType.SYNC_CONTEXT_MANAGER:
+            self._close_obj.__exit__(exception, None, None)
+        elif self.type == FactoryType.ASYNC_CONTEXT_MANAGER:
+            await self._close_obj.__aexit__(exception, None, None)
         else:
             msg = f'Unsupported close for factory type: {self.type}'
             raise TypeError(msg)
 
+        return None
+
 
 class HabAppObjProvider:
-    __slots__ = ('_created', '_deferred', '_factories', '_lock', '_order', '_ready')
+    __slots__ = ('_created', '_deferred', '_factories', '_lock', '_order')
 
     def __init__(self) -> None:
         self._factories: Final[dict[type, ObjFactory]] = {}
         self._created: Final[dict[type, object]] = {HabAppObjProvider: self}
         self._order: tuple[ObjFactory, ...] = ()
+
         self._lock: Final = Lock()
         self._deferred: tuple[type, ...] = ()
-        self._ready: tuple[ObjFactory, ...] = ()
 
     def _add_factory(self, obj: type) -> None:
 
@@ -137,17 +154,17 @@ class HabAppObjProvider:
             return await self._create(cls)
 
     async def close(self, exception: BaseException | None = None) -> None:
-        self._created.clear()
-
         async with self._lock:
+            order: Final = self._order
+            self._order = ()
+            self._created.clear()
+
             exceptions = []
-            for factory in reversed(self._order):
+            for factory in reversed(order):
                 try:
                     await factory.close(exception)
                 except Exception as e:
                     exceptions.append(e)
-
-            self._order = ()
 
         if exceptions:
             msg = 'Errors during close()'
@@ -160,6 +177,12 @@ class HabAppObjProvider:
     async def __aexit__(self, exc_type: type[BaseException] | None, exc_value: BaseException | None,
                         traceback: TracebackType | None) -> None:
         await self.close(exc_type)
+
+    def has_factory(self, cls: type) -> bool:
+        try:
+            return cls in self._factories
+        except TypeError:
+            return False
 
 
 HABAPP_PROVIDER: Final = HabAppObjProvider()

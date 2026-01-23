@@ -1,5 +1,5 @@
 from collections.abc import AsyncGenerator, Generator
-from typing import Annotated, Any
+from typing import Any
 
 from HABApp.core.provider.type_helper import _get_types_from_hint, _resolve_origins, get_return_type
 
@@ -15,12 +15,9 @@ def test_types_from_hint() -> None:
 def test_resolve_origins() -> None:
     assert _resolve_origins(Generator[dict, Any, Any]) is dict
     assert _resolve_origins(AsyncGenerator[dict, Any]) is dict
-    assert _resolve_origins(Annotated[dict, Any]) is dict
 
     assert _resolve_origins(dict[str, str]) == dict[str, str]
-    assert _resolve_origins(dict[Annotated[int, 'asdf'], str]) == dict[int, str]
-    assert _resolve_origins(list[Annotated[int, 'asdf']]) == list[int]
-    assert _resolve_origins(tuple[Annotated[int, 'asdf'], ...]) == tuple[int, ...]
+    assert _resolve_origins(AsyncGenerator[dict[str, int], Any]) == dict[str, int]
 
 
 def test_get_return_type_simple() -> None:
@@ -73,6 +70,11 @@ class B:
 
 
 def test_get_return_type_class() -> None:
+    assert get_return_type(ClsOuter) is ClsOuter
+    assert get_return_type(B.ClsInner) is B.ClsInner
+
+
+def test_get_return_type_class_funcs() -> None:
     assert get_return_type(B.outer_type) is ClsOuter
     assert get_return_type(B.outer_str) is ClsOuter
     assert get_return_type(B.inner_type) is B.ClsInner

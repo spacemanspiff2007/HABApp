@@ -1,4 +1,6 @@
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
+from types import TracebackType
+from typing import Any
 
 from HABApp.core.provider import HabAppObjProvider
 
@@ -15,6 +17,7 @@ async def test_provider_simple_call() -> None:
     @p.register
     def p2() -> dict:
         calls.append('p2')
+        return {}
 
     @p.register
     def a(x: int) -> str:
@@ -31,7 +34,7 @@ async def test_provider_simple_call() -> None:
 
     calls.clear()
     assert await p.get(tuple) == ('asdf', )
-    assert calls == ['p1', 'p2', 'b(0, None)']
+    assert calls == ['p1', 'p2', 'b(0, {})']
 
 
 async def test_provider_simple_call_cleanup() -> None:
@@ -69,3 +72,137 @@ async def test_provider_simple_call_cleanup() -> None:
     await p.close()
 
     assert calls == ['a close', 'p2 close', 'p1 close', 'p3 close']
+
+
+def test_has_factory() -> None:
+    def func() -> list:
+        pass
+
+    p = HabAppObjProvider()
+    p.register(func)
+    assert p.has_factory(list)
+    # noinspection PyTypeChecker
+    assert not p.has_factory([])
+
+
+async def test_type_factory_callable() -> None:
+    def func() -> int:
+        return 1
+
+    p = HabAppObjProvider()
+    p.register(func)
+    assert await p.get(int) == 1
+
+
+async def test_type_factory_class() -> None:
+    class MyCls:
+        pass
+
+    p = HabAppObjProvider()
+    p.register(MyCls)
+    assert isinstance(await p.get(MyCls), MyCls)
+
+
+async def test_type_factory_coroutine() -> None:
+    async def func() -> int:
+        return 1
+
+    p = HabAppObjProvider()
+    p.register(func)
+    assert await p.get(int) == 1
+
+
+async def test_type_factory_sync_generator() -> None:
+    calls = []
+
+    def func() -> Generator[int, Any, None]:
+        yield 1
+        calls.append('close')
+
+    p = HabAppObjProvider()
+    p.register(func)
+    assert await p.get(int) == 1
+    await p.close()
+
+    assert calls == ['close']
+
+
+async def test_type_factory_async_generator() -> None:
+    calls = []
+
+    async def func() -> AsyncGenerator[int, Any]:
+        yield 1
+        calls.append('close')
+
+    p = HabAppObjProvider()
+    p.register(func)
+    assert await p.get(int) == 1
+    await p.close()
+
+    assert calls == ['close']
+
+
+async def test_type_factory_class_sync_context_manager() -> None:
+    calls = []
+
+    class MyCls:
+        def __enter__(self):
+            calls.append('enter')
+            return self
+
+        def __exit__(self, exc_type: type[BaseException] | None,
+                     exc_val: BaseException | None, exc_tb: TracebackType | None) -> None:
+            calls.append('exit')
+
+    p = HabAppObjProvider()
+    p.register(MyCls)
+    assert isinstance(await p.get(MyCls), MyCls)
+    await p.close()
+
+    assert calls == ['enter', 'exit']
+
+
+async def test_type_factory_class_async_context_manager() -> None:
+    calls = []
+
+    class MyCls:
+        async def __aenter__(self):
+            calls.append('enter')
+            return self
+
+        async def __aexit__(self, exc_type: type[BaseException] | None,
+                            exc_val: BaseException | None, exc_tb: TracebackType | None) -> None:
+            calls.append('exit')
+
+    p = HabAppObjProvider()
+    p.register(MyCls)
+    assert isinstance(await p.get(MyCls), MyCls)
+    await p.close()
+
+    assert calls == ['enter', 'exit']
+
+
+async def test_multiple_enter() -> None:
+    def func() -> Generator[list, Any, None]:
+        obj = []
+        calls.append(('yield', id(obj)))
+        yield obj
+        calls.append(('close', id(obj)))
+
+    calls = []
+    p = HabAppObjProvider()
+    p.register(func)
+
+    target = []
+
+    async with p:
+        obj = await p.get(list)
+        target.append(('yield', id(obj)))
+        target.append(('close', id(obj)))
+
+    async with p:
+        obj = await p.get(list)
+        target.append(('yield', id(obj)))
+        target.append(('close', id(obj)))
+
+    assert calls == target

@@ -2,10 +2,12 @@ import ast
 import inspect
 import re
 from collections.abc import AsyncGenerator, Generator
+from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from enum import StrEnum
 from importlib import import_module
+from inspect import isclass
 from types import ModuleType
-from typing import Annotated, Any, Final, get_args, get_origin
+from typing import Any, Final, get_args, get_origin
 
 
 def _is_type_checking_condition(expr: ast.expr) -> bool:
@@ -60,6 +62,8 @@ class FactoryType(StrEnum):
     CALLABLE = 'callable'
     SYNC_GENERATOR = 'sync_generator'
     ASYNC_GENERATOR = 'async_generator'
+    SYNC_CONTEXT_MANAGER = 'sync_context_manager'
+    ASYNC_CONTEXT_MANAGER = 'async_context_manager'
 
 
 def get_factory_type(obj: Any) -> FactoryType:
@@ -68,11 +72,21 @@ def get_factory_type(obj: Any) -> FactoryType:
 
     if inspect.isasyncgenfunction(obj):
         return FactoryType.ASYNC_GENERATOR
+
     if inspect.isgeneratorfunction(obj):
         return FactoryType.SYNC_GENERATOR
+
     if inspect.iscoroutinefunction(obj):
         return FactoryType.COROUTINE
-    if inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isclass(obj):
+
+    if inspect.isclass(obj):
+        if issubclass(obj, AbstractAsyncContextManager) or (hasattr(obj, '__aenter__') and hasattr(obj, '__aexit__')):
+            return FactoryType.ASYNC_CONTEXT_MANAGER
+        if issubclass(obj, AbstractContextManager) or (hasattr(obj, '__enter__') and hasattr(obj, '__exit__')):
+            return FactoryType.SYNC_CONTEXT_MANAGER
+        return FactoryType.CALLABLE
+
+    if inspect.isfunction(obj) or inspect.ismethod(obj):
         return FactoryType.CALLABLE
 
     msg = f'Unsupported factory type: {obj}'
@@ -86,38 +100,36 @@ def get_obj_annotations(obj: Any) -> dict[str, type]:
     try:
         annotations = inspect.get_annotations(func, eval_str=True)
     except NameError:
-        import_type_checking_hints(func.__module__)
+
+        # identify hints which caused this error
+        obj_signature = inspect.signature(__get_func(obj))
+        params_annotations: set[str] = set()
+        for param in obj_signature.parameters.values():
+            params_annotations.update(_get_types_from_hint(param.annotation))
+
+        # Explicitly try to import these types
+        try:
+            import_type_checking_hints(func.__module__, only_names=tuple(params_annotations))
+        except KeyError:
+            msg = f'Error while importing! Did you use a relative import? Tried {", ".join(sorted(params_annotations))}'
+            # keep the original exception!
+            raise RuntimeError(msg)  # noqa: B904
+
+        # try again
         annotations = inspect.get_annotations(func, eval_str=True)
 
     annotations.pop('return', None)
     return {k: _resolve_origins(v) for k, v in annotations.items()}
 
 
-def _resolve_origins(original_hint: type) -> type:
-    hint = original_hint
-    while (origin := get_origin(hint)) is not None:
-        if origin is AsyncGenerator:
-            (hint, _) = get_args(hint)
-        elif origin is Generator:
-            (hint, _, _) = get_args(hint)
-        elif origin is Annotated:
-            hint = get_args(hint)[0]
-        elif origin is dict:
-            _arg_k, _arg_v = get_args(hint)
-            hint = dict[_resolve_origins(_arg_k), _resolve_origins(_arg_v)]
-            break
-        elif origin is list:
-            (_arg_l, ) = get_args(hint)
-            hint = list[_resolve_origins(_arg_l)]
-            break
-        elif origin is tuple:
-            _args = tuple(_resolve_origins(h) for h in get_args(hint))
-            hint = tuple[*_args]
-            break
-        else:
-            msg = f'Unsupported type hint origin {origin} for {original_hint}'
-            raise TypeError(msg)
+def _resolve_origins(hint: type) -> type:
+    if (origin := get_origin(hint)) is None:
+        return hint
 
+    if origin is AsyncGenerator:
+        (hint, _) = get_args(hint)
+    elif origin is Generator:
+        (hint, _, _) = get_args(hint)
     return hint
 
 
@@ -170,6 +182,9 @@ def _get_types_from_hint(original_hint: str) -> tuple[str, ...]:
 
 
 def get_return_type(obj: Any) -> type:
+    if isclass(obj):
+        return obj
+
     obj_signature = inspect.signature(__get_func(obj))
     return_annotation = obj_signature.return_annotation
 
