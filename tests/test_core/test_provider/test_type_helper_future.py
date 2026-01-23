@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from HABApp.core.provider.type_helper import get_obj_annotations
+from HABApp.core.provider.type_helper import get_obj_parameters
 
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ def func(obj: ClsOuter) -> int:
 
 
 def test_resolve() -> None:
-    annotation = get_obj_annotations(func)
+    annotation = get_obj_parameters(func)
 
     from .test_type_helper import ClsOuter  # noqa: PLC0415
     assert len(annotation) == 1

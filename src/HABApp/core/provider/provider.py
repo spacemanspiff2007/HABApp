@@ -3,7 +3,7 @@ from __future__ import annotations
 from asyncio import Lock
 from typing import TYPE_CHECKING, Any, Final, Self, TypeVar
 
-from HABApp.core.provider.type_helper import FactoryType, get_factory_type, get_obj_annotations, get_return_type
+from HABApp.core.provider.type_helper import FactoryType, get_factory_type, get_obj_parameters, get_return_type
 
 
 if TYPE_CHECKING:
@@ -132,7 +132,7 @@ class HabAppObjProvider:
             raise ValueError(msg)
 
         factory = self._factories[cls]
-        dependencies = get_obj_annotations(factory.factory)
+        dependencies = get_obj_parameters(factory.factory)
 
         kwargs = {}
         for name, dep_type in dependencies.items():

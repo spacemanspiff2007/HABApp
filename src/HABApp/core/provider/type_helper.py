@@ -93,16 +93,18 @@ def get_factory_type(obj: Any) -> FactoryType:
     raise TypeError(msg)
 
 
-def get_obj_annotations(obj: Any) -> dict[str, type]:
+def get_obj_parameters(obj: Any) -> dict[str, type]:
 
     func = __get_func(obj)
+    obj_signature = inspect.signature(func)
+    if not obj_signature.parameters:
+        return {}
 
     try:
         annotations = inspect.get_annotations(func, eval_str=True)
     except NameError:
 
         # identify hints which caused this error
-        obj_signature = inspect.signature(__get_func(obj))
         params_annotations: set[str] = set()
         for param in obj_signature.parameters.values():
             params_annotations.update(_get_types_from_hint(param.annotation))
