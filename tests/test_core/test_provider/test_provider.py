@@ -206,3 +206,19 @@ async def test_multiple_enter() -> None:
         target.append(('close', id(obj)))
 
     assert calls == target
+
+
+p = HabAppObjProvider()
+
+
+class SomeClass:
+    @p.register
+    @classmethod
+    def create(cls) -> 'SomeClass':
+        return SomeClass()
+
+
+async def test_deferred() -> None:
+    assert p._deferred
+    assert isinstance(await p.get(SomeClass), SomeClass)
+    assert not p._deferred

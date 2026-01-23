@@ -109,6 +109,7 @@ class Connection(BaseModel):
 
 
 class OpenhabConfig(BaseModel):
+    """Configuration for openHAB. Changes in these sections are typically applied without a restart"""
     connection: Connection = Field(default_factory=Connection)
     general: General = Field(default_factory=General)
     ping: Ping = Field(default_factory=Ping)

@@ -88,7 +88,7 @@ class General(BaseModel):
 
 
 class MqttConfig(BaseModel):
-    """MQTT configuration"""
+    """Configuration for MQTT. Changes in these sections are typically applied without a restart"""
 
     connection: Connection = Field(default_factory=Connection)
     subscribe: Subscribe = Field(default_factory=Subscribe)

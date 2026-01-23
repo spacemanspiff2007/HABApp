@@ -101,7 +101,7 @@ class HabAppObjProvider:
         try:
             return_type = get_return_type(obj)
         except NameError:
-            if obj not in self._factories:
+            if obj not in self._deferred:
                 self._deferred += (obj, )
             return None
 
@@ -127,6 +127,10 @@ class HabAppObjProvider:
         self._add_factory(obj)
         return obj
 
+    def _resolve_deferred(self) -> None:
+        for obj in self._deferred:
+            self._add_factory(obj)
+
     async def _create(self, cls: type) -> object:
 
         if cls not in self._factories:
@@ -149,8 +153,7 @@ class HabAppObjProvider:
             return self._created[cls]
 
         # try resolving deferred factories
-        for obj in self._deferred:
-            self._add_factory(obj)
+        self._resolve_deferred()
 
         async with self._lock:
             if cls in self._created:
@@ -163,7 +166,7 @@ class HabAppObjProvider:
             self._order = ()
             self._created.clear()
 
-            exceptions = []
+            exceptions: Final[list[Exception]] = []
             for factory in reversed(order):
                 try:
                     await factory.close(exception)
@@ -183,10 +186,27 @@ class HabAppObjProvider:
         await self.close(exc_type)
 
     def has_factory(self, cls: type) -> bool:
+        # try resolving deferred factories
+        self._resolve_deferred()
+
         try:
             return cls in self._factories
         except TypeError:
             return False
+
+    def remove_factory(self, cls: type) -> None:
+        # try resolving deferred factories
+        self._resolve_deferred()
+
+        if cls in self._created:
+            msg = f'Object for {cls} is already created!'
+            raise RuntimeError(msg)
+
+        self._factories.pop(cls)
+        return None
+
+    def get_created(self) -> tuple[object, ...]:
+        return tuple(self._created.values())
 
 
 HABAPP_PROVIDER: Final = HabAppObjProvider()
