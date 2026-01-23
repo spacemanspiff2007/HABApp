@@ -71,9 +71,11 @@ class ObjFactory:
             except StopAsyncIteration:
                 pass
         elif self.type == FactoryType.SYNC_CONTEXT_MANAGER:
-            self._close_obj.__exit__(exception, None, None)
+            exc_type = type(exception) if exception else None
+            self._close_obj.__exit__(exc_type, exception, None)
         elif self.type == FactoryType.ASYNC_CONTEXT_MANAGER:
-            await self._close_obj.__aexit__(exception, None, None)
+            exc_type = type(exception) if exception else None
+            await self._close_obj.__aexit__(exc_type, exception, None)
         else:
             msg = f'Unsupported close for factory type: {self.type}'
             raise TypeError(msg)
@@ -151,6 +153,8 @@ class HabAppObjProvider:
             self._add_factory(obj)
 
         async with self._lock:
+            if cls in self._created:
+                return self._created[cls]
             return await self._create(cls)
 
     async def close(self, exception: BaseException | None = None) -> None:
