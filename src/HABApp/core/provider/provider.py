@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from asyncio import Lock
+from inspect import isclass
 from typing import TYPE_CHECKING, Any, Final, Self, TypeVar
 
 from HABApp.core.provider.type_helper import FactoryType, get_factory_type, get_obj_parameters, get_return_type
@@ -10,7 +11,24 @@ if TYPE_CHECKING:
     from types import TracebackType
 
 
-T = TypeVar('T')
+class HABAppProviderError(Exception):
+    pass
+
+
+class FactoryAlreadyRegisteredError(HABAppProviderError):
+    pass
+
+
+class FactoryNotFoundError(HABAppProviderError):
+    pass
+
+
+class CyclicDependencyError(HABAppProviderError):
+    @classmethod
+    def from_stack(cls, stack: tuple[type, ...]) -> Self:
+        msg = (f'Cyclic dependency: '
+               f'{" -> ".join(s.__name__ if isclass(s) else str(s) for s in reversed(stack))}')
+        return cls(msg)
 
 
 class ObjFactory:
@@ -83,6 +101,9 @@ class ObjFactory:
         return None
 
 
+T = TypeVar('T')
+
+
 class HabAppObjProvider:
     __slots__ = ('_created', '_deferred', '_factories', '_lock', '_order')
 
@@ -113,7 +134,7 @@ class HabAppObjProvider:
             msg = (f'Factory for type {return_type} is already registered:\n'
                    f'  {existing.factory} from {existing.factory.__module__}\n'
                    f'  {obj} from {obj.__module__}')
-            raise ValueError(msg)
+            raise FactoryAlreadyRegisteredError(msg)
 
         if isinstance(return_type, str):
             msg = (f'Factory {obj} has a string return type "{return_type}" which is not supported.\n'
@@ -131,18 +152,21 @@ class HabAppObjProvider:
         for obj in self._deferred:
             self._add_factory(obj)
 
-    async def _create(self, cls: type) -> object:
+    async def _create(self, cls: type, stack: tuple[type, ...] = ()) -> object:
 
         if cls not in self._factories:
             msg = f'No factory registered for type {cls}'
-            raise ValueError(msg)
+            raise FactoryNotFoundError(msg)
+
+        if cls in stack:
+            raise CyclicDependencyError.from_stack(stack + (cls, ))
 
         factory = self._factories[cls]
         dependencies = get_obj_parameters(factory.factory)
 
         kwargs = {}
         for name, dep_type in dependencies.items():
-            kwargs[name] = await self._create(dep_type)
+            kwargs[name] = await self._create(dep_type, stack + (cls, ))
 
         self._created[cls] = obj = await factory.call(**kwargs)
         self._order += (factory, )
@@ -207,6 +231,22 @@ class HabAppObjProvider:
 
     def get_created(self) -> tuple[object, ...]:
         return tuple(self._created.values())
+
+    def add_object(self, obj: object, cls: type | None = None, *, override_factory: bool = False) -> None:
+        """Temporarily add an object to the provider"""
+        if cls is not None:
+            cls = type(obj)
+
+        if cls in self._created:
+            msg = f'Object for {cls} is already created!'
+            raise RuntimeError(msg)
+
+        if cls in self._factories and not override_factory:
+            msg = f'Factory for {cls} is already registered!'
+            raise RuntimeError(msg)
+
+        self._created[cls] = obj
+        return None
 
 
 HABAPP_PROVIDER: Final = HabAppObjProvider()

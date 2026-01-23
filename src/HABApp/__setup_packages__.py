@@ -5,7 +5,7 @@ from HABApp.__check_dependency_packages__ import check_dependency_packages
 # if installed we use uvloop because it seems to be much faster (untested)
 # -----------------------------------------------------------------------------
 try:
-    import uvloop  # type: ignore
+    import uvloop
 
     uvloop.install()
     print('Using uvloop')

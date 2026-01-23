@@ -2,7 +2,10 @@ from collections.abc import AsyncGenerator, Generator
 from types import TracebackType
 from typing import Any
 
+import pytest
+
 from HABApp.core.provider import HabAppObjProvider
+from HABApp.core.provider.provider import CyclicDependencyError
 
 
 async def test_provider_simple_call() -> None:
@@ -222,3 +225,24 @@ async def test_deferred() -> None:
     assert p._deferred
     assert isinstance(await p.get(SomeClass), SomeClass)
     assert not p._deferred
+
+
+async def test_cyclic_dependency() -> None:
+
+    def func_int(obj: str | None) -> int:
+        pass
+
+    def func_bool(obj: int) -> bool:
+        pass
+
+    def func_str(obj: bool) -> str | None:
+        pass
+
+    p = HabAppObjProvider()
+    p.register(func_int)
+    p.register(func_bool)
+    p.register(func_str)
+
+    with pytest.raises(CyclicDependencyError) as e:
+        await p.get(int)
+    assert str(e.value) == 'Cyclic dependency: int -> bool -> str | None -> int'
