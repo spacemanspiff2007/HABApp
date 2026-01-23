@@ -356,7 +356,7 @@ async def async_remove_link(item: str | ItemRegistryItem, channel: str):
     if resp.status == 404:
         raise LinkNotFoundError.from_names(item, channel)
     if resp.status == 405:
-        LinkNotEditableError.from_names(item, channel)
+        raise LinkNotEditableError.from_names(item, channel)
 
     msg = 'Unexpected error'
     raise LinkRequestError(msg)
