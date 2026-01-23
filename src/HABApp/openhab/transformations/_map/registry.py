@@ -5,7 +5,7 @@ from fastnumbers import int as to_int
 from immutables import Map
 from javaproperties import loads as load_map_file
 
-from HABApp.openhab.errors import MapTransformationNotFound
+from HABApp.openhab.errors import MapTransformationNotFoundError
 from HABApp.openhab.transformations._map.classes import (
     MapKeyType,
     MapTransformation,
@@ -26,7 +26,7 @@ class MapTransformationRegistry(TransformationRegistryBase):
             data, default = self.objs[name]
         except KeyError:
             msg = f'Map transformation "{name:s}" not found!'
-            raise MapTransformationNotFound(msg) from None
+            raise MapTransformationNotFoundError(msg) from None
 
         if default is not None:
             return MapTransformationWithDefault(data, name=name, default=default)
