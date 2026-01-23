@@ -241,7 +241,7 @@ class HabAppObjProvider:
             msg = f'Object for {cls} is already created!'
             raise RuntimeError(msg)
 
-        if cls in self._factories and not override_factory:
+        if self.has_factory(cls) and not override_factory:
             msg = f'Factory for {cls} is already registered!'
             raise RuntimeError(msg)
 
