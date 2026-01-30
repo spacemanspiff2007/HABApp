@@ -1,5 +1,6 @@
 import logging
 import warnings
+from asyncio import get_event_loop
 from collections.abc import Awaitable, Callable, Coroutine
 from concurrent.futures import Future
 from types import TracebackType
@@ -148,7 +149,7 @@ class SimpleRuleRunner:
 
         ir = ItemRegistry()
         eb = EventBus()
-        file_manager = FileManager(None)
+        file_manager = FileManager(None, eb)
         self.restore = setup_internals(ir, eb, file_manager, final=False)
 
         # setup so we capture errors / warnings
@@ -163,7 +164,7 @@ class SimpleRuleRunner:
         self.monkeypatch.setattr(HABApp.core, 'Items', ir)
 
         # Patch the hook so we can instantiate the rules
-        hook = HABAppRuleHook(self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None)
+        hook = HABAppRuleHook(self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop())
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 
         # patch worker with a synchronous worker

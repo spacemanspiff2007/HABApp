@@ -1,65 +1,65 @@
+from __future__ import annotations
+
 import logging
 import re
-import typing
-from asyncio import sleep
-from pathlib import Path
+from asyncio import Lock, sleep
+from typing import TYPE_CHECKING, Any, Final
 
 import HABApp
 import HABApp.__cmd_args__ as cmd_args
-from HABApp.core import shutdown
 from HABApp.core.connections import Connections
 from HABApp.core.files.errors import AlreadyHandledFileError
-from HABApp.core.internals import uses_item_registry
-from HABApp.core.internals.proxy import uses_file_manager
 from HABApp.core.internals.wrapped_function import wrap_func
 from HABApp.core.logger import log_warning
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import log_exception
 from HABApp.rule_manager.rule_file import RuleFile
 
 
-log = logging.getLogger('HABApp.Rules')
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+    from pathlib import Path
 
-item_registry = uses_item_registry()
-file_manager = uses_file_manager()
+    from HABApp.core.files import FileManager
+    from HABApp.core.shutdown import ShutdownInfo
+
+
+log = logging.getLogger('HABApp.Rules')
 
 
 class RuleManager:
 
-    def __init__(self, parent) -> None:
-        assert isinstance(parent, HABApp.runtime.Runtime)
-        self.runtime = parent
+    def __init__(self, shutdown: ShutdownInfo, file_manager: FileManager) -> None:
+        self._shutdown: Final = shutdown
+        self._file_manager: Final = file_manager
 
-        self.files: typing.Dict[str, RuleFile] = {}
+        self._files: Final[dict[str, RuleFile]] = {}
+        self._lock: Final = Lock()
 
     async def setup(self):
-
-        # shutdown
-        shutdown.register(self.shutdown, msg='Cancel rule schedulers')
-
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
-            self.files['bench'] = file = BenchFile(self)
-            ok = await wrap_func(file.load).async_run()
-            if not ok:
-                log.error('Failed to load Benchmark!')
-                shutdown.request()
+
+            async with self._lock:
+                self._files['bench'] = file = BenchFile(self)
+                ok = await wrap_func(file.load).async_run()
+                if not ok:
+                    log.error('Failed to load Benchmark!')
+                    self._shutdown.request_showdown()
+                    return None
+                await file.check_all_rules()
                 return None
-            await file.check_all_rules()
-            return None
 
         path = HABApp.CONFIG.directories.rules
         prefix = 'rules/'
 
-        file_manager.add_handler(
+        self._file_manager.add_handler(
             self.__class__.__name__, log, prefix=prefix,
             on_load=self.request_file_load, on_unload=self.request_file_unload
         )
-        file_manager.add_folder(
+        self._file_manager.add_folder(
             prefix, path, priority=0, pattern=re.compile(r'.py$', re.IGNORECASE), name='rules-python'
         )
-
-        # Initial loading of rules
-        HABApp.core.internals.wrap_func(self.load_rules_on_startup, logger=log).run()
 
     async def load_rules_on_startup(self):
 
@@ -71,23 +71,22 @@ class RuleManager:
             await sleep(1)
 
         # if we want to shut down we don't load the rules
-        if shutdown.is_requested():
+        if self._shutdown.is_requested():
             return None
 
         # trigger event for every file
-        await file_manager.get_file_watcher().load_files(dispatcher_name_include=r'^rules.*$')
+        await self._file_manager.get_file_watcher().load_files(dispatcher_name_include=r'^rules.*$')
         return None
 
     @log_exception
     def get_rule(self, rule_name):
         found = []
-        for file in self.files.values():
+        for file in self._files.values():
             if rule_name is None:
                 for rule in file.rules.values():
                     found.append(rule)
-            else:
-                if rule_name in file.rules:
-                    found.append(file.rules[rule_name])
+            elif rule_name in file.rules:
+                found.append(file.rules[rule_name])
 
         # if we want all return them
         if rule_name is None:
@@ -102,22 +101,23 @@ class RuleManager:
     async def request_file_unload(self, name: str, path: Path) -> None:
         path_str = str(path)
 
-        # Only unload already loaded files
-        if path_str not in self.files:
-            log_warning(log, f'Rule file {path} is not yet loaded and therefore can not be unloaded')
+        async with self._lock:
+            # Only unload already loaded files
+            if path_str not in self._files:
+                log_warning(log, f'Rule file {path} is not yet loaded and therefore can not be unloaded')
+                return None
+
+            log.debug(f'Removing file: {name}')
+            rule = self._files.pop(path_str)
+
+            await rule.unload()
             return None
-
-        log.debug(f'Removing file: {name}')
-        rule = self.files.pop(path_str)
-
-        await rule.unload()
-        return None
 
     async def request_file_load(self, name: str, path: Path) -> None:
         path_str = str(path)
 
         # if we want to shut down we don't load the rules
-        if shutdown.is_requested():
+        if self._shutdown.is_requested():
             log.debug(f'Skip load of {name:s} because of shutdown')
             return None
 
@@ -126,21 +126,33 @@ class RuleManager:
             log_warning(log, f'Rule file {name} ({path}) does not exist and can not be loaded!')
             return None
 
-        log.debug(f'Loading file: {name}')
-        self.files[path_str] = rule_file = RuleFile(self, name, path)
+        async with self._lock:
+            log.debug(f'Loading file: {name}')
+            self._files[path_str] = rule_file = RuleFile(self, name, path)
 
-        ok = await rule_file.load()
-        if not ok:
-            self.files.pop(path_str)
-            log.warning(f'Failed to load {path_str}!')
-            raise AlreadyHandledFileError()
+            ok = await rule_file.load()
+            if not ok:
+                self._files.pop(path_str)
+                log.warning(f'Failed to load {path_str}!')
+                raise AlreadyHandledFileError()
 
-        log.debug(f'File {name} successfully loaded!')
+            log.debug(f'File {name} successfully loaded!')
 
-        # Do simple checks which prevent errors
-        await rule_file.check_all_rules()
-        return None
+            # Do simple checks which prevent errors
+            await rule_file.check_all_rules()
+            return None
 
-    async def shutdown(self) -> None:
-        for f in self.files.values():
-            await f.unload()
+    async def unload_rules(self) -> None:
+        async with self._lock:
+            while self._files:
+                _, f = self._files.popitem()
+                await f.unload()
+
+
+@HABAPP_PROVIDER.register
+async def _provide_manger(shutdown: ShutdownInfo, file_manager: FileManager) -> AsyncGenerator[RuleManager, Any]:
+
+    obj = RuleManager(shutdown, file_manager)
+    await obj.setup()
+    yield obj
+    await obj.unload_rules()

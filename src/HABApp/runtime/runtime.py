@@ -14,15 +14,13 @@ import HABApp.util
 from HABApp.core import Connections, shutdown
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection as openhab_connection
+from HABApp.rule_manager import RuleManager
 
 
 class Runtime:
-
-    def __init__(self) -> None:
-        # Rule engine
-        self.rule_manager: HABApp.rule_manager.RuleManager = None
 
     async def start(self, config_folder: Path) -> None:
         try:
@@ -32,13 +30,10 @@ class Runtime:
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
-            file_watcher = HABApp.core.files.HABAppFileWatcher()
-            shutdown.register(file_watcher.shutdown, msg='Shutdown file watcher')
-
             # replace proxy objects
-            ir = HABApp.core.internals.ItemRegistry()
-            eb = HABApp.core.internals.EventBus()
-            file_manager = HABApp.core.files.FileManager(file_watcher)
+            ir = await HABAPP_PROVIDER.get(HABApp.core.internals.ItemRegistry)
+            eb = await HABAPP_PROVIDER.get(HABApp.core.internals.EventBus)
+            file_manager = await HABAPP_PROVIDER.get(HABApp.core.files.FileManager)
 
             setup_internals(ir, eb, file_manager)
             assert isinstance(HABApp.core.Items, ConstProxyObj)
@@ -46,7 +41,6 @@ class Runtime:
             assert isinstance(HABApp.core.EventBus, ConstProxyObj)
             HABApp.core.EventBus = eb
 
-            file_manager.setup()
 
             # Load config
             HABApp.config.setup_habapp_configuration(config_folder)
@@ -63,10 +57,12 @@ class Runtime:
             await HABApp.parameters.parameter_files.setup_param_files()
 
             # Rule engine
-            self.rule_manager = HABApp.rule_manager.RuleManager(self)
-            await self.rule_manager.setup()
+            rule_manager = await HABAPP_PROVIDER.get(RuleManager)
 
             Connections.application_startup_complete()
+
+            await rule_manager.load_rules_on_startup()
+
 
         except HABApp.config.InvalidConfigError:
             shutdown.request()

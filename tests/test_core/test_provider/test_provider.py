@@ -37,7 +37,7 @@ async def test_provider_simple_call() -> None:
 
     calls.clear()
     assert await p.get(tuple) == ('asdf', )
-    assert calls == ['p1', 'p2', 'b(0, {})']
+    assert calls == ['p2', 'b(0, {})']
 
 
 async def test_provider_simple_call_cleanup() -> None:
@@ -86,6 +86,29 @@ def test_has_factory() -> None:
     assert p.has_factory(list)
     # noinspection PyTypeChecker
     assert not p.has_factory([])
+
+
+async def test_create_once() -> None:
+
+    p = HabAppObjProvider()
+
+    @p.register
+    def func() -> list:
+        return []
+
+    @p.register
+    def func2(l: list) -> dict:
+        return {'l': l}
+
+    l1 = await p.get(list)
+    l2 = await p.get(list)
+    assert l1 is l2
+
+    d1 = await p.get(dict)
+    d2 = await p.get(dict)
+
+    assert d1['l'] is l1
+    assert d2['l'] is l1
 
 
 async def test_type_factory_callable() -> None:

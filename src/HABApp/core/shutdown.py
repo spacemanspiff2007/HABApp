@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging.handlers
 import signal
 import traceback
@@ -7,15 +8,15 @@ from asyncio import sleep
 from dataclasses import dataclass
 from inspect import iscoroutinefunction
 from types import BuiltinMethodType, FunctionType, MethodType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from HABApp.core.asyncio import create_task
-from HABApp.core.const import loop
 from HABApp.core.lib.helper import get_obj_name
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
+    from collections.abc import AsyncGenerator, Awaitable, Callable
     from typing import Any, NoReturn
 
 
@@ -95,9 +96,6 @@ async def _shutdown() -> None:
     objs = (
         *(obj for obj in _REGISTERED if not obj.last),
         *(obj for obj in _REGISTERED if obj.last),
-        # shutdown of the event loop has to be the last thing that is done
-        # since stopping of the loop exits the program
-        ShutdownFunction(func=loop.stop, msg='Stopping asyncio loop', last=True)
     )
 
     for obj in objs:
@@ -119,15 +117,57 @@ def request() -> None:
     create_task(_shutdown())
 
 
-def is_requested() -> bool:
-    return _REQUESTED
+class ShutdownInfo:
+    def __init__(self) -> None:
+        self._requested: bool = False
+        self._event: Final[asyncio.Event[None]] = asyncio.Event()
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} requested={self._requested}>'
+
+    async def wait_for_shutdown(self) -> None:
+        await self._event.wait()
+
+    async def sleep(self, delay: float) -> None:
+        if self._event.is_set():
+            # if we sleep in a loop we should have a small delay to allow other tasks to run
+            await asyncio.sleep(0.05)
+            return None
+
+        try:  # noqa: SIM105
+            await asyncio.wait_for(self._event.wait(), timeout=delay)
+        except TimeoutError:
+            pass
+
+        return None
+
+    def is_requested(self) -> bool:
+        return self._requested
+
+    def request_showdown(self) -> None:
+        if not self._requested:
+            self._requested = True
+            self._event.set()
 
 
-def register_signal_handler() -> None:
-    def shutdown_handler(sig, frame) -> None:
+@HABAPP_PROVIDER.register
+async def __shutdown_factory() -> AsyncGenerator[ShutdownInfo, Any]:
+
+    obj = ShutdownInfo()
+
+    def shutdown_handler(sig: Any, frame: Any) -> None:
         print('Shutting down ...')
+        log.debug('Requested shutdown')
+
+        obj.request_showdown()
         request()
 
     # register shutdown helper
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
+
+    yield obj
+
+    # restore default behavior
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)

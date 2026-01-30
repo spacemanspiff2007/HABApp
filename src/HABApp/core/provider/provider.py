@@ -166,7 +166,10 @@ class HabAppObjProvider:
 
         kwargs = {}
         for name, dep_type in dependencies.items():
-            kwargs[name] = await self._create(dep_type, stack + (cls, ))
+            if dep_type in self._created:
+                kwargs[name] = self._created[dep_type]
+            else:
+                kwargs[name] = await self._create(dep_type, stack + (cls, ))
 
         self._created[cls] = obj = await factory.call(**kwargs)
         self._order += (factory, )
@@ -180,6 +183,7 @@ class HabAppObjProvider:
         self._resolve_deferred()
 
         async with self._lock:
+            # double check after acquiring the lock in case another coroutine created it in the meantime
             if cls in self._created:
                 return self._created[cls]
             return await self._create(cls)
@@ -189,6 +193,7 @@ class HabAppObjProvider:
             order: Final = self._order
             self._order = ()
             self._created.clear()
+            self._created[HabAppObjProvider] = self
 
             exceptions: Final[list[Exception]] = []
             for factory in reversed(order):

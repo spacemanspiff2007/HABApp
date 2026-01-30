@@ -51,19 +51,22 @@ def use_dummy_cfg(monkeypatch):
     return cfg
 
 
-@pytest.fixture(autouse=True, scope='session')
-def event_loop():
-    yield HABApp.core.const.loop
-
-
 @pytest.fixture()
 def ir():
     return ItemRegistry()
 
 
+@pytest.fixture(autouse=True)
+async def _patch_event_loop() -> None:
+    # todo: remove this once we fix asyncio handling
+    for module in [HABApp.core.asyncio, HABApp.core.items.tmp_data]:
+        assert module.__annotations__['loop']
+        module.loop = asyncio.get_event_loop()
+
+
 @pytest.fixture()
-def file_manager():
-    return FileManager(None)
+def file_manager(eb: EventBus):
+    return FileManager(None, eb)
 
 
 @pytest.fixture(autouse=True)

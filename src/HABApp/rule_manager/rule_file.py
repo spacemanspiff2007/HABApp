@@ -3,6 +3,7 @@ from __future__ import annotations
 import collections
 import logging
 import runpy
+from asyncio import AbstractEventLoop, get_event_loop
 from typing import TYPE_CHECKING
 
 import HABApp
@@ -63,9 +64,12 @@ class RuleFile:
         tb.insert(0, f'Could not load {self.path}!')
         return [line.replace('<module>', self.path.name) for line in tb]
 
-    def create_rules(self, created_rules: list) -> None:
+    def create_rules(self, created_rules: list, loop: AbstractEventLoop) -> None:
 
-        rule_hook = HABAppRuleHook(created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
+        rule_hook = HABAppRuleHook(
+            created_rules.append, self.suggest_rule_name,
+            self.rule_manager, self, loop
+        )
 
         # It seems like python 3.8 doesn't allow path like objects anymore:
         # https://github.com/spacemanspiff2007/HABApp/issues/111
@@ -80,7 +84,7 @@ class RuleFile:
         ign.proc_tb = self.__process_tc
 
         with ign:
-            await wrap_func(self.create_rules).async_run(created_rules)
+            await wrap_func(self.create_rules).async_run(created_rules, get_event_loop())
 
         if ign.raised_exception:
             # unload all rule instances which might have already been created otherwise they might

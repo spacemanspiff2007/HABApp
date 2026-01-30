@@ -5,7 +5,7 @@ import warnings
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from re import Pattern
-from typing import Any, Final, Literal, ParamSpec, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Final, Literal, ParamSpec, TypeVar, overload
 
 import HABApp
 import HABApp.core
@@ -38,9 +38,12 @@ from .interfaces.rule_subprocess import (
 from .rule_hook import get_rule_hook as _get_rule_hook
 
 
+if TYPE_CHECKING:
+    pass
+
 log = logging.getLogger('HABApp.Rule')
 
-
+# Todo: Do this somewhere else
 # Func to log deprecation warnings
 def send_warnings_to_log(message, category, filename, lineno, file=None, line=None) -> None:
     log.warning(f'{filename}:{lineno}: {category.__name__}:{message}')
@@ -68,11 +71,10 @@ class Rule(ContextProvidingObj):
         hook = _get_rule_hook()
         hook.register_rule(self)
 
-        self.__runtime: HABApp.runtime.Runtime = hook.runtime
-        assert isinstance(self.__runtime, HABApp.runtime.Runtime)
+        self.__rule_manager: Final = hook.rule_manager
 
         # scheduler
-        self.run: Final = _HABAppJobBuilder(self._habapp_ctx)
+        self.run: Final = _HABAppJobBuilder(self._habapp_ctx, loop=hook.event_loop)
 
         # suggest a rule name
         self.rule_name: str = hook.suggest_rule_name(self)
@@ -260,7 +262,7 @@ class Rule(ContextProvidingObj):
 
     def get_rule(self, rule_name: str) -> 'Rule | list[Rule]':
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
-        return self.__runtime.rule_manager.get_rule(rule_name)
+        return self.__rule_manager.get_rule(rule_name)
 
     @staticmethod
     def get_items(type: tuple[type[ITEM_TYPE], ...] | type[ITEM_TYPE] | None = None,
@@ -336,6 +338,7 @@ def create_rule(f: Callable[PSPEC_RULE, TYPE_RULE], *args: PSPEC_RULE.args, **kw
     try:
         _get_rule_hook()
     except RuntimeError:
+        # noinspection PyTypeChecker
         return None
 
     return f(*args, **kwargs)

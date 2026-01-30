@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 import warnings
+from asyncio import AbstractEventLoop
 from collections.abc import Callable, Hashable, Iterable, Mapping
 from datetime import datetime as dt_datetime
 from typing import TYPE_CHECKING, Any, Final, Self, TypeAlias
@@ -15,7 +16,6 @@ from eascheduler.schedulers.async_scheduler import AsyncScheduler
 from typing_extensions import ParamSpec, override
 
 from HABApp.core.asyncio import create_task_from_async, run_func_from_async
-from HABApp.core.const import loop
 from HABApp.core.internals import Context, wrap_func
 from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction
 from HABApp.rule.scheduler.job_ctrl import CountdownJobControl, DateTimeJobControl, OneTimeJobControl
@@ -72,7 +72,7 @@ class AsyncHABAppScheduler(AsyncScheduler):
 
 
 class HABAppJobBuilder:
-    def __init__(self, context: HABAppRuleContext) -> None:
+    def __init__(self, context: HABAppRuleContext, *, loop: AbstractEventLoop) -> None:
         self._habapp_rule_ctx: Context = context
         self._scheduler: Final = AsyncHABAppScheduler(event_loop=loop, enabled=False)
 

@@ -106,6 +106,11 @@ class LogCollector:
                     record.unlink()
                     continue
 
+                # [asyncio] | DEBUG | Using proactor: IocpProactor'
+                if record.name == 'asyncio' and record.msg.splitlines('Using proactor: '):
+                    record.unlink()
+                    continue
+
                 self.res_records.append(record)
                 prev_rec = record
                 for n in ('name', 'levelname'):

@@ -1,9 +1,7 @@
-from asyncio import Task, create_task, run_coroutine_threadsafe, sleep
+from asyncio import AbstractEventLoop, Task, create_task, run_coroutine_threadsafe, sleep
 from collections.abc import Awaitable, Callable
 from inspect import iscoroutinefunction
 from typing import Any, Final
-
-from HABApp.core.const import loop
 
 
 # TODO: switch to time.monotonic for measurements instead of fixed sleep time
@@ -32,7 +30,7 @@ class PendingFuture:
             if not (t.done() or t.cancelled()):
                 t.cancel()
 
-    def reset(self, thread_safe: bool = False) -> None:
+    def reset(self, *, loop: AbstractEventLoop | None = None) -> None:
         if self.is_canceled:
             return None
 
@@ -42,11 +40,10 @@ class PendingFuture:
             if not (t.done() or t.cancelled()):
                 t.cancel()
 
-        if thread_safe:
+        if loop is None:
+            self.task = create_task(self.__countdown())
+        else:
             self.task = run_coroutine_threadsafe(self.__countdown(), loop)
-            return None
-
-        self.task = create_task(self.__countdown())
         return None
 
     async def __countdown(self) -> None:

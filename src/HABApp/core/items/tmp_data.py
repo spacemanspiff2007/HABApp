@@ -1,5 +1,6 @@
 import logging
 import typing
+from asyncio import AbstractEventLoop
 from datetime import datetime, timedelta
 
 import HABApp
@@ -13,6 +14,9 @@ if typing.TYPE_CHECKING:
 
 
 TMP_DATA: typing.Dict[str, 'TmpItemData'] = {}
+
+
+loop: AbstractEventLoop
 
 
 class TmpItemData:
@@ -43,7 +47,7 @@ def add_tmp_data(item: 'BaseItem'):
     data = TMP_DATA.setdefault(item.name, TmpItemData())
     data.add_tasks(item._last_update.tasks, item._last_change.tasks)
 
-    CLEANUP.reset(thread_safe=True)
+    CLEANUP.reset(loop=loop)
 
 
 def restore_tmp_data(item: 'BaseItem'):

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from asyncio import get_event_loop
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from time import monotonic
@@ -8,7 +9,6 @@ from typing import TYPE_CHECKING, Any, Final
 from typing_extensions import override
 
 from HABApp.core.asyncio import run_func_from_async, thread_context
-from HABApp.core.const import loop
 from HABApp.core.internals import Context, ContextProvidingObj
 from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase, default_logger
 
@@ -147,4 +147,4 @@ class WrappedThreadFunction(WrappedFunctionBase[P, R]):
     async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
 
         pool_func = PoolFunc(self, self.func, args, kwargs, context=self._habapp_ctx)
-        return await loop.run_in_executor(POOL, pool_func.run)
+        return await get_event_loop().run_in_executor(POOL, pool_func.run)

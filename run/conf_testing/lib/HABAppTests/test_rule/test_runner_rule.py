@@ -1,11 +1,12 @@
 import logging
 
 import HABApp
-from HABApp.core import shutdown
 from HABApp.core.const.topics import TOPIC_FILES
 from HABApp.core.events import EventFilter
 from HABApp.core.events.habapp_events import RequestFileLoadEvent
 from HABApp.core.lib import SingleTask
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.core.shutdown import ShutdownInfo
 from HABApp.core.wrapper import ignore_exception
 from HABAppTests.test_rule.test_case import TestResult, TestResultStatus
 
@@ -44,6 +45,8 @@ class TestRunnerRule(HABApp.Rule):
     async def _run_tests(self) -> None:
         results: list[TestResult] = []
 
+        # todo: Implement this properly
+        shutdown = await HABAPP_PROVIDER.get(ShutdownInfo)
         while (rule := self._get_next_rule()) is not None and not shutdown.is_requested():
             results.extend(await rule.run_test_cases())
 

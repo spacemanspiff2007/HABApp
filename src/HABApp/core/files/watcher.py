@@ -3,7 +3,7 @@ import contextlib
 import logging
 import re
 from asyncio import Event, Task
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from pathlib import Path
 from re import Pattern
 from typing import Any, Final
@@ -12,6 +12,7 @@ from typing_extensions import override
 from watchfiles import Change, DefaultFilter, awatch
 
 from HABApp.core.asyncio import create_task_from_async
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
 
 
@@ -259,3 +260,10 @@ class HABAppFileWatcher:
             for dispatcher in self._dispatchers:
                 if dispatcher.allow(None, file):
                     await dispatcher.dispatch(file)
+
+
+@HABAPP_PROVIDER.register
+async def __get_file_watcher() -> AsyncGenerator[HABAppFileWatcher, Any]:
+    obj = HABAppFileWatcher()
+    yield obj
+    await obj.shutdown()

@@ -8,9 +8,10 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.config.models.openhab import General as OpenHABGeneralConfig
-from HABApp.core import shutdown
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.lib import Timeout, ValueChange
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.core.shutdown import ShutdownInfo
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler.func_async import async_get_system_info
 
@@ -68,6 +69,9 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
         level_change: ValueChange[int] = ValueChange()
 
         sleep_secs = 1
+
+        # todo: Implement this properly
+        shutdown = await HABAPP_PROVIDER.get(ShutdownInfo)
 
         while not shutdown.is_requested():
             await asyncio.sleep(sleep_secs)

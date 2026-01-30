@@ -50,8 +50,8 @@ habapp:
   debug:
     watch event loop:
       enabled: True
-      reset every: 10
-      timeout: 25
+      reset every: 30
+      timeout: 120
 
     periodic traceback:
         enabled: True
