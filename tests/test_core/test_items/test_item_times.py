@@ -1,4 +1,6 @@
 import asyncio
+from collections.abc import AsyncGenerator
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -10,10 +12,11 @@ from HABApp.core.events import NoEventFilter
 from HABApp.core.internals import EventBus, ItemRegistry, wrap_func
 from HABApp.core.items import Item
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
+from HABApp.core.items.tmp_data import TmpItemData
 from tests.helpers import LogCollector, TestEventBus
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def u():
     a = UpdatedTime('test', Instant.now())
     w1 = a.add_watch(1)
@@ -28,7 +31,7 @@ def u():
         w2.cancel()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def c():
     a = ChangedTime('test', Instant.now())
     w1 = a.add_watch(1)
@@ -41,6 +44,17 @@ def c():
         w1.cancel()
     if w2._parent_ctx is not None:
         w2.cancel()
+
+
+@pytest.fixture
+async def tmp_data() -> AsyncGenerator[dict[str, TmpItemData], Any]:
+    obj = HABApp.core.items.tmp_data.TMP_DATA
+
+    yield obj
+
+    obj.clear()
+    HABApp.core.items.tmp_data.CLEANUP.task.cancel()
+
 
 
 def test_sec_timedelta(parent_rule, test_logs: LogCollector) -> None:
@@ -142,7 +156,7 @@ async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: EventB
     await asyncio.sleep(0.01)
 
 
-async def test_watcher_change_restore(parent_rule, ir: ItemRegistry) -> None:
+async def test_watcher_change_restore(parent_rule, ir: ItemRegistry, tmp_data) -> None:
     name = 'test_save_restore'
 
     item_a = Item(name)
@@ -150,9 +164,9 @@ async def test_watcher_change_restore(parent_rule, ir: ItemRegistry) -> None:
     watcher = item_a.watch_change(1)
 
     # remove item
-    assert name not in HABApp.core.items.tmp_data.TMP_DATA
+    assert name not in tmp_data
     ir.pop_item(name)
-    assert name in HABApp.core.items.tmp_data.TMP_DATA
+    assert name in tmp_data
 
     item_b = Item(name)
     ir.add_item(item_b)
@@ -161,7 +175,7 @@ async def test_watcher_change_restore(parent_rule, ir: ItemRegistry) -> None:
     ir.pop_item(name)
 
 
-async def test_watcher_update_restore(parent_rule, ir: ItemRegistry) -> None:
+async def test_watcher_update_restore(parent_rule, ir: ItemRegistry, tmp_data) -> None:
     name = 'test_save_restore'
 
     item_a = Item(name)
@@ -169,9 +183,9 @@ async def test_watcher_update_restore(parent_rule, ir: ItemRegistry) -> None:
     watcher = item_a.watch_update(1)
 
     # remove item
-    assert name not in HABApp.core.items.tmp_data.TMP_DATA
+    assert name not in tmp_data
     ir.pop_item(name)
-    assert name in HABApp.core.items.tmp_data.TMP_DATA
+    assert name in tmp_data
 
     item_b = Item(name)
     ir.add_item(item_b)
@@ -182,7 +196,7 @@ async def test_watcher_update_restore(parent_rule, ir: ItemRegistry) -> None:
 
 @pytest.mark.ignore_log_warnings
 async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
-                                      sync_worker, eb: TestEventBus, ir: ItemRegistry) -> None:
+                                      sync_worker, eb: TestEventBus, ir: ItemRegistry, tmp_data) -> None:
     monkeypatch.setattr(HABApp.core.items.tmp_data.CLEANUP, 'secs', 0.7)
 
     text_warning = ''
@@ -199,13 +213,13 @@ async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
     item_a.watch_update(1)
 
     # remove item
-    assert name not in HABApp.core.items.tmp_data.TMP_DATA
+    assert name not in tmp_data
     ir.pop_item(name)
-    assert name in HABApp.core.items.tmp_data.TMP_DATA
+    assert name in tmp_data
 
     # ensure that the tmp data gets deleted
     await asyncio.sleep(0.8)
-    assert name not in HABApp.core.items.tmp_data.TMP_DATA
+    assert name not in tmp_data
 
     assert text_warning == 'Item test_save_restore has been deleted 0.7s ago even though it has item watchers.' \
                            ' If it will be added again the watchers have to be created again, too!'
