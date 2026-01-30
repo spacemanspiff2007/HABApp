@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import warnings
 from asyncio import get_event_loop
@@ -251,4 +252,4 @@ class SimpleRuleRunner:
                 if process_events:
                     obj.process_events()
 
-        HABApp.core.asyncio.loop.run_until_complete(_run())
+        asyncio.run(_run())
