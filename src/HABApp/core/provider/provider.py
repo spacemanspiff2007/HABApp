@@ -153,6 +153,9 @@ class HabAppObjProvider:
             self._add_factory(obj)
 
     async def _create(self, cls: type, stack: tuple[type, ...] = ()) -> object:
+        # double check e.g. after acquiring the lock in case another coroutine created it in the meantime
+        if cls in self._created:
+            return self._created[cls]
 
         if cls not in self._factories:
             msg = f'No factory registered for type {cls}'
@@ -183,9 +186,6 @@ class HabAppObjProvider:
         self._resolve_deferred()
 
         async with self._lock:
-            # double check after acquiring the lock in case another coroutine created it in the meantime
-            if cls in self._created:
-                return self._created[cls]
             return await self._create(cls)
 
     async def close(self, exception: BaseException | None = None) -> None:
@@ -234,7 +234,7 @@ class HabAppObjProvider:
         self._factories.pop(cls)
         return None
 
-    def get_created(self) -> tuple[object, ...]:
+    def get_all_objects(self) -> tuple[object, ...]:
         return tuple(self._created.values())
 
     def add_object(self, obj: object, cls: type | None = None, *, override_factory: bool = False) -> None:
@@ -251,6 +251,44 @@ class HabAppObjProvider:
             raise RuntimeError(msg)
 
         self._created[cls] = obj
+        return None
+
+    async def create_all(self) -> None:
+        """Create all registered objects"""
+
+        # try resolving deferred factories
+        self._resolve_deferred()
+
+        dependencies: Final = {
+            cls: frozenset(get_obj_parameters(f.factory).values())
+            for cls, f in self._factories.items() if cls not in self._created
+        }
+
+        can_create = [[cls for cls, deps in dependencies.items() if not deps]]
+
+        async with self._lock:
+            # create in batches
+            while can_create:
+                # create batch
+                for cls in can_create.pop():
+                    await self._create(cls)
+
+                # append next batch
+                deps_available = frozenset(self._created)
+                deps_ok = [
+                    cls for cls, deps in dependencies.items()
+                    if cls not in self._created and not (deps - deps_available)
+                ]
+                if deps_ok:
+                    can_create.append(deps_ok)
+
+            # If we hit something here we have a missing dependency
+            # Requesting it will raise the appropriate exception
+            for cls in self._factories:
+                if cls in self._created:
+                    continue
+                await self._create(cls)
+
         return None
 
 

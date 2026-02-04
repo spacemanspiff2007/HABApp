@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from HABApp.core.provider import HabAppObjProvider
-from HABApp.core.provider.provider import CyclicDependencyError
+from HABApp.core.provider.provider import CyclicDependencyError, FactoryNotFoundError
 
 
 async def test_provider_simple_call() -> None:
@@ -269,3 +269,59 @@ async def test_cyclic_dependency() -> None:
     with pytest.raises(CyclicDependencyError) as e:
         await p.get(int)
     assert str(e.value) == 'Cyclic dependency: int -> bool -> str | None -> int'
+
+
+async def test_create_all() -> None:
+    calls = []
+
+    def func_int() -> int:
+        calls.append('int')
+        return 0
+
+    def func_bool(obj: int) -> bool:
+        calls.append('bool')
+        return True
+
+    def func_str(obj: bool) -> str:
+        calls.append('str')
+        return 'a'
+
+    def func_list() -> list:
+        calls.append('list')
+        return []
+
+    def func_dict(a: list, b: str) -> dict:
+        calls.append('dict')
+        return {}
+
+    p = HabAppObjProvider()
+    p.register(func_int)
+    p.register(func_list)
+    p.register(func_bool)
+    p.register(func_str)
+    p.register(func_dict)
+
+    await p.create_all()
+
+    assert calls == ['int', 'list', 'bool', 'str', 'dict']
+
+
+async def test_create_all_error() -> None:
+
+    def func_int() -> int:
+        pass
+
+    def func_bool(obj: int) -> bool:
+        pass
+
+    def func_dict(a: list, b: int) -> dict:
+        pass
+
+    p = HabAppObjProvider()
+    p.register(func_int)
+    p.register(func_bool)
+    p.register(func_dict)
+
+    with pytest.raises(FactoryNotFoundError) as e:
+        await p.create_all()
+    assert str(e.value) == "No factory registered for type <class 'list'>"
