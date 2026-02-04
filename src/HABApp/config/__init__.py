@@ -3,7 +3,7 @@ from HABApp.config.errors import InvalidConfigError
 
 # isort: split
 
-from HABApp.config.config import CONFIG
+from HABApp.config.config import CONFIG, ApplicationConfig
 
 
 # isort: split

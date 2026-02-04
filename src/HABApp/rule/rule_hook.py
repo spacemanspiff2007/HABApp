@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from asyncio import AbstractEventLoop
 
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
@@ -9,10 +8,12 @@ from typing import TYPE_CHECKING, Any, Final
 
 
 if TYPE_CHECKING:
+    from asyncio import AbstractEventLoop
     from collections.abc import Callable
     from types import FrameType, TracebackType
 
     from HABApp import Rule
+    from HABApp.rule.interfaces.http_client import HABAppHttpClient
     from HABApp.rule_manager import RuleFile, RuleManager
 
 
@@ -26,7 +27,8 @@ class HABAppRuleHook:
 
     def __init__(self,
                  cb_register_rule: Callable[[Rule], Any], cb_suggest_name: Callable[[Rule], str],
-                 rule_manager: RuleManager, rule_file: RuleFile, loop: AbstractEventLoop) -> None:
+                 rule_manager: RuleManager, rule_file: RuleFile, loop: AbstractEventLoop,
+                 async_http_client: HABAppHttpClient) -> None:
         # callbacks
         self._cb_register: Final = cb_register_rule
         self._cb_suggest_name: Final = cb_suggest_name
@@ -35,6 +37,7 @@ class HABAppRuleHook:
         self.rule_manager: Final = rule_manager
         self.rule_file: Final = rule_file
         self.event_loop: Final = loop
+        self.async_http_client: Final = async_http_client
 
         self.is_closed: bool = False
 

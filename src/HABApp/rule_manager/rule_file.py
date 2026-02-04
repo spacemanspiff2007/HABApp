@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 
 import HABApp
 from HABApp.core.internals import get_current_context, wrap_func
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.rule.interfaces.http_client import HABAppHttpClient
 from HABApp.rule.rule_hook import HABAppRuleHook
 
 
@@ -64,11 +66,11 @@ class RuleFile:
         tb.insert(0, f'Could not load {self.path}!')
         return [line.replace('<module>', self.path.name) for line in tb]
 
-    def create_rules(self, created_rules: list, loop: AbstractEventLoop) -> None:
+    def create_rules(self, created_rules: list, loop: AbstractEventLoop, async_http_client: HABAppHttpClient) -> None:
 
         rule_hook = HABAppRuleHook(
             created_rules.append, self.suggest_rule_name,
-            self.rule_manager, self, loop
+            self.rule_manager, self, loop=loop, async_http_client=async_http_client
         )
 
         # It seems like python 3.8 doesn't allow path like objects anymore:
@@ -84,7 +86,9 @@ class RuleFile:
         ign.proc_tb = self.__process_tc
 
         with ign:
-            await wrap_func(self.create_rules).async_run(created_rules, get_event_loop())
+            await wrap_func(self.create_rules).async_run(
+                created_rules, get_event_loop(), await HABAPP_PROVIDER.get(HABAppHttpClient)
+            )
 
         if ign.raised_exception:
             # unload all rule instances which might have already been created otherwise they might

@@ -8,10 +8,11 @@ import HABApp.config
 import HABApp.core
 import HABApp.mqtt.connection as mqtt_connection
 import HABApp.parameters.parameter_files
-import HABApp.rule.interfaces._http
 import HABApp.rule_manager
 import HABApp.util
+from HABApp.config.models import ApplicationConfig
 from HABApp.core import Connections, shutdown
+from HABApp.core.files import FileManager
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.provider import HABAPP_PROVIDER
@@ -45,16 +46,16 @@ class Runtime:
             # Load config
             HABApp.config.setup_habapp_configuration(config_folder)
 
-            # generic HTTP
-            await HABApp.rule.interfaces._http.create_client()
-
             # Connection setup
             openhab_connection.setup()
             mqtt_connection.setup()
 
             # File loader setup
             # Parameter Files
-            await HABApp.parameters.parameter_files.setup_param_files()
+            await HABApp.parameters.parameter_files.setup_param_files(
+                await HABAPP_PROVIDER.get(ApplicationConfig),
+                await HABAPP_PROVIDER.get(FileManager)
+            )
 
             # Rule engine
             rule_manager = await HABAPP_PROVIDER.get(RuleManager)

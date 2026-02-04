@@ -24,7 +24,6 @@ from HABApp.core.internals import (
     wrap_func,
 )
 from HABApp.core.items import BaseItem, BaseValueItem
-from HABApp.rule import interfaces
 from HABApp.rule.scheduler.job_builder import HABAppJobBuilder as _HABAppJobBuilder
 
 from .interfaces import async_subprocess_exec
@@ -80,7 +79,7 @@ class Rule(ContextProvidingObj):
         self.rule_name: str = hook.suggest_rule_name(self)
 
         # interfaces
-        self.async_http = interfaces.http
+        self.async_http: Final = hook.async_http_client
         self.mqtt: Final = HABApp.mqtt.interface_sync
         self.oh: Final = HABApp.openhab.interface_sync
         self.openhab: Final = self.oh

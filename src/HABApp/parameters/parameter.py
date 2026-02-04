@@ -190,7 +190,8 @@ class DictParameter(BaseParameter):
         """
         value = _get_value(self._filename, *self._keys)
         if not isinstance(value, dict):
-            raise ValueError(f'Value "{value}" for {self.__class__.__name__} is not a dict! ({type(value)})')
+            msg = f'Value "{value}" for {self.__class__.__name__} is not a dict! ({type(value)})'
+            raise ValueError(msg)
         return value
 
     def __repr__(self) -> str:
