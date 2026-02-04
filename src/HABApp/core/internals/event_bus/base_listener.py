@@ -1,7 +1,7 @@
 from typing import Any, Final
 
 
-class EventBusBaseListener:
+class EventBusListenerBase:
     def __init__(self, topic: str, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         if not isinstance(topic, str):

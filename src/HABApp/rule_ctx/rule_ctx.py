@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, TypeVar
 import HABApp
 from HABApp.core.const.topics import ALL_TOPICS
 from HABApp.core.internals import Context, EventBusListener, uses_event_bus, uses_item_registry, wrap_func
-from HABApp.core.internals.event_bus import EventBusBaseListener
+from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.lib import get_obj_name
 
 
@@ -71,7 +71,7 @@ class HABAppRuleContext(Context):
 
                 # Check if we have a valid item for all listeners
                 for listener in self.objs:
-                    if not isinstance(listener, EventBusBaseListener):
+                    if not isinstance(listener, EventBusListenerBase):
                         continue
 
                     # Internal topics - don't warn there

@@ -3,8 +3,7 @@ import threading
 from typing import Any
 
 from HABApp.core.const.log import TOPIC_EVENTS
-
-from .base_listener import EventBusBaseListener
+from HABApp.core.internals.event_bus.base_listener import EventBusListenerBase
 
 
 event_log = logging.getLogger(TOPIC_EVENTS)
@@ -16,7 +15,7 @@ class EventBus:
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._listeners: dict[str, tuple[EventBusBaseListener, ...]] = {}
+        self._listeners: dict[str, tuple[EventBusListenerBase, ...]] = {}
 
     def post_event(self, topic: str, event: Any) -> None:
         if not isinstance(topic, str):
@@ -37,8 +36,8 @@ class EventBus:
                 listener.notify_listeners(event)
         return None
 
-    def add_listener(self, listener: EventBusBaseListener) -> None:
-        if not isinstance(listener, EventBusBaseListener):
+    def add_listener(self, listener: EventBusListenerBase) -> None:
+        if not isinstance(listener, EventBusListenerBase):
             raise TypeError()
         if not isinstance(topic := listener.topic, str):
             raise TypeError()
@@ -58,8 +57,8 @@ class EventBus:
             habapp_log.debug(f'Added event listener for {listener.describe()}')
             return None
 
-    def remove_listener(self, listener: EventBusBaseListener) -> None:
-        if not isinstance(listener, EventBusBaseListener):
+    def remove_listener(self, listener: EventBusListenerBase) -> None:
+        if not isinstance(listener, EventBusListenerBase):
             raise TypeError()
         if not isinstance(topic := listener.topic, str):
             raise TypeError()
@@ -75,7 +74,12 @@ class EventBus:
                 return None
 
             # remove listener
-            self._listeners[topic] = tuple(o for o in item_listeners if o is not listener)
+            new_listeners = tuple(o for o in item_listeners if o is not listener)
+            if new_listeners:
+                self._listeners[topic] = new_listeners
+            else:
+                self._listeners.pop(topic, None)
+
             habapp_log.debug(f'Removed event listener for {listener.describe()}')
             return None
 

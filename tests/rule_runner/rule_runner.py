@@ -20,7 +20,7 @@ from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.files import FileManager
 from HABApp.core.internals import Context, EventBus, ItemRegistry, setup_internals
-from HABApp.core.internals.event_bus import EventBusBaseListener
+from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
 from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
@@ -98,7 +98,7 @@ class AsyncFunc(WrappedFunctionBase):
         return await self.coro(*args, **kwargs)
 
 
-class AppendListener(EventBusBaseListener):
+class AppendListener(EventBusListenerBase):
     def __init__(self, topic: str, obj: list) -> None:
         super().__init__(topic)
         self.obj = obj

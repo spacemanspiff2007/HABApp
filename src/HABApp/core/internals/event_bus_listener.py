@@ -3,14 +3,14 @@ from typing import Any
 from typing_extensions import override
 
 from HABApp.core.internals import AutoContextBoundObj, EventFilterBase, uses_event_bus
-from HABApp.core.internals.event_bus import EventBusBaseListener
+from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.internals.wrapped_function import WrappedFunctionBase
 
 
 event_bus = uses_event_bus()
 
 
-class EventBusListener(EventBusBaseListener):
+class EventBusListener(EventBusListenerBase):
     def __init__(self, topic: str, callback: WrappedFunctionBase, event_filter: EventFilterBase, **kwargs: Any) -> None:
         super().__init__(topic, **kwargs)
 
