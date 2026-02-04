@@ -6,7 +6,6 @@ from typing import Self
 import pytest
 from watchfiles import Change
 
-from HABApp.core.const.const import PYTHON_312
 from HABApp.core.files import HABAppFileWatcher
 from HABApp.core.files import watcher as watcher_module
 
@@ -33,7 +32,6 @@ class MyPath(PurePath):
         return self
 
 
-@pytest.mark.skipif(not PYTHON_312, reason='Subclassing Path requires Python 3.12!')
 async def test_watcher(monkeypatch, test_logs) -> None:
     logging.getLogger('HABApp.file.events').setLevel(0)
     test_logs.set_min_level(0)

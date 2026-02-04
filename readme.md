@@ -128,6 +128,9 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 26.XX.X (2026-XX-XX)
+- Breaking: Requires at least Python 3.12
+
 #### 25.12.0 (2025-12-08)
 - Breaking: Requires at least Python 3.11
 - Added ``last_value`` to the item which contains the last known value before the current one
