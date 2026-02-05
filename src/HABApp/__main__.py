@@ -10,6 +10,7 @@ from HABApp.core.shutdown import ShutdownInfo
 
 
 async def main() -> int | str:
+
     loop = asyncio.get_event_loop()
     loop.slow_callback_duration = 0.02
 

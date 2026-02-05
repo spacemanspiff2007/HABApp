@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from types import FrameType, TracebackType
 
     from HABApp import Rule
+    from HABApp.core.internals import EventBus, ItemRegistry
     from HABApp.rule.interfaces.http_client import HABAppHttpClient
     from HABApp.rule_manager import RuleFile, RuleManager
 
@@ -28,7 +29,7 @@ class HABAppRuleHook:
     def __init__(self,
                  cb_register_rule: Callable[[Rule], Any], cb_suggest_name: Callable[[Rule], str],
                  rule_manager: RuleManager, rule_file: RuleFile, loop: AbstractEventLoop,
-                 async_http_client: HABAppHttpClient) -> None:
+                 async_http_client: HABAppHttpClient, item_registry: ItemRegistry, event_bus: EventBus) -> None:
         # callbacks
         self._cb_register: Final = cb_register_rule
         self._cb_suggest_name: Final = cb_suggest_name
@@ -36,20 +37,25 @@ class HABAppRuleHook:
         # runtime objs
         self.rule_manager: Final = rule_manager
         self.rule_file: Final = rule_file
-        self.event_loop: Final = loop
         self.async_http_client: Final = async_http_client
+        self.item_registry: Final = item_registry
+        self.event_bus: Final = event_bus
 
-        self.is_closed: bool = False
+        # asyncio
+        self.event_loop: Final = loop
+
+        # hook state
+        self._is_closed: bool = False
 
     def __enter__(self) -> None:
         pass
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
                  exc_tb: TracebackType | None) -> None:
-        self.is_closed = True
+        self._is_closed = True
 
     def register_rule(self, rule: Rule) -> None:
-        if self.is_closed:
+        if self._is_closed:
             # if we keep adding rules dynamically they will always get attached to the file and never unloaded
             log.warning(f'Added another rule of type {rule.__class__.__name__:s} '
                         'but file load has already been completed!')

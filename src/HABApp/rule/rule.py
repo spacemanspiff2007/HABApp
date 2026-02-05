@@ -1,7 +1,6 @@
 import logging
 import re
 import sys
-import warnings
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from re import Pattern
@@ -19,8 +18,6 @@ from HABApp.core.internals import (
     ContextProvidingObj,
     EventBusListener,
     EventFilterBase,
-    uses_item_registry,
-    uses_post_event,
     wrap_func,
 )
 from HABApp.core.items import BaseItem, BaseValueItem
@@ -42,22 +39,6 @@ if TYPE_CHECKING:
 
 log = logging.getLogger('HABApp.Rule')
 
-# Todo: Do this somewhere else
-# Func to log deprecation warnings
-def send_warnings_to_log(message, category, filename, lineno, file=None, line=None) -> None:
-    log.warning(f'{filename}:{lineno}: {category.__name__}:{message}')
-    return
-
-
-
-# Setup deprecation warnings
-warnings.simplefilter('default')
-warnings.showwarning = send_warnings_to_log
-
-
-post_event = uses_post_event()
-item_registry = uses_item_registry()
-
 
 ITEM_TYPE = TypeVar('ITEM_TYPE', bound=BaseItem)
 
@@ -70,7 +51,10 @@ class Rule(ContextProvidingObj):
         hook = _get_rule_hook()
         hook.register_rule(self)
 
+        # internals
         self.__rule_manager: Final = hook.rule_manager
+        self.__post_event: Final = hook.event_bus.post_event
+        self.__item_registry: Final = hook.item_registry
 
         # scheduler
         self.run: Final = _HABAppJobBuilder(self._habapp_ctx, loop=hook.event_loop)
@@ -119,7 +103,7 @@ class Rule(ContextProvidingObj):
         :return:
         """
         assert isinstance(name, (str, BaseValueItem)), type(name)
-        return post_event(
+        return self.__post_event(
             name.name if isinstance(name, BaseValueItem) else name,
             event
         )
@@ -263,8 +247,8 @@ class Rule(ContextProvidingObj):
         assert rule_name is None or isinstance(rule_name, str), type(rule_name)
         return self.__rule_manager.get_rule(rule_name)
 
-    @staticmethod
-    def get_items(type: tuple[type[ITEM_TYPE], ...] | type[ITEM_TYPE] | None = None,
+    def get_items(self,
+                  type: tuple[type[ITEM_TYPE], ...] | type[ITEM_TYPE] | None = None,
                   name: str | Pattern[str] | None = None,
                   tags: str | Iterable[str] | None = None,
                   groups: str | Iterable[str] | None = None,
@@ -305,7 +289,7 @@ class Rule(ContextProvidingObj):
                 raise ValueError(msg)
 
         ret = []
-        for item in item_registry.get_items():  # type: HABApp.core.items.BaseItem
+        for item in self.__item_registry.get_items():  # type: HABApp.core.items.BaseItem
             if type is not None and not isinstance(item, type):
                 continue
 

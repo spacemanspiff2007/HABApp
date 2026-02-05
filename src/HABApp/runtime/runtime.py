@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import warnings
 from pathlib import Path
 
 import eascheduler
@@ -19,6 +21,20 @@ from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab import connection as openhab_connection
 from HABApp.rule_manager import RuleManager
+
+
+log = logging.getLogger('HABApp.Warnings')
+
+
+# Func to log deprecation warnings
+def send_warnings_to_log(message, category, filename, lineno, file=None, line=None) -> None:  # noqa: PLR0913
+    log.warning(f'{filename}:{lineno}: {category.__name__}: {message}')
+    return
+
+
+# Setup deprecation warnings
+warnings.simplefilter('default')
+warnings.showwarning = send_warnings_to_log
 
 
 class Runtime:

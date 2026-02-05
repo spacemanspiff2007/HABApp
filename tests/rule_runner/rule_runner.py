@@ -166,7 +166,8 @@ class SimpleRuleRunner:
 
         # Patch the hook so we can instantiate the rules
         hook = HABAppRuleHook(
-            self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop(), None
+            self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop(), None,
+            item_registry=ir, event_bus=eb,
         )
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 
