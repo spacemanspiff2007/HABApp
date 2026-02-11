@@ -58,9 +58,8 @@ class Runtime:
             assert isinstance(HABApp.core.EventBus, ConstProxyObj)
             HABApp.core.EventBus = eb
 
-
             # Load config
-            HABApp.config.setup_habapp_configuration(config_folder)
+            await HABApp.config.setup_habapp_configuration(config_folder)
 
             # Connection setup
             openhab_connection.setup()

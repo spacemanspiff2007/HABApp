@@ -62,11 +62,14 @@ class WatchEventLoopConfig(BaseModel):
 class DebugConfig(BaseModel):
     """Debugging options for HABApp"""
 
-    periodic_traceback: PeriodicTracebackDumpConfig = Field(
-        alias='periodic traceback', default_factory=PeriodicTracebackDumpConfig)
+    dump_threads: PeriodicTracebackDumpConfig = Field(
+        alias='dump threads', default_factory=PeriodicTracebackDumpConfig)
 
-    traceback_on_shutdown_signal: bool = Field(
-        False, alias='traceback on shutdown signal',
+    dump_tasks: PeriodicTracebackDumpConfig = Field(
+        alias='dump tasks', default_factory=PeriodicTracebackDumpConfig)
+
+    dump_threads_on_shutdown_signal: bool = Field(
+        False, alias='dump threads on shutdown signal',
         description='Dump the traceback of all currently running threads into a file when receiving a shutdown signal. '
                     'Not available on Windows!'
     )

@@ -7,6 +7,7 @@ from HABApp.__cmd_args__ import find_config_folder, parse_args
 from HABApp.__debug_info__ import print_debug_info
 from HABApp.__splash_screen__ import show_screen
 from HABApp.core.shutdown import ShutdownInfo
+from HABApp.runtime.debug_traceback import DebugTraceback
 
 
 async def main() -> int | str:
@@ -40,6 +41,13 @@ async def main() -> int | str:
 
     log = logging.getLogger('HABApp')
 
+    debug_traceback = DebugTraceback()
+    # setup debug traceback as soon as we have the config
+    debug_traceback.setup(HABApp.config.CONFIG)
+
+    # load shutdown helper first
+    shutdown = await HABAPP_PROVIDER.get(ShutdownInfo)
+
     try:
         cfg_folder = find_config_folder(args.config)
 
@@ -49,25 +57,26 @@ async def main() -> int | str:
         except ModuleNotFoundError:
             pass
 
-        shutdown = await HABAPP_PROVIDER.get(ShutdownInfo)
-
         tg = asyncio.TaskGroup()
         HABAPP_PROVIDER.add_object(tg, asyncio.TaskGroup)
 
         app = HABApp.runtime.Runtime()
 
-        async with tg, HABAPP_PROVIDER:
-            tg.create_task(app.start(cfg_folder))
-            tg.create_task(shutdown.wait_for_shutdown())
+        async with HABAPP_PROVIDER, tg:
+            tg.create_task(app.start(cfg_folder), name='HABApp Runtime')
+            tg.create_task(shutdown.wait_for_shutdown(), name='Wait for Shutdown')
 
     except *Exception as egroup:
         for exception in egroup.exceptions:
             for line in HABApp.core.lib.exceptions.format_exception(exception):
                 log.error(line)
                 print(exception)
+        return_code = 1
     else:
-        return 0
-    return 1
+        return_code = 0
+
+    await debug_traceback.shutdown()
+    return return_code
 
 
 if __name__ == '__main__':

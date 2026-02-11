@@ -1,9 +1,9 @@
 directories:
-  logging: log      # Folder where the logs will be written to
-  rules: rules      # Folder from which the rule files will be loaded
-  param: parameters # Folder from which the parameter files will be loaded
-  config: config    # Folder from which configuration files (e.g. for textual thing configuration) will be loaded
-  lib: lib          # Folder where additional libraries can be placed
+  logging: log       # Folder where the logs will be written to
+  rules: rules       # Folder from which the rule files will be loaded
+  params: parameters # Folder from which the parameter files will be loaded
+  config: config     # Folder from which configuration files (e.g. for textual thing configuration) will be loaded
+  lib: lib           # Folder where additional libraries can be placed
 
 location:
   latitude: 52.5185537
@@ -53,7 +53,12 @@ habapp:
       reset every: 30
       timeout: 120
 
-    periodic traceback:
+    dump tasks:
         enabled: True
-        delay: 20
-        interval: 600
+        delay: 30
+        interval: 240
+
+    dump threads:
+        enabled: True
+        delay: 30
+        interval: 240

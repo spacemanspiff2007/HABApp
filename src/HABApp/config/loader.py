@@ -11,7 +11,6 @@ from HABApp.config.logging import HABAppQueueHandler, load_logging_file
 from HABApp.core import shutdown
 from HABApp.core.internals.proxy.proxies import uses_file_manager
 
-from .debug import setup_debug
 from .errors import AbsolutePathExpected, InvalidConfigError
 from .logging import create_default_logfile, get_logging_dict
 from .logging.buffered_logger import BufferedLogger
@@ -23,7 +22,7 @@ log = logging.getLogger('HABApp.Config')
 file_manager = uses_file_manager()
 
 
-def setup_habapp_configuration(config_folder: Path) -> None:
+async def setup_habapp_configuration(config_folder: Path) -> None:
 
     CONFIG.set_file_path(config_folder / 'config.yml')
     preprocess = CONFIG.load_preprocess
@@ -33,6 +32,10 @@ def setup_habapp_configuration(config_folder: Path) -> None:
     preprocess.delete_entry(('openhab', 'connection', 'topic filter'))
     # change name for param folder, remove 2026
     preprocess.move_entry(('directories', 'param'), ('directories', 'params'))
+
+    # debug settings, remove 2027
+    preprocess.move_entry(('habapp', 'debug', 'periodic traceback'), ('habapp', 'debug', 'dump threads'))
+    preprocess.rename_entry(('habapp', 'debug', 'traceback on shutdown signal'), 'dump threads on shutdown signal')
 
     logging_cfg_path = config_folder / 'logging.yml'
     create_default_logfile(logging_cfg_path)
@@ -46,14 +49,12 @@ def setup_habapp_configuration(config_folder: Path) -> None:
     except (AbsolutePathExpected, InvalidConfigError):
         pass
 
-    load_habapp_cfg(do_print=not loaded_logging)
+    await load_habapp_cfg(do_print=not loaded_logging)
 
     if not loaded_logging:
         load_logging_cfg(logging_cfg_path)
 
     shutdown.register(stop_queue_handlers, msg='Stop logging queue handlers', last=True)
-
-    setup_debug()
 
     watcher = file_manager.get_file_watcher()
     watcher.watch_file('config.log_file', config_file_changed, config_folder / 'logging.yml', habapp_internal=True)
@@ -69,12 +70,12 @@ def set_flush_delay() -> None:
 async def config_file_changed(path: str) -> None:
     file = Path(path)
     if file.name == 'config.yml':
-        load_habapp_cfg()
+        await load_habapp_cfg()
     if file.name == 'logging.yml':
         load_logging_cfg(file)
 
 
-def load_habapp_cfg(do_print=False) -> None:
+async def load_habapp_cfg(do_print=False) -> None:
     def error(text: str) -> None:
         if do_print:
             print(text)
@@ -82,7 +83,7 @@ def load_habapp_cfg(do_print=False) -> None:
             log.error(text)
 
     try:
-        CONFIG.load_config_file()
+        await CONFIG.load_config_file()
     except pydantic.ValidationError as e:
         for line in str(e).splitlines():
             error(line)

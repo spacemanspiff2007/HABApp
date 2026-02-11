@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncGenerator, Generator
 from types import TracebackType
 from typing import Any
@@ -325,3 +326,29 @@ async def test_create_all_error() -> None:
     with pytest.raises(FactoryNotFoundError) as e:
         await p.create_all()
     assert str(e.value) == "No factory registered for type <class 'list'>"
+
+
+async def test_concurrent_create() -> None:
+
+    event = asyncio.Event()
+
+    async def factory_with_delay() -> AsyncGenerator[dict, Any]:
+        await event.wait()
+        yield {}
+
+    p = HabAppObjProvider()
+    p.register(factory_with_delay)
+
+    async def request_object():
+        return await p.get(dict)
+
+    tasks = [asyncio.create_task(request_object()) for _ in range(50)]
+
+    await asyncio.sleep(0.1)
+    event.set()
+
+    obj = await p.get(dict)
+
+    # All should return the same object
+    results = await asyncio.gather(*tasks)
+    assert {id(r) for r in results} == {id(obj) for _ in results}

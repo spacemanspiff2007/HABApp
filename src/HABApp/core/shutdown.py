@@ -120,7 +120,7 @@ def request() -> None:
 class ShutdownInfo:
     def __init__(self) -> None:
         self._requested: bool = False
-        self._event: Final[asyncio.Event[None]] = asyncio.Event()
+        self._event: Final[asyncio.Event] = asyncio.Event()
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} requested={self._requested}>'
@@ -153,16 +153,18 @@ class ShutdownInfo:
 @HABAPP_PROVIDER.register
 async def __shutdown_factory() -> AsyncGenerator[ShutdownInfo, Any]:
 
-    obj = ShutdownInfo()
+    loop: Final = asyncio.get_event_loop()
+    obj: Final = ShutdownInfo()
 
     def shutdown_handler(sig: Any, frame: Any) -> None:
         print('Shutting down ...')
         log.debug('Requested shutdown')
 
-        obj.request_showdown()
+        loop.call_soon_threadsafe(obj.request_showdown)
         request()
 
     # register shutdown helper
+    log.debug('Registering shutdown signal handlers')
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
 

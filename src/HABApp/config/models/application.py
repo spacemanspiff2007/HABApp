@@ -1,4 +1,5 @@
-from easyconfig import AppBaseModel, Field
+from easyconfig.models import Field
+from easyconfig.models.convenience import AsyncAppBaseModel
 
 from HABApp.config.models.directories import DirectoriesConfig
 from HABApp.config.models.habapp import HABAppConfig
@@ -7,7 +8,7 @@ from HABApp.config.models.mqtt import MqttConfig
 from HABApp.config.models.openhab import OpenhabConfig
 
 
-class ApplicationConfig(AppBaseModel):
+class ApplicationConfig(AsyncAppBaseModel):
     """Structure that contains the complete configuration"""
 
     directories: DirectoriesConfig = Field(default_factory=DirectoriesConfig)
