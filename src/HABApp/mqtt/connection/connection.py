@@ -1,14 +1,25 @@
 from __future__ import annotations
 
 import logging
-from typing import TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from aiomqtt import Client, MqttError
 
-import HABApp
-from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
+from HABApp.core.connections import (
+    AutoReconnectPlugin,
+    BaseConnection,
+    ConnectionManager,
+    ConnectionStateToEventBusPlugin,
+)
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.connections.base_plugin import BaseConnectionPluginConnectedTask
+from HABApp.core.provider import HABAPP_PROVIDER
+
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+
+    from HABApp.config import ApplicationConfig
 
 
 log = logging.getLogger('HABApp.mqtt.connection')
@@ -17,14 +28,15 @@ log = logging.getLogger('HABApp.mqtt.connection')
 CONTEXT_TYPE: TypeAlias = Client | None
 
 
-def setup() -> None:
-    config = HABApp.config.CONFIG.mqtt
+@HABAPP_PROVIDER.register
+async def setup(connection_manager: ConnectionManager, config: ApplicationConfig) -> AsyncGenerator[
+    MqttConnection, Any]:
 
     from HABApp.mqtt.connection.handler import CONNECTION_HANDLER
     from HABApp.mqtt.connection.publish import PUBLISH_HANDLER
     from HABApp.mqtt.connection.subscribe import SUBSCRIPTION_HANDLER
 
-    connection = Connections.add(CONNECTION)
+    connection = connection_manager.add(CONNECTION)
 
     connection.register_plugin(CONNECTION_HANDLER, 0)
     connection.register_plugin(SUBSCRIPTION_HANDLER, 10)
@@ -34,8 +46,13 @@ def setup() -> None:
     connection.register_plugin(AutoReconnectPlugin())
 
     # config changes
-    config.subscribe.subscribe_for_changes(SUBSCRIPTION_HANDLER.subscription_cfg_changed)
-    config.connection.subscribe_for_changes(connection.status_configuration_changed)
+    config.mqtt.subscribe.subscribe_for_changes(SUBSCRIPTION_HANDLER.subscription_cfg_changed)
+    config.mqtt.connection.subscribe_for_changes(connection.status_configuration_changed)
+
+    yield connection
+
+    connection.on_application_shutdown()
+
 
 
 class MqttConnection(BaseConnection):

@@ -8,18 +8,19 @@ import eascheduler
 import HABApp
 import HABApp.config
 import HABApp.core
-import HABApp.mqtt.connection as mqtt_connection
 import HABApp.parameters.parameter_files
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.config.models import ApplicationConfig
-from HABApp.core import Connections, shutdown
+from HABApp.core import shutdown
+from HABApp.core.connections import ConnectionManager
 from HABApp.core.files import FileManager
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
-from HABApp.openhab import connection as openhab_connection
+from HABApp.mqtt.connection.connection import MqttConnection
+from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.rule_manager import RuleManager
 
 
@@ -41,8 +42,6 @@ class Runtime:
 
     async def start(self, config_folder: Path) -> None:
         try:
-            # shutdown setup
-            shutdown.register(Connections.on_application_shutdown, msg='Shutting down connections')
 
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
@@ -62,8 +61,8 @@ class Runtime:
             await HABApp.config.setup_habapp_configuration(config_folder)
 
             # Connection setup
-            openhab_connection.setup()
-            mqtt_connection.setup()
+            await HABAPP_PROVIDER.get(OpenhabConnection)
+            await HABAPP_PROVIDER.get(MqttConnection)
 
             # File loader setup
             # Parameter Files
@@ -75,7 +74,8 @@ class Runtime:
             # Rule engine
             rule_manager = await HABAPP_PROVIDER.get(RuleManager)
 
-            Connections.application_startup_complete()
+            mgr = await HABAPP_PROVIDER.get(ConnectionManager)
+            mgr.application_startup_complete()
 
             await rule_manager.load_rules_on_startup()
 

@@ -5,13 +5,20 @@ from typing import TYPE_CHECKING, Any, TypeAlias
 
 import aiohttp
 
-import HABApp
-from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
+from HABApp.core.connections import (
+    AutoReconnectPlugin,
+    BaseConnection,
+    ConnectionManager,
+    ConnectionStateToEventBusPlugin,
+)
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 if TYPE_CHECKING:
     from asyncio import Queue
+    from collections.abc import AsyncGenerator
 
+    from HABApp.config import ApplicationConfig
     from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
     from HABApp.openhab.items import OpenhabItem, Thing
@@ -49,8 +56,8 @@ class OpenhabContext:
 CONTEXT_TYPE: TypeAlias = OpenhabContext | None
 
 
-def setup() -> None:
-    config = HABApp.config.CONFIG.openhab
+@HABAPP_PROVIDER.register
+async def setup(connection_manager: ConnectionManager, config: ApplicationConfig) -> AsyncGenerator[OpenhabConnection, Any]:
 
     from HABApp.openhab.connection.handler import HANDLER as CONNECTION_HANDLER
     from HABApp.openhab.connection.plugins import (
@@ -66,7 +73,7 @@ def setup() -> None:
         WebsocketPlugin,
     )
 
-    connection = Connections.add(OpenhabConnection())
+    connection = connection_manager.add(OpenhabConnection())
     connection.register_plugin(CONNECTION_HANDLER)
 
     connection.register_plugin(WaitForStartlevelPlugin(), 0)
@@ -85,7 +92,11 @@ def setup() -> None:
     connection.register_plugin(AutoReconnectPlugin())
 
     # config changes
-    config.general.subscribe_for_changes(CONNECTION_HANDLER.update_cfg_general)
+    config.openhab.general.subscribe_for_changes(CONNECTION_HANDLER.update_cfg_general)
+
+    yield connection
+
+    connection.on_application_shutdown()
 
 
 class OpenhabConnection(BaseConnection):

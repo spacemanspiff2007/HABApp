@@ -5,9 +5,8 @@ import re
 from asyncio import Lock, sleep
 from typing import TYPE_CHECKING, Any, Final
 
-import HABApp
 import HABApp.__cmd_args__ as cmd_args
-from HABApp.core.connections import Connections
+from HABApp.core.connections import ConnectionManager
 from HABApp.core.files.errors import AlreadyHandledFileError
 from HABApp.core.internals.wrapped_function import wrap_func
 from HABApp.core.logger import log_warning
@@ -20,6 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from pathlib import Path
 
+    from HABApp.config import ApplicationConfig
     from HABApp.core.files import FileManager
     from HABApp.core.shutdown import ShutdownInfo
 
@@ -29,9 +29,10 @@ log = logging.getLogger('HABApp.Rules')
 
 class RuleManager:
 
-    def __init__(self, shutdown: ShutdownInfo, file_manager: FileManager) -> None:
+    def __init__(self, shutdown: ShutdownInfo, file_manager: FileManager, config: ApplicationConfig) -> None:
         self._shutdown: Final = shutdown
         self._file_manager: Final = file_manager
+        self._config: Final = config
 
         self._files: Final[dict[str, RuleFile]] = {}
         self._lock: Final = Lock()
@@ -50,7 +51,7 @@ class RuleManager:
                 await file.check_all_rules()
                 return None
 
-        path = HABApp.CONFIG.directories.rules
+        path = self._config.directories.rules
         prefix = 'rules/'
 
         self._file_manager.add_handler(
@@ -60,12 +61,15 @@ class RuleManager:
         self._file_manager.add_folder(
             prefix, path, priority=0, pattern=re.compile(r'.py$', re.IGNORECASE), name='rules-python'
         )
+        return None
 
-    async def load_rules_on_startup(self):
+    async def load_rules_on_startup(self) -> None:
 
-        if HABApp.CONFIG.openhab.general.wait_for_openhab:
-            c = Connections.get('openhab')
-            while not (c.is_shutdown or c.is_disabled or c.is_online):
+        connections = await HABAPP_PROVIDER.get(ConnectionManager)
+
+        if self._config.openhab.general.wait_for_openhab:
+            c = connections.get('openhab')
+            while not (c.is_shutdown or c.is_disabled or c.is_online or self._shutdown.is_requested()):
                 await sleep(1)
         else:
             await sleep(1)
@@ -150,9 +154,10 @@ class RuleManager:
 
 
 @HABAPP_PROVIDER.register
-async def _provide_manger(shutdown: ShutdownInfo, file_manager: FileManager) -> AsyncGenerator[RuleManager, Any]:
+async def _provide_manger(shutdown: ShutdownInfo, file_manager: FileManager,
+                          config: ApplicationConfig) -> AsyncGenerator[RuleManager, Any]:
 
-    obj = RuleManager(shutdown, file_manager)
+    obj = RuleManager(shutdown, file_manager, config)
     await obj.setup()
     yield obj
     await obj.unload_rules()
