@@ -4,7 +4,8 @@ import pytest
 
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.internals import EventBus, EventBusListener, EventFilterBase, wrap_func
+from HABApp.core.internals import EventBus, EventBusListener, EventFilterBase
+from HABApp.core.internals.function_executor.factory import ExecutorFactory
 
 
 class TestEventBus(EventBus):
@@ -14,9 +15,13 @@ class TestEventBus(EventBus):
         super().__init__()
         self.allow_errors = False
         self.errors = []
+        self.worker_factory: ExecutorFactory | None = None
 
     def listen_events(self, name: str, cb, filter: EventFilterBase) -> None:
-        listener = EventBusListener(name, wrap_func(cb, name=f'TestFunc for {name}'), filter)
+        assert self.worker_factory is not None
+        func = self.worker_factory.create(cb, name=f'TestFunc for {name}')
+
+        listener = EventBusListener(name, func, filter)
         self.add_listener(listener)
 
     def post_event(self, topic: str, event: Any) -> None:
@@ -26,7 +31,7 @@ class TestEventBus(EventBus):
         super().post_event(topic, event)
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.fixture
 def eb():
     eb = TestEventBus()
     yield eb

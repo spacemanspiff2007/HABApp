@@ -4,7 +4,7 @@ import sys
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from re import Pattern
-from typing import TYPE_CHECKING, Any, Final, Literal, ParamSpec, TypeVar, overload
+from typing import Any, Final, Literal, TypeVar, overload
 
 import HABApp
 import HABApp.core
@@ -23,6 +23,7 @@ from HABApp.core.internals import (
 from HABApp.core.items import BaseItem, BaseValueItem
 from HABApp.rule.scheduler.job_builder import HABAppJobBuilder as _HABAppJobBuilder
 
+from ..rule_ctx import HABAppRuleContext
 from .interfaces import async_subprocess_exec
 from .interfaces.rule_subprocess import (
     HINT_EXEC_ARGS,
@@ -34,9 +35,6 @@ from .interfaces.rule_subprocess import (
 from .rule_hook import get_rule_hook as _get_rule_hook
 
 
-if TYPE_CHECKING:
-    pass
-
 log = logging.getLogger('HABApp.Rule')
 
 
@@ -44,12 +42,15 @@ ITEM_TYPE = TypeVar('ITEM_TYPE', bound=BaseItem)
 
 
 class Rule(ContextProvidingObj):
+    _habapp_ctx: HABAppRuleContext
 
     def __init__(self) -> None:
-        super().__init__(context=HABApp.rule_ctx.HABAppRuleContext(self))
-
         hook = _get_rule_hook()
         hook.register_rule(self)
+
+        super().__init__(
+            context=HABApp.rule_ctx.HABAppRuleContext(self, hook.event_bus, hook.item_registry, hook.executor_factory)
+        )
 
         # internals
         self.__rule_manager: Final = hook.rule_manager
@@ -313,11 +314,7 @@ class Rule(ContextProvidingObj):
         return ret
 
 
-PSPEC_RULE = ParamSpec('PSPEC_RULE')
-TYPE_RULE = TypeVar('TYPE_RULE', bound=Rule)
-
-
-def create_rule(f: Callable[PSPEC_RULE, TYPE_RULE], *args: PSPEC_RULE.args, **kwargs: PSPEC_RULE.kwargs) -> TYPE_RULE:
+def create_rule[R: Rule, **P](f: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R:
     try:
         _get_rule_hook()
     except RuntimeError:

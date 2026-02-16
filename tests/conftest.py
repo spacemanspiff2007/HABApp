@@ -51,7 +51,7 @@ def use_dummy_cfg(monkeypatch):
     return cfg
 
 
-@pytest.fixture()
+@pytest.fixture
 def ir():
     return ItemRegistry()
 
@@ -64,7 +64,7 @@ async def _patch_event_loop() -> None:
         module.loop = asyncio.get_event_loop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def file_manager(eb: EventBus):
     return FileManager(None, eb)
 

@@ -5,12 +5,11 @@ from asyncio import get_event_loop
 from collections.abc import Awaitable, Callable, Coroutine
 from concurrent.futures import Future
 from types import TracebackType
-from typing import Any, Final, Self
+from typing import Any, Final, Self, override
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
 from pytest import MonkeyPatch  # noqa: PT013
-from typing_extensions import override
 
 import HABApp
 import HABApp.core.lib.exceptions.format
@@ -23,11 +22,12 @@ from HABApp.core.internals import Context, EventBus, ItemRegistry, setup_interna
 from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
-from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
+from HABApp.core.internals.wrapped_function.base import WrappedFunctionBase
 from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
 from HABApp.core.lib.exceptions.format import fallback_format
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
+from tests.helpers.sync_worker import TestingExecutorFactory
 
 
 def suggest_rule_name(obj: object) -> str:
@@ -80,7 +80,7 @@ class SyncPool:
         return f
 
 
-class AsyncFunc(WrappedFunctionBase):
+class AsyncFunc[**P, R](WrappedFunctionBase[P, R]):
     def __init__(self, coro: Callable[P, Coroutine[Any, Any, R]],
                  name: str | None = None,
                  logger: logging.Logger | None = None,
@@ -167,7 +167,7 @@ class SimpleRuleRunner:
         # Patch the hook so we can instantiate the rules
         hook = HABAppRuleHook(
             self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop(), None,
-            item_registry=ir, event_bus=eb,
+            item_registry=ir, event_bus=eb, executor_factory=TestingExecutorFactory(eb),
         )
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 

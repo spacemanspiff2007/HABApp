@@ -1,41 +1,40 @@
-from typing import Any
+from __future__ import annotations
 
-from typing_extensions import override
+from typing import TYPE_CHECKING, Any, Final, override
 
-from HABApp.core.internals import AutoContextBoundObj, EventFilterBase, uses_event_bus
+from HABApp.core.internals import AutoContextBoundObj
 from HABApp.core.internals.event_bus import EventBusListenerBase
-from HABApp.core.internals.wrapped_function import WrappedFunctionBase
 
 
-event_bus = uses_event_bus()
+if TYPE_CHECKING:
+    from HABApp.core.internals import EventFilterBase, FunctionExecutorBase
 
 
 class EventBusListener(EventBusListenerBase):
-    def __init__(self, topic: str, callback: WrappedFunctionBase, event_filter: EventFilterBase, **kwargs: Any) -> None:
+    def __init__(self, topic: str, func: FunctionExecutorBase, event_filter: EventFilterBase, **kwargs: Any) -> None:
         super().__init__(topic, **kwargs)
 
-        assert isinstance(callback, WrappedFunctionBase)
-        self.func: WrappedFunctionBase = callback
-        self.filter: EventFilterBase = event_filter
+        self._func: Final = func
+        self._filter: Final = event_filter
 
     def notify_listeners(self, event: Any) -> None:
-        if self.filter.trigger(event):
-            self.func.run(event)
+        if self._filter.trigger(event):
+            self._func.execute_background(event)
 
     def describe(self) -> str:
-        return f'"{self.topic}" (filter={self.filter.describe()})'
+        return f'"{self.topic}" (filter={self._filter.describe()})'
 
     def cancel(self) -> None:
         """Stop listening on the event bus"""
-        event_bus.remove_listener(self)
+        if self._event_bus is not None:
+            self._event_bus.remove_listener(self)
 
 
 class ContextBoundEventBusListener(EventBusListener, AutoContextBoundObj):
 
     @override
-    def _ctx_unlink(self):
-        event_bus.remove_listener(self)
-        return super()._ctx_unlink()
+    def _ctx_unlink(self) -> None:
+        super().cancel()
 
     @override
     def cancel(self) -> None:

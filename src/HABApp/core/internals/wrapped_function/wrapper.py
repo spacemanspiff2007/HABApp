@@ -6,7 +6,7 @@ from typing import Any
 from HABApp.config import CONFIG
 from HABApp.core import shutdown
 from HABApp.core.internals import Context
-from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
+from HABApp.core.internals.wrapped_function.base import WrappedFunctionBase
 from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction
 from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunction
 from HABApp.core.internals.wrapped_function.wrapped_thread import (
@@ -16,7 +16,7 @@ from HABApp.core.internals.wrapped_function.wrapped_thread import (
 )
 
 
-def wrap_func(func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
+def wrap_func[**P, R](func: Callable[P, R] | Callable[P, Coroutine[Any, Any, R]],
               warn_too_long=True,
               name: str | None = None,
               logger: logging.Logger | None = None,

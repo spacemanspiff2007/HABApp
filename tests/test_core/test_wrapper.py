@@ -12,7 +12,7 @@ from HABApp.core.wrapper import ExceptionToHABApp, ignore_exception
 log = Mock()
 
 
-@pytest.fixture()
+@pytest.fixture
 def p_mock(monkeypatch):
     m = Mock()
     monkeypatch.setattr(HABApp.core.wrapper, 'post_event', m)

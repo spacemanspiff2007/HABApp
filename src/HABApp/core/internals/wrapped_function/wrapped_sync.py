@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
-
-from typing_extensions import override
+from typing import override
 
 from HABApp.core.asyncio import create_task
 from HABApp.core.internals import Context
-from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
+from HABApp.core.internals.wrapped_function.base import WrappedFunctionBase
 
 
-class WrappedSyncFunction(WrappedFunctionBase[P, R]):
+class WrappedSyncFunction[**P, R](WrappedFunctionBase[P, R]):
 
     def __init__(self, func: Callable,
                  warn_too_long=True,

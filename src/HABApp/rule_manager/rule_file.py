@@ -7,7 +7,7 @@ from asyncio import AbstractEventLoop, get_event_loop
 from typing import TYPE_CHECKING
 
 import HABApp
-from HABApp.core.internals import EventBus, ItemRegistry, get_current_context, wrap_func
+from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry, get_current_context
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.rule.interfaces.http_client import HABAppHttpClient
 from HABApp.rule.rule_hook import HABAppRuleHook
@@ -68,12 +68,12 @@ class RuleFile:
 
     def create_rules(self, created_rules: list,
                      loop: AbstractEventLoop, async_http_client: HABAppHttpClient,
-                     item_registry: ItemRegistry, event_bus: EventBus) -> None:
+                     item_registry: ItemRegistry, event_bus: EventBus, executor_factory: ExecutorFactory) -> None:
 
         rule_hook = HABAppRuleHook(
             created_rules.append, self.suggest_rule_name,
             self.rule_manager, self, loop=loop, async_http_client=async_http_client,
-            item_registry=item_registry, event_bus=event_bus
+            item_registry=item_registry, event_bus=event_bus, executor_factory=executor_factory
         )
 
         # It seems like python 3.8 doesn't allow path like objects anymore:
@@ -88,11 +88,14 @@ class RuleFile:
         ign = HABApp.core.wrapper.ExceptionToHABApp(logger=log)
         ign.proc_tb = self.__process_tc
 
+        executor_factory = await HABAPP_PROVIDER.get(ExecutorFactory)
+
         with ign:
-            await wrap_func(self.create_rules).async_run(
+            await executor_factory.create(self.create_rules).execute(
                 created_rules,
                 loop=get_event_loop(), async_http_client=await HABAPP_PROVIDER.get(HABAppHttpClient),
                 item_registry=await HABAPP_PROVIDER.get(ItemRegistry), event_bus=await HABAPP_PROVIDER.get(EventBus),
+                executor_factory=executor_factory
             )
 
         if ign.raised_exception:

@@ -4,13 +4,11 @@ from asyncio import get_event_loop
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from time import monotonic
-from typing import TYPE_CHECKING, Any, Final
-
-from typing_extensions import override
+from typing import TYPE_CHECKING, Any, Final, override
 
 from HABApp.core.asyncio import run_func_from_async, thread_context
 from HABApp.core.internals import Context, ContextProvidingObj
-from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase, default_logger
+from HABApp.core.internals.wrapped_function.base import WrappedFunctionBase, default_logger
 
 
 if TYPE_CHECKING:
@@ -123,7 +121,7 @@ class PoolFunc(ContextProvidingObj):
                 pool_info.discard(self)
 
 
-class WrappedThreadFunction(WrappedFunctionBase[P, R]):
+class WrappedThreadFunction[**P, R](WrappedFunctionBase[P, R]):
 
     def __init__(self, func: Callable[P, R],
                  warn_too_long: bool = True,

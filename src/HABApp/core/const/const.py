@@ -1,6 +1,6 @@
 import sys
 from enum import Enum
-from typing import Final, Literal, TypeAlias
+from typing import Final, Literal
 
 from whenever import Instant
 
@@ -13,7 +13,7 @@ class _MissingType(Enum):
 
 
 MISSING: Final = _MissingType._MISSING
-MISSING_TYPE: TypeAlias = Literal[_MissingType._MISSING]
+type MISSING_TYPE = Literal[_MissingType._MISSING]
 
 STARTUP_INSTANT: Final = Instant.now()
 

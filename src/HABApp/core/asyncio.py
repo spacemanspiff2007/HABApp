@@ -12,7 +12,6 @@ from threading import get_ident
 from typing import TYPE_CHECKING, Final
 from typing import Any as _Any
 from typing import ParamSpec as _ParamSpec
-from typing import TypeVar as _TypeVar
 
 import HABApp
 from HABApp.core.const.installation import PYTHON_INSTALLATION_PATHS
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
     from collections.abc import Coroutine as _Coroutine
 
 
-thread_context: Final = _ContextVar('thread_ctx')
+thread_context: Final = _ContextVar[str]('thread_ctx')
 thread_ident: Final = get_ident()
 
 
@@ -89,10 +88,7 @@ def _is_in_thread() -> bool:
 _tasks = set()
 
 
-_T = _TypeVar('_T')
-
-
-def create_task(coro: _Coroutine[_Any, _Any, _T], name: str | None = None) -> _Future[_T]:
+def create_task[T](coro: _Coroutine[_Any, _Any, T], name: str | None = None) -> _Future[T]:
     # https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
     if _is_in_thread():
         f = _run_coroutine_threadsafe(_async_execute_awaitable(coro), loop)
@@ -106,14 +102,14 @@ def create_task(coro: _Coroutine[_Any, _Any, _T], name: str | None = None) -> _F
     return t
 
 
-def create_task_from_async(coro: _Coroutine[_Any, _Any, _T], name: str | None = None) -> _Task[_T]:
+def create_task_from_async[T](coro: _Coroutine[_Any, _Any, T], name: str | None = None) -> _Task[T]:
     t = _get_event_loop().create_task(coro, name=name)
     _tasks.add(t)
     t.add_done_callback(_tasks.discard)
     return t
 
 
-def run_coro_from_thread(coro: _Coroutine[_Any, _Any, _T], calling: _Callable) -> _T:
+def run_coro_from_thread[T](coro: _Coroutine[_Any, _Any, T], calling: _Callable) -> T:
     # This function call is blocking, so it can't be called in the async context
     if not _is_in_thread():
         raise AsyncContextError(calling)
@@ -125,7 +121,7 @@ def run_coro_from_thread(coro: _Coroutine[_Any, _Any, _T], calling: _Callable) -
 _P = _ParamSpec('_P')
 
 
-def run_func_from_async(func: _Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
+def run_func_from_async[**P, T](func: _Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
     """Runs a function from an async context"""
 
     # we already have an async context
@@ -137,7 +133,7 @@ def run_func_from_async(func: _Callable[_P, _T], *args: _P.args, **kwargs: _P.kw
     return future.result()
 
 
-async def _async_execute_func(func: _Callable[_P, _T], *args: _P.args, **kwargs: _P.kwargs) -> _T:
+async def _async_execute_func[**P, T](func: _Callable[P, T], *args: _P.args, **kwargs: _P.kwargs) -> T:
     """Helper coroutine to execute a function from the event loop"""
 
     ctx = thread_context.set(None)
@@ -147,7 +143,7 @@ async def _async_execute_func(func: _Callable[_P, _T], *args: _P.args, **kwargs:
         thread_context.reset(ctx)
 
 
-async def _async_execute_awaitable(awaitable: _Awaitable[_T]) -> _T:
+async def _async_execute_awaitable[T](awaitable: _Awaitable[T]) -> T:
     """Helper coroutine to execute a coroutine from the event loop and wait for the result"""
 
     ctx = thread_context.set(None)

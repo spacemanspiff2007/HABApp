@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from types import FrameType, TracebackType
 
     from HABApp import Rule
-    from HABApp.core.internals import EventBus, ItemRegistry
+    from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
     from HABApp.rule.interfaces.http_client import HABAppHttpClient
     from HABApp.rule_manager import RuleFile, RuleManager
 
@@ -29,7 +29,9 @@ class HABAppRuleHook:
     def __init__(self,
                  cb_register_rule: Callable[[Rule], Any], cb_suggest_name: Callable[[Rule], str],
                  rule_manager: RuleManager, rule_file: RuleFile, loop: AbstractEventLoop,
-                 async_http_client: HABAppHttpClient, item_registry: ItemRegistry, event_bus: EventBus) -> None:
+                 async_http_client: HABAppHttpClient, item_registry: ItemRegistry, event_bus: EventBus,
+                 executor_factory: ExecutorFactory) -> None:
+
         # callbacks
         self._cb_register: Final = cb_register_rule
         self._cb_suggest_name: Final = cb_suggest_name
@@ -40,6 +42,7 @@ class HABAppRuleHook:
         self.async_http_client: Final = async_http_client
         self.item_registry: Final = item_registry
         self.event_bus: Final = event_bus
+        self.executor_factory: Final = executor_factory
 
         # asyncio
         self.event_loop: Final = loop

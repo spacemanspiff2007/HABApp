@@ -24,8 +24,7 @@ if TYPE_CHECKING:
 
     from HABApp.core.events.habapp_events import RequestFileLoadEvent, RequestFileUnloadEvent
     from HABApp.core.files.watcher import HABAppFileWatcher
-    from HABApp.core.internals import EventBus
-
+    from HABApp.core.internals import EventBus, ExecutorFactory
 
 log = logging.getLogger('HABApp.files')
 
@@ -275,26 +274,27 @@ class FileManager:
     async def shutdown(self) -> None:
         await self._task.wait()
 
-    def setup(self) -> None:
+    def setup(self, executor_factory: ExecutorFactory) -> None:
         self._event_bus.add_listener(
             HABApp.core.internals.EventBusListener(
-                TOPIC_FILES, HABApp.core.internals.wrap_func(self.event_load),
+                TOPIC_FILES, executor_factory.create(self.event_load),
                 HABApp.core.events.EventFilter(HABApp.core.events.habapp_events.RequestFileLoadEvent)
             )
         )
 
         self._event_bus.add_listener(
             HABApp.core.internals.EventBusListener(
-                TOPIC_FILES, HABApp.core.internals.wrap_func(self.event_unload),
+                TOPIC_FILES, executor_factory.create(self.event_unload),
                 HABApp.core.events.EventFilter(HABApp.core.events.habapp_events.RequestFileUnloadEvent)
             )
         )
 
 
 @HABAPP_PROVIDER.register
-async def __get_file_manager(event_bus: EventBus, watcher: HABAppFileWatcher) -> AsyncGenerator[FileManager, Any]:
+async def __get_file_manager(event_bus: EventBus, watcher: HABAppFileWatcher,
+                             executor_factory: ExecutorFactory) -> AsyncGenerator[FileManager, Any]:
     obj = FileManager(watcher, event_bus)
-    obj.setup()
+    obj.setup(executor_factory)
 
     yield obj
 

@@ -1,4 +1,5 @@
 import asyncio
+from asyncio import TaskGroup
 
 from HABApp.core.items import AggregationItem, Item
 
@@ -17,35 +18,37 @@ async def test_aggregation_item() -> None:
         await asyncio.sleep(t)
         src.post_value(v)
 
-    asyncio.create_task(post_val(1 * INTERVAL, 1))
-    asyncio.create_task(post_val(2 * INTERVAL, 3))
-    asyncio.create_task(post_val(3 * INTERVAL, 5))
-    asyncio.create_task(post_val(4 * INTERVAL, 4))
-    asyncio.create_task(post_val(5 * INTERVAL, 2))
+    async with TaskGroup() as tg:
 
-    await asyncio.sleep(INTERVAL + INTERVAL / 2)
-    assert agg.value == (1, [1])
+        tg.create_task(post_val(1 * INTERVAL, 1))
+        tg.create_task(post_val(2 * INTERVAL, 3))
+        tg.create_task(post_val(3 * INTERVAL, 5))
+        tg.create_task(post_val(4 * INTERVAL, 4))
+        tg.create_task(post_val(5 * INTERVAL, 2))
 
-    await asyncio.sleep(INTERVAL)
-    assert agg.value == (3, [1, 3])
+        await asyncio.sleep(INTERVAL + INTERVAL / 2)
+        assert agg.value == (1, [1])
 
-    await asyncio.sleep(INTERVAL)
-    assert agg.value == (5, [1, 3, 5])
+        await asyncio.sleep(INTERVAL)
+        assert agg.value == (3, [1, 3])
 
-    await asyncio.sleep(INTERVAL * 6)    # 0.6 because the value reaches into the interval!
-    assert agg.value == (5, [5, 4, 2])
+        await asyncio.sleep(INTERVAL)
+        assert agg.value == (5, [1, 3, 5])
 
-    await asyncio.sleep(INTERVAL)
-    assert agg.value == (4, [4, 2])
+        await asyncio.sleep(INTERVAL * 6)    # 0.6 because the value reaches into the interval!
+        assert agg.value == (5, [5, 4, 2])
 
-    await asyncio.sleep(INTERVAL)
-    assert agg.value == (2, [2])
+        await asyncio.sleep(INTERVAL)
+        assert agg.value == (4, [4, 2])
 
-    await asyncio.sleep(INTERVAL)
-    assert agg.value == (2, [2])
+        await asyncio.sleep(INTERVAL)
+        assert agg.value == (2, [2])
 
-    await asyncio.sleep(INTERVAL)
-    assert agg.value == (2, [2])
+        await asyncio.sleep(INTERVAL)
+        assert agg.value == (2, [2])
+
+        await asyncio.sleep(INTERVAL)
+        assert agg.value == (2, [2])
 
 
 async def test_aggregation_item_cleanup() -> None:
@@ -62,14 +65,15 @@ async def test_aggregation_item_cleanup() -> None:
         await asyncio.sleep(t)
         src.post_value(v)
 
-    asyncio.create_task(post_val(1 * INTERVAL, 1))
-    asyncio.create_task(post_val(2 * INTERVAL, 3))
-    asyncio.create_task(post_val(3 * INTERVAL, 5))
-    asyncio.create_task(post_val(4 * INTERVAL, 7))
-    asyncio.create_task(post_val(5 * INTERVAL, 9))
+    async with TaskGroup() as tg:
+        tg.create_task(post_val(1 * INTERVAL, 1))
+        tg.create_task(post_val(2 * INTERVAL, 3))
+        tg.create_task(post_val(3 * INTERVAL, 5))
+        tg.create_task(post_val(4 * INTERVAL, 7))
+        tg.create_task(post_val(5 * INTERVAL, 9))
 
-    await asyncio.sleep(INTERVAL / 2)
-    await asyncio.sleep(5 * INTERVAL)
+        await asyncio.sleep(INTERVAL / 2)
+        await asyncio.sleep(5 * INTERVAL)
 
-    agg.aggregation_period(INTERVAL)
-    assert list(agg._vals) == [7, 9]
+        agg.aggregation_period(INTERVAL)
+        assert list(agg._vals) == [7, 9]

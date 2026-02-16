@@ -1,15 +1,13 @@
 import logging
 from collections.abc import Callable, Coroutine
-from typing import Any, Final
-
-from typing_extensions import override
+from typing import Any, Final, override
 
 from HABApp.core.asyncio import create_task
 from HABApp.core.internals import Context
-from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
+from HABApp.core.internals.wrapped_function.base import WrappedFunctionBase
 
 
-class WrappedAsyncFunction(WrappedFunctionBase[P, R]):
+class WrappedAsyncFunction[**P, R](WrappedFunctionBase[P, R]):
 
     def __init__(self, coro: Callable[P, Coroutine[Any, Any, R]],
                  name: str | None = None,

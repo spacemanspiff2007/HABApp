@@ -2,11 +2,6 @@ from HABApp.core import asyncio, const, errors, lib, provider, shutdown, types
 
 
 # isort: split
-
-from HABApp.core import connections
-
-
-# isort: split
 from HABApp.core import internals, logger, wrapper
 
 
@@ -15,6 +10,11 @@ from HABApp.core import internals, logger, wrapper
 import HABApp.core.events
 import HABApp.core.files
 import HABApp.core.items
+
+
+# isort: split
+
+from HABApp.core import connections
 
 
 # isort: split

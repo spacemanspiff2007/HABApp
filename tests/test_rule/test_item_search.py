@@ -14,7 +14,7 @@ from HABApp.rule.rule_hook import HABAppRuleHook
 def rule(ir: ItemRegistry) -> Rule:
     rules = []
     hook = HABAppRuleHook(rules.append, lambda x: x.__class__.__name__, None, None, loop=Mock, async_http_client=None,
-                          item_registry=ir, event_bus=Mock())
+                          item_registry=ir, event_bus=Mock(), executor_factory=None)
     hook.in_dict(globals())
     return Rule()
 

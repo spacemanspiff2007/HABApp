@@ -48,7 +48,6 @@ class AggregationItem(BaseValueItem):
             raise WrongItemTypeError.from_item(item, cls)
         return item
 
-
     def __init__(self, name: str) -> None:
         super().__init__(name)
         self.__period: float = 0

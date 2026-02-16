@@ -5,7 +5,7 @@ import warnings
 from asyncio import AbstractEventLoop
 from collections.abc import Callable, Hashable, Iterable, Mapping
 from datetime import datetime as dt_datetime
-from typing import TYPE_CHECKING, Any, Final, Self, TypeAlias
+from typing import TYPE_CHECKING, Any, Final, Self, override
 
 from eascheduler.builder import FilterBuilder, JobBuilder, TriggerBuilder
 from eascheduler.builder.helper import HINT_INSTANT, HINT_TIMEDELTA, get_instant, get_pos_timedelta_secs
@@ -13,7 +13,7 @@ from eascheduler.builder.triggers import TriggerObject, _get_producer
 from eascheduler.executor import ExecutorBase
 from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
 from eascheduler.schedulers.async_scheduler import AsyncScheduler
-from typing_extensions import ParamSpec, override
+from typing_extensions import ParamSpec
 
 from HABApp.core.asyncio import create_task_from_async, run_func_from_async
 from HABApp.core.internals import Context, wrap_func
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 HINT_CB_P = ParamSpec('HINT_CB_P')
-HINT_CB: TypeAlias = Callable[HINT_CB_P, Any]
+type HINT_CB[**HINT_CB_P] = Callable[HINT_CB_P, Any]
 
 
 class WrappedSyncExecutor(ExecutorBase):

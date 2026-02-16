@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Final
 import HABApp.__cmd_args__ as cmd_args
 from HABApp.core.connections import ConnectionManager
 from HABApp.core.files.errors import AlreadyHandledFileError
-from HABApp.core.internals.wrapped_function import wrap_func
+from HABApp.core.internals import ExecutorFactory
 from HABApp.core.logger import log_warning
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import log_exception
@@ -30,6 +30,7 @@ log = logging.getLogger('HABApp.Rules')
 class RuleManager:
 
     def __init__(self, shutdown: ShutdownInfo, file_manager: FileManager, config: ApplicationConfig) -> None:
+
         self._shutdown: Final = shutdown
         self._file_manager: Final = file_manager
         self._config: Final = config
@@ -41,9 +42,11 @@ class RuleManager:
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
 
+            executor_factory = await HABAPP_PROVIDER.get(ExecutorFactory)
+
             async with self._lock:
                 self._files['bench'] = file = BenchFile(self)
-                ok = await wrap_func(file.load).async_run()
+                ok = await executor_factory.create(file.load).execute()
                 if not ok:
                     log.error('Failed to load Benchmark!')
                     self._shutdown.request_showdown()

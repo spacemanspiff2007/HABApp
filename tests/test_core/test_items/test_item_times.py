@@ -9,7 +9,7 @@ from whenever import Instant
 import HABApp
 import HABApp.core.items.tmp_data
 from HABApp.core.events import NoEventFilter
-from HABApp.core.internals import EventBus, ItemRegistry, wrap_func
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import Item
 from HABApp.core.items.base_item import ChangedTime, UpdatedTime
 from HABApp.core.items.tmp_data import TmpItemData
@@ -100,7 +100,7 @@ async def test_cancel_running(parent_rule, u: UpdatedTime) -> None:
 async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: EventBus) -> None:
     m = MagicMock()
     u.set(Instant.now())
-    list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
+    list = HABApp.core.internals.EventBusListener('test', sync_worker.create(m, name='MockFunc'), NoEventFilter())
     eb.add_listener(list)
 
     u.set(Instant.now())
@@ -129,7 +129,7 @@ async def test_event_update(parent_rule, u: UpdatedTime, sync_worker, eb: EventB
 async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: EventBus) -> None:
     m = MagicMock()
     c.set(Instant.now())
-    list = HABApp.core.internals.EventBusListener('test', wrap_func(m, name='MockFunc'), NoEventFilter())
+    list = HABApp.core.internals.EventBusListener('test', sync_worker.create(m, name='MockFunc'), NoEventFilter())
     eb.add_listener(list)
 
     c.set(Instant.now())

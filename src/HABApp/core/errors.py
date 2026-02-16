@@ -4,7 +4,7 @@ from typing import Self as _Self
 from HABApp.core.const.hints import HasNameAttr as _HasNameAttr
 
 
-class HABAppException(Exception):
+class HABAppException(Exception):  # noqa: N818
     pass
 
 
@@ -23,6 +23,11 @@ class ItemAlreadyExistsError(HABAppException):
     def __init__(self, name: str) -> None:
         super().__init__(f'Item {name} does already exist and can not be added again!')
         self.name: str = name
+
+
+class EventBusAlreadySetError(HABAppException):
+    def __init__(self, desc: str) -> None:
+        super().__init__(f'Event bus listener {desc} is already added and can not be added again!')
 
 
 class ContextNotFoundError(HABAppException):
@@ -56,7 +61,7 @@ class ItemValueIsNoneError(HABAppValueError):
 
 class InvalidItemValueError(HABAppValueError):
     @classmethod
-    def from_item(cls, item: _HasNameAttr, value) -> _Self:
+    def from_item(cls, item: _HasNameAttr, value: _Any) -> _Self:
         return cls(f'Invalid value for {item.__class__.__name__} {item.name:s}: {value}')
 
 

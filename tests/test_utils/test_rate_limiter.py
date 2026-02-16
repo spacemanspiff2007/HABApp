@@ -17,7 +17,7 @@ from HABApp.util.rate_limiter.parser import LIMIT_REGEX
 from tests.helpers import MockedMonotonic
 
 
-@pytest.fixture()
+@pytest.fixture
 def time(monkeypatch) -> MockedMonotonic:
     m = MockedMonotonic()
     monkeypatch.setattr(fixed_window_module, 'monotonic', m.get_time)

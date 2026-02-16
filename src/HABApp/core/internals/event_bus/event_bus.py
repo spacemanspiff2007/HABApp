@@ -1,13 +1,13 @@
 import logging
 import threading
-from typing import Any
+from typing import Any, Final
 
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals.event_bus.base_listener import EventBusListenerBase
 
 
-event_log = logging.getLogger(TOPIC_EVENTS)
-habapp_log = logging.getLogger('HABApp')
+event_log: Final = logging.getLogger(TOPIC_EVENTS)
+habapp_log: Final = logging.getLogger('HABApp')
 
 
 class EventBus:
@@ -15,7 +15,7 @@ class EventBus:
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._listeners: dict[str, tuple[EventBusListenerBase, ...]] = {}
+        self._listeners: Final[dict[str, tuple[EventBusListenerBase, ...]]] = {}
 
     def post_event(self, topic: str, event: Any) -> None:
         if not isinstance(topic, str):
@@ -52,6 +52,9 @@ class EventBus:
                 habapp_log.warning(f'Event listener for {listener.describe()} has already been added!')
                 return None
 
+            # noinspection PyProtectedMember
+            listener._set_event_bus(self)
+
             # add listener
             self._listeners[topic] = item_listeners + (listener, )
             habapp_log.debug(f'Added event listener for {listener.describe()}')
@@ -72,6 +75,9 @@ class EventBus:
             if listener not in item_listeners:
                 habapp_log.warning(f'Event listener for {listener.describe()} has already been removed!')
                 return None
+
+            # noinspection PyProtectedMember
+            listener._clear_event_bus()
 
             # remove listener
             new_listeners = tuple(o for o in item_listeners if o is not listener)
