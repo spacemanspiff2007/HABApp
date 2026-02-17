@@ -1,62 +1,61 @@
 import asyncio
+from collections.abc import AsyncGenerator
 from datetime import date
+from typing import Any
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
 import HABApp
+from HABApp.config import ApplicationConfig
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.events import NoEventFilter
-from HABApp.core.internals import EventBusListener, wrap_func
-from HABApp.core.internals.wrapped_function.wrapped_sync import WrappedSyncFunction
-from HABApp.core.internals.wrapped_function.wrapped_thread import (
-    WrappedThreadFunction,
-    create_thread_pool,
-    stop_thread_pool,
-)
+from HABApp.core.internals import EventBusListener
+from HABApp.core.internals.function_executor.factory import PoolExecutorFactory
+from HABApp.core.internals.function_executor.thread_pool import HABAppThreadPool
 from tests.helpers import TestEventBus
 
 
-def test_error() -> None:
+def test_error(sync_worker) -> None:
     with pytest.raises(TypeError) as e:
-        wrap_func(None)
+        sync_worker.create(None)
     assert str(e.value) == 'Callable or coroutine function expected! Got "None" (type NoneType)'
 
     with pytest.raises(TypeError) as e:
-        wrap_func(6)
+        sync_worker.create(6)
     assert str(e.value) == 'Callable or coroutine function expected! Got "6" (type int)'
 
     with pytest.raises(TypeError) as e:
-        wrap_func(date(2023, 12, 24))
+        sync_worker.create(date(2023, 12, 24))
     assert str(e.value) == 'Callable or coroutine function expected! Got "2023-12-24" (type date)'
 
 
-def test_sync_run(sync_worker) -> None:
+async def test_sync_run(sync_worker) -> None:
     func = Mock()
-    f = wrap_func(func, name='mock')
-    f.run()
+    f = sync_worker.create(func, name='mock')
+    await f.execute()
     func.assert_called_once_with()
 
 
-async def test_async_run() -> None:
+async def test_async_run(sync_worker) -> None:
     coro = AsyncMock()
-    f = wrap_func(coro, name='coro_mock')
-    f.run()
+    f = sync_worker.create(coro, name='coro_mock')
+    await f.execute()
     await asyncio.sleep(0.05)
     coro.assert_awaited_once()
 
 
-def test_sync_args(sync_worker) -> None:
+async def test_sync_args(sync_worker) -> None:
     func = Mock()
-    f = wrap_func(func, name='mock')
-    f.run('arg1', 'arg2', kw1='kw1')
+    f = sync_worker.create(func, name='mock')
+    await f.execute('arg1', 'arg2', kw1='kw1')
     func.assert_called_once_with('arg1', 'arg2', kw1='kw1')
 
 
-async def test_async_args() -> None:
+async def test_async_args(sync_worker) -> None:
     coro = AsyncMock()
-    f = wrap_func(coro, name='coro_mock')
-    f.run('arg1', 'arg2', kw1='kw1')
+    f = sync_worker.create(coro, name='coro_mock')
+    await f.execute('arg1', 'arg2', kw1='kw1')
 
     await asyncio.sleep(0.05)
     coro.assert_awaited_once_with('arg1', 'arg2', kw1='kw1')
@@ -76,12 +75,12 @@ async def async_func_div_error() -> None:
 async def test_async_error_wrapper(eb: TestEventBus, name, func, sync_worker) -> None:
     eb.allow_errors = True
 
-    f = wrap_func(func)
+    f = sync_worker.create(func)
     err_func = AsyncMock()
-    err_listener = EventBusListener(TOPIC_ERRORS, wrap_func(err_func, name='ErrMock'), NoEventFilter())
+    err_listener = EventBusListener(TOPIC_ERRORS, sync_worker.create(err_func, name='ErrMock'), NoEventFilter())
     eb.add_listener(err_listener)
 
-    f.run()
+    await f.execute()
     await asyncio.sleep(0.05)
 
     assert err_func.called
@@ -93,33 +92,41 @@ async def test_async_error_wrapper(eb: TestEventBus, name, func, sync_worker) ->
 
 
 @pytest.fixture
-def thread_pool():
-    create_thread_pool(2)
-    yield
-    stop_thread_pool()
+async def thread_pool() -> AsyncGenerator[HABAppThreadPool, Any]:
+    cfg = ApplicationConfig()
+    cfg.habapp.thread_pool.threads = 2
+    pool = HABAppThreadPool.create(cfg)
+    yield pool
+    await pool.shutdown()
 
 
-async def test_ret_wrapped_sync_func(thread_pool) -> None:
+@pytest.fixture
+def executor_factory(eb, thread_pool) -> PoolExecutorFactory:
+    return PoolExecutorFactory(eb, None, thread_pool)
+
+
+async def test_ret_wrapped_sync_func(executor_factory: PoolExecutorFactory) -> None:
 
     def func() -> int:
         return 1
 
-    ret = await WrappedSyncFunction(func).async_run()
+    ret = await executor_factory.create(func).execute()
     assert ret == 1
 
-    ret = await WrappedThreadFunction(func).async_run()
+    ret = await executor_factory.create(func).execute()
     assert ret == 1
 
 
 @pytest.mark.ignore_log_errors
-async def test_wrapped_sync_func(thread_pool, eb: TestEventBus) -> None:
+async def test_wrapped_sync_func(
+        executor_factory: PoolExecutorFactory, eb: TestEventBus) -> None:
     eb.allow_errors = True
 
     def func() -> None:
         1/0
 
-    ret = await WrappedThreadFunction(func).async_run()
+    ret = await executor_factory.create(func).execute()
     assert ret is None
 
-    ret = await WrappedSyncFunction(func).async_run()
+    ret = await executor_factory.create(func).execute()
     assert ret is None

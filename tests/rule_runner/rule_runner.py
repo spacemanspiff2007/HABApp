@@ -1,11 +1,9 @@
 import asyncio
-import logging
 import warnings
 from asyncio import get_event_loop
-from collections.abc import Awaitable, Callable, Coroutine
-from concurrent.futures import Future
+from collections.abc import Awaitable
 from types import TracebackType
-from typing import Any, Final, Self, override
+from typing import Self
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
@@ -18,12 +16,9 @@ import HABApp.rule.scheduler.job_builder as job_builder_module
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.files import FileManager
-from HABApp.core.internals import Context, EventBus, ItemRegistry, setup_internals
+from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.internals.proxy import ConstProxyObj
-from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
-from HABApp.core.internals.wrapped_function.base import WrappedFunctionBase
-from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
 from HABApp.core.lib.exceptions.format import fallback_format
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
@@ -68,34 +63,6 @@ def raising_fallback_format(e: Exception, existing_traceback: list[str]) -> list
     traceback = fallback_format(e, existing_traceback)
     _ = traceback
     raise
-
-
-class SyncPool:
-    def submit(self, callback, *args, **kwargs) -> Future:
-        # This executes the callback so we can not ignore exceptions
-        res = callback(*args, **kwargs)
-
-        f = Future()
-        f.set_result(res)
-        return f
-
-
-class AsyncFunc[**P, R](WrappedFunctionBase[P, R]):
-    def __init__(self, coro: Callable[P, Coroutine[Any, Any, R]],
-                 name: str | None = None,
-                 logger: logging.Logger | None = None,
-                 context: Context | None = None) -> None:
-
-        super().__init__(name=name, func=coro, logger=logger, context=context)
-        self.coro: Final = coro
-
-    @override
-    def run(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        raise NotImplementedError()
-
-    @override
-    async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
-        return await self.coro(*args, **kwargs)
 
 
 class AppendListener(EventBusListenerBase):
@@ -170,11 +137,6 @@ class SimpleRuleRunner:
             item_registry=ir, event_bus=eb, executor_factory=TestingExecutorFactory(eb),
         )
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
-
-        # patch worker with a synchronous worker
-        self.monkeypatch.setattr(wrapped_thread, 'POOL', SyncPool())
-        self.monkeypatch.setattr(wrapper, 'WrappedAsyncFunction', AsyncFunc)
-        self.monkeypatch.setattr(wrapper, 'SYNC_CLS', WrappedThreadFunction, raising=False)
 
         # raise exceptions during error formatting
         self.monkeypatch.setattr(HABApp.core.lib.exceptions.format, 'fallback_format', raising_fallback_format)

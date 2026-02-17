@@ -13,4 +13,3 @@ from .item_registry import ItemRegistry, ItemRegistryItem
 
 from .event_bus_listener import ContextBoundEventBusListener, EventBusListener
 from .function_executor import ExecutorFactory, FunctionExecutorBase
-from .wrapped_function import WrappedFunctionBase, wrap_func

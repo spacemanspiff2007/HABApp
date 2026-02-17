@@ -110,6 +110,7 @@ async def provide_executor(config: ApplicationConfig, event_bus: EventBus) -> As
         yield SyncExecutorFactory(event_bus)
 
     factory = PoolExecutorFactory(event_bus, config, HABAppThreadPool.create(config))
+    pool_cfg.subscribe_set_options(on_next_value=False)
     pool_cfg.subscribe_for_changes(factory.update_pool)
     yield factory
 

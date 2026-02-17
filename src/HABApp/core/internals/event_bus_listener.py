@@ -34,7 +34,9 @@ class ContextBoundEventBusListener(EventBusListener, AutoContextBoundObj):
 
     @override
     def _ctx_unlink(self) -> None:
-        super().cancel()
+        super()._ctx_unlink()
+        # Then remove from event bus
+        EventBusListener.cancel(self)
 
     @override
     def cancel(self) -> None:

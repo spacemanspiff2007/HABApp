@@ -18,12 +18,11 @@ from HABApp.core.internals import (
     ContextProvidingObj,
     EventBusListener,
     EventFilterBase,
-    wrap_func,
 )
 from HABApp.core.items import BaseItem, BaseValueItem
 from HABApp.rule.scheduler.job_builder import HABAppJobBuilder as _HABAppJobBuilder
+from HABApp.rule_ctx import HABAppRuleContext
 
-from ..rule_ctx import HABAppRuleContext
 from .interfaces import async_subprocess_exec
 from .interfaces.rule_subprocess import (
     HINT_EXEC_ARGS,
@@ -56,9 +55,10 @@ class Rule(ContextProvidingObj):
         self.__rule_manager: Final = hook.rule_manager
         self.__post_event: Final = hook.event_bus.post_event
         self.__item_registry: Final = hook.item_registry
+        self.__executor_factory: Final = hook.executor_factory
 
         # scheduler
-        self.run: Final = _HABAppJobBuilder(self._habapp_ctx, loop=hook.event_loop)
+        self.run: Final = _HABAppJobBuilder(self._habapp_ctx, loop=hook.event_loop, executor=hook.executor_factory)
 
         # suggest a rule name
         self.rule_name: str = hook.suggest_rule_name(self)
@@ -124,7 +124,7 @@ class Rule(ContextProvidingObj):
             filters on the values of the event. It is also possible to group filters logically with, e.g.
             :class:`~HABApp.core.events.AndFilterGroup` and :class:`~HABApp.core.events.OrFilterGroup`
         """
-        cb = wrap_func(callback, context=self._habapp_ctx)
+        cb = self.__executor_factory.create(callback, context=self._habapp_ctx)
         name = name.name if isinstance(name, BaseItem) else name
 
         if event_filter is None:
@@ -170,14 +170,14 @@ class Rule(ContextProvidingObj):
         :return:
         """
 
-        cb = wrap_func(callback, context=self._habapp_ctx)
+        cb = self.__executor_factory.create(callback, context=self._habapp_ctx)
 
         call_args, call_kwargs = build_exec_params(
             program, *args, _capture_output=capture_output, _additional_python_path=additional_python_path, **kwargs
         )
         return create_task(
             async_subprocess_exec(
-                cb.run, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
+                cb.execute_background, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
         )
 
     @overload
@@ -232,7 +232,7 @@ class Rule(ContextProvidingObj):
             new_args.insert(0, module_or_package)
             new_args.insert(0, '-m')
 
-        cb = wrap_func(callback, context=self._habapp_ctx)
+        cb = self.__executor_factory.create(callback, context=self._habapp_ctx)
         call_args, call_kwargs = build_exec_params(
             sys.executable, *new_args,
             _capture_output=capture_output, _additional_python_path=additional_python_path,
@@ -241,7 +241,7 @@ class Rule(ContextProvidingObj):
 
         return create_task(
             async_subprocess_exec(
-                cb.run, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
+                cb.execute_background, *call_args, raw_info=raw_info, calling_func=self.execute_python, **call_kwargs)
         )
 
     def get_rule(self, rule_name: str) -> 'Rule | list[Rule]':

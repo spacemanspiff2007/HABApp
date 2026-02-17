@@ -11,7 +11,6 @@ from HABApp.core.internals import (
     EventBusListener,
     ExecutorFactory,
     ItemRegistry,
-    wrap_func,
 )
 from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.lib import get_obj_name
@@ -69,7 +68,7 @@ class HABAppRuleContext(Context):
             rule._habapp_rule_ctx = None
 
             # user implementation
-            await wrap_func(rule.on_rule_removed).async_run()
+            await self.executor_factory.create(rule.on_rule_removed).execute()
 
     async def check_rule(self) -> None:
         with HABApp.core.wrapper.ExceptionToHABApp(log):
@@ -94,4 +93,4 @@ class HABAppRuleContext(Context):
             self.rule.run._scheduler.set_enabled(True)
 
             # user implementation
-            await wrap_func(self.rule.on_rule_loaded).async_run()
+            await self.executor_factory.create(self.rule.on_rule_loaded).execute()

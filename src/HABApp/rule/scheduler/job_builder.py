@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import random
 import warnings
 from asyncio import AbstractEventLoop
 from collections.abc import Callable, Hashable, Iterable, Mapping
-from datetime import datetime as dt_datetime
 from typing import TYPE_CHECKING, Any, Final, Self, override
 
 from eascheduler.builder import FilterBuilder, JobBuilder, TriggerBuilder
@@ -15,15 +13,14 @@ from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
 from eascheduler.schedulers.async_scheduler import AsyncScheduler
 from typing_extensions import ParamSpec
 
-from HABApp.core.asyncio import create_task_from_async, run_func_from_async
-from HABApp.core.internals import Context, wrap_func
-from HABApp.core.internals.wrapped_function.wrapped_async import WrappedAsyncFunction
+from HABApp.core.asyncio import run_func_from_async
+from HABApp.core.internals import Context
+from HABApp.core.internals.function_executor import ExecutorFactory, FunctionExecutorBase
 from HABApp.rule.scheduler.job_ctrl import CountdownJobControl, DateTimeJobControl, OneTimeJobControl
 
 
 if TYPE_CHECKING:
 
-    from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
     from HABApp.rule_ctx import HABAppRuleContext
 
 
@@ -31,8 +28,8 @@ HINT_CB_P = ParamSpec('HINT_CB_P')
 type HINT_CB[**HINT_CB_P] = Callable[HINT_CB_P, Any]
 
 
-class WrappedSyncExecutor(ExecutorBase):
-    def __init__(self, func: WrappedThreadFunction,
+class WrappedHabappExecutor(ExecutorBase):
+    def __init__(self, func: FunctionExecutorBase,
                  args: Iterable = (), kwargs: Mapping[str, Any] | None = None) -> None:
         self._func: Final = func
         self._args: Final = args
@@ -40,28 +37,11 @@ class WrappedSyncExecutor(ExecutorBase):
 
     @override
     def execute(self) -> None:
-        self._func.run(*self._args, **self._kwargs)
+        self._func.execute_background(*self._args, **self._kwargs)
 
 
-class WrappedAsyncExecutor(ExecutorBase):
-    def __init__(self, func: WrappedAsyncFunction,
-                 args: Iterable = (), kwargs: Mapping[str, Any] | None = None) -> None:
-        self._func: Final = func
-        self._args: Final = args
-        self._kwargs: Final = kwargs if kwargs is not None else {}
-
-    @override
-    def execute(self) -> None:
-        create_task_from_async(
-            self._func.async_run(*self._args, **self._kwargs),
-            name=self._func.name
-        )
-
-
-def wrapped_func_executor(func: Any, args: Iterable = (), kwargs: Mapping[str, Any] | None = None) -> ExecutorBase:
-    if isinstance(func, WrappedAsyncFunction):
-        return WrappedAsyncExecutor(func, args, kwargs)
-    return WrappedSyncExecutor(func, args, kwargs)
+def wrapped_habapp_executor(func: Any, args: Iterable = (), kwargs: Mapping[str, Any] | None = None) -> ExecutorBase:
+    return WrappedHabappExecutor(func, args, kwargs)
 
 
 class AsyncHABAppScheduler(AsyncScheduler):
@@ -72,11 +52,12 @@ class AsyncHABAppScheduler(AsyncScheduler):
 
 
 class HABAppJobBuilder:
-    def __init__(self, context: HABAppRuleContext, *, loop: AbstractEventLoop) -> None:
+    def __init__(self, context: HABAppRuleContext, *, loop: AbstractEventLoop, executor: ExecutorFactory) -> None:
         self._habapp_rule_ctx: Context = context
+        self._executor: Final = executor
         self._scheduler: Final = AsyncHABAppScheduler(event_loop=loop, enabled=False)
 
-        self._builder: Final = JobBuilder(self._scheduler, wrapped_func_executor)
+        self._builder: Final = JobBuilder(self._scheduler, wrapped_habapp_executor)
 
         self.trigger: Final = TriggerBuilder
         self.filter: Final = FilterBuilder
@@ -85,9 +66,9 @@ class HABAppJobBuilder:
                           *args: HINT_CB_P.args,
                           job_id: Hashable | None = None, **kwargs: HINT_CB_P.kwargs) -> CountdownJobControl:
 
-        callback = wrap_func(callback, context=self._habapp_rule_ctx)
+        callback = self._executor.create(callback, context=self._habapp_rule_ctx)
 
-        job = CountdownJob(wrapped_func_executor(callback, args, kwargs), get_pos_timedelta_secs(secs), job_id=job_id)
+        job = CountdownJob(wrapped_habapp_executor(callback, args, kwargs), get_pos_timedelta_secs(secs), job_id=job_id)
         job.link_scheduler(self._scheduler)
         return CountdownJobControl(job)
 
@@ -109,9 +90,9 @@ class HABAppJobBuilder:
                      *args: HINT_CB_P.args,
                      job_id: Hashable | None = None, **kwargs: HINT_CB_P.kwargs) -> OneTimeJobControl:
 
-        callback = wrap_func(callback, context=self._habapp_rule_ctx)
+        callback = self._executor.create(callback, context=self._habapp_rule_ctx)
 
-        job = OneTimeJob(wrapped_func_executor(callback, args, kwargs), get_instant(instant), job_id=job_id)
+        job = OneTimeJob(wrapped_habapp_executor(callback, args, kwargs), get_instant(instant), job_id=job_id)
         job.link_scheduler(self._scheduler)
         return OneTimeJobControl(job)
 
@@ -133,9 +114,9 @@ class HABAppJobBuilder:
                    *args: HINT_CB_P.args,
                    job_id: Hashable | None = None, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
 
-        callback = wrap_func(callback, context=self._habapp_rule_ctx)
+        callback = self._executor.create(callback, context=self._habapp_rule_ctx)
 
-        job = DateTimeJob(wrapped_func_executor(callback, args, kwargs), _get_producer(trigger), job_id=job_id)
+        job = DateTimeJob(wrapped_habapp_executor(callback, args, kwargs), _get_producer(trigger), job_id=job_id)
         job.link_scheduler(self._scheduler)
         return DateTimeJobControl(job)
 
@@ -176,97 +157,3 @@ class HABAppJobBuilder:
         :param kwargs: |param_scheduled_cb_kwargs|
         """
         return self.once(None, callback, *args, job_id=job_id, **kwargs)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # deprecated functions
-    # ------------------------------------------------------------------------------------------------------------------
-    def every(self, start_time, interval,
-              callback: HINT_CB, *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-
-        warnings.warn(
-            'self.run.every is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-
-        return self.at(
-            TriggerBuilder.interval(start_time, interval),
-            callback, *args, **kwargs
-        )
-
-    def on_day_of_week(self, time, weekdays,
-                       callback: HINT_CB, *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.on_day_of_week is deprecated. Use self.run.at in combination with a trigger and a filter',
-            DeprecationWarning, stacklevel=2
-        )
-
-        if isinstance(time, dt_datetime):
-            time = time.time()
-
-        return self.at(
-            TriggerBuilder.time(time).only_at(FilterBuilder.weekdays(weekdays)),
-            callback, *args, **kwargs
-        )
-
-    def on_every_day(self, time, callback: HINT_CB,
-                     *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.on_every_day is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-
-        if isinstance(time, dt_datetime):
-            time = time.time()
-
-        return self.at(
-            TriggerBuilder.time(time),
-            callback, *args, **kwargs
-        )
-
-    def on_sunrise(self, callback: HINT_CB,
-                   *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.on_sunrise is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-        return self.at(TriggerBuilder.sunrise(), callback, *args, **kwargs)
-
-    def on_sunset(self, callback: HINT_CB,
-                  *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.on_sunset is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-        return self.at(TriggerBuilder.sunset(), callback, *args, **kwargs)
-
-    def on_sun_dawn(self, callback: HINT_CB,
-                  *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.on_sun_dawn is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-        return self.at(TriggerBuilder.dawn(), callback, *args, **kwargs)
-
-    def on_sun_dusk(self, callback: HINT_CB,
-                    *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.on_sun_dusk is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-        return self.at(TriggerBuilder.dusk(), callback, *args, **kwargs)
-
-    def every_minute(self, callback: HINT_CB,
-                     *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.every_minute is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-        return self.at(TriggerBuilder.interval(random.randint(0, 60 - 1), 60), callback, *args, **kwargs)
-
-    def every_hour(self, callback: HINT_CB,
-                   *args: HINT_CB_P.args, **kwargs: HINT_CB_P.kwargs) -> DateTimeJobControl:
-        warnings.warn(
-            'self.run.every_hour is deprecated. Use self.run.at in combination with a trigger',
-            DeprecationWarning, stacklevel=2
-        )
-        return self.at(TriggerBuilder.interval(random.randint(0, 3600 - 1), 3600), callback, *args, **kwargs)

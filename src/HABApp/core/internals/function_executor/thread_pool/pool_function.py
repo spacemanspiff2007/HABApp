@@ -3,6 +3,7 @@ from __future__ import annotations
 from time import monotonic
 from typing import TYPE_CHECKING, Final
 
+from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.internals import Context, ContextProvidingObj
 
 
@@ -15,11 +16,11 @@ if TYPE_CHECKING:
 
 class PoolFunction[**P, R](ContextProvidingObj):
     __slots__ = (
-        'dur_finish', 'dur_start', 'executor', 'func', 'func_args', 'func_kwargs', 'pool', 'submitted', 'usage_high'
+        'dur_run', 'dur_start', 'executor', 'func', 'func_args', 'func_kwargs', 'pool', 'submitted', 'usage_high'
     )
 
-    def __init__(self, executor: CallablePoolExecutor, pool: HABAppThreadPool, func: Callable[P, R], *args: P.args,
-                 context: Context | None = None,  kwargs: P.kwargs) -> None:
+    def __init__(self, executor: CallablePoolExecutor, pool: HABAppThreadPool, func: Callable[P, R], *, args: P.args,
+                 context: Context | None = None, kwargs: P.kwargs) -> None:
         super().__init__(context=context)
 
         self.executor: Final = executor
@@ -31,7 +32,7 @@ class PoolFunction[**P, R](ContextProvidingObj):
         # timing checks
         self.submitted: float = monotonic()
         self.dur_start: float = 0.0
-        self.dur_finish: float = 0.0
+        self.dur_run: float = 0.0
 
         # thread info
         self.usage_high: int = 0
@@ -51,17 +52,21 @@ class PoolFunction[**P, R](ContextProvidingObj):
                 )
 
             # Execute the function
-            ret = self.func(*self.args, **self.kwargs)
+            ret = self.func(*self.func_args, **self.func_kwargs)
 
             # log warning if execution takes too long
             self.dur_run = monotonic() - ts_start
 
-            if parent.warn_too_long and self.dur_run > 0.8 and self.usage_high >= self.pool.max_workers * 0.6:
-                parent.log.warning(f'{self.usage_high:d}/{self.pool.max_workers:d} threads have been in use and '
-                                   f'execution of {parent.name} took too long: {self.dur_run:.2f}s')
+            if self.executor.warn_too_long and self.dur_run > 0.8 and self.usage_high >= self.pool.max_workers * 0.6:
+                self.executor.log.warning(
+                    f'{self.usage_high:d}/{self.pool.max_workers:d} threads have been in use and '
+                    f'execution of {self.executor.name} took too long: {self.dur_run:.2f}s'
+                )
 
         except Exception as e:
-            ...
+            # Process and dump the exception traceback from a coroutine.
+            # That way we effectively serialize the logged tracebacks in case two exceptions happen at once
+            run_func_from_async(self.executor.process_exception, e, *self.func_args, **self.func_kwargs)
         else:
             return ret
         finally:

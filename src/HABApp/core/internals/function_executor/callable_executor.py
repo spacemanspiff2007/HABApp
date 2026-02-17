@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import get_event_loop
+from asyncio import wrap_future
 from typing import TYPE_CHECKING, override
 
 from HABApp.core.asyncio import create_task
@@ -34,12 +34,13 @@ class CallablePoolExecutor[**P, R](SyncFunctionExecutorBase[P, R]):
     @override
     async def execute(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
         pool = self._factory.pool
-        pool_func = PoolFunction(self, pool, self.func, *args, context=self._habapp_ctx, **kwargs)
-        return await get_event_loop().run_in_executor(pool, pool_func)
+        pool_func = PoolFunction(self, pool, self.func, args=args, kwargs=kwargs, context=self._habapp_ctx)
+        fut = pool.submit(pool_func)
+        return await wrap_future(fut)
 
     @override
     def execute_background(self, *args: P.args, **kwargs: P.kwargs) -> None:
         pool = self._factory.pool
-        pool_func = PoolFunction(self, pool, self.func, *args, context=self._habapp_ctx, **kwargs)
+        pool_func = PoolFunction(self, pool, self.func, args=args, kwargs=kwargs, context=self._habapp_ctx)
         pool.submit(pool_func)
         return None

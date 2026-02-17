@@ -38,7 +38,7 @@ class RuleManager:
         self._files: Final[dict[str, RuleFile]] = {}
         self._lock: Final = Lock()
 
-    async def setup(self):
+    async def setup(self) -> None:
         if cmd_args.DO_BENCH:
             from HABApp.rule_manager.benchmark import BenchFile
 

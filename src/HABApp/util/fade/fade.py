@@ -1,8 +1,8 @@
 from datetime import timedelta
 from time import time
-from typing import Union
+from typing import Final, Union
 
-from HABApp.core.internals import AutoContextBoundObj, wrap_func
+from HABApp.core.internals import AutoContextBoundObj, FunctionExecutorBase, get_current_context
 from HABApp.rule.scheduler import trigger
 
 
@@ -48,7 +48,9 @@ class Fade:
         self._fade_finished = True
 
         self._fade_worker: FadeWorker | None = None
-        self.__callback = wrap_func(callback) if callback is not None else None
+        self.__callback: Final[FunctionExecutorBase | None] = (
+            get_current_context().executor_factory.create(callback) if callback is not None else None
+        )
 
         self.value = 0
 
@@ -128,7 +130,7 @@ class Fade:
             self.stop_fade()
 
         if self.__callback is not None:
-            self.__callback.run(self.value)
+            self.__callback.execute_background(self.value)
 
     def schedule_fade(self) -> 'Fade':
         """Automatically run the fade with the Scheduler. The callback can be used to set the current fade value

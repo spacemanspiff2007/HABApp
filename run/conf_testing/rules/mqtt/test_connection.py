@@ -3,8 +3,9 @@ import asyncio
 from HABAppTests import EventWaiter, TestBaseRule, get_random_string
 
 import HABApp
-from HABApp.core.connections import Connections, ConnectionStatus
+from HABApp.core.connections import ConnectionManager, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.mqtt import interface_async
 
 
@@ -62,7 +63,9 @@ class TestMQTTConnection(TestBaseRule):
         await self.trigger_reconnect()
 
         await asyncio.sleep(0.2)
-        connection = Connections.get('mqtt')
+
+        manager = await HABAPP_PROVIDER.get(ConnectionManager)
+        connection = manager.get('mqtt')
         while not connection.is_online:
             await asyncio.sleep(0.2)
 
@@ -71,7 +74,8 @@ class TestMQTTConnection(TestBaseRule):
         HABApp.core.Items.pop_item(topic)
 
     async def trigger_reconnect(self) -> None:
-        connection = Connections.get('mqtt')
+        manager = await HABAPP_PROVIDER.get(ConnectionManager)
+        connection = manager.get('mqtt')
         connection.status._set_manual(ConnectionStatus.DISCONNECTED)
         connection.advance_status_task.start_if_not_running()
 

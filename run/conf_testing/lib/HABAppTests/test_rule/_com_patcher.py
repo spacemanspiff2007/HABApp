@@ -5,7 +5,7 @@ from collections.abc import Callable
 from types import ModuleType, TracebackType
 from typing import Any, Final
 
-from pytest import MonkeyPatch
+from pytest import MonkeyPatch  # noqa: PT013
 
 import HABApp.mqtt.connection.publish
 import HABApp.mqtt.connection.subscribe
@@ -13,6 +13,8 @@ import HABApp.openhab.connection.handler
 import HABApp.openhab.connection.handler.func_async
 import HABApp.openhab.process_events
 from HABApp.config import CONFIG
+from HABApp.core.connections import ConnectionManager
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 class PatcherName:
@@ -38,8 +40,8 @@ class BasePatcher:
             self.name.logged = True
         self._log.debug(msg)
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
-                 exc_tb: TracebackType | None) -> bool:
+    async def __aexit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
+                        exc_tb: TracebackType | None) -> bool:
 
         self.monkeypatch.undo()
         return False
@@ -98,7 +100,7 @@ class RestPatcher(BasePatcher):
             return resp
         return resp_wrap
 
-    def __enter__(self) -> None:
+    async def __aenter__(self) -> None:
         m = self.monkeypatch
 
         # http functions
@@ -118,7 +120,7 @@ class WebsocketPatcher(BasePatcher):
     def __init__(self, name: str) -> None:
         super().__init__(name, 'Wsocket')
 
-    def __enter__(self) -> None:
+    async def __aenter__(self) -> None:
 
         def prettify(text: str) -> str:
             # try to prettyfy the input so it's not the json in json event
@@ -146,7 +148,8 @@ class WebsocketPatcher(BasePatcher):
                 return await func(text)
             return _sender
 
-        conn = HABApp.core.connections.Connections.get('openhab')
+        mgr = await HABAPP_PROVIDER.get(ConnectionManager)
+        conn = mgr.get('openhab')
         for p in conn.plugins:
             if isinstance(p, module.WebsocketPlugin):
                 if p._websocket is not None:
@@ -155,7 +158,6 @@ class WebsocketPatcher(BasePatcher):
         else:
             msg = f'No websocket plugin found in {conn.plugins!r}'
             raise ValueError(msg)
-
 
 
 class MqttPatcher(BasePatcher):
@@ -175,7 +177,7 @@ class MqttPatcher(BasePatcher):
             return await func(topic, payload, qos, retain)
         return wrapped_publish
 
-    def __enter__(self) -> None:
+    async def __aenter__(self) -> None:
         m = self.monkeypatch
 
         module = HABApp.mqtt.connection.subscribe

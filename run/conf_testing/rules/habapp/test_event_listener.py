@@ -15,6 +15,7 @@ class TestNoWarningOnRuleUnload(TestBaseRule):
         self.add_test('CheckWarning', self.test_unload)
 
     async def test_unload(self) -> None:
+
         item = Item.get_create_item(get_random_name('HABApp'))
 
         grp = EventListenerGroup().add_listener(item, self.cb, ValueChangeEventFilter())
@@ -27,7 +28,9 @@ class TestNoWarningOnRuleUnload(TestBaseRule):
 
         # Workaround to so we don't crash
         self.on_rule_unload = lambda: None
-        self._habapp_ctx = HABAppRuleContext(self)
+        self._habapp_ctx = HABAppRuleContext(
+            self, self._habapp_ctx.event_bus, self._habapp_ctx.item_registry, self._habapp_ctx.executor_factory
+        )
 
     def cb(self, event) -> None:
         pass

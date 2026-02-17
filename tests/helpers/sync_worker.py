@@ -30,7 +30,11 @@ class TestingCallableExecutor[**P, R](SyncFunctionExecutorBase[P, R]):
 
     @override
     def execute_background(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        self.func(*args, **kwargs)
+        try:
+            self.func(*args, **kwargs)
+        except Exception as e:
+            self.process_exception(e, *args, **kwargs)
+            return None
 
 
 class TestingCoroExecutor[**P, R](FunctionExecutorBase[P, R]):

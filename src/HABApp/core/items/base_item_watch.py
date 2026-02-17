@@ -10,7 +10,6 @@ from HABApp.core.internals import (
     ContextBoundEventBusListener,
     get_current_context,
     uses_post_event,
-    wrap_func,
 )
 from HABApp.core.lib import PendingFuture
 
@@ -51,7 +50,7 @@ class BaseWatch(AutoContextBoundObj):
         return context.add_event_listener(
             ContextBoundEventBusListener(
                 self.name,
-                wrap_func(callback, context=context),
+                context.executor_factory.create(callback, context=context),
                 EventFilter(self.EVENT, seconds=self.fut.secs),
                 parent_ctx=context
             )

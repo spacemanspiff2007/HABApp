@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from asyncio import get_event_loop
+from concurrent.futures import Future as ConcurrentFuture
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from typing import TYPE_CHECKING, Final, Self
@@ -46,9 +46,12 @@ class HABAppThreadPool:
     @staticmethod
     async def shutdown_thread_pool_executor(executor: ThreadPoolExecutor) -> None:
         log.debug('Shutting down')
-        fut = get_event_loop().run_in_executor(None, executor.shutdown)
+
         try:
-            await asyncio.wait_for(fut, timeout=5)
+            await asyncio.wait_for(
+                asyncio.to_thread(executor.shutdown, wait=True, cancel_futures=False),
+                timeout=5
+            )
         except TimeoutError:
             log.error('Timeout while waiting for shutdown! Are you using long running threads?')
 
@@ -72,7 +75,7 @@ class HABAppThreadPool:
         return None
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} pending={len(self._pending):s} running={len(self._running):d}>'
+        return f'<{self.__class__.__name__} pending={len(self._pending):d} running={len(self._running):d}>'
 
     def func_start(self, func: PoolFunction) -> None:
         with self._lock_pending:
@@ -90,9 +93,8 @@ class HABAppThreadPool:
         with self._lock_running:
             self._running.discard(func)
 
-    def submit(self, func: PoolFunction) -> None:
+    def submit[**P, R](self, func: PoolFunction[P, R]) -> ConcurrentFuture[R]:
         with self._lock_pending:
             self._pending.add(func)
 
-        self._executor.submit(func.run)
-        return None
+        return self._executor.submit(func.run)

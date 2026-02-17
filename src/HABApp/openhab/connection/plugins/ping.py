@@ -8,8 +8,9 @@ from typing import Final
 import HABApp.openhab.events
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.internals import uses_event_bus, uses_item_registry
+from HABApp.core.internals import ExecutorFactory, uses_event_bus, uses_item_registry
 from HABApp.core.lib import SingleTask
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.connection import OpenhabConnection
 
 
@@ -40,9 +41,11 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
         self.next_value = None
         self.timestamp_sent = None
 
+        executor_factory = await HABAPP_PROVIDER.get(ExecutorFactory)
+
         self.listener = HABApp.core.internals.EventBusListener(
             HABApp.config.CONFIG.openhab.ping.item,
-            HABApp.core.internals.wrap_func(self.ping_received),
+            executor_factory.create(self.ping_received),
             HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateUpdatedEvent)
         )
         EventBus.add_listener(self.listener)
