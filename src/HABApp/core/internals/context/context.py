@@ -1,17 +1,22 @@
-from collections.abc import Callable
-from typing import Any, Optional, TypeVar
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBoundObjectIsAlreadyUnlinkedError
 
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+
 class ContextBoundObj:
-    def __init__(self, parent_ctx: Optional['Context'], **kwargs: Any) -> None:
+    def __init__(self, parent_ctx: Context | None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self._parent_ctx = parent_ctx
+        self._parent_ctx: Context | None = parent_ctx
         if parent_ctx is not None:
             parent_ctx.add_obj(self)
 
-    def _ctx_link(self, parent_ctx: 'Context') -> None:
+    def _ctx_link(self, parent_ctx: Context) -> None:
         assert isinstance(parent_ctx, Context)
         if self._parent_ctx is not None:
             raise ContextBoundObjectIsAlreadyLinkedError()
@@ -20,14 +25,11 @@ class ContextBoundObj:
         parent_ctx.add_obj(self)
 
     def _ctx_unlink(self) -> None:
-        if self._parent_ctx is None:
+        if (parent := self._parent_ctx) is None:
             raise ContextBoundObjectIsAlreadyUnlinkedError()
 
-        self._parent_ctx.remove_obj(self)
         self._parent_ctx = None
-
-
-HINT_CONTEXT_BOUND_OBJ = TypeVar('HINT_CONTEXT_BOUND_OBJ', bound=ContextBoundObj)
+        parent.remove_obj(self)
 
 
 class Context:
@@ -42,7 +44,7 @@ class Context:
         assert isinstance(obj, ContextBoundObj)
         self.objs.remove(obj)
 
-    def link(self, obj: HINT_CONTEXT_BOUND_OBJ) -> HINT_CONTEXT_BOUND_OBJ:
+    def link[O: ContextBoundObj](self, obj: O) -> O:
         assert isinstance(obj, ContextBoundObj)
         # noinspection PyProtectedMember
         obj._ctx_link(self)

@@ -1,5 +1,4 @@
 import logging
-import threading
 from typing import Any, Final
 
 from HABApp.core.const.log import TOPIC_EVENTS
@@ -14,7 +13,6 @@ class EventBus:
     __slots__ = ('_listeners', '_lock')
 
     def __init__(self) -> None:
-        self._lock = threading.Lock()
         self._listeners: Final[dict[str, tuple[EventBusListenerBase, ...]]] = {}
 
     def post_event(self, topic: str, event: Any) -> None:
@@ -44,21 +42,20 @@ class EventBus:
         if not topic:
             raise ValueError()
 
-        with self._lock:
-            item_listeners = self._listeners.get(topic, ())
+        item_listeners = self._listeners.get(topic, ())
 
-            # don't add the same listener twice
-            if listener in item_listeners:
-                habapp_log.warning(f'Event listener for {listener.describe()} has already been added!')
-                return None
-
-            # noinspection PyProtectedMember
-            listener._set_event_bus(self)
-
-            # add listener
-            self._listeners[topic] = item_listeners + (listener, )
-            habapp_log.debug(f'Added event listener for {listener.describe()}')
+        # don't add the same listener twice
+        if listener in item_listeners:
+            habapp_log.warning(f'Event listener for {listener.describe()} has already been added!')
             return None
+
+        # noinspection PyProtectedMember
+        listener._set_event_bus(self)
+
+        # add listener
+        self._listeners[topic] = item_listeners + (listener, )
+        habapp_log.debug(f'Added event listener for {listener.describe()}')
+        return None
 
     def remove_listener(self, listener: EventBusListenerBase) -> None:
         if not isinstance(listener, EventBusListenerBase):
@@ -68,27 +65,25 @@ class EventBus:
         if not topic:
             raise ValueError()
 
-        with self._lock:
-            item_listeners = self._listeners.get(topic, ())
+        item_listeners = self._listeners.get(topic, ())
 
-            # print warning if we try to remove it twice
-            if listener not in item_listeners:
-                habapp_log.warning(f'Event listener for {listener.describe()} has already been removed!')
-                return None
-
-            # noinspection PyProtectedMember
-            listener._clear_event_bus()
-
-            # remove listener
-            new_listeners = tuple(o for o in item_listeners if o is not listener)
-            if new_listeners:
-                self._listeners[topic] = new_listeners
-            else:
-                self._listeners.pop(topic, None)
-
-            habapp_log.debug(f'Removed event listener for {listener.describe()}')
+        # print warning if we try to remove it twice
+        if listener not in item_listeners:
+            habapp_log.warning(f'Event listener for {listener.describe()} has already been removed!')
             return None
 
+        # noinspection PyProtectedMember
+        listener._clear_event_bus()
+
+        # remove listener
+        new_listeners = tuple(o for o in item_listeners if o is not listener)
+        if new_listeners:
+            self._listeners[topic] = new_listeners
+        else:
+            self._listeners.pop(topic, None)
+
+        habapp_log.debug(f'Removed event listener for {listener.describe()}')
+        return None
+
     def remove_all_listeners(self) -> None:
-        with self._lock:
-            self._listeners.clear()
+        self._listeners.clear()

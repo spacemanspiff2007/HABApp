@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Final, TypeVar, overload
+from typing import Final, overload
 
 from HABApp.core.const.log import TOPIC_ITEMS
 from HABApp.core.errors import ItemAlreadyExistsError, ItemNotFoundException
 from HABApp.core.internals.item_registry import ItemRegistryItem
 
-
-ITEM_TYPE = TypeVar('ITEM_TYPE', bound=ItemRegistryItem)
 
 log = logging.getLogger(TOPIC_ITEMS)
 
@@ -34,7 +32,7 @@ class ItemRegistry:
     def get_item_names(self) -> tuple[str, ...]:
         return tuple(self._items.keys())
 
-    def add_item(self, item: ITEM_TYPE) -> ITEM_TYPE:
+    def add_item[I: ItemRegistryItem](self, item: I) -> I:
         if not isinstance(item, ItemRegistryItem):
             msg = f'Item must be of type {ItemRegistryItem.__name__} not {type(item)}'
             raise TypeError(msg)
@@ -60,7 +58,7 @@ class ItemRegistry:
         return item
 
     @overload
-    def pop_item(self, name: ITEM_TYPE) -> ITEM_TYPE:
+    def pop_item[I: ItemRegistryItem](self, name: I) -> I:
         ...
 
     @overload
