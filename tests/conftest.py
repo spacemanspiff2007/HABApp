@@ -59,7 +59,7 @@ def ir():
 @pytest.fixture(autouse=True)
 async def _patch_event_loop() -> None:
     # todo: remove this once we fix asyncio handling
-    for module in [HABApp.core.asyncio, HABApp.core.items.tmp_data]:
+    for module in [HABApp.core.items.tmp_data]:
         assert module.__annotations__['loop']
         module.loop = asyncio.get_event_loop()
 

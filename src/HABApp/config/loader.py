@@ -102,7 +102,7 @@ async def load_habapp_cfg(do_print=False) -> None:
         log.warning('No country is set in the config file. Holidays will not be available.')
     else:
         try:
-            eascheduler.setup_holidays(location.country, location.subdivision if location.subdivision else None)
+            eascheduler.setup_holidays(location.country, location.subdivision or None)
         except Exception as e:
             for line in str(e).splitlines():
                 error(line)

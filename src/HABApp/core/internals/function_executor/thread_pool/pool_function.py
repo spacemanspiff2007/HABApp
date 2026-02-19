@@ -3,11 +3,12 @@ from __future__ import annotations
 from time import monotonic
 from typing import TYPE_CHECKING, Final
 
-from HABApp.core.asyncio import run_func_from_async
+from HABApp.core.asyncio import loop_context, run_func_from_async
 from HABApp.core.internals import Context, ContextProvidingObj
 
 
 if TYPE_CHECKING:
+    from asyncio import AbstractEventLoop
     from collections.abc import Callable
 
     from HABApp.core.internals.function_executor.callable_executor import CallablePoolExecutor
@@ -16,11 +17,20 @@ if TYPE_CHECKING:
 
 class PoolFunction[**P, R](ContextProvidingObj):
     __slots__ = (
-        'dur_run', 'dur_start', 'executor', 'func', 'func_args', 'func_kwargs', 'pool', 'submitted', 'usage_high'
+        '_loop',
+        'dur_run',
+        'dur_start',
+        'executor',
+        'func',
+        'func_args',
+        'func_kwargs',
+        'pool',
+        'submitted',
+        'usage_high'
     )
 
     def __init__(self, executor: CallablePoolExecutor, pool: HABAppThreadPool, func: Callable[P, R], *, args: P.args,
-                 context: Context | None = None, kwargs: P.kwargs) -> None:
+                 context: Context | None = None, kwargs: P.kwargs, loop: AbstractEventLoop) -> None:
         super().__init__(context=context)
 
         self.executor: Final = executor
@@ -37,7 +47,11 @@ class PoolFunction[**P, R](ContextProvidingObj):
         # thread info
         self.usage_high: int = 0
 
+        self._loop: Final = loop
+
     def run(self) -> R:
+        loop_token: Final = loop_context.set(self._loop)
+
         try:
             ts_start = monotonic()
             self.dur_start = ts_start - self.submitted
@@ -70,4 +84,5 @@ class PoolFunction[**P, R](ContextProvidingObj):
         else:
             return ret
         finally:
+            loop_context.reset(loop_token)
             self.pool.func_complete(self)

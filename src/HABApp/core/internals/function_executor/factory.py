@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from asyncio import get_event_loop
 from inspect import iscoroutinefunction
 from typing import TYPE_CHECKING, Any, Final, override
 
@@ -20,10 +21,11 @@ if TYPE_CHECKING:
 
 
 class ExecutorFactory:
-    __slots__ = ('event_bus', )
+    __slots__ = ('event_bus', 'loop')
 
     def __init__(self, event_bus: EventBus) -> None:
         self.event_bus: Final = event_bus
+        self.loop: Final = get_event_loop()
 
     def _create_coro_factory[**P, R](self, func: Callable[P, Coroutine[Any, Any, R]], *,
                                      name: str | None = None, logger: logging.Logger | None = None,

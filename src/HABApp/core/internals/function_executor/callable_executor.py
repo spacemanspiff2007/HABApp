@@ -34,13 +34,15 @@ class CallablePoolExecutor[**P, R](SyncFunctionExecutorBase[P, R]):
     @override
     async def execute(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
         pool = self._factory.pool
-        pool_func = PoolFunction(self, pool, self.func, args=args, kwargs=kwargs, context=self._habapp_ctx)
+        loop = self._factory.loop
+        pool_func = PoolFunction(self, pool, self.func, args=args, kwargs=kwargs, context=self._habapp_ctx, loop=loop)
         fut = pool.submit(pool_func)
         return await wrap_future(fut)
 
     @override
     def execute_background(self, *args: P.args, **kwargs: P.kwargs) -> None:
         pool = self._factory.pool
-        pool_func = PoolFunction(self, pool, self.func, args=args, kwargs=kwargs, context=self._habapp_ctx)
+        loop = self._factory.loop
+        pool_func = PoolFunction(self, pool, self.func, args=args, kwargs=kwargs, context=self._habapp_ctx, loop=loop)
         pool.submit(pool_func)
         return None

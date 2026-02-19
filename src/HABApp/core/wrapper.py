@@ -1,5 +1,6 @@
 import functools
 import logging
+from asyncio import get_event_loop
 from collections.abc import Awaitable, Callable
 from inspect import iscoroutinefunction
 from logging import Logger
@@ -9,7 +10,7 @@ from sys import _getframe as sys_get_frame
 from types import TracebackType
 from typing import ParamSpec, TypeVar, overload
 
-from HABApp.core.asyncio import thread_context
+from HABApp.core.asyncio import loop_context, thread_context
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import uses_post_event
@@ -109,22 +110,28 @@ def ignore_exception(func):
     return wrapped_func
 
 
-def in_thread(func: Callable[P, T]) -> Callable[P, T]:
+def in_thread[**P, T](func: Callable[P, T]) -> Callable[P, T]:
     # async not allowed
     if iscoroutinefunction(func):
         msg = 'Cannot use in_thread with async functions!'
         raise ValueError(msg)
 
+    # this wrapper is either called from a HABApp thread pool or synchronously from a coroutine
+    if (loop := loop_context.get(None)) is None:
+        loop = get_event_loop()
+
     @functools.wraps(func)
     def f(*args: P.args, **kwargs: P.kwargs) -> T:
-        ctx = thread_context.set('UserThread')
+        thread_token = thread_context.set('UserThread')
+        loop_token = loop_context.set(loop)
         try:
             return func(*args, **kwargs)
         except Exception as e:
             process_exception(func, e)
             return None
         finally:
-            thread_context.reset(ctx)
+            thread_context.reset(thread_token)
+            loop_context.reset(loop_token)
     return f
 
 
