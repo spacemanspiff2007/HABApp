@@ -53,6 +53,7 @@ class MapTransformationRegistry(TransformationRegistryBase):
             obj[key] = value
 
         self.objs[name] = Map(obj), default
+        return None
 
 
 MAP_REGISTRY: Final = MapTransformationRegistry('map')
@@ -62,4 +63,4 @@ class MapTransformationFactory(TransformationFactoryBase[dict[MapKeyType, MapVal
     pass
 
 
-MAP_FACTORY = MapTransformationFactory(MAP_REGISTRY)
+MAP_FACTORY: Final = MapTransformationFactory(MAP_REGISTRY)
