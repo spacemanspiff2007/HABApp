@@ -1,15 +1,16 @@
 import logging
 import logging.config
 from pathlib import Path
+from typing import Final
 
 import eascheduler
 import pydantic
 
 from HABApp import __version__
 from HABApp.config.config import CONFIG
-from HABApp.config.logging import HABAppQueueHandler, load_logging_file
-from HABApp.core import shutdown
-from HABApp.core.internals.proxy.proxies import uses_file_manager
+from HABApp.config.logging import HABAppQueueHandler, LogQueueManager, load_logging_file
+from HABApp.core.files import FileManager
+from HABApp.core.provider import HABAPP_PROVIDER
 
 from .errors import AbsolutePathExpected, InvalidConfigError
 from .logging import create_default_logfile, get_logging_dict
@@ -19,12 +20,11 @@ from .logging.buffered_logger import BufferedLogger
 log = logging.getLogger('HABApp.Config')
 
 
-file_manager = uses_file_manager()
-
-
 async def setup_habapp_configuration(config_folder: Path) -> None:
+    logging_cfg_path: Final = config_folder / 'logging.yml'
+    habapp_cfg_path: Final = config_folder / 'config.yml'
 
-    CONFIG.set_file_path(config_folder / 'config.yml')
+    CONFIG.set_file_path(habapp_cfg_path)
     preprocess = CONFIG.load_preprocess
     preprocess.set_log_func(log.warning)
     # old sse event handler config, remove 2026
@@ -37,14 +37,13 @@ async def setup_habapp_configuration(config_folder: Path) -> None:
     preprocess.move_entry(('habapp', 'debug', 'periodic traceback'), ('habapp', 'debug', 'dump threads'))
     preprocess.rename_entry(('habapp', 'debug', 'traceback on shutdown signal'), 'dump threads on shutdown signal')
 
-    logging_cfg_path = config_folder / 'logging.yml'
     create_default_logfile(logging_cfg_path)
 
     loaded_logging = False
 
     # Try load the logging config
     try:
-        load_logging_cfg(logging_cfg_path)
+        await load_logging_cfg(logging_cfg_path)
         loaded_logging = True
     except (AbsolutePathExpected, InvalidConfigError):
         pass
@@ -52,13 +51,13 @@ async def setup_habapp_configuration(config_folder: Path) -> None:
     await load_habapp_cfg(do_print=not loaded_logging)
 
     if not loaded_logging:
-        load_logging_cfg(logging_cfg_path)
+        await load_logging_cfg(logging_cfg_path)
 
-    shutdown.register(stop_queue_handlers, msg='Stop logging queue handlers', last=True)
+    file_manager = await HABAPP_PROVIDER.get(FileManager)
 
     watcher = file_manager.get_file_watcher()
-    watcher.watch_file('config.log_file', config_file_changed, config_folder / 'logging.yml', habapp_internal=True)
-    watcher.watch_file('config.cfg_file', config_file_changed, config_folder / 'config.yml', habapp_internal=True)
+    watcher.watch_file('config.log_file', config_file_changed, logging_cfg_path, habapp_internal=True)
+    watcher.watch_file('config.cfg_file', config_file_changed, habapp_cfg_path, habapp_internal=True)
 
     CONFIG.habapp.logging.subscribe_for_changes(set_flush_delay)
 
@@ -72,10 +71,10 @@ async def config_file_changed(path: str) -> None:
     if file.name == 'config.yml':
         await load_habapp_cfg()
     if file.name == 'logging.yml':
-        load_logging_cfg(file)
+        await load_logging_cfg(file)
 
 
-async def load_habapp_cfg(do_print=False) -> None:
+async def load_habapp_cfg(do_print: bool = False) -> None:
     def error(text: str) -> None:
         if do_print:
             print(text)
@@ -110,24 +109,13 @@ async def load_habapp_cfg(do_print=False) -> None:
     log.debug('Loaded HABApp config')
 
 
-QUEUE_HANDLER: list['HABAppQueueHandler'] = []
-
-
-def stop_queue_handlers() -> None:
-    for qh in QUEUE_HANDLER:
-        qh.signal_stop()
-    while QUEUE_HANDLER:
-        qh = QUEUE_HANDLER.pop()
-        qh.stop()
-
-
-def load_logging_cfg(path: Path) -> None:
+async def load_logging_cfg(path: Path) -> None:
     # If the logging file gets accidentally deleted we do nothing
     if (logging_yaml := load_logging_file(path)) is None:
         return None
 
-    # stop buffered handlers
-    stop_queue_handlers()
+    manager = await HABAPP_PROVIDER.get(LogQueueManager)
+    manager.stop()
 
     buf_log = BufferedLogger()
     cfg, q_handlers = get_logging_dict(logging_yaml, buf_log)
@@ -141,9 +129,7 @@ def load_logging_cfg(path: Path) -> None:
         raise InvalidConfigError from None
 
     # start buffered handlers
-    for qh in q_handlers:
-        QUEUE_HANDLER.append(qh)
-        qh.start()
+    manager.add(q_handlers)
 
     logging.getLogger('HABApp').info(f'HABApp Version {__version__}')
 

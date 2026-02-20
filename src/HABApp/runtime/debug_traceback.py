@@ -15,7 +15,6 @@ from HABApp.core.wrapper import log_exception
 
 
 if TYPE_CHECKING:
-
     from collections.abc import Callable
 
     from HABApp.config import ApplicationConfig

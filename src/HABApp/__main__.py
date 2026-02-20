@@ -37,32 +37,33 @@ async def main() -> int | str:
 
     if HABApp.__cmd_args__.DO_DEBUG:
         print_debug_info()
-        sys.exit(0)
+        return 0
 
     log = logging.getLogger('HABApp')
 
-    debug_traceback = DebugTraceback()
     # setup debug traceback as soon as we have the config
+    debug_traceback = DebugTraceback()
     debug_traceback.setup(HABApp.config.CONFIG)
 
     # load shutdown helper first
     shutdown = await HABAPP_PROVIDER.get(ShutdownInfo)
 
     try:
-        cfg_folder = find_config_folder(args.config)
-
-        # see if we have user code (e.g. for additional logging configuration or additional setup)
-        try:  # noqa: SIM105
-            import HABAppUser  # noqa: F401, PLC0415
-        except ModuleNotFoundError:
-            pass
-
         tg = asyncio.TaskGroup()
         HABAPP_PROVIDER.add_object(tg, asyncio.TaskGroup)
 
-        app = HABApp.runtime.Runtime()
-
         async with HABAPP_PROVIDER, tg:
+
+            cfg_folder = find_config_folder(args.config)
+
+            # see if we have user code (e.g. for additional logging configuration or additional setup)
+            try:  # noqa: SIM105
+                import HABAppUser  # noqa: F401, PLC0415
+            except ModuleNotFoundError:
+                pass
+
+            app = HABApp.runtime.Runtime()
+
             tg.create_task(app.start(cfg_folder), name='HABApp Runtime')
             tg.create_task(shutdown.wait_for_shutdown(), name='Wait for Shutdown')
 

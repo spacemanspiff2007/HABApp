@@ -24,7 +24,7 @@ def show_screen() -> None:
 
     just_fix_windows_console()
 
-    for line_text, line_red in zip(text.strip('\n\r').splitlines(), red.strip('\n\r').splitlines()):
+    for line_text, line_red in zip(text.strip('\n\r').splitlines(), red.strip('\n\r').splitlines(), strict=True):
         red = line_red.strip()
         assert line_text.endswith(red)
         print(f'{line_text[:-len(red)]:s}{Fore.RED}{line_text[-len(red):]}{Fore.RESET}')
