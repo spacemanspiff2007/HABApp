@@ -70,6 +70,10 @@ class HABAppQueueHandler:
             except Empty:
                 pass
 
+            if (handler := self._handler) is not None:
+                self._handler = None
+                handler.close()
+
             log.debug(f'{self._name} thread stopped')
         finally:
             with LOCK:

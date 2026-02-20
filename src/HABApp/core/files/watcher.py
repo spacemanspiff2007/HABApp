@@ -6,9 +6,8 @@ from asyncio import Event, Task
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from pathlib import Path
 from re import Pattern
-from typing import Any, Final
+from typing import Any, Final, override
 
-from typing_extensions import override
 from watchfiles import Change, DefaultFilter, awatch
 
 from HABApp.core.asyncio import create_task_from_async
@@ -159,6 +158,8 @@ class HABAppFileWatcher:
                       dispatchers: list[FileWatcherDispatcherBase] | None = None) -> bool:
         if not DEFAULT_FILTER(change, path):
             return False
+
+        path = Path(path).as_posix()
 
         if dispatchers is not None:
             return any(dispatcher.allow(change, path) for dispatcher in dispatchers)

@@ -84,7 +84,13 @@ def load_logging_file(path: Path) -> dict[str, Any] | None:
 
 
 def rotate_handler_files(handlers_cfg: dict) -> None:
-    for cfg in handlers_cfg.values():
+    for name, cfg in handlers_cfg.items():
+
+        # close handler so we can rotate the file without issues
+        handler: logging.Handler | None = logging._handlers.get(name)
+        if handler is not None:
+            handler.close()
+
         if (filename := cfg.get('filename')) is None:
             continue
         if (backup_count := cfg.get('backupCount')) is None:
