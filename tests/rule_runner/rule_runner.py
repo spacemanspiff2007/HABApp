@@ -18,11 +18,11 @@ from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.files import FileManager
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.event_bus import EventBusListenerBase
+from HABApp.core.internals.function_executor.testing import TestingExecutorFactory
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.lib.exceptions.format import fallback_format
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
-from tests.helpers.sync_worker import TestingExecutorFactory
 
 
 def suggest_rule_name(obj: object) -> str:
