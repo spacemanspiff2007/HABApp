@@ -22,7 +22,6 @@ async def main() -> int | str:
     from HABApp.core.provider import HABAPP_PROVIDER
 
     # todo: fix this
-    HABApp.core.asyncio.loop = loop
     HABApp.core.items.tmp_data.loop = loop
 
     @HABAPP_PROVIDER.register
