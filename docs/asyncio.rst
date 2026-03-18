@@ -17,9 +17,10 @@ Async http calls are available through the ``self.async_http`` object in rule in
 Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: HABApp.rule.interfaces.http
+.. autoclass:: HABApp.rule.interfaces.HABAppHttpClient
    :members:
-   :imported-members:
+   :inherited-members:
+   :member-order: groupwise
 
 Examples
 ^^^^^^^^^^^^^^^^^^^^^^^^
