@@ -1,9 +1,9 @@
-aiohttp     == 3.13.2
+aiohttp     == 3.13.3
 pydantic    == 2.12.5
 bidict      == 0.23.1
 watchfiles  == 1.1.1
-ujson       == 5.11.0
-aiomqtt     == 2.4.0
+ujson       == 5.12.0
+aiomqtt     == 2.5.1
 
 eascheduler == 0.2.7
 
