@@ -3,13 +3,12 @@
 import re
 from base64 import b64decode, b64encode
 from datetime import datetime
-from typing import Any, Final, Literal, Self
+from typing import Any, Final, Literal, Self, override
 
 from fastnumbers import float as fast_float
 from fastnumbers import real, try_int, try_real
 from pydantic import BaseModel as _BaseModel
 from pydantic import ConfigDict, Field, TypeAdapter
-from typing_extensions import override
 from whenever import Instant, OffsetDateTime, PlainDateTime, SystemDateTime, ZonedDateTime
 
 from HABApp.core.types import HSB, RGB, Point

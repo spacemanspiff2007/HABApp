@@ -1,6 +1,4 @@
-from typing import Any
-
-from typing_extensions import override
+from typing import Any, override
 
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import uses_get_item, uses_item_registry

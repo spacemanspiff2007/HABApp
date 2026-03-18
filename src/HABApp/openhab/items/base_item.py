@@ -1,10 +1,9 @@
 import datetime
 from collections.abc import Callable, Mapping
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, override
 
 from immutables import Map
 from pydantic import ValidationError
-from typing_extensions import override
 
 from HABApp.core.const import MISSING
 from HABApp.core.items import BaseValueItem

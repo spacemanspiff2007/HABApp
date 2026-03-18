@@ -2,13 +2,12 @@ import asyncio
 import re
 import typing
 from re import Pattern
-from typing import Any, Self
+from typing import Any, Self, override
 
 import pydantic
 import pydantic_core
 import whenever
 from pydantic import PrivateAttr
-from typing_extensions import override
 
 from tests.helpers.code_gen.module_context import ModuleContext
 

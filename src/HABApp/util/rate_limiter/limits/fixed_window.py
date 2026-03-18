@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from time import monotonic
-
-from typing_extensions import override
+from typing import override
 
 from .base import BaseRateLimit, BaseRateLimitInfo
 

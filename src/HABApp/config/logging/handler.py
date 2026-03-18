@@ -4,8 +4,7 @@ from datetime import date, datetime
 from logging import LogRecord
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-
-from typing_extensions import override
+from typing import override
 
 
 class MidnightRotatingFileHandler(RotatingFileHandler):

@@ -1,6 +1,5 @@
 import re
-
-from typing_extensions import override
+from typing import override
 
 from tests.helpers.code_gen.module_context import ModuleContext
 

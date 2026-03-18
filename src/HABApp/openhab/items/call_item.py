@@ -1,7 +1,5 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final
-
-from typing_extensions import override
+from typing import TYPE_CHECKING, Final, override
 
 from HABApp.core.const import MISSING
 from HABApp.core.const.const import _MissingType

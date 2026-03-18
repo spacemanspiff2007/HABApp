@@ -1,8 +1,7 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, override
 
 from immutables import Map
-from typing_extensions import override
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.openhab.definitions.websockets.item_value_types import (
