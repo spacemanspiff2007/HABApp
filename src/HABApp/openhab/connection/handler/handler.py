@@ -45,9 +45,21 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             connection.status_from_setup_to_disabled()
             return None
 
-        # Bearer token authentication (Issue #2)
+        # If no token is explicitly configured, check whether a legacy API token was placed
+        # in the user or password field and migrate it automatically with a deprecation warning.
+        if not bearer_token:
+            for field_name, field_value in (('user', user), ('password', password)):
+                if field_value.startswith('oh.'):
+                    log.warning(
+                        f'Found openHAB API token in the "{field_name}" config field. '
+                        'Please move it to the "token" config field. '
+                        'Using a token in "user" or "password" is deprecated and will be removed in a future version.'
+                    )
+                    bearer_token = field_value
+                    break
+
         if bearer_token:
-            if user or password:
+            if config.token and (user or password):
                 log.warning('Both bearer token and user/password are configured. Bearer token takes precedence.')
             session_kwargs: dict[str, Any] = {
                 'base_url': url,
@@ -56,13 +68,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
                 'headers': {'Authorization': f'Bearer {bearer_token}'},
             }
         else:
-            # Fix for Issue #1: normalize token from password field to user field
-            # openHAB expects the API token as the username with a blank password in BasicAuth
-            is_token = user.startswith('oh.') or password.startswith('oh.')
-            if is_token and not user:
-                user, password = password, ''
-
-            if not is_token and (not user or not password):
+            if not user or not password:
                 log.info('Connection disabled (user/password missing)!')
                 connection.status_from_setup_to_disabled()
                 return None

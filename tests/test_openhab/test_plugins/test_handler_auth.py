@@ -1,13 +1,11 @@
 """Tests for authentication logic in the openHAB connection handler."""
 from __future__ import annotations
 
-import pytest
-
 from HABApp.openhab.connection.plugins.websockets import WebsocketPlugin
 
 
 class TestBuildToken:
-    """Tests for WebsocketPlugin._build_token (Issue #1 regression check)."""
+    """Tests for WebsocketPlugin._build_token."""
 
     def test_token_in_login(self):
         from aiohttp import BasicAuth
@@ -27,34 +25,62 @@ class TestBuildToken:
         assert WebsocketPlugin._build_token(auth) == expected
 
 
-class TestTokenNormalization:
-    """Tests that token normalization in handler.py fixes Issue #1."""
+class TestTokenResolution:
+    """Tests for the token resolution logic used in handler.py on_setup.
 
-    def _normalize(self, user: str, password: str):
-        """Replicate the normalization logic from handler.py on_setup."""
-        is_token = user.startswith('oh.') or password.startswith('oh.')
-        if is_token and not user:
-            user, password = password, ''
-        return user, password
+    When a token is found in the legacy 'user' or 'password' config fields it
+    must be migrated to Bearer auth with a deprecation warning.  The returned
+    ``legacy_field`` name is non-None only when migration occurred.
+    """
 
-    def test_token_in_user_unchanged(self):
-        user, password = self._normalize('oh.mytoken.abc', '')
-        assert user == 'oh.mytoken.abc'
-        assert password == ''
+    class _Config:
+        def __init__(self, token='', user='', password=''):
+            self.token = token
+            self.user = user
+            self.password = password
 
-    def test_token_in_password_moved_to_user(self):
-        """Token in password field must be moved to user for BasicAuth to work."""
-        user, password = self._normalize('', 'oh.mytoken.abc')
-        assert user == 'oh.mytoken.abc'
-        assert password == ''
+    def _resolve(self, config) -> tuple[str | None, str | None]:
+        """Replicates the token resolution in handler.py on_setup."""
+        bearer = config.token or None
+        legacy_field = None
+        if not bearer:
+            for fname, fval in (('user', config.user), ('password', config.password)):
+                if fval.startswith('oh.'):
+                    bearer = fval
+                    legacy_field = fname
+                    break
+        return bearer, legacy_field
 
-    def test_both_set_not_touched(self):
-        """If both fields are set, do not silently rearrange them."""
-        user, password = self._normalize('oh.user_token', 'oh.pass_token')
-        assert user == 'oh.user_token'
-        assert password == 'oh.pass_token'
+    def test_explicit_token_field(self):
+        cfg = self._Config(token='oh.explicit.token')
+        bearer, legacy = self._resolve(cfg)
+        assert bearer == 'oh.explicit.token'
+        assert legacy is None
 
-    def test_plain_credentials_unchanged(self):
-        user, password = self._normalize('admin', 'secret')
-        assert user == 'admin'
-        assert password == 'secret'
+    def test_token_in_user_migrated(self):
+        """Token placed in 'user' is detected and migration flag is set."""
+        cfg = self._Config(user='oh.legacy_user_token')
+        bearer, legacy = self._resolve(cfg)
+        assert bearer == 'oh.legacy_user_token'
+        assert legacy == 'user'
+
+    def test_token_in_password_migrated(self):
+        """Token placed in 'password' is detected and migration flag is set."""
+        cfg = self._Config(password='oh.legacy_pass_token')
+        bearer, legacy = self._resolve(cfg)
+        assert bearer == 'oh.legacy_pass_token'
+        assert legacy == 'password'
+
+    def test_explicit_token_takes_precedence_over_user(self):
+        """Explicit token field wins; no migration flag when both are set."""
+        cfg = self._Config(token='oh.explicit', user='oh.user_token')
+        bearer, legacy = self._resolve(cfg)
+        assert bearer == 'oh.explicit'
+        assert legacy is None
+
+    def test_plain_credentials_no_token(self):
+        """Plain username/password: no bearer token resolved."""
+        cfg = self._Config(user='admin', password='secret')
+        bearer, legacy = self._resolve(cfg)
+        assert bearer is None
+        assert legacy is None

@@ -121,10 +121,12 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         try:
             session = self.plugin_connection.context.session
 
-            # Issue #2: use bearer token from config if configured
-            bearer_token = HABApp.CONFIG.openhab.connection.token
-            if bearer_token:
-                token = bearer_token
+            # Derive the access token from the session auth configuration.
+            # If the session uses Bearer auth the token is in the Authorization header;
+            # otherwise fall back to building the token from BasicAuth credentials.
+            auth_header = session.headers.get('Authorization', '')
+            if auth_header.startswith('Bearer '):
+                token = auth_header[len('Bearer '):]
             else:
                 token = self._build_token(session.auth)
 

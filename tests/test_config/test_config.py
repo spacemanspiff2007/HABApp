@@ -51,6 +51,7 @@ openhab:
     url: http://localhost:8080   # Connect to this url. Empty string ("") disables the connection.
     user: ''
     password: ''
+    token: ''                    # openHAB API token for Bearer token authentication. If set, HABApp uses "Authorization: Bearer <token>" for all REST and WebSocket requests instead of Basic Auth. Leave empty to use user/password authentication.
     verify_ssl: true             # Check certificates when using https
   general:
     listen_only: false      # If True HABApp does not change anything on the openHAB instance.
