@@ -120,7 +120,13 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
     async def websockets_task(self) -> None:
         try:
             session = self.plugin_connection.context.session
-            token = self._build_token(session.auth)
+
+            # Issue #2: use bearer token from config if configured
+            bearer_token = HABApp.CONFIG.openhab.connection.token
+            if bearer_token:
+                token = bearer_token
+            else:
+                token = self._build_token(session.auth)
 
             ws_cfg = HABApp.CONFIG.openhab.connection.websocket
             max_msg_size = int(ws_cfg.max_msg_size)
