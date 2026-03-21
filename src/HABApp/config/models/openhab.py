@@ -94,6 +94,11 @@ class Connection(BaseModel):
         'http://localhost:8080', description='Connect to this url. Empty string ("") disables the connection.')
     user: str = ''
     password: str = ''
+    token: str = Field(
+        '', description='openHAB API token for Bearer token authentication. '
+                        'If set, HABApp uses "Authorization: Bearer <token>" for all REST and WebSocket requests '
+                        'instead of Basic Auth. Leave empty to use user/password authentication.'
+    )
     verify_ssl: bool = Field(True, description='Check certificates when using https')
 
     websocket: Websocket = Field(

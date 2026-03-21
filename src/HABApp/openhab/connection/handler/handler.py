@@ -37,6 +37,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
         url: str = config.url
         user: str = config.user
         password: str = config.password
+        bearer_token: str = config.token
 
         # do not run without an url
         if not url:
@@ -44,12 +45,40 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             connection.status_from_setup_to_disabled()
             return None
 
-        # do not run without user/pw - since OH3 mandatory
-        is_token = user.startswith('oh.') or password.startswith('oh.')
-        if not is_token and (not user or not password):
-            log.info('Connection disabled (user/password missing)!')
-            connection.status_from_setup_to_disabled()
-            return None
+        # If no token is explicitly configured, check whether a legacy API token was placed
+        # in the user or password field and migrate it automatically with a deprecation warning.
+        if not bearer_token:
+            for field_name, field_value in (('user', user), ('password', password)):
+                if field_value.startswith('oh.'):
+                    log.warning(
+                        f'Found openHAB API token in the "{field_name}" config field. '
+                        'Please move it to the "token" config field. '
+                        'Using a token in "user" or "password" is deprecated and will be removed in a future version.'
+                    )
+                    bearer_token = field_value
+                    break
+
+        if bearer_token:
+            if config.token and (user or password):
+                log.warning('Both bearer token and user/password are configured. Bearer token takes precedence.')
+            session_kwargs: dict[str, Any] = {
+                'base_url': url,
+                'timeout': aiohttp.ClientTimeout(total=None),
+                'json_serialize': dump_json,
+                'headers': {'Authorization': f'Bearer {bearer_token}'},
+            }
+        else:
+            if not user or not password:
+                log.info('Connection disabled (user/password missing)!')
+                connection.status_from_setup_to_disabled()
+                return None
+
+            session_kwargs = {
+                'base_url': url,
+                'timeout': aiohttp.ClientTimeout(total=None),
+                'json_serialize': dump_json,
+                'auth': aiohttp.BasicAuth(user, password),
+            }
 
         if not config.verify_ssl:
             self.options['ssl'] = False
@@ -64,12 +93,7 @@ class ConnectionHandler(BaseConnectionPlugin[OpenhabConnection]):
             self.session = None
             await s.close()
 
-        self.session = aiohttp.ClientSession(
-            base_url=url,
-            timeout=aiohttp.ClientTimeout(total=None),
-            json_serialize=dump_json,
-            auth=aiohttp.BasicAuth(user, password),
-        )
+        self.session = aiohttp.ClientSession(**session_kwargs)
         self.request = self.session._request
 
     async def on_connected(self) -> None:
