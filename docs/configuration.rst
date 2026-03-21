@@ -51,6 +51,12 @@ Example
             url: http://localhost:8080
             user: ''
             password: ''
+            token: ''            # openHAB API token for Bearer token authentication.
+                                 # If set, HABApp uses "Authorization: Bearer <token>" for all
+                                 # REST and WebSocket requests instead of Basic Auth.
+                                 # Leave empty to use user/password authentication.
+                                 # Tokens can be created in the openHAB UI under
+                                 # Settings → API Tokens.
 
         general:
             listen_only: False  # If True  HABApp will not change any value on the openHAB instance.
@@ -199,3 +205,5 @@ Debug
 .. autopydantic_model:: PeriodicTracebackDumpConfig
 
 .. autopydantic_model:: WatchEventLoopConfig
+
+
