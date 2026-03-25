@@ -19,6 +19,7 @@ from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
+from HABApp.mqtt import MqttAsyncInterface, MqttInterface
 from HABApp.mqtt.connection.connection import MqttConnection
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.rule_manager import RuleManager
@@ -51,7 +52,7 @@ class Runtime:
             eb = await HABAPP_PROVIDER.get(HABApp.core.internals.EventBus)
             file_manager = await HABAPP_PROVIDER.get(HABApp.core.files.FileManager)
 
-            setup_internals(ir, eb, file_manager)
+            setup_internals(ir, eb)
             assert isinstance(HABApp.core.Items, ConstProxyObj)
             HABApp.core.Items = ir
             assert isinstance(HABApp.core.EventBus, ConstProxyObj)
@@ -63,6 +64,10 @@ class Runtime:
             # Connection setup
             await HABAPP_PROVIDER.get(OpenhabConnection)
             await HABAPP_PROVIDER.get(MqttConnection)
+
+            # create MQTT objects for backwards compatibility 2026-03
+            HABApp.mqtt.interface_sync = await HABAPP_PROVIDER.get(MqttInterface)
+            HABApp.mqtt.interface_async = await HABAPP_PROVIDER.get(MqttAsyncInterface)
 
             # File loader setup
             # Parameter Files

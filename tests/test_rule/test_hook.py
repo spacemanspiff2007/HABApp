@@ -11,7 +11,9 @@ def test_rule_hook_log(caplog) -> None:
         pass
 
     rules = []
-    hook = HABAppRuleHook(rules.append, lambda x: x.__class__.__name__, None, None, None, None, None, None, None)
+    hook = HABAppRuleHook(
+        rules.append, lambda x: x.__class__.__name__, None, None, None, None, None, None, None, None, None
+    )
     with hook:
         hook.register_rule(MyRule())
 
@@ -27,7 +29,9 @@ def test_rule_hook_log(caplog) -> None:
 def test_rule_hook_exception():
 
     rules = []
-    hook = HABAppRuleHook(rules.append, lambda x: x.__class__.__name__, None, None, None, None, None, None, None)
+    hook = HABAppRuleHook(
+        rules.append, lambda x: x.__class__.__name__, None, None, None, None, None, None, None, None, None
+    )
 
     with pytest.raises(ValueError):
         with hook:

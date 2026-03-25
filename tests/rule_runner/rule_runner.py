@@ -4,6 +4,7 @@ from asyncio import get_event_loop
 from collections.abc import Awaitable
 from types import TracebackType
 from typing import Self
+from unittest.mock import Mock
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
@@ -21,6 +22,7 @@ from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.internals.function_executor.testing import TestingExecutorFactory
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.lib.exceptions.format import fallback_format
+from HABApp.mqtt import MqttAsyncInterface, MqttInterface
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
 
@@ -118,7 +120,7 @@ class SimpleRuleRunner:
         ir = ItemRegistry()
         eb = EventBus()
         file_manager = FileManager(None, eb)
-        self.restore = setup_internals(ir, eb, file_manager, final=False)
+        self.restore = setup_internals(ir, eb, final=False)
 
         # setup so we capture errors / warnings
         eb.add_listener(AppendListener(TOPIC_WARNINGS, self._warnings))
@@ -135,6 +137,7 @@ class SimpleRuleRunner:
         hook = HABAppRuleHook(
             self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop(), None,
             item_registry=ir, event_bus=eb, executor_factory=TestingExecutorFactory(eb),
+            mqtt_interface_sync=Mock(MqttInterface), mqtt_interface_async=Mock(MqttAsyncInterface)
         )
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 

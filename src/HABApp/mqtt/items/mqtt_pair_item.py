@@ -1,13 +1,11 @@
-from typing import Any
+from typing import Any, Final
 
-from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.internals import uses_item_registry
-from HABApp.mqtt.interface_sync import publish
-
-from . import MqttBaseItem
-
-
-Items = uses_item_registry()
+from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
+from HABApp.core.internals import ItemRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.mqtt import MqttInterface
+from HABApp.mqtt.connection.interface import MqttUserPayload
+from HABApp.mqtt.items import MqttBaseItem
 
 
 def build_write_topic(read_topic: str) -> str | None:
@@ -36,28 +34,35 @@ class MqttPairItem(MqttBaseItem):
         :param initial_value: state the item will have if it gets created
         :return: item
         """
-        assert isinstance(name, str), type(name)
+        if not isinstance(name, str):
+            raise ItemNameNotOfTypeStrError.from_value(name)
+
+        item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
 
         # try to build write topic
         if write_topic is None:
             write_topic = build_write_topic(name)
 
         try:
-            item = Items.get_item(name)
+            item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = Items.add_item(
-                cls(name, write_topic=write_topic, initial_value=initial_value, last_value=last_value)
+            item = item_registry.add_item(
+                cls(
+                    name, write_topic=write_topic, initial_value=initial_value, last_value=last_value,
+                    interface=HABAPP_PROVIDER.get_existing(MqttInterface)
+                )
             )
 
-        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        if not isinstance(item, cls):
+            raise WrongItemTypeError.from_item(item, cls)
         return item
 
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
-                 write_topic: str | None = None) -> None:
-        super().__init__(name, initial_value, last_value)
+                 write_topic: str | None = None, *, interface: MqttInterface) -> None:
+        super().__init__(name, initial_value, last_value, interface=interface)
         self.write_topic: str = write_topic
 
-    def publish(self, payload, qos: int | None = None, retain: bool | None = None):
+    def publish(self, payload: MqttUserPayload, qos: int | None = None, retain: bool | None = None) -> None:
         """
         Publish the payload under the write topic from the item.
 
@@ -67,4 +72,4 @@ class MqttPairItem(MqttBaseItem):
         :return: 0 if successful
         """
 
-        return publish(self.write_topic, payload, qos=qos, retain=retain)
+        self._mqtt_interface.publish(self.write_topic, payload, qos=qos, retain=retain)

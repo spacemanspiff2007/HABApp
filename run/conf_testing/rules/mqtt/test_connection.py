@@ -6,7 +6,6 @@ import HABApp
 from HABApp.core.connections import ConnectionManager, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.core.provider import HABAPP_PROVIDER
-from HABApp.mqtt import interface_async
 
 
 class TestMQTTConnection(TestBaseRule):
@@ -45,7 +44,7 @@ class TestMQTTConnection(TestBaseRule):
             await waiter.async_wait_for_event(value=data)
 
     async def test_mqtt_async_subscribe(self) -> None:
-        await interface_async.async_subscribe(self.topic_async)
+        self.async_mqtt.subscribe(self.topic_async)
         await self.test_async_subscribed_event()
 
     async def test_mqtt_item_creation(self) -> None:

@@ -1,221 +1,131 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Final
 
-import HABApp
-from HABApp.config import CONFIG
-from HABApp.core.asyncio import run_coro_from_thread
-from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.internals import uses_get_item, uses_item_registry, uses_post_event
 from HABApp.core.lib import SingleTask
-from HABApp.core.wrapper import process_exception
 from HABApp.mqtt.connection.connection import MqttPlugin
-from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
-from HABApp.mqtt.mqtt_payload import get_msg_payload
 
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
 
     from HABApp.config.models.mqtt import QOS
-
-SUBSCRIBE_CFG = CONFIG.mqtt.subscribe
+    from HABApp.config.models.mqtt import Subscribe as SubscribeConfig
 
 
 class SubscriptionHandler(MqttPlugin):
-    def __init__(self) -> None:
-        super().__init__(task_name='MqttSubscribe')
-        self.runtime_subs: dict[str, int] = {}
-        self.subscribed_to: dict[str, int] = {}
+    def __init__(self, subscribe_cfg: SubscribeConfig) -> None:
+        super().__init__()
 
-        self.sub_task = SingleTask(self.apply_subscriptions, 'ApplySubscriptionsTask')
+        self._config: Final = subscribe_cfg
 
-    async def interface_subscribe(self, topic_or_topics: str | Iterable[tuple[str, int | None]],
-                                  qos: QOS | None = None) -> None:
-        """
-        Subscribe to a MQTT topic. Note that subscriptions made this way are volatile and will only remain until
-        the next restart.
+        self._subs_target: Final[dict[str, QOS]] = {}
+        self._subscribed_to: Final[dict[str, QOS]] = {}
 
-        :param topic_or_topics: MQTT topic or multiple topic qos pairs to subscribe to
-        :param qos: QoS, can be 0, 1 or 2.  If not specified value from configuration file will be used.
-        """
+        self._sub_task: Final = SingleTask(self._apply_subscriptions, 'ApplySubscriptionsTask')
 
-        if qos is None:
-            qos = SUBSCRIBE_CFG.qos
-        if not isinstance(topic_or_topics, str):
-            for _t, _q in topic_or_topics:
-                self.runtime_subs[_t] = _q if _q is not None else qos
-        else:
-            self.runtime_subs[topic_or_topics] = qos
+    async def on_connected(self) -> None:
+        # Since we are freshly connected we have not yet subscribed to anything
+        # We need to clear this here because in case of error it might still have the topics
+        # from the last successful subscription in this dict
+        self._subscribed_to.clear()
 
-        if self.plugin_connection.context is not None:
-            await self.apply_subscriptions()
+        self._sub_task.start_if_not_running()
+        await self._sub_task.wait()
 
-    async def interface_unsubscribe(self, topic_or_topics: str | Iterable[str]) -> None:
-        """
-        Unsubscribe from a MQTT topic
+    async def on_disconnected(self) -> None:
+        await self._sub_task.cancel_wait()
 
-        :param topic_or_topics: MQTT topic
-        """
+        # without errors, it's a graceful disconnect so we unsubscribe
+        if not self.plugin_connection.has_errors:
+            await self._do_unsubscribe(list(self._subscribed_to))
 
-        if isinstance(topic_or_topics, str):
-            topic_or_topics = [topic_or_topics]
-
-        for topic in topic_or_topics:
-            self.runtime_subs.pop(topic, None)
-
-        if self.plugin_connection.context is not None:
-            await self.apply_subscriptions()
-
-    def subscription_cfg_changed(self):
+    def config_changed(self) -> None:
         if not self.plugin_connection.is_online:
             return None
-        self.sub_task.start_if_not_running()
+        self._sub_task.start_if_not_running()
+        return None
 
-    async def unsubscribe(self, topics: list[str] | None):
-        log = self.plugin_connection.log
+    def subscribe(self, topics: tuple[tuple[str, QOS | None], ...]) -> None:
+        for topic, qos in topics:
+            self._subs_target[topic] = qos if qos is not None else self._config.qos
 
-        if (client := self.plugin_connection.context) is None:
-            return None
+        self.config_changed()
 
-        if topics is None:
-            topics = sorted(set(self.runtime_subs) | set(self.subscribed_to))
+    def unsubscribe(self, topics: tuple[str, ...]) -> None:
+        for topic in topics:
+            self._subs_target.pop(topic, None)
 
+        self.config_changed()
+
+    async def _do_subscribe(self, topics: list[tuple[str, QOS]]) -> None:
         if not topics:
             return None
 
-        log.debug('Unsubscribing from:')
-        for topic in topics:
-            log.debug(f' - "{topic:s}"')
+        if (client := self.plugin_connection.context) is None:
+            raise RuntimeError()
+        log = self.plugin_connection.log
+
+        if len(topics) == 1:
+            topic, qos = topics[0]
+            log.debug(f'Subscribing to "{topic}" (QoS {qos:d})')
+        else:
+            log.debug('Subscribing to:')
+            for topic, qos in sorted(topics):
+                log.debug(f' - "{topic}" (QoS {qos:d})')
+
+        await client.subscribe(topics)
+
+        for topic, qos in topics:
+            self._subscribed_to[topic] = qos
+        return None
+
+    async def _do_unsubscribe(self, topics: list[str]) -> None:
+        if not topics:
+            return None
+
+        if (client := self.plugin_connection.context) is None:
+            return None
+        log = self.plugin_connection.log
+
+        if len(topics) == 1:
+            log.debug(f'Unsubscribing from "{topics[0]}"')
+        else:
+            log.debug('Unsubscribing from:')
+            for topic in sorted(topics):
+                log.debug(f' - "{topic}"')
 
         await client.unsubscribe(topics)
 
         for topic in topics:
-            self.subscribed_to.pop(topic)
-
-    async def apply_subscriptions(self) -> None:
-        log = self.plugin_connection.log
-        default_qos = SUBSCRIBE_CFG.qos
-
-        client = self.plugin_connection.context
-        assert client is not None
-
-        target: dict[str, int] = {}
-
-        # If our connection has errors we'll do a disconnect cycle anyway, so we don't even try to subscribe to anything
-        # Unsubscribing has the corresponding handling, so we call that every time
-        if not self.plugin_connection.has_errors:
-            # subscription from config
-            for topic, qos in CONFIG.mqtt.subscribe.get_topic_qos():
-                target[topic] = qos
-            # runtime subscriptions overwrite the subscriptions from the config file
-            for topic, qos in self.runtime_subs.items():
-                target[topic] = qos
-
-        unsubscribe = []
-        for sub_topic, sub_qos in sorted(self.subscribed_to.items()):
-            if sub_topic not in target or target[sub_topic] != sub_qos:
-                unsubscribe.append(sub_topic)
-
-        await self.unsubscribe(unsubscribe)
-
-        if subscribe := [(topic, qos) for topic, qos in target.items() if topic not in self.subscribed_to]:
-            log.debug('Subscribing to:')
-            for topic, qos in subscribe:
-                log.debug(f' - "{topic}" (QoS {qos:d})')
-
-            await client.subscribe(subscribe)
-
-            for topic, qos in subscribe:
-                self.subscribed_to[topic] = qos
-
-        log.debug('Subscriptions successfully updated')
-
-    async def on_connected(self) -> None:
-        await super().on_connected()
-
-        # Since we are freshly connected we have not yet subscribed to anything
-        # We need to clear this here because in case of error it might still have the topics
-        # from the last successful subscription in this dict
-        self.subscribed_to.clear()
-
-        self.sub_task.start_if_not_running()
-        await self.sub_task.wait()
-
-    async def on_disconnected(self) -> None:
-        await super().on_disconnected()
-        await self.sub_task.cancel_wait()
-
-        # without errors, it's a graceful disconnect
-        if not self.plugin_connection.has_errors:
-            await self.unsubscribe(None)
-
-    async def mqtt_task(self) -> None:
-        client = self.plugin_connection.context
-        assert client is not None
-
-        async for message in client.messages:
-            try:
-                topic, payload = get_msg_payload(message)
-                if topic is None:
-                    continue
-
-                msg_to_event(topic, payload, message.retain)
-            except Exception as e:
-                process_exception('mqtt payload handling', e, logger=self.plugin_connection.log)
-
-
-post_event = uses_post_event()
-get_item = uses_get_item()
-Items = uses_item_registry()
-
-
-def msg_to_event(topic: str, payload: Any, retain: bool) -> None:
-
-    _item = None    # type: HABApp.mqtt.items.MqttBaseItem | None
-    try:
-        _item = get_item(topic)   # type: HABApp.mqtt.items.MqttBaseItem
-    except ItemNotFoundException:
-        # only create items for if the message has the retain flag
-        if retain:
-            _item = Items.add_item(HABApp.mqtt.items.MqttItem(topic))
-
-    # we don't have an item -> we process only the event
-    if _item is None:
-        post_event(topic, MqttValueUpdateEvent(topic, payload))
+            self._subscribed_to.pop(topic)
         return None
 
-    # Remember state and update item before doing callbacks
-    _old_state = _item.value
-    _item.set_value(payload)
+    async def _apply_subscriptions(self) -> None:
+        has_changed: bool = False
 
-    post_event(topic, MqttValueUpdateEvent(topic, payload))
-    if payload != _old_state:
-        post_event(topic, MqttValueChangeEvent(topic, payload, _old_state))
+        # If our connection has errors we'll do a disconnect cycle anyway
+        # so we don't even try to subscribe to anything
+        while not self.plugin_connection.has_errors:
 
+            target: dict[str, QOS] = dict(self._config.get_topic_qos())
+            target.update(self._subs_target)
 
-SUBSCRIPTION_HANDLER = SubscriptionHandler()
+            if target == self._subscribed_to:
+                break
+            has_changed = True
 
+            to_remove = list(frozenset(self._subscribed_to) - frozenset(target))
 
-async_subscribe = SUBSCRIPTION_HANDLER.interface_subscribe
-async_unsubscribe = SUBSCRIPTION_HANDLER.interface_unsubscribe
+            to_add: list[tuple[str, QOS]] = []
+            for topic, qos in target.items():
+                if (subscribed_qos := self._subscribed_to.get(topic)) is None or subscribed_qos != qos:
+                    to_add.append((topic, qos))
 
+            if not self.plugin_connection.has_errors:
+                await self._do_unsubscribe(to_remove)
 
-def subscribe(topic_or_topics: str | Iterable[tuple[str, int | None]], qos: QOS | None = None) -> None:
-    """
-    Subscribe to a MQTT topic. Note that subscriptions made this way are volatile and will only remain until
-    the next restart.
+            if not self.plugin_connection.has_errors:
+                await self._do_subscribe(to_add)
 
-    :param topic_or_topics: MQTT topic or multiple topic qos pairs to subscribe to
-    :param qos: QoS, can be 0, 1 or 2.  If not specified value from configuration file will be used.
-    """
-    run_coro_from_thread(async_subscribe(topic_or_topics, qos), calling=subscribe)
-
-
-def unsubscribe(topic_or_topics: str | Iterable[str]) -> None:
-    """
-    Unsubscribe from a MQTT topic
-
-    :param topic_or_topics: MQTT topic
-    """
-    run_coro_from_thread(async_subscribe(topic_or_topics), calling=subscribe)
+        if has_changed:
+            self.plugin_connection.log.debug('Subscriptions successfully updated')

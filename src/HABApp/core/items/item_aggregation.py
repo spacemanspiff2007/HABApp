@@ -5,20 +5,19 @@ import collections
 import time
 import typing
 from datetime import timedelta
+from typing import Final
 
 import HABApp
 from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
 from HABApp.core.events import EventFilter, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import (
     EventBusListener,
+    ItemRegistry,
     get_current_context,
-    uses_item_registry,
 )
 from HABApp.core.items import BaseValueItem
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
-
-
-item_registry = uses_item_registry()
 
 
 class AggregationItem(BaseValueItem):
@@ -33,6 +32,8 @@ class AggregationItem(BaseValueItem):
         """
         if not isinstance(name, str):
             raise ItemNameNotOfTypeStrError.from_value(name)
+
+        item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
 
         try:
             item = item_registry.get_item(name)

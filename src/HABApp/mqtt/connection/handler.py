@@ -5,13 +5,7 @@ from aiomqtt import Client, TLSParameters
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.connections._definitions import CONNECTION_HANDLER_NAME
-from HABApp.core.internals import uses_get_item, uses_item_registry, uses_post_event
-from HABApp.mqtt.connection.connection import CONTEXT_TYPE, MqttConnection
-
-
-post_event = uses_post_event()
-get_item = uses_get_item()
-Items = uses_item_registry()
+from HABApp.mqtt.connection.connection import MqttConnection, MqttContextType
 
 
 class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
@@ -52,7 +46,8 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
 
         connection.context = Client(
             hostname=config.host, port=config.port,
-            username=config.user if config.user else None, password=config.password if config.password else None,
+            username=config.user or None,
+            password=config.password or None,
             identifier=config.identifier,
 
             tls_insecure=tls_insecure,
@@ -61,7 +56,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
             # clean_session=False
         )
 
-    async def on_connecting(self, connection: MqttConnection, context: CONTEXT_TYPE) -> None:
+    async def on_connecting(self, connection: MqttConnection, context: MqttContextType) -> None:
         assert context is not None
 
         connection.log.info(f'Connecting to {context._hostname}:{context._port}')
@@ -69,11 +64,8 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
 
         connection.log.info('Connection successful')
 
-    async def on_disconnected(self, connection: MqttConnection, context: CONTEXT_TYPE) -> None:
+    async def on_disconnected(self, connection: MqttConnection, context: MqttContextType) -> None:
         assert context is not None
 
         connection.log.info('Disconnected')
         await context.__aexit__(None, None, None)
-
-
-CONNECTION_HANDLER = ConnectionHandler()

@@ -1,5 +1,7 @@
 from typing import Any, Final
 
+from HABApp.core.errors import ItemNameNotOfTypeStrError
+
 
 class ItemRegistryItem:
     """ItemRegistryItem, all items that will be stored in the Item Registry must inherit from this
@@ -9,8 +11,7 @@ class ItemRegistryItem:
         super().__init__(**kwargs)
 
         if not isinstance(name, str):
-            msg = f'Name must be a string not {type(name)}'
-            raise TypeError(msg)
+            raise ItemNameNotOfTypeStrError.from_value(name)
 
         self._name: Final = name
 

@@ -1,12 +1,9 @@
-from typing import Any
+from typing import Any, Final
 
 from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
-from HABApp.core.internals import uses_get_item, uses_item_registry
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import BaseValueItem
-
-
-get_item = uses_get_item()
-item_registry = uses_item_registry()
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 class Item(BaseValueItem):
@@ -24,8 +21,10 @@ class Item(BaseValueItem):
         if not isinstance(name, str):
             raise ItemNameNotOfTypeStrError.from_value(name)
 
+        item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+
         try:
-            item = get_item(name)
+            item = item_registry. get_item(name)
         except ItemNotFoundException:
             item = cls(name, initial_value, last_value)
             item_registry.add_item(item)

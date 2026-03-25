@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from collections.abc import Coroutine as _Coroutine
 
 
-thread_context: Final[_ContextVar[str]] = _ContextVar[str]('thread_ctx')
+thread_context: Final[_ContextVar[str | None]] = _ContextVar('thread_ctx')
 thread_ident: Final = get_ident()
 
 loop_context: Final[_ContextVar[AbstractEventLoop]] = _ContextVar('loop_ctx')
@@ -67,8 +67,8 @@ def thread_error_msg() -> None:
 
 
 def _is_in_thread() -> bool:
-    thread_ctx: bool = thread_context.get(None) is not None
-    same_ident = get_ident() == thread_ident
+    thread_ctx: Final[bool] = thread_context.get(None) is not None
+    same_ident: Final = get_ident() == thread_ident
 
     # both markers point to async
     if not thread_ctx and same_ident:

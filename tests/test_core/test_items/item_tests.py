@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 from whenever import Instant, patch_current_time
 
 from HABApp.core.events import NoEventFilter, ValueCommandEvent
-from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
 from tests.helpers import TestEventBus
 
@@ -16,9 +15,6 @@ class ItemTests:
     def get_item(self) -> Item:
         return self.ITEM_CLASS('test_name')
 
-    def get_create_item(self) -> Item:
-        return self.ITEM_CLASS.get_create_item(name='test_name')
-
     def test_item_params(self) -> None:
         assert self.ITEM_CLASS is not None
         assert self.ITEM_VALUES is not None
@@ -27,15 +23,6 @@ class ItemTests:
         item = self.get_item()
         assert repr(item)
         assert str(item)
-
-    def test_factories(self, ir: ItemRegistry) -> None:
-        assert not ir.item_exists(self.get_item())
-
-        obj = self.get_create_item()
-        assert isinstance(obj, self.ITEM_CLASS)
-
-        obj2 = self.ITEM_CLASS.get_item(name=obj.name)
-        assert obj is obj2
 
     def test_var_names(self) -> None:
         values = self.ITEM_VALUES

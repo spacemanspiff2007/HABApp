@@ -1,17 +1,19 @@
-from typing import Any, override
+from typing import Any, Final, override
 
-from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.internals import uses_get_item, uses_item_registry
+from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import BaseValueItem
-from HABApp.mqtt.interface_sync import publish
-
-
-get_item = uses_get_item()
-item_registry = uses_item_registry()
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.mqtt import MqttInterface
+from HABApp.mqtt.connection.interface import MqttUserPayload
 
 
 class MqttBaseItem(BaseValueItem):
-    pass
+
+    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None, *,
+                 interface: MqttInterface) -> None:
+        super().__init__(name, initial_value, last_value)
+        self._mqtt_interface: Final = interface
 
 
 class MqttItem(MqttBaseItem):
@@ -26,18 +28,22 @@ class MqttItem(MqttBaseItem):
         :param last_value: last value the item will have if it gets created
         :return: item
         """
-        assert isinstance(name, str), type(name)
+        if not isinstance(name, str):
+            raise ItemNameNotOfTypeStrError.from_value(name)
+
+        item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
 
         try:
-            item = get_item(name)
+            item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = cls(name, initial_value, last_value)
+            item = cls(name, initial_value, last_value, interface=HABAPP_PROVIDER.get_existing(MqttInterface))
             item_registry.add_item(item)
 
-        assert isinstance(item, cls), f'{cls} != {type(item)}'
+        if not isinstance(item, cls):
+            raise WrongItemTypeError.from_item(item, cls)
         return item
 
-    def publish(self, payload, qos: int | None = None, retain: bool | None = None):
+    def publish(self, payload: MqttUserPayload, qos: int | None = None, retain: bool | None = None) -> None:
         """
         Publish the payload under the topic from the item.
 
@@ -46,12 +52,12 @@ class MqttItem(MqttBaseItem):
         :param retain: retain message. If not specified value from configuration file will be used.
         """
 
-        return publish(self.name, payload, qos=qos, retain=retain)
+        self._mqtt_interface.publish(self.name, payload, qos=qos, retain=retain)
 
     @override
-    def command_value(self, value: Any) -> None:
+    def command_value(self, value: MqttUserPayload) -> None:
         """Send a command to the topic, the same as publish
 
         :param value: value to be sent
         """
-        publish(self.name, value)
+        self._mqtt_interface.publish(self.name, value)

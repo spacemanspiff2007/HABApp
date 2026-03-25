@@ -1,7 +1,5 @@
 from typing import Any, Final, Self
 
-from HABApp.mqtt.interface_sync import publish
-
 
 class MqttPublishOptions:
     """Allows to store the topic, qos and retain settings for a topic. These values can then be used to publish
@@ -38,6 +36,7 @@ class MqttPublishOptions:
         :param payload: MQTT Payload
         """
 
+        # todo: fix this
         return publish(self._topic, payload, qos=self._qos, retain=self._retain)
 
     def replace(self, topic: str | None = None, qos: int | None = None, retain: bool | None = None) -> Self:

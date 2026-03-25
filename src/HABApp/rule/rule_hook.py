@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from HABApp import Rule
     from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
+    from HABApp.mqtt import MqttAsyncInterface, MqttInterface
     from HABApp.rule.interfaces.http_client import HABAppHttpClient
     from HABApp.rule_manager import RuleFile, RuleManager
 
@@ -30,7 +31,8 @@ class HABAppRuleHook:
                  cb_register_rule: Callable[[Rule], Any], cb_suggest_name: Callable[[Rule], str],
                  rule_manager: RuleManager, rule_file: RuleFile, loop: AbstractEventLoop,
                  async_http_client: HABAppHttpClient, item_registry: ItemRegistry, event_bus: EventBus,
-                 executor_factory: ExecutorFactory) -> None:
+                 executor_factory: ExecutorFactory,
+                 mqtt_interface_sync: MqttInterface, mqtt_interface_async: MqttAsyncInterface) -> None:
 
         # callbacks
         self._cb_register: Final = cb_register_rule
@@ -43,6 +45,8 @@ class HABAppRuleHook:
         self.item_registry: Final = item_registry
         self.event_bus: Final = event_bus
         self.executor_factory: Final = executor_factory
+        self.mqtt_interface_sync: Final = mqtt_interface_sync
+        self.mqtt_interface_async: Final = mqtt_interface_async
 
         # asyncio
         self.event_loop: Final = loop

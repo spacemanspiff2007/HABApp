@@ -77,7 +77,7 @@ def clean_objs(ir: ItemRegistry, eb: EventBus, file_manager: FileManager, reques
             yield None
             return None
 
-    restore = setup_internals(ir, eb, file_manager, final=False)
+    restore = setup_internals(ir, eb, final=False)
 
     yield
 

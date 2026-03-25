@@ -1,5 +1,7 @@
+from unittest.mock import Mock
+
 from HABApp.core.internals import ItemRegistry
-from HABApp.mqtt.connection.subscribe import msg_to_event
+from HABApp.mqtt.connection.messages import MessagesHandler
 
 
 class MqttDummyMsg:
@@ -14,11 +16,13 @@ class MqttDummyMsg:
 async def test_retain_create(ir: ItemRegistry) -> None:
     topic = '/test/creation'
 
+    handler = MessagesHandler(Mock())
+
     assert not ir.item_exists(topic)
-    msg_to_event(topic, 'aaa', retain=False)
+    handler.msg_to_event(topic, 'aaa', retain=False)
     assert not ir.item_exists(topic)
 
     # Retain True will create the item
-    msg_to_event(topic, 'adsf123', retain=True)
+    handler.msg_to_event(topic, 'adsf123', retain=True)
     assert ir.item_exists(topic)
     assert ir.get_item(topic).value == 'adsf123'

@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Final, Self
 
 from eascheduler.builder.helper import HINT_POS_TIMEDELTA, get_pos_timedelta_secs
 from whenever import Instant
@@ -8,20 +8,15 @@ from HABApp.core.errors import ItemNameNotOfTypeStrError, WrongItemTypeError
 from HABApp.core.internals import (
     EventBusListener,
     EventFilterBase,
+    ItemRegistry,
     get_current_context,
-    uses_get_item,
-    uses_item_registry,
 )
 from HABApp.core.internals.item_registry import ItemRegistryItem
+from HABApp.core.items.base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
+from HABApp.core.items.tmp_data import add_tmp_data as _add_tmp_data
+from HABApp.core.items.tmp_data import restore_tmp_data as _restore_tmp_data
 from HABApp.core.lib import InstantView
-
-from .base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
-from .tmp_data import add_tmp_data as _add_tmp_data
-from .tmp_data import restore_tmp_data as _restore_tmp_data
-
-
-get_item = uses_get_item()
-item_registry = uses_item_registry()
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 class BaseItem(ItemRegistryItem):
@@ -36,7 +31,9 @@ class BaseItem(ItemRegistryItem):
         """
         if not isinstance(name, str):
             raise ItemNameNotOfTypeStrError.from_value(name)
-        item = get_item(name)
+
+        item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+        item = item_registry.get_item(name)
 
         if not isinstance(item, cls):
             raise WrongItemTypeError.from_item(item, cls)

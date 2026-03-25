@@ -34,9 +34,6 @@ class TestScheduler(TestBaseRule):
 
         self.add_test('Test scheduler every', self.test_scheduler_every)
 
-        self.run.at(self.run.trigger.sunrise(), print, 'sunrise')
-        self.run.at(self.run.trigger.sunset(), print, 'sunset')
-
         self.item = Item.get_create_item(get_random_name('HABApp'))
         self.item.listen_event(lambda x: self.item_states.append(x), ValueUpdateEventFilter())
         self.item_states = []
@@ -49,19 +46,13 @@ class TestScheduler(TestBaseRule):
         def called() -> None:
             calls.append(monotonic())
 
-        job = self.run.every(None, 0.5, called)
+        job = self.run.at(self.run.trigger.interval(None, 0.5), called)
         job.to_item(self.item)
 
         executions = 10
-        try:
-            started = monotonic()
-            while monotonic() - started < executions * 0.6 + 1:
-                sleep(0.1)
+        sleep(0.25 + (executions - 1) * 0.5)
 
-                if len(calls) >= executions:
-                    break
-        finally:
-            job.cancel()
+        job.cancel()
 
         assert len(calls) == executions, calls
 

@@ -23,6 +23,10 @@ class FactoryNotFoundError(HABAppProviderError):
     pass
 
 
+class ObjectDoesNotExistError(HABAppProviderError):
+    pass
+
+
 class CyclicDependencyError(HABAppProviderError):
     @classmethod
     def from_stack(cls, stack: tuple[type, ...]) -> Self:
@@ -236,6 +240,13 @@ class HabAppObjProvider:
 
     def get_all_objects(self) -> tuple[object, ...]:
         return tuple(self._created.values())
+
+    def get_existing(self, cls: type[T]) -> T:
+        try:
+            return self._created[cls]
+        except KeyError:
+            msg = f'Object for {cls.__name__} does not exist'
+            raise ObjectDoesNotExistError(msg) from None
 
     def add_object(self, obj: object, cls: type | None = None, *, override_factory: bool = False) -> None:
         """Temporarily add an object to the provider"""

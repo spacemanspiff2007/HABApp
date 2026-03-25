@@ -5,7 +5,6 @@ from threading import Lock
 
 import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
-from HABApp.mqtt.interface_sync import publish
 
 from .bench_base import BenchBaseRule
 from .bench_times import BenchContainer, BenchTime
@@ -77,7 +76,7 @@ class MqttBenchRule(BenchBaseRule):
         self.bench_times = self.bench_times_container.create(test_name)
 
         self.time_sent = time.time()
-        publish(self.name, self.values[0])
+        self.mqtt.publish(self.name, self.values[0])
 
         self.run.soon(LOCK.acquire)
         time.sleep(1)
@@ -107,7 +106,7 @@ class MqttBenchRule(BenchBaseRule):
             return None
 
         self.time_sent = time.time()
-        publish(self.name, self.values[0])
+        self.mqtt.publish(self.name, self.values[0])
 
     async def a_post_next_event_val(self, event: ValueUpdateEvent) -> None:
         self.post_next_event_val(event)

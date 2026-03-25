@@ -15,6 +15,8 @@ import HABApp.openhab.process_events
 from HABApp.config import CONFIG
 from HABApp.core.connections import ConnectionManager
 from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.mqtt.connection import MqttConnection
+from HABApp.mqtt.connection.messages import MessagesHandler
 
 
 class PatcherName:
@@ -180,8 +182,14 @@ class MqttPatcher(BasePatcher):
     async def __aenter__(self) -> None:
         m = self.monkeypatch
 
-        module = HABApp.mqtt.connection.subscribe
-        m.setattr(module, 'msg_to_event', self.wrap_msg(module.msg_to_event))
+        mqtt_connection: Final = HABAPP_PROVIDER.get_existing(MqttConnection)
+        mqtt_client: Final = mqtt_connection.context
 
-        obj = HABApp.mqtt.connection.publish.PUBLISH_HANDLER.plugin_connection.context
-        m.setattr(obj, 'publish', self.pub_msg(obj.publish))
+        for plugin in mqtt_connection.plugins:
+            if isinstance(plugin, MessagesHandler):
+                m.setattr(plugin, 'msg_to_event', self.wrap_msg(plugin.msg_to_event))
+                break
+        else:
+            raise RuntimeError()
+
+        m.setattr(mqtt_client, 'publish', self.pub_msg(mqtt_client.publish))
