@@ -2,25 +2,19 @@ from __future__ import annotations
 
 import logging
 from asyncio import sleep
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final, TypeAlias
 
 from immutables import Map
 
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import map_null_str
 from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
 from HABApp.openhab.definitions.websockets.item_value_types import QuantityTypeModel
-from HABApp.openhab.item_to_reg import (
-    add_thing_to_registry,
-    add_to_registry,
-    fresh_item_sync,
-    get_thing_status_from_resp,
-    remove_from_registry,
-    remove_thing_from_registry,
-)
+from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 
 
 if TYPE_CHECKING:
@@ -67,19 +61,24 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     log.warning('Thing sync failed!')
 
     async def load_items(self, context: OpenhabContext) -> None:
-        from HABApp.openhab.map_items import map_item
-        OpenhabItem = HABApp.openhab.items.OpenhabItem
+        OpenhabItem: TypeAlias = HABApp.openhab.items.OpenhabItem
+
+        from HABApp.openhab.item_factory import OhItemFactory
+        from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
+
+        item_factory: Final = await HABAPP_PROVIDER.get(OhItemFactory)
+        registry_handler: Final = await HABAPP_PROVIDER.get(OhItemRegistryHandler)
 
         log.debug('Requesting items')
         items = await async_get_items()
         items_len = len(items)
         log.debug(f'Got response with {items_len} items')
 
-        fresh_item_sync()
+        registry_handler.fresh_item_sync()
 
         # add all items
         for item in items:
-            new_item = map_item(
+            new_item = item_factory.create_item(
                 item.name, item.type, map_null_str(item.state), map_null_str(item.last_state),
                 label=item.label, tags=frozenset(item.tags), groups=frozenset(item.groups), metadata=item.metadata
             )
@@ -87,14 +86,14 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             # error
             if new_item is None:
                 continue
-            add_to_registry(new_item, set_value=True)
+            registry_handler.add_to_registry(new_item, set_value=True)
 
         # remove items which are no longer available
         ist = set(Items.get_item_names())
         soll = {item.name for item in items}
         for k in ist - soll:
             if isinstance(Items.get_item(k), OpenhabItem):
-                remove_from_registry(k)
+                registry_handler.remove_from_registry(k)
 
         log.info(f'Updated {items_len:d} Items')
 
@@ -103,13 +102,13 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         }
         context.created_items.update(created_items)
 
-    async def sync_items(self, context: OpenhabContext):
+    async def sync_items(self, context: OpenhabContext) -> int:
         log.debug('Starting item state sync')
         created_items = context.created_items
 
         items = await async_get_all_items_state()
 
-        synced = 0
+        synced: int = 0
         for item in items:
             # if the item is still None it was not initialized during the start of the item event listener
             if (new_state := map_null_str(item.state)) is None:
@@ -135,6 +134,9 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
     async def load_things(self, context: OpenhabContext) -> None:
         Thing = HABApp.openhab.items.Thing
 
+        from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
+        registry_handler: Final = await HABAPP_PROVIDER.get(OhItemRegistryHandler)
+
         # try to update things, too
         log.debug('Requesting things')
 
@@ -144,7 +146,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         created_things = {}
         for thing in things:
-            t = add_thing_to_registry(thing)
+            t = registry_handler.add_thing_to_registry(thing)
             created_things[t.name] = (t, t.last_update)
 
         context.created_things.update(created_things)
@@ -154,20 +156,22 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         soll = {thing.uid for thing in things}
         for k in ist - soll:
             if isinstance(Items.get_item(k), Thing):
-                remove_thing_from_registry(k)
+                registry_handler.remove_thing_from_registry(k)
         log.info(f'Updated {thing_count:d} Things')
 
-    async def sync_things(self, context: OpenhabContext):
+    async def sync_things(self, context: OpenhabContext) -> int:
         log.debug('Starting Thing sync')
         created_things = context.created_things
 
-        synced = 0
+        synced: int = 0
 
         for thing in await async_get_things():
             existing_thing, existing_datetime = created_things[thing.uid]
 
             if thing_changed(existing_thing, thing) and existing_thing.last_update != existing_datetime:
-                new_status, new_status_detail, new_status_description = get_thing_status_from_resp(thing)
+                new_status, new_status_detail, new_status_description = (
+                    OhItemRegistryHandler.get_thing_status_from_resp(thing)
+                )
 
                 existing_thing.status = new_status
                 existing_thing.status_detail = new_status_detail
@@ -184,7 +188,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
 
 def thing_changed(old: HABApp.openhab.items.Thing, new: ThingResp) -> bool:
-    new_status, new_status_detail, new_status_description = get_thing_status_from_resp(new)
+    new_status, new_status_detail, new_status_description = OhItemRegistryHandler.get_thing_status_from_resp(new)
 
     return old.status != new_status or \
         old.status_detail != new_status_detail or \

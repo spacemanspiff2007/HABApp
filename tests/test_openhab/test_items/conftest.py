@@ -5,6 +5,7 @@ import pytest
 from HABApp.openhab import items as items_module
 from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent
 from HABApp.openhab.definitions.websockets import base as websocket_base_module
+from HABApp.openhab.item_factory import OhItemFactory
 
 
 class ValueCollector:
@@ -43,3 +44,7 @@ def websocket_events(monkeypatch) -> ValueCollector:
 @pytest.fixture(autouse=True)
 def patch_event_id(monkeypatch) -> None:
     monkeypatch.setattr(websocket_base_module, 'MSG_CTR', 1)
+
+
+def item_factory() -> OhItemFactory:
+    return OhItemFactory(None)

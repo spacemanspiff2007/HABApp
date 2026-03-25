@@ -130,6 +130,23 @@ async def test_type_factory_class() -> None:
     assert isinstance(await p.get(MyCls), MyCls)
 
 
+async def test_type_factory_class_with_params() -> None:
+    p = HabAppObjProvider()
+
+    @p.register
+    class MyCls:
+        def __init__(self, p: int) -> None:
+            self.p = p
+
+    @p.register
+    def func() -> int:
+        return 1
+
+    obj = await p.get(MyCls)
+    assert isinstance(obj, MyCls)
+    assert obj.p == 1
+
+
 async def test_type_factory_coroutine() -> None:
     async def func() -> int:
         return 1

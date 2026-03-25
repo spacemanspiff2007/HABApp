@@ -99,29 +99,42 @@ class OpenhabItems(TestBaseRule):
         oh_item.modify()
         assert item.tags == set()
 
-    @OpenhabTmpItem.use('String', arg_name='oh_item')
+    @OpenhabTmpItem.use('String', arg_name='oh_item1')
+    @OpenhabTmpItem.use('String', arg_name='oh_item2')
     @OpenhabTmpItem.create('Group', 'group1')
     @OpenhabTmpItem.create('Group', 'group2')
-    def test_groups(self, oh_item: OpenhabTmpItem) -> None:
+    def test_groups(self, oh_item1: OpenhabTmpItem, oh_item2: OpenhabTmpItem) -> None:
         grp1 = GroupItem.get_item('group1')
         grp2 = GroupItem.get_item('group2')
 
         assert grp1.members == ()
         assert grp2.members == ()
 
-        oh_item.create_item(groups=['group1'])
+        oh_item1.create_item(groups=['group1'])
 
-        item = StringItem.get_item(oh_item.name)
-        assert item.groups == {'group1'}
-        assert grp1.members == (item, )
+        item1 = StringItem.get_item(oh_item1.name)
+        assert item1.groups == {'group1'}
+        assert grp1.members == (item1, )
 
-        oh_item.modify(groups=['group1', 'group2'])
-        assert item.groups == {'group1', 'group2'}
-        assert grp1.members == (item, )
-        assert grp2.members == (item, )
+        oh_item1.modify(groups=['group1', 'group2'])
+        assert item1.groups == {'group1', 'group2'}
+        assert grp1.members == (item1, )
+        assert grp2.members == (item1, )
 
-        oh_item.modify()
-        assert item.groups == set()
+        oh_item2.create_item(groups=['group1'])
+
+        item2 = StringItem.get_item(oh_item2.name)
+        assert item2.groups == {'group1', }
+        assert grp1.members == (item1, item2)
+        assert grp2.members == (item1, )
+
+        oh_item2.modify()
+        assert item2.groups == set()
+        assert grp1.members == (item1, )
+        assert grp2.members == (item1, )
+
+        oh_item1.modify()
+        assert item1.groups == set()
         assert grp1.members == ()
         assert grp2.members == ()
 

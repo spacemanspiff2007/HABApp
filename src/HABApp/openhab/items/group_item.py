@@ -1,11 +1,13 @@
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Final
 
+from immutables import Map
+
 from HABApp.core.const import MISSING
 from HABApp.openhab.connection.plugins import post_update, send_command, send_websocket_event
 from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent
 from HABApp.openhab.definitions.websockets.item_value_types import RefreshTypeModel, StringTypeModel, UnDefTypeModel
-from HABApp.openhab.item_to_reg import get_members
+from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
 
 
@@ -32,11 +34,18 @@ class GroupItem(OpenhabItem):
     _command_to_oh: Final = OutgoingCommandEvent('GroupItem')
     _state_from_oh_str = staticmethod(StringTypeModel.get_value_from_state)
 
+    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None, label: str | None = None,
+                 tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
+                 metadata: Mapping[str, MetaData] = Map(), *,
+                 registry_handler: OhItemRegistryHandler) -> None:
+        super().__init__(name, initial_value, last_value, label, tags, groups, metadata)
+        self._oh_registry_handler: Final = registry_handler
+
     @property
     def members(self) -> tuple[OpenhabItem, ...]:
         """Resolves and then returns all group members"""
 
-        return get_members(self.name)
+        return self._oh_registry_handler.get_group_members(self.name)
 
     def oh_post_update(self, value: Any = MISSING) -> None:
         """Post an update to the openHAB item

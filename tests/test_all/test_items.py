@@ -8,7 +8,8 @@ from HABApp.core.items import BaseItem, BaseValueItem
 from HABApp.core.provider import HabAppObjProvider
 from HABApp.mqtt import MqttInterface
 from HABApp.mqtt.items import MqttBaseItem, MqttPairItem
-from HABApp.openhab.items import OpenhabItem
+from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
+from HABApp.openhab.items import GroupItem, OpenhabItem
 from tests.helpers.inspect import get_module_classes
 
 
@@ -32,6 +33,8 @@ def params_item_init():
 
         if issubclass(cls, MqttBaseItem):
             kwargs = {'interface': Mock(MqttInterface)}
+        elif issubclass(cls, GroupItem):
+            kwargs = {'registry_handler': Mock(OhItemRegistryHandler)}
 
         params.append(
             pytest.param(cls, kwargs, id=f'{cls.__module__.rsplit('.', 1)[-1]}.{cls.__name__}')

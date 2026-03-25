@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator, Generator
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from enum import StrEnum
 from importlib import import_module
-from inspect import isclass
+from inspect import Parameter, isclass
 from types import ModuleType
 from typing import Any, Final, get_args, get_origin
 
@@ -94,9 +94,11 @@ def get_factory_type(obj: Any) -> FactoryType:
 
 
 def get_obj_parameters(obj: Any) -> dict[str, type]:
+    is_class: Final = isclass(obj)
 
-    func = __get_func(obj)
-    obj_signature = inspect.signature(func)
+    func: Final = __get_func(obj) if not is_class else obj.__init__
+
+    obj_signature: Final = inspect.signature(func)
     if not obj_signature.parameters:
         return {}
 
@@ -148,9 +150,12 @@ def _find_top_level_separator(hint: str) -> int:
 
 
 def _get_types_from_hint(original_hint: str) -> tuple[str, ...]:
-    types: list[str] = []
+    if original_hint is Parameter.empty:
+        return ()
 
-    stack: list[str] = [original_hint]
+    types: Final[list[str]] = []
+
+    stack: Final[list[str]] = [original_hint]
     while stack:
         hint = stack.pop()
 

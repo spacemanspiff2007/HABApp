@@ -8,6 +8,7 @@ from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import uses_get_item, uses_post_event
 from HABApp.core.logger import log_warning
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS, TOPIC_THINGS
 from HABApp.openhab.events import (
@@ -21,12 +22,8 @@ from HABApp.openhab.events import (
     ThingStatusInfoEvent,
     ThingUpdatedEvent,
 )
-from HABApp.openhab.item_to_reg import (
-    add_thing_to_registry,
-    add_to_registry,
-    remove_from_registry,
-    remove_thing_from_registry,
-)
+from HABApp.openhab.item_factory import OhItemFactory
+from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 
 
 log = logging.getLogger('HABApp.openhab.items')
@@ -71,19 +68,19 @@ def on_openhab_event(event: OpenhabEvent) -> None:
 
         # Events that remove items from the item registry
         if isinstance(event, ItemRemovedEvent):
-            remove_from_registry(event.name)
+            HABAPP_PROVIDER.get_existing(OhItemRegistryHandler).remove_from_registry(event.name)
             post_event(TOPIC_ITEMS, event)
             return None
 
         # Events that add things to the item registry
         if isinstance(event, ThingAddedEvent):
-            add_thing_to_registry(event)
+            HABAPP_PROVIDER.get_existing(OhItemRegistryHandler).add_thing_to_registry(event)
             post_event(TOPIC_THINGS, event)
             return None
 
         # Events that remove things from the item registry
         if isinstance(event, ThingRemovedEvent):
-            remove_thing_from_registry(event.name)
+            HABAPP_PROVIDER.get_existing(OhItemRegistryHandler).remove_thing_from_registry(event.name)
             post_event(TOPIC_THINGS, event)
             return None
 
@@ -96,7 +93,6 @@ def on_openhab_event(event: OpenhabEvent) -> None:
 
 async def item_event(event: ItemAddedEvent | ItemUpdatedEvent) -> None:
     try:
-        from HABApp.openhab.map_items import map_item
 
         name = event.name
 
@@ -104,14 +100,14 @@ async def item_event(event: ItemAddedEvent | ItemUpdatedEvent) -> None:
         if (cfg := await HABApp.openhab.interface_async.async_get_item(name)) is None:
             return None
 
-        new_item = map_item(
+        new_item = HABAPP_PROVIDER.get_existing(OhItemFactory).create_item(
             name, event.type, value=None, last_value=None,
             label=event.label, tags=event.tags, groups=event.groups, metadata=cfg.metadata
         )
         if new_item is None:
             return None
 
-        add_to_registry(new_item)
+        HABAPP_PROVIDER.get_existing(OhItemRegistryHandler).add_to_registry(new_item)
         # Send Event to Event Bus
         post_event(TOPIC_ITEMS, event)
         return None

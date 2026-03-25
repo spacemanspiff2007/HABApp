@@ -1,6 +1,6 @@
 import inspect
 from collections.abc import Iterable
-from typing import Any, get_type_hints
+from typing import Any, Final, get_type_hints
 
 import pytest
 
@@ -18,15 +18,15 @@ def check_class_annotations(cls: type[object],
 
     name = cls.__name__
 
-    annotation_vars = get_type_hints(cls)
-    # ignore the specified annotations
-    for _name in ignore:
-        annotation_vars.pop(_name, None)
+    annotation_vars: Final = get_type_hints(cls)
+    docstr_vars: Final = get_ivars_from_docstring(cls, correct_hints)
+    init_vars: Final = inspect.getfullargspec(cls).annotations
 
-    docstr_vars = get_ivars_from_docstring(cls, correct_hints)
-    init_vars = inspect.getfullargspec(cls).annotations
+    for _obj in (annotation_vars, docstr_vars, init_vars):
+        for _name in ignore:
+            _obj.pop(_name, None)
 
-    # If we return None we can just skip the annotation because it's most likely to be auto gernerated
+    # If we return None we can just skip the annotation because it's most likely to be auto generated
     if 'return' not in annotation_vars and 'return' in init_vars and init_vars['return'] is None:
         del init_vars['return']
 

@@ -1,8 +1,8 @@
 from immutables import Map
 
 from HABApp.core.types import Point
+from HABApp.openhab.item_factory import OhItemFactory
 from HABApp.openhab.items import CallItem, LocationItem
-from HABApp.openhab.map_items import map_item
 
 
 def test_call_set_value() -> None:
@@ -28,8 +28,8 @@ def test_call_post_update(websocket_events) -> None:
     websocket_events.assert_called_once('StringList', r'a,0\,1', event='update')
 
 
-def test_call_map() -> None:
-    call = map_item(
+def test_call_map(item_factory: OhItemFactory) -> None:
+    call = item_factory.create_item(
         'my_call_item', 'Call', 'my_value', last_value='my_last_value',
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
@@ -42,7 +42,7 @@ def test_call_map() -> None:
     assert call.groups == frozenset()
     assert call.metadata == Map()
 
-    i = map_item(
+    i = item_factory.create_item(
         'my_call_item', 'Call', '03018,2722720', last_value=None,
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
@@ -75,8 +75,8 @@ def test_location_post_update(websocket_events) -> None:
     websocket_events.assert_called_once('Point', '-30,179,78.901', event='update')
 
 
-def test_location_map() -> None:
-    call = map_item(
+def test_location_map(item_factory: OhItemFactory) -> None:
+    call = item_factory.create_item(
         'my_call_item', 'Location', '52.518705,13.376072', last_value='52.5,13.3',
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
@@ -89,7 +89,7 @@ def test_location_map() -> None:
     assert call.groups == frozenset()
     assert call.metadata == Map()
 
-    i = map_item(
+    i = item_factory.create_item(
         'my_call_item', 'Location', '52.518705,13.376072,43', last_value=None,
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )

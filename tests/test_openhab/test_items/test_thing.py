@@ -13,11 +13,12 @@ from HABApp.openhab.items import Thing
 from tests.test_openhab.test_events.test_from_dict import get_event
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def test_thing(ir: ItemRegistry):
     with patch_current_time(Instant.from_utc(2000, 1, 1), keep_ticking=False):
         thing = HABApp.openhab.items.Thing('test_thing')
         yield thing
+
 
 def get_status_event(status: str) -> ThingStatusInfoEvent:
     data = {
