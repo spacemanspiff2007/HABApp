@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import HABApp
 from HABApp.core.errors import ItemNotFoundException
-from HABApp.core.internals import uses_get_item, uses_item_registry, uses_post_event
+from HABApp.core.internals import EventBus, uses_get_item, uses_item_registry, uses_post_event
 from HABApp.core.wrapper import process_exception
 from HABApp.mqtt.connection.connection import MqttTaskPlugin
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
@@ -16,9 +16,10 @@ if TYPE_CHECKING:
 
 
 class MessagesHandler(MqttTaskPlugin):
-    def __init__(self, interface: MqttInterface) -> None:
+    def __init__(self, interface: MqttInterface, event_bus: EventBus) -> None:
         super().__init__(task_name='MqttMessages')
         self._interface: Final = interface
+        self._event_bus: Final = event_bus
 
     async def mqtt_task(self) -> None:
         client = self.plugin_connection.context
@@ -42,7 +43,9 @@ class MessagesHandler(MqttTaskPlugin):
         except ItemNotFoundException:
             # only create items for if the message has the retain flag
             if retain:
-                _item = Items.add_item(HABApp.mqtt.items.MqttItem(topic, interface=self._interface))
+                _item = Items.add_item(
+                    HABApp.mqtt.items.MqttItem(topic, interface=self._interface, event_bus=self._event_bus)
+                )
 
         # we don't have an item -> we process only the event
         if _item is None:

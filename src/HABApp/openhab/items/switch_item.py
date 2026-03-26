@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING, Final, Literal
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.openhab.definitions.websockets.item_value_types import OnOffTypeModel, RefreshTypeModel, UnDefTypeModel
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand
 
 

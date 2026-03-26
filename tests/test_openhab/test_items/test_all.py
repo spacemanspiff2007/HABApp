@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from HABApp.core.internals import EventBus
 from HABApp.core.items import Item
 from HABApp.core.types import HSB, Point
 from HABApp.openhab.item_factory import OhItemFactory
@@ -30,7 +31,7 @@ from tests.helpers.inspect import assert_same_signature, check_class_annotations
 
 
 def _get_oh_classes() -> tuple[type[OpenhabItem], ...]:
-    return tuple(c for c in OhItemFactory(None)._items.values())
+    return tuple(c for c in OhItemFactory(None, None)._items.values())
 
 
 @pytest.fixture(params=_get_oh_classes())
@@ -40,9 +41,9 @@ def cls(request):
 
 @pytest.fixture
 def cls_instance(cls):
-    kwargs = {}
+    kwargs = {'event_bus': Mock(EventBus)}
     if issubclass(cls, GroupItem):
-        kwargs = {'registry_handler': Mock(OhItemRegistryHandler)}
+        kwargs['registry_handler'] = Mock(OhItemRegistryHandler)
     return cls('item_name', **kwargs)
 
 
@@ -125,12 +126,12 @@ def test_doc_ivar(cls) -> None:
         ignore=(
             '_update_to_oh', '_command_to_oh', '_state_from_oh_str',
             # class specific
-            'registry_handler'
+            'registry_handler', 'event_bus'
         )
     )
 
     # test that the class has the corresponding attribute
-    create_with = {'name': 'test'}
+    create_with = {'name': 'test', 'event_bus': Mock(EventBus)}
 
     if cls is ColorItem:
         create_with['initial_value'] = HSB(0, 0, 0)

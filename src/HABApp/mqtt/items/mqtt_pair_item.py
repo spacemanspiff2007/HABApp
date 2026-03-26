@@ -1,7 +1,7 @@
 from typing import Any, Final
 
 from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
-from HABApp.core.internals import ItemRegistry
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.mqtt import MqttInterface
 from HABApp.mqtt.connection.interface import MqttUserPayload
@@ -38,6 +38,7 @@ class MqttPairItem(MqttBaseItem):
             raise ItemNameNotOfTypeStrError.from_value(name)
 
         item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+        event_bus: Final = HABAPP_PROVIDER.get_existing(EventBus)
 
         # try to build write topic
         if write_topic is None:
@@ -49,7 +50,7 @@ class MqttPairItem(MqttBaseItem):
             item = item_registry.add_item(
                 cls(
                     name, write_topic=write_topic, initial_value=initial_value, last_value=last_value,
-                    interface=HABAPP_PROVIDER.get_existing(MqttInterface)
+                    event_bus=event_bus, interface=HABAPP_PROVIDER.get_existing(MqttInterface)
                 )
             )
 
@@ -58,8 +59,8 @@ class MqttPairItem(MqttBaseItem):
         return item
 
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
-                 write_topic: str | None = None, *, interface: MqttInterface) -> None:
-        super().__init__(name, initial_value, last_value, interface=interface)
+                 write_topic: str | None = None, *, interface: MqttInterface, event_bus: EventBus) -> None:
+        super().__init__(name, initial_value, last_value, interface=interface, event_bus=event_bus)
         self.write_topic: str = write_topic
 
     def publish(self, payload: MqttUserPayload, qos: int | None = None, retain: bool | None = None) -> None:

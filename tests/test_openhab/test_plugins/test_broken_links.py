@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 from functools import partial
+from unittest.mock import Mock
 
 import HABApp.openhab.connection.plugins.overview_broken_links as plugin_module
-from HABApp.core.internals import ItemRegistry
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import Item
 from HABApp.openhab.definitions.rest import ItemChannelLinkResp, ThingResp
 from HABApp.openhab.definitions.rest.things import ChannelResp, ThingStatusResp
@@ -39,7 +40,7 @@ async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(plugin_module, 'async_get_things', _mock_things)
     monkeypatch.setattr(plugin_module, 'async_get_links', _mock_links)
 
-    ir.add_item(Item('item1'))
+    ir.add_item(Item('item1', event_bus=Mock(EventBus)))
 
     p = plugin_module.BrokenLinksPlugin()
     await p.on_online()

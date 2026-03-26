@@ -2,6 +2,7 @@ from threading import Lock
 from typing import Any
 
 from HABApp.core.const import MISSING
+from HABApp.core.internals import EventBus
 from HABApp.core.items import Item
 
 from .mode_base import BaseMode
@@ -27,8 +28,9 @@ class MultiModeItem(Item):
         item._default_value = default_value
         return item
 
-    def __init__(self, name: str, initial_value: Any = None, default_value: Any = MISSING) -> None:
-        super().__init__(name=name, initial_value=initial_value)
+    def __init__(self, name: str, initial_value: Any = None, default_value: Any = MISSING, *,
+                 event_bus: EventBus) -> None:
+        super().__init__(name=name, initial_value=initial_value, event_bus=event_bus)
 
         self.__values_by_prio: dict[int, BaseMode] = {}
         self.__values_by_name: dict[str, BaseMode] = {}

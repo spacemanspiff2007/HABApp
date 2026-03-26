@@ -1,13 +1,15 @@
 import logging
+from unittest.mock import Mock
 
 import pytest
 
+from HABApp.core.internals import EventBus
 from HABApp.core.types import HSB
 from HABApp.openhab.items import ColorItem
 
 
 def test_send_command() -> None:
-    c = ColorItem('item_name')
+    c = ColorItem('item_name', event_bus=Mock(EventBus))
 
     with pytest.raises(ValueError) as e:
         c.oh_send_command('asdf')

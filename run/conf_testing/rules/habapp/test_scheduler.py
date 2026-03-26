@@ -61,7 +61,7 @@ class TestScheduler(TestBaseRule):
             assert 0.46 <= diff <= 0.54, diff
 
         sleep(0.1)
-        assert len(self.item_states) == executions + 1  # First event before the first call, then None as the last event
+        assert len(self.item_states) == executions - 1
         assert self.item_states[-1].value is None
 
 

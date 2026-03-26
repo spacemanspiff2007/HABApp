@@ -46,5 +46,6 @@ def patch_event_id(monkeypatch) -> None:
     monkeypatch.setattr(websocket_base_module, 'MSG_CTR', 1)
 
 
+@pytest.fixture
 def item_factory() -> OhItemFactory:
-    return OhItemFactory(None)
+    return OhItemFactory(None, None)

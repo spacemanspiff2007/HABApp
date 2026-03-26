@@ -1,11 +1,12 @@
 import datetime
 from collections.abc import Callable, Mapping
-from typing import Any, NamedTuple, override
+from typing import Any, NamedTuple, Self, override
 
 from immutables import Map
 from pydantic import ValidationError
 
 from HABApp.core.const import MISSING
+from HABApp.core.internals import EventBus
 from HABApp.core.items import BaseValueItem
 from HABApp.core.lib.funcs import compare as _compare
 from HABApp.openhab.connection.plugins import send_websocket_event
@@ -35,14 +36,14 @@ class OpenhabItem(BaseValueItem):
 
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()) -> None:
-        super().__init__(name, initial_value=initial_value, last_value=last_value)
+                 metadata: Mapping[str, MetaData] = Map(), *, event_bus: EventBus) -> None:
+        super().__init__(name, initial_value=initial_value, last_value=last_value, event_bus=event_bus)
         self.label: str | None = label
         self.tags: frozenset[str] = tags
         self.groups: frozenset[str] = groups
         self.metadata: Mapping[str, MetaData] = metadata
 
-    def _update_item_definition(self, item: 'OpenhabItem') -> None:
+    def _update_item_definition(self, item: Self) -> None:
         self.label = item.label
         self.tags = item.tags
         self.groups = item.groups

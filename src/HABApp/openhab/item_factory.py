@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from immutables import Map
 
+from HABApp.core.internals import EventBus
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
 from HABApp.openhab.items import (
@@ -34,10 +35,12 @@ log = logging.getLogger('HABApp.openhab.items')
 
 @HABAPP_PROVIDER.register
 class OhItemFactory:
-    __slots__ = ('_items', '_registry_handler')
+    __slots__ = ('_event_bus', '_items', '_registry_handler')
 
-    def __init__(self, registry_handler: OhItemRegistryHandler) -> None:
+    def __init__(self, registry_handler: OhItemRegistryHandler, event_bus: EventBus) -> None:
         self._registry_handler: Final = registry_handler
+        self._event_bus: Final = event_bus
+
         self._items: Final[dict[str, type[OpenhabItem]]] = {
             'String': StringItem,
             'Number': NumberItem,
@@ -62,7 +65,7 @@ class OhItemFactory:
             assert isinstance(type, str)
             assert value is None or isinstance(value, str)
 
-            kwargs = {}
+            kwargs = {'event_bus': self._event_bus}
 
             # map Metadata
             if metadata is not None:

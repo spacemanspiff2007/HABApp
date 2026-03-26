@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from HABApp.core.errors import ItemNameNotOfTypeStrError, WrongItemTypeError
-from HABApp.core.internals import ItemRegistry
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseItem, BaseValueItem
 from HABApp.core.provider import HabAppObjProvider
 from HABApp.mqtt import MqttInterface
@@ -29,12 +29,12 @@ def get_item_classes() -> list[type[BaseValueItem]]:
 def params_item_init():
     params = []
     for cls in get_item_classes():
-        kwargs = {}
+        kwargs = {'event_bus': Mock(EventBus)}
 
         if issubclass(cls, MqttBaseItem):
-            kwargs = {'interface': Mock(MqttInterface)}
+            kwargs['interface'] = Mock(MqttInterface)
         elif issubclass(cls, GroupItem):
-            kwargs = {'registry_handler': Mock(OhItemRegistryHandler)}
+            kwargs['registry_handler'] = Mock(OhItemRegistryHandler)
 
         params.append(
             pytest.param(cls, kwargs, id=f'{cls.__module__.rsplit('.', 1)[-1]}.{cls.__name__}')
@@ -74,7 +74,7 @@ def params_get_create_item():
 
 
 def _setup_item(cls: type, monkeypatch: pytest.MonkeyPatch, ir: ItemRegistry) -> None:
-    provider_objs = {ItemRegistry: ir, MqttInterface: Mock(MqttInterface)}
+    provider_objs = {ItemRegistry: ir, MqttInterface: Mock(MqttInterface), EventBus: Mock(EventBus)}
     provider_mock = Mock(HabAppObjProvider)
     provider_mock.get_existing = Mock(side_effect=provider_objs.__getitem__)
 
@@ -113,7 +113,7 @@ def test_get_item(cls: type[BaseValueItem], kwargs: dict, monkeypatch, ir) -> No
     with pytest.raises(ItemNameNotOfTypeStrError):
         cls.get_item(name=123)
 
-    ir.add_item(BaseValueItem('item_name'))
+    ir.add_item(BaseValueItem('item_name', event_bus=Mock(EventBus)))
 
     with pytest.raises(WrongItemTypeError):
         cls.get_item(name='item_name')

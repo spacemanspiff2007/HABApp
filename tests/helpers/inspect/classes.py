@@ -23,6 +23,7 @@ def check_class_annotations(cls: type[object],
     init_vars: Final = inspect.getfullargspec(cls).annotations
 
     for _obj in (annotation_vars, docstr_vars, init_vars):
+        _obj.pop('return', None)
         for _name in ignore:
             _obj.pop(_name, None)
 

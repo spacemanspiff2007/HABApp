@@ -3,9 +3,13 @@ from math import ceil, floor
 from HABApp.core.items import BaseValueItem
 
 
+def _get_item(value: float) -> BaseValueItem:
+    return BaseValueItem('asdf', value, event_bus=None)
+
+
 def test_numeric() -> None:
-    a = BaseValueItem('asdf', 1)
-    b = BaseValueItem('asdf', 5)
+    a = _get_item(1)
+    b = _get_item(5)
 
     assert a + 10 == 11
     assert a - 10 == -9
@@ -17,7 +21,7 @@ def test_numeric() -> None:
 
 
 def test_built_in() -> None:
-    a = BaseValueItem('asdf', 1.49)
+    a = _get_item(1.49)
     assert round(a, 1) == 1.5
     assert round(a) == 1
 
@@ -26,18 +30,18 @@ def test_built_in() -> None:
 
 
 def test_unary() -> None:
-    a = BaseValueItem('asdf', -1)
+    a = _get_item(-1)
     assert abs(a) == 1
     assert -a == 1
 
 
 def test_cast() -> None:
-    assert float(BaseValueItem('asdf', 1)) == 1.0
-    assert int(BaseValueItem('asdf', 1.5)) == 1
+    assert float(_get_item(1)) == 1.0
+    assert int(_get_item(1.5)) == 1
 
 
 def test_compare() -> None:
-    a = BaseValueItem('asdf', 1)
+    a = _get_item(1)
     assert a < 2
     assert a <= 2
     assert a > 0

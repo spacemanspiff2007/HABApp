@@ -43,14 +43,15 @@ def test_number_unit_of_measurement(item_factory: OhItemFactory) -> None:
         item_factory.create_item,
         last_value=None, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}}
     )
-    metadata = Map(unit=MetaData('°C'))
-    assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, metadata=metadata)
-    assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2, metadata=metadata)
-    assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3, metadata=metadata)
-    assert make_item('test4', 'Number:Speed', '4.0 km/h', ) == NumberItem('test', 4, metadata=metadata)
-    assert make_item('test5', 'Number:Intensity', '5.0 W/m2', ) == NumberItem('test', 5, metadata=metadata)
-    assert make_item('test6', 'Number:Dimensionless', '6.0', ) == NumberItem('test', 6, metadata=metadata)
-    assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7, metadata=metadata)
+
+    kwargs = {'metadata': Map(unit=MetaData('°C')), 'event_bus': None}
+    assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, **kwargs)
+    assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2, **kwargs)
+    assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3, **kwargs)
+    assert make_item('test4', 'Number:Speed', '4.0 km/h', ) == NumberItem('test', 4, **kwargs)
+    assert make_item('test5', 'Number:Intensity', '5.0 W/m2', ) == NumberItem('test', 5, **kwargs)
+    assert make_item('test6', 'Number:Dimensionless', '6.0', ) == NumberItem('test', 6, **kwargs)
+    assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7, **kwargs)
 
 
 def test_datetime(item_factory: OhItemFactory) -> None:

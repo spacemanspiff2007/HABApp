@@ -1,24 +1,24 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from math import ceil, floor
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
 from whenever import Instant
 
 from HABApp.core.const import MISSING
 from HABApp.core.events import ValueChangeEvent, ValueCommandEvent, ValueUpdateEvent
-from HABApp.core.internals import uses_post_event
 from HABApp.core.items.base_item import BaseItem
 from HABApp.core.lib.funcs import compare as _compare
 
 
 if TYPE_CHECKING:
+    from HABApp.core.internals import EventBus
     datetime = datetime
 
 
 log = logging.getLogger('HABApp')
-
-post_event = uses_post_event()
 
 
 class BaseValueItem(BaseItem):
@@ -30,8 +30,10 @@ class BaseValueItem(BaseItem):
     :ivar datetime last_update: Timestamp of the last time when the item has updated the value (read only)
     """
 
-    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None) -> None:
+    def __init__(self, name: str, initial_value: Any = None, last_value: Any = None, *, event_bus: EventBus) -> None:
         super().__init__(name)
+
+        self._eb: Final = event_bus
 
         self.value: Any = initial_value
         self.last_value: Any = last_value
@@ -67,9 +69,9 @@ class BaseValueItem(BaseItem):
         state_changed = self.set_value(new_value)
 
         # create events
-        post_event(self._name, ValueUpdateEvent(self._name, self.value))
+        self._eb.post_event(self._name, ValueUpdateEvent(self._name, self.value))
         if state_changed:
-            post_event(
+            self._eb.post_event(
                 self._name, ValueChangeEvent(self._name, value=self.value, old_value=old_value)
             )
         return state_changed
@@ -81,7 +83,7 @@ class BaseValueItem(BaseItem):
 
         :param value: the commanded value
         """
-        post_event(self._name, ValueCommandEvent(self._name, value))
+        self._eb.post_event(self._name, ValueCommandEvent(self._name, value))
 
     def post_value_if(self, new_value, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
                       lower_than=MISSING, lt=MISSING, lower_equal=MISSING, le=MISSING,

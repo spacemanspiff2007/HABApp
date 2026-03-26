@@ -1,13 +1,15 @@
 import logging
+from unittest.mock import Mock
 
 import pytest
 
 from HABApp.core.errors import InvalidItemValueError
+from HABApp.core.internals import EventBus
 from HABApp.openhab.items import ContactItem
 
 
 def test_send_command() -> None:
-    c = ContactItem('item_name')
+    c = ContactItem('item_name', event_bus=Mock(EventBus))
 
     with pytest.raises(ValueError) as e:
         c.oh_send_command('asdf')
@@ -15,12 +17,12 @@ def test_send_command() -> None:
 
 
 def test_switch_set_value() -> None:
-    ContactItem('').set_value(None)
-    ContactItem('').set_value('OPEN')
-    ContactItem('').set_value('CLOSED')
+    ContactItem('', event_bus=Mock(EventBus)).set_value(None)
+    ContactItem('', event_bus=Mock(EventBus)).set_value('OPEN')
+    ContactItem('', event_bus=Mock(EventBus)).set_value('CLOSED')
 
     with pytest.raises(InvalidItemValueError):
-        ContactItem('item_name').set_value('asdf')
+        ContactItem('item_name', event_bus=Mock(EventBus)).set_value('asdf')
 
 
 def test_from_oh_str(caplog) -> None:

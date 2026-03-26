@@ -7,7 +7,7 @@ from HABApp.core.errors import (
     ItemValueIsNoneError,
     WrongItemTypeError,
 )
-from HABApp.core.internals import ItemRegistry
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseValueItem
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.types import HSB, RGB
@@ -106,11 +106,12 @@ class ColorItem(BaseValueItem):
             raise ItemNameNotOfTypeStrError.from_value(name)
 
         item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+        event_bus: Final = HABAPP_PROVIDER.get_existing(EventBus)
 
         try:
             item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = item_registry.add_item(cls(name, initial_value, last_value))
+            item = item_registry.add_item(cls(name, initial_value, last_value, event_bus=event_bus))
 
         if not isinstance(item, cls):
             raise WrongItemTypeError.from_item(item, cls)

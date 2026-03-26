@@ -21,7 +21,10 @@ if TYPE_CHECKING:
     from HABApp.config import ApplicationConfig
     from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
+    from HABApp.openhab.item_factory import OhItemFactory
+    from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
     from HABApp.openhab.items import OpenhabItem, Thing
+    from HABApp.openhab.process_events import OhEventHandler
 
 
 @dataclass
@@ -56,8 +59,12 @@ class OpenhabContext:
 CONTEXT_TYPE: TypeAlias = OpenhabContext | None
 
 
+
 @HABAPP_PROVIDER.register
-async def setup(connection_manager: ConnectionManager, config: ApplicationConfig) -> AsyncGenerator[OpenhabConnection, Any]:
+async def setup(
+        connection_manager: ConnectionManager, config: ApplicationConfig,
+        item_factory: OhItemFactory, registry_handler: OhItemRegistryHandler, event_handler: OhEventHandler
+) -> AsyncGenerator[OpenhabConnection, Any]:
 
     from HABApp.openhab.connection.handler import HANDLER as CONNECTION_HANDLER
     from HABApp.openhab.connection.plugins import (
@@ -78,9 +85,15 @@ async def setup(connection_manager: ConnectionManager, config: ApplicationConfig
 
     connection.register_plugin(WaitForStartlevelPlugin(), 0)
     connection.register_plugin(OUTGOING_PLUGIN, 10)
-    connection.register_plugin(LoadOpenhabItemsPlugin('LoadItemsAndThings'), 20)
-    connection.register_plugin(WebsocketPlugin(), 30)
-    connection.register_plugin(LoadOpenhabItemsPlugin('SyncItemsAndThings'), 40)
+    connection.register_plugin(
+        LoadOpenhabItemsPlugin('LoadItemsAndThings', item_factory=item_factory, registry_handler=registry_handler),
+        20
+    )
+    connection.register_plugin(WebsocketPlugin(event_handler=event_handler), 30)
+    connection.register_plugin(
+        LoadOpenhabItemsPlugin('SyncItemsAndThings', item_factory=item_factory, registry_handler=registry_handler),
+        40
+    )
     connection.register_plugin(LoadTransformationsPlugin(), 50)
     connection.register_plugin(PingPlugin(), 100)
     connection.register_plugin(WaitForPersistenceRestore(), 110)

@@ -1,12 +1,14 @@
 from datetime import datetime
+from unittest.mock import Mock
 
 from whenever import PlainDateTime
 
+from HABApp.core.internals import EventBus
 from HABApp.openhab.items import DatetimeItem
 
 
 def test_post_update(websocket_events) -> None:
-    item = DatetimeItem('')
+    item = DatetimeItem('', event_bus=Mock(EventBus))
 
     item.oh_post_update(datetime(2025, 1, 1, 12, 0, 1))
     websocket_events.assert_called_once('DateTime', '2025-01-01T12:00:01', event='update')

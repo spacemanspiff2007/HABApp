@@ -2,7 +2,8 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Final
 
 from HABApp.openhab.definitions.websockets.item_value_types import RefreshTypeModel, StringTypeModel, UnDefTypeModel
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
 
 if TYPE_CHECKING:

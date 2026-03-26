@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import AsyncGenerator
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from whenever import Instant
@@ -159,7 +159,7 @@ async def test_event_change(parent_rule, c: ChangedTime, sync_worker, eb: EventB
 async def test_watcher_change_restore(parent_rule, ir: ItemRegistry, tmp_data) -> None:
     name = 'test_save_restore'
 
-    item_a = Item(name)
+    item_a = Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_a)
     watcher = item_a.watch_change(1)
 
@@ -168,7 +168,7 @@ async def test_watcher_change_restore(parent_rule, ir: ItemRegistry, tmp_data) -
     ir.pop_item(name)
     assert name in tmp_data
 
-    item_b = Item(name)
+    item_b = Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_b)
 
     assert item_b._last_change.tasks == [watcher]
@@ -178,7 +178,7 @@ async def test_watcher_change_restore(parent_rule, ir: ItemRegistry, tmp_data) -
 async def test_watcher_update_restore(parent_rule, ir: ItemRegistry, tmp_data) -> None:
     name = 'test_save_restore'
 
-    item_a = Item(name)
+    item_a = Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_a)
     watcher = item_a.watch_update(1)
 
@@ -187,7 +187,7 @@ async def test_watcher_update_restore(parent_rule, ir: ItemRegistry, tmp_data) -
     ir.pop_item(name)
     assert name in tmp_data
 
-    item_b = Item(name)
+    item_b = Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_b)
 
     assert item_b._last_update.tasks == [watcher]
@@ -208,7 +208,7 @@ async def test_watcher_update_cleanup(monkeypatch, parent_rule, c: ChangedTime,
     eb.listen_events(HABApp.core.const.topics.TOPIC_WARNINGS, get_log, NoEventFilter())
 
     name = 'test_save_restore'
-    item_a = HABApp.core.items.Item(name)
+    item_a = HABApp.core.items.Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_a)
     item_a.watch_update(1)
 

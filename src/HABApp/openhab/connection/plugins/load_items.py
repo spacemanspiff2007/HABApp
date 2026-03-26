@@ -9,7 +9,6 @@ from immutables import Map
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import uses_item_registry
-from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import map_null_str
 from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
@@ -20,6 +19,7 @@ from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 if TYPE_CHECKING:
     from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.rest import ThingResp
+    from HABApp.openhab.item_factory import OhItemFactory
 
 
 log = logging.getLogger('HABApp.openhab.items')
@@ -27,6 +27,13 @@ Items = uses_item_registry()
 
 
 class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
+    def __init__(self, name: str | None = None, *,
+                 item_factory: OhItemFactory, registry_handler: OhItemRegistryHandler) -> None:
+
+        super().__init__(name)
+
+        self._item_factory: Final = item_factory
+        self._registry_handler: Final = registry_handler
 
     async def on_connected(self, context: OpenhabContext) -> None:
         # The context will be created fresh for each connect
@@ -63,11 +70,8 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
     async def load_items(self, context: OpenhabContext) -> None:
         OpenhabItem: TypeAlias = HABApp.openhab.items.OpenhabItem
 
-        from HABApp.openhab.item_factory import OhItemFactory
-        from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
-
-        item_factory: Final = await HABAPP_PROVIDER.get(OhItemFactory)
-        registry_handler: Final = await HABAPP_PROVIDER.get(OhItemRegistryHandler)
+        item_factory: Final = self._item_factory
+        registry_handler: Final = self._registry_handler
 
         log.debug('Requesting items')
         items = await async_get_items()
@@ -133,9 +137,7 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     async def load_things(self, context: OpenhabContext) -> None:
         Thing = HABApp.openhab.items.Thing
-
-        from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
-        registry_handler: Final = await HABAPP_PROVIDER.get(OhItemRegistryHandler)
+        registry_handler: Final = self._registry_handler
 
         # try to update things, too
         log.debug('Requesting things')

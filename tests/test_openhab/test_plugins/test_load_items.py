@@ -8,6 +8,8 @@ from HABApp.openhab.connection.connection import OpenhabContext
 from HABApp.openhab.connection.plugins import LoadOpenhabItemsPlugin
 from HABApp.openhab.definitions.rest import ItemRespList, ShortItemResp, ThingResp
 from HABApp.openhab.definitions.rest.things import ThingStatusResp
+from HABApp.openhab.item_factory import OhItemFactory
+from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items import Thing
 
 
@@ -77,16 +79,19 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_get_all_items_state)
     monkeypatch.setattr(load_items_module, 'async_get_things', _mock_get_empty)
 
+    registry_handler = OhItemRegistryHandler(ir)
+    kwargs = {'item_factory': OhItemFactory(registry_handler, None), 'registry_handler': registry_handler}
+
     context = (
         OpenhabContext.new_context(
             version=(1, 0, 0), session=None, session_options=None, out_queue=None)
     )
 
     # initial item create
-    await LoadOpenhabItemsPlugin().on_connected(context)
+    await LoadOpenhabItemsPlugin(**kwargs).on_connected(context)
 
     # sync state
-    await LoadOpenhabItemsPlugin().on_connected(context)
+    await LoadOpenhabItemsPlugin(**kwargs).on_connected(context)
 
     assert [(i.name, i.value) for i in ir.get_items()] == [
         ('ItemLength', 5), ('ItemPlain', 3.14), ('ItemNoUpdate', None)]
@@ -98,6 +103,9 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
 async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_items', _mock_get_empty)
     monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_raise)
+
+    registry_handler = OhItemRegistryHandler(ir)
+    kwargs = {'item_factory': OhItemFactory(registry_handler, None), 'registry_handler': registry_handler}
 
     things_resp: list[ThingResp] = []
 
@@ -126,7 +134,7 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     )
 
     # initial thing create
-    await LoadOpenhabItemsPlugin().on_connected(context)
+    await LoadOpenhabItemsPlugin(**kwargs).on_connected(context)
 
     ir_thing = ir.get_item('thing_2')
     assert isinstance(ir_thing, Thing)
@@ -136,7 +144,7 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     t2.status.description = 'asdf'
 
     # sync state
-    await LoadOpenhabItemsPlugin().on_connected(context)
+    await LoadOpenhabItemsPlugin(**kwargs).on_connected(context)
 
     assert ir.get_item('thing_2').status_description == 'asdf'
 

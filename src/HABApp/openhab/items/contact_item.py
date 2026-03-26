@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING, Final, Literal
 from HABApp.core.errors import InvalidItemValueError
 from HABApp.openhab.definitions.websockets.item_value_types import OpenClosedTypeModel
 from HABApp.openhab.interface_sync import post_update
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
 
 if TYPE_CHECKING:

@@ -1,10 +1,11 @@
 import asyncio
 from datetime import timedelta
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
 from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent
+from HABApp.core.internals import EventBus
 from HABApp.core.items import Item
 from tests.helpers import LogCollector
 from tests.helpers.parent_rule import DummyRule
@@ -12,7 +13,7 @@ from tests.helpers.parent_rule import DummyRule
 
 async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector) -> None:
 
-    i = Item('test')
+    i = Item('test', event_bus=Mock(EventBus))
     w1 = i.watch_change(5)
     w2 = i.watch_change(5)
 
@@ -36,7 +37,7 @@ async def test_watch_update(parent_rule: DummyRule, sync_worker, caplog, method)
 
     secs = 0.2
 
-    i = Item('test')
+    i = Item('test', event_bus=Mock(EventBus))
     func = getattr(i, method)
     func(secs / 2)
     w = func(timedelta(seconds=secs))

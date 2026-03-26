@@ -1,7 +1,7 @@
 from typing import Any, Final, override
 
 from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
-from HABApp.core.internals import ItemRegistry
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseValueItem
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.mqtt import MqttInterface
@@ -11,8 +11,8 @@ from HABApp.mqtt.connection.interface import MqttUserPayload
 class MqttBaseItem(BaseValueItem):
 
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None, *,
-                 interface: MqttInterface) -> None:
-        super().__init__(name, initial_value, last_value)
+                 interface: MqttInterface, event_bus: EventBus) -> None:
+        super().__init__(name, initial_value, last_value, event_bus=event_bus)
         self._mqtt_interface: Final = interface
 
 
@@ -32,11 +32,15 @@ class MqttItem(MqttBaseItem):
             raise ItemNameNotOfTypeStrError.from_value(name)
 
         item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+        event_bus: Final = HABAPP_PROVIDER.get_existing(EventBus)
 
         try:
             item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = cls(name, initial_value, last_value, interface=HABAPP_PROVIDER.get_existing(MqttInterface))
+            item = cls(
+                name, initial_value, last_value,
+                event_bus=event_bus, interface=HABAPP_PROVIDER.get_existing(MqttInterface)
+            )
             item_registry.add_item(item)
 
         if not isinstance(item, cls):

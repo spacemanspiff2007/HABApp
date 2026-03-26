@@ -4,8 +4,8 @@ import pytest
 
 
 def assert_same_signature(func_a, func_b) -> bool:
-    sig_a = inspect.signature(func_a)
-    sig_b = inspect.signature(func_b)
+    sig_a = inspect.signature(func_a, eval_str=True)
+    sig_b = inspect.signature(func_b, eval_str=True)
     assert sig_a == sig_b, f'\n  {sig_a}\n  {sig_b}\n'
 
     doc_a = inspect.getdoc(func_a)

@@ -11,6 +11,7 @@ import HABApp
 from HABApp.core.errors import ItemNameNotOfTypeStrError, ItemNotFoundException, WrongItemTypeError
 from HABApp.core.events import EventFilter, ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import (
+    EventBus,
     EventBusListener,
     ItemRegistry,
     get_current_context,
@@ -34,19 +35,20 @@ class AggregationItem(BaseValueItem):
             raise ItemNameNotOfTypeStrError.from_value(name)
 
         item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+        event_bus: Final = HABAPP_PROVIDER.get_existing(EventBus)
 
         try:
             item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = cls(name)
+            item = cls(name, event_bus=event_bus)
             item_registry.add_item(item)
 
         if not isinstance(item, cls):
             raise WrongItemTypeError.from_item(item, cls)
         return item
 
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
+    def __init__(self, name: str, *, event_bus: EventBus) -> None:
+        super().__init__(name, event_bus=event_bus)
         self.__period: float = 0
         self.__aggregation_func: typing.Callable[[typing.Iterable], typing.Any] = lambda x: x
 

@@ -6,7 +6,8 @@ from HABApp.core.types import HSB, RGB
 from HABApp.openhab.definitions.websockets.item_value_types import (
     HSBTypeModel,
 )
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.items.commands import OnOffCommand, PercentCommand
 
 

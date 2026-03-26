@@ -11,7 +11,6 @@ from pydantic import ValidationError
 import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.const.log import TOPIC_EVENTS
-from HABApp.core.internals import uses_item_registry
 from HABApp.core.lib import SingleTask
 from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
@@ -24,20 +23,18 @@ from HABApp.openhab.definitions.websockets import (
     WebsocketTopicEnum,
 )
 from HABApp.openhab.definitions.websockets.base import BaseOutEvent
-from HABApp.openhab.process_events import on_openhab_event
+from HABApp.openhab.process_events import OhEventHandler
 
 
 class WebSocketClosedError(ClientError):
     pass
 
 
-Items = uses_item_registry()
-
-
 class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None) -> None:
+    def __init__(self, name: str | None = None, *, event_handler: OhEventHandler) -> None:
         super().__init__(name)
+        self._event_handler: Final = event_handler
         self.task: Final = SingleTask(self.websockets_task, name='WebsocketsEventsTask')
 
         self._websocket: ClientWebSocketResponse | None = None
@@ -76,7 +73,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                         self._sent_events[key] = event
                     await ws.send_str(text)
                     queue.task_done()
-            except Exception as e:  # noqa: PERF203
+            except Exception as e:
                 self.plugin_connection.process_exception(e, 'Outgoing queue worker')
 
     async def _websocket_ping(self, ping_interval: float) -> None:
@@ -184,10 +181,10 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
             return None
 
         # cache so we don't have to look up every event
-        _on_openhab_event = on_openhab_event
-        log = self.plugin_connection.log
-        log_events = logging.getLogger(f'{TOPIC_EVENTS}.openhab')
-        debug_lvl = logging.DEBUG
+        _on_openhab_event: Final = self._event_handler.on_openhab_event
+        log: Final = self.plugin_connection.log
+        log_events: Final = logging.getLogger(f'{TOPIC_EVENTS}.openhab')
+        debug_lvl: Final = logging.DEBUG
 
         # Setup event filter
         await self._setup_websocket_filter(ws, log)

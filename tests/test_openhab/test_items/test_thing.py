@@ -7,9 +7,10 @@ from whenever import Instant, patch_current_time
 
 import HABApp
 from HABApp.core.internals import ItemRegistry
-from HABApp.openhab import process_events as process_events_module
 from HABApp.openhab.events import ThingAddedEvent, ThingStatusInfoEvent, ThingUpdatedEvent
+from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items import Thing
+from HABApp.openhab.process_events import OhEventHandler
 from tests.test_openhab.test_events.test_from_dict import get_event
 
 
@@ -18,6 +19,11 @@ def test_thing(ir: ItemRegistry):
     with patch_current_time(Instant.from_utc(2000, 1, 1), keep_ticking=False):
         thing = HABApp.openhab.items.Thing('test_thing')
         yield thing
+
+
+@pytest.fixture
+def event_handler(ir, eb) -> OhEventHandler:
+    return OhEventHandler(eb, ir, registry_handler=OhItemRegistryHandler(ir))
 
 
 def get_status_event(status: str) -> ThingStatusInfoEvent:
@@ -164,29 +170,29 @@ def test_thing_updated_event(test_thing: Thing) -> None:
         assert test_thing._last_change.instant == instant7
 
 
-def test_thing_called_status_event(ir: ItemRegistry, test_thing: Thing) -> None:
+def test_thing_called_status_event(ir: ItemRegistry, test_thing: Thing, event_handler) -> None:
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
     event = get_status_event('REMOVING')
     assert test_thing.name == event.name
 
-    process_events_module.on_openhab_event(event)
+    event_handler.on_openhab_event(event)
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_called_updated_event(ir: ItemRegistry, test_thing: Thing) -> None:
+def test_thing_called_updated_event(ir: ItemRegistry, test_thing: Thing, event_handler) -> None:
     ir.add_item(test_thing)
     test_thing.process_event = Mock()
 
     event = ThingUpdatedEvent('test_thing', 'new_type', 'new_label', '', channels=[], configuration={}, properties={})
     assert test_thing.name == event.name
 
-    process_events_module.on_openhab_event(event)
+    event_handler.on_openhab_event(event)
     test_thing.process_event.assert_called_once_with(event)
 
 
-def test_thing_handler_add_event(ir: ItemRegistry) -> None:
+def test_thing_handler_add_event(ir: ItemRegistry, event_handler) -> None:
     name = 'AddedThing'
     type = 'thing:type'
     label = 'my_label'
@@ -197,7 +203,7 @@ def test_thing_handler_add_event(ir: ItemRegistry) -> None:
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
-    process_events_module.on_openhab_event(event)
+    event_handler.on_openhab_event(event)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)
@@ -219,7 +225,7 @@ def test_thing_handler_add_event(ir: ItemRegistry) -> None:
 
     event = ThingAddedEvent(name=name, thing_type=type, label=label, location=location, channels=channels,
                             configuration=configuration, properties=properties)
-    process_events_module.on_openhab_event(event)
+    event_handler.on_openhab_event(event)
 
     thing = ir.get_item(name)
     assert isinstance(thing, Thing)

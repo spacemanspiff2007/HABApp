@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING, Final
 from HABApp.core.const import MISSING
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.types import RawType
 
 

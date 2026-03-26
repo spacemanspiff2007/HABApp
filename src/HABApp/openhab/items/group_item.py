@@ -4,11 +4,13 @@ from typing import TYPE_CHECKING, Any, Final
 from immutables import Map
 
 from HABApp.core.const import MISSING
+from HABApp.core.internals import EventBus
 from HABApp.openhab.connection.plugins import post_update, send_command, send_websocket_event
 from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent
 from HABApp.openhab.definitions.websockets.item_value_types import RefreshTypeModel, StringTypeModel, UnDefTypeModel
 from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
 
 if TYPE_CHECKING:
@@ -37,8 +39,8 @@ class GroupItem(OpenhabItem):
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None, label: str | None = None,
                  tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map(), *,
-                 registry_handler: OhItemRegistryHandler) -> None:
-        super().__init__(name, initial_value, last_value, label, tags, groups, metadata)
+                 event_bus: EventBus, registry_handler: OhItemRegistryHandler) -> None:
+        super().__init__(name, initial_value, last_value, label, tags, groups, metadata, event_bus=event_bus)
         self._oh_registry_handler: Final = registry_handler
 
     @property

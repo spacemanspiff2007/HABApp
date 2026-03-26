@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from HABApp import Rule
-from HABApp.core.internals import ItemRegistry
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseValueItem, Item
 from HABApp.openhab.items import OpenhabItem, SwitchItem
 from HABApp.openhab.items.base_item import MetaData
@@ -21,8 +21,8 @@ def rule(ir: ItemRegistry) -> Rule:
 
 
 def test_search_type(ir: ItemRegistry, rule: Rule) -> None:
-    item1 = BaseValueItem('item_1')
-    item2 = Item('item_2')
+    item1 = BaseValueItem('item_1', event_bus=Mock(EventBus))
+    item2 = Item('item_2', event_bus=Mock(EventBus))
 
     assert rule.get_items() == []
 
@@ -37,11 +37,18 @@ def test_search_type(ir: ItemRegistry, rule: Rule) -> None:
 
 
 def test_search_oh(ir: ItemRegistry, rule: Rule) -> None:
-    item1 = OpenhabItem('oh_item_1', tags=frozenset(['tag1', 'tag2', 'tag3']),
-                        groups=frozenset(['grp1', 'grp2']), metadata={'meta1': MetaData('meta_v1')})
-    item2 = SwitchItem('oh_item_2', tags=frozenset(['tag1', 'tag2', 'tag4']),
-                       groups=frozenset(['grp2', 'grp3']), metadata={'meta2': MetaData('meta_v2', config={'a': 'b'})})
-    item3 = Item('item_2')
+    item1 = OpenhabItem(
+        'oh_item_1', tags=frozenset(['tag1', 'tag2', 'tag3']),
+        groups=frozenset(['grp1', 'grp2']), metadata={'meta1': MetaData('meta_v1')},
+        event_bus=Mock(EventBus)
+    )
+    item2 = SwitchItem(
+        'oh_item_2', tags=frozenset(['tag1', 'tag2', 'tag4']),
+        groups=frozenset(['grp2', 'grp3']), metadata={'meta2': MetaData('meta_v2', config={'a': 'b'})},
+        event_bus=Mock(EventBus)
+    )
+
+    item3 = Item('item_2', event_bus=Mock(EventBus))
 
     assert rule.get_items() == []
 
@@ -75,8 +82,8 @@ def test_classcheck(rule: Rule) -> None:
 
 
 def test_search_name(ir: ItemRegistry, rule: Rule) -> None:
-    item1 = BaseValueItem('item_1a')
-    item2 = Item('item_2a')
+    item1 = BaseValueItem('item_1a', event_bus=Mock(EventBus))
+    item2 = Item('item_2a', event_bus=Mock(EventBus))
 
     assert rule.get_items() == []
 
