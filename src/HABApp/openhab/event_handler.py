@@ -32,12 +32,15 @@ log = logging.getLogger('HABApp.openhab.items')
 
 @HABAPP_PROVIDER.register
 class OhEventHandler:
-    __slots__ = ('_event_bus', '_item_registry', '_registry_handler')
+    __slots__ = ('_event_bus', '_item_factory', '_item_registry', '_registry_handler')
 
-    def __init__(self, event: EventBus, item_registry: ItemRegistry, registry_handler: OhItemRegistryHandler) -> None:
+    def __init__(self, event: EventBus, item_registry: ItemRegistry,
+                 registry_handler: OhItemRegistryHandler, item_factory: OhItemFactory) -> None:
+
         self._event_bus: Final = event
         self._registry_handler: Final = registry_handler
         self._item_registry: Final = item_registry
+        self._item_factory: Final = item_factory
 
     def on_openhab_event(self, event: OpenhabEvent) -> None:
         post_event: Final = self._event_bus.post_event
@@ -108,14 +111,14 @@ class OhEventHandler:
             if (cfg := await HABApp.openhab.interface_async.async_get_item(name)) is None:
                 return None
 
-            new_item = HABAPP_PROVIDER.get_existing(OhItemFactory).create_item(
+            new_item = self._item_factory.create_item(
                 name, event.type, value=None, last_value=None,
                 label=event.label, tags=event.tags, groups=event.groups, metadata=cfg.metadata
             )
             if new_item is None:
                 return None
 
-            HABAPP_PROVIDER.get_existing(OhItemRegistryHandler).add_to_registry(new_item)
+            self._registry_handler.add_to_registry(new_item)
             # Send Event to Event Bus
             self._event_bus.post_event(TOPIC_ITEMS, event)
 

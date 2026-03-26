@@ -9,6 +9,7 @@ import HABApp
 from HABApp.core.internals import ItemRegistry
 from HABApp.openhab.event_handler import OhEventHandler
 from HABApp.openhab.events import ThingAddedEvent, ThingStatusInfoEvent, ThingUpdatedEvent
+from HABApp.openhab.item_factory import OhItemFactory
 from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items import Thing
 from tests.test_openhab.test_events.test_from_dict import get_event
@@ -23,7 +24,10 @@ def test_thing(ir: ItemRegistry):
 
 @pytest.fixture
 def event_handler(ir, eb) -> OhEventHandler:
-    return OhEventHandler(eb, ir, registry_handler=OhItemRegistryHandler(ir))
+    registry_handler = OhItemRegistryHandler(ir)
+    return OhEventHandler(
+        eb, ir, registry_handler=registry_handler, item_factory=OhItemFactory(registry_handler, eb)
+    )
 
 
 def get_status_event(status: str) -> ThingStatusInfoEvent:
