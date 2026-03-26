@@ -21,10 +21,10 @@ if TYPE_CHECKING:
     from HABApp.config import ApplicationConfig
     from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
+    from HABApp.openhab.event_handler import OhEventHandler
     from HABApp.openhab.item_factory import OhItemFactory
     from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
     from HABApp.openhab.items import OpenhabItem, Thing
-    from HABApp.openhab.process_events import OhEventHandler
 
 
 @dataclass

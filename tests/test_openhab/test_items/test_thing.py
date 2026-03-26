@@ -7,10 +7,10 @@ from whenever import Instant, patch_current_time
 
 import HABApp
 from HABApp.core.internals import ItemRegistry
+from HABApp.openhab.event_handler import OhEventHandler
 from HABApp.openhab.events import ThingAddedEvent, ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items import Thing
-from HABApp.openhab.process_events import OhEventHandler
 from tests.test_openhab.test_events.test_from_dict import get_event
 
 

@@ -11,7 +11,7 @@ import HABApp.mqtt.connection.publish
 import HABApp.mqtt.connection.subscribe
 import HABApp.openhab.connection.handler
 import HABApp.openhab.connection.handler.func_async
-import HABApp.openhab.process_events
+import HABApp.openhab.event_handler
 from HABApp.config import CONFIG
 from HABApp.core.connections import ConnectionManager
 from HABApp.core.provider import HABAPP_PROVIDER

@@ -23,7 +23,7 @@ from HABApp.openhab.definitions.websockets import (
     WebsocketTopicEnum,
 )
 from HABApp.openhab.definitions.websockets.base import BaseOutEvent
-from HABApp.openhab.process_events import OhEventHandler
+from HABApp.openhab.event_handler import OhEventHandler
 
 
 class WebSocketClosedError(ClientError):
