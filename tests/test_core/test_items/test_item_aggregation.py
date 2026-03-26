@@ -2,14 +2,23 @@ import asyncio
 from asyncio import TaskGroup
 
 import pytest
+from pytest import MonkeyPatch
 
+import HABApp
 from HABApp import Rule
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import AggregationItem, Item
+from HABApp.core.provider import HABAPP_PROVIDER
 from tests.rule_runner import SimpleRuleRunner
 
 
+def _setup(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setitem(HABAPP_PROVIDER._created, ItemRegistry, HABApp.core.Items)
+    monkeypatch.setitem(HABAPP_PROVIDER._created, EventBus, HABApp.core.EventBus)
+
+
 @pytest.mark.no_internals
-async def test_aggregation_item() -> None:
+async def test_aggregation_item(monkeypatch) -> None:
 
     class TestAggregation(Rule):
         async def test_agg(self) -> None:
@@ -59,11 +68,12 @@ async def test_aggregation_item() -> None:
                 assert agg.value == (2, [2])
 
     async with SimpleRuleRunner():
+        _setup(monkeypatch)
         await TestAggregation().test_agg()
 
 
 @pytest.mark.no_internals
-async def test_aggregation_item_cleanup() -> None:
+async def test_aggregation_item_cleanup(monkeypatch) -> None:
 
     class TestAggregation(Rule):
         async def test_agg(self) -> None:
@@ -94,4 +104,5 @@ async def test_aggregation_item_cleanup() -> None:
                 assert list(agg._vals) == [7, 9]
 
     async with SimpleRuleRunner():
+        _setup(monkeypatch)
         await TestAggregation().test_agg()
