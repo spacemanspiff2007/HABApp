@@ -1,17 +1,16 @@
 from typing import override
 
+from tests.helpers.code_gen.models._base import BaseModel, BaseOperation
+from tests.helpers.code_gen.models._select import SelectInputType, SelectInputTypeWithDefault
+from tests.helpers.code_gen.models._text import TransformTextType
 from tests.helpers.code_gen.module_context import ModuleContext
-
-from . import SelectInputType, SelectInputTypeNoDefault
-from ._base import BaseModel, BaseOperation
-from .transform import TransformTextType
 
 
 class MixinsModel(BaseModel):
     select: SelectInputType
-    mixins: SelectInputTypeNoDefault
-
     name: TransformTextType
+
+    mixins: SelectInputTypeWithDefault
 
 
 class MixinsOperation(BaseOperation):

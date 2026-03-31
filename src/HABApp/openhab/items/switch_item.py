@@ -47,7 +47,7 @@ class SwitchItem(OpenhabItem, OnOffCommand):
         """Test value against off-value"""
         return self.value == 'OFF'
 
-    def toggle(self):
+    def toggle(self) -> None:
         """Toggle the switch. Turns the switch on when off or off when currently on."""
         if self.value == 'ON':
             self.off()
@@ -57,6 +57,7 @@ class SwitchItem(OpenhabItem, OnOffCommand):
             raise ItemValueIsNoneError.from_item(self)
         else:
             raise InvalidItemValueError.from_item(self, self.value)
+        return None
 
     def __str__(self) -> str:
         return str(self.value)

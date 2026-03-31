@@ -6,10 +6,10 @@ from typing import Any, Self, override
 
 from pydantic import PrivateAttr
 
-from ._base import BaseModel
+from tests.helpers.code_gen.models._base import BaseModel
 
 
-class TransformModel(BaseModel):
+class RegexSearchModel(BaseModel):
     search: str
     _pattern: Pattern  = PrivateAttr()
 
@@ -17,6 +17,11 @@ class TransformModel(BaseModel):
         self._pattern = re.compile(self.search, re.IGNORECASE)
         return self
 
+    def is_found(self, text: str) -> bool:
+        return self._pattern.search(text) is not None
+
+
+class TransformModel(RegexSearchModel):
     def _get_match_text(self, m: Match, text: str) -> str:  # noqa: ARG002
         groups = m.groups()
         return ''.join(p for p in groups if p is not None)

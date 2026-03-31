@@ -1,8 +1,7 @@
 from typing import override
 
+from tests.helpers.code_gen.models._base import BaseOperation
 from tests.helpers.code_gen.module_context import ModuleContext
-
-from ._base import BaseOperation
 
 
 class SeparatorOperation(BaseOperation):

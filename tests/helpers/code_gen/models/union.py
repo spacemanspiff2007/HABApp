@@ -1,10 +1,9 @@
 import re
 from typing import override
 
+from tests.helpers.code_gen.models._base import BaseModel, BaseOperation
+from tests.helpers.code_gen.models._select import SelectInputType
 from tests.helpers.code_gen.module_context import ModuleContext
-
-from . import SelectInputType
-from ._base import BaseModel, BaseOperation
 
 
 ADAPTER_NAME_REGEX = re.compile('(?<=[a-z])([A-Z])')

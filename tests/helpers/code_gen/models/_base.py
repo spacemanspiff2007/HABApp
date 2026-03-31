@@ -1,15 +1,13 @@
+
 from typing import Annotated
 
 from pydantic import BaseModel as _BaseModel
-from pydantic import (
-    ConfigDict,
-    StringConstraints,
-)
+from pydantic import ConfigDict, StringConstraints
 
 from tests.helpers.code_gen.module_context import ModuleContext
 
 
-VarType = Annotated[str, StringConstraints(pattern=r'\w+')]
+type VarType = Annotated[str, StringConstraints(pattern=r'\w+')]
 
 
 class BaseModel(_BaseModel):
