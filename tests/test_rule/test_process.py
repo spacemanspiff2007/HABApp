@@ -1,6 +1,5 @@
 import asyncio
 import sys
-from asyncio import get_event_loop_policy
 from json import loads
 from pathlib import Path
 from unittest.mock import Mock
@@ -10,16 +9,8 @@ import pytest
 import HABApp.rule
 from HABApp.rule import FinishedProcessInfo, Rule
 from HABApp.rule.interfaces import rule_subprocess
-
-from ..helpers import LogCollector
-from ..rule_runner import SimpleRuleRunner
-
-
-# It's either subprocesses or async-mqtt but never both
-pytestmark = pytest.mark.skipif(
-    get_event_loop_policy().__class__.__name__ == 'WindowsSelectorEventLoopPolicy',
-    reason='Subprocesses not supported with the WindowsSelectorEventLoopPolicy'
-)
+from tests.helpers import LogCollector
+from tests.rule_runner import SimpleRuleRunner
 
 
 class ProcRule(Rule):
@@ -40,7 +31,7 @@ async def rule_runner():
 
 
 @pytest.fixture
-async def rule(monkeypatch, rule_runner):
+async def rule(monkeypatch, rule_runner) -> ProcRule:
     monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__).with_name('config.yml'))
 
     return ProcRule()
@@ -59,7 +50,7 @@ async def test_run_func_arg_errors(rule) -> None:
     assert str(e.value) == 'additional_python_path[1] is not of type str! "123" (int)'
 
 
-@pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, 'OK', '')], [False, 'OK']])
+@pytest.mark.parametrize(('flag', 'result'), [[True, FinishedProcessInfo(0, 'OK', '')], [False, 'OK']])
 @pytest.mark.no_internals
 async def test_run_func(rule, flag, result) -> None:
 
@@ -70,7 +61,7 @@ async def test_run_func(rule, flag, result) -> None:
     rule.cb.assert_called_once_with(result)
 
 
-@pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
+@pytest.mark.parametrize(('flag', 'result'), [[True, FinishedProcessInfo(0, None, None)], [False, '']])
 @pytest.mark.no_internals
 async def test_run_func_no_cap(rule, flag: bool, result) -> None:
     await rule.execute_subprocess(
@@ -80,7 +71,7 @@ async def test_run_func_no_cap(rule, flag: bool, result) -> None:
     rule.cb.assert_called_once_with(FinishedProcessInfo(0, None, None))
 
 
-@pytest.mark.parametrize('flag,result', [[True, FinishedProcessInfo(0, None, None)], [False, '']])
+@pytest.mark.parametrize(('flag', 'result'), [[True, FinishedProcessInfo(0, None, None)], [False, '']])
 @pytest.mark.no_internals
 async def test_run_func_cancel(rule, flag, result, test_logs: LogCollector) -> None:
 
