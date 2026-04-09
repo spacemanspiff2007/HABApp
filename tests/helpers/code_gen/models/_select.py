@@ -4,7 +4,8 @@ import inspect
 import re
 import typing
 from re import Pattern
-from typing import Annotated, Any, get_args, get_origin, override
+from types import UnionType
+from typing import Annotated, Any, Union, get_args, get_origin, override
 
 import pydantic
 import pydantic_core
@@ -59,25 +60,42 @@ class SelectModuleObjs(_SelectBaseModel):
             return False
         return any(p.search(name) for p in pattern)
 
+    def _is_default_excluded(self, name: str, obj: Any) -> bool:
+        if not self.exclude_default:
+            return False
+
+        if name.endswith(('BaseModel', 'Base', 'Mixin')):
+            return True
+
+        # unpack Annotated and Union, otherwise it points to the typing module and we ignore it
+        while True:
+            if (origin := get_origin(obj)) is Annotated:
+                obj = get_args(obj)[0]
+                continue
+
+            # if it's a union we don't ignore it
+            if origin in (Union, UnionType) or isinstance(obj, UnionType):
+                return False
+
+            break
+
+        return (obj_module := inspect.getmodule(obj)) is not None and obj_module in (
+            pydantic,
+            pydantic_core,
+            typing,
+            whenever,
+            asyncio,
+            enum,
+        )
+
     @override
     def select_objects(self, module: ModuleContext) -> dict[str, type]:
         ret: dict[str, type] = {}
 
         module_objs = module.get_objects()
         for name, obj in module_objs.items():
-
-            if self.exclude_default:
-                if name.endswith(('BaseModel', 'Base', 'Mixin')):
-                    continue
-
-                # unpack Annotated, otherwise it points to the typing module and we ignore it
-                _obj = obj
-                while get_origin(_obj) is Annotated:
-                    _obj = get_args(_obj)[0]
-
-                if ((obj_module := inspect.getmodule(_obj)) is not None and
-                        obj_module in (pydantic, pydantic_core, typing, whenever, asyncio, enum)):
-                    continue
+            if self._is_default_excluded(name, obj):
+                continue
 
             if not self._name_is_included(name):
                 continue
