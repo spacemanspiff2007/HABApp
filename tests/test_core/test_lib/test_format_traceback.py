@@ -166,7 +166,7 @@ def func_ir() -> None:
     from HABApp.core.items import Item
     Items = HABApp.core.Items
 
-    Items.add_item(Item('asdf'))
+    Items.add_item(Item('asdf', event_bus=None))
     Items.get_item('1234')
 
 
@@ -207,7 +207,7 @@ File "test_core/test_lib/test_format_traceback.py", line x in func_ir
      x | def func_ir() -> None:
      x |     from HABApp.core.items import Item
      x |     Items = HABApp.core.Items
-     x |     Items.add_item(Item('asdf'))
+     x |     Items.add_item(Item('asdf', event_bus=None))
 -->  x |     Items.get_item('1234')
    ------------------------------------------------------------
      HABApp.core.Items = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
@@ -317,8 +317,8 @@ ValueError'''
 def _test_item_registry() -> None:
 
     ir = ItemRegistry()
-    ir.add_item(Item('asdf'))
-    ir.add_item(Item('1324'))
+    ir.add_item(Item('asdf', event_bus=None))
+    ir.add_item(Item('1324', event_bus=None))
     ir.get_item('45678')
 
 
@@ -345,8 +345,8 @@ File "test_core/test_lib/test_format_traceback.py", line x in _test_item_registr
 --------------------------------------------------------------------------------
      x | def _test_item_registry() -> None:
      x |     ir = ItemRegistry()
-     x |     ir.add_item(Item('asdf'))
-     x |     ir.add_item(Item('1324'))
+     x |     ir.add_item(Item('asdf', event_bus=None))
+     x |     ir.add_item(Item('1324', event_bus=None))
 -->  x |     ir.get_item('45678')
    ------------------------------------------------------------
      ir = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
