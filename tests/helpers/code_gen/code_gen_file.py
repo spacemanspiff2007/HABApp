@@ -149,6 +149,15 @@ class CodeGenFile:
             return None
 
         self._path.write_text(new_text)
+
+        print()
+        print('-' * 80)
+        print(self._text)
+        print('-' * 80)
+        print(new_text)
+        print('-' * 80)
+        print()
+
         pytest.exit('New code generated')
         return self
 
