@@ -4,7 +4,7 @@ import inspect
 import re
 import typing
 from re import Pattern
-from typing import Any, override
+from typing import Annotated, Any, get_args, get_origin, override
 
 import pydantic
 import pydantic_core
@@ -69,7 +69,13 @@ class SelectModuleObjs(_SelectBaseModel):
             if self.exclude_default:
                 if name.endswith(('BaseModel', 'Base', 'Mixin')):
                     continue
-                if ((obj_module := inspect.getmodule(obj)) is not None and
+
+                # unpack Annotated, otherwise it points to the typing module and we ignore it
+                _obj = obj
+                while get_origin(_obj) is Annotated:
+                    _obj = get_args(_obj)[0]
+
+                if ((obj_module := inspect.getmodule(_obj)) is not None and
                         obj_module in (pydantic, pydantic_core, typing, whenever, asyncio, enum)):
                     continue
 

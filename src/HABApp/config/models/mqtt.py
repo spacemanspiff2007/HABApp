@@ -2,13 +2,13 @@ import random
 import string
 from collections.abc import Generator
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypeAlias
 
 from easyconfig.models import BaseModel
 from pydantic import Field
 
 
-QOS = Literal[0, 1, 2]
+QOS: TypeAlias = Literal[0, 1, 2]
 
 
 class TLSSettings(BaseModel):

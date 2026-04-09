@@ -34,7 +34,7 @@ class UnionOperation(BaseOperation):
         else:
             seps[-1] = ''
 
-        ret = [f'{union.name}: Final = {"Annotated[" if discriminator else "("}']
+        ret = [f'type {union.name} = {"Annotated[" if discriminator else "("}']
 
         for name, sep in zip(names, seps, strict=True):
             ret.append(f'    {name:s}{sep:s}')

@@ -67,7 +67,7 @@ class RuleFile:
         tb.insert(0, f'Could not load {self.path}!')
         return [line.replace('<module>', self.path.name) for line in tb]
 
-    def create_rules(self, created_rules: list,
+    def create_rules(self, created_rules: list,  # noqa: PLR0913
                      loop: AbstractEventLoop, async_http_client: HABAppHttpClient,
                      item_registry: ItemRegistry, event_bus: EventBus,
                      executor_factory: ExecutorFactory,
@@ -77,7 +77,7 @@ class RuleFile:
             created_rules.append, self.suggest_rule_name,
             self.rule_manager, self, loop=loop, async_http_client=async_http_client,
             item_registry=item_registry, event_bus=event_bus, executor_factory=executor_factory,
-            mqtt_interface_sync=mqtt_interface_sync, mqtt_interface_async=mqtt_interface_async
+            mqtt_interface_sync=mqtt_interface_sync, mqtt_interface_async=mqtt_interface_async,
         )
 
         # It seems like python 3.8 doesn't allow path like objects anymore:
@@ -101,7 +101,7 @@ class RuleFile:
                 item_registry=await HABAPP_PROVIDER.get(ItemRegistry), event_bus=await HABAPP_PROVIDER.get(EventBus),
                 executor_factory=executor_factory,
                 mqtt_interface_sync=await HABAPP_PROVIDER.get(MqttInterface),
-                mqtt_interface_async=await HABAPP_PROVIDER.get(MqttAsyncInterface)
+                mqtt_interface_async=await HABAPP_PROVIDER.get(MqttAsyncInterface),
             )
 
         if ign.raised_exception:

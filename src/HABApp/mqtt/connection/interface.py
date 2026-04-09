@@ -9,6 +9,7 @@ from HABApp.core.const.json import dump_json
 from HABApp.core.internals import ItemRegistryItem
 from HABApp.mqtt.connection.publish import MqttPublishQueueType
 from HABApp.mqtt.connection.subscribe import SubscriptionHandler
+from HABApp.mqtt.util import MqttPublishOptions
 
 
 type MqttUserPayload = (
@@ -63,6 +64,15 @@ class MqttAsyncInterface:
 
         self._pub_queue.put_nowait((topic, data, qos, retain))
         return None
+
+    def publish_options(self, topic: str, *, qos: QOS | None = None, retain: bool | None = None) -> MqttPublishOptions:
+        """Allows to store the topic, qos and retain settings for a topic. These values can then be used to publish
+
+        :param topic: MQTT topic
+        :param qos: QoS, can be 0, 1 or 2. If not specified the value from configuration file will be used.
+        :param retain: retain message. If not specified the value from configuration file will be used.
+        """
+        return MqttPublishOptions(topic=topic, qos=qos, retain=retain, interface=self)
 
     def subscribe(self, topic_or_topics: str | Iterable[str] | Iterable[tuple[str, int | None]], *,
                   qos: QOS | None = None) -> None:
@@ -124,6 +134,15 @@ class MqttInterface:
         :param retain: retain message. If not specified the value from configuration file will be used.
         """
         return run_func_from_async(self._i.publish, topic, payload, qos=qos, retain=retain)
+
+    def publish_options(self, topic: str, *, qos: QOS | None = None, retain: bool | None = None) -> MqttPublishOptions:
+        """Allows to store the topic, qos and retain settings for a topic. These values can then be used to publish
+
+        :param topic: MQTT topic
+        :param qos: QoS, can be 0, 1 or 2. If not specified the value from configuration file will be used.
+        :param retain: retain message. If not specified the value from configuration file will be used.
+        """
+        return MqttPublishOptions(topic=topic, qos=qos, retain=retain, interface=self._i)
 
     def subscribe(self, topic_or_topics: str | Iterable[str] | Iterable[tuple[str, int | None]], *,
                   qos: QOS | None = None) -> None:

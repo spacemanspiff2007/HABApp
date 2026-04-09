@@ -607,7 +607,7 @@ class UpDownTypeModel(ItemValueBase):
 #     adapter: true
 # ----------------------------------------------------------------------------------------------------------------------
 
-OpenHabValueType: Final = (
+type OpenHabValueType = (
     DateTimeTypeModel |
     DecimalTypeModel |
     HSBTypeModel |
@@ -712,7 +712,7 @@ class UpDownLastUpdateTypeModel(UpDownTypeModel, LastUpdateMixin):
     pass
 
 
-OpenHabEventValueLastUpdateType: Final = (
+type OpenHabEventValueLastUpdateType = (
     DateTimeLastUpdateTypeModel |
     DecimalLastUpdateTypeModel |
     HSBLastUpdateTypeModel |
@@ -817,7 +817,7 @@ class UpDownLastChangeTypeModel(UpDownTypeModel, LastChangeMixin):
     pass
 
 
-OpenHabEventValueLastChangeType: Final = (
+type OpenHabEventValueLastChangeType = (
     DateTimeLastChangeTypeModel |
     DecimalLastChangeTypeModel |
     HSBLastChangeTypeModel |

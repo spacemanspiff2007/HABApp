@@ -137,7 +137,7 @@ class SimpleRuleRunner:
         hook = HABAppRuleHook(
             self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop(), None,
             item_registry=ir, event_bus=eb, executor_factory=TestingExecutorFactory(eb),
-            mqtt_interface_sync=Mock(MqttInterface), mqtt_interface_async=Mock(MqttAsyncInterface)
+            mqtt_interface_sync=Mock(MqttInterface), mqtt_interface_async=Mock(MqttAsyncInterface),
         )
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
 

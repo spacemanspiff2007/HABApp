@@ -1,15 +1,29 @@
-from typing import Any, Final, Self
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Final, Self
+
+from HABApp.core.const import MISSING, MISSING_TYPE
+
+
+if TYPE_CHECKING:
+    from HABApp.config.models.mqtt import QOS
+    from HABApp.mqtt import MqttAsyncInterface, MqttInterface
+    from HABApp.mqtt.connection.interface import MqttUserPayload
 
 
 class MqttPublishOptions:
-    """Allows to store the topic, qos and retain settings for a topic. These values can then be used to publish
-    """
-    def __init__(self, topic: str, qos: int | None = None, retain: bool | None = None) -> None:
+    """Allows to store the topic, qos and retain settings for a topic. These values can then be used to publish"""
+
+    __slots__ = ('_interface', '_qos', '_retain', '_topic')
+
+    def __init__(self, topic: str, *, qos: QOS | None, retain: bool | None,
+                 interface: MqttInterface | MqttAsyncInterface) -> None:
         if not isinstance(topic, str):
             raise TypeError()
         if not topic:
             raise ValueError()
 
+        self._interface: Final = interface
         self._topic: Final = topic
         self._qos: Final = qos
         self._retain: Final = retain
@@ -29,17 +43,8 @@ class MqttPublishOptions:
         """Retain"""
         return self._retain
 
-    def publish(self, payload: Any) -> None:
-        """
-        Publish a payload
-
-        :param payload: MQTT Payload
-        """
-
-        # todo: fix this
-        return publish(self._topic, payload, qos=self._qos, retain=self._retain)
-
-    def replace(self, topic: str | None = None, qos: int | None = None, retain: bool | None = None) -> Self:
+    def replace(self, topic: str | MISSING_TYPE = MISSING, *,
+                qos: QOS | None | MISSING_TYPE = MISSING, retain: bool | None | MISSING_TYPE = MISSING) -> Self:
         """
         Replace the topic, qos and retain with the given values and return a new object.
 
@@ -50,7 +55,17 @@ class MqttPublishOptions:
         """
 
         return self.__class__(
-            topic if topic is not None else self._topic,
-            qos if qos is not None else self._qos,
-            retain if retain is not None else self._retain
+            topic if topic is not MISSING else self._topic,
+            qos=qos if qos is not MISSING else self._qos,
+            retain=retain if retain is not MISSING else self._retain,
+            interface=self._interface
         )
+
+    def publish(self, payload: MqttUserPayload) -> None:
+        """
+        Publish a payload
+
+        :param payload: MQTT Payload
+        """
+
+        self._interface.publish(self._topic, payload, qos=self._qos, retain=self._retain)

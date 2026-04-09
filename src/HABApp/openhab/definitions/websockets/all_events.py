@@ -36,7 +36,7 @@ from .websocket_events import WebsocketEventType
 #     discriminator: 'type'
 # ----------------------------------------------------------------------------------------------------------------------
 
-OpenHabEventType: Final = Annotated[
+type OpenHabEventType = Annotated[
     ChannelDescriptionChangedEvent |
     ChannelTriggeredEvent |
     GroupStateChangedEvent |
