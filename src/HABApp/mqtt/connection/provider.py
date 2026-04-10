@@ -10,7 +10,6 @@ from HABApp.core.connections import (
     ConnectionManager,
     ConnectionStateToEventBusPlugin,
 )
-from HABApp.core.internals import EventBus
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.mqtt.connection.connection import MqttConnection
 from HABApp.mqtt.connection.handler import ConnectionHandler
@@ -24,6 +23,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
     from HABApp.config import ApplicationConfig
+    from HABApp.core.internals import EventBus, ItemRegistry
 
 
 log = logging.getLogger('HABApp.mqtt.connection')
@@ -34,6 +34,7 @@ type MqttContextType = Client | None
 
 @HABAPP_PROVIDER.register
 async def setup(connection_manager: ConnectionManager, config: ApplicationConfig, event_bus: EventBus,
+                item_registry: ItemRegistry,
                 ) -> AsyncGenerator[tuple[MqttConnection, MqttAsyncInterface, MqttInterface], Any]:
 
     pub_cfg: Final = config.mqtt.general
@@ -52,11 +53,11 @@ async def setup(connection_manager: ConnectionManager, config: ApplicationConfig
     config.mqtt.connection.subscribe_for_changes(connection.status_configuration_changed)
 
     connection.register_plugin(ConnectionHandler(), 0)
-    connection.register_plugin(MessagesHandler(sync_interface, event_bus), 10)
+    connection.register_plugin(MessagesHandler(sync_interface, event_bus, item_registry), 10)
     connection.register_plugin(subscribe_handler, 20)
     connection.register_plugin(publish_handler, 30)
 
-    connection.register_plugin(ConnectionStateToEventBusPlugin())
+    connection.register_plugin(ConnectionStateToEventBusPlugin(event_bus=event_bus))
     connection.register_plugin(AutoReconnectPlugin())
 
     yield connection, async_interface, sync_interface

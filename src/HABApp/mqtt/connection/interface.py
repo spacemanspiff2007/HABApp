@@ -142,7 +142,7 @@ class MqttInterface:
         :param qos: QoS, can be 0, 1 or 2. If not specified the value from configuration file will be used.
         :param retain: retain message. If not specified the value from configuration file will be used.
         """
-        return MqttPublishOptions(topic=topic, qos=qos, retain=retain, interface=self._i)
+        return MqttPublishOptions(topic=topic, qos=qos, retain=retain, interface=self)
 
     def subscribe(self, topic_or_topics: str | Iterable[str] | Iterable[tuple[str, int | None]], *,
                   qos: QOS | None = None) -> None:

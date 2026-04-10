@@ -5,15 +5,15 @@ from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.internals.event_bus.base_listener import EventBusListenerBase
 
 
-event_log: Final = logging.getLogger(TOPIC_EVENTS)
 habapp_log: Final = logging.getLogger('HABApp')
 
 
 class EventBus:
-    __slots__ = ('_listeners', '_lock')
+    __slots__ = ('_listeners', '_log')
 
     def __init__(self) -> None:
         self._listeners: Final[dict[str, tuple[EventBusListenerBase, ...]]] = {}
+        self._log: Final = logging.getLogger(TOPIC_EVENTS)
 
     def post_event(self, topic: str, event: Any) -> None:
         if not isinstance(topic, str):
@@ -26,7 +26,7 @@ class EventBus:
             event_prv = event[:120] + ' ...' if len(event) > 120 else event
             event_prv = "'" + event_prv.replace('\n', '\\n') + "'"
 
-        event_log.info(f'{topic:>20s}: {event_prv}')
+        self._log.info(f'{topic:>20s}: {event_prv}')
 
         # Notify all listeners
         if (listeners := self._listeners.get(topic)) is not None:

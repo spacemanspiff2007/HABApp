@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any
 
 import aiohttp
 
@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
     from HABApp.config import ApplicationConfig
+    from HABApp.core.internals import EventBus
     from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
     from HABApp.openhab.event_handler import OhEventHandler
@@ -56,13 +57,12 @@ class OpenhabContext:
         )
 
 
-CONTEXT_TYPE: TypeAlias = OpenhabContext | None
-
+type CONTEXT_TYPE = OpenhabContext | None
 
 
 @HABAPP_PROVIDER.register
 async def setup(
-        connection_manager: ConnectionManager, config: ApplicationConfig,
+        connection_manager: ConnectionManager, config: ApplicationConfig, event_bus: EventBus,
         item_factory: OhItemFactory, registry_handler: OhItemRegistryHandler, event_handler: OhEventHandler
 ) -> AsyncGenerator[OpenhabConnection, Any]:
 
@@ -101,7 +101,7 @@ async def setup(
     connection.register_plugin(ThingOverviewPlugin(), 500_000)
     connection.register_plugin(BrokenLinksPlugin(), 500_001)
 
-    connection.register_plugin(ConnectionStateToEventBusPlugin())
+    connection.register_plugin(ConnectionStateToEventBusPlugin(event_bus=event_bus))
     connection.register_plugin(AutoReconnectPlugin())
 
     # config changes

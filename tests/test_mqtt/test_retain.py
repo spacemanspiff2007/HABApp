@@ -16,7 +16,7 @@ class MqttDummyMsg:
 async def test_retain_create(ir: ItemRegistry) -> None:
     topic = '/test/creation'
 
-    handler = MessagesHandler(Mock(), Mock())
+    handler = MessagesHandler(Mock(), Mock(), item_registry=ir)
 
     assert not ir.item_exists(topic)
     handler.msg_to_event(topic, 'aaa', retain=False)

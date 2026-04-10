@@ -3,7 +3,6 @@ from HABAppTests import EventWaiter, ItemWaiter, TestBaseRule
 from HABApp.core.events import ValueUpdateEventFilter
 from HABApp.mqtt.events import MqttValueUpdateEventFilter
 from HABApp.mqtt.items import MqttItem, MqttPairItem
-from HABApp.mqtt.util import MqttPublishOptions
 
 
 class TestMQTTEvents(TestBaseRule):
@@ -55,7 +54,7 @@ class TestMQTTEvents(TestBaseRule):
                 waiter.wait_for_state(data)
 
     def test_mqtt_topic_info(self) -> None:
-        t = MqttPublishOptions('test/event_topic')
+        t = self.mqtt.publish_options('test/event_topic')
         with EventWaiter(t.topic, ValueUpdateEventFilter()) as waiter:
             t.publish('asdf')
             waiter.wait_for_event(value='asdf')
