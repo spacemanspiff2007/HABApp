@@ -12,10 +12,6 @@ def uses_post_event() -> Callable[[str, Any], None]:
     return create_proxy(uses_post_event)
 
 
-def uses_event_bus() -> 'HABApp.core.internals.EventBus':
-    return create_proxy(uses_event_bus)
-
-
 def uses_get_item() -> Callable[[str], 'HABApp.core.internals.item_registry.item_registry.ItemRegistryItem']:
     return create_proxy(uses_get_item)
 
@@ -30,6 +26,6 @@ def setup_internals(ir: 'HABApp.core.internals.ItemRegistry',
     """Replace the proxy objects with the real thing"""
     replacements = {
         uses_item_registry: ir, uses_get_item: ir.get_item,
-        uses_event_bus: eb, uses_post_event: eb.post_event,
+        uses_post_event: eb.post_event,
     }
     return replace_proxies(replacements, final=final)

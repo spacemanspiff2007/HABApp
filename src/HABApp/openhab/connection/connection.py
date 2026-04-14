@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
     from HABApp.config import ApplicationConfig
-    from HABApp.core.internals import EventBus
+    from HABApp.core.internals import EventBus, ItemRegistry
     from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
     from HABApp.openhab.event_handler import OhEventHandler
@@ -62,7 +62,8 @@ type CONTEXT_TYPE = OpenhabContext | None
 
 @HABAPP_PROVIDER.register
 async def setup(
-        connection_manager: ConnectionManager, config: ApplicationConfig, event_bus: EventBus,
+        connection_manager: ConnectionManager, config: ApplicationConfig,
+        event_bus: EventBus, item_registry: ItemRegistry,
         item_factory: OhItemFactory, registry_handler: OhItemRegistryHandler, event_handler: OhEventHandler
 ) -> AsyncGenerator[OpenhabConnection, Any]:
 
@@ -95,7 +96,7 @@ async def setup(
         40
     )
     connection.register_plugin(LoadTransformationsPlugin(), 50)
-    connection.register_plugin(PingPlugin(), 100)
+    connection.register_plugin(PingPlugin(item_registry=item_registry, event_bus=event_bus), 100)
     connection.register_plugin(WaitForPersistenceRestore(), 110)
     connection.register_plugin(TextualThingConfigPlugin(), 120)
     connection.register_plugin(ThingOverviewPlugin(), 500_000)

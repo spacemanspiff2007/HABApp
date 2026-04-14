@@ -8,7 +8,7 @@ from typing import Final
 import HABApp.openhab.events
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.internals import ExecutorFactory, uses_event_bus, uses_item_registry
+from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
 from HABApp.core.lib import SingleTask
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.connection import OpenhabConnection
@@ -17,14 +17,14 @@ from HABApp.openhab.connection.connection import OpenhabConnection
 PING_CONFIG: Final = CONFIG.openhab.ping
 
 log = logging.getLogger('HABApp.openhab.items')
-Items = uses_item_registry()
-EventBus = uses_event_bus()
 
 
 class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None) -> None:
+    def __init__(self, name: str | None = None, *, event_bus: EventBus, item_registry: ItemRegistry) -> None:
         super().__init__(name)
+        self._event_bus: Final = event_bus
+        self._item_registry: Final = item_registry
         self.task: Final = SingleTask(self.ping_worker, 'OhQueueWorker')
 
         self.sent_value: float | None = None
@@ -43,23 +43,23 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         executor_factory = await HABAPP_PROVIDER.get(ExecutorFactory)
 
-        self.listener = HABApp.core.internals.EventBusListener(
+        self.listener = listener = HABApp.core.internals.EventBusListener(
             HABApp.config.CONFIG.openhab.ping.item,
             executor_factory.create(self.ping_received),
             HABApp.core.events.EventFilter(HABApp.openhab.events.ItemStateUpdatedEvent)
         )
-        EventBus.add_listener(self.listener)
+        self._event_bus.add_listener(listener)
 
         self.task.start()
 
     async def on_disconnected(self) -> None:
         await self.task.cancel_wait()
 
-        if self.listener is not None:
-            self.listener.cancel()
+        if (listener := self.listener) is not None:
             self.listener = None
+            listener.cancel()
 
-    async def ping_received(self, event: HABApp.openhab.events.ItemStateEvent):
+    async def ping_received(self, event: HABApp.openhab.events.ItemStateEvent) -> None:
         value = event.value
         if value != self.sent_value:
             return None
@@ -68,6 +68,7 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
         # Then we only take the first one
         if self.next_value is None:
             self.next_value = round((monotonic() - self.timestamp_sent) * 1000, 1)
+        return None
 
     async def ping_worker(self) -> None:
         try:
@@ -75,7 +76,7 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
             item_name = PING_CONFIG.item
 
-            if not (send_ping := Items.item_exists(item_name)):
+            if not (send_ping := self._item_registry.item_exists(item_name)):
                 log.warning(f'Number item "{item_name:s}" does not exist!')
 
             while True:
@@ -89,7 +90,7 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
                         f'{self.sent_value:.1f}' if self.sent_value is not None else None
                     )
                 else:
-                    send_ping = Items.item_exists(item_name)
+                    send_ping = self._item_registry.item_exists(item_name)
 
                 await sleep(PING_CONFIG.interval)
 
