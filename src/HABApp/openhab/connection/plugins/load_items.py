@@ -8,7 +8,6 @@ from immutables import Map
 
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.internals import uses_item_registry
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import map_null_str
 from HABApp.openhab.connection.handler.func_async import async_get_all_items_state, async_get_items, async_get_things
@@ -17,21 +16,23 @@ from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 
 
 if TYPE_CHECKING:
+    from HABApp.core.internals import ItemRegistry
     from HABApp.core.lib import InstantView
     from HABApp.openhab.definitions.rest import ThingResp
     from HABApp.openhab.item_factory import OhItemFactory
 
 
 log = logging.getLogger('HABApp.openhab.items')
-Items = uses_item_registry()
 
 
 class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
     def __init__(self, name: str | None = None, *,
+                 item_registry: ItemRegistry,
                  item_factory: OhItemFactory, registry_handler: OhItemRegistryHandler) -> None:
 
         super().__init__(name)
 
+        self._item_registry: Final = item_registry
         self._item_factory: Final = item_factory
         self._registry_handler: Final = registry_handler
 
@@ -93,16 +94,16 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             registry_handler.add_to_registry(new_item, set_value=True)
 
         # remove items which are no longer available
-        ist = set(Items.get_item_names())
+        ist = set(self._item_registry.get_item_names())
         soll = {item.name for item in items}
         for k in ist - soll:
-            if isinstance(Items.get_item(k), OpenhabItem):
+            if isinstance(self._item_registry.get_item(k), OpenhabItem):
                 registry_handler.remove_from_registry(k)
 
         log.info(f'Updated {items_len:d} Items')
 
         created_items: dict[str, tuple[OpenhabItem, InstantView]] = {
-            i.name: (i, i.last_update) for i in Items.get_items() if isinstance(i, OpenhabItem)
+            i.name: (i, i.last_update) for i in self._item_registry.get_items() if isinstance(i, OpenhabItem)
         }
         context.created_items.update(created_items)
 
@@ -154,10 +155,10 @@ class LoadOpenhabItemsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         context.created_things.update(created_things)
 
         # remove things which were deleted
-        ist = set(Items.get_item_names())
+        ist = set(self._item_registry.get_item_names())
         soll = {thing.uid for thing in things}
         for k in ist - soll:
-            if isinstance(Items.get_item(k), Thing):
+            if isinstance(self._item_registry.get_item(k), Thing):
                 registry_handler.remove_thing_from_registry(k)
         log.info(f'Updated {thing_count:d} Things')
 

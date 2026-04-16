@@ -42,7 +42,7 @@ async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs) -> None:
 
     ir.add_item(Item('item1', event_bus=Mock(EventBus)))
 
-    p = plugin_module.BrokenLinksPlugin()
+    p = plugin_module.BrokenLinksPlugin(item_registry=ir)
     await p.on_online()
 
     add = partial(test_logs.add_expected, 'HABApp.openhab.links', logging.WARNING)

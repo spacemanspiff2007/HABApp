@@ -87,20 +87,26 @@ async def setup(
     connection.register_plugin(WaitForStartlevelPlugin(), 0)
     connection.register_plugin(OUTGOING_PLUGIN, 10)
     connection.register_plugin(
-        LoadOpenhabItemsPlugin('LoadItemsAndThings', item_factory=item_factory, registry_handler=registry_handler),
+        LoadOpenhabItemsPlugin(
+            'LoadItemsAndThings',
+            item_factory=item_factory, registry_handler=registry_handler, item_registry=item_registry
+        ),
         20
     )
     connection.register_plugin(WebsocketPlugin(event_handler=event_handler), 30)
     connection.register_plugin(
-        LoadOpenhabItemsPlugin('SyncItemsAndThings', item_factory=item_factory, registry_handler=registry_handler),
+        LoadOpenhabItemsPlugin(
+            'SyncItemsAndThings',
+            item_factory=item_factory, registry_handler=registry_handler, item_registry=item_registry
+        ),
         40
     )
     connection.register_plugin(LoadTransformationsPlugin(), 50)
     connection.register_plugin(PingPlugin(item_registry=item_registry, event_bus=event_bus), 100)
-    connection.register_plugin(WaitForPersistenceRestore(), 110)
+    connection.register_plugin(WaitForPersistenceRestore(item_registry=item_registry), 110)
     connection.register_plugin(TextualThingConfigPlugin(), 120)
     connection.register_plugin(ThingOverviewPlugin(), 500_000)
-    connection.register_plugin(BrokenLinksPlugin(), 500_001)
+    connection.register_plugin(BrokenLinksPlugin(item_registry=item_registry), 500_001)
 
     connection.register_plugin(ConnectionStateToEventBusPlugin(event_bus=event_bus))
     connection.register_plugin(AutoReconnectPlugin())

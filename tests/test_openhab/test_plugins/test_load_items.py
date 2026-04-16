@@ -80,7 +80,11 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_things', _mock_get_empty)
 
     registry_handler = OhItemRegistryHandler(ir)
-    kwargs = {'item_factory': OhItemFactory(registry_handler, None), 'registry_handler': registry_handler}
+    kwargs = {
+        'item_factory': OhItemFactory(registry_handler, None),
+        'registry_handler': registry_handler,
+        'item_registry': ir
+    }
 
     context = (
         OpenhabContext.new_context(
@@ -105,7 +109,11 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_raise)
 
     registry_handler = OhItemRegistryHandler(ir)
-    kwargs = {'item_factory': OhItemFactory(registry_handler, None), 'registry_handler': registry_handler}
+    kwargs = {
+        'item_factory': OhItemFactory(registry_handler, None),
+        'registry_handler': registry_handler,
+        'item_registry': ir,
+    }
 
     things_resp: list[ThingResp] = []
 

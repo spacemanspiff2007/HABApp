@@ -1,25 +1,28 @@
 from __future__ import annotations
 
 import logging
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.internals import uses_item_registry
 from HABApp.core.logger import log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.connection.handler.func_async import async_get_links, async_get_things
 
 
-PING_CONFIG: Final = CONFIG.openhab.ping
+if TYPE_CHECKING:
+    from HABApp.core.internals import ItemRegistry
 
-Items = uses_item_registry()
+
+PING_CONFIG: Final = CONFIG.openhab.ping
 
 
 class BrokenLinksPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None) -> None:
+    def __init__(self, name: str | None = None, *, item_registry: ItemRegistry) -> None:
         super().__init__(name)
+        self._item_registry: Final = item_registry
+
         self.do_run = True
 
     async def on_online(self):
@@ -36,7 +39,7 @@ class BrokenLinksPlugin(BaseConnectionPlugin[OpenhabConnection]):
         available_channels = {c.uid for t in things for c in t.channels}
 
         for link in sorted(links, key=lambda x: x.channel):
-            if not Items.item_exists(link.item):
+            if not self._item_registry.item_exists(link.item):
                 log_warning(log, f'Item "{link.item}" does not exist! '
                                  f'(link between item "{link.item:s}" and channel "{link.channel:s}")')
                 continue

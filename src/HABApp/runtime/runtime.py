@@ -12,12 +12,12 @@ import HABApp.parameters.parameter_files
 import HABApp.rule_manager
 import HABApp.util
 from HABApp.config.models import ApplicationConfig
-from HABApp.core import shutdown
 from HABApp.core.connections import ConnectionManager
 from HABApp.core.files import FileManager
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.core.shutdown import ShutdownInfo
 from HABApp.core.wrapper import process_exception
 from HABApp.mqtt import MqttAsyncInterface, MqttInterface
 from HABApp.mqtt.connection.connection import MqttConnection
@@ -41,7 +41,7 @@ warnings.showwarning = send_warnings_to_log
 
 class Runtime:
 
-    async def start(self, config_folder: Path) -> None:
+    async def start(self, config_folder: Path, shutdown: ShutdownInfo) -> None:
         try:
 
             # setup exception handler for the scheduler
@@ -84,10 +84,9 @@ class Runtime:
 
             await rule_manager.load_rules_on_startup()
 
-
         except HABApp.config.InvalidConfigError:
-            shutdown.request()
+            shutdown.request_showdown()
         except Exception as e:
             process_exception('Runtime.start', e)
             await asyncio.sleep(1)  # Sleep so we can do a graceful shutdown
-            shutdown.request()
+            shutdown.request_showdown()

@@ -2,23 +2,16 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING
 
 import HABApp
-from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
-from HABApp.core.internals import uses_item_registry
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.definitions.helpers.log_table import Table
 
 
 if TYPE_CHECKING:
     from HABApp.openhab.definitions.rest import ThingResp
-
-
-PING_CONFIG: Final = CONFIG.openhab.ping
-
-Items = uses_item_registry()
 
 
 class ThingOverviewPlugin(BaseConnectionPlugin[OpenhabConnection]):

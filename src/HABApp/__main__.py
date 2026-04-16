@@ -63,7 +63,7 @@ async def main() -> int | str:
 
             app = HABApp.runtime.Runtime()
 
-            tg.create_task(app.start(cfg_folder), name='HABApp Runtime')
+            tg.create_task(app.start(cfg_folder, shutdown), name='HABApp Runtime')
             tg.create_task(shutdown.wait_for_shutdown(), name='Wait for Shutdown')
 
     except *Exception as egroup:
