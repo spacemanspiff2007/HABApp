@@ -8,7 +8,7 @@ import HABApp
 import HABApp.openhab.events
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.files.file import HABAppFile
-from HABApp.core.lib import PendingFuture
+from HABApp.core.lib import DebouncedCall
 from HABApp.core.logger import HABAppError, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.openhab.connection.plugins.plugin_things.cfg_validator import InvalidItemNameError, validate_cfg
@@ -34,7 +34,7 @@ class TextualThingConfigPlugin(BaseConnectionPlugin[OpenhabConnection]):
     def __init__(self) -> None:
         super().__init__()
         self.created_items: dict[str, set[str]] = {}
-        self.do_cleanup = PendingFuture(self.clean_items, 120)
+        self.do_cleanup = DebouncedCall(self.clean_items, 120)
 
         self.watcher: AggregatingAsyncEventHandler | None = None
 
