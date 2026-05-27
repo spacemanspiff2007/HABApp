@@ -1,22 +1,19 @@
 from __future__ import annotations
 
-from asyncio import (
-    CancelledError,
-    Task,
-    create_task,
-    get_running_loop,
-    sleep,
-)
+from asyncio import CancelledError, Task, create_task, get_running_loop, sleep
 from inspect import iscoroutinefunction
 from typing import TYPE_CHECKING, Any, Final, Self
 
 from whenever import Instant, TimeDelta
+
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Coroutine
 
 
+@HABAPP_PROVIDER.register
 class DebouncedCallRegistry:
     __slots__ = ('_loop', '_objs', '_tasks', 'enabled')
 
@@ -143,7 +140,7 @@ class DebouncedCall(DebouncedCallBase):
         super().__init__(timeout, registry)
 
         # coro-func or a class that implements __call__ that is a coro-func
-        if not (iscoroutinefunction(func) or iscoroutinefunction(getattr(func, '__call__', None))):
+        if not (iscoroutinefunction(func) or iscoroutinefunction(getattr(func, '__call__', None))):  # noqa: B004
             msg = f'Function must be a coroutine function or callable returning an awaitable, is {type(func)}'
             raise TypeError(msg)
 

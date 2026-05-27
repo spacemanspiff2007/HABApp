@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from typing import Any
 
 import pytest
@@ -6,6 +7,7 @@ from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.internals import EventBus, EventBusListener, EventFilterBase
 from HABApp.core.internals.function_executor.factory import ExecutorFactory
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 class TestEventBus(EventBus):
@@ -32,9 +34,14 @@ class TestEventBus(EventBus):
 
 
 @pytest.fixture
-def eb():
+def eb() -> Generator[TestEventBus, Any, None]:
     eb = TestEventBus()
+
+    # ToDo: rework so we don't have to add it to HABAPP_PROVIDER
+    HABAPP_PROVIDER.add_object(eb, EventBus)
     yield eb
+    HABAPP_PROVIDER._created.pop(EventBus, None)
+
     eb.remove_all_listeners()
 
     for event in eb.errors:

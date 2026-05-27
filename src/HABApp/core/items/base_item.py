@@ -12,9 +12,8 @@ from HABApp.core.internals import (
     get_current_context,
 )
 from HABApp.core.internals.item_registry import ItemRegistryItem
-from HABApp.core.items.base_item_times import ChangedTime, ItemNoChangeWatch, ItemNoUpdateWatch, UpdatedTime
-from HABApp.core.items.tmp_data import add_tmp_data as _add_tmp_data
-from HABApp.core.items.tmp_data import restore_tmp_data as _restore_tmp_data
+from HABApp.core.items.base_item_times import ItemChangeTime, ItemTimeWatch, ItemUpdateTime
+from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.lib import InstantView
 from HABApp.core.provider import HABAPP_PROVIDER
 
@@ -43,8 +42,8 @@ class BaseItem(ItemRegistryItem):
         super().__init__(name)
 
         _now = Instant.now()
-        self._last_change: ChangedTime = ChangedTime(self._name, _now)
-        self._last_update: UpdatedTime = UpdatedTime(self._name, _now)
+        self._last_change: Final = ItemChangeTime(_now)
+        self._last_update: Final = ItemUpdateTime(_now)
 
     @property
     def last_change(self) -> InstantView:
@@ -66,25 +65,23 @@ class BaseItem(ItemRegistryItem):
             ret += f'{", " if ret else ""}{k}: {getattr(self, k)}'
         return f'<{self.__class__.__name__} {ret:s}>'
 
-    def watch_change(self, secs: HINT_POS_TIMEDELTA) -> ItemNoChangeWatch:
+    def watch_change(self, secs: HINT_POS_TIMEDELTA) -> ItemTimeWatch:
         """Generate an event if the item does not change for a certain period of time.
         Has to be called from inside a rule function.
 
-        :param secs: secs after which the event will occur, max 1 decimal digit for floats
+        :param secs: secs after which the event will occur
         :return: The watch obj which can be used to cancel the watch
         """
-        secs = round(get_pos_timedelta_secs(secs), 1)
-        return self._last_change.add_watch(secs)
+        return self._last_change.add_watch(self._name, get_pos_timedelta_secs(secs))
 
-    def watch_update(self, secs: HINT_POS_TIMEDELTA) -> ItemNoUpdateWatch:
+    def watch_update(self, secs: HINT_POS_TIMEDELTA) -> ItemTimeWatch:
         """Generate an event if the item does not receive and update for a certain period of time.
         Has to be called from inside a rule function.
 
-        :param secs: secs after which the event will occur, max 1 decimal digit for floats
+        :param secs: secs after which the event will occur
         :return: The watch obj which can be used to cancel the watch
         """
-        secs = round(get_pos_timedelta_secs(secs), 1)
-        return self._last_update.add_watch(secs)
+        return self._last_update.add_watch(self._name, get_pos_timedelta_secs(secs))
 
     def listen_event(self, callback: TYPE_EVENT_CALLBACK,
                      event_filter: EventFilterBase | None = None) -> EventBusListener:
@@ -103,9 +100,9 @@ class BaseItem(ItemRegistryItem):
     def _on_item_added(self) -> None:
         """This function gets automatically called when the item is added to the item registry
         """
-        _restore_tmp_data(self)
+        HABAPP_PROVIDER.get_existing(ItemTimesBackup).add_to_registry(self)
 
     def _on_item_removed(self) -> None:
         """This function gets automatically called when the item is removed from the item registry
         """
-        _add_tmp_data(self)
+        HABAPP_PROVIDER.get_existing(ItemTimesBackup).remove_from_registry(self)

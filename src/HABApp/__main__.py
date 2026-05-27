@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 
+import HABApp
 from HABApp.__cmd_args__ import find_config_folder, parse_args
 from HABApp.__debug_info__ import print_debug_info
 from HABApp.__splash_screen__ import show_screen
@@ -17,12 +18,8 @@ async def main() -> int | str:
 
     show_screen()
 
-    import HABApp.core.items.tmp_data
     from HABApp.config.models import ApplicationConfig
     from HABApp.core.provider import HABAPP_PROVIDER
-
-    # todo: fix this
-    HABApp.core.items.tmp_data.loop = loop
 
     @HABAPP_PROVIDER.register
     def __get_config() -> ApplicationConfig:

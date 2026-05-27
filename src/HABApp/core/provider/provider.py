@@ -250,7 +250,7 @@ class HabAppObjProvider:
 
     def add_object(self, obj: object, cls: type | None = None, *, override_factory: bool = False) -> None:
         """Temporarily add an object to the provider"""
-        if cls is not None:
+        if cls is None:
             cls = type(obj)
 
         if cls in self._created:

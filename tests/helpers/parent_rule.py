@@ -1,7 +1,7 @@
 import pytest
 
 import HABApp
-import HABApp.core.items.base_item_watch
+import HABApp.core.items.base_item_times
 from HABApp.core.internals import ContextProvidingObj, ExecutorFactory
 
 
@@ -22,6 +22,6 @@ def parent_rule(monkeypatch, eb, ir, sync_worker):
     monkeypatch.setattr(HABApp.core.internals, 'get_current_context', ret_dummy_rule_context)
     monkeypatch.setattr(HABApp.core.internals.context.get_context, 'get_current_context', ret_dummy_rule_context)
 
-    monkeypatch.setattr(HABApp.core.items.base_item_watch, 'get_current_context', ret_dummy_rule_context)
+    monkeypatch.setattr(HABApp.core.items.base_item_times, 'get_current_context', ret_dummy_rule_context)
 
     return rule

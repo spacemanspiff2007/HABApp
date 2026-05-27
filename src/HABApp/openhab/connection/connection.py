@@ -74,7 +74,6 @@ async def setup(
         LoadOpenhabItemsPlugin,
         LoadTransformationsPlugin,
         PingPlugin,
-        TextualThingConfigPlugin,
         ThingOverviewPlugin,
         WaitForPersistenceRestore,
         WaitForStartlevelPlugin,
@@ -104,7 +103,6 @@ async def setup(
     connection.register_plugin(LoadTransformationsPlugin(), 50)
     connection.register_plugin(PingPlugin(item_registry=item_registry, event_bus=event_bus), 100)
     connection.register_plugin(WaitForPersistenceRestore(item_registry=item_registry), 110)
-    connection.register_plugin(TextualThingConfigPlugin(), 120)
     connection.register_plugin(ThingOverviewPlugin(), 500_000)
     connection.register_plugin(BrokenLinksPlugin(item_registry=item_registry), 500_001)
 

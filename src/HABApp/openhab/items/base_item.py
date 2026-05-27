@@ -137,6 +137,3 @@ class OpenhabItem(BaseValueItem):
         return get_persistence_data(
             self._name, persistence, start_time, end_time
         )
-
-
-HINT_TYPE_OPENHAB_ITEM = type[OpenhabItem]

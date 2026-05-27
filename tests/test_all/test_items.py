@@ -5,6 +5,7 @@ import pytest
 from HABApp.core.errors import ItemNameNotOfTypeStrError, WrongItemTypeError
 from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseItem, BaseValueItem
+from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.provider import HabAppObjProvider
 from HABApp.mqtt import MqttInterface
 from HABApp.mqtt.items import MqttBaseItem, MqttPairItem
@@ -74,7 +75,10 @@ def params_get_create_item():
 
 
 def _setup_item(cls: type, monkeypatch: pytest.MonkeyPatch, ir: ItemRegistry) -> None:
-    provider_objs = {ItemRegistry: ir, MqttInterface: Mock(MqttInterface), EventBus: Mock(EventBus)}
+    provider_objs = {
+        ItemRegistry: ir, EventBus: Mock(EventBus), ItemTimesBackup: Mock(ItemTimesBackup),
+        MqttInterface: Mock(MqttInterface)
+    }
     provider_mock = Mock(HabAppObjProvider)
     provider_mock.get_existing = Mock(side_effect=provider_objs.__getitem__)
 
@@ -87,7 +91,7 @@ def _setup_item(cls: type, monkeypatch: pytest.MonkeyPatch, ir: ItemRegistry) ->
 
 
 @pytest.mark.parametrize(('cls', 'kwargs'), params_get_create_item())
-def test_get_create_item(cls: type[BaseValueItem], kwargs: dict, monkeypatch, ir) -> None:
+def test_get_create_item(cls: type[BaseValueItem], kwargs: dict, monkeypatch, ir, item_times_backup) -> None:
     _setup_item(cls, monkeypatch, ir)
 
     with pytest.raises(ItemNameNotOfTypeStrError):
@@ -107,7 +111,7 @@ def test_get_create_item(cls: type[BaseValueItem], kwargs: dict, monkeypatch, ir
 
 
 @pytest.mark.parametrize(('cls', 'kwargs'), params_item_init())
-def test_get_item(cls: type[BaseValueItem], kwargs: dict, monkeypatch, ir) -> None:
+def test_get_item(cls: type[BaseValueItem], kwargs: dict, monkeypatch, ir, item_times_backup) -> None:
     _setup_item(cls, monkeypatch, ir)
 
     with pytest.raises(ItemNameNotOfTypeStrError):

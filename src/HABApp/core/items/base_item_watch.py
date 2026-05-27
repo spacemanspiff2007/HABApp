@@ -1,65 +1,78 @@
 from __future__ import annotations
 
 import logging
-import typing
+from typing import TYPE_CHECKING, Final, override
 
-from HABApp.core.asyncio import run_func_from_async
-from HABApp.core.events import EventFilter, ItemNoChangeEvent, ItemNoUpdateEvent
-from HABApp.core.internals import (
-    AutoContextBoundObj,
-    ContextBoundEventBusListener,
-    get_current_context,
-    uses_post_event,
-)
-from HABApp.core.lib import PendingFuture
+from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent
+from HABApp.core.lib import DebouncedCallBase, DebouncedCallRegistry
 
 
-if typing.TYPE_CHECKING:
-    import HABApp
-    from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
+if TYPE_CHECKING:
+    from HABApp.core.internals import EventBus
 
 
 log = logging.getLogger('HABApp')
 
-post_event = uses_post_event()
+
+class DebouncedEventBase(DebouncedCallBase):
+    __slots__ = ('_eb', '_item', '_secs', '_watchers')
+
+    def __init__(self, timeout: float, item_name: str, registry: DebouncedCallRegistry, event_bus: EventBus) -> None:
+        super().__init__(timeout, registry)
+        self._eb: Final[EventBus] = event_bus
+        self._secs: Final[float] = timeout
+        self._item: Final[str] = item_name
+
+        self._watchers: int = 0
+
+    def log_desc(self) -> str:
+        return f'{self.event_cls().__name__}({self._item}, {self._secs}s)'
+
+    def _log_watchers(self) -> None:
+        log.debug(f'{self.log_desc():s} has now {self._watchers} watcher{"" if self._watchers == 1 else "s"}')
+
+    def watcher_increase(self) -> int:
+        self._watchers += 1
+        self._log_watchers()
+        return self._watchers
+
+    def watcher_decrease(self) -> int:
+        self._watchers -= 1
+        self._log_watchers()
+        return self._watchers
+
+    @override
+    def _repr_parts(self) -> str:
+        return f' item={self._item}'
+
+    @property
+    def seconds(self) -> float:
+        return self._secs
+
+    @property
+    def item(self) -> str:
+        return self._item
+
+    @staticmethod
+    def event_cls() -> type[object]:
+        raise NotImplementedError()
 
 
-class BaseWatch(AutoContextBoundObj):
-    EVENT: type[ItemNoUpdateEvent | ItemNoChangeEvent]
+class DebouncedNoUpdateEvent(DebouncedEventBase):
+    async def _run(self) -> None:
+        self._eb.post_event(self._item, ItemNoUpdateEvent(self._item, self._secs))
 
-    def __init__(self, name: str, secs: int | float) -> None:
-        super().__init__()
-        self.fut = PendingFuture(self._post_event, secs)
-        self.name: str = name
-
-    async def _post_event(self) -> None:
-        post_event(self.name, self.EVENT(self.name, self.fut.secs))
-
-    def __cancel_watch(self) -> None:
-        self.fut.cancel()
-        log.debug(f'Canceled {self.__class__.__name__} ({self.fut.secs}s) for {self.name}')
-
-    def cancel(self) -> None:
-        """Cancel the item watch"""
-        self._ctx_unlink()
-        run_func_from_async(self.__cancel_watch)
-
-    def listen_event(self, callback: TYPE_EVENT_CALLBACK) -> HABApp.core.base.EventBusListener:
-        """Listen to (only) the event that is emitted by this watcher"""
-        context = get_current_context()
-        return context.add_event_listener(
-            ContextBoundEventBusListener(
-                self.name,
-                context.executor_factory.create(callback, context=context),
-                EventFilter(self.EVENT, seconds=self.fut.secs),
-                parent_ctx=context
-            )
-        )
+    @override
+    @staticmethod
+    def event_cls() -> type[ItemNoUpdateEvent]:
+        return ItemNoUpdateEvent
 
 
-class ItemNoUpdateWatch(BaseWatch):
-    EVENT = ItemNoUpdateEvent
+class DebouncedNoChangeEvent(DebouncedEventBase):
+    async def _run(self) -> None:
+        self._eb.post_event(self._item, ItemNoChangeEvent(self._item, self._secs))
 
-
-class ItemNoChangeWatch(BaseWatch):
-    EVENT = ItemNoChangeEvent
+    @override
+    @staticmethod
+    def event_cls() -> type[ItemNoChangeEvent]:
+        return ItemNoChangeEvent

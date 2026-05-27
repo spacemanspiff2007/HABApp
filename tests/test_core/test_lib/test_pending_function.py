@@ -1,6 +1,4 @@
 import asyncio
-from collections.abc import AsyncGenerator
-from typing import Any
 
 import pytest
 from whenever import Instant, TimeDelta
@@ -13,7 +11,7 @@ async def dummy_coro() -> None:
 
 
 @pytest.fixture
-async def registry() -> AsyncGenerator[DebouncedCallRegistry, Any]:
+async def registry() -> DebouncedCallRegistry:
     r = DebouncedCallRegistry()
     yield r
     await r.shutdown()

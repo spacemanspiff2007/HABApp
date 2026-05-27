@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import traceback
+
 # noinspection PyProtectedMember
 from sys import _getframe as sys_get_frame
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
 from HABApp.core.errors import ContextNotFoundError, ContextNotSetError
 from HABApp.core.internals.context import Context, ContextBoundObj, ContextProvidingObj
@@ -19,7 +21,8 @@ def get_current_context(obj: ContextProvidingObj | None = None) -> HABApp.rule_c
     if obj is not None:
         return obj._habapp_ctx
 
-    frame: FrameType | None = sys_get_frame(1)
+    this_frame: Final = sys_get_frame(1)
+    frame: FrameType | None = this_frame
 
     while frame is not None:
 
@@ -32,7 +35,8 @@ def get_current_context(obj: ContextProvidingObj | None = None) -> HABApp.rule_c
 
         frame = frame.f_back
 
-    raise ContextNotFoundError()
+    msg = f'No context found!:\n{"".join(traceback.format_stack(this_frame))}'
+    raise ContextNotFoundError(msg)
 
 
 class AutoContextBoundObj(ContextBoundObj):

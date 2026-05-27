@@ -8,10 +8,12 @@ from HABApp.core.errors import ItemAlreadyExistsError, ItemNotFoundException
 from HABApp.core.internals.item_registry import ItemRegistryItem
 
 
-log = logging.getLogger(TOPIC_ITEMS)
+log: Final = logging.getLogger(TOPIC_ITEMS)
 
 
 class ItemRegistry:
+    __slots__ = ('_items', )
+
     def __init__(self) -> None:
         self._items: Final[dict[str, ItemRegistryItem]] = {}
 

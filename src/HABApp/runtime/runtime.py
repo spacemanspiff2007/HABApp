@@ -16,6 +16,7 @@ from HABApp.core.connections import ConnectionManager
 from HABApp.core.files import FileManager
 from HABApp.core.internals import setup_internals
 from HABApp.core.internals.proxy import ConstProxyObj
+from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.shutdown import ShutdownInfo
 from HABApp.core.wrapper import process_exception
@@ -47,11 +48,12 @@ class Runtime:
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
-            # replace proxy objects
+            await HABAPP_PROVIDER.get(ItemTimesBackup)
             ir = await HABAPP_PROVIDER.get(HABApp.core.internals.ItemRegistry)
             eb = await HABAPP_PROVIDER.get(HABApp.core.internals.EventBus)
-            file_manager = await HABAPP_PROVIDER.get(HABApp.core.files.FileManager)
+            await HABAPP_PROVIDER.get(HABApp.core.files.FileManager)
 
+            # replace proxy objects
             setup_internals(ir, eb)
             assert isinstance(HABApp.core.Items, ConstProxyObj)
             HABApp.core.Items = ir

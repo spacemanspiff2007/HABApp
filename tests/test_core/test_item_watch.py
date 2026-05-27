@@ -1,5 +1,8 @@
 import asyncio
+import logging
+from collections.abc import AsyncGenerator
 from datetime import timedelta
+from typing import Any
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -7,30 +10,54 @@ import pytest
 from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent
 from HABApp.core.internals import EventBus
 from HABApp.core.items import Item
+from HABApp.core.lib import DebouncedCallRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers import LogCollector
 from tests.helpers.parent_rule import DummyRule
 
 
-async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector) -> None:
+@pytest.fixture
+async def registry() -> AsyncGenerator[DebouncedCallRegistry, Any]:
+    r = DebouncedCallRegistry()
+
+    # ToDo: rework so we don't have to add it to HABAPP_PROVIDER
+    if HABAPP_PROVIDER.has_factory(DebouncedCallRegistry):
+        HABAPP_PROVIDER.remove_factory(DebouncedCallRegistry)
+    HABAPP_PROVIDER.add_object(r, DebouncedCallRegistry)
+    yield r
+    HABAPP_PROVIDER._created.pop(DebouncedCallRegistry, None)
+    await r.shutdown()
+
+
+async def test_multiple_add(parent_rule: DummyRule, test_logs: LogCollector, registry) -> None:
+    test_logs.set_min_level(logging.DEBUG)
 
     i = Item('test', event_bus=Mock(EventBus))
     w1 = i.watch_change(5)
     w2 = i.watch_change(5)
 
-    assert w1 is w2
-    w1.fut.cancel()
+    f, = i._last_change._factories
+    assert f._watchers == 2
 
-    w2 = i.watch_change(5)
-    assert w1 is not w2
-    w2.fut.cancel()
+    w1.cancel()
+    assert f._watchers == 1
 
-    test_logs.add_ignored('HABApp', 'WARNING', 'Watcher ItemNoChangeWatch (5.0s) for test has already been created')
+    w2.cancel()
+    assert not i._last_change._factories
 
-    await asyncio.sleep(0.01)
+    assert test_logs.update().get_messages() == [
+        '   [HABApp] | DEBUG | Created ItemNoChangeEvent(test, 5.0s)',
+        '   [HABApp] | DEBUG | ItemNoChangeEvent(test, 5.0s) has now 1 watcher',
+        '   [HABApp] | DEBUG | ItemNoChangeEvent(test, 5.0s) has now 2 watchers',
+        '   [HABApp] | DEBUG | ItemNoChangeEvent(test, 5.0s) has now 1 watcher',
+        '   [HABApp] | DEBUG | ItemNoChangeEvent(test, 5.0s) has now 0 watchers',
+        '   [HABApp] | DEBUG | Removed ItemNoChangeEvent(test, 5.0s)',
+    ]
+    test_logs.caplog.clear()
 
 
 @pytest.mark.parametrize('method', ('watch_update', 'watch_change'))
-async def test_watch_update(parent_rule: DummyRule, sync_worker, caplog, method) -> None:
+async def test_watch_update(parent_rule: DummyRule, sync_worker, caplog, method, registry) -> None:
     caplog.set_level(0)
     cb = MagicMock()
     cb.__name__ = 'MockName'
