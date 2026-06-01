@@ -12,7 +12,6 @@ from .out import (
 from .overview_broken_links import BrokenLinksPlugin
 from .overview_things import ThingOverviewPlugin
 from .ping import PingPlugin
-from .plugin_things import TextualThingConfigPlugin
 from .wait_for_restore import WaitForPersistenceRestore
 from .wait_for_startlevel import WaitForStartlevelPlugin
 from .websockets import WebsocketPlugin
