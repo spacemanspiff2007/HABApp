@@ -67,7 +67,7 @@ class ItemTimesBackup(DebouncedCallBase):
             w = HABAppWarning(logging.getLogger('HABApp.Item'))
             hrs = diff.in_hours()
             w.add(
-                f'Item {name} has been deleted {hrs:.0}h ago even though it has item watchers. '
+                f'Item {name} has been deleted {hrs:.0f}h ago even though it has item watchers. '
                 f'If it will be added again the watchers have to be created again, too!'
             )
             w.dump()

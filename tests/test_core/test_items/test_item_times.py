@@ -4,13 +4,14 @@ from typing import Any
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from whenever import Instant
+from whenever import Instant, TimeDelta
 
 import HABApp
 from HABApp.core.events import NoEventFilter
 from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import Item
 from HABApp.core.items.base_item_times import ItemChangeTime, ItemTimeWatch, ItemUpdateTime
+from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.lib import DebouncedCallRegistry
 from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers import TestEventBus
@@ -59,20 +60,30 @@ async def registry() -> AsyncGenerator[DebouncedCallRegistry, Any]:
     await r.shutdown()
 
 
+@pytest.fixture
+def item_times_backup(registry) -> Generator[ItemTimesBackup, Any, None]:
+    b = ItemTimesBackup(registry)
+    if HABAPP_PROVIDER.has_factory(ItemTimesBackup):
+        HABAPP_PROVIDER.remove_factory(ItemTimesBackup)
+    HABAPP_PROVIDER.add_object(b, ItemTimesBackup)
+    yield b
+    HABAPP_PROVIDER._created.pop(ItemTimesBackup, None)
+
+
 async def test_cancel_running(parent_rule, update_time_1) -> None:
     u, w1, w2 = update_time_1
 
-    u.set(Instant.now())
+    now = Instant.now()
+    u.set(now)
 
-    await asyncio.sleep(1.1)
-    assert w1._task is None
-    assert not w2._task.done()
+    await asyncio.sleep(0.05)
+
+    f1, f2 = u._factories
 
     w2.cancel()
     await asyncio.sleep(0.05)
-    u.set(Instant.now())
-    await asyncio.sleep(0.05)
-    assert w2 not in u.tasks
+
+    f1, = u._factories
 
 
 async def test_event_update(parent_rule, update_time_1: ItemUpdateTime, sync_worker, eb: EventBus) -> None:
@@ -138,68 +149,59 @@ async def test_event_change(parent_rule, update_time_2: ItemChangeTime, sync_wor
     await asyncio.sleep(0.01)
 
 
-async def test_watcher_change_restore(parent_rule, ir: ItemRegistry) -> None:
+@pytest.mark.parametrize(
+    ('func_name', 'obj_name'), (('watch_change', '_last_change'), ('watch_update', '_last_update'), )
+)
+async def test_watcher_restore(func_name, obj_name,
+                               parent_rule, ir: ItemRegistry, item_times_backup: ItemTimesBackup) -> None:
+
     name = 'test_save_restore'
 
     item_a = Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_a)
-    watcher = item_a.watch_change(1)
+
+    # calls item_a.watch_change(1)
+    watcher = getattr(item_a, func_name)(1)
 
     # remove item
-    assert name not in tmp_data
+    assert name not in item_times_backup._data
     ir.pop_item(name)
-    assert name in tmp_data
+    assert name in item_times_backup._data
 
+    # adding restores the watcher
     item_b = Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_b)
 
-    assert item_b._last_change.tasks == [watcher]
-    ir.pop_item(name)
-
-
-async def test_watcher_update_restore(parent_rule, ir: ItemRegistry) -> None:
-    name = 'test_save_restore'
-
-    item_a = Item(name, event_bus=Mock(EventBus))
-    ir.add_item(item_a)
-    watcher = item_a.watch_update(1)
-
-    # remove item
-    assert name not in tmp_data
-    ir.pop_item(name)
-    assert name in tmp_data
-
-    item_b = Item(name, event_bus=Mock(EventBus))
-    ir.add_item(item_b)
-
-    assert item_b._last_update.tasks == [watcher]
-    ir.pop_item(name)
+    assert getattr(item_b, obj_name)._factories == (watcher._event_factory, )
 
 
 @pytest.mark.ignore_log_warnings
-async def test_watcher_update_cleanup(monkeypatch, parent_rule, update_time_2: ItemChangeTime,
-                                      sync_worker, eb: TestEventBus, ir: ItemRegistry) -> None:
-    text_warning = ''
+async def test_watcher_update_cleanup(
+        parent_rule, update_time_2: ItemChangeTime, eb: TestEventBus, ir: ItemRegistry,
+        item_times_backup: ItemTimesBackup) -> None:
 
-    def get_log(event) -> None:
+    item_times_backup._timeout = TimeDelta(seconds=0.7)
+
+    text_warning: str = ''
+
+    def get_log(event: str) -> None:
         nonlocal text_warning
-        text_warning = event
+        text_warning += event
 
     eb.listen_events(HABApp.core.const.topics.TOPIC_WARNINGS, get_log, NoEventFilter())
 
     name = 'test_save_restore'
-    item_a = HABApp.core.items.Item(name, event_bus=Mock(EventBus))
+    item_a = Item(name, event_bus=Mock(EventBus))
     ir.add_item(item_a)
     item_a.watch_update(1)
+    await asyncio.sleep(0.01)
 
-    # remove item
-    assert name not in tmp_data
     ir.pop_item(name)
-    assert name in tmp_data
 
     # ensure that the tmp data gets deleted
     await asyncio.sleep(0.8)
-    assert name not in tmp_data
 
-    assert text_warning == 'Item test_save_restore has been deleted 0.7s ago even though it has item watchers.' \
-                           ' If it will be added again the watchers have to be created again, too!'
+    assert text_warning == (
+        'Item test_save_restore has been deleted 0h ago even though it has item watchers. '
+        'If it will be added again the watchers have to be created again, too!'
+    )

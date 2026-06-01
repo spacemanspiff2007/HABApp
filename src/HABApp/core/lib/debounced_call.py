@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import CancelledError, Task, create_task, get_running_loop, sleep
+from asyncio import CancelledError, Task, create_task, sleep
 from inspect import iscoroutinefunction
 from typing import TYPE_CHECKING, Any, Final, Self
 
@@ -15,10 +15,9 @@ if TYPE_CHECKING:
 
 @HABAPP_PROVIDER.register
 class DebouncedCallRegistry:
-    __slots__ = ('_loop', '_objs', '_tasks', 'enabled')
+    __slots__ = ('_objs', '_tasks', 'enabled')
 
     def __init__(self) -> None:
-        self._loop: Final = get_running_loop()
         self._tasks: Final[set[Task]] = set()
         self._objs: tuple[DebouncedCallBase, ...] = ()
 
