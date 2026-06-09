@@ -18,7 +18,7 @@ default_logger = logging.getLogger('HABApp.Worker')
 
 
 class FunctionExecutorBase[**P, R](ContextProvidingObj):
-    __slots__ = ('_event_bus', '_factory', 'log', 'name')
+    __slots__ = ('_factory', 'log', 'name')
 
     def __init__(self, func: Callable[P, R], *,
                  name: str | None = None, logger: logging.Logger | None = None,
