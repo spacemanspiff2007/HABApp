@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from easyconfig.models import BaseModel, Field
 from pydantic import AnyHttpUrl, ByteSize, TypeAdapter, field_validator
@@ -34,7 +34,7 @@ class General(BaseModel):
     )
 
 
-class EventTypeFilterEnum(str, Enum):
+class EventTypeFilterEnum(StrEnum):
     OFF = 'OFF'
     AUTO = 'AUTO'
     CONFIG = 'CONFIG'

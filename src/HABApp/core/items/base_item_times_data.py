@@ -27,6 +27,7 @@ class ItemTimesBackup(DebouncedCallBase):
             dict[str, tuple[Instant, tuple[DebouncedEventBase, ...], tuple[DebouncedEventBase, ...]]]
         ] = {}
 
+    # noinspection PyProtectedMember
     def _backup(self, item: BaseItem) -> None:
         f_update = item._last_update._factories
         f_change = item._last_change._factories
@@ -37,6 +38,7 @@ class ItemTimesBackup(DebouncedCallBase):
             f.cancel()
         self.reset()
 
+    # noinspection PyProtectedMember
     def _restore(self, item: BaseItem) -> None:
         if (objs := self._data.get(item.name)) is None:
             return None
