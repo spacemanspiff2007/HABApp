@@ -13,6 +13,7 @@ from HABApp.core.items import Item
 from HABApp.core.items.base_item_times import ItemChangeTime, ItemTimeWatch, ItemUpdateTime
 from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.lib import DebouncedCallRegistry
+from HABApp.core.lib.asyncio.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers import TestEventBus
 
@@ -49,7 +50,7 @@ def update_time_2() -> Generator[tuple[ItemChangeTime, ItemTimeWatch, ItemTimeWa
 
 @pytest.fixture(autouse=True)
 async def registry() -> AsyncGenerator[DebouncedCallRegistry, Any]:
-    r = DebouncedCallRegistry()
+    r = DebouncedCallRegistry(AsyncioProvider())
 
     # ToDo: rework so we don't have to add it to HABAPP_PROVIDER
     if HABAPP_PROVIDER.has_factory(DebouncedCallRegistry):

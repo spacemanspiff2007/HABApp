@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable, Coroutine
 from typing import Any, Final
 
 from HABApp.core.lib import SingleTask
 
 
 class PluginTask(SingleTask):
-    def __init__(self, coro: Callable[[], Awaitable[Any]], name: str | None,
+    def __init__(self, coro: Callable[[], Coroutine[Any, Any, Any]], name: str | None,
                  logger: logging.Logger | None,
                  exception_handler: Callable[[Exception, Callable | str | None], Any]) -> None:
         super().__init__(coro, name)

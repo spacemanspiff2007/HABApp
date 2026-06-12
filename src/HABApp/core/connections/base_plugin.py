@@ -6,7 +6,7 @@ from HABApp.core.lib import SingleTask
 
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
+    from collections.abc import Callable, Coroutine
 
     from HABApp.core.connections.base_connection import BaseConnection
     from HABApp.core.connections.plugin_callback import PluginCallbackHandler
@@ -30,7 +30,7 @@ class BaseConnectionPlugin[T: BaseConnection]:
 
 
 class BaseConnectionPluginConnectedTask[T: BaseConnection](BaseConnectionPlugin[T]):
-    def __init__(self, task_coro: Callable[[], Awaitable[Any]],
+    def __init__(self, task_coro: Callable[[], Coroutine[Any, Any, Any]],
                  task_name: str, name: str | None = None) -> None:
         super().__init__(name)
         self.task: Final = SingleTask(task_coro, name=task_name)

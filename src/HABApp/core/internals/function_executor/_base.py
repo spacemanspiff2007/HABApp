@@ -14,7 +14,8 @@ if TYPE_CHECKING:
 
     from HABApp.core.internals.function_executor.factory import ExecutorFactory
 
-default_logger = logging.getLogger('HABApp.Worker')
+
+default_logger: Final = logging.getLogger('HABApp.Worker')
 
 
 class FunctionExecutorBase[**P, R](ContextProvidingObj):

@@ -11,6 +11,7 @@ from HABApp.core.events import ItemNoChangeEvent, ItemNoUpdateEvent
 from HABApp.core.internals import EventBus
 from HABApp.core.items import Item
 from HABApp.core.lib import DebouncedCallRegistry
+from HABApp.core.lib.asyncio.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers import LogCollector
 from tests.helpers.parent_rule import DummyRule
@@ -18,7 +19,7 @@ from tests.helpers.parent_rule import DummyRule
 
 @pytest.fixture
 async def registry() -> AsyncGenerator[DebouncedCallRegistry, Any]:
-    r = DebouncedCallRegistry()
+    r = DebouncedCallRegistry(AsyncioProvider())
 
     # ToDo: rework so we don't have to add it to HABAPP_PROVIDER
     if HABAPP_PROVIDER.has_factory(DebouncedCallRegistry):

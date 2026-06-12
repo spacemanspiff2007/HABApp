@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import CancelledError, Task, create_task, sleep
+from asyncio import CancelledError, Task
 from inspect import iscoroutinefunction
 from typing import TYPE_CHECKING, Any, Final, Self
 
@@ -10,21 +10,23 @@ from HABApp.core.provider import HABAPP_PROVIDER
 
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable, Coroutine
+    from collections.abc import Awaitable, Callable
+
+    from HABApp.core.lib.asyncio.asyncio import AsyncioProvider
 
 
 @HABAPP_PROVIDER.register
 class DebouncedCallRegistry:
-    __slots__ = ('_objs', '_tasks', 'enabled')
+    __slots__ = ('_objs', 'asyncio', 'enabled')
 
-    def __init__(self) -> None:
-        self._tasks: Final[set[Task]] = set()
+    def __init__(self, provider: AsyncioProvider) -> None:
+        self.asyncio: Final[AsyncioProvider] = provider
         self._objs: tuple[DebouncedCallBase, ...] = ()
 
         self.enabled: bool = True
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} tasks={len(self._tasks)} objs={len(self._objs)}>'
+        return f'<{self.__class__.__name__} objs={len(self._objs)}>'
 
     def __contains__(self, item: DebouncedCallBase) -> bool:
         return item in self._objs
@@ -38,16 +40,6 @@ class DebouncedCallRegistry:
         self._objs = tuple(o for o in self._objs if o is not obj)
         return self
 
-    async def sleep_until(self, target: Instant) -> None:
-        delay: Final[float] = (target - Instant.now()).in_seconds()
-        await sleep(delay)
-
-    def create_task[T](self, coro: Coroutine[Any, Any, T]) -> Task[T]:
-        task: Final = create_task(coro)
-        self._tasks.add(task)
-        task.add_done_callback(self._tasks.discard)
-        return task
-
     async def shutdown(self) -> None:
         self.enabled = False
 
@@ -55,9 +47,11 @@ class DebouncedCallRegistry:
             obj.cancel()
 
         # wait till tasks are done
-        while self._tasks:
+        for obj in self._objs:
             try:  # noqa: SIM105
-                await next(iter(self._tasks))
+                # noinspection PyProtectedMember
+                if (task := obj._task) is not None:
+                    await task
             except CancelledError:
                 pass
 
@@ -110,7 +104,7 @@ class DebouncedCallBase:
         if not self._registry.enabled:
             return None
 
-        self._task = task = self._registry.create_task(self._countdown_task())
+        self._task = task = self._registry.asyncio.create_task(self._countdown_task())
         task.add_done_callback(self._task_done)
         return None
 
@@ -119,9 +113,9 @@ class DebouncedCallBase:
             self._task = None
 
     async def _countdown_task(self) -> None:
-        reg: Final = self._registry
+        reg: Final = self._registry.asyncio
 
-        await reg.sleep_until(self._due_at)
+        await reg.sleep(self._due_at)
 
         # the run logic should always be executed completely,
         # that's why we shield it from cancellation by running it as a new task

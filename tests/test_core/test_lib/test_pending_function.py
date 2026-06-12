@@ -4,6 +4,7 @@ import pytest
 from whenever import Instant, TimeDelta
 
 from HABApp.core.lib import DebouncedCall, DebouncedCallRegistry
+from HABApp.core.lib.asyncio.asyncio import AsyncioProvider
 
 
 async def dummy_coro() -> None:
@@ -12,7 +13,7 @@ async def dummy_coro() -> None:
 
 @pytest.fixture
 async def registry() -> DebouncedCallRegistry:
-    r = DebouncedCallRegistry()
+    r = DebouncedCallRegistry(AsyncioProvider())
     yield r
     await r.shutdown()
 
@@ -161,7 +162,7 @@ class TestDebouncedCallRegistry:
     async def test_sleep_negative(self, registry: DebouncedCallRegistry) -> None:
         past = Instant.now().subtract(hours=1)
         # Should complete without hanging even though target is in the past
-        await asyncio.wait_for(registry.sleep_until(past), timeout=0.1)
+        await asyncio.wait_for(registry.asyncio.sleep(past), timeout=0.1)
 
     async def test_repr(self, registry: DebouncedCallRegistry) -> None:
-        assert repr(registry) == '<DebouncedCallRegistry tasks=0 objs=0>'
+        assert repr(registry) == '<DebouncedCallRegistry objs=0>'
