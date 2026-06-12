@@ -13,8 +13,8 @@ class SingleTask:
         if name is None:
             name = f'{self.__class__.__name__}_{coro.__name__}'
 
-        self.coro: Final = coro
-        self.name: Final = name
+        self.coro: Final[Callable[[], Coroutine[Any, Any, Any]]] = coro
+        self.name: Final[str] = name
         self.task: Task | None = None
 
     @property
