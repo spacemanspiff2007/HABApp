@@ -9,7 +9,7 @@ import HABApp.openhab.events
 from HABApp.config import CONFIG
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
-from HABApp.core.lib import SingleTask
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.connection import OpenhabConnection
 
@@ -21,11 +21,12 @@ log = logging.getLogger('HABApp.openhab.items')
 
 class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None, *, event_bus: EventBus, item_registry: ItemRegistry) -> None:
+    def __init__(self, name: str | None = None, *,
+                 event_bus: EventBus, item_registry: ItemRegistry, asyncio_provider: AsyncioProvider) -> None:
         super().__init__(name)
         self._event_bus: Final = event_bus
         self._item_registry: Final = item_registry
-        self.task: Final = SingleTask(self.ping_worker, 'OhQueueWorker')
+        self.task: Final = asyncio_provider.create_single_task(self.ping_worker, 'OhQueueWorker')
 
         self.sent_value: float | None = None
         self.next_value: float | None = None

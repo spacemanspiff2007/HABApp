@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Final
 
-from HABApp.core.lib import SingleTask
-
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
     from HABApp.core.connections.base_connection import BaseConnection
     from HABApp.core.connections.plugin_callback import PluginCallbackHandler
+    from HABApp.core.lib.asyncio import AsyncioProvider
 
 
 class BaseConnectionPlugin[T: BaseConnection]:
@@ -30,10 +29,10 @@ class BaseConnectionPlugin[T: BaseConnection]:
 
 
 class BaseConnectionPluginConnectedTask[T: BaseConnection](BaseConnectionPlugin[T]):
-    def __init__(self, task_coro: Callable[[], Coroutine[Any, Any, Any]],
-                 task_name: str, name: str | None = None) -> None:
+    def __init__(self, task_coro: Callable[[], Coroutine[Any, Any, Any]], *,
+                 task_name: str, name: str | None = None, asyncio_provider: AsyncioProvider) -> None:
         super().__init__(name)
-        self.task: Final = SingleTask(task_coro, name=task_name)
+        self.task: Final = asyncio_provider.create_single_task(task_coro, name=task_name)
 
     async def on_connected(self) -> None:
         self.task.start()

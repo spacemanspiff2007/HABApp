@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
     from HABApp.config import ApplicationConfig
     from HABApp.core.internals import EventBus, ItemRegistry
+    from HABApp.core.lib.asyncio import AsyncioProvider
 
 
 log = logging.getLogger('HABApp.mqtt.connection')
@@ -33,8 +34,8 @@ type MqttContextType = Client | None
 
 
 @HABAPP_PROVIDER.register
-async def setup(connection_manager: ConnectionManager, config: ApplicationConfig, event_bus: EventBus,
-                item_registry: ItemRegistry,
+async def setup(connection_manager: ConnectionManager, config: ApplicationConfig,
+                event_bus: EventBus, item_registry: ItemRegistry, asyncio_provider: AsyncioProvider,
                 ) -> AsyncGenerator[tuple[MqttConnection, MqttAsyncInterface, MqttInterface], Any]:
 
     pub_cfg: Final = config.mqtt.general
@@ -48,7 +49,7 @@ async def setup(connection_manager: ConnectionManager, config: ApplicationConfig
     async_interface: Final = MqttAsyncInterface(config.mqtt, publish_handler.queue, subscribe_handler)
     sync_interface: Final = MqttInterface(async_interface)
 
-    connection = connection_manager.add(MqttConnection())
+    connection = connection_manager.add(MqttConnection(asyncio_provider))
     # config changes should trigger a reconnect
     config.mqtt.connection.subscribe_for_changes(connection.status_configuration_changed)
 

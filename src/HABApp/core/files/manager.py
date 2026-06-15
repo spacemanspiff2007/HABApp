@@ -14,7 +14,6 @@ from HABApp.core.const.topics import TOPIC_FILES
 from HABApp.core.files.file import HABAppFile
 from HABApp.core.files.file_properties import get_file_properties
 from HABApp.core.files.name_builder import FileNameBuilder
-from HABApp.core.lib import SingleTask
 from HABApp.core.provider import HABAPP_PROVIDER
 
 
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
     from HABApp.core.events.habapp_events import RequestFileLoadEvent, RequestFileUnloadEvent
     from HABApp.core.files.watcher import HABAppFileWatcher
     from HABApp.core.internals import EventBus, ExecutorFactory
+    from HABApp.core.lib.asyncio import AsyncioProvider
 
 log = logging.getLogger('HABApp.files')
 
@@ -57,7 +57,7 @@ class FileTypeHandler:
 
 
 class FileManager:
-    def __init__(self, watcher: HABAppFileWatcher, event_bus: EventBus) -> None:
+    def __init__(self, watcher: HABAppFileWatcher, event_bus: EventBus, asyncio_provider: AsyncioProvider) -> None:
         self._watcher: Final = watcher
         self._event_bus: Final = event_bus
 
@@ -70,7 +70,7 @@ class FileManager:
         self._file_names: Final = FileNameBuilder()
         self._file_handlers: tuple[FileTypeHandler, ...] = ()
 
-        self._task: Final = SingleTask(self._load_file_task, name='file load worker')
+        self._task: Final = asyncio_provider.create_single_task(self._load_file_task, name='file load worker')
 
         self._event_received: bool = False
 

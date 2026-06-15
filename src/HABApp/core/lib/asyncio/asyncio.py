@@ -1,28 +1,30 @@
 from __future__ import annotations
 
 import logging
-from asyncio import Task
+from asyncio import AbstractEventLoop, Task, get_running_loop
 from asyncio import create_task as _create_task
 from asyncio import sleep as _sleep
 from typing import TYPE_CHECKING, Any, Final, Self
 
 from whenever import Instant, TimeDelta
 
+from HABApp.core.lib.asyncio.single_task import SingleTask
 from HABApp.core.provider import HABAPP_PROVIDER
 
 
 if TYPE_CHECKING:
-    from collections.abc import Coroutine
+    from collections.abc import Callable, Coroutine
     from types import TracebackType
 
 
 @HABAPP_PROVIDER.register
 class AsyncioProvider:
-    __slots__ = ('_log', '_tasks')
+    __slots__ = ('_log', '_tasks', 'loop')
 
-    def __init__(self) -> None:
+    def __init__(self, *, loop: AbstractEventLoop | None = None) -> None:
         self._tasks: Final[set[Task]] = set()
-        self._log: Final = logging.getLogger('HABApp.tasks')
+        self._log: Final = logging.getLogger('HABApp.asyncio')
+        self.loop: Final[AbstractEventLoop] = loop if loop is not None else get_running_loop()
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} tasks={len(self._tasks)}>'
@@ -75,3 +77,6 @@ class AsyncioProvider:
             self._log.warning('Some tasks are still running:')
             for task in self._tasks:
                 self._log.warning(f' - {task.get_name():s} done={task.done()}')
+
+    def create_single_task(self, coro: Callable[[], Coroutine[Any, Any, Any]], name: str | None = None) -> SingleTask:
+        return SingleTask(coro, name=name, asyncio=self)

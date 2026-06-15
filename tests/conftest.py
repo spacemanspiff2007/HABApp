@@ -12,6 +12,7 @@ import HABApp
 from HABApp.core.files import FileManager
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.items.base_item_times_data import ItemTimesBackup
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers import LogCollector, eb, get_dummy_cfg, params, parent_rule, sync_worker
 from tests.helpers.log.log_matcher import AsyncDebugWarningMatcher, LogLevelMatcher
@@ -78,9 +79,14 @@ def ir() -> Generator[ItemRegistry, Any, None]:
     HABAPP_PROVIDER._created.pop(ItemRegistry, None)
 
 
+@pytest.fixture(autouse=True)
+async def asyncio_provider():
+    return AsyncioProvider()
+
+
 @pytest.fixture
-def file_manager(eb: EventBus):
-    return FileManager(None, eb)
+def file_manager(eb: EventBus, asyncio_provider: AsyncioProvider) -> FileManager:
+    return FileManager(None, eb, asyncio_provider)
 
 
 @pytest.fixture(autouse=True)

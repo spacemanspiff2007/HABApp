@@ -11,6 +11,7 @@ from HABApp.core.connections import (
     ConnectionManager,
     ConnectionStateToEventBusPlugin,
 )
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
 
 
@@ -63,7 +64,7 @@ type CONTEXT_TYPE = OpenhabContext | None
 @HABAPP_PROVIDER.register
 async def setup(
         connection_manager: ConnectionManager, config: ApplicationConfig,
-        event_bus: EventBus, item_registry: ItemRegistry,
+        event_bus: EventBus, item_registry: ItemRegistry, asyncio_provider: AsyncioProvider,
         item_factory: OhItemFactory, registry_handler: OhItemRegistryHandler, event_handler: OhEventHandler
 ) -> AsyncGenerator[OpenhabConnection, Any]:
 
@@ -92,7 +93,9 @@ async def setup(
         ),
         20
     )
-    connection.register_plugin(WebsocketPlugin(event_handler=event_handler), 30)
+    connection.register_plugin(
+        WebsocketPlugin(event_handler=event_handler, asyncio_provider=asyncio_provider), 30
+    )
     connection.register_plugin(
         LoadOpenhabItemsPlugin(
             'SyncItemsAndThings',
@@ -101,7 +104,9 @@ async def setup(
         40
     )
     connection.register_plugin(LoadTransformationsPlugin(), 50)
-    connection.register_plugin(PingPlugin(item_registry=item_registry, event_bus=event_bus), 100)
+    connection.register_plugin(
+        PingPlugin(item_registry=item_registry, event_bus=event_bus, asyncio_provider=asyncio_provider), 100
+    )
     connection.register_plugin(WaitForPersistenceRestore(item_registry=item_registry), 110)
     connection.register_plugin(ThingOverviewPlugin(), 500_000)
     connection.register_plugin(BrokenLinksPlugin(item_registry=item_registry), 500_001)

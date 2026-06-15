@@ -11,7 +11,7 @@ from pydantic import ValidationError
 import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.const.log import TOPIC_EVENTS
-from HABApp.core.lib import SingleTask
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.definitions.helpers import get_discriminator_values_from_union
@@ -32,10 +32,11 @@ class WebSocketClosedError(ClientError):
 
 class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None, *, event_handler: OhEventHandler) -> None:
+    def __init__(self, name: str | None = None, *,
+                 event_handler: OhEventHandler, asyncio_provider: AsyncioProvider) -> None:
         super().__init__(name)
         self._event_handler: Final = event_handler
-        self.task: Final = SingleTask(self.websockets_task, name='WebsocketsEventsTask')
+        self.task: Final = asyncio_provider.create_single_task(self.websockets_task, name='WebsocketsEventsTask')
 
         self._websocket: ClientWebSocketResponse | None = None
         self.queue: Queue[BaseOutEvent] | None = None

@@ -1,10 +1,11 @@
 import logging
+from typing import Final
 
 import HABApp
 from HABApp.core.const.topics import TOPIC_FILES
 from HABApp.core.events import EventFilter
 from HABApp.core.events.habapp_events import RequestFileLoadEvent
-from HABApp.core.lib import SingleTask
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.shutdown import ShutdownInfo
 from HABApp.core.wrapper import ignore_exception
@@ -24,7 +25,7 @@ class TestRunnerRule(HABApp.Rule):
         self.countdown = self.run.countdown(3, self._files_const)
         self.countdown.reset()
 
-        self.task = SingleTask(self._run_tests)
+        self.task: Final = HABAPP_PROVIDER.get_existing(AsyncioProvider).create_single_task(self._run_tests)
 
     async def _file_event(self, event) -> None:
         self.countdown.reset()

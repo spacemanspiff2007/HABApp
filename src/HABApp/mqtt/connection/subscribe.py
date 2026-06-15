@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
-from HABApp.core.lib import SingleTask
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.mqtt.connection.connection import MqttPlugin
 
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class SubscriptionHandler(MqttPlugin):
-    def __init__(self, subscribe_cfg: SubscribeConfig) -> None:
+    def __init__(self, subscribe_cfg: SubscribeConfig, asyncio_provider: AsyncioProvider) -> None:
         super().__init__()
 
         self._config: Final = subscribe_cfg
@@ -21,7 +21,7 @@ class SubscriptionHandler(MqttPlugin):
         self._subs_target: Final[dict[str, QOS]] = {}
         self._subscribed_to: Final[dict[str, QOS]] = {}
 
-        self._sub_task: Final = SingleTask(self._apply_subscriptions, 'ApplySubscriptionsTask')
+        self._sub_task: Final = asyncio_provider.create_single_task(self._apply_subscriptions, 'ApplySubscriptionsTask')
 
     async def on_connected(self) -> None:
         # Since we are freshly connected we have not yet subscribed to anything

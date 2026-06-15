@@ -6,6 +6,7 @@ from aiomqtt import Client, MqttError
 from HABApp.core.connections import BaseConnection
 from HABApp.core.connections.base_connection import AlreadyHandledException
 from HABApp.core.connections.base_plugin import BaseConnectionPlugin, BaseConnectionPluginConnectedTask
+from HABApp.core.lib.asyncio import AsyncioProvider
 
 
 log: Final = logging.getLogger('HABApp.mqtt.connection')
@@ -15,8 +16,8 @@ type MqttContextType = Client | None
 
 
 class MqttConnection(BaseConnection):
-    def __init__(self) -> None:
-        super().__init__('mqtt')
+    def __init__(self, asyncio_provider: AsyncioProvider) -> None:
+        super().__init__('mqtt', asyncio_provider=asyncio_provider)
         self.context: MqttContextType = None
 
     @override

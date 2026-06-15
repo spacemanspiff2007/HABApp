@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from asyncio import Queue, QueueEmpty, sleep
 from typing import TYPE_CHECKING, Any, Final, Literal
+from unittest.mock import Mock
 
 from HABApp.core.asyncio import run_func_from_async
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import ItemRegistryItem, uses_get_item
-from HABApp.core.lib import SingleTask
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.logger import log_error, log_info, log_warning
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
 from HABApp.openhab.connection.handler import convert_to_oh_str, post, put
@@ -34,15 +35,21 @@ def empty_queue(queue: Queue) -> None:
 
 class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None) -> None:
+    def __init__(self, name: str | None = None, *, asyncio_provider: AsyncioProvider) -> None:
         super().__init__(name)
 
         self.queue: Queue[BaseOutEvent] | None = None
         self.http_queue: Queue[tuple[str, str, bool]] | None = None
 
-        self.task_http_worker: Final = SingleTask(self.http_queue_worker, 'OhHttpQueueWorker')
-        self.task_watcher_websocket: Final = SingleTask(self.websocket_queue_watcher, 'OhWebsocketQueueWatcher')
-        self.task_watcher_http: Final = SingleTask(self.http_queue_watcher, 'OhHttpQueueWatcher')
+        self.task_http_worker: Final = asyncio_provider.create_single_task(
+            self.http_queue_worker, 'OhHttpQueueWorker'
+        )
+        self.task_watcher_websocket: Final = asyncio_provider.create_single_task(
+            self.websocket_queue_watcher, 'OhWebsocketQueueWatcher'
+        )
+        self.task_watcher_http: Final = asyncio_provider.create_single_task(
+            self.http_queue_watcher, 'OhHttpQueueWatcher'
+        )
 
     async def on_connected(self, context: OpenhabContext) -> None:
         self.queue: Queue[BaseOutEvent] = context.out_queue
@@ -159,7 +166,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     log_info(log, f'{size} messages in {name:s} queue')
 
 
-OUTGOING_PLUGIN: Final = OutgoingCommandsPlugin()
+OUTGOING_PLUGIN: Final = OutgoingCommandsPlugin(asyncio_provider=Mock())
 async_post_update: Final = OUTGOING_PLUGIN.async_post_update
 async_send_command: Final = OUTGOING_PLUGIN.async_send_command
 async_send_websocket_event: Final = OUTGOING_PLUGIN.async_send_websocket_event
