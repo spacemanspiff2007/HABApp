@@ -8,6 +8,7 @@ from immutables import Map
 from HABApp.core.internals import EventBus
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
 from HABApp.openhab.items import (
     CallItem,
     ColorItem,
@@ -22,6 +23,7 @@ from HABApp.openhab.items import (
     RollershutterItem,
     StringItem,
     SwitchItem,
+    Thing,
 )
 from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
@@ -35,11 +37,14 @@ log = logging.getLogger('HABApp.openhab.items')
 
 @HABAPP_PROVIDER.register
 class OhItemFactory:
-    __slots__ = ('_event_bus', '_items', '_registry_handler')
+    __slots__ = ('_event_bus', '_interface', '_items', '_registry_handler')
 
-    def __init__(self, registry_handler: OhItemRegistryHandler, event_bus: EventBus) -> None:
+    def __init__(self, registry_handler: OhItemRegistryHandler, interface: OpenHabSyncInterface,
+                 event_bus: EventBus) -> None:
+
         self._registry_handler: Final = registry_handler
         self._event_bus: Final = event_bus
+        self._interface: Final = interface
 
         self._items: Final[dict[str, type[OpenhabItem]]] = {
             'String': StringItem,
@@ -65,7 +70,7 @@ class OhItemFactory:
             assert isinstance(type, str)
             assert value is None or isinstance(value, str)
 
-            kwargs = {'event_bus': self._event_bus}
+            kwargs = {'event_bus': self._event_bus, 'interface': self._interface}
 
             # map Metadata
             if metadata is not None:
@@ -105,3 +110,6 @@ class OhItemFactory:
         except Exception as e:
             process_exception(self.create_item, e, logger=log)
             return None
+
+    def create_thing(self, name: str) -> Thing:
+        return Thing(name, interface=self._interface)

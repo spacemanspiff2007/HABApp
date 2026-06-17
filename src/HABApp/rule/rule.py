@@ -65,9 +65,14 @@ class Rule(ContextProvidingObj):
 
         # interfaces
         self.async_http: Final = hook.async_http_client
+
         self.mqtt: Final = hook.mqtt_interface_sync
         self.async_mqtt: Final = hook.mqtt_interface_async
-        self.oh: Final = HABApp.openhab.interface_sync
+
+        self.oh: Final = hook.oh_interface_sync
+        self.async_oh: Final = hook.oh_interface_async
+
+        # alias
         self.openhab: Final = self.oh
 
     def on_rule_loaded(self) -> None:

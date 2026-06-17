@@ -4,6 +4,7 @@ from aiomqtt.types import PayloadType
 
 from HABApp.config.models.mqtt import General as GeneralMqttConfig
 from HABApp.core.lib import SingleConsumerQueue
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.mqtt.connection.connection import MqttTaskPlugin
 
 
@@ -11,8 +12,8 @@ type MqttPublishQueueType = SingleConsumerQueue[tuple[str, PayloadType, int, boo
 
 
 class PublishHandler(MqttTaskPlugin):
-    def __init__(self, config: GeneralMqttConfig) -> None:
-        super().__init__(task_name='MqttPublish')
+    def __init__(self, config: GeneralMqttConfig, asyncio_provider: AsyncioProvider) -> None:
+        super().__init__(task_name='MqttPublish', asyncio_provider=asyncio_provider)
 
         self._cfg: Final = config
         self.queue: Final[MqttPublishQueueType] = SingleConsumerQueue()

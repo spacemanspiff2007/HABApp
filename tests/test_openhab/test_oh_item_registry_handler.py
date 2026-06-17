@@ -5,13 +5,13 @@ from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items import GroupItem, NumberItem, StringItem
 
 
-def test_get_group_name_to_item(ir: ItemRegistry) -> None:
+def test_get_group_name_to_item(ir: ItemRegistry, oh_interface) -> None:
     handler = OhItemRegistryHandler(ir)
 
-    a = StringItem('a', 1, groups=frozenset(('test_grp',)), event_bus=Mock(EventBus))
-    b = StringItem('b', 'asdf', groups=frozenset(('test_grp',)), event_bus=Mock(EventBus))
-    c = StringItem('c', (1, 2), groups=frozenset(('test_grp',)), event_bus=Mock(EventBus))
-    d = StringItem('d', groups=frozenset(('test_grp',)), event_bus=Mock(EventBus))
+    a = StringItem('a', 1, groups=frozenset(('test_grp',)), event_bus=Mock(EventBus), interface=oh_interface)
+    b = StringItem('b', 'asdf', groups=frozenset(('test_grp',)), event_bus=Mock(EventBus), interface=oh_interface)
+    c = StringItem('c', (1, 2), groups=frozenset(('test_grp',)), event_bus=Mock(EventBus), interface=oh_interface)
+    d = StringItem('d', groups=frozenset(('test_grp',)), event_bus=Mock(EventBus), interface=oh_interface)
 
     handler.add_to_registry(a)
     handler.add_to_registry(b)
@@ -21,12 +21,12 @@ def test_get_group_name_to_item(ir: ItemRegistry) -> None:
     assert handler.get_group_members('test_grp') == (a, b, c, d)
 
 
-def test_add(ir) -> None:
+def test_add(ir, oh_interface) -> None:
     handler = OhItemRegistryHandler(ir)
 
-    a = StringItem('a', groups=frozenset(('c', )), event_bus=Mock(EventBus))
-    b = StringItem('b', groups=frozenset(('c', 'does_not_exist')), event_bus=Mock(EventBus))
-    c = GroupItem('c', registry_handler=handler, event_bus=Mock(EventBus))
+    a = StringItem('a', groups=frozenset(('c', )), event_bus=Mock(EventBus), interface=oh_interface)
+    b = StringItem('b', groups=frozenset(('c', 'does_not_exist')), event_bus=Mock(EventBus), interface=oh_interface)
+    c = GroupItem('c', registry_handler=handler, event_bus=Mock(EventBus), interface=oh_interface)
 
     handler.add_to_registry(a)
     handler.add_to_registry(b)
@@ -50,15 +50,17 @@ def test_add(ir) -> None:
     assert handler.get_group_members('asdf') == ()
 
 
-def test_update(ir) -> None:
+def test_update(ir, oh_interface) -> None:
     handler = OhItemRegistryHandler(ir)
 
-    a = NumberItem('a', event_bus=Mock(EventBus))
+    a = NumberItem('a', event_bus=Mock(EventBus), interface=oh_interface)
     handler.add_to_registry(a)
 
     assert a.label is None
     assert a.dimension is None
-    handler.add_to_registry(NumberItem('a', label='asdf', dimension='length', event_bus=Mock(EventBus)))
+    handler.add_to_registry(
+        NumberItem('a', label='asdf', dimension='length', event_bus=Mock(EventBus), interface=oh_interface)
+    )
 
     assert a.label == 'asdf'
     assert a.dimension == 'length'

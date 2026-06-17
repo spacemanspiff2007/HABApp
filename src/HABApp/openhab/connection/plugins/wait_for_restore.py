@@ -10,7 +10,6 @@ from HABApp.core.lib.timeout import Timeout
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.shutdown import ShutdownInfo
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
-from HABApp.openhab.items import OpenhabItem
 
 
 if TYPE_CHECKING:
@@ -27,6 +26,8 @@ class WaitForPersistenceRestore(BaseConnectionPlugin[OpenhabConnection]):
         super().__init__(name)
 
     def count_none_items(self) -> int:
+        from HABApp.openhab.items import OpenhabItem
+
         found = 0
         for item in self._item_registry.get_items():
             if isinstance(item, OpenhabItem) and item.value is None:

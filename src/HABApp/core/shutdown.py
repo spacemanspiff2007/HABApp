@@ -43,7 +43,7 @@ class ShutdownInfo:
     def is_requested(self) -> bool:
         return self._requested
 
-    def request_showdown(self) -> None:
+    def request_shutdown(self) -> None:
         if not self._requested:
             self._requested = True
             self._event.set()
@@ -59,7 +59,7 @@ async def __shutdown_factory() -> AsyncGenerator[ShutdownInfo, Any]:
         print('Shutting down ...')
         log.debug('Requested shutdown')
 
-        loop.call_soon_threadsafe(obj.request_showdown)
+        loop.call_soon_threadsafe(obj.request_shutdown)
 
     # register shutdown helper
     log.debug('Registering shutdown signal handlers')

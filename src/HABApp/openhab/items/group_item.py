@@ -5,7 +5,7 @@ from immutables import Map
 
 from HABApp.core.const import MISSING
 from HABApp.core.internals import EventBus
-from HABApp.openhab.connection.plugins import post_update, send_command, send_websocket_event
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
 from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent
 from HABApp.openhab.definitions.websockets.item_value_types import RefreshTypeModel, StringTypeModel, UnDefTypeModel
 from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
@@ -39,8 +39,9 @@ class GroupItem(OpenhabItem):
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None, label: str | None = None,
                  tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map(), *,
-                 event_bus: EventBus, registry_handler: OhItemRegistryHandler) -> None:
-        super().__init__(name, initial_value, last_value, label, tags, groups, metadata, event_bus=event_bus)
+                 event_bus: EventBus, interface: OpenHabSyncInterface, registry_handler: OhItemRegistryHandler) -> None:
+        super().__init__(name, initial_value, last_value, label, tags, groups, metadata,
+                         event_bus=event_bus, interface=interface)
         self._oh_registry_handler: Final = registry_handler
 
     @property
@@ -57,10 +58,10 @@ class GroupItem(OpenhabItem):
         new_value = self.value if value is MISSING else value
 
         if (obj := UnDefTypeModel.from_value(new_value)) is not None:
-            send_websocket_event(ItemStateSendEvent.create(name=self._name, payload=obj))
+            self._oh._send_websocket_event(ItemStateSendEvent.create(name=self._name, payload=obj))
             return None
 
-        post_update(self._name, new_value, transport='http')
+        self._oh.post_update(self._name, new_value, transport='http')
         return None
 
     def oh_send_command(self, value: Any = MISSING) -> None:
@@ -71,8 +72,8 @@ class GroupItem(OpenhabItem):
         new_value = self.value if value is MISSING else value
 
         if (obj := RefreshTypeModel.from_value(new_value)) is not None:
-            send_websocket_event(ItemCommandSendEvent.create(name=self._name, payload=obj))
+            self._oh._send_websocket_event(ItemCommandSendEvent.create(name=self._name, payload=obj))
             return None
 
-        send_command(self._name, new_value, transport='http')
+        self._oh.send_command(self._name, new_value, transport='http')
         return None

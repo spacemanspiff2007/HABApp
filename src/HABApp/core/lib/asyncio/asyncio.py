@@ -21,10 +21,10 @@ if TYPE_CHECKING:
 class AsyncioProvider:
     __slots__ = ('_log', '_tasks', 'loop')
 
-    def __init__(self, *, loop: AbstractEventLoop | None = None) -> None:
+    def __init__(self) -> None:
         self._tasks: Final[set[Task]] = set()
         self._log: Final = logging.getLogger('HABApp.asyncio')
-        self.loop: Final[AbstractEventLoop] = loop if loop is not None else get_running_loop()
+        self.loop: Final[AbstractEventLoop] = get_running_loop()
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} tasks={len(self._tasks)}>'

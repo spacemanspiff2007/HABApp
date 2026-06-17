@@ -291,9 +291,9 @@ class FileManager:
 
 
 @HABAPP_PROVIDER.register
-async def __get_file_manager(event_bus: EventBus, watcher: HABAppFileWatcher,
+async def __get_file_manager(asyncio_provider: AsyncioProvider, event_bus: EventBus, watcher: HABAppFileWatcher,
                              executor_factory: ExecutorFactory) -> AsyncGenerator[FileManager, Any]:
-    obj = FileManager(watcher, event_bus)
+    obj = FileManager(watcher, event_bus, asyncio_provider=asyncio_provider)
     obj.setup(executor_factory)
 
     yield obj

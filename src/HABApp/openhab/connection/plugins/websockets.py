@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import logging
-from asyncio import Queue, TaskGroup, sleep
+from asyncio import TaskGroup, sleep
 from base64 import b64encode
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 from aiohttp import BasicAuth, ClientError, ClientWebSocketResponse, WSMsgType
 from pydantic import ValidationError
@@ -13,7 +13,8 @@ from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.const.log import TOPIC_EVENTS
 from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.logger import HABAppError, HABAppWarning
-from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
+from HABApp.openhab.connection.connection import OhWebsocketQueue, OpenhabConnection, OpenhabContext
+from HABApp.openhab.connection.handler import OhClientSession
 from HABApp.openhab.definitions.helpers import get_discriminator_values_from_union
 from HABApp.openhab.definitions.websockets import (
     OPENHAB_EVENT_TYPE_ADAPTER,
@@ -22,8 +23,11 @@ from HABApp.openhab.definitions.websockets import (
     WebsocketSendTypeFilter,
     WebsocketTopicEnum,
 )
-from HABApp.openhab.definitions.websockets.base import BaseOutEvent
-from HABApp.openhab.event_handler import OhEventHandler
+
+
+if TYPE_CHECKING:
+    from HABApp.openhab.definitions.websockets.base import BaseOutEvent
+    from HABApp.openhab.event_handler import OhEventHandler
 
 
 class WebSocketClosedError(ClientError):
@@ -33,28 +37,31 @@ class WebSocketClosedError(ClientError):
 class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     def __init__(self, name: str | None = None, *,
-                 event_handler: OhEventHandler, asyncio_provider: AsyncioProvider) -> None:
+                 event_handler: OhEventHandler, asyncio_provider: AsyncioProvider,
+                 ws_queue: OhWebsocketQueue, session: OhClientSession) -> None:
         super().__init__(name)
         self._event_handler: Final = event_handler
         self.task: Final = asyncio_provider.create_single_task(self.websockets_task, name='WebsocketsEventsTask')
 
         self._websocket: ClientWebSocketResponse | None = None
-        self.queue: Queue[BaseOutEvent] | None = None
+        self._queue: Final[OhWebsocketQueue] = ws_queue
+        self._session: Final[OhClientSession] = session
 
         self._sent_events: Final[dict[str, BaseOutEvent]] = {}
 
     async def on_connected(self, context: OpenhabContext) -> None:
-        self.queue: Queue[BaseOutEvent] = context.out_queue
+        self._queue.set_open(True)
         self.task.start()
 
     async def on_disconnected(self) -> None:
+        self._queue.set_open(False)
         await self.task.cancel_wait()
         self._sent_events.clear()
 
     @staticmethod
     def _build_token(auth: BasicAuth) -> str:
-        login = auth.login
-        password = auth.password
+        login: Final = auth.login
+        password: Final = auth.password
 
         # we use token as auth
         for v in (login, password):
@@ -64,7 +71,9 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         # basic auth
         return b64encode(f'{login}:{password}'.encode()).decode()
 
-    async def _websocket_sender(self, ws: ClientWebSocketResponse, queue: Queue[BaseOutEvent]) -> None:
+    async def _websocket_sender(self, ws: ClientWebSocketResponse) -> None:
+        queue: Final = self._queue
+
         while True:
             try:
                 while True:
@@ -73,7 +82,6 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                     if (key := event.event_id) is not None:
                         self._sent_events[key] = event
                     await ws.send_str(text)
-                    queue.task_done()
             except Exception as e:
                 self.plugin_connection.process_exception(e, 'Outgoing queue worker')
 
@@ -117,7 +125,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     async def websockets_task(self) -> None:
         try:
-            session = self.plugin_connection.context.session
+            session: Final = self._session.aiohttp_session
             token = self._build_token(session.auth)
 
             ws_cfg = HABApp.CONFIG.openhab.connection.websocket
@@ -130,7 +138,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 self._websocket = ws
                 try:
                     async with TaskGroup() as tg:
-                        tg.create_task(self._websocket_sender(ws, self.queue))
+                        tg.create_task(self._websocket_sender(ws))
                         tg.create_task(self._websocket_ping(ping_interval))
                         tg.create_task(self._websocket_events())
                 finally:

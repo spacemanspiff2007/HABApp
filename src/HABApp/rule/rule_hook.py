@@ -6,6 +6,8 @@ import logging
 from sys import _getframe as sys_get_frame
 from typing import TYPE_CHECKING, Any, Final
 
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
+
 
 if TYPE_CHECKING:
     from asyncio import AbstractEventLoop
@@ -27,11 +29,12 @@ log = logging.getLogger('HABApp.Rule')
 
 class HABAppRuleHook:
 
-    def __init__(self,
+    def __init__(self,  # noqa: PLR0913
                  cb_register_rule: Callable[[Rule], Any], cb_suggest_name: Callable[[Rule], str],
                  rule_manager: RuleManager, rule_file: RuleFile, loop: AbstractEventLoop,
                  async_http_client: HABAppHttpClient, item_registry: ItemRegistry, event_bus: EventBus,
                  executor_factory: ExecutorFactory,
+                 oh_interface_sync: OpenHabSyncInterface, oh_interface_async: OpenHabAsyncInterface,
                  mqtt_interface_sync: MqttInterface, mqtt_interface_async: MqttAsyncInterface) -> None:
 
         # callbacks
@@ -45,6 +48,8 @@ class HABAppRuleHook:
         self.item_registry: Final = item_registry
         self.event_bus: Final = event_bus
         self.executor_factory: Final = executor_factory
+        self.oh_interface_sync: Final = oh_interface_sync
+        self.oh_interface_async: Final = oh_interface_async
         self.mqtt_interface_sync: Final = mqtt_interface_sync
         self.mqtt_interface_async: Final = mqtt_interface_async
 

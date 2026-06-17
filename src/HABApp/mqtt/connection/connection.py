@@ -31,8 +31,8 @@ class MqttPlugin(BaseConnectionPlugin[MqttConnection]):
 
 class MqttTaskPlugin(BaseConnectionPluginConnectedTask[MqttConnection]):
 
-    def __init__(self, task_name: str) -> None:
-        super().__init__(self._mqtt_wrap_task, task_name)
+    def __init__(self, task_name: str, asyncio_provider: AsyncioProvider) -> None:
+        super().__init__(self._mqtt_wrap_task, task_name=task_name, asyncio_provider=asyncio_provider)
 
     async def mqtt_task(self):
         raise NotImplementedError()

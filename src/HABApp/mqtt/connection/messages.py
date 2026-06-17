@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 import HABApp
 from HABApp.core.errors import ItemNotFoundException
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.wrapper import process_exception
 from HABApp.mqtt.connection.connection import MqttTaskPlugin
 from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
@@ -16,8 +17,9 @@ if TYPE_CHECKING:
 
 
 class MessagesHandler(MqttTaskPlugin):
-    def __init__(self, interface: MqttInterface, event_bus: EventBus, item_registry: ItemRegistry) -> None:
-        super().__init__(task_name='MqttMessages')
+    def __init__(self, interface: MqttInterface, event_bus: EventBus, item_registry: ItemRegistry,
+                 asyncio_provider: AsyncioProvider) -> None:
+        super().__init__(task_name='MqttMessages', asyncio_provider=asyncio_provider)
         self._interface: Final = interface
         self._event_bus: Final = event_bus
         self._item_registry: Final = item_registry

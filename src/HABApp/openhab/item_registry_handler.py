@@ -20,7 +20,8 @@ if TYPE_CHECKING:
     from HABApp.core.internals import ItemRegistry
     from HABApp.openhab.definitions.rest import ThingResp
     from HABApp.openhab.events import ThingAddedEvent
-    from HABApp.openhab.items import OpenhabItem
+    from HABApp.openhab.item_factory import OhItemFactory
+    from HABApp.openhab.items import OpenhabItem, Thing
 
 log = logging.getLogger('HABApp.openhab.items')
 
@@ -106,7 +107,7 @@ class OhItemRegistryHandler:
             obj.status.description if obj.status.description is not None else ''
         )
 
-    def add_thing_to_registry(self, data: ThingResp | ThingAddedEvent) -> HABApp.openhab.items.Thing:
+    def add_thing_to_registry(self, data: ThingResp | ThingAddedEvent, item_factory: OhItemFactory) -> Thing:
         ir: Final = self._ir
 
         if isinstance(data, HABApp.openhab.events.thing_events.ThingAddedEvent):
@@ -124,11 +125,11 @@ class OhItemRegistryHandler:
                 new_thing = existing
             else:
                 # Replace existing item with the correct type
-                new_thing = HABApp.openhab.items.Thing(name=name)
+                new_thing = item_factory.create_thing(name=name)
                 log_warning(log, f'Item type changed from {existing.__class__} to {new_thing.__class__}')
                 ir.pop_item(name)
         else:
-            new_thing = HABApp.openhab.items.Thing(name=name)
+            new_thing = item_factory.create_thing(name=name)
 
         new_thing.status = status
         new_thing.status_detail = status_detail

@@ -9,6 +9,7 @@ from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.provider import HabAppObjProvider
 from HABApp.mqtt import MqttInterface
 from HABApp.mqtt.items import MqttBaseItem, MqttPairItem
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
 from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items import GroupItem, OpenhabItem
 from tests.helpers.inspect import get_module_classes
@@ -34,7 +35,9 @@ def params_item_init():
 
         if issubclass(cls, MqttBaseItem):
             kwargs['interface'] = Mock(MqttInterface)
-        elif issubclass(cls, GroupItem):
+        if issubclass(cls, OpenhabItem):
+            kwargs['interface'] = Mock(OpenHabSyncInterface)
+        if issubclass(cls, GroupItem):
             kwargs['registry_handler'] = Mock(OhItemRegistryHandler)
 
         params.append(

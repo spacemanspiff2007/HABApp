@@ -7,8 +7,8 @@ from HABApp.core.internals import EventBus
 from HABApp.openhab.items import DatetimeItem
 
 
-def test_post_update(websocket_events) -> None:
-    item = DatetimeItem('', event_bus=Mock(EventBus))
+def test_post_update(websocket_events, oh_interface) -> None:
+    item = DatetimeItem('', event_bus=Mock(EventBus), interface=oh_interface)
 
     item.oh_post_update(datetime(2025, 1, 1, 12, 0, 1))
     websocket_events.assert_called_once('DateTime', '2025-01-01T12:00:01', event='update')

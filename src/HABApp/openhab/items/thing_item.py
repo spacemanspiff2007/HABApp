@@ -1,14 +1,14 @@
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Final
 
 from immutables import Map
 from whenever import Instant
 
 from HABApp.core.items import BaseItem
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
 from HABApp.openhab.definitions import ThingStatusDetailEnum, ThingStatusEnum
 from HABApp.openhab.definitions.things import THING_STATUS_DEFAULT, THING_STATUS_DETAIL_DEFAULT
 from HABApp.openhab.events import ThingConfigStatusInfoEvent, ThingStatusInfoEvent, ThingUpdatedEvent
-from HABApp.openhab.interface_sync import set_thing_enabled
 
 
 class Thing(BaseItem):
@@ -22,7 +22,7 @@ class Thing(BaseItem):
     :ivar Mapping[str, Any] configuration: Thing configuration
     :ivar Mapping[str, Any] properties: Thing properties
     """
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, *, interface: OpenHabSyncInterface) -> None:
         super().__init__(name)
 
         self.status: ThingStatusEnum = THING_STATUS_DEFAULT
@@ -34,6 +34,8 @@ class Thing(BaseItem):
 
         self.configuration: Mapping[str, Any] = Map()
         self.properties: Mapping[str, Any] = Map()
+
+        self._oh: Final = interface
 
     @property
     def is_enabled(self) -> bool:
@@ -81,10 +83,10 @@ class Thing(BaseItem):
 
         return None
 
-    def set_enabled(self, enable: bool = True):
+    def set_enabled(self, enable: bool = True):  # noqa: FBT002
         """Enable/disable the thing
 
         :param enable: True to enable, False to disable the thing
         :return:
         """
-        return set_thing_enabled(self.name, enable)
+        return self._oh.set_thing_enabled(self.name, enable)

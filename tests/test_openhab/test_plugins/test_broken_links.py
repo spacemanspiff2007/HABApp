@@ -7,6 +7,7 @@ from unittest.mock import Mock
 import HABApp.openhab.connection.plugins.overview_broken_links as plugin_module
 from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import Item
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 from HABApp.openhab.definitions.rest import ItemChannelLinkResp, ThingResp
 from HABApp.openhab.definitions.rest.things import ChannelResp, ThingStatusResp
 
@@ -37,12 +38,13 @@ async def _mock_links() -> list[ItemChannelLinkResp]:
 
 
 async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs) -> None:
-    monkeypatch.setattr(plugin_module, 'async_get_things', _mock_things)
-    monkeypatch.setattr(plugin_module, 'async_get_links', _mock_links)
-
     ir.add_item(Item('item1', event_bus=Mock(EventBus)))
 
-    p = plugin_module.BrokenLinksPlugin(item_registry=ir)
+    mock_if = Mock(OpenHabAsyncInterface)
+    mock_if.get_things = _mock_things
+    mock_if.get_links = _mock_links
+
+    p = plugin_module.BrokenLinksPlugin(item_registry=ir, interface=mock_if)
     await p.on_online()
 
     add = partial(test_logs.add_expected, 'HABApp.openhab.links', logging.WARNING)
@@ -56,6 +58,6 @@ async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     async def do_raise():
         raise ValueError()
 
-    monkeypatch.setattr(plugin_module, 'async_get_things', do_raise)
-    monkeypatch.setattr(plugin_module, 'async_get_links', do_raise)
+    mock_if.get_things = do_raise
+    mock_if.get_links = do_raise
     await p.on_online()

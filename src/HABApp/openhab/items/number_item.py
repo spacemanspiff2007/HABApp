@@ -5,6 +5,7 @@ from immutables import Map
 
 from HABApp.core.errors import InvalidItemValueError, ItemValueIsNoneError
 from HABApp.core.internals import EventBus
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
 from HABApp.openhab.definitions.websockets.item_value_types import (
     DecimalTypeModel,
     QuantityTypeModel,
@@ -40,8 +41,11 @@ class NumberItem(OpenhabItem):
     def __init__(self, name: str, initial_value: int | float = None, last_value: int | float = None,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
                  metadata: Mapping[str, MetaData] = Map(), dimension: str | None = None, *,
-                 event_bus: EventBus) -> None:
-        super().__init__(name, initial_value, last_value, label, tags, groups, metadata, event_bus=event_bus)
+                 event_bus: EventBus, interface: OpenHabSyncInterface) -> None:
+
+        super().__init__(name, initial_value, last_value, label, tags, groups, metadata,
+                         event_bus=event_bus, interface=interface)
+
         self.dimension: str | None = dimension
 
     @override

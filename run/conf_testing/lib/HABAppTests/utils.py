@@ -6,7 +6,8 @@ from pathlib import Path
 
 import HABApp
 from HABApp.core.asyncio import run_coro_from_thread
-from HABApp.openhab.connection.handler import post
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.openhab.connection.handler import OhClientSession
 from HABApp.openhab.items import Thing
 
 
@@ -61,7 +62,8 @@ def find_astro_sun_thing(*, create: bool = True) -> str:
         'ID': 'habapp-testing'
     }
 
-    resp = run_coro_from_thread(post('/rest/things', json=data), calling=find_astro_sun_thing)
+    session = HABAPP_PROVIDER.get_existing(OhClientSession)
+    resp = run_coro_from_thread(session.post('/rest/things', json=data), calling=find_astro_sun_thing)
 
     if resp.status != 201:
         msg = f'Could not create astro thing! {resp.text}'

@@ -31,7 +31,7 @@ from tests.helpers.inspect import assert_same_signature, check_class_annotations
 
 
 def _get_oh_classes() -> tuple[type[OpenhabItem], ...]:
-    return tuple(c for c in OhItemFactory(None, None)._items.values())
+    return tuple(c for c in OhItemFactory(None, None, None)._items.values())
 
 
 @pytest.fixture(params=_get_oh_classes())
@@ -40,8 +40,8 @@ def cls(request):
 
 
 @pytest.fixture
-def cls_instance(cls):
-    kwargs = {'event_bus': Mock(EventBus)}
+def cls_instance(cls, eb, oh_interface):
+    kwargs = {'event_bus': eb, 'interface': oh_interface}
     if issubclass(cls, GroupItem):
         kwargs['registry_handler'] = Mock(OhItemRegistryHandler)
     return cls('item_name', **kwargs)
@@ -51,8 +51,8 @@ def test_name(cls_instance) -> None:
     assert cls_instance.name == 'item_name'
 
 
-def test_thing_name() -> None:
-    t = Thing('thing_name')
+def test_thing_name(oh_interface) -> None:
+    t = Thing('thing_name', interface=oh_interface)
     assert t.name == 'thing_name'
 
 
@@ -83,7 +83,7 @@ def test_item_name_set_in_oh_value(cls: type[OpenhabItem]) -> None:
     assert cls._command_to_oh._name == cls.__name__
 
 
-def test_doc_ivar(cls) -> None:
+def test_doc_ivar(cls, oh_interface) -> None:
 
     correct_hints = {
         StringItem: {'value': str},
@@ -126,12 +126,12 @@ def test_doc_ivar(cls) -> None:
         ignore=(
             '_update_to_oh', '_command_to_oh', '_state_from_oh_str',
             # class specific
-            'registry_handler', 'event_bus'
+            'registry_handler', 'event_bus', 'interface',
         )
     )
 
     # test that the class has the corresponding attribute
-    create_with = {'name': 'test', 'event_bus': Mock(EventBus)}
+    create_with = {'name': 'test', 'event_bus': Mock(EventBus), 'interface': oh_interface}
 
     if cls is ColorItem:
         create_with['initial_value'] = HSB(0, 0, 0)

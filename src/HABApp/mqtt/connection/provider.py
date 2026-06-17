@@ -39,11 +39,11 @@ async def setup(connection_manager: ConnectionManager, config: ApplicationConfig
                 ) -> AsyncGenerator[tuple[MqttConnection, MqttAsyncInterface, MqttInterface], Any]:
 
     pub_cfg: Final = config.mqtt.general
-    publish_handler: Final = PublishHandler(pub_cfg)
+    publish_handler: Final = PublishHandler(pub_cfg, asyncio_provider=asyncio_provider)
     pub_cfg.subscribe_for_changes(publish_handler.config_changed)
 
     sub_cfg: Final = config.mqtt.subscribe
-    subscribe_handler: Final = SubscriptionHandler(sub_cfg)
+    subscribe_handler: Final = SubscriptionHandler(sub_cfg, asyncio_provider)
     sub_cfg.subscribe_for_changes(subscribe_handler.config_changed)
 
     async_interface: Final = MqttAsyncInterface(config.mqtt, publish_handler.queue, subscribe_handler)
@@ -54,7 +54,10 @@ async def setup(connection_manager: ConnectionManager, config: ApplicationConfig
     config.mqtt.connection.subscribe_for_changes(connection.status_configuration_changed)
 
     connection.register_plugin(ConnectionHandler(), 0)
-    connection.register_plugin(MessagesHandler(sync_interface, event_bus, item_registry), 10)
+    connection.register_plugin(
+        MessagesHandler(sync_interface, event_bus, item_registry, asyncio_provider=asyncio_provider),
+        10
+    )
     connection.register_plugin(subscribe_handler, 20)
     connection.register_plugin(publish_handler, 30)
 

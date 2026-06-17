@@ -2,7 +2,7 @@ import json
 import logging
 import pprint
 from collections.abc import Callable
-from types import ModuleType, TracebackType
+from types import TracebackType
 from typing import Any, Final
 
 from pytest import MonkeyPatch  # noqa: PT013
@@ -10,13 +10,13 @@ from pytest import MonkeyPatch  # noqa: PT013
 import HABApp.mqtt.connection.publish
 import HABApp.mqtt.connection.subscribe
 import HABApp.openhab.connection.handler
-import HABApp.openhab.connection.handler.func_async
 import HABApp.openhab.event_handler
 from HABApp.config import CONFIG
 from HABApp.core.connections import ConnectionManager
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.mqtt.connection import MqttConnection
 from HABApp.mqtt.connection.messages import MessagesHandler
+from HABApp.openhab.connection.handler import OhClientSession
 
 
 class PatcherName:
@@ -105,16 +105,10 @@ class RestPatcher(BasePatcher):
     async def __aenter__(self) -> None:
         m = self.monkeypatch
 
-        # http functions
-        to_patch: Final[tuple[tuple[ModuleType, tuple[str, ...]]], ...] = (
-            (HABApp.openhab.connection.handler, ('get', 'put', 'post', 'delete')),
-            (HABApp.openhab.connection.handler.func_async, ('get', 'put', 'post', 'delete')),
-            (HABApp.openhab.connection.plugins.out, ('put', 'post')),
-        )
+        session = HABAPP_PROVIDER.get_existing(OhClientSession)
 
-        for module, methods in to_patch:
-            for name in methods:
-                m.setattr(module, name, self.wrap_http(getattr(module, name)))
+        for name in ('get', 'put', 'post', 'delete'):
+            m.setattr(session, name, self.wrap_http(getattr(session, name)))
 
 
 class WebsocketPatcher(BasePatcher):

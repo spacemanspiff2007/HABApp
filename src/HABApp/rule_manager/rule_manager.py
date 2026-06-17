@@ -49,7 +49,7 @@ class RuleManager:
                 ok = await executor_factory.create(file.load).execute()
                 if not ok:
                     log.error('Failed to load Benchmark!')
-                    self._shutdown.request_showdown()
+                    self._shutdown.request_shutdown()
                     return None
                 await file.check_all_rules()
                 return None

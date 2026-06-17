@@ -1,16 +1,25 @@
 import inspect
+from typing import Final
 
 import pytest
 
 
-def assert_same_signature(func_a, func_b) -> bool:
-    sig_a = inspect.signature(func_a, eval_str=True)
-    sig_b = inspect.signature(func_b, eval_str=True)
+def assert_same_signature(func_a, func_b, *, eval_str: bool = True,
+                          check_docstring: bool = True, ignore_return: bool = False) -> bool:
+
+    sig_a: inspect.Signature = inspect.signature(func_a, eval_str=eval_str)
+    sig_b: inspect.Signature = inspect.signature(func_b, eval_str=eval_str)
+
+    if ignore_return:
+        sig_a = sig_a.replace(return_annotation=inspect.Signature.empty)
+        sig_b = sig_b.replace(return_annotation=inspect.Signature.empty)
+
     assert sig_a == sig_b, f'\n  {sig_a}\n  {sig_b}\n'
 
-    doc_a = inspect.getdoc(func_a)
-    doc_b = inspect.getdoc(func_b)
-    assert doc_a == doc_b
+    if check_docstring:
+        doc_a: Final = inspect.getdoc(func_a)
+        doc_b: Final = inspect.getdoc(func_b)
+        assert doc_a == doc_b, f'\n  {doc_a}\n  {doc_b}\n'
 
     return True
 

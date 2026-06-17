@@ -1,10 +1,11 @@
 import logging
+from unittest.mock import Mock
 
 from whenever import Instant
 
-import HABApp.openhab.connection.plugins.load_items as load_items_module
 from HABApp.core.internals import ItemRegistry
 from HABApp.openhab.connection.connection import OpenhabContext
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 from HABApp.openhab.connection.plugins import LoadOpenhabItemsPlugin
 from HABApp.openhab.definitions.rest import ItemRespList, ShortItemResp, ThingResp
 from HABApp.openhab.definitions.rest.things import ThingStatusResp
@@ -74,22 +75,22 @@ async def _mock_raise():
     raise ValueError()
 
 
-async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
-    monkeypatch.setattr(load_items_module, 'async_get_items', _mock_get_all_items)
-    monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_get_all_items_state)
-    monkeypatch.setattr(load_items_module, 'async_get_things', _mock_get_empty)
+async def test_item_sync(ir: ItemRegistry, test_logs) -> None:
+
+    mock_if = Mock(OpenHabAsyncInterface)
+    mock_if.get_items = _mock_get_all_items
+    mock_if.get_items_only_state = _mock_get_all_items_state
+    mock_if.get_things = _mock_get_empty
 
     registry_handler = OhItemRegistryHandler(ir)
     kwargs = {
-        'item_factory': OhItemFactory(registry_handler, None),
+        'item_factory': OhItemFactory(registry_handler, interface=None, event_bus=None),
         'registry_handler': registry_handler,
-        'item_registry': ir
+        'item_registry': ir,
+        'interface': mock_if
     }
 
-    context = (
-        OpenhabContext.new_context(
-            version=(1, 0, 0), session=None, session_options=None, out_queue=None)
-    )
+    context = OpenhabContext.new_context(version=(1, 0, 0))
 
     # initial item create
     await LoadOpenhabItemsPlugin(**kwargs).on_connected(context)
@@ -104,23 +105,24 @@ async def test_item_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
                            'Item ItemLength is a UoM item but "unit" is not found in item metadata')
 
 
-async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
-    monkeypatch.setattr(load_items_module, 'async_get_items', _mock_get_empty)
-    monkeypatch.setattr(load_items_module, 'async_get_all_items_state', _mock_raise)
-
-    registry_handler = OhItemRegistryHandler(ir)
-    kwargs = {
-        'item_factory': OhItemFactory(registry_handler, None),
-        'registry_handler': registry_handler,
-        'item_registry': ir,
-    }
-
+async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs, oh_interface) -> None:
     things_resp: list[ThingResp] = []
 
     async def _mock_ret():
         return things_resp
 
-    monkeypatch.setattr(load_items_module, 'async_get_things', _mock_ret)
+    mock_if = Mock(OpenHabAsyncInterface)
+    mock_if.get_items = _mock_get_empty
+    mock_if.get_items_only_state = _mock_get_all_items_state
+    mock_if.get_things = _mock_ret
+
+    registry_handler = OhItemRegistryHandler(ir)
+    kwargs = {
+        'item_factory': OhItemFactory(registry_handler, oh_interface, None),
+        'registry_handler': registry_handler,
+        'item_registry': ir,
+        'interface': mock_if,
+    }
 
     t1 = ThingResp(
         UID='thing_1', thingTypeUID='thing_type_1', editable=True, statusInfo=ThingStatusResp(
@@ -135,11 +137,7 @@ async def test_thing_sync(monkeypatch, ir: ItemRegistry, test_logs) -> None:
     )
 
     things_resp = [t1, t2]
-
-    context = (
-        OpenhabContext.new_context(
-            version=(1, 0, 0), session=None, session_options=None, out_queue=None)
-    )
+    context = OpenhabContext.new_context(version=(1, 0, 0))
 
     # initial thing create
     await LoadOpenhabItemsPlugin(**kwargs).on_connected(context)

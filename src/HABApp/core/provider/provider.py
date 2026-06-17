@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from asyncio import Lock
+from collections.abc import Awaitable, Callable
 from inspect import isclass
 from typing import TYPE_CHECKING, Any, Final, Self, TypeVar
 
@@ -156,6 +157,17 @@ class HabAppObjProvider:
         for obj in self._deferred:
             self._add_factory(obj)
 
+    async def _resolve_kwargs(self, factory: Any, stack: tuple[type, ...] = ()) -> dict[str, object]:
+        dependencies: Final = get_obj_parameters(factory)
+
+        kwargs: Final[dict[str, object]] = {}
+        for name, dep_type in dependencies.items():
+            if dep_type in self._created:
+                kwargs[name] = self._created[dep_type]
+            else:
+                kwargs[name] = await self._create(dep_type, stack)
+        return kwargs
+
     async def _create(self, cls: type, stack: tuple[type, ...] = ()) -> object:
         # double check e.g. after acquiring the lock in case another coroutine created it in the meantime
         if cls in self._created:
@@ -168,16 +180,8 @@ class HabAppObjProvider:
         if cls in stack:
             raise CyclicDependencyError.from_stack(stack + (cls, ))
 
-        factory = self._factories[cls]
-        dependencies = get_obj_parameters(factory.factory)
-
-        kwargs = {}
-        for name, dep_type in dependencies.items():
-            if dep_type in self._created:
-                kwargs[name] = self._created[dep_type]
-            else:
-                kwargs[name] = await self._create(dep_type, stack + (cls, ))
-
+        factory: Final = self._factories[cls]
+        kwargs = await self._resolve_kwargs(factory.factory, stack + (cls, ))
         self._created[cls] = obj = await factory.call(**kwargs)
         self._order += (factory, )
         return obj
@@ -192,12 +196,15 @@ class HabAppObjProvider:
         async with self._lock:
             return await self._create(cls)
 
+    async def call(self, coro_func: Callable[..., Awaitable[T]]) -> T:
+        async with self._lock:
+            kwargs: Final = await self._resolve_kwargs(coro_func)
+        return await coro_func(**kwargs)
+
     async def close(self, exception: BaseException | None = None) -> None:
         async with self._lock:
             order: Final = self._order
             self._order = ()
-            self._created.clear()
-            self._created[HabAppObjProvider] = self
 
             exceptions: Final[list[Exception]] = []
             for factory in reversed(order):
@@ -205,6 +212,13 @@ class HabAppObjProvider:
                     await factory.close(exception)
                 except Exception as e:
                     exceptions.append(e)
+
+                # remove from the created objects
+                self._created.pop(factory.provides)
+
+            # It's possible that we have manually added objects so we have to clear
+            self._created.clear()
+            self._created[HabAppObjProvider] = self
 
         if exceptions:
             msg = 'Errors during close()'

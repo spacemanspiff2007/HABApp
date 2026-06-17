@@ -2,7 +2,8 @@ from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
 from immutables import Map
 
 from HABApp.core.events import ValueUpdateEventFilter
-from HABApp.openhab.interface_async import async_get_items
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 from HABApp.openhab.items import GroupItem, NumberItem, StringItem
 
 
@@ -65,7 +66,7 @@ class OpenhabItems(TestBaseRule):
         self.openhab.get_item(self.item_group.name)
 
     async def test_api_async(self) -> None:
-        await async_get_items()
+        await HABAPP_PROVIDER.get_existing(OpenHabAsyncInterface).get_items()
 
     def test_small_float_values(self) -> None:
         # https://github.com/spacemanspiff2007/HABApp/issues/425

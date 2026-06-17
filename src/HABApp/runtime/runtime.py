@@ -22,6 +22,7 @@ from HABApp.core.shutdown import ShutdownInfo
 from HABApp.core.wrapper import process_exception
 from HABApp.mqtt import MqttAsyncInterface, MqttInterface
 from HABApp.mqtt.connection.connection import MqttConnection
+from HABApp.openhab.connection import setup_openhab_connection
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.rule_manager import RuleManager
 
@@ -65,6 +66,8 @@ class Runtime:
 
             # Connection setup
             await HABAPP_PROVIDER.get(OpenhabConnection)
+            await HABAPP_PROVIDER.call(setup_openhab_connection)
+
             await HABAPP_PROVIDER.get(MqttConnection)
 
             # create MQTT objects for backwards compatibility 2026-03
@@ -87,8 +90,8 @@ class Runtime:
             await rule_manager.load_rules_on_startup()
 
         except HABApp.config.InvalidConfigError:
-            shutdown.request_showdown()
+            shutdown.request_shutdown()
         except Exception as e:
             process_exception('Runtime.start', e)
             await asyncio.sleep(1)  # Sleep so we can do a graceful shutdown
-            shutdown.request_showdown()
+            shutdown.request_shutdown()

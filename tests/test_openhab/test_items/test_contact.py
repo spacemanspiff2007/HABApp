@@ -8,21 +8,21 @@ from HABApp.core.internals import EventBus
 from HABApp.openhab.items import ContactItem
 
 
-def test_send_command() -> None:
-    c = ContactItem('item_name', event_bus=Mock(EventBus))
+def test_send_command(oh_interface) -> None:
+    c = ContactItem('item_name', event_bus=Mock(EventBus), interface=oh_interface)
 
     with pytest.raises(ValueError) as e:
         c.oh_send_command('asdf')
     assert str(e.value) == "Invalid value: 'asdf' (<class 'str'>) for ContactItem"
 
 
-def test_switch_set_value() -> None:
-    ContactItem('', event_bus=Mock(EventBus)).set_value(None)
-    ContactItem('', event_bus=Mock(EventBus)).set_value('OPEN')
-    ContactItem('', event_bus=Mock(EventBus)).set_value('CLOSED')
+def test_switch_set_value(oh_interface) -> None:
+    ContactItem('', event_bus=Mock(EventBus), interface=oh_interface).set_value(None)
+    ContactItem('', event_bus=Mock(EventBus), interface=oh_interface).set_value('OPEN')
+    ContactItem('', event_bus=Mock(EventBus), interface=oh_interface).set_value('CLOSED')
 
     with pytest.raises(InvalidItemValueError):
-        ContactItem('item_name', event_bus=Mock(EventBus)).set_value('asdf')
+        ContactItem('item_name', event_bus=Mock(EventBus), interface=oh_interface).set_value('asdf')
 
 
 def test_from_oh_str(caplog) -> None:

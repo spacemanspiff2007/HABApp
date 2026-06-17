@@ -8,8 +8,8 @@ from HABApp.core.types import HSB
 from HABApp.openhab.items import ColorItem
 
 
-def test_send_command() -> None:
-    c = ColorItem('item_name', event_bus=Mock(EventBus))
+def test_send_command(oh_interface) -> None:
+    c = ColorItem('item_name', event_bus=Mock(EventBus), interface=oh_interface)
 
     with pytest.raises(ValueError) as e:
         c.oh_send_command('asdf')

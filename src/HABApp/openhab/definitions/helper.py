@@ -15,7 +15,7 @@ def convert_to_oh_str(obj: Any) -> str:
         return str(obj)
 
     if isinstance(obj, datetime):
-        # Add timezone (if not yet defined) to string, then remote anything below ms.
+        # Add timezone (if not yet defined) to string, then remove anything below ms.
         # 2018-11-19T09:47:38.284000+0100 -> 2018-11-19T09:47:38.284+0100
         return obj.astimezone(None).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 

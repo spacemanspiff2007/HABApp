@@ -1,2 +1,2 @@
-from . import plugins
-from .connection import setup
+from HABApp.openhab.connection import plugins, provider
+from HABApp.openhab.connection.provider import OpenhabConnection, setup_openhab_connection

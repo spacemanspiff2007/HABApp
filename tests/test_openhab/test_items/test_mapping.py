@@ -44,7 +44,7 @@ def test_number_unit_of_measurement(item_factory: OhItemFactory) -> None:
         last_value=None, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}}
     )
 
-    kwargs = {'metadata': Map(unit=MetaData('°C')), 'event_bus': None}
+    kwargs = {'metadata': Map(unit=MetaData('°C')), 'event_bus': None, 'interface': item_factory._interface}
     assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, **kwargs)
     assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2, **kwargs)
     assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3, **kwargs)

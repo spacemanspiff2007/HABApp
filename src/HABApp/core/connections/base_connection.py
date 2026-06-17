@@ -206,6 +206,10 @@ class BaseConnection:
         self.status.from_setup_to_disabled()
         self.advance_status_task.start_if_not_running()
 
+    def status_from_startup_to_disabled(self) -> None:
+        self.status.from_startup_to_disabled()
+        self.advance_status_task.start_if_not_running()
+
     def status_from_connected_to_disconnected(self) -> None:
         self.status.from_connected_to_disconnected()
         self.advance_status_task.start_if_not_running()
@@ -244,5 +248,6 @@ class BaseConnection:
 
             self.log.debug(f' - {status}: {", ".join(coros)}')
 
-        self.status.setup = True
+        if self.status.status != self.status.status.DISABLED:
+            self.status.setup = True
         self.advance_status_task.start_if_not_running()

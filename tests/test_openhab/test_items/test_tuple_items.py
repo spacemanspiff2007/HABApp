@@ -8,18 +8,18 @@ from HABApp.openhab.item_factory import OhItemFactory
 from HABApp.openhab.items import CallItem, LocationItem
 
 
-def test_call_set_value() -> None:
-    call = CallItem('my_call_item', event_bus=Mock(EventBus))
+def test_call_set_value(oh_interface) -> None:
+    call = CallItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value(('03,018', '2722720'))
     assert call.value == ('03,018', '2722720')
 
-    call = CallItem('my_call_item', event_bus=Mock(EventBus))
+    call = CallItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value(('a', 'b'))
     assert call.value == ('a', 'b')
 
 
-def test_call_post_update(websocket_events) -> None:
-    call = CallItem('my_call_item', event_bus=Mock(EventBus))
+def test_call_post_update(websocket_events, oh_interface) -> None:
+    call = CallItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
 
     call.oh_post_update(('asdf', ))
     websocket_events.assert_called_once('StringList', 'asdf', event='update')
@@ -58,18 +58,18 @@ def test_call_map(item_factory: OhItemFactory) -> None:
     assert call.metadata == Map()
 
 
-def test_location_set_value() -> None:
-    call = LocationItem('my_location_item', event_bus=Mock(EventBus))
+def test_location_set_value(oh_interface) -> None:
+    call = LocationItem('my_location_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value((-10, 20))
     assert call.value == Point(-10, 20, None)
 
-    call = LocationItem('my_location_item', event_bus=Mock(EventBus))
+    call = LocationItem('my_location_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value((1, 2, 3.3))
     assert call.value == Point(1, 2, 3.3)
 
 
-def test_location_post_update(websocket_events) -> None:
-    call = LocationItem('my_call_item', event_bus=Mock(EventBus))
+def test_location_post_update(websocket_events, oh_interface) -> None:
+    call = LocationItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
 
     call.oh_post_update((45, -60))
     websocket_events.assert_called_once('Point', '45,-60', event='update')

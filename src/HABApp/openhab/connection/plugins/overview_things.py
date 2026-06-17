@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import HABApp
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.openhab.connection.connection import OpenhabConnection
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 from HABApp.openhab.definitions.helpers.log_table import Table
 
 
@@ -16,8 +17,9 @@ if TYPE_CHECKING:
 
 class ThingOverviewPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None) -> None:
+    def __init__(self, *, name: str | None = None, interface: OpenHabAsyncInterface) -> None:
         super().__init__(name)
+        self._interface: Final = interface
         self.do_run = True
 
     async def on_online(self) -> None:
@@ -28,7 +30,7 @@ class ThingOverviewPlugin(BaseConnectionPlugin[OpenhabConnection]):
         await asyncio.sleep(90)
         self.do_run = False
 
-        self.draw_table(await HABApp.openhab.interface_async.async_get_things())
+        self.draw_table(await self._interface.get_things())
 
     @HABApp.core.wrapper.ignore_exception
     def draw_table(self, thing_data: tuple[ThingResp, ...]) -> None:

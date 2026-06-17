@@ -12,7 +12,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
     def __init__(self) -> None:
         super().__init__(name=CONNECTION_HANDLER_NAME)
 
-    async def on_setup(self, connection: MqttConnection):
+    async def on_setup(self, connection: MqttConnection) -> None:
         log = connection.log
         config = CONFIG.mqtt.connection
 
@@ -55,6 +55,7 @@ class ConnectionHandler(BaseConnectionPlugin[MqttConnection]):
 
             # clean_session=False
         )
+        return None
 
     async def on_connecting(self, connection: MqttConnection, context: MqttContextType) -> None:
         assert context is not None

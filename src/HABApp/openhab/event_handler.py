@@ -1,9 +1,6 @@
 import logging
 from typing import Final
 
-import HABApp
-import HABApp.core
-import HABApp.openhab.events
 from HABApp.core.asyncio import create_task_from_async
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
@@ -11,6 +8,7 @@ from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.logger import log_warning
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS, TOPIC_THINGS
 from HABApp.openhab.events import (
     ItemAddedEvent,
@@ -32,15 +30,17 @@ log = logging.getLogger('HABApp.openhab.items')
 
 @HABAPP_PROVIDER.register
 class OhEventHandler:
-    __slots__ = ('_event_bus', '_item_factory', '_item_registry', '_registry_handler')
+    __slots__ = ('_event_bus', '_interface', '_item_factory', '_item_registry', '_registry_handler')
 
     def __init__(self, event: EventBus, item_registry: ItemRegistry,
-                 registry_handler: OhItemRegistryHandler, item_factory: OhItemFactory) -> None:
+                 registry_handler: OhItemRegistryHandler, item_factory: OhItemFactory,
+                 interface: OpenHabAsyncInterface) -> None:
 
         self._event_bus: Final = event
         self._registry_handler: Final = registry_handler
         self._item_registry: Final = item_registry
         self._item_factory: Final = item_factory
+        self._interface: Final = interface
 
     def on_openhab_event(self, event: OpenhabEvent) -> None:
         post_event: Final = self._event_bus.post_event
@@ -86,7 +86,7 @@ class OhEventHandler:
 
             # Events that add things to the item registry
             if isinstance(event, ThingAddedEvent):
-                self._registry_handler.add_thing_to_registry(event)
+                self._registry_handler.add_thing_to_registry(event, self._item_factory)
                 post_event(TOPIC_THINGS, event)
                 return None
 
@@ -108,7 +108,7 @@ class OhEventHandler:
             name = event.name
 
             # Since metadata is not part of the event we have to request it through the item
-            if (cfg := await HABApp.openhab.interface_async.async_get_item(name)) is None:
+            if (cfg := await self._interface.get_item(name)) is None:
                 return None
 
             new_item = self._item_factory.create_item(

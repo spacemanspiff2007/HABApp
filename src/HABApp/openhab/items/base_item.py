@@ -1,6 +1,6 @@
 import datetime
 from collections.abc import Callable, Mapping
-from typing import Any, NamedTuple, Self, override
+from typing import Any, Final, NamedTuple, Self, override
 
 from immutables import Map
 from pydantic import ValidationError
@@ -9,8 +9,7 @@ from HABApp.core.const import MISSING
 from HABApp.core.internals import EventBus
 from HABApp.core.items import BaseValueItem
 from HABApp.core.lib.funcs import compare as _compare
-from HABApp.openhab.connection.plugins import send_websocket_event
-from HABApp.openhab.interface_sync import get_persistence_data
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
 from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
 
 
@@ -36,12 +35,17 @@ class OpenhabItem(BaseValueItem):
 
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map(), *, event_bus: EventBus) -> None:
+                 metadata: Mapping[str, MetaData] = Map(), *,
+                 event_bus: EventBus, interface: OpenHabSyncInterface) -> None:
+
         super().__init__(name, initial_value=initial_value, last_value=last_value, event_bus=event_bus)
+
         self.label: str | None = label
         self.tags: frozenset[str] = tags
         self.groups: frozenset[str] = groups
         self.metadata: Mapping[str, MetaData] = metadata
+
+        self._oh: Final = interface
 
     def _update_item_definition(self, item: Self) -> None:
         self.label = item.label
@@ -70,7 +74,7 @@ class OpenhabItem(BaseValueItem):
         :param value: (optional) value to be sent. If not specified the current item value will be used.
         """
         new_value = self.value if value is MISSING else value
-        send_websocket_event(self._command_to_oh.create_event(self._name, new_value))
+        self._oh._send_websocket_event(self._command_to_oh.create_event(self._name, new_value))
 
     # For the openhab items HABApp internal commands make not much sense
     # so we send the commands to openHAB
@@ -88,7 +92,7 @@ class OpenhabItem(BaseValueItem):
         :param value: (optional) value to be posted. If not specified the current item value will be used.
         """
         new_value = self.value if value is MISSING else value
-        send_websocket_event(self._update_to_oh.create_event(self._name, new_value))
+        self._oh._send_websocket_event(self._update_to_oh.create_event(self._name, new_value))
 
     def oh_post_update_if(self, new_value, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
                           lower_than=MISSING, lt=MISSING, lower_equal=MISSING, le=MISSING,
@@ -134,6 +138,6 @@ class OpenhabItem(BaseValueItem):
         :param end_time: return only items which are older than this
         """
 
-        return get_persistence_data(
+        return self._oh.get_persistence_data(
             self._name, persistence, start_time, end_time
         )

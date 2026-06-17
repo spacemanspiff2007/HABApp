@@ -15,14 +15,14 @@ from HABApp.core.internals import EventBus
 from tests.helpers import LogCollector
 
 
-async def test_file_watcher_event(monkeypatch, file_manager, test_logs: LogCollector) -> None:
+async def test_file_watcher_event(monkeypatch, file_manager, test_logs: LogCollector, asyncio_provider) -> None:
     test_logs.set_min_level(0)
 
     eb = Mock(EventBus)
     eb.post_event = Mock()
     eb.post_event.assert_not_called()
 
-    file_manager = FileManager(None, eb)
+    file_manager = FileManager(None, eb, asyncio_provider)
 
     file_manager.add_folder('tests-', Path('tests/'), name='d', priority=1)
 

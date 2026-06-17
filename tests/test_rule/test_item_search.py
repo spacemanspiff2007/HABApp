@@ -5,6 +5,7 @@ import pytest
 from HABApp import Rule
 from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseValueItem, Item
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
 from HABApp.openhab.items import OpenhabItem, SwitchItem
 from HABApp.openhab.items.base_item import MetaData
 from HABApp.rule.rule_hook import HABAppRuleHook
@@ -15,6 +16,7 @@ def rule(ir: ItemRegistry) -> Rule:
     rules = []
     hook = HABAppRuleHook(rules.append, lambda x: x.__class__.__name__, None, None, loop=Mock, async_http_client=None,
                           item_registry=ir, event_bus=Mock(), executor_factory=None,
+                          oh_interface_sync=None, oh_interface_async=None,
                           mqtt_interface_async=None, mqtt_interface_sync=None)
     hook.in_dict(globals())
     return Rule()
@@ -40,12 +42,12 @@ def test_search_oh(ir: ItemRegistry, rule: Rule) -> None:
     item1 = OpenhabItem(
         'oh_item_1', tags=frozenset(['tag1', 'tag2', 'tag3']),
         groups=frozenset(['grp1', 'grp2']), metadata={'meta1': MetaData('meta_v1')},
-        event_bus=Mock(EventBus)
+        event_bus=Mock(EventBus), interface=Mock(OpenHabSyncInterface)
     )
     item2 = SwitchItem(
         'oh_item_2', tags=frozenset(['tag1', 'tag2', 'tag4']),
         groups=frozenset(['grp2', 'grp3']), metadata={'meta2': MetaData('meta_v2', config={'a': 'b'})},
-        event_bus=Mock(EventBus)
+        event_bus=Mock(EventBus), interface=Mock(OpenHabSyncInterface)
     )
 
     item3 = Item('item_2', event_bus=Mock(EventBus))

@@ -10,6 +10,7 @@ import HABApp
 from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry, get_current_context
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.mqtt import MqttAsyncInterface, MqttInterface
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.rule.interfaces.http_client import HABAppHttpClient
 from HABApp.rule.rule_hook import HABAppRuleHook
 
@@ -71,13 +72,16 @@ class RuleFile:
                      loop: AbstractEventLoop, async_http_client: HABAppHttpClient,
                      item_registry: ItemRegistry, event_bus: EventBus,
                      executor_factory: ExecutorFactory,
-                     mqtt_interface_sync: MqttInterface, mqtt_interface_async: MqttAsyncInterface) -> None:
+                     mqtt_interface_sync: MqttInterface, mqtt_interface_async: MqttAsyncInterface,
+                     oh_interface_sync: OpenHabSyncInterface, oh_interface_async: OpenHabAsyncInterface
+                     ) -> None:
 
         rule_hook = HABAppRuleHook(
             created_rules.append, self.suggest_rule_name,
             self.rule_manager, self, loop=loop, async_http_client=async_http_client,
             item_registry=item_registry, event_bus=event_bus, executor_factory=executor_factory,
             mqtt_interface_sync=mqtt_interface_sync, mqtt_interface_async=mqtt_interface_async,
+            oh_interface_sync=oh_interface_sync, oh_interface_async=oh_interface_async
         )
 
         # It seems like python 3.8 doesn't allow path like objects anymore:
@@ -100,6 +104,8 @@ class RuleFile:
                 loop=get_event_loop(), async_http_client=await HABAPP_PROVIDER.get(HABAppHttpClient),
                 item_registry=await HABAPP_PROVIDER.get(ItemRegistry), event_bus=await HABAPP_PROVIDER.get(EventBus),
                 executor_factory=executor_factory,
+                oh_interface_sync=await HABAPP_PROVIDER.get(OpenHabSyncInterface),
+                oh_interface_async=await HABAPP_PROVIDER.get(OpenHabAsyncInterface),
                 mqtt_interface_sync=await HABAPP_PROVIDER.get(MqttInterface),
                 mqtt_interface_async=await HABAPP_PROVIDER.get(MqttAsyncInterface),
             )

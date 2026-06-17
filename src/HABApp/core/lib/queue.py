@@ -1,7 +1,9 @@
 import asyncio
+import logging
 from asyncio import Future, QueueEmpty
 from collections import deque
-from typing import Final
+from collections.abc import Callable, Coroutine
+from typing import Final, NoReturn
 
 
 class SingleConsumerQueue[T]:
@@ -60,3 +62,35 @@ class SingleConsumerQueue[T]:
         if (g := self._getter) is not None and not g.done():
             g.set_result(None)
         return None
+
+
+class WatchedSingleConsumerQueue[T](SingleConsumerQueue[T]):
+    __slots__ = ()
+
+    async def queue_watcher_task(self, log: logging.Logger, name: str, *,
+                                 sleep: Callable[[int], Coroutine[None, None, None]],
+                                 first_msg_at: int = 150, interval: int = 10) -> NoReturn:
+
+        if interval <= 1:
+            raise ValueError()
+
+        upper: int = first_msg_at
+        lower: int = -1
+        last_info_at: int = first_msg_at // 2
+
+        while True:
+            await sleep(interval)
+            size = len(self._queue)
+
+            if size > upper:
+                upper = size * 2
+                lower = size // 2
+                log.warning(f'{size} messages in {name:s} queue')
+            elif size < lower:
+                upper = max(size // 2, first_msg_at)
+                lower = size // 2
+                if lower <= last_info_at:
+                    lower = -1
+                    log.info(f'{name:s} queue OK')
+                else:
+                    log.info(f'{size} messages in {name:s} queue')

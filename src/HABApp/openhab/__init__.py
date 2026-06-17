@@ -6,11 +6,5 @@ import HABApp.openhab.types
 
 # isort: split
 
-import HABApp.openhab.interface_async
-import HABApp.openhab.interface_sync
-
-
-# isort: split
-
 # items use the interface for the convenience functions
 import HABApp.openhab.items

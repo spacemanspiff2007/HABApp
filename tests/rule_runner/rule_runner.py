@@ -21,8 +21,10 @@ from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.internals.function_executor.testing import TestingExecutorFactory
 from HABApp.core.internals.proxy import ConstProxyObj
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.lib.exceptions.format import fallback_format
 from HABApp.mqtt import MqttAsyncInterface, MqttInterface
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
 
@@ -119,7 +121,8 @@ class SimpleRuleRunner:
 
         ir = ItemRegistry()
         eb = EventBus()
-        file_manager = FileManager(None, eb)
+        async_provider = AsyncioProvider()
+        file_manager = FileManager(None, eb, async_provider)
         self.restore = setup_internals(ir, eb, final=False)
 
         # setup so we capture errors / warnings
@@ -137,6 +140,7 @@ class SimpleRuleRunner:
         hook = HABAppRuleHook(
             self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop(), None,
             item_registry=ir, event_bus=eb, executor_factory=TestingExecutorFactory(eb),
+            oh_interface_sync=Mock(OpenHabSyncInterface), oh_interface_async=Mock(OpenHabAsyncInterface),
             mqtt_interface_sync=Mock(MqttInterface), mqtt_interface_async=Mock(MqttAsyncInterface),
         )
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)

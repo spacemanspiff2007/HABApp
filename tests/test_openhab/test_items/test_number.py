@@ -9,23 +9,23 @@ from HABApp.openhab.items import NumberItem
 from HABApp.openhab.items.base_item import MetaData
 
 
-def test_number_item_unit() -> None:
-    assert NumberItem('test', 1, event_bus=Mock(EventBus)).unit is None
-    assert NumberItem('test', 1, metadata=Map(unit=MetaData('°C')), event_bus=Mock(EventBus)).unit == '°C'
+def test_number_item_unit(oh_interface) -> None:
+    assert NumberItem('test', 1, event_bus=Mock(EventBus), interface=oh_interface).unit is None
+    assert NumberItem('test', 1, metadata=Map(unit=MetaData('°C')), event_bus=Mock(EventBus), interface=oh_interface).unit == '°C'
 
 
-def test_number_item_bool() -> None:
+def test_number_item_bool(oh_interface) -> None:
     with pytest.raises(ItemValueIsNoneError):
-        assert not NumberItem('asdf', event_bus=Mock(EventBus))
+        assert not NumberItem('asdf', event_bus=Mock(EventBus), interface=oh_interface)
 
-    assert not NumberItem('asdf', 0, event_bus=Mock(EventBus))
-    assert NumberItem('asdf', 1, event_bus=Mock(EventBus))
+    assert not NumberItem('asdf', 0, event_bus=Mock(EventBus), interface=oh_interface)
+    assert NumberItem('asdf', 1, event_bus=Mock(EventBus), interface=oh_interface)
 
 
-def test_number_set_value() -> None:
-    NumberItem('', event_bus=Mock(EventBus)).set_value(None)
-    NumberItem('', event_bus=Mock(EventBus)).set_value(1)
-    NumberItem('', event_bus=Mock(EventBus)).set_value(-3.3)
+def test_number_set_value(oh_interface) -> None:
+    NumberItem('', event_bus=Mock(EventBus), interface=oh_interface).set_value(None)
+    NumberItem('', event_bus=Mock(EventBus), interface=oh_interface).set_value(1)
+    NumberItem('', event_bus=Mock(EventBus), interface=oh_interface).set_value(-3.3)
 
     with pytest.raises(InvalidItemValueError):
-        NumberItem('item_name', event_bus=Mock(EventBus)).set_value('asdf')
+        NumberItem('item_name', event_bus=Mock(EventBus), interface=oh_interface).set_value('asdf')

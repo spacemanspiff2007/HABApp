@@ -43,7 +43,7 @@ def test_transitions() -> None:
         assert get_flow() == ['DISCONNECTED', 'OFFLINE', 'SHUTDOWN']
 
 
-async def test_plugin_callback() -> None:
+async def test_plugin_callback(asyncio_provider) -> None:
 
     sentinel = object()
     mock_connected = Mock()
@@ -65,7 +65,7 @@ async def test_plugin_callback() -> None:
             assert connection is b
             mock_setup()
 
-    b = BaseConnection('test')
+    b = BaseConnection('test', asyncio_provider=asyncio_provider)
     b.register_plugin(TestPlugin())
 
     b.context = sentinel

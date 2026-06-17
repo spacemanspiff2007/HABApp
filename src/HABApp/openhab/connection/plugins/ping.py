@@ -12,6 +12,7 @@ from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
 from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.connection import OpenhabConnection
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 
 
 PING_CONFIG: Final = CONFIG.openhab.ping
@@ -22,10 +23,12 @@ log = logging.getLogger('HABApp.openhab.items')
 class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     def __init__(self, name: str | None = None, *,
-                 event_bus: EventBus, item_registry: ItemRegistry, asyncio_provider: AsyncioProvider) -> None:
+                 event_bus: EventBus, item_registry: ItemRegistry,
+                 asyncio_provider: AsyncioProvider, interface: OpenHabAsyncInterface) -> None:
         super().__init__(name)
         self._event_bus: Final = event_bus
         self._item_registry: Final = item_registry
+        self._interface: Final = interface
         self.task: Final = asyncio_provider.create_single_task(self.ping_worker, 'OhQueueWorker')
 
         self.sent_value: float | None = None
@@ -86,9 +89,10 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
                 self.timestamp_sent = monotonic()
 
                 if send_ping:
-                    HABApp.openhab.interface_async.async_post_update(
+                    self._interface.post_update(
                         item_name,
-                        f'{self.sent_value:.1f}' if self.sent_value is not None else None
+                        f'{self.sent_value:.1f}' if self.sent_value is not None else None,
+                        transport='http'
                     )
                 else:
                     send_ping = self._item_registry.item_exists(item_name)

@@ -7,6 +7,7 @@ from whenever import Instant, patch_current_time
 
 import HABApp
 from HABApp.core.internals import ItemRegistry
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 from HABApp.openhab.event_handler import OhEventHandler
 from HABApp.openhab.events import ThingAddedEvent, ThingStatusInfoEvent, ThingUpdatedEvent
 from HABApp.openhab.item_factory import OhItemFactory
@@ -16,17 +17,19 @@ from tests.test_openhab.test_events.test_from_dict import get_event
 
 
 @pytest.fixture
-def test_thing(ir: ItemRegistry):
+def test_thing(ir: ItemRegistry, oh_interface):
     with patch_current_time(Instant.from_utc(2000, 1, 1), keep_ticking=False):
-        thing = HABApp.openhab.items.Thing('test_thing')
+        thing = HABApp.openhab.items.Thing('test_thing', interface=oh_interface)
         yield thing
 
 
 @pytest.fixture
-def event_handler(ir, eb) -> OhEventHandler:
+def event_handler(ir, eb, oh_interface) -> OhEventHandler:
     registry_handler = OhItemRegistryHandler(ir)
     return OhEventHandler(
-        eb, ir, registry_handler=registry_handler, item_factory=OhItemFactory(registry_handler, eb)
+        eb, ir, registry_handler=registry_handler,
+        item_factory=OhItemFactory(registry_handler, interface=oh_interface, event_bus=eb),
+        interface=Mock(OpenHabAsyncInterface)
     )
 
 
