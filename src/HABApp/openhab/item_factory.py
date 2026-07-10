@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 
 
-log = logging.getLogger('HABApp.openhab.items')
+log: Final = logging.getLogger('HABApp.openhab.items')
 
 
 @HABAPP_PROVIDER.register

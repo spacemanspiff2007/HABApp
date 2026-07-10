@@ -127,13 +127,11 @@ And since it is just like a normal item triggering on changes etc. is possible, 
             my_agg.aggregation_func(max)
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    import asyncio
+    import doc_runner
 
-    async def main():
-        async with SimpleRuleRunner():
-            MyRule().execute()
-    asyncio.run(main())
+    async def main(provider):
+        MyRule().execute()
+    doc_runner.run(main)
 
 The value of ``my_agg`` in the example will now always be the maximum of ``MyInputItem`` in the last two hours.
 It will automatically update and always reflect the latest changes of ``MyInputItem``.

@@ -27,7 +27,7 @@ class Item(BaseValueItem):
         event_bus: Final = HABAPP_PROVIDER.get_existing(EventBus)
 
         try:
-            item = item_registry. get_item(name)
+            item = item_registry.get_item(name)
         except ItemNotFoundException:
             item = cls(name, initial_value, last_value, event_bus=event_bus)
             item_registry.add_item(item)

@@ -16,12 +16,14 @@ if TYPE_CHECKING:
 
 
 class TestingCallableExecutor[**P, R](SyncFunctionExecutorBase[P, R]):
+    _factory: TestingExecutorFactory
 
     @override
     async def execute(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
         try:
             return self.func(*args, **kwargs)
         except Exception as e:
+            self._factory.errors.append(e)
             self.process_exception(e, *args, **kwargs)
             return None
 
@@ -30,6 +32,7 @@ class TestingCallableExecutor[**P, R](SyncFunctionExecutorBase[P, R]):
         try:
             self.func(*args, **kwargs)
         except Exception as e:
+            self._factory.errors.append(e)
             self.process_exception(e, *args, **kwargs)
             return None
 
@@ -50,6 +53,7 @@ class TestingCoroExecutor[**P, R](FunctionExecutorBase[P, R]):
         try:
             return await self.coro(*args, **kwargs)
         except Exception as e:
+            self._factory.errors.append(e)
             self.process_exception(e, *args, **kwargs)
             return None
 
@@ -61,11 +65,12 @@ class TestingCoroExecutor[**P, R](FunctionExecutorBase[P, R]):
 
 
 class TestingExecutorFactory(ExecutorFactory):
-    __slots__ = ('tasks', )
+    __slots__ = ('errors', 'tasks')
 
     def __init__(self, event_bus: EventBus) -> None:
         super().__init__(event_bus)
         self.tasks: Final[set[asyncio.Task]] = set()
+        self.errors: Final[list[Exception]] = []
 
     @override
     def _create_coro_factory[**P, R](self, func: Callable[P, Coroutine[Any, Any, R]], *,

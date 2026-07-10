@@ -56,7 +56,7 @@ class AsyncioProvider:
         await self.wait_for_tasks()
         return None
 
-    async def wait_for_tasks(self) -> None:
+    async def wait_for_tasks(self) -> int:
 
         started: Final = Instant.now()
         log_every: Final = 2
@@ -77,6 +77,7 @@ class AsyncioProvider:
             self._log.warning('Some tasks are still running:')
             for task in self._tasks:
                 self._log.warning(f' - {task.get_name():s} done={task.done()}')
+        return len(self._tasks)
 
     def create_single_task(self, coro: Callable[[], Coroutine[Any, Any, Any]], name: str | None = None) -> SingleTask:
         return SingleTask(coro, name=name, asyncio=self)

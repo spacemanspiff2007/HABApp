@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Self
 
 from easyconfig import BaseModel
-from pydantic import Field, conint, model_validator
+from pydantic import Field, model_validator
 
 
 class ThreadPoolConfig(BaseModel):
@@ -11,7 +11,7 @@ class ThreadPoolConfig(BaseModel):
     Use only if you have experience developing asyncio applications!
     If the thread pool is disabled using blocking calls in functions can and will break HABApp'''
 
-    threads: conint(ge=1, le=32) = 10
+    threads: int = Field(10, ge=1, le=32)
     '''Amount of threads to use for the executor'''
 
 

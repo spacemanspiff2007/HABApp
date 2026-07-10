@@ -21,7 +21,7 @@ rules in the HABApp rule engine. So lets write a small rule which prints somethi
 .. exec_code::
 
    # ------------ hide: start ------------
-   async def run():
+   async def run(provider):
    # ------------ hide: stop -------------
        import HABApp
 
@@ -40,8 +40,9 @@ rules in the HABApp rule engine. So lets write a small rule which prints somethi
        # Rules
        MyFirstRule()
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
-   SimpleRuleRunner().run(run())
+   import doc_runner
+   doc_runner.run(run)
+
 
 A more generic rule
 ------------------------------
@@ -51,7 +52,7 @@ This often comes in handy if there is some logic that shall be applied to differ
 .. exec_code::
 
    # ------------ hide: start ------------
-   async def run():
+   async def run(provider):
    # ------------ hide: stop -------------
        import HABApp
 
@@ -71,8 +72,8 @@ This often comes in handy if there is some logic that shall be applied to differ
        for t in ['Text 1', 'Text 2']:
            MyFirstRule(t)
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
-   SimpleRuleRunner().run(run())
+   import doc_runner
+   doc_runner.run(run)
 
 Interacting with items
 ------------------------------
@@ -91,7 +92,7 @@ An item is created and added to the item registry through the corresponding clas
    :hide_output:
 
    # ------------ hide: start ------------
-   async def run():
+   async def run(provider):
    # ------------ hide: stop -------------
 
       from HABApp.core.items import Item
@@ -100,8 +101,8 @@ An item is created and added to the item registry through the corresponding clas
       item = Item.get_create_item("an-item-name", "a value")
 
    # ------------ hide: start ------------
-   from rule_runner import SimpleRuleRunner
-   SimpleRuleRunner().run(run())
+   import doc_runner
+   doc_runner.run(run)
 
 
 Values
@@ -125,8 +126,13 @@ To access items from openHAB use the correct openHAB item type (see :ref:`the op
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-    async def run():
-    # ------------ hide: stop -------------
+    async def run(provider):
+       await provider.create_all()
+
+       from HABApp.testing import UserTimeControl
+       time_control = await provider.get(UserTimeControl)
+
+       # ------------ hide: stop -------------
        import HABApp
        from HABApp.core.items import Item
 
@@ -152,9 +158,12 @@ To access items from openHAB use the correct openHAB item type (see :ref:`the op
 
 
        MyFirstRule()
-    # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+
+       # ------------ hide: start ------------
+       await time_control.advance(1)
+
+    import doc_runner
+    doc_runner.run(run)
 
 
 Timestamps
@@ -175,7 +184,10 @@ The deltas for :class:`~HABApp.core.lib.InstantView` can be specified as
     # ------------ hide: start ------------
     from whenever import Instant, patch_current_time
 
-    async def run():
+    async def run(provider):
+       from HABApp.testing import UserTimeControl
+       time_control = await provider.get(UserTimeControl)
+
        from HABApp.core.items import Item
        item = Item.get_create_item('Item_Name', initial_value='value')
        item._last_change.instant = Instant.from_utc(2024, 4, 30, 10, 30)
@@ -220,9 +232,11 @@ The deltas for :class:`~HABApp.core.lib.InstantView` can be specified as
 
        TimestampRule()
 
-    # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+       # ------------ hide: start ------------
+       await time_control.advance(1)
+
+    import doc_runner
+    doc_runner.run(run)
 
 
 
@@ -236,7 +250,7 @@ passed to the callback.
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
 
        from HABApp.core.items import Item
        Item.get_create_item('Item_Name', initial_value='Some value')
@@ -278,8 +292,9 @@ passed to the callback.
        i = Item.get_item('Item_Name')
        i.post_value('Changed value')
 
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
+
 
 
 Trigger an event when an item is constant
@@ -288,9 +303,10 @@ Trigger an event when an item is constant
 .. exec_code::
 
    # ------------ hide: start ------------
-   async def run():
-       import time, HABApp
-       HABApp.core.Items.add_item(HABApp.core.items.Item('test_watch'))
+   async def run(provider):
+       from HABApp.testing import TestingItemFactory
+       f = await provider.get(TestingItemFactory)
+       await f.create('Item', 'test_watch')
        # ------------ hide: stop -------------
 
        import HABApp
@@ -317,10 +333,11 @@ Trigger an event when an item is constant
 
        MyFirstRule()
        # ------------ hide: start ------------
-       HABApp.core.EventBus.post_event('Item_Name', ItemNoChangeEvent('Item_Name', 10))
+       from HABApp.core.internals import EventBus
+       provider.get_existing(EventBus).post_event('Item_Name', ItemNoChangeEvent('Item_Name', 10))
 
-   from rule_runner import SimpleRuleRunner
-   SimpleRuleRunner().run(run())
+   import doc_runner
+   doc_runner.run(run)
 
 
 Convenience functions
@@ -338,9 +355,10 @@ Something similar is available for openHAB items (``oh_post_update_if``)
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-       import time, HABApp
-       HABApp.core.Items.add_item(HABApp.core.items.Item('Item_Name'))
+    async def run(provider):
+       from HABApp.testing import TestingItemFactory
+       f = await provider.get(TestingItemFactory)
+       await f.create('Item', 'Item_Name')
     # ------------ hide: stop -------------
 
        import HABApp
@@ -373,6 +391,6 @@ Something similar is available for openHAB items (``oh_post_update_if``)
 
        MyFirstRule()
 
-    # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+   # ------------ hide: start ------------
+   import doc_runner
+   doc_runner.run(run)

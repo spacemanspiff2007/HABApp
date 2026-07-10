@@ -74,6 +74,7 @@ class Rule(ContextProvidingObj):
 
         # alias
         self.openhab: Final = self.oh
+        self.async_openhab: Final = self.async_oh
 
     def on_rule_loaded(self) -> None:
         """Override this to method to implement logic that will be called when

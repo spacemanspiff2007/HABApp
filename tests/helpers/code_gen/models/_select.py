@@ -1,10 +1,11 @@
 import asyncio
+import collections
 import enum
 import inspect
 import re
 import typing
 from re import Pattern
-from types import UnionType
+from types import ModuleType, UnionType
 from typing import Annotated, Any, Union, get_args, get_origin, override
 
 import pydantic
@@ -35,6 +36,7 @@ class SelectModuleObjs(_SelectBaseModel):
     include: str | list[str]
     exclude: str | list[str] | None = None
     exclude_default: bool = True
+    exclude_foreign: bool = False
 
     _pattern_include: tuple[Pattern, ...] = PrivateAttr()
     _pattern_exclude: tuple[Pattern, ...] = PrivateAttr()
@@ -59,6 +61,12 @@ class SelectModuleObjs(_SelectBaseModel):
         if not (pattern := self._pattern_exclude):
             return False
         return any(p.search(name) for p in pattern)
+
+    def _is_foreign_excluded(self, name: str, obj: Any, this_module: ModuleType) -> bool:
+        if not self.exclude_foreign:
+            return False
+
+        return (obj_module := inspect.getmodule(obj)) is not None and obj_module is not this_module
 
     def _is_default_excluded(self, name: str, obj: Any) -> bool:
         if not self.exclude_default:
@@ -86,6 +94,7 @@ class SelectModuleObjs(_SelectBaseModel):
             whenever,
             asyncio,
             enum,
+            collections.abc,
         )
 
     @override
@@ -95,6 +104,9 @@ class SelectModuleObjs(_SelectBaseModel):
         module_objs = module.get_objects()
         for name, obj in module_objs.items():
             if self._is_default_excluded(name, obj):
+                continue
+
+            if self._is_foreign_excluded(name, obj, module._module):
                 continue
 
             if not self._name_is_included(name):

@@ -114,7 +114,7 @@ class HabAppObjProvider:
 
     def __init__(self) -> None:
         self._factories: Final[dict[type, ObjFactory]] = {}
-        self._created: Final[dict[type, object]] = {HabAppObjProvider: self}
+        self._created: Final[dict[type, object]] = {self.__class__: self}
         self._order: tuple[ObjFactory, ...] = ()
 
         self._lock: Final = Lock()
@@ -218,7 +218,7 @@ class HabAppObjProvider:
 
             # It's possible that we have manually added objects so we have to clear
             self._created.clear()
-            self._created[HabAppObjProvider] = self
+            self._created[self.__class__] = self
 
         if exceptions:
             msg = 'Errors during close()'
@@ -241,7 +241,7 @@ class HabAppObjProvider:
         except TypeError:
             return False
 
-    def remove_factory(self, cls: type) -> None:
+    def remove_factory(self, cls: type) -> Any:
         # try resolving deferred factories
         self._resolve_deferred()
 
@@ -249,8 +249,7 @@ class HabAppObjProvider:
             msg = f'Object for {cls} is already created!'
             raise RuntimeError(msg)
 
-        self._factories.pop(cls)
-        return None
+        return self._factories.pop(cls).factory
 
     def get_all_objects(self) -> tuple[object, ...]:
         return tuple(self._created.values())

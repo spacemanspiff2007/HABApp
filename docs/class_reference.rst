@@ -9,22 +9,13 @@ Watches
 ======================================
 
 
-ItemNoUpdateWatch
+ItemTimeWatch
 """"""""""""""""""""""""""""""""""""""
 
-.. autoclass:: HABApp.core.items.base_item_watch.ItemNoUpdateWatch
+.. autoclass:: HABApp.core.items.base_item_times.ItemTimeWatch
    :members:
    :inherited-members:
    :member-order: groupwise
-
-ItemNoChangeWatch
-""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: HABApp.core.items.base_item_watch.ItemNoChangeWatch
-   :members:
-   :inherited-members:
-   :member-order: groupwise
-
 
 
 InstantView
