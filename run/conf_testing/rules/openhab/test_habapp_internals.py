@@ -1,10 +1,10 @@
-from HABAppTests import AsyncOpenhabTmpItem, TestBaseRule
-
 from HABApp.openhab.connection.handler.func_async import (
     async_get_item_with_habapp_meta,
     async_remove_habapp_metadata,
     async_set_habapp_metadata,
 )
+from HABAppTests import AsyncOpenhabTmpItem, TestBaseRule
+
 from HABApp.openhab.definitions.rest.habapp_data import HABAppThingPluginData
 
 
