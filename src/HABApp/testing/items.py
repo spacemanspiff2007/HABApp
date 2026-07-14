@@ -1,7 +1,7 @@
 from inspect import isclass
 from typing import Any, Final, Literal, NotRequired, Self, TypedDict, overload
 
-from HABApp.core.internals import EventBus
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseItem, Item
 from HABApp.mqtt import MqttInterface
 from HABApp.mqtt.items import MqttBaseItem, MqttItem, MqttPairItem
@@ -22,6 +22,7 @@ from HABApp.openhab.items import (
     RollershutterItem,
     StringItem,
     SwitchItem,
+    Thing,
 )
 
 
@@ -62,6 +63,9 @@ class TestingItems:
             last_value: Any = None, label: str | None = None, tags: OhGroupType | None = None,
             groups: OhGroupType | None = None, metadata: MetadataDict | None = None) -> Self: ...
 
+    @overload
+    def add(self, type: Literal['Thing'] | type[Thing], name: str) -> Self: ...
+
     def add(self, type: Any, name: str, value: Any = None, **kwargs: Any) -> Self:
         result: dict[str, Any] = {'type': type, 'name': name, 'value': value}
         result.update(kwargs)
@@ -72,8 +76,9 @@ class TestingItems:
 # noinspection PyShadowingBuiltins
 class TestingItemFactory:
     def __init__(self, event_bus: EventBus, oh_registry_handler: OhItemRegistryHandler,
-                 if_oh: OpenHabSyncInterface, if_mqtt: MqttInterface) -> None:
+                 if_oh: OpenHabSyncInterface, if_mqtt: MqttInterface, item_registry: ItemRegistry) -> None:
         self._eb: Final = event_bus
+        self._ir: Final = item_registry
         self._oh_registry_handler: Final = oh_registry_handler
         self._if_oh: Final = if_oh
         self._if_mqtt: Final = if_mqtt
@@ -102,15 +107,18 @@ class TestingItemFactory:
             classes = (
                 Item, MqttItem, MqttPairItem,
                 StringItem, NumberItem, SwitchItem, ContactItem, RollershutterItem, DimmerItem, DatetimeItem,
-                ColorItem, ImageItem, GroupItem, PlayerItem, LocationItem, CallItem
+                ColorItem, ImageItem, GroupItem, PlayerItem, LocationItem, CallItem,
+                Thing
             )
 
             d = {c.__name__: c for c in classes}
             for _name, _cls in tuple(d.items()):
+                if not _name.endswith('Item'):
+                    continue
                 _name = _name.removesuffix('Item')
                 if not _name:
                     continue
-                assert _name not in d
+                assert _name not in d, _name
                 d[_name] = _cls
 
             type = d.get(type, type)
@@ -127,9 +135,14 @@ class TestingItemFactory:
         if issubclass(type, OpenhabItem):
             kwargs['interface'] = self._if_oh
 
-        obj = type(name=name, initial_value=value, last_value=last_value, **kwargs)
+        if issubclass(type, Thing):
+            obj: Final = type(name=name, interface=self._if_oh)
+        else:
+            obj: Final = type(name=name, initial_value=value, last_value=last_value, **kwargs)
 
         if isinstance(obj, OpenhabItem):
             self._oh_registry_handler.add_to_registry(obj)
+        else:
+            self._ir.add_item(obj)
 
         return obj

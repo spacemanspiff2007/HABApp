@@ -3,7 +3,6 @@ import time
 from collections import deque
 from threading import Lock
 
-import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
 from HABApp.openhab.items import NumberItem
 
@@ -38,7 +37,7 @@ class OpenhabBenchRule(BenchBaseRule):
     def cleanup(self):
         self.stop_load()
 
-        all_items = set(HABApp.core.Items.get_item_names())
+        all_items = {n.name for n in self.get_items()}
         to_rem = set(self.name_list) & all_items
 
         if not to_rem:

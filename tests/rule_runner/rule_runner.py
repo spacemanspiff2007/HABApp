@@ -19,14 +19,13 @@ from HABApp.core.events.habapp_events import HABAppException
 from HABApp.core.files import FileManager
 from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
 from HABApp.core.internals.event_bus import EventBusListenerBase
-from HABApp.core.internals.function_executor.testing import TestingExecutorFactory
-from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.lib.exceptions.format import fallback_format
 from HABApp.mqtt import MqttAsyncInterface, MqttInterface
 from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
+from HABApp.testing.executor import TestingExecutorFactory
 
 
 def suggest_rule_name(obj: object) -> str:
@@ -115,9 +114,6 @@ class SimpleRuleRunner:
         self._ignored_exceptions = exceptions
 
     async def set_up(self) -> None:
-        # ensure that we call setup only once!
-        assert isinstance(HABApp.core.Items, ConstProxyObj)
-        assert isinstance(HABApp.core.EventBus, ConstProxyObj)
 
         ir = ItemRegistry()
         eb = EventBus()
@@ -131,10 +127,6 @@ class SimpleRuleRunner:
 
         # Scheduler
         self.monkeypatch.setattr(prod_sun_module, 'OBSERVER', Observer(52.51870523376821, 13.376072914752532, 10))
-
-        # Overwrite
-        self.monkeypatch.setattr(HABApp.core, 'EventBus', eb)
-        self.monkeypatch.setattr(HABApp.core, 'Items', ir)
 
         # Patch the hook so we can instantiate the rules
         hook = HABAppRuleHook(

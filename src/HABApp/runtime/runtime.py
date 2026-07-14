@@ -14,8 +14,6 @@ import HABApp.util
 from HABApp.config.models import ApplicationConfig
 from HABApp.core.connections import ConnectionManager
 from HABApp.core.files import FileManager
-from HABApp.core.internals import setup_internals
-from HABApp.core.internals.proxy import ConstProxyObj
 from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.shutdown import ShutdownInfo
@@ -53,13 +51,6 @@ class Runtime:
             ir = await HABAPP_PROVIDER.get(HABApp.core.internals.ItemRegistry)
             eb = await HABAPP_PROVIDER.get(HABApp.core.internals.EventBus)
             await HABAPP_PROVIDER.get(HABApp.core.files.FileManager)
-
-            # replace proxy objects
-            setup_internals(ir, eb)
-            assert isinstance(HABApp.core.Items, ConstProxyObj)
-            HABApp.core.Items = ir
-            assert isinstance(HABApp.core.EventBus, ConstProxyObj)
-            HABApp.core.EventBus = eb
 
             # Load config
             await HABApp.config.setup_habapp_configuration(config_folder)

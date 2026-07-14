@@ -1,10 +1,11 @@
 import asyncio
+from typing import Final
 
 from HABAppTests import EventWaiter, TestBaseRule, get_random_string
 
-import HABApp
 from HABApp.core.connections import ConnectionManager, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.provider import HABAPP_PROVIDER
 
 
@@ -48,12 +49,14 @@ class TestMQTTConnection(TestBaseRule):
         await self.test_async_subscribed_event()
 
     async def test_mqtt_item_creation(self) -> None:
+        items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+
         topic = 'mqtt/item/creation'
-        assert HABApp.core.Items.item_exists(topic) is False
+        assert items.item_exists(topic) is False
 
         self.mqtt.publish(topic, 'asdf')
         await asyncio.sleep(0.1)
-        assert HABApp.core.Items.item_exists(topic) is False
+        assert items.item_exists(topic) is False
 
         # We create the item only on retain
         self.mqtt.publish(topic, 'asdf', retain=True)
@@ -68,9 +71,9 @@ class TestMQTTConnection(TestBaseRule):
         while not connection.is_online:
             await asyncio.sleep(0.2)
 
-        assert HABApp.core.Items.item_exists(topic) is True
+        assert items.item_exists(topic) is True
 
-        HABApp.core.Items.pop_item(topic)
+        items.pop_item(topic)
 
     async def trigger_reconnect(self) -> None:
         manager = await HABAPP_PROVIDER.get(ConnectionManager)

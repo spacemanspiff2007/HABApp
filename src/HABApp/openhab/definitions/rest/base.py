@@ -1,11 +1,8 @@
-from pydantic import BaseModel, Extra, validator
+from pydantic import BaseModel, ConfigDict, validator
 
 
 class RestBase(BaseModel):
-
-    # default configuration for RestAPI models
-    class Config:
-        extra = Extra.forbid
+    model_config = ConfigDict(extra='forbid', strict=True)
 
 
 def none_is_empty_str(v) -> str:

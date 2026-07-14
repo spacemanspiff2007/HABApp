@@ -2,10 +2,12 @@ import random
 import time
 from collections import deque
 from threading import Lock
+from typing import Final
 
-import HABApp
 from HABApp.core.events import ValueUpdateEvent
 
+from ...core.internals import ItemRegistry
+from ...core.provider import HABAPP_PROVIDER
 from .bench_base import BenchBaseRule
 from .bench_times import BenchContainer, BenchTime
 
@@ -30,9 +32,10 @@ class HABAppBenchRule(BenchBaseRule):
         self.values = deque()
 
     def cleanup(self) -> None:
+        items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
         for n in self.name_list:
-            if HABApp.core.Items.item_exists(n):
-                HABApp.core.Items.pop_item(n)
+            if items.item_exists(n):
+                items.pop_item(n)
 
     def set_up(self) -> None:
         self.cleanup()

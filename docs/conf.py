@@ -274,6 +274,9 @@ TYPE_REPLACEMENTS = {
 }
 
 
+NAME_REMOVE_INIT_ENDSWITH = ('Item', 'JobControl', 'Interface')
+
+
 def replace_node_contents(node: Node):
     """Find nodes with given `tag_matches` and `text_matches`. Recursively
     iterate children nodes.
@@ -294,7 +297,7 @@ def replace_node_contents(node: Node):
     replacement = TYPE_REPLACEMENTS.get(node_text)
 
     # https://www.sphinx-doc.org/en/master/extdev/nodes.html
-    if isinstance(node, desc_signature) and node.attributes.get('fullname', '').endswith(('Item', 'JobControl')):
+    if isinstance(node, desc_signature) and node.attributes.get('fullname', '').endswith(NAME_REMOVE_INIT_ENDSWITH):
         log(f'Removing constructor signature of {", ".join(node.attributes["ids"])}')
         assert len(node.children) == 3
         signature_node = node.children[2]

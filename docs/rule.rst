@@ -30,7 +30,7 @@ using an IDE!
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
         # ------------ hide: stop ------------
 
         from HABApp.core.items import Item
@@ -39,8 +39,8 @@ using an IDE!
         print(my_item)
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
 If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
@@ -51,7 +51,7 @@ It is possible to check the item value by comparing it
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
 
         from HABApp.core.items import Item
         Item.get_create_item('MyItem', initial_value=5)
@@ -69,8 +69,8 @@ It is possible to check the item value by comparing it
             pass    # do something
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 An overview over the item types can be found on :ref:`the HABApp item section <HABAPP_ITEM_TYPES>`,
 :ref:`the openHAB item section <OPENHAB_ITEM_TYPES>` and the :ref:`the mqtt item section <MQTT_ITEM_TYPES>`
@@ -93,10 +93,10 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
     :caption: Example
 
     # ------------ hide: start ------------
-    async def run():
-
-        import time, HABApp
-        HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('Item', 'MyItem')
         # ------------ hide: stop -------------
         from HABApp import Rule
         from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent, ValueChangeEventFilter, ValueUpdateEventFilter
@@ -122,8 +122,8 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
         MyRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 Additionally there is the possibility to filter not only on the event type but on the event values, too.
 This can be achieved by passing the value to the event filter.
@@ -174,10 +174,10 @@ Example
     :caption: Example
 
     # ------------ hide: start ------------
-    async def run():
-
-        import time, HABApp
-        HABApp.core.Items.add_item(HABApp.core.items.Item('MyItem'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('Item', 'MyItem')
         # ------------ hide: stop -------------
         from HABApp import Rule
         from HABApp.core.events import EventFilter, ValueUpdateEventFilter, ValueUpdateEvent, OrFilterGroup
@@ -214,8 +214,8 @@ Example
         MyRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 .. py:currentmodule:: HABApp.rule.scheduler.job_builder
 
@@ -258,7 +258,7 @@ Example
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
         # ------------ hide: stop -------------
         from HABApp import Rule
         from HABApp.rule.scheduler import filter, trigger
@@ -343,8 +343,8 @@ Example
         MyTriggerRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 Reoccuring Jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -20,16 +20,10 @@ Get an even when the item is constant for 5 and for 10 seconds.
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-
-        from unittest.mock import Mock
-        import time, HABApp, eascheduler
-
-        # We have no event loop running so this doesn't work. We patch it so this example doesn't raise an error
-        my_item = HABApp.core.items.Item('test_watch')
-        my_item.watch_change = lambda x: Mock(spec=HABApp.core.items.base_item_watch.ItemNoUpdateWatch)
-
-        HABApp.core.Items.add_item(my_item)
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('Item', 'test_watch')
         # ------------ hide: stop -------------
         import HABApp
         from HABApp.core.items import Item
@@ -63,11 +57,13 @@ Get an even when the item is constant for 5 and for 10 seconds.
         MyRule()
 
     # ------------ hide: start ------------
-        HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 5))
-        HABApp.core.EventBus.post_event('test_watch', ItemNoChangeEvent('test_watch', 10))
+        from HABApp.core.internals import EventBus
+        eb = provider.get_existing(EventBus)
+        eb.post_event('test_watch', ItemNoChangeEvent('test_watch', 5))
+        eb.post_event('test_watch', ItemNoChangeEvent('test_watch', 10))
 
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Turn something off after movement
@@ -79,7 +75,7 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
         import time, HABApp
         from HABApp.core.items import Item
         Item.get_create_item('movement_sensor1')
@@ -115,8 +111,8 @@ Turn a device off 30 seconds after one of the movement sensors in a room signals
         MyCountdownRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Process Errors in Rules
@@ -130,9 +126,13 @@ It also uses the built in :ref:`rate limiter <RATE_LIMITER>` to limit the amount
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-    # ------------ hide: stop -------------
+    async def run(provider):
+        import logging
 
+        # disable logging of the exception because the logger.error goes to stderr
+        logging.getLogger('HABApp.Worker').setLevel(logging.CRITICAL)
+
+    # ------------ hide: stop -------------
         import HABApp
         from HABApp.core.events.habapp_events import HABAppException
         from HABApp.core.events import EventFilter
@@ -177,5 +177,5 @@ It also uses the built in :ref:`rate limiter <RATE_LIMITER>` to limit the amount
         FaultyRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run(), ignored_exceptions=(ZeroDivisionError,))
+    import doc_runner
+    doc_runner.run(run, ignore_errors=(ZeroDivisionError, ))

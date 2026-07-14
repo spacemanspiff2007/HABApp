@@ -119,6 +119,7 @@ To access items from openHAB use the correct openHAB item type (see :ref:`the op
     import sys
     root = logging.getLogger('HABApp')
     root.setLevel(logging.DEBUG)
+    logging.getLogger('HABApp.Items').setLevel(logging.INFO)
 
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
@@ -151,16 +152,15 @@ To access items from openHAB use the correct openHAB item type (see :ref:`the op
 
                # The item value can be used in comparisons through this shortcut ...
                if self.my_item == 'Change':
-                   print('Item value is "Change"')
+                   print('Item is equal "Change"')
                # ... which is the same as this:
                if self.my_item.value == 'Change':
-                   print('Item.value is "Change"')
+                   print('Item.value is equal "Change"')
 
 
        MyFirstRule()
 
        # ------------ hide: start ------------
-       await time_control.advance(1)
 
     import doc_runner
     doc_runner.run(run)

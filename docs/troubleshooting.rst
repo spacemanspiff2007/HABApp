@@ -95,7 +95,7 @@ Additional benefit is proper tracebacks in case of Exception.
     def library_function(cb):
         pass
 
-    async def run():
+    async def run(provider):
     # ------------ hide: stop -------------
         from HABApp.rule import Rule, in_thread
 
@@ -123,5 +123,5 @@ Additional benefit is proper tracebacks in case of Exception.
         MyRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)

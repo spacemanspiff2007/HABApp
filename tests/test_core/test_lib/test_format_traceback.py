@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Final
 
 import pytest
 from easyconfig import create_app_config
@@ -12,6 +13,7 @@ from HABApp.core.internals.item_registry import ItemRegistry
 from HABApp.core.items import Item
 from HABApp.core.lib import format_exception
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_suppressed_habapp_file
+from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers.traceback import remove_dyn_parts_from_traceback
 
 
@@ -162,29 +164,13 @@ ZeroDivisionError: division by zero'''
 
 
 def func_ir() -> None:
+    items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
 
-    from HABApp.core.items import Item
-    Items = HABApp.core.Items
-
-    Items.add_item(Item('asdf', event_bus=None))
-    Items.get_item('1234')
-
-
-@pytest.fixture
-def _setup_ir(clean_objs, monkeypatch, ir, eb):
-
-    from HABApp.core.internals.proxy import ConstProxyObj
-    assert isinstance(HABApp.core.Items, ConstProxyObj)
-    assert isinstance(HABApp.core.EventBus, ConstProxyObj)
-
-    monkeypatch.setattr(HABApp.core, 'Items', ir)
-    monkeypatch.setattr(HABApp.core, 'EventBus', eb)
-
-    yield
+    items.get_item('1234')
 
 
 @pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
-def test_skip_objs(_setup_ir) -> None:
+def test_skip_objs() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_ir)
     print('\n\n-')
@@ -232,7 +218,7 @@ Traceback (most recent call last):
     func()
     ~~~~^^
   File "test_core/test_lib/test_format_traceback.py", line x, in func_ir
-    Items.get_item('1234')
+    items.get_item('1234')
     ~~~~~~~~~~~~~~^^^^^^^^
   File "internals/item_registry/item_registry.py", line x, in get_item
     raise ItemNotFoundException(name) from None

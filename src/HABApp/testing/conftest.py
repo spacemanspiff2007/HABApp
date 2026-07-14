@@ -1,3 +1,5 @@
+# ruff: noqa: PLR0913, S101
+
 import os
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
@@ -15,8 +17,7 @@ from whenever._utils import _TimePatch
 import HABApp.rule.rule as rule_module
 from HABApp.config import ApplicationConfig
 from HABApp.config.models.mqtt import MqttConfig
-from HABApp.core.internals import EventBus, ItemRegistry
-from HABApp.core.internals.function_executor.testing import TestingExecutorFactory
+from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
 from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.lib import DebouncedCallRegistry
 from HABApp.core.lib.asyncio import AsyncioProvider
@@ -27,6 +28,7 @@ from HABApp.mqtt.connection.messages import MessagesHandler as MqttMessagesHandl
 from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.rule.rule_hook import HABAppRuleHook
+from HABApp.testing.executor import TestingExecutorFactory
 from HABApp.testing.inspect_habapp import find_in_modules
 from HABApp.testing.items import TestingItemFactory, TestingItems
 from HABApp.testing.mqtt import MqttLoopbackQueue
@@ -122,7 +124,7 @@ def testing_scheduler(monkeypatch: pytest.MonkeyPatch,
 
     scheduler: Final = TestingScheduler(asyncio_provider)
 
-    def func(event_loop: Any, enabled: Any = None):
+    def func(event_loop: Any, enabled: Any = None) -> TestingScheduler:
         return scheduler
 
     monkeypatch.setattr('HABApp.rule.scheduler.job_builder.AsyncHABAppScheduler', func)
@@ -147,7 +149,7 @@ async def habapp_provider(  # noqa: PLR0913
         monkeypatch: pytest.MonkeyPatch, habapp_provider_modules: tuple[tuple[ModuleType, str, Any], ...],
         item_registry: ItemRegistry, event_bus: EventBus, item_times_backup: ItemTimesBackup,
         asyncio_provider: AsyncioTestingProvider, debounced_call_registry: DebouncedCallRegistry,
-        interface_mqtt: MqttInterface
+        interface_mqtt: MqttInterface, testing_executor_factory: TestingExecutorFactory
 ) -> AsyncGenerator[HabAppObjProvider, Any]:
 
     provider: Final = HabAppObjProvider()
@@ -161,6 +163,7 @@ async def habapp_provider(  # noqa: PLR0913
     provider.add_object(asyncio_provider, AsyncioProvider)
     provider.add_object(debounced_call_registry, DebouncedCallRegistry)
     provider.add_object(interface_mqtt, MqttInterface)
+    provider.add_object(testing_executor_factory, ExecutorFactory)
 
     async with provider:
         yield provider
@@ -233,12 +236,13 @@ def interface_mqtt(interface_mqtt_async: MqttAsyncInterface, mqtt_msg_handler: M
     return i
 
 
-
 @pytest.fixture
-def testing_item_factory(event_bus: EventBus, oh_item_registry_handler: OhItemRegistryHandler,
+def testing_item_factory(event_bus: EventBus, item_registry: ItemRegistry,
+                         oh_item_registry_handler: OhItemRegistryHandler,
                          interface_oh: OpenHabSyncInterface, interface_mqtt: MqttInterface) -> TestingItemFactory:
     return TestingItemFactory(
-        event_bus=event_bus, oh_registry_handler=oh_item_registry_handler, if_oh=interface_oh, if_mqtt=interface_mqtt
+        event_bus=event_bus, item_registry=item_registry,
+        oh_registry_handler=oh_item_registry_handler, if_oh=interface_oh, if_mqtt=interface_mqtt
     )
 
 
@@ -253,9 +257,9 @@ async def create_testing_items(testing_items: TestingItems, testing_item_factory
 
 
 @pytest.fixture
-async def create_executor_factory(event_bus: EventBus) -> AsyncGenerator[TestingExecutorFactory, Any]:
+async def testing_executor_factory(event_bus: EventBus) -> AsyncGenerator[TestingExecutorFactory, Any]:
 
-    f = TestingExecutorFactory(event_bus)
+    f: Final = TestingExecutorFactory(event_bus)
 
     yield f
 
@@ -267,7 +271,8 @@ async def rule_hook(
         monkeypatch: pytest.MonkeyPatch, item_registry: ItemRegistry,
         event_bus: EventBus, rule_registry: RuleRegistry,
         interface_oh: OpenHabSyncInterface, interface_oh_async: OpenHabAsyncInterface,
-        interface_mqtt: MqttInterface, interface_mqtt_async: MqttAsyncInterface
+        interface_mqtt: MqttInterface, interface_mqtt_async: MqttAsyncInterface,
+        testing_executor_factory: TestingExecutorFactory
 ) -> AsyncGenerator[HABAppRuleHook, Any]:
 
     # Patch the hook so we can instantiate the rules
@@ -280,7 +285,7 @@ async def rule_hook(
         None,
         item_registry=item_registry,
         event_bus=event_bus,
-        executor_factory=TestingExecutorFactory(event_bus),
+        executor_factory=testing_executor_factory,
         oh_interface_sync=interface_oh,
         oh_interface_async=interface_oh_async,
         mqtt_interface_sync=interface_mqtt,
@@ -297,7 +302,6 @@ async def rule_hook(
 
 __all__ = (
     'asyncio_provider',
-    'create_executor_factory',
     'create_testing_items',
     'debounced_call_registry',
     'event_bus',
@@ -319,6 +323,7 @@ __all__ = (
     'rule_hook',
     'rule_registry',
     'set_scheduler_config',
+    'testing_executor_factory',
     'testing_item_factory',
     'testing_items',
     'testing_scheduler',

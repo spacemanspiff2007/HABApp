@@ -6,6 +6,7 @@ from pathlib import Path
 
 import HABApp
 from HABApp.core.asyncio import run_coro_from_thread
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.handler import OhClientSession
 from HABApp.openhab.items import Thing
@@ -44,7 +45,7 @@ def get_random_string(length: int = 10) -> str:
 
 
 def find_astro_sun_thing(*, create: bool = True) -> str:
-    items = HABApp.core.Items.get_items()
+    items = HABAPP_PROVIDER.get_existing(ItemRegistry)
     for item in items:
         if isinstance(item, Thing) and item.name.startswith('astro:sun'):
             return item.name

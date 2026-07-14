@@ -347,10 +347,10 @@ This example shows how to fade a Dimmer from 0 to 100 in 30 secs
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-
-        import HABApp
-        HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('DimmerItem', 'Dimmer1')
         # ------------ hide: stop -------------
 
         from HABApp import Rule
@@ -373,8 +373,8 @@ This example shows how to fade a Dimmer from 0 to 100 in 30 secs
         FadeExample()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run(), process_events=False)
+    import doc_runner
+    doc_runner.run(run)
 
 This example shows how to fade three values together (e.g. for an RGB strip)
 
@@ -382,9 +382,10 @@ This example shows how to fade three values together (e.g. for an RGB strip)
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-        import HABApp
-        HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('DimmerItem', 'Dimmer1')
     # ------------ hide: stop -------------
 
         from HABApp import Rule
@@ -411,8 +412,8 @@ This example shows how to fade three values together (e.g. for an RGB strip)
         Fade3Example()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run(), process_events=False)
+    import doc_runner
+    doc_runner.run(run)
 
 
 Documentation
@@ -435,11 +436,12 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-        import HABApp
-        HABApp.core.Items.add_item(HABApp.openhab.items.SwitchItem('RoomLights'))
-        HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor1'))
-        HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor2'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('Switch', 'RoomLights')
+        await factory.create('Number', 'MovementSensor1')
+        await factory.create('Number', 'MovementSensor2')
     # ------------ hide: stop -------------
         from datetime import time
 
@@ -476,8 +478,8 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
         EventListenerGroupExample()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Documentation
@@ -496,7 +498,7 @@ Basic Example
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
     # ------------ hide: stop -------------
         import HABApp
         from HABApp.core.events import ValueUpdateEventFilter
@@ -535,8 +537,8 @@ Basic Example
         MyMultiModeItemTestRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 
@@ -556,7 +558,7 @@ Advanced Example
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-    async def run():
+    async def run(provider):
     # ------------ hide: stop -------------
         import logging
         import HABApp
@@ -622,8 +624,8 @@ Advanced Example
         MyMultiModeItemTestRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Example SwitchItemValueMode
@@ -634,11 +636,10 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-        import HABApp
-
-        from HABApp.openhab.items import SwitchItem
-        HABApp.core.Items.add_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('Switch', 'Automatic_Enabled', value='ON')
     # ------------ hide: stop -------------
         import HABApp
         from HABApp.openhab.items import SwitchItem
@@ -673,8 +674,8 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
         MyMultiModeItemTestRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Documentation

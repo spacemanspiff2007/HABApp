@@ -16,7 +16,7 @@ class MqttPublishOptions:
 
     __slots__ = ('_interface', '_qos', '_retain', '_topic')
 
-    def __init__(self, topic: str, *, qos: QOS | None, retain: bool | None,
+    def __init__(self, topic: str, *, qos: QOS | None = None, retain: bool | None = None,
                  interface: MqttInterface | MqttAsyncInterface) -> None:
         if not isinstance(topic, str):
             raise TypeError()

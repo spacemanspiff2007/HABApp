@@ -48,7 +48,7 @@ class FunctionExecutorBase[**P, R](ContextProvidingObj):
 
     def process_exception(self, e: Exception, *args: Any, **kwargs: Any) -> None:
 
-        lines = format_exception(e)
+        lines: Final = format_exception(e)
 
         # Log Exception
         self.log.error(f'Error in {self.name:s}: {e}')

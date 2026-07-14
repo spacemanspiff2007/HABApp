@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from HABApp.core.internals.function_executor.testing import TestingExecutorFactory
+from HABApp.testing.executor import TestingExecutorFactory
 
 
 if TYPE_CHECKING:

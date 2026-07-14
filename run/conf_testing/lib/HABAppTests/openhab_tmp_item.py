@@ -4,10 +4,11 @@ from collections.abc import Generator
 from functools import wraps
 from time import monotonic
 from types import TracebackType
-from typing import Any, NotRequired, Self, TypedDict, Unpack
+from typing import Any, Final, NotRequired, Self, TypedDict, Unpack
 
 import HABApp
 from HABApp.core.asyncio import AsyncContextError, thread_context
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS
@@ -46,9 +47,10 @@ class OpenhabTmpItemBase:
         return self._name
 
     def _wait_until_item_exists(self) -> Generator[float, Any, Any]:
+        items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
         # wait max 1 sec for the item to be created
         stop = monotonic() + 1.5
-        while not HABApp.core.Items.item_exists(self.name):
+        while not items.item_exists(self.name):
             if monotonic() > stop:
                 msg = f'Item {self.name} was not found!'
                 raise TimeoutError(msg)

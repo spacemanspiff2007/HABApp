@@ -14,7 +14,7 @@ Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
         import HABApp
         from HABApp.parameters.parameters import _PARAMETERS
         _PARAMETERS['param_file_testrule'] = {'min_value': 10, 'Rule A': {'subkey1': {'subkey2': ['a', 'b', 'c']}}}
@@ -53,10 +53,12 @@ Currently there are is :class:`~HABApp.parameters.Parameter` and :class:`~HABApp
         MyRuleWithParameters()
 
     # ------------ hide: start ------------
-        HABApp.core.EventBus.post_event('test_watch', HABApp.core.events.ValueChangeEvent('test_item', 5, 6))
+        from HABApp.core.internals import EventBus
+        eb = provider.get_existing(EventBus)
+        eb.post_event('test_watch', HABApp.core.events.ValueChangeEvent('test_item', 5, 6))
 
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Created file:
@@ -95,7 +97,7 @@ Just add the "reloads on" entry to the file.
     :caption: rule
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
         from HABApp.parameters.parameters import _PARAMETERS
         _PARAMETERS['my_param'] = {'key1': {'v': 10}, 'key2': {'v': 12}}
 
@@ -114,8 +116,8 @@ Just add the "reloads on" entry to the file.
             MyRule(k, v)
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Parameter classes
