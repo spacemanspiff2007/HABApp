@@ -1,5 +1,4 @@
 from .context import AutoContextBoundObj, Context, ContextBoundObj, ContextProvidingObj, get_current_context
-from .proxy import setup_internals, uses_get_item, uses_item_registry, uses_post_event
 
 
 # isort: split

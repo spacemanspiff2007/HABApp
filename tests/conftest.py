@@ -10,7 +10,7 @@ import pytest
 
 import HABApp
 from HABApp.core.files import FileManager
-from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.provider import HABAPP_PROVIDER
@@ -87,22 +87,6 @@ async def asyncio_provider():
 @pytest.fixture
 def file_manager(eb: EventBus, asyncio_provider: AsyncioProvider) -> FileManager:
     return FileManager(None, eb, asyncio_provider)
-
-
-@pytest.fixture(autouse=True)
-def clean_objs(ir: ItemRegistry, eb: EventBus, file_manager: FileManager, request):
-    markers = request.node.own_markers
-    for marker in markers:
-        if marker.name == 'no_internals':
-            yield None
-            return None
-
-    restore = setup_internals(ir, eb, final=False)
-
-    yield
-
-    for r in restore:
-        r.restore()
 
 
 @pytest.fixture(autouse=True)

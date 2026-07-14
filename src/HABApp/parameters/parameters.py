@@ -4,10 +4,9 @@ from pydantic import BaseModel
 
 from HABApp.core.const.topics import TOPIC_FILES
 from HABApp.core.events.habapp_events import RequestFileLoadEvent
-from HABApp.core.internals import uses_post_event
+from HABApp.core.internals import EventBus
+from HABApp.core.provider import HABAPP_PROVIDER
 
-
-post_event = uses_post_event()
 
 _PARAMETERS: dict[str, dict | list | BaseModel] = {}
 _VALIDATORS: dict[str, BaseModel] = {}
@@ -57,7 +56,7 @@ def set_file_validator(filename: str, model: BaseModel | None) -> None:
         return None
 
     log.debug(f'Validator for {filename} changed')
-    post_event(TOPIC_FILES, RequestFileLoadEvent(filename))
+    HABAPP_PROVIDER.get_existing(EventBus).post_event(TOPIC_FILES, RequestFileLoadEvent(filename))
 
 
 def add_parameter(file: str, *keys, default_value):

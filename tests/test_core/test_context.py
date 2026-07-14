@@ -5,8 +5,8 @@ from unittest.mock import Mock
 import pytest
 
 import HABApp
-from HABApp.core import EventBus
 from HABApp.core.asyncio import AsyncContextError, run_coro_from_thread, thread_context
+from HABApp.core.internals import EventBus
 from HABApp.core.wrapper import in_thread
 
 

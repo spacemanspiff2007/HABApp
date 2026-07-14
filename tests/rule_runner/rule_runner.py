@@ -16,8 +16,7 @@ import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.job_builder as job_builder_module
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.files import FileManager
-from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.internals.event_bus import EventBusListenerBase
 from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.lib.exceptions.format import fallback_format
@@ -118,8 +117,6 @@ class SimpleRuleRunner:
         ir = ItemRegistry()
         eb = EventBus()
         async_provider = AsyncioProvider()
-        file_manager = FileManager(None, eb, async_provider)
-        self.restore = setup_internals(ir, eb, final=False)
 
         # setup so we capture errors / warnings
         eb.add_listener(AppendListener(TOPIC_WARNINGS, self._warnings))

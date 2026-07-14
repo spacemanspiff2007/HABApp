@@ -13,20 +13,19 @@ from typing import ParamSpec, TypeVar, overload
 from HABApp.core.asyncio import loop_context, thread_context
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.internals import uses_post_event
+from HABApp.core.internals import EventBus
 from HABApp.core.lib import format_exception, get_obj_name
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 log = logging.getLogger('HABApp')
-
-post_event = uses_post_event()
 
 
 T = TypeVar('T')  # the callable/awaitable return type
 P = ParamSpec('P')  # the callable parameters
 
 
-def process_exception(func: Callable | str, e: Exception,
+def process_exception(func: Callable | str, e: Exception, *,
                       do_print=False, logger: logging.Logger = log) -> None:
     lines = format_exception(e)
 
@@ -42,7 +41,9 @@ def process_exception(func: Callable | str, e: Exception,
         logger.error(line)
 
     # send Error to internal event bus, so we can reprocess it and notify the user
-    post_event(TOPIC_ERRORS, HABAppException(func_name=func_name, exception=e, traceback='\n'.join(lines)))
+    HABAPP_PROVIDER.get_existing(EventBus).post_event(
+        TOPIC_ERRORS, HABAppException(func_name=func_name, exception=e, traceback='\n'.join(lines))
+    )
 
 
 @overload
@@ -177,7 +178,7 @@ class ExceptionToHABApp:
                 self.log.log(self.log_level, line)
 
         # send Error to internal event bus so we can reprocess it and notify the user
-        post_event(
+        HABAPP_PROVIDER.get_existing(EventBus).post_event(
             TOPIC_WARNINGS if self.log_level == logging.WARNING else TOPIC_ERRORS,
             HABAppException(func_name=f_name, exception=exc_val, traceback='\n'.join(tb))
         )

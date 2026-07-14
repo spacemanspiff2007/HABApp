@@ -37,7 +37,7 @@ async def _mock_links() -> list[ItemChannelLinkResp]:
     ]
 
 
-async def test_link_warning(monkeypatch, ir: ItemRegistry, test_logs) -> None:
+async def test_link_warning(monkeypatch, ir: ItemRegistry, eb: EventBus, test_logs) -> None:
     ir.add_item(Item('item1', event_bus=Mock(EventBus)))
 
     mock_if = Mock(OpenHabAsyncInterface)

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import logging
+from asyncio import Task
 from typing import TYPE_CHECKING, Any, Final, override
 
+from HABApp.core.internals import Context
 from HABApp.core.internals.function_executor import FunctionExecutorBase
 from HABApp.core.internals.function_executor._base import SyncFunctionExecutorBase
 from HABApp.core.internals.function_executor.factory import ExecutorFactory
@@ -69,19 +72,24 @@ class TestingExecutorFactory(ExecutorFactory):
 
     def __init__(self, event_bus: EventBus) -> None:
         super().__init__(event_bus)
-        self.tasks: Final[set[asyncio.Task]] = set()
         self.errors: Final[list[Exception]] = []
+        self.tasks: Final[set[Task]] = set()
 
     @override
     def _create_coro_factory[**P, R](self, func: Callable[P, Coroutine[Any, Any, R]], *,
                                      name: str | None = None, logger: logging.Logger | None = None,
                                      context: Context | None = None) -> TestingCoroExecutor[P, R]:
-        return TestingCoroExecutor(func, name=name, logger=logger, context=context, factory=self)
+        return TestingCoroExecutor(
+            func, name=name, factory=self, logger=logger,
+            context=context,
+        )
 
     @override
     def _create_function_factory[**P, R](self, func: Callable[P, Coroutine[Any, Any, R]], *,
                                          name: str | None = None, logger: logging.Logger | None = None,
                                          warn_too_long: bool = True,
                                          context: Context | None = None) -> TestingCallableExecutor[P, R]:
-        return TestingCallableExecutor(func, name=name, logger=logger, warn_too_long=warn_too_long,
-                                       context=context, factory=self)
+        return TestingCallableExecutor(
+            func, name=name, factory=self, warn_too_long=warn_too_long, logger=logger,
+            context=context
+        )

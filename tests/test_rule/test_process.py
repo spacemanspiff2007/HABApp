@@ -1,7 +1,9 @@
 import asyncio
 import sys
+from collections.abc import AsyncGenerator
 from json import loads
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -31,10 +33,12 @@ async def rule_runner():
 
 
 @pytest.fixture
-async def rule(monkeypatch, rule_runner) -> ProcRule:
+async def rule(monkeypatch, rule_runner, eb) -> AsyncGenerator[ProcRule, Any]:
     monkeypatch.setattr(HABApp.CONFIG, '_file_path', Path(__file__).with_name('config.yml'))
 
-    return ProcRule()
+    yield ProcRule()
+
+    eb.errors.clear()
 
 
 @pytest.mark.no_internals

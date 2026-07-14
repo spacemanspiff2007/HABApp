@@ -7,8 +7,9 @@ from eascheduler.job_control.base import BaseControl
 from whenever import Instant
 
 from HABApp.core.asyncio import run_func_from_async
-from HABApp.core.internals import uses_item_registry
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import BaseValueItem
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.items import OpenhabItem
 
 
@@ -18,9 +19,6 @@ if TYPE_CHECKING:
 
     from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
     from eascheduler.jobs.base import JobBase
-
-
-Items = uses_item_registry()
 
 
 class HABAppBaseControl(BaseControl):
@@ -53,7 +51,14 @@ class HABAppBaseControl(BaseControl):
             self._cancel_timestamp_to_item(None)
             return None
 
-        self._item = Items.get_item(item if not isinstance(item, BaseValueItem) else item.name)
+        if isinstance(item, BaseValueItem):
+            self._item = item
+        else:
+            item = HABAPP_PROVIDER.get_existing(ItemRegistry).get_item(item)
+            if not isinstance(item, BaseValueItem):
+                raise TypeError()
+            self._item = item
+
         self._job.on_update.register(self._timestamp_to_item)
         self._job.on_finished.register(self._cancel_timestamp_to_item)
         # Update the item with the current timestamp
