@@ -165,12 +165,11 @@ ZeroDivisionError: division by zero'''
 
 def func_ir() -> None:
     items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
-
     items.get_item('1234')
 
 
 @pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
-def test_skip_objs() -> None:
+def test_skip_objs(ir) -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_ir)
     print('\n\n-')
@@ -184,32 +183,32 @@ File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 -->  x |         func()
      x |     except Exception as e:
    ------------------------------------------------------------
-     e = ItemNotFoundException('Item 1234 does not exist!')
+     e = ObjectDoesNotExistError('Object for ItemRegistry does not exist')
      func = <function func_ir at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
 File "test_core/test_lib/test_format_traceback.py", line x in func_ir
 --------------------------------------------------------------------------------
      x | def func_ir() -> None:
-     x |     from HABApp.core.items import Item
-     x |     Items = HABApp.core.Items
-     x |     Items.add_item(Item('asdf', event_bus=None))
--->  x |     Items.get_item('1234')
+-->  x |     items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+     x |     items.get_item('1234')
    ------------------------------------------------------------
-     HABApp.core.Items = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
-     Items = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+     HABAPP_PROVIDER = <HABApp.core.provider.provider.HabAppObjProvider object at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
-File "internals/item_registry/item_registry.py", line x in get_item
+File "core/provider/provider.py", line x in get_existing
 --------------------------------------------------------------------------------
-     x | def get_item(self, name: str) -> ItemRegistryItem:
-     x |     try:
-     x |         return self._items[name]
+     x | def get_existing(self, cls: type[T]) -> T:
+       (...)
+     x |         return self._created[cls]
      x |     except KeyError:
--->  x |         raise ItemNotFoundException(name) from None
+     x |         msg = f'Object for {cls.__name__} does not exist'
+-->  x |         raise ObjectDoesNotExistError(msg) from None
    ------------------------------------------------------------
-     name = '1234'
-     self = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+     cls = <class 'HABApp.core.internals.item_registry.item_registry.ItemRegistry'>
+     self = <HABApp.core.provider.provider.HabAppObjProvider object at 0xAAAAAAAAAAAAAAAA>
+     self._created = {<class 'HABApp.core.provider.provider.HabAppObjProvider'>: <HABApp.core.provider.provider.HabAppObjProvider object at 0xAAAAAAAAAAAAAAAA>, <class 'HABApp.core.items.base_item_times_data.ItemTimesBackup'>: <Mock spec='ItemTimesBackup' id='140147242873728'>}
+     msg = 'Object for ItemRegistry does not exist'
    ------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -218,11 +217,11 @@ Traceback (most recent call last):
     func()
     ~~~~^^
   File "test_core/test_lib/test_format_traceback.py", line x, in func_ir
-    items.get_item('1234')
-    ~~~~~~~~~~~~~~^^^^^^^^
-  File "internals/item_registry/item_registry.py", line x, in get_item
-    raise ItemNotFoundException(name) from None
-HABApp.core.errors.ItemNotFoundException: Item 1234 does not exist!'''
+    items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "core/provider/provider.py", line x, in get_existing
+    raise ObjectDoesNotExistError(msg) from None
+HABApp.core.provider.provider.ObjectDoesNotExistError: Object for ItemRegistry does not exist'''
 
 
 def multiline_obj_name() -> None:
