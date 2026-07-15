@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from whenever import Instant, seconds
 
@@ -45,11 +47,14 @@ async def test_timestamp_rule(capsys, habapp_provider: HabAppObjProvider, time_c
     )
 
 
+def ts_print(text: Any) -> None:
+    print(str(Instant.now().to_tz('UTC')).split('+')[0], text)
+
+
 class SchedulerRule(Rule):
     @staticmethod
     def print(text: str) -> None:
-        # cut away the utc timezone information
-        print(str(Instant.now().to_tz('utc')).split('+')[0], text)
+        ts_print(text)
 
     def __init__(self) -> None:
         super().__init__()
@@ -80,9 +85,7 @@ class ItemConstRule(Rule):
         item.post_value(1)
 
     def event(self, event: ItemNoUpdateEvent | ItemNoChangeEvent) -> None:
-        print(
-            str(Instant.now().to_tz('utc')).split('+')[0], event
-        )
+        ts_print(event)
 
 
 async def test_item_const_rule(capsys, time_control: UserTimeControl, rule_hook, eb) -> None:
@@ -118,14 +121,12 @@ class OhItemRule(Rule):
         self.run.soon(self.check_item)
 
     def event(self, event: ItemCommandEvent) -> None:
-        print(
-            str(Instant.now().to_tz('utc')).split('+')[0], event
-        )
+        ts_print(event)
 
     def check_item(self) -> None:
         assert self.item.is_on()
         assert self.nr_item == 15
-        print(str(Instant.now().to_tz('utc')).split('+')[0], 'Items Ok')
+        ts_print('Items Ok')
 
 
 async def test_oh_item_rule(capsys, time_control: UserTimeControl, rule_hook, eb) -> None:
@@ -159,13 +160,11 @@ class MqttItemRule(Rule):
         self.run.soon(self.check_item)
 
     def event(self, event: ItemCommandEvent) -> None:
-        print(
-            str(Instant.now().to_tz('utc')).split('+')[0], event
-        )
+        ts_print(event)
 
     def check_item(self) -> None:
         assert self.item == 123
-        print(str(Instant.now().to_tz('utc')).split('+')[0], 'Items Ok')
+        ts_print('Items Ok')
 
 
 async def test_mqtt_item_rule(capsys, time_control: UserTimeControl, rule_hook, eb) -> None:
