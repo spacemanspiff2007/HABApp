@@ -308,7 +308,7 @@ def _test_item_registry() -> None:
 
 
 @pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
-def test_omit_items() -> None:
+def test_omit_items(ir) -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(_test_item_registry)
     print('\n\n-')
