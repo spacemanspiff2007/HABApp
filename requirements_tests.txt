@@ -9,3 +9,4 @@
 packaging      == 26.0
 pytest         == 9.0
 pytest-asyncio == 1.3
+tzdata         == 2026.3
