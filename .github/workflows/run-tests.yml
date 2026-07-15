@@ -37,21 +37,9 @@ jobs:
         pip install -r requirements_tests.txt
     - name: Run tests with pytest
       run: python -m pytest
+      env:
+        PYTHONPATH: src
 
-  docs:
-    needs: pre-commit
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v6
-    - name: Setup Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.12'
-    - name: Install dependencies
-      run: |
-        pip install -r docs/requirements.txt -r requirements.txt
-    - name: Build docs
-      run: sphinx-build docs build_docs --color -b html -E -W -n --keep-going
 
   slotscheck:
     needs: pre-commit
@@ -68,3 +56,19 @@ jobs:
     - name: Run slotscheck
       working-directory: src
       run: python -m slotscheck HABApp --verbose
+
+
+  docs:
+    needs: [tests, slotscheck]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        pip install -r docs/requirements.txt -r requirements.txt
+    - name: Build docs
+      run: sphinx-build docs build_docs --color -b html -E -W -n --keep-going
