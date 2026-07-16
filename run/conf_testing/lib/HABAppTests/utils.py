@@ -45,7 +45,7 @@ def get_random_string(length: int = 10) -> str:
 
 
 def find_astro_sun_thing(*, create: bool = True) -> str:
-    items = HABAPP_PROVIDER.get_existing(ItemRegistry)
+    items = HABAPP_PROVIDER.get_existing(ItemRegistry).get_items()
     for item in items:
         if isinstance(item, Thing) and item.name.startswith('astro:sun'):
             return item.name
