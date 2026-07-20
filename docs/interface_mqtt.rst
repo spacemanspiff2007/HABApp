@@ -186,20 +186,25 @@ MqttPublishOptions
         from unittest.mock import MagicMock
         HABApp.mqtt.util.publish_options.publish = MagicMock()
     # ------------ hide: stop -------------
+        from HABApp import Rule
 
-        from HABApp.mqtt.util import MqttPublishOptions
 
-        topic = MqttPublishOptions('my/output/only/topic')
-        topic.publish('new_value')
+        class MyMqttRule(Rule):
+            def __init__(self):
+                super().__init__()
 
-        topic_qos = MqttPublishOptions('my/output/only/topic', qos=2)
-        topic_qos.publish('new_value')
+                topic = self.mqtt.publish_options('my/output/only/topic')
 
-        # create new through replace command wich will use qos=2 and retain=True
-        topic_qos_retain = topic_qos.replace(retain=True)
-        topic_qos_retain.publish('new_value')
+                topic_qos = self.mqtt.publish_options('my/output/only/topic', qos=2)
+                topic_qos.publish('new_value')
+
+                # create new through replace command wich will use qos=2 and retain=True
+                topic_qos_retain = topic_qos.replace(retain=True)
+                topic_qos_retain.publish('new_value')
 
     # ------------ hide: start ------------
+        MyMqttRule()
+
     import doc_runner
     doc_runner.run(run)
 
