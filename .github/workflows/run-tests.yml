@@ -72,6 +72,4 @@ jobs:
           pip install -r docs/requirements.txt -r requirements.txt
       - name: Build docs
         working-directory: src
-        run: sphinx-build docs build_docs --color -b html -E -W -n --keep-going
-    env:
-      CI: true
+        run: sphinx-build ../docs ../build_docs --color -b html -E -W -n --keep-going
