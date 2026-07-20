@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,51 +24,53 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.12', '3.13', '3.14']
+        python-version: [ '3.12', '3.13', '3.14' ]
 
     steps:
-    - uses: actions/checkout@v6
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        pip install -r requirements_tests.txt
-    - name: Run tests with pytest
-      run: python -m pytest
-      env:
-        PYTHONPATH: src
+      - uses: actions/checkout@v6
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements_tests.txt
+      - name: Run tests with pytest
+        run: python -m pytest
+        env:
+          PYTHONPATH: src
 
 
   slotscheck:
     needs: pre-commit
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
-    - name: Setup Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.14'
-    - name: Install dependencies
-      run: |
-        pip install slotscheck -r requirements.txt
-    - name: Run slotscheck
-      working-directory: src
-      run: python -m slotscheck HABApp --verbose
+      - uses: actions/checkout@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Install dependencies
+        run: |
+          pip install slotscheck -r requirements.txt
+      - name: Run slotscheck
+        working-directory: src
+        run: python -m slotscheck HABApp --verbose
 
 
   docs:
-    needs: [tests, slotscheck]
+    needs: [ tests, slotscheck ]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
-    - name: Setup Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.13'
-    - name: Install dependencies
-      run: |
-        pip install -r docs/requirements.txt -r requirements.txt
-    - name: Build docs
-      run: sphinx-build docs build_docs --color -b html -E -W -n --keep-going
+      - uses: actions/checkout@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: |
+          pip install -r docs/requirements.txt -r requirements.txt
+      - name: Build docs
+        run: sphinx-build docs build_docs --color -b html -E -W -n --keep-going
+    env:
+      CI: true
