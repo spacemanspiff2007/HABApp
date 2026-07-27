@@ -42,8 +42,8 @@ using an IDE!
     import doc_runner
     doc_runner.run(run)
 
-If an item value gets set there will be a :class:`~HABApp.core.ValueUpdateEvent` on the event bus.
-If it changes there will be additionally a :class:`~HABApp.core.ValueChangeEvent`, too.
+If an item value gets set there will be a :class:`~HABApp.core.events.ValueUpdateEvent` on the event bus.
+If it changes there will be additionally a :class:`~HABApp.core.events.ValueChangeEvent`, too.
 
 It is possible to check the item value by comparing it
 
@@ -83,7 +83,7 @@ The passed function will be called as soon as an event occurs and the event will
 into the function.
 
 There is the possibility to reduce the function calls to a certain event type with an additional event filter
-(typically :class:`~HABApp.core.ValueUpdateEventFilter` or :class:`~HABApp.core.ValueChangeEventFilter`).
+(typically :class:`~HABApp.core.events.ValueUpdateEventFilter` or :class:`~HABApp.core.events.ValueChangeEventFilter`).
 
 An overview over the events can be found on :ref:`the HABApp event section <HABAPP_EVENT_TYPES>`,
 :ref:`the openHAB event section <OPENHAB_EVENT_TYPES>` and the :ref:`the MQTT event section <MQTT_EVENT_TYPES>`

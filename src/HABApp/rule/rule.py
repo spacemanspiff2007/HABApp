@@ -161,7 +161,7 @@ class Rule(ContextProvidingObj):
         """Run another program
 
         :param callback: Function that will be called when the process has finished.
-                         First parameter takes a :class:`str` when :attr:`raw_info` is ``False`` (default) else
+                         First parameter takes a :class:`str` when ``raw_info`` is ``False`` (default) else
                          an instance of :class:`~HABApp.rule.FinishedProcessInfo`
         :param program: python module (path to file) or python package
         :param args: arguments passed to the module or to package
@@ -206,7 +206,7 @@ class Rule(ContextProvidingObj):
         to run the module or package.
 
         :param callback: Function that will be called when the process has finished.
-                         First parameter takes a :class:`str` when :attr:`raw_info` is ``False`` (default) else
+                         First parameter takes a :class:`str` when ``raw_info`` is ``False`` (default) else
                          an instance of :class:`~HABApp.rule.FinishedProcessInfo`
         :param module_or_package: python module (path to file) or python package (just the name)
         :param args: arguments passed to the module or to package

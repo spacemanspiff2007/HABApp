@@ -53,7 +53,7 @@ openHAB item types
 
 Description and example
 ======================================
-Items that are created from openHAB inherit all from :class:`~HABApp.openHAB.items.OpenhabItem` and
+Items that are created from openHAB inherit all from :class:`~HABApp.openhab.items.base_item.OpenhabItem` and
 provide convenience functions which simplify many things.
 
 Example:

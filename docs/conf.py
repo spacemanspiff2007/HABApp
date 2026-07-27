@@ -7,19 +7,21 @@
 # http://www.sphinx-doc.org/en/master/config
 
 
+import importlib
 import logging
 import os
 import re
 import sys
 from pathlib import Path
+from typing import Final
 
 import sphinx
 from docutils.nodes import Node, Text
 from sphinx.addnodes import desc_signature
 
 
-IS_RTD_BUILD = os.environ.get('READTHEDOCS', '-').lower() == 'true'
-IS_CI = os.environ.get('CI', '-') == 'true'
+IS_RTD_BUILD: Final = os.environ.get('READTHEDOCS', '-').lower() == 'true'
+IS_CI: Final = os.environ.get('CI', '-') == 'true'
 
 # https://www.sphinx-doc.org/en/master/extdev/logging.html
 sphinx_logger = sphinx.util.logging.getLogger('post')
@@ -77,7 +79,7 @@ extensions = [
     'sphinx_exec_code',
     'sphinx.ext.inheritance_diagram',
     'sphinxcontrib.autodoc_pydantic',
-    'sphinx_copybutton'
+    'sphinx_copybutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -341,11 +343,43 @@ def setup(app) -> None:
 if IS_RTD_BUILD:
     intersphinx_mapping = {
         'python': ('https://docs.python.org/3', None),
-        'whenever': ('https://whenever.readthedocs.io/en/stable', None)
+        'whenever': ('https://whenever.readthedocs.io/en/stable', None),
+        'eascheduler': ('https://eascheduler.readthedocs.io/en/latest/', None),
+        'pydantic': ('https://docs.pydantic.dev/latest', None),
+        'holidays': ('https://python-holidays.readthedocs.io/en/latest/', None),
     }
 
 # Don't show warnings for missing python references since these are created via intersphinx during the RTD build
-if not IS_RTD_BUILD:
-    nitpick_ignore_regex.append(
-        (re.compile(r'py:data|py:class'), re.compile(r'typing\..+'))
+else:
+    nitpick_ignore_regex.extend((
+        # python datatypes
+        (re.compile(r'py:class'), re.compile(r'^(typing|collections|re|datetime).*$')),
+
+        # external libraries
+        (re.compile(r'py:class'), re.compile(r'^(whenever|eascheduler|pydantic|holidays)\..+$')),
+
+        # openHAB response definitions
+        (re.compile(r'.+'), re.compile(r'^HABApp\.openhab\.definitions\..+')),
+
+        # this is just a sentinel, don't link to it
+        (re.compile(r'.+'), re.compile(r'^.+_MissingType.*')),
+
+        # don't document mixins, these are documented through the item class
+        (re.compile(r'.+'), re.compile(r'^HABApp\.openhab\.items\.commands\..+')),
+
+    ))
+
+    def assert_object_exists(dotted_path: str) -> bool:
+        module_path, attr = dotted_path.rsplit('.', 1)
+        module = importlib.import_module(module_path)
+        assert hasattr(module, attr)
+
+    ignore_types: Final = (
+        'HABApp.util.multimode.mode_base.BaseMode',     # Documented through the corresponding Mode
+        'HABApp.openhab.events.thing_events.ThingRegistryBaseEvent',    # Only base class for Thing Events
+        'HABApp.core.events.filter.event.TypeBoundEventFilter',
     )
+
+    for ignore_type in ignore_types:
+        assert_object_exists(ignore_type)
+        nitpick_ignore_regex.append((re.compile(r'py:class'), re.compile(re.escape(ignore_type))))

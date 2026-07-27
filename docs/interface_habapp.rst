@@ -70,6 +70,16 @@ HSB types can be sent directly to openHAB and will be converted accordingly.
    :member-order: groupwise
 
 
+Point
+======================================
+Datatype for coordinates handling
+
+.. autoclass:: HABApp.core.types.Point
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
 .. _HABAPP_ITEM_TYPES:
 
 **************************************
