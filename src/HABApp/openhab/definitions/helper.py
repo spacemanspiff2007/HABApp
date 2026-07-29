@@ -45,7 +45,7 @@ def convert_to_oh_str(obj: Any) -> str:
     raise ValueError()
 
 
-def map_null_str(value: str) -> str | None:
+def map_null_str(value: str | None) -> str | None:
     if value in ('NULL', 'UNDEF'):
         return None
     return value

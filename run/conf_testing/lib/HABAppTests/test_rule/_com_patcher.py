@@ -128,15 +128,14 @@ class WebsocketPatcher(BasePatcher):
             except ValueError:
                 return text
 
-        class WrappedAdapter:
-            @staticmethod
-            def validate_json(validate_input) -> Any:
-                self.log(f'{"IN":^6s} {prettify(validate_input):s}')
-                return adapter.validate_json(validate_input)
+        def validate_json(validate_input: str) -> Any:
+            self.log(f'{"IN":^6s} {prettify(validate_input):s}')
+            return original_validate_json(validate_input)
 
         module = HABApp.openhab.connection.plugins.websockets
-        adapter = module.OPENHAB_EVENT_TYPE_ADAPTER
-        self.monkeypatch.setattr(module, 'OPENHAB_EVENT_TYPE_ADAPTER', WrappedAdapter)
+        adapter: Final = module.OPENHAB_EVENT_TYPE_ADAPTER
+        original_validate_json: Final = adapter.validate_json
+        self.monkeypatch.setattr(adapter, 'validate_json', validate_json)
 
         def log_send(func):
             async def _sender(text):

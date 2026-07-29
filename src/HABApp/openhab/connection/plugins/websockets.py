@@ -93,6 +93,7 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
             type='WebSocketEvent',
             topic='openhab/websocket/heartbeat',
             payload='PING',
+            source='HABApp',
         ).model_dump_json(by_alias=True, exclude_none=True)
 
         stop_reason: str = ''

@@ -1,5 +1,7 @@
 from typing import Any, Final
 
+from whenever import Instant
+
 import HABApp.core
 
 from .base_event import OpenhabEvent
@@ -13,6 +15,10 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
+    def __init__(self, name: str, value: Any, *, last_state_update: Instant | None) -> None:
+        super().__init__(name, value)
+
+        self.last_state_update: Final = last_state_update
 
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
@@ -20,6 +26,12 @@ class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
+    def __init__(self, name: str, value: Any, old_value: Any, *,
+                 last_state_update: Instant | None, last_state_change: Instant | None) -> None:
+        super().__init__(name, value, old_value)
+
+        self.last_state_update: Final = last_state_update
+        self.last_state_change: Final = last_state_change
 
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)

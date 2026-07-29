@@ -1,3 +1,5 @@
+from typing import Final
+
 from pydantic import BaseModel as _BaseModel
 from pydantic import ConfigDict, Field, PlainSerializer
 from pydantic_core import to_json
@@ -29,7 +31,7 @@ MSG_CTR: int = 1
 def msg_id() -> str:
     global MSG_CTR
 
-    value = MSG_CTR
+    value: Final = MSG_CTR
 
     MSG_CTR += 1
     if MSG_CTR >= 1_000_000:  # noqa: PLR2004

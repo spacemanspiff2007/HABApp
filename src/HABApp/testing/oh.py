@@ -83,6 +83,10 @@ class OhWebsocketLoopbackQueue:
         self._event_bus.post_event(name, ItemStateEvent(name=name, value=value))
 
         if changed:
-            self._event_bus.post_event(name, ItemStateChangedEvent(name=name, value=value, old_value=old_value))
+            self._event_bus.post_event(
+                name, ItemStateChangedEvent(
+                    name=name, value=value, old_value=old_value, last_state_update=None, last_state_change=None
+                )
+            )
 
         return None

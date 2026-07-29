@@ -2,6 +2,7 @@ import datetime
 import inspect
 
 import pytest
+from whenever import ZonedDateTime
 
 import HABApp.openhab.events as events_module
 from HABApp.openhab.definitions.websockets import OPENHAB_EVENT_TYPE_ADAPTER
@@ -82,6 +83,19 @@ def test__ItemStateUpdatedEvent() -> None:  # noqa: N802
     assert event.name == 'my_item_name'
     assert event.value == 9.5
     assert str(event) == '<ItemStateUpdatedEvent name: my_item_name, value: 9.5>'
+
+    event = get_event({
+        'type': 'ItemStateUpdatedEvent',
+        'topic': 'openhab/items/my_item_name/stateupdated',
+        'payload': '{"type":"String","value":"a","lastStateUpdate":"2026-06-15T12:13:14.123456+02:00[Europe/Berlin]"}'
+    })
+    assert isinstance(event, ItemStateUpdatedEvent)
+    assert event.name == 'my_item_name'
+    assert event.value == 'a'
+    assert str(event) == '<ItemStateUpdatedEvent name: my_item_name, value: a>'
+    assert event.last_state_update == ZonedDateTime(
+        2026, 6, 15, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
+    ).to_instant()
 
 
 # noinspection PyPep8Naming
@@ -240,6 +254,26 @@ def test__ItemStateChangedEvent2() -> None:  # noqa: N802
     assert event.old_value == 9.5
     assert event.old_value.unit == '°C'
     assert str(event) == '<ItemStateChangedEvent name: TestDateTimeTOGGLE, value: 7.5 °C, old_value: 9.5 °C>'
+
+    event = get_event({
+        'type': 'ItemStateChangedEvent',
+        'topic': 'openhab/items/my_item_name/statechanged',
+        'payload': (
+            '{"type":"String","value":"b","oldType":"String","oldValue":"a",'
+            '"lastStateUpdate":"2026-06-15T12:13:14.123456+02:00[Europe/Berlin]",'
+            '"lastStateChange":"2026-06-14T12:13:14.123456+02:00[Europe/Berlin]"'
+            '}')
+    })
+    assert isinstance(event, ItemStateChangedEvent)
+    assert event.name == 'my_item_name'
+    assert event.value == 'b'
+    assert event.old_value == 'a'
+    assert event.last_state_update == ZonedDateTime(
+        2026, 6, 15, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
+    ).to_instant()
+    assert event.last_state_change == ZonedDateTime(
+        2026, 6, 14, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
+    ).to_instant()
 
 
 # noinspection PyPep8Naming

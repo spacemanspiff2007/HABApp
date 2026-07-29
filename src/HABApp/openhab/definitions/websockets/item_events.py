@@ -16,7 +16,12 @@ from HABApp.openhab.events.item_events import ItemStateUpdatedEvent as TargetIte
 from HABApp.openhab.events.item_events import ItemUpdatedEvent as TargetItemUpdatedEvent
 
 from .base import SERIALIZE_TO_JSON_STR, BaseEvent, BaseModel, BaseOutEvent
-from .item_value_types import OPENHAB_VALUE_TYPE_ADAPTER, OpenHabValueType
+from .item_value_types import (
+    OPENHAB_EVENT_VALUE_LAST_CHANGE_TYPE_ADAPTER,
+    OPENHAB_VALUE_TYPE_ADAPTER,
+    OpenHabEventValueLastUpdateType,
+    OpenHabValueType,
+)
 
 
 class ValueChangedPayload(BaseModel):
@@ -40,13 +45,14 @@ class ItemStateEvent(BaseEvent):
 
 class ItemStateUpdatedEvent(BaseEvent):
     type: Literal['ItemStateUpdatedEvent']
-    payload: Json[OpenHabValueType]
+    payload: Json[OpenHabEventValueLastUpdateType]
 
     @override
     def to_event(self) -> TargetItemStateUpdatedEvent:
         payload = self.payload
         return TargetItemStateUpdatedEvent(
-            name=self.topic[14:-13], value=payload.get_value()
+            name=self.topic[14:-13], value=payload.get_value(),
+            last_state_update=payload.last_update.to_instant() if payload.last_update else None
         )
 
 
@@ -69,12 +75,16 @@ class ItemStateChangedEvent(BaseEvent):
     @override
     def to_event(self) -> TargetItemStateChangedEvent:
         payload = self.payload
-        old = OPENHAB_VALUE_TYPE_ADAPTER.validate_python({'type': payload.pop('oldType'), 'value': payload.pop('oldValue')})
-        new = OPENHAB_VALUE_TYPE_ADAPTER.validate_python(payload)
+        old = OPENHAB_VALUE_TYPE_ADAPTER.validate_python(
+            {'type': payload.pop('oldType'), 'value': payload.pop('oldValue')}
+        )
+        new = OPENHAB_EVENT_VALUE_LAST_CHANGE_TYPE_ADAPTER.validate_python(payload)
         return TargetItemStateChangedEvent(
             name=self.topic[14:-13],
             value=new.get_value(),
-            old_value=old.get_value()
+            old_value=old.get_value(),
+            last_state_change=new.last_change.to_instant() if new.last_change else None,
+            last_state_update=new.last_update.to_instant() if new.last_update else None
         )
 
 

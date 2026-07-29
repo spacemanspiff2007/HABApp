@@ -1,3 +1,6 @@
+from typing import Final
+
+import whenever
 from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
 from immutables import Map
 
@@ -21,6 +24,7 @@ class OpenhabItems(TestBaseRule):
 
         self.add_test('TestSmallValues', self.test_small_float_values)
         self.add_test('TestLastValue', self.test_last_value)
+        self.add_test('TestOhTimestamp', self.test_oh_timestamp)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -184,6 +188,33 @@ class OpenhabItems(TestBaseRule):
 
             for _ in range(3):
                 _send_and_check(3, None)
+
+    @OpenhabTmpItem.create('Number', arg_name='tmp_item')
+    def test_oh_timestamp(self, tmp_item: OpenhabTmpItem) -> None:
+        """This rule tests that the timestamp from openHAB is used to set the item time"""
+        item = NumberItem.get_item(tmp_item.name)
+
+        # we need a value, if we update from NULL the timestamps are missing
+        item.oh_post_update(0)
+        with ItemWaiter(item) as w:
+            w.wait_for_state(0)
+
+        # openHAB timestamps are ~20ms off so we have to round
+        ts_now: Final = whenever.Instant.now().round(
+            unit='millisecond', increment=10, mode='floor').subtract(milliseconds=10)
+        ts_past: Final = ts_now.subtract(hours=1)
+
+        with whenever.patch_current_time(ts_past, keep_ticking=False):
+            item.post_value(1)
+            assert item.last_update._instant == ts_past
+            assert item.last_change._instant == ts_past
+
+            item.oh_post_update(2)
+            with ItemWaiter(item) as w:
+                w.wait_for_state(2)
+
+            assert item.last_update._instant > ts_now
+            assert item.last_change._instant > ts_now
 
 
 OpenhabItems()

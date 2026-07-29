@@ -5,6 +5,7 @@ from HABApp.core.asyncio import create_task_from_async
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.events import ValueChangeEvent, ValueUpdateEvent
 from HABApp.core.internals import EventBus, ItemRegistry
+from HABApp.core.items import BaseValueItem
 from HABApp.core.logger import log_warning
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
@@ -50,18 +51,28 @@ class OhEventHandler:
             # so the items have the correct state when we process the event in a rule
             try:
                 if isinstance(event, ValueUpdateEvent):
-                    __item = self._item_registry.get_item(event.name)  # type: HABApp.core.items.base_valueitem.BaseValueItem
-                    __item.set_value(event.value)
+                    _item: BaseValueItem = self._item_registry.get_item(event.name)
+                    _item.set_value(event.value)
+
+                    # todo: implement this better, this is just a dirty hack
+                    if (ts := getattr(event, 'last_state_update', None)) is not None:
+                        _item._last_update.set(ts)
+
                     post_event(event.name, event)
                     return None
 
                 if isinstance(event, ValueChangeEvent):
+                    # todo: implement this better, this is just a dirty hack
+                    if (ts := getattr(event, 'last_state_change', None)) is not None:
+                        _item: BaseValueItem = self._item_registry.get_item(event.name)
+                        _item._last_change.set(ts)
+
                     post_event(event.name, event)
                     return None
 
                 if isinstance(event, (ThingStatusInfoEvent, ThingUpdatedEvent, ThingConfigStatusInfoEvent)):
-                    __thing = self._item_registry.get_item(event.name)   # type: HABApp.openhab.items.Thing
-                    __thing.process_event(event)
+                    _thing = self._item_registry.get_item(event.name)   # type: HABApp.openhab.items.Thing
+                    _thing.process_event(event)
                     post_event(event.name, event)
                     return None
 

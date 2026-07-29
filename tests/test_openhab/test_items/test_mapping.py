@@ -1,9 +1,10 @@
 from datetime import datetime
 from functools import partial
+from typing import Final
 
 import pytest
 from immutables import Map
-from whenever import SystemDateTime
+from whenever import Instant, SystemDateTime
 
 from HABApp.openhab.item_factory import OhItemFactory
 from HABApp.openhab.items import DatetimeItem, NumberItem
@@ -72,3 +73,25 @@ def test_datetime(item_factory: OhItemFactory) -> None:
 
     offset_str = '-0400'
     assert isinstance(get_dt('2022-06-15T09:21:43.754673068'), DatetimeItem)
+
+
+def test_update_item_times(item_factory: OhItemFactory) -> None:
+
+    timestamp_ms: Final = 1781352888123
+    instant: Final = Instant.from_utc(2026, 6, 13, 12, 14, 48, nanosecond=123_000_000)
+
+    obj = item_factory.create_item(
+        'test1',
+        'String',
+        value='test_str',
+        label='',
+        tags=frozenset(),
+        groups=frozenset(),
+        metadata={},
+        last_value=None,
+        last_state_change=timestamp_ms,
+        last_state_update=timestamp_ms + 1_000
+    )
+
+    assert obj.last_change == instant
+    assert obj.last_update == instant.add(seconds=1)

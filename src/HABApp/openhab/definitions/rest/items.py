@@ -51,11 +51,13 @@ class ItemResp(BaseModel):
     # https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core.io.rest.core/src/main/java/org/openhab/core/io/rest/core/item/EnrichedItemDTO.java
     link: str | None = None
     state: str
-    last_state: str | None = Field(default=None, alias='lastState')
     transformed_state: str | None = Field(default=None, alias='transformedState')
     state_description: StateDescriptionResp | None = Field(default=None, alias='stateDescription')
-    unit: str | None = Field(default=None, alias='unitSymbol')
     command_description: CommandDescriptionResp | None = Field(default=None, alias='commandDescription')
+    last_state: str | None = Field(default=None, alias='lastState')
+    last_state_update: int | None = Field(None, alias='lastStateUpdate')
+    last_state_change: int | None = Field(None, alias='lastStateChange')
+    unit: str | None = Field(default=None, alias='unitSymbol')
     metadata: dict[str, Any] = {}
     editable: bool = True
 

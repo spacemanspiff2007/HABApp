@@ -21,12 +21,12 @@ class BaseModel(_BaseModel):
 
 
 class LastUpdateMixin(BaseModel):
-    last_update: ZonedDateTime = Field(alias='lastStateUpdate')
+    last_update: ZonedDateTime | None = Field(None, alias='lastStateUpdate')
 
 
 class LastChangeMixin(BaseModel):
-    last_update: ZonedDateTime = Field(alias='lastStateUpdate')
-    last_change: ZonedDateTime = Field(alias='lastStateChange')
+    last_update: ZonedDateTime | None = Field(None, alias='lastStateUpdate')
+    last_change: ZonedDateTime | None = Field(None, alias='lastStateChange')
 
 
 class ItemValueBase(BaseModel):

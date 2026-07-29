@@ -44,10 +44,10 @@ class BaseValueItem(BaseItem):
         :param new_value: new value of the item
         :return: True if state has changed
         """
-        _now = Instant.now()
+        _now: Final = Instant.now()
 
-        current_value = self.value
-        state_changed = current_value != new_value
+        current_value: Final = self.value
+        state_changed: Final = current_value != new_value
 
         self.value = new_value
         self._last_update.set(_now)

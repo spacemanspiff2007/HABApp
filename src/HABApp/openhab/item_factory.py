@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Final
 
 from immutables import Map
+from whenever import Instant
 
 from HABApp.core.internals import EventBus
 from HABApp.core.provider import HABAPP_PROVIDER
@@ -64,8 +65,9 @@ class OhItemFactory:
 
     def create_item(self, name: str, type: str, value: str | None, last_value: str | None,
                     label: str | None, tags: frozenset[str],
-                    groups: frozenset[str], metadata: dict[str, dict[str, Any]] | None,) -> \
-            OpenhabItem | None:
+                    groups: frozenset[str], metadata: dict[str, dict[str, Any]] | None,
+                    last_state_update: int | None = None, last_state_change: int | None = None
+                    ) -> OpenhabItem | None:
         try:
             assert isinstance(type, str)
             assert value is None or isinstance(value, str)
@@ -102,14 +104,20 @@ class OhItemFactory:
             if last_value is not None:
                 last_value = cls._state_from_oh_str_or_none(name, last_value, log.warning)
 
-            return cls(
+            obj: Final = cls(
                 name, initial_value=value, last_value=last_value,
                 label=label, tags=tags, groups=groups, metadata=meta, **kwargs
             )
 
+            if last_state_update is not None:
+                obj._last_update.set(Instant.from_timestamp_millis(last_state_update), events=False)
+            if last_state_change is not None:
+                obj._last_change.set(Instant.from_timestamp_millis(last_state_change), events=False)
         except Exception as e:
             process_exception(self.create_item, e, logger=log)
             return None
+
+        return obj
 
     def create_thing(self, name: str) -> Thing:
         return Thing(name, interface=self._interface)
