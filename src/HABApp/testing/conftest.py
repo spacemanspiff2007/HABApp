@@ -295,6 +295,11 @@ async def rule_hook(
 
     yield hook
 
+
+@pytest.fixture
+async def testing_rules(rule_hook: HABAppRuleHook) -> None:
+    return None
+
 # ----------------------------------------------------------------------------------------------------------------------
 # CodeGen
 # ----------------------------------------------------------------------------------------------------------------------
@@ -326,6 +331,7 @@ __all__ = (
     'testing_executor_factory',
     'testing_item_factory',
     'testing_items',
+    'testing_rules',
     'testing_scheduler',
     'testing_start_time',
     'time_control',

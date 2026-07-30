@@ -91,7 +91,9 @@ class AsyncioTestingProvider(AsyncioProvider):
 
             # Wake them all
             for f in batch:
-                f.set_result(None)
+                # if we reschedule the future might get canceled
+                if not f.cancelled():
+                    f.set_result(None)
 
             await asyncio.sleep(0.05)
 
@@ -104,6 +106,9 @@ class TestingStartTimeOptions(NamedTuple):
 class UserTimeControl:
     def __init__(self, asyncio: AsyncioTestingProvider) -> None:
         self._asyncio: Final = asyncio
+
+    async def sleep(self) -> None:
+        await self.advance_to(Instant.now())
 
     async def advance(self, diff: TimeDeltaLike) -> None:
         return await self.advance_to(
