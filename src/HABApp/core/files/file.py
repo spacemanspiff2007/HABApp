@@ -140,6 +140,10 @@ class HABAppFile:
         # With failed the handler will have already unloaded the file
         return self._state is FileState.LOADED
 
+    def can_go_to_pending(self) -> bool:
+        # FAILED should never go to pending automatically because we need a reload on the file itself
+        return self._state in (FileState.DEPENDENCIES_OK, FileState.DEPENDENCIES_MISSING, FileState.DEPENDENCIES_ERROR)
+
     async def load(self, handler: FileTypeHandler, manager: FileManager) -> None:
         if not self.can_be_loaded():
             msg = f'File {self.name} can not be loaded because current state is {self._state}!'
@@ -176,9 +180,10 @@ class HABAppFile:
         return None
 
     def file_state_changed(self, file: HABAppFile, manager: FileManager) -> None:
-        name = file.name
+        name: Final = file.name
+
         if name in self.properties.reloads_on:
             if self.can_be_unloaded():
                 self.set_state(FileState.UNLOAD_PENDING, manager)
-            else:
+            elif self.can_go_to_pending():
                 self.set_state(FileState.PENDING, manager)
