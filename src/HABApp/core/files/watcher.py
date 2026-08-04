@@ -117,7 +117,7 @@ class HABAppFileWatcher:
 
     def __notify_task(self) -> None:
         if self._files_task is None:
-            self._files_task = create_task_from_async(self._watcher_task())
+            self._files_task = create_task_from_async(self._watcher_task(), name='FileSystemWatcher')
         else:
             self._stop_event.set()
 

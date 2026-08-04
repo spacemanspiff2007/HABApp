@@ -53,7 +53,8 @@ async def _provide_watched_queue(asyncio_provider: AsyncioProvider,
         q.queue_watcher_task(
             log=logging.getLogger('HABApp.openhab.queue'),
             name=name, sleep=asyncio_provider.sleep
-        )
+        ),
+        name=f'{name.title()}QueueWatcher'
     )
     yield q
     task.cancel()
