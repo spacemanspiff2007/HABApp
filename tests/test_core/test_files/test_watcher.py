@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import PurePath
-from typing import Self
+from typing import Any, Self
 
 import pytest
 from watchfiles import Change
@@ -38,7 +38,11 @@ async def test_watcher(monkeypatch, test_logs) -> None:
 
     f = HABAppFileWatcher()
     f._watcher_task = lambda: 'ReplacedTask'
-    monkeypatch.setattr(watcher_module, 'create_task_from_async', lambda x: x)
+
+    def _create_task_from_async(obj: Any, name: str | None = None):
+        return obj
+
+    monkeypatch.setattr(watcher_module, 'create_task_from_async', _create_task_from_async)
 
     with pytest.raises(FileNotFoundError) as e:
         f._add_path(MyPath('a/b/c'))
