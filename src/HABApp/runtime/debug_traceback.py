@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import faulthandler
+import gc
 import logging
 import signal
 import traceback
 from asyncio import sleep
 from datetime import datetime
+from types import AsyncGeneratorType, FrameType
 from typing import TYPE_CHECKING, Any, Final, TextIO
 
 from HABApp.config.logging import rotate_file
@@ -142,6 +144,58 @@ class DebugTraceback:
         return None
 
 
+def _get_frame(obj: Any) -> FrameType | None:
+    return (
+        getattr(obj, 'cr_frame', None)
+        or getattr(obj, 'gi_frame', None)
+        or getattr(obj, 'ag_frame', None)
+    )
+
+
+def _get_awaited(obj: Any):  # noqa: ANN202
+    return (
+        getattr(obj, 'cr_await', None)
+        or getattr(obj, 'gi_yieldfrom', None)
+        or getattr(obj, 'ag_await', None)
+    )
+
+
+def _resolve_awaited(awaited: Any) -> Any:
+    """Return a coroutine/generator/async-gen to descend into, or None."""
+    # native coroutine or generator - descend directly
+    if _get_frame(awaited) is not None:
+        return awaited
+
+    # a Task/Future wrapping another coroutine -> descend into the coro
+    if isinstance(awaited, asyncio.Task):
+        return awaited.get_coro()
+
+    # async_generator_asend / athrow wrapper -> find wrapped async generator
+    type_name = type(awaited).__name__
+    if type_name in ('async_generator_asend', 'async_generator_athrow'):
+        for ref in gc.get_referents(awaited):
+            if isinstance(ref, AsyncGeneratorType):
+                return ref
+
+    return None
+
+
+def _format_task_stack(task: asyncio.Task) -> list[str]:
+    lines: list[str] = []
+
+    obj = task.get_coro()
+    while obj is not None:
+        frame = _get_frame(obj)
+        if frame is None:
+            break
+
+        lines.extend(traceback.format_list(traceback.extract_stack(frame, limit=1)))
+
+        obj = _resolve_awaited(_get_awaited(obj))
+
+    return lines
+
+
 def _dump_tasks_overview(file: TextIO) -> None:
 
     lines: list[str] = []
@@ -165,9 +219,8 @@ def _dump_tasks_overview(file: TextIO) -> None:
             if done or cancelled:
                 continue
 
-            if (coro := task.get_coro()) is not None and (frame := coro.cr_frame) is not None:
-                tb_lines = traceback.format_stack(frame)
-                lines.extend(tb_lines)
+            tb_lines = _format_task_stack(task)
+            lines.extend(tb_lines)
             lines.append('\n')
 
         except Exception as e:

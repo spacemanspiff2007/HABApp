@@ -5,11 +5,10 @@ from threading import Lock
 
 import HABApp
 from HABApp.core.events import ValueUpdateEvent, ValueUpdateEventFilter
-
-from ...core.internals import ItemRegistry
-from ...core.provider import HABAPP_PROVIDER
-from .bench_base import BenchBaseRule
-from .bench_times import BenchContainer, BenchTime
+from HABApp.core.internals import ItemRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.rule_manager.benchmark.bench_base import BenchBaseRule
+from HABApp.rule_manager.benchmark.bench_times import BenchContainer, BenchTime
 
 
 LOCK = Lock()
@@ -32,7 +31,7 @@ class MqttBenchRule(BenchBaseRule):
         self.values = deque()
 
     def cleanup(self) -> None:
-        ir = HABAPP_PROVIDER.get(ItemRegistry)
+        ir = HABAPP_PROVIDER.get_existing(ItemRegistry)
         for n in self.name_list:
             if ir.item_exists(n):
                 ir.pop_item(n)

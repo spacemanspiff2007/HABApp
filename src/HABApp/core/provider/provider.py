@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from asyncio import Lock
-from collections.abc import Awaitable, Callable
+from asyncio import Lock, Task, current_task
+from contextlib import asynccontextmanager
 from inspect import isclass
 from typing import TYPE_CHECKING, Any, Final, Self, TypeVar
 
@@ -9,6 +9,7 @@ from HABApp.core.provider.type_helper import FactoryType, get_factory_type, get_
 
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator, Awaitable, Callable
     from types import TracebackType
 
 
@@ -110,7 +111,7 @@ T = TypeVar('T')
 
 
 class HabAppObjProvider:
-    __slots__ = ('_created', '_deferred', '_factories', '_lock', '_order')
+    __slots__ = ('_created', '_deferred', '_factories', '_lock', '_lock_task', '_order')
 
     def __init__(self) -> None:
         self._factories: Final[dict[type, ObjFactory]] = {}
@@ -118,7 +119,23 @@ class HabAppObjProvider:
         self._order: tuple[ObjFactory, ...] = ()
 
         self._lock: Final = Lock()
+        self._lock_task: Task | None = None
         self._deferred: tuple[type, ...] = ()
+
+    @asynccontextmanager
+    async def _reentrant_lock(self) -> AsyncGenerator[None, Any]:
+        task: Final = current_task()
+        if self._lock_task is task and task is not None:
+            # Same task holds the lock -> reentry
+            yield
+            return
+
+        async with self._lock:
+            self._lock_task = task
+            try:
+                yield
+            finally:
+                self._lock_task = None
 
     def _add_factory(self, obj: type) -> None:
 
@@ -193,16 +210,16 @@ class HabAppObjProvider:
         # try resolving deferred factories
         self._resolve_deferred()
 
-        async with self._lock:
+        async with self._reentrant_lock():
             return await self._create(cls)
 
     async def call(self, coro_func: Callable[..., Awaitable[T]]) -> T:
-        async with self._lock:
+        async with self._reentrant_lock():
             kwargs: Final = await self._resolve_kwargs(coro_func)
         return await coro_func(**kwargs)
 
     async def close(self, exception: BaseException | None = None) -> None:
-        async with self._lock:
+        async with self._reentrant_lock():
             order: Final = self._order
             self._order = ()
 
@@ -290,7 +307,7 @@ class HabAppObjProvider:
 
         can_create = [[cls for cls, deps in dependencies.items() if not deps]]
 
-        async with self._lock:
+        async with self._reentrant_lock():
             # create in batches
             while can_create:
                 # create batch
