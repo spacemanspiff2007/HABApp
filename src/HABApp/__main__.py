@@ -11,7 +11,7 @@ from HABApp.core.shutdown import ShutdownInfo
 from HABApp.runtime.debug_traceback import DebugTraceback
 
 
-async def main() -> int | str:
+async def async_main() -> int | str:
 
     loop = asyncio.get_event_loop()
     loop.slow_callback_duration = 0.02
@@ -76,8 +76,8 @@ async def main() -> int | str:
     return return_code
 
 
-if __name__ == '__main__':
-
+# This is the entry point for the script created by the setup
+def main() -> None:
     loop_factory = asyncio.SelectorEventLoop
 
     # we can have subprocesses (https://docs.python.org/3/library/asyncio-platforms.html#subprocess-support-on-windows)
@@ -87,4 +87,8 @@ if __name__ == '__main__':
         if os.environ.get('HABAPP_NO_MQTT') is not None:
             loop_factory = asyncio.ProactorEventLoop
 
-    sys.exit(asyncio.run(main(), debug=True, loop_factory=loop_factory))
+    sys.exit(asyncio.run(async_main(), debug=True, loop_factory=loop_factory))
+
+
+if __name__ == '__main__':
+    main()
