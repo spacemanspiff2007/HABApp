@@ -77,8 +77,9 @@ async def async_main() -> int | str:
 
 
 # This is the entry point for the script created by the setup
+# Do not remove or rename!
 def main() -> None:
-    loop_factory = asyncio.SelectorEventLoop
+    loop_factory: type[asyncio.AbstractEventLoop] | None = None
 
     # we can have subprocesses (https://docs.python.org/3/library/asyncio-platforms.html#subprocess-support-on-windows)
     # or mqtt support (https://github.com/sbtinstruments/aiomqtt#note-for-windows-users)
