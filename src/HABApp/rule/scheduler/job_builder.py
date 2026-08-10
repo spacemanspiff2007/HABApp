@@ -6,7 +6,7 @@ from collections.abc import Callable, Hashable, Iterable, Mapping
 from typing import TYPE_CHECKING, Any, Final, Self, override
 
 from eascheduler.builder import FilterBuilder, JobBuilder, TriggerBuilder
-from eascheduler.builder.helper import HINT_INSTANT, HINT_TIMEDELTA, get_instant, get_pos_timedelta_secs
+from eascheduler.builder.helper import HINT_INSTANT, HINT_TIMEDELTA, get_instant, get_pos_timedelta
 from eascheduler.builder.triggers import TriggerObject, _get_producer
 from eascheduler.executor import ExecutorBase
 from eascheduler.jobs import CountdownJob, DateTimeJob, OneTimeJob
@@ -68,7 +68,7 @@ class HABAppJobBuilder:
 
         callback = self._executor.create(callback, context=self._habapp_rule_ctx)
 
-        job = CountdownJob(wrapped_habapp_executor(callback, args, kwargs), get_pos_timedelta_secs(secs), job_id=job_id)
+        job = CountdownJob(wrapped_habapp_executor(callback, args, kwargs), get_pos_timedelta(secs), job_id=job_id)
         job.link_scheduler(self._scheduler)
         return CountdownJobControl(job)
 

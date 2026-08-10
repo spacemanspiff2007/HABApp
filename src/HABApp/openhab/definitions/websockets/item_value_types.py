@@ -9,7 +9,7 @@ from fastnumbers import float as fast_float
 from fastnumbers import real, try_int, try_real
 from pydantic import BaseModel as _BaseModel
 from pydantic import ConfigDict, Field, TypeAdapter
-from whenever import Instant, OffsetDateTime, PlainDateTime, SystemDateTime, ZonedDateTime
+from whenever import Instant, OffsetDateTime, PlainDateTime, ZonedDateTime
 
 from HABApp.core.types import HSB, RGB, Point
 from HABApp.openhab.types import RawType, StringList
@@ -93,7 +93,7 @@ class DateTimeTypeModel(ItemValueBase):
 
     @override
     def get_value(self) -> datetime:
-        return OffsetDateTime.parse_common_iso(self.value).to_plain().py_datetime()
+        return OffsetDateTime.parse_iso(self.value).to_plain().to_stdlib()
 
     # noinspection PyNestedDecorators
     @override
@@ -106,19 +106,18 @@ class DateTimeTypeModel(ItemValueBase):
     # noinspection PyNestedDecorators
     @override
     @classmethod
-    def from_value(cls, value: datetime | Instant | PlainDateTime |
-                               ZonedDateTime | OffsetDateTime | SystemDateTime) -> Self | None:
+    def from_value(cls, value: datetime | Instant | PlainDateTime | ZonedDateTime | OffsetDateTime) -> Self | None:
         if isinstance(value, datetime):
             return cls(type='DateTime', value=value.isoformat())
 
         # https://whenever.readthedocs.io/en/latest/overview.html#iso-8601
-        if isinstance(value, (Instant, PlainDateTime, ZonedDateTime, OffsetDateTime, SystemDateTime)):
-            return cls(type='DateTime', value=value.format_common_iso())
+        if isinstance(value, (Instant, PlainDateTime, ZonedDateTime, OffsetDateTime)):
+            return cls(type='DateTime', value=value.format_iso())
 
         if isinstance(value, str):
             # try parsing through whenever types and datetime
-            for parse in (Instant.parse_common_iso, PlainDateTime.parse_common_iso, ZonedDateTime.parse_common_iso,
-                          OffsetDateTime.parse_common_iso, SystemDateTime.parse_common_iso, datetime.fromisoformat):
+            for parse in (Instant.parse_iso, PlainDateTime.parse_iso, ZonedDateTime.parse_iso,
+                          OffsetDateTime.parse_iso, datetime.fromisoformat):
                 try:
                     v = parse(value)
                 except ValueError:  # noqa: PERF203

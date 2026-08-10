@@ -4,12 +4,13 @@ from typing import Final
 
 import pytest
 from immutables import Map
-from whenever import Instant, SystemDateTime
+from whenever import Instant
 
 from HABApp.openhab.item_factory import OhItemFactory
 from HABApp.openhab.items import DatetimeItem, NumberItem
 from HABApp.openhab.items.base_item import MetaData
 from tests.helpers import TestEventBus
+from tests.helpers.timezone import get_timezone_str
 
 
 @pytest.mark.ignore_log_errors
@@ -58,7 +59,7 @@ def test_number_unit_of_measurement(item_factory: OhItemFactory) -> None:
 def test_datetime(item_factory: OhItemFactory) -> None:
 
     # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
-    offset_str = SystemDateTime(2022, 6, 15).format_common_iso()[-6:].replace(':', '')
+    offset_str = get_timezone_str(with_sign=True)
 
     def get_dt(value: str):
         assert value.startswith('2022-06-15')   # Date must match with offset_str

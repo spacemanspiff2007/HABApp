@@ -1,6 +1,6 @@
 from typing import Final, Self
 
-from eascheduler.builder.helper import HINT_POS_TIMEDELTA, get_pos_timedelta_secs
+from eascheduler.builder.helper import HINT_POS_TIMEDELTA, get_pos_timedelta
 from whenever import Instant
 
 from HABApp.core.const.hints import TYPE_EVENT_CALLBACK
@@ -72,7 +72,7 @@ class BaseItem(ItemRegistryItem):
         :param secs: secs after which the event will occur
         :return: The watch obj which can be used to cancel the watch
         """
-        return self._last_change.add_watch(self._name, get_pos_timedelta_secs(secs))
+        return self._last_change.add_watch(self._name, get_pos_timedelta(secs).total('seconds'))
 
     def watch_update(self, secs: HINT_POS_TIMEDELTA) -> ItemTimeWatch:
         """Generate an event if the item does not receive and update for a certain period of time.
@@ -81,7 +81,7 @@ class BaseItem(ItemRegistryItem):
         :param secs: secs after which the event will occur
         :return: The watch obj which can be used to cancel the watch
         """
-        return self._last_update.add_watch(self._name, get_pos_timedelta_secs(secs))
+        return self._last_update.add_watch(self._name, get_pos_timedelta(secs).total('seconds'))
 
     def listen_event(self, callback: TYPE_EVENT_CALLBACK,
                      event_filter: EventFilterBase | None = None) -> EventBusListener:

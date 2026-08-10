@@ -1,21 +1,21 @@
-aiohttp     == 3.13.3
-pydantic    == 2.12.5
+aiohttp     == 3.14.3
+pydantic    == 2.13.4
 bidict      == 0.23.1
-watchfiles  == 1.1.1
-ujson       == 5.12.0
+watchfiles  == 1.2.0
+ujson       == 5.13.0
 aiomqtt     == 2.5.1
 
-eascheduler == 0.2.7
+eascheduler == 0.2.9
 
 immutables  == 0.21
 easyconfig  == 0.4.5
 stack_data  == 0.6.3
 colorama    == 0.4.6
-fastnumbers == 5.1.1
+fastnumbers == 5.2.0
 
-geopy == 2.4.1
+geopy == 2.5.0
 
-typing-extensions == 4.15.0
+typing-extensions == 4.16.0
 
 aiohttp-sse-client == 0.2.1
 

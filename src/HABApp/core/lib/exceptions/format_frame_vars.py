@@ -20,7 +20,7 @@ SKIPPED_TYPES: Final = (
     datetime.date, datetime.datetime, datetime.time, datetime.timedelta,
     Map, Path,
     whenever.Instant,
-    whenever.SystemDateTime, whenever.PlainDateTime, whenever.ZonedDateTime, whenever.OffsetDateTime,
+    whenever.PlainDateTime, whenever.ZonedDateTime, whenever.OffsetDateTime,
     whenever.TimeDelta, whenever.DateDelta, whenever.DateTimeDelta
 )
 

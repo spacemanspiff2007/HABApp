@@ -1,4 +1,4 @@
-from . import inspect
+from . import inspect, timezone
 from .event_bus import TestEventBus, eb
 from .habapp_config import get_dummy_cfg
 from .log import LogCollector

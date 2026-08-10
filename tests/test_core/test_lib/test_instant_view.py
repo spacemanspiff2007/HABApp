@@ -1,10 +1,11 @@
 from datetime import timedelta as dt_timedelta
 
 import pytest
-from whenever import Instant, SystemDateTime, patch_current_time, seconds
+from whenever import Instant, PlainDateTime, patch_current_time, seconds
 
 from HABApp.core.items.base_valueitem import datetime
 from HABApp.core.lib.instant_view import InstantView
+from tests.helpers.timezone import remove_timezone_str
 
 
 @pytest.fixture
@@ -78,12 +79,12 @@ def test_delta_funcs(view: InstantView) -> None:
 
 
 def test_convert() -> None:
-    s = SystemDateTime(2021, 1, 2, 10, 11, 12)
+    s = PlainDateTime(2021, 1, 2, 10, 11, 12).assume_system_tz()
     view = InstantView(s.to_instant())
     assert view.py_datetime() == datetime(2021, 1, 2, 10, 11, 12)
 
 
 def test_repr() -> None:
-    view = InstantView(SystemDateTime(2021, 1, 2, 10, 11, 12).to_instant())
+    view = InstantView(PlainDateTime(2021, 1, 2, 10, 11, 12).assume_system_tz().to_instant())
     # Cut the timezone away because we don't know where the test is running
-    assert str(view)[:-6] == 'InstantView(2021-01-02T10:11:12+'
+    assert remove_timezone_str(str(view)) == 'InstantView(2021-01-02T10:11:12+'

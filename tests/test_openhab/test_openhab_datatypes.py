@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import pytest
-from whenever import SystemDateTime
 
 from HABApp.openhab.items import DatetimeItem, NumberItem
+from tests.helpers.timezone import get_timezone_str
 
 
 @pytest.mark.parametrize('value, target', (('0', 0), ('-15', -15), ('55', 55), ))
@@ -24,7 +24,7 @@ def test_type_decimal(value: str, target: int) -> None:
 
 def __get_dt_parms():
     # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
-    offset_str = SystemDateTime(2023, 6, 17).format_common_iso()[-5:].replace(':', '')
+    offset_str = get_timezone_str()
 
     return (
         pytest.param(f'2023-06-17T15:31:04.754673068+{offset_str}', datetime(2023, 6, 17, 15, 31, 4, 754673), id='T1'),
