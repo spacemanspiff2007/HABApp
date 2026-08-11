@@ -187,7 +187,7 @@ class GroupItemDtoModel(ItemDtoModel):
     group_function: GroupFunctionDTOModel | None = Field(default=None, alias='function')
 
 
-# https://github.com/openhab/openhab-core/blob/ce374252fa2c821103da888302f930c1c127f73c/bundles/org.openhab.core/src/main/java/org/openhab/core/items/events/ItemAddedEvent.java
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/items/events/ItemAddedEvent.java
 class ItemAddedEvent(BaseEvent):
     type: Literal['ItemAddedEvent']
     payload: Json[GroupItemDtoModel]
