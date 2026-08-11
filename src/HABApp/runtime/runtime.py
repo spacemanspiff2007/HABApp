@@ -18,7 +18,6 @@ from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.shutdown import ShutdownInfo
 from HABApp.core.wrapper import process_exception
-from HABApp.mqtt import MqttAsyncInterface, MqttInterface
 from HABApp.mqtt.connection.connection import MqttConnection
 from HABApp.openhab.connection import setup_openhab_connection
 from HABApp.openhab.connection.connection import OpenhabConnection
@@ -60,10 +59,6 @@ class Runtime:
             await HABAPP_PROVIDER.call(setup_openhab_connection)
 
             await HABAPP_PROVIDER.get(MqttConnection)
-
-            # create MQTT objects for backwards compatibility 2026-03
-            HABApp.mqtt.interface_sync = await HABAPP_PROVIDER.get(MqttInterface)
-            HABApp.mqtt.interface_async = await HABAPP_PROVIDER.get(MqttAsyncInterface)
 
             # File loader setup
             # Parameter Files

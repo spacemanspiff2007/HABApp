@@ -130,6 +130,8 @@ MyOpenhabRule()
 
 #### 26.XX.X (2026-XX-XX)
 - Breaking: Requires at least Python 3.12
+- Breaking: ``Rule.get_items()`` is not a staticmethod anymore
+- Fixed a bug with the scheduler and sun azimuth
 
 #### 25.12.0 (2025-12-08)
 - Breaking: Requires at least Python 3.11
