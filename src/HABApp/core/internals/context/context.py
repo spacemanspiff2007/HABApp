@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from HABApp.rule_ctx import HABAppRuleContext
 
 
-_HABAPP_RULE_CTX: Final[ContextVar[HABAppRuleContext]] = ContextVar('_habapp_rule_ctx')
+_HABAPP_RULE_CTX: Final[ContextVar[HABAppRuleContext | None]] = ContextVar('_habapp_rule_ctx', default=None)
 
 
 class ContextBoundObj:
@@ -81,7 +81,7 @@ def _wrap_with_rule_context[**P, R](func: Callable[P, R]) -> Callable[P, R]:
         @wraps(func)
         async def async_wrapper(self, *args: P.args, **kwargs: P.kwargs) -> R:
             ctx: Final = getattr(self, '_habapp_ctx', None)
-            if _HABAPP_RULE_CTX.get(None) is ctx:
+            if _HABAPP_RULE_CTX.get() is ctx:
                 return await func(self, *args, **kwargs)
 
             token: Final = _HABAPP_RULE_CTX.set(ctx)
@@ -96,7 +96,7 @@ def _wrap_with_rule_context[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     @wraps(func)
     def wrapper(self, *args: P.args, **kwargs: P.kwargs) -> R:
         ctx: Final = getattr(self, '_habapp_ctx', None)
-        if _HABAPP_RULE_CTX.get(None) is ctx:
+        if _HABAPP_RULE_CTX.get() is ctx:
             return func(self, *args, **kwargs)
 
         token: Final = _HABAPP_RULE_CTX.set(ctx)
