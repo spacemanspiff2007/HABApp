@@ -1,4 +1,11 @@
-from .context import AutoContextBoundObj, Context, ContextBoundObj, ContextProvidingObj, get_current_context
+from .context import (
+    AutoContextBoundObj,
+    Context,
+    ContextBoundObj,
+    ContextProvidingObj,
+    get_current_context,
+    wrap_methods_with_cls_context,
+)
 
 
 # isort: split

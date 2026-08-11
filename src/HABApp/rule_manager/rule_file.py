@@ -7,7 +7,7 @@ from asyncio import AbstractEventLoop, get_event_loop
 from typing import TYPE_CHECKING
 
 import HABApp
-from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry, get_current_context
+from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.mqtt import MqttAsyncInterface, MqttInterface
 from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
@@ -49,7 +49,7 @@ class RuleFile:
 
     async def check_all_rules(self) -> None:
         for rule in self.rules.values():
-            await get_current_context(rule).check_rule()
+            await rule._habapp_ctx.check_rule()
 
     async def unload(self) -> None:
 
@@ -59,7 +59,7 @@ class RuleFile:
 
         # unload all registered callbacks
         for rule in self.rules.values():
-            await get_current_context(rule).unload_rule()
+            await rule._habapp_ctx.unload_rule()
 
         log.debug(f'File {self.name} successfully unloaded!')
         return None
@@ -115,7 +115,7 @@ class RuleFile:
             # still listen to events and do stuff
             for rule in created_rules:
                 with ign:
-                    await get_current_context(rule).unload_rule()
+                    await rule._habapp_ctx.unload_rule()
             return False
 
         if not created_rules:
@@ -140,7 +140,7 @@ class RuleFile:
             # still listen to events and do stuff
             for rule in created_rules:
                 with ign:
-                    await get_current_context(rule).unload_rule()
+                    await rule._habapp_ctx.unload_rule()
             return False
 
         return True

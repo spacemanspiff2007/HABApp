@@ -1,4 +1,4 @@
-from .context import Context, ContextBoundObj, ContextProvidingObj
+from .context import Context, ContextBoundObj, ContextProvidingObj, wrap_methods_with_cls_context
 
 
 # isort: split

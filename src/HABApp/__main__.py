@@ -85,8 +85,8 @@ def main() -> None:
     # or mqtt support (https://github.com/sbtinstruments/aiomqtt#note-for-windows-users)
     # but not both. For testing, it makes sense to use mqtt support as a default
     if sys.platform.lower() == 'win32' or os.name.lower() == 'nt':
-        if os.environ.get('HABAPP_NO_MQTT') is not None:
-            loop_factory = asyncio.ProactorEventLoop
+        if os.environ.get('HABAPP_NO_MQTT') is None:
+            loop_factory = asyncio.SelectorEventLoop
 
     sys.exit(asyncio.run(async_main(), debug=True, loop_factory=loop_factory))
 

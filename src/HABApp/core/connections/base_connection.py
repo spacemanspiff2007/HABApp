@@ -104,7 +104,7 @@ class BaseConnection:
         else:
             if func is None:
                 func = f'{self.name} connection'
-            process_exception(func, e, self.log)
+            process_exception(func, e, logger=self.log)
 
     def register_plugin(self, obj: BaseConnectionPlugin, priority: int | Literal['first', 'last'] | None = None):
         from .plugin_callback import get_plugin_callbacks

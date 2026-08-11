@@ -201,7 +201,7 @@ class OpenhabItems(TestBaseRule):
 
         # openHAB timestamps are ~20ms off so we have to round
         ts_now: Final = whenever.Instant.now().round(
-            unit='millisecond', increment=10, mode='floor').subtract(milliseconds=10)
+            'millisecond', increment=10, mode='floor').subtract(milliseconds=10)
         ts_past: Final = ts_now.subtract(hours=1)
 
         with whenever.patch_current_time(ts_past, keep_ticking=False):

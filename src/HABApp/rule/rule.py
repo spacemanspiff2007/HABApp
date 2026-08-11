@@ -18,6 +18,7 @@ from HABApp.core.internals import (
     ContextProvidingObj,
     EventBusListener,
     EventFilterBase,
+    wrap_methods_with_cls_context,
 )
 from HABApp.core.items import BaseItem, BaseValueItem
 from HABApp.rule.scheduler.job_builder import HABAppJobBuilder as _HABAppJobBuilder
@@ -44,6 +45,8 @@ class Rule(ContextProvidingObj):
     _habapp_ctx: HABAppRuleContext
 
     def __init__(self) -> None:
+        wrap_methods_with_cls_context(type(self))
+
         hook = _get_rule_hook()
         hook.register_rule(self)
 
