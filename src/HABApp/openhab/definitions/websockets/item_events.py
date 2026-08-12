@@ -52,7 +52,7 @@ class ItemStateUpdatedEvent(BaseEvent):
         payload = self.payload
         return TargetItemStateUpdatedEvent(
             name=self.topic[14:-13], value=payload.get_value(),
-            last_state_update=payload.last_update.to_instant() if payload.last_update else None,
+            last_state_update=None,  # payload.last_update.to_instant() if payload.last_update else None,
             source=self.source
         )
 
@@ -72,8 +72,8 @@ class ItemStateChangedEvent(BaseEvent):
             name=self.topic[14:-13],
             value=new.get_value(),
             old_value=old.get_value(),
-            last_state_change=new.last_change.to_instant() if new.last_change else None,
-            last_state_update=new.last_update.to_instant() if new.last_update else None,
+            last_state_change=None,  # new.last_change.to_instant() if new.last_change else None,
+            last_state_update=None,  # new.last_update.to_instant() if new.last_update else None,
             source=self.source
         )
 
