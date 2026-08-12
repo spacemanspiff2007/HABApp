@@ -357,6 +357,8 @@ else:
 
         # external libraries
         (re.compile(r'py:class'), re.compile(r'^(whenever|eascheduler|pydantic|holidays)\..+$')),
+        # external library types
+        (re.compile(r'py:class'), re.compile(r'^Instant$')),
 
         # openHAB response definitions
         (re.compile(r'.+'), re.compile(r'^HABApp\.openhab\.definitions\..+')),
