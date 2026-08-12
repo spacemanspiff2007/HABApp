@@ -79,16 +79,19 @@ def test__ItemStateUpdatedEvent() -> None:  # noqa: N802
     assert event.name == 'my_item_name'
     assert event.value == 9.5
     assert str(event) == '<ItemStateUpdatedEvent name: my_item_name, value: 9.5>'
+    assert event.source is None
 
     event = get_event({
         'type': 'ItemStateUpdatedEvent',
         'topic': 'openhab/items/my_item_name/stateupdated',
-        'payload': '{"type":"String","value":"a","lastStateUpdate":"2026-06-15T12:13:14.123456+02:00[Europe/Berlin]"}'
+        'payload': '{"type":"String","value":"a","lastStateUpdate":"2026-06-15T12:13:14.123456+02:00[Europe/Berlin]"}',
+        'source': 'TestSource'
     })
     assert isinstance(event, ItemStateUpdatedEvent)
     assert event.name == 'my_item_name'
     assert event.value == 'a'
     assert str(event) == '<ItemStateUpdatedEvent name: my_item_name, value: a>'
+    assert event.source == 'TestSource'
     assert event.last_state_update == ZonedDateTime(
         2026, 6, 15, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
     ).to_instant()
@@ -101,13 +104,15 @@ def test__ItemCommandEvent() -> None:  # noqa: N802
     assert isinstance(event, ItemCommandEvent)
     assert event.name == 'Ping'
     assert event.value == '1'
+    assert event.source is None
 
     event = get_event({'topic': 'openhab/items/Ping/command', 'payload': '{"type":"Quantity","value":"7.5 s"}',
-                       'type': 'ItemCommandEvent'})
+                       'type': 'ItemCommandEvent', 'source': 'TestSource'})
     assert isinstance(event, ItemCommandEvent)
     assert event.name == 'Ping'
     assert event.value == 7.5
     assert str(event) == '<ItemCommandEvent name: Ping, value: 7.5 s>'
+    assert event.source == 'TestSource'
 
 
 # noinspection PyPep8Naming
@@ -201,11 +206,12 @@ def test__ItemRemovedEvent() -> None:  # noqa: N802
 def test__ItemStateChangedEvent1() -> None:  # noqa: N802
     event = get_event({'topic': 'openhab/items/Ping/statechanged',
                        'payload': '{"type":"String","value":"1","oldType":"UnDef","oldValue":"NULL"}',
-                       'type': 'ItemStateChangedEvent'})
+                       'type': 'ItemStateChangedEvent', 'source': 'TestSource'})
     assert isinstance(event, ItemStateChangedEvent)
     assert event.name == 'Ping'
     assert event.value == '1'
     assert event.old_value is None
+    assert event.source == 'TestSource'
 
 
 # noinspection PyPep8Naming
@@ -235,6 +241,7 @@ def test__ItemStateChangedEvent2() -> None:  # noqa: N802
     assert event.name == 'TestDateTimeTOGGLE'
     assert event.value == datetime.datetime(2018, 6, 21, 19, 47, 8)
     assert event.old_value == datetime.datetime(2017, 6, 20, 17, 46, 7)
+    assert event.source is None
 
     _in = {
         'topic': 'openhab/items/TestDateTimeTOGGLE/statechanged',

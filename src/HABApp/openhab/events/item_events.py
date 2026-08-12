@@ -15,10 +15,20 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
-    def __init__(self, name: str, value: Any, *, last_state_update: Instant | None) -> None:
+    """
+    :ivar Instant | None last_state_update: Optional timestamp of the state update
+    :ivar str | None source: Optional source of the update
+    """
+    __slots__ = ('last_state_update', 'source')
+
+    last_state_update: Instant | None
+    source: str | None
+
+    def __init__(self, name: str, value: Any, *, last_state_update: Instant | None, source: str | None = None) -> None:
         super().__init__(name, value)
 
         self.last_state_update: Final = last_state_update
+        self.source: Final = source
 
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
@@ -26,12 +36,26 @@ class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
 
 class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
+    """
+    :ivar Instant | None last_state_update: Optional timestamp of the state update
+    :ivar Instant | None last_state_change: Optional timestamp of the state change
+    :ivar str | None source: Optional source of the update
+    """
+
+    __slots__ = ('last_state_change', 'last_state_update', 'source')
+
+    last_state_update: Instant | None
+    last_state_change: Instant | None
+    source: str | None
+
     def __init__(self, name: str, value: Any, old_value: Any, *,
-                 last_state_update: Instant | None, last_state_change: Instant | None) -> None:
+                 last_state_update: Instant | None, last_state_change: Instant | None,
+                 source: str | None = None) -> None:
         super().__init__(name, value, old_value)
 
         self.last_state_update: Final = last_state_update
         self.last_state_change: Final = last_state_change
+        self.source: Final = source
 
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
@@ -41,6 +65,17 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
 
 
 class ItemCommandEvent(OpenhabEvent, HABApp.core.events.ValueCommandEvent):
+    """
+    :ivar str | None source: Optional source of the update
+    """
+
+    __slots__ = ('source', )
+
+    source: str | None
+
+    def __init__(self, name: str, value: Any, *, source: str | None = None) -> None:
+        super().__init__(name, value)
+        self.source: Final = source
 
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)

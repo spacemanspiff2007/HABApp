@@ -5,11 +5,10 @@ from HABApp.openhab.definitions.websockets.base import BaseOutEvent
 from HABApp.openhab.definitions.websockets.item_value_types import ItemValueBase
 
 
-class OutgoingEventBase:
+class OutgoingEventBase[T: ItemCommandSendEvent | ItemStateSendEvent]:
     __slots__ = ('_event', '_name', '_types')
 
-    def __init__(self, name: str, *types: str | type[ItemValueBase],
-                 event: type[ItemCommandSendEvent | ItemStateSendEvent]) -> None:
+    def __init__(self, name: str, *types: str | type[ItemValueBase], event: type[T]) -> None:
         self._event: Final = event
         self._name: Final = name
         self._types: Final = tuple(self._check_type(t, check_existing=False) for t in types)
@@ -49,13 +48,13 @@ class OutgoingEventBase:
     def supported_event_names(self) -> tuple[str, ...]:
         return tuple(t.__name__ for t in self._types)
 
-    def create_event(self, name: str, value: Any) -> BaseOutEvent:
+    def create_event(self, name: str, value: Any, *, source: str | None = None) -> T:
         for t in self._types:
             if (r := t.from_value(value)) is not None:
-                return self._event.create(name, r)
+                return self._event.create(name, r, source=source)
 
         if isinstance(value, ItemValueBase):
-            return self._event.create(name, value)
+            return self._event.create(name, value, source=source)
 
         msg = f"Invalid value: '{value}' ({type(value)}) for {self._name:s}"
         raise ValueError(msg)
@@ -64,14 +63,14 @@ class OutgoingEventBase:
         return f'{self.__class__.__name__}{self._name:s}({", ".join(self.supported_event_names())})'
 
 
-class OutgoingStateEvent(OutgoingEventBase):
+class OutgoingStateEvent(OutgoingEventBase[ItemStateSendEvent]):
 
     @override
     def __init__(self, name: str, *types: str | type[ItemValueBase]) -> None:
         super().__init__(name, *types, event=ItemStateSendEvent)
 
 
-class OutgoingCommandEvent(OutgoingEventBase):
+class OutgoingCommandEvent(OutgoingEventBase[ItemCommandSendEvent]):
     @override
     def __init__(self, name: str, *types: str | type[ItemValueBase]) -> None:
         super().__init__(name, *types, event=ItemCommandSendEvent)

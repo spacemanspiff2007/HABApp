@@ -21,7 +21,6 @@ def test_class_annotations() -> None:
         check_class_annotations(
             cls,
             init_alias={'initial_value': 'value', 'group_names': 'groups', 'thing_type': 'type'},
-            ignore=('last_state_change', 'last_state_update')
         )
 
 

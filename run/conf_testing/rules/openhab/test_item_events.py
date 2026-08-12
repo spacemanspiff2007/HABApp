@@ -1,3 +1,5 @@
+from typing import Final
+
 from HABAppTests import (
     EventWaiter,
     ItemWaiter,
@@ -9,7 +11,14 @@ from HABAppTests import (
 )
 
 from HABApp.core.events import ValueUpdateEventFilter
-from HABApp.openhab.events import ItemCommandEventFilter
+from HABApp.openhab.events import (
+    ItemCommandEvent,
+    ItemCommandEventFilter,
+    ItemStateChangedEvent,
+    ItemStateUpdatedEvent,
+    ItemStateUpdatedEventFilter,
+)
+from HABApp.openhab.items import NumberItem
 
 
 class TestOpenhabEventTypes(TestBaseRule):
@@ -30,6 +39,9 @@ class TestOpenhabEventTypes(TestBaseRule):
         }
         for name, unit in dimensions.items():
             self.add_test(f'Quantity {name} events', self.test_quantity_type_events, name, unit)
+
+        self.add_test('EventSourceCommand', self.test_event_source_command)
+        self.add_test('EventSourceUpdate', self.test_event_source_update)
 
     def test_item(self, item_type: str, test_states: tuple, test_commands: tuple) -> None:
         item_name = f'{item_type}_value_test'
@@ -68,6 +80,67 @@ class TestOpenhabEventTypes(TestBaseRule):
                     post_func(post_value)
                     event_waiter.wait_for_event(value=receive_value)
                     item_waiter.wait_for_state(receive_value)
+
+    def test_event_source_command(self) -> None:
+        with OpenhabTmpItem('Number') as item, EventWaiter(item.name, ItemCommandEventFilter()) as event_waiter:
+            # test manual source
+            item.oh_send_command(5, source='TestSource')
+            event: ItemCommandEvent = event_waiter.wait_for_event()
+            assert event.source == 'HABApp.TestSource'
+
+            # automatic source
+            item.oh_send_command(6)
+            event: ItemCommandEvent = event_waiter.wait_for_event()
+            assert event.source == 'HABApp'
+
+    def test_event_source_update(self) -> None:
+
+        events: list[ItemStateUpdatedEvent | ItemStateChangedEvent] = []
+
+        def _on_event(event: ItemStateUpdatedEvent | ItemStateChangedEvent) -> None:
+            assert isinstance(event, (ItemStateUpdatedEvent, ItemStateChangedEvent))
+            events.append(event)
+
+        with OpenhabTmpItem('Number') as item, EventWaiter(item.name, ItemStateUpdatedEventFilter()) as event_waiter:
+
+            NumberItem.get_item(item.name).listen_event(_on_event)
+
+            # test manual source
+            value_1: Final = 5
+            item.oh_post_update(value_1, source='TestSource_1')
+            item.oh_post_update(value_1, source='TestSource_2')
+
+            # automatic source
+            value_2: Final = 6
+            item.oh_post_update(value_2)
+            item.oh_post_update(value_2)
+            event_waiter.wait_for_event()
+
+        e1, e2, e3, e4, e5, e6 = events
+
+        assert isinstance(e1, ItemStateUpdatedEvent)
+        assert e1.source is None
+        assert e1.value == value_1
+
+        assert isinstance(e2, ItemStateChangedEvent)
+        assert e2.source == 'HABApp.TestSource_1'
+        assert e2.value == value_1
+
+        assert isinstance(e3, ItemStateUpdatedEvent)
+        assert e3.source is None
+        assert e3.value == value_1
+
+        assert isinstance(e4, ItemStateUpdatedEvent)
+        assert e4.source is None
+        assert e4.value == value_2
+
+        assert isinstance(e5, ItemStateChangedEvent)
+        assert e5.source == 'HABApp'
+        assert e5.value == value_2
+
+        assert isinstance(e6, ItemStateUpdatedEvent)
+        assert e6.source is None
+        assert e6.value == value_2
 
 
 TestOpenhabEventTypes()

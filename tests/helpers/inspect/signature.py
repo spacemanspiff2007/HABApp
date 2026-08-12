@@ -1,11 +1,32 @@
 import inspect
-from typing import Final
+import re
+from collections.abc import Sequence
+from inspect import Parameter
 
 import pytest
 
 
+def _drop_parameter(sig: inspect.Signature, p: Parameter) -> inspect.Signature:
+    if p.name not in sig.parameters:
+        return sig
+
+    existing = sig.parameters[p.name]
+    assert existing == p, f'Parameters do not match:\n  {existing}\n  {p}'
+
+    params = [param for name, param in sig.parameters.items() if name != p.name]
+    return sig.replace(parameters=params)
+
+
+def _drop_parameter_from_docstr(docs: str, p: Parameter) -> str:
+    if not docs:
+        return docs
+
+    return re.sub(r'^\s*:param\s+' + p.name + r':\s+[^\n]+\n', '', docs, flags=re.MULTILINE)
+
+
 def assert_same_signature(func_a, func_b, *, eval_str: bool = True,
-                          check_docstring: bool = True, ignore_return: bool = False) -> bool:
+                          check_docstring: bool = True, ignore_return: bool = False,
+                          drop_params: Sequence[Parameter] | None = None) -> bool:
 
     sig_a: inspect.Signature = inspect.signature(func_a, eval_str=eval_str)
     sig_b: inspect.Signature = inspect.signature(func_b, eval_str=eval_str)
@@ -14,12 +35,23 @@ def assert_same_signature(func_a, func_b, *, eval_str: bool = True,
         sig_a = sig_a.replace(return_annotation=inspect.Signature.empty)
         sig_b = sig_b.replace(return_annotation=inspect.Signature.empty)
 
+    if drop_params:
+        for p in drop_params:
+            sig_a = _drop_parameter(sig_a, p)
+            sig_b = _drop_parameter(sig_b, p)
+
     assert sig_a == sig_b, f'\n  {sig_a}\n  {sig_b}\n'
 
     if check_docstring:
-        doc_a: Final = inspect.getdoc(func_a)
-        doc_b: Final = inspect.getdoc(func_b)
-        assert doc_a == doc_b, f'\n  {doc_a}\n  {doc_b}\n'
+        doc_a: str = inspect.getdoc(func_a) or ''
+        doc_b: str = inspect.getdoc(func_b) or ''
+
+        if drop_params:
+            for p in drop_params:
+                doc_a = _drop_parameter_from_docstr(doc_a, p)
+                doc_b = _drop_parameter_from_docstr(doc_b, p)
+
+        assert doc_a == doc_b, f'\n  {doc_a.replace('\n', '\\n')}\n  {doc_b.replace('\n', '\\n')}\n'
 
     return True
 

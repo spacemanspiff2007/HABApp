@@ -1,3 +1,4 @@
+import inspect
 from datetime import datetime
 from typing import Any, Literal
 from unittest.mock import Mock
@@ -62,8 +63,10 @@ def test_inheritance(cls_instance) -> None:
 
 
 def test_conditional_function_call_signature(cls) -> None:
-    assert_same_signature(Item.post_value_if, cls.post_value_if)
-    assert_same_signature(Item.post_value_if, cls.oh_post_update_if)
+    p = [inspect.Parameter('source', inspect.Parameter.KEYWORD_ONLY, default=None, annotation=str | None)]
+
+    assert_same_signature(Item.post_value_if, cls.post_value_if, drop_params=p)
+    assert_same_signature(Item.post_value_if, cls.oh_post_update_if, drop_params=p)
 
 
 def test_refresh_command(cls_instance: OpenhabItem, websocket_events) -> None:

@@ -68,13 +68,16 @@ class OpenhabItem(BaseValueItem):
                 log_func(f'Invalid value for {cls.__name__:s} {name:s}: "{value}"! Using None instead')
             return None
 
-    def oh_send_command(self, value: Any = MISSING) -> None:
+    def oh_send_command(self, value: Any = MISSING, *, source: str | None = None) -> None:
         """Send a command to the openHAB item
 
         :param value: (optional) value to be sent. If not specified the current item value will be used.
+        :param source: (optional) source where this command comes from
         """
         new_value = self.value if value is MISSING else value
-        self._oh._send_websocket_event(self._command_to_oh.create_event(self._name, new_value))
+        self._oh._send_websocket_event(
+            self._command_to_oh.create_event(self._name, new_value, source=source)
+        )
 
     # For the openhab items HABApp internal commands make not much sense
     # so we send the commands to openHAB
@@ -86,18 +89,22 @@ class OpenhabItem(BaseValueItem):
         """
         self.oh_send_command(value)
 
-    def oh_post_update(self, value: Any = MISSING) -> None:
+    def oh_post_update(self, value: Any = MISSING, *, source: str | None = None) -> None:
         """Post an update to the openHAB item
 
         :param value: (optional) value to be posted. If not specified the current item value will be used.
+        :param source: (optional) source where this update comes from
         """
         new_value = self.value if value is MISSING else value
-        self._oh._send_websocket_event(self._update_to_oh.create_event(self._name, new_value))
+        self._oh._send_websocket_event(
+            self._update_to_oh.create_event(self._name, new_value, source=source)
+        )
 
     def oh_post_update_if(self, new_value, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
                           lower_than=MISSING, lt=MISSING, lower_equal=MISSING, le=MISSING,
                           greater_than=MISSING, gt=MISSING, greater_equal=MISSING, ge=MISSING,
-                          is_=MISSING, is_not=MISSING) -> bool:
+                          is_=MISSING, is_not=MISSING,
+                          source: str | None = None) -> bool:
         """
         Post a value depending on the current state of the item. If one of the comparisons is true the new state
         will be posted.
@@ -117,6 +124,7 @@ class OpenhabItem(BaseValueItem):
         :param ge: item state has to be greater equal the passed value
         :param is_: item state has to be the same object as the passt value (e.g. None)
         :param is_not: item state has to be not the same object as the passt value (e.g. None)
+        :param source: (optional) source where this update comes from
 
         :return: `True` if the new value was posted else `False`
         """
@@ -124,7 +132,7 @@ class OpenhabItem(BaseValueItem):
         if _compare(self.value, equal=equal, eq=eq, not_equal=not_equal, ne=ne,
                     lower_than=lower_than, lt=lt, lower_equal=lower_equal, le=le,
                     greater_than=greater_than, gt=gt, greater_equal=greater_equal, ge=ge, is_=is_, is_not=is_not):
-            self.oh_post_update(new_value)
+            self.oh_post_update(new_value, source=source)
             return True
         return False
 

@@ -23,6 +23,8 @@ def get_ivars_from_docstring(cls_obj: type[object], correct_hints: dict[str, Any
 
     ret = {}
     for cls in inspect.getmro(cls_obj):
+        if cls is object:
+            break
         mod = importlib.import_module(cls.__module__)
         docstr = cls.__doc__
         if not docstr:

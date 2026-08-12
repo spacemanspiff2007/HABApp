@@ -7,6 +7,8 @@ class ValueUpdateEvent:
     :ivar Any value:
     """
 
+    __slots__ = ('name', 'value')
+
     name: str
     value: Any
 
@@ -24,6 +26,8 @@ class ValueChangeEvent:
     :ivar Any value:
     :ivar Any old_value:
     """
+
+    __slots__ = ('name', 'old_value', 'value')
 
     name: str
     value: Any
@@ -43,6 +47,7 @@ class ValueCommandEvent:
     :ivar str name:
     :ivar Any value:
     """
+    __slots__ = ('name', 'value')
 
     name: str
     value: Any
@@ -61,6 +66,8 @@ class ItemNoChangeEvent:
     :ivar int | float seconds:
     """
 
+    __slots__ = ('name', 'seconds')
+
     name: str
     seconds: int | float
 
@@ -77,6 +84,9 @@ class ItemNoUpdateEvent:
     :ivar str name:
     :ivar int | float seconds:
     """
+
+    __slots__ = ('name', 'seconds')
+
     name: str
     seconds: int | float
 

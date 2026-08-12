@@ -52,19 +52,8 @@ class ItemStateUpdatedEvent(BaseEvent):
         payload = self.payload
         return TargetItemStateUpdatedEvent(
             name=self.topic[14:-13], value=payload.get_value(),
-            last_state_update=payload.last_update.to_instant() if payload.last_update else None
-        )
-
-
-class Oh4ItemStateUpdatedEvent(BaseEvent):
-    type: Literal['ItemStateUpdatedEvent']
-    payload: Json[OpenHabValueType]
-
-    @override
-    def to_event(self) -> TargetItemStateUpdatedEvent:
-        payload = self.payload
-        return TargetItemStateUpdatedEvent(
-            name=self.topic[14:-13], value=payload.get_value()
+            last_state_update=payload.last_update.to_instant() if payload.last_update else None,
+            source=self.source
         )
 
 
@@ -84,23 +73,8 @@ class ItemStateChangedEvent(BaseEvent):
             value=new.get_value(),
             old_value=old.get_value(),
             last_state_change=new.last_change.to_instant() if new.last_change else None,
-            last_state_update=new.last_update.to_instant() if new.last_update else None
-        )
-
-
-class Oh4ItemStateChangedEvent(BaseEvent):
-    type: Literal['ItemStateChangedEvent']
-    payload: Json[ValueChangedPayload]
-
-    @override
-    def to_event(self) -> TargetItemStateChangedEvent:
-        payload = self.payload
-        new = (ta := OPENHAB_VALUE_TYPE_ADAPTER).validate_python({'type': payload.type, 'value': payload.value})
-        old = ta.validate_python({'type': payload.old_type, 'value': payload.old_value})
-        return TargetItemStateChangedEvent(
-            name=self.topic[14:-13],
-            value=new.get_value(),
-            old_value=old.get_value()
+            last_state_update=new.last_update.to_instant() if new.last_update else None,
+            source=self.source
         )
 
 
@@ -112,7 +86,7 @@ class ItemCommandEvent(BaseEvent):
     def to_event(self) -> TargetItemCommandEvent:
         payload = self.payload
         return TargetItemCommandEvent(
-            name=self.topic[14:-8], value=payload.get_value()
+            name=self.topic[14:-8], value=payload.get_value(), source=self.source
         )
 
 
@@ -233,9 +207,10 @@ class ItemStateSendEvent(BaseOutEvent):
     payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
 
     @classmethod
-    def create(cls, name: str, payload: OpenHabValueType) -> Self:
+    def create(cls, name: str, payload: OpenHabValueType, *, source: str | None = None) -> Self:
+        src = 'HABApp' if source is None else f'HABApp.{source:s}'
         return cls(
-            type='ItemStateEvent', topic=f'openhab/items/{name:s}/state', payload=payload
+            type='ItemStateEvent', topic=f'openhab/items/{name:s}/state', payload=payload, source=src
         )
 
 
@@ -245,7 +220,8 @@ class ItemCommandSendEvent(BaseOutEvent):
     payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
 
     @classmethod
-    def create(cls, name: str, payload: OpenHabValueType) -> Self:
+    def create(cls, name: str, payload: OpenHabValueType, *, source: str | None = None) -> Self:
+        src = 'HABApp' if source is None else f'HABApp.{source:s}'
         return cls(
-            type='ItemCommandEvent', topic=f'openhab/items/{name:s}/command', payload=payload
+            type='ItemCommandEvent', topic=f'openhab/items/{name:s}/command', payload=payload, source=src
         )

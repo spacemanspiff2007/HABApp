@@ -49,10 +49,10 @@ class CallItem(OpenhabItem):
         raise InvalidItemValueError.from_item(self, new_value)
 
     @override
-    def oh_post_update(self,
-                       value: tuple[str, ...] | list[str] | StringList | None | _MissingType = MISSING) -> None:
+    def oh_post_update(self, value: tuple[str, ...] | list[str] | StringList | _MissingType | None = MISSING, *,
+                       source: str | None = None) -> None:
 
         if isinstance(value, (tuple, list)):
-            return super().oh_post_update(StringList(value))
+            return super().oh_post_update(StringList(value), source=source)
 
-        return super().oh_post_update(value)
+        return super().oh_post_update(value, source=source)
