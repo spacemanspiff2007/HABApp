@@ -42,7 +42,7 @@ ITEM_TYPE = TypeVar('ITEM_TYPE', bound=BaseItem)
 
 
 class Rule(ContextProvidingObj):
-    _habapp_ctx: HABAppRuleContext
+    _habapp_ctx: HABAppRuleContext | None
 
     def __init__(self) -> None:
         wrap_methods_with_cls_context(type(self))

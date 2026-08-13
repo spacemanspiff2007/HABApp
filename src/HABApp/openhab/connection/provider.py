@@ -115,16 +115,14 @@ async def provide_client_session(app_config: ApplicationConfig,
         yield Mock(OhClientSession, side_effect=RuntimeError(msg))
         return
 
-    options: Final[dict[str, str | int | bool]] = {}
     if not config.verify_ssl:
-        options['ssl'] = False
         log.info('Verify ssl set to False!')
-    else:
-        options.pop('ssl', None)
+
+    headers: Final = (('Authorization', aiohttp.encode_basic_auth(user, password)), )
 
     async with aiohttp.ClientSession(base_url=url, timeout=aiohttp.ClientTimeout(total=None),
-                                     json_serialize=dump_json, auth=aiohttp.BasicAuth(user, password),) as client:
-        session = OhClientSession(session=client, options=options, connection=connection)
+                                     json_serialize=dump_json, headers=headers) as client:
+        session = OhClientSession(session=client, ssl=config.verify_ssl, connection=connection)
         session.update_cfg(app_config.openhab.general)
         yield session
 
@@ -162,7 +160,7 @@ async def setup_openhab_connection(  # noqa: PLR0913
     connection.register_plugin(
         WebsocketPlugin(
             event_handler=event_handler, asyncio_provider=asyncio_provider,
-            ws_queue=websocket_queue, session=oh_connection
+            ws_queue=websocket_queue, session=oh_connection, config=config.openhab
         ),
         30
     )

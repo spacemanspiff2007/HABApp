@@ -103,12 +103,10 @@ class RestPatcher(BasePatcher):
         return resp_wrap
 
     async def __aenter__(self) -> None:
-        m = self.monkeypatch
-
         session = HABAPP_PROVIDER.get_existing(OhClientSession)
-
-        for name in ('get', 'put', 'post', 'delete'):
-            m.setattr(session, name, self.wrap_http(getattr(session, name)))
+        name: Final = '_request'
+        obj: Final = session.aiohttp_session
+        self.monkeypatch.setattr(obj, name, self.wrap_http(getattr(obj, name)))
 
 
 class WebsocketPatcher(BasePatcher):

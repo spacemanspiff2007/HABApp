@@ -30,7 +30,8 @@ class TestOpenhabInterfaceLinks(TestBaseRule):
 
         self.__create_test_item()
         if not self.openhab.item_exists(self.item_name):
-            raise Exception('item could not be created')
+            msg = 'item could not be created'
+            raise Exception(msg)
 
     def tear_down(self) -> None:
         try:

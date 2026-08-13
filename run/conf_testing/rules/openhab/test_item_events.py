@@ -40,8 +40,10 @@ class TestOpenhabEventTypes(TestBaseRule):
         for name, unit in dimensions.items():
             self.add_test(f'Quantity {name} events', self.test_quantity_type_events, name, unit)
 
-        self.add_test('EventSourceCommand', self.test_event_source_command)
-        self.add_test('EventSourceUpdate', self.test_event_source_update)
+        self.add_test('EventSourceCommandHttp', self.test_event_source_command, 'http')
+        self.add_test('EventSourceCommandWs', self.test_event_source_command, 'websocket')
+        self.add_test('EventSourceUpdateHttp', self.test_event_source_update, 'http')
+        self.add_test('EventSourceUpdateWs', self.test_event_source_update, 'websocket')
 
     def test_item(self, item_type: str, test_states: tuple, test_commands: tuple) -> None:
         item_name = f'{item_type}_value_test'
@@ -81,19 +83,19 @@ class TestOpenhabEventTypes(TestBaseRule):
                     event_waiter.wait_for_event(value=receive_value)
                     item_waiter.wait_for_state(receive_value)
 
-    def test_event_source_command(self) -> None:
+    def test_event_source_command(self, transport: str) -> None:
         with OpenhabTmpItem('Number') as item, EventWaiter(item.name, ItemCommandEventFilter()) as event_waiter:
             # test manual source
-            item.oh_send_command(5, source='TestSource')
+            self.oh.send_command(item.name, 5, source='TestSource', transport=transport)
             event: ItemCommandEvent = event_waiter.wait_for_event()
             assert event.source == 'HABApp.TestSource'
 
             # automatic source
-            item.oh_send_command(6)
+            self.oh.send_command(item.name, 6, source='TestSource', transport=transport)
             event: ItemCommandEvent = event_waiter.wait_for_event()
-            assert event.source == 'HABApp'
+            assert event.source == 'HABApp.TestOpenhabEventTypes'
 
-    def test_event_source_update(self) -> None:
+    def test_event_source_update(self, transport: str) -> None:
 
         events: list[ItemStateUpdatedEvent | ItemStateChangedEvent] = []
 
@@ -107,13 +109,13 @@ class TestOpenhabEventTypes(TestBaseRule):
 
             # test manual source
             value_1: Final = 5
-            item.oh_post_update(value_1, source='TestSource_1')
-            item.oh_post_update(value_1, source='TestSource_2')
+            self.oh.post_update(item.name, value_1, source='TestSource_1', transport=transport)
+            self.oh.post_update(item.name, value_1, source='TestSource_2', transport=transport)
 
             # automatic source
             value_2: Final = 6
-            item.oh_post_update(value_2)
-            item.oh_post_update(value_2)
+            self.oh.post_update(item.name, value_2, transport=transport)
+            self.oh.post_update(item.name, value_2, transport=transport)
             event_waiter.wait_for_event()
 
         e1, e2, e3, e4, e5, e6 = events
@@ -135,7 +137,7 @@ class TestOpenhabEventTypes(TestBaseRule):
         assert e4.value == value_2
 
         assert isinstance(e5, ItemStateChangedEvent)
-        assert e5.source == 'HABApp'
+        assert e5.source == 'HABApp.TestOpenhabEventTypes'
         assert e5.value == value_2
 
         assert isinstance(e6, ItemStateUpdatedEvent)

@@ -8,7 +8,7 @@ from urllib.parse import quote as quote_url
 from HABApp.core.errors import ItemNotFoundException
 from HABApp.core.internals import ItemRegistry, ItemRegistryItem
 from HABApp.core.provider import HABAPP_PROVIDER
-from HABApp.openhab.definitions.helper import convert_to_oh_str
+from HABApp.openhab.definitions.helper import convert_to_oh_str, get_source
 from HABApp.openhab.definitions.rest import (
     ItemChannelLinkResp,
     ItemChannelLinkRespList,
@@ -63,21 +63,21 @@ class OpenHabAsyncInterface:
         self._get_item: Final = ir.get_item
         self._client: Final = client
 
-    def _async_post_update(self, item: str | ItemRegistryItem, state: Any) -> None:
+    def _async_post_update(self, item: str | ItemRegistryItem, state: Any, *, source: str | None = None) -> None:
         if not isinstance(item, str):
             item = item.name
         if not isinstance(state, str):
             state = convert_to_oh_str(state)
-        self._http_queue.put_nowait((item, state, False))
+        self._http_queue.put_nowait((item, state, False, source))
         return None
 
-    def _async_send_command(self, item: str | ItemRegistryItem, state: Any) -> None:
+    def _async_send_command(self, item: str | ItemRegistryItem, state: Any, *, source: str | None = None) -> None:
         if not isinstance(item, str):
             item = item.name
         if not isinstance(state, str):
             state = convert_to_oh_str(state)
 
-        self._http_queue.put_nowait((item, state, True))
+        self._http_queue.put_nowait((item, state, True, source))
         return None
 
     def send_websocket_event(self, event: ItemStateSendEvent | ItemCommandSendEvent) -> None:
@@ -90,7 +90,7 @@ class OpenHabAsyncInterface:
         if isinstance(event.payload, RawTypeModel):
             # 'openhab/items/<NAME>/<state|command>'
             _, _, name, action = event.topic.split('/')
-            self._http_queue.put_nowait((name, event.payload.value, action == 'command'))
+            self._http_queue.put_nowait((name, event.payload.value, action == 'command', event.source))
             return None
 
         self._ws_queue.put_nowait(event)
@@ -113,37 +113,39 @@ class OpenHabAsyncInterface:
 
         return item
 
-    def post_update(self, item: str | ItemRegistryItem, state: Any, *,
+    def post_update(self, item: str | ItemRegistryItem, state: Any, *, source: str | None = None,
                     transport: Literal['http', 'websocket'] = 'websocket') -> None:
         """
         Post an update to the item
 
         :param item: item name or item
         :param state: new item state
+        :param source: optional source of the update
         :param transport: transport to use. Websocket is much faster but stricter concerning which types are accepted
         """
 
         # by default, we use the websocket connection because it's much faster
         if transport != 'websocket' or (item_obj := self._try_get_item(item)) is None:
-            return self._async_post_update(item, state)
+            return self._async_post_update(item, state, source=get_source(source))
 
-        return item_obj.oh_post_update(state)
+        return item_obj.oh_post_update(state, source=get_source(source))
 
-    def send_command(self, item: str | ItemRegistryItem, command: Any, *,
+    def send_command(self, item: str | ItemRegistryItem, command: Any, *, source: str | None = None,
                      transport: Literal['http', 'websocket'] = 'websocket') -> None:
         """
         Send the specified command to the item
 
         :param item: item name or item
         :param command: command
+        :param source: optional source of the command
         :param transport: transport to use. Websocket is much faster but stricter concerning which types are accepted
         """
 
         # by default, we use the websocket connection because it's much faster
         if transport != 'websocket' or (item_obj := self._try_get_item(item)) is None:
-            return self._async_send_command(item, command)
+            return self._async_send_command(item, command, source=get_source(source))
 
-        return item_obj.oh_send_command(command)
+        return item_obj.oh_send_command(command, source=get_source(source))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Http Interface

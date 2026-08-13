@@ -10,4 +10,4 @@
 # Development versions contain the DEV-COUNTER postfix:
 # - 24.01.0.DEV-1
 
-__version__ = '26.8.0.DEV-4'
+__version__ = '26.8.0.DEV-5'

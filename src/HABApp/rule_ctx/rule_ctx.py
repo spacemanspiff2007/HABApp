@@ -31,7 +31,7 @@ TB = TypeVar('TB', bound=EventBusListener)
 class HABAppRuleContext(Context):
     def __init__(self, rule: Rule, event_bus: EventBus, item_registry: ItemRegistry, executor_factory: ExecutorFactory) -> None:
         super().__init__()
-        self.rule: Rule | None = rule
+        self.rule: Final[Rule] = rule
         self.event_bus: Final = event_bus
         self.item_registry: Final = item_registry
         self.executor_factory: Final = executor_factory
@@ -64,8 +64,7 @@ class HABAppRuleContext(Context):
             self.objs = None    # Set to None so we crash if we want to schedule new stuff
 
             # clean references
-            self.rule = None
-            rule._habapp_rule_ctx = None
+            rule._habapp_ctx = None
 
             # user implementation
             await self.executor_factory.create(rule.on_rule_removed).execute()

@@ -34,29 +34,31 @@ class OpenHabSyncInterface:
     def _send_websocket_event(self, event: ItemStateSendEvent | ItemCommandSendEvent) -> None:
         return run_func_from_async(self._i.send_websocket_event, event)
 
-    def post_update(self, item: str | ItemRegistryItem, state: Any, *,
+    def post_update(self, item: str | ItemRegistryItem, state: Any, *, source: str | None = None,
                     transport: Literal['http', 'websocket'] = 'websocket') -> None:
         """
         Post an update to the item
 
         :param item: item name or item
         :param state: new item state
+        :param source: (optional) source of the update
         :param transport: transport to use. Websocket is much faster but stricter concerning which types are accepted
         """
 
-        return run_func_from_async(self._i.post_update, item, state, transport=transport)
+        return run_func_from_async(self._i.post_update, item, state, transport=transport, source=source)
 
-    def send_command(self, item: str | ItemRegistryItem, command: Any, *,
+    def send_command(self, item: str | ItemRegistryItem, command: Any, *, source: str | None = None,
                      transport: Literal['http', 'websocket'] = 'websocket') -> None:
         """
         Send the specified command to the item
 
         :param item: item name or item
         :param command: command
+        :param source: (optional) source of the command
         :param transport: transport to use. Websocket is much faster but stricter concerning which types are accepted
         """
 
-        return run_func_from_async(self._i.send_command, item, command, transport=transport)
+        return run_func_from_async(self._i.send_command, item, command, transport=transport, source=source)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Http Interface

@@ -27,6 +27,10 @@ def _in_rule_init(frame: FrameType) -> bool:
     return False
 
 
+def get_current_context_or_none() -> HABAppRuleContext | None:
+    return _HABAPP_RULE_CTX.get()
+
+
 # noinspection PyProtectedMember
 def get_current_context() -> HABAppRuleContext:
     # Context is already set, this is the default path

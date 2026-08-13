@@ -24,7 +24,7 @@ class OpenhabItems(TestBaseRule):
 
         self.add_test('TestSmallValues', self.test_small_float_values)
         self.add_test('TestLastValue', self.test_last_value)
-        self.add_test('TestOhTimestamp', self.test_oh_timestamp)
+        self.add_test('TestOhTimestampIsUsed', self.test_oh_timestamp_is_used)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -190,7 +190,7 @@ class OpenhabItems(TestBaseRule):
                 _send_and_check(3, None)
 
     @OpenhabTmpItem.create('Number', arg_name='tmp_item')
-    def test_oh_timestamp(self, tmp_item: OpenhabTmpItem) -> None:
+    def test_oh_timestamp_is_used(self, tmp_item: OpenhabTmpItem) -> None:
         """This rule tests that the timestamp from openHAB is used to set the item time"""
         item = NumberItem.get_item(tmp_item.name)
 

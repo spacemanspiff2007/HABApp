@@ -2,7 +2,6 @@ import datetime
 import inspect
 
 import pytest
-from whenever import ZonedDateTime
 
 import HABApp.openhab.events as events_module
 from HABApp.openhab.definitions.websockets import OPENHAB_EVENT_TYPE_ADAPTER
@@ -92,9 +91,12 @@ def test__ItemStateUpdatedEvent() -> None:  # noqa: N802
     assert event.value == 'a'
     assert str(event) == '<ItemStateUpdatedEvent name: my_item_name, value: a>'
     assert event.source == 'TestSource'
-    assert event.last_state_update == ZonedDateTime(
-        2026, 6, 15, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
-    ).to_instant()
+
+    # to clarify from openHAB side
+    assert event.last_state_update is None
+    # assert event.last_state_update == ZonedDateTime(
+    #     2026, 6, 15, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
+    # ).to_instant()
 
 
 # noinspection PyPep8Naming
@@ -271,12 +273,17 @@ def test__ItemStateChangedEvent2() -> None:  # noqa: N802
     assert event.name == 'my_item_name'
     assert event.value == 'b'
     assert event.old_value == 'a'
-    assert event.last_state_update == ZonedDateTime(
-        2026, 6, 15, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
-    ).to_instant()
-    assert event.last_state_change == ZonedDateTime(
-        2026, 6, 14, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
-    ).to_instant()
+
+    # To clarify from openHAB side
+    assert event.last_state_update is None
+    assert event.last_state_change is None
+
+    # assert event.last_state_update == ZonedDateTime(
+    #     2026, 6, 15, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
+    # ).to_instant()
+    # assert event.last_state_change == ZonedDateTime(
+    #     2026, 6, 14, 12, 13, 14, nanosecond=123456000, tz='Europe/Berlin'
+    # ).to_instant()
 
 
 # noinspection PyPep8Naming

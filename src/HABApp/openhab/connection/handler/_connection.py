@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from aiohttp.client import ClientResponse, _RequestContextManager
 from aiohttp.hdrs import METH_DELETE, METH_GET, METH_POST, METH_PUT
+from aiohttp.typedefs import Query as _Query
 
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.shutdown import ShutdownInfo
@@ -18,14 +19,16 @@ if TYPE_CHECKING:
     from HABApp.openhab.connection.connection import OpenhabConnection
 
 
+
 # noinspection PyProtectedMember
 class OhClientSession:
     # no slots because otherwise we can't monkeypatch the session for testing
     # __slots__ = ('_connection', '_request', '_session', 'options', 'read_only')  # noqa: ERA001
 
-    def __init__(self, session: ClientSession, options: dict[str, Any], connection: OpenhabConnection) -> None:
+    def __init__(self, session: ClientSession, connection: OpenhabConnection, *,
+                 ssl: bool) -> None:
 
-        self.options: Final = options
+        self._ssl: Final = ssl
         self._session: Final = session
         self._connection: Final = connection
         self._request = self._session.request
@@ -38,39 +41,47 @@ class OhClientSession:
     def update_cfg(self, cfg: OhGeneralConfig) -> None:
         self.read_only = cfg.listen_only
 
-    async def get(self, url: str, *, log_404: bool = True, **kwargs: Any) -> ClientResponse:
-        mgr = _RequestContextManager(self._request(METH_GET, url, **self.options, **kwargs))
+    async def get(self, url: str, *, log_404: bool = True,
+                  params: _Query | None = None, **kwargs: Any) -> ClientResponse:
+
+        mgr = _RequestContextManager(self._request(METH_GET, url, params=params, ssl=self._ssl, **kwargs))
         return await self.check_response(mgr, log_404=log_404)
 
     async def post(self, url: str, *, log_404: bool = True, json: dict[str, Any] | None = None,
-                   data: str | None = None, **kwargs: Any) -> ClientResponse | None:
+                   data: str | None = None, params: _Query | None = None, **kwargs: Any) -> ClientResponse | None:
 
         if self.read_only:
             return None
 
-        mgr = _RequestContextManager(self._request(METH_POST, url, data=data, json=json, **self.options, **kwargs))
+        mgr = _RequestContextManager(
+            self._request(METH_POST, url, data=data, json=json, params=params, ssl=self._ssl, **kwargs)
+        )
         if data is None:
             data = json
         return await self.check_response(mgr, log_404=log_404, sent_data=data)
 
     async def put(self, url: str, *, log_404: bool = True, json: dict[str, Any] | None = None,
-                  data: str | None = None, **kwargs: Any) -> ClientResponse | None:
+                  data: str | None = None, params: _Query | None = None, **kwargs: Any) -> ClientResponse | None:
 
         if self.read_only:
             return None
 
-        mgr = _RequestContextManager(self._request(METH_PUT, url, data=data, json=json, **self.options, **kwargs))
+        mgr = _RequestContextManager(
+            self._request(METH_PUT, url, data=data, json=json, params=params, ssl=self._ssl, **kwargs)
+        )
         if data is None:
             data = json
         return await self.check_response(mgr, log_404=log_404, sent_data=data)
 
     async def delete(self, url: str, *, log_404: bool = True, json: dict[str, Any] | None = None,
-                     data: str | None = None, **kwargs: Any) -> ClientResponse | None:
+                     data: str | None = None, params: _Query | None = None, **kwargs: Any) -> ClientResponse | None:
 
         if self.read_only:
             return None
 
-        mgr = _RequestContextManager(self._request(METH_DELETE, url, data=data, json=json, **self.options, **kwargs))
+        mgr = _RequestContextManager(
+            self._request(METH_DELETE, url, data=data, json=json, params=params, ssl=self._ssl, **kwargs)
+        )
         if data is None:
             data = json
         return await self.check_response(mgr, log_404=log_404, sent_data=data)

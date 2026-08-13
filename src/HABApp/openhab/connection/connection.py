@@ -39,7 +39,7 @@ class OpenhabContext:
 type CONTEXT_TYPE = OpenhabContext | None
 
 type OhWebsocketQueue = WatchedSingleConsumerQueue[BaseOutEvent]
-type OhHttpQueue = WatchedSingleConsumerQueue[tuple[str, str, bool]]
+type OhHttpQueue = WatchedSingleConsumerQueue[tuple[str, str, bool, str | None]]
 
 
 class OpenhabConnection(BaseConnection):

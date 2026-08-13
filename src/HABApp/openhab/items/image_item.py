@@ -64,28 +64,32 @@ class ImageItem(OpenhabItem):
 
         raise InvalidItemValueError.from_item(self, new_value)
 
-    def oh_post_update(self, value: bytes | None = MISSING, image_type: str | None = None) -> None:
+    def oh_post_update(self, value: bytes | None = MISSING, *,
+                       image_type: str | None = None, source: str | None = None) -> None:
         """Post an update to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param value: image data
         :param image_type: (optional) what kind of image, ``jpeg`` or ``png``
+        :param source: (optional) source where this update comes from
         """
         if value is MISSING:
             value = self.value
         elif isinstance(value, bytes):
             value = RawType.create(data_type=image_type, data=value)
-        return super().oh_post_update(value)
+        return super().oh_post_update(value, source=source)
 
-    def oh_send_command(self, value: bytes | None = MISSING, image_type: str | None = None) -> None:
+    def oh_send_command(self, value: bytes | None = MISSING, *,
+                        image_type: str | None = None, source: str | None = None) -> None:
         """Send a command to an openHAB image with new image data. Image type is automatically detected,
         in rare cases when this does not work it can be set manually.
 
         :param value: image data
         :param image_type: (optional) what kind of image, ``jpeg`` or ``png``
+        :param source: (optional) source where this command comes from
         """
         if value is MISSING:
             value = self.value
         elif isinstance(value, bytes):
             value = RawType.create(data_type=image_type, data=value)
-        return super().oh_send_command(value)
+        return super().oh_send_command(value, source=source)

@@ -10,6 +10,7 @@ from HABApp.core.internals import EventBus
 from HABApp.core.items import BaseValueItem
 from HABApp.core.lib.funcs import compare as _compare
 from HABApp.openhab.connection.handler import OpenHabSyncInterface
+from HABApp.openhab.definitions.helper import get_source
 from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
 
 
@@ -74,9 +75,11 @@ class OpenhabItem(BaseValueItem):
         :param value: (optional) value to be sent. If not specified the current item value will be used.
         :param source: (optional) source where this command comes from
         """
-        new_value = self.value if value is MISSING else value
+        new_value: Final = self.value if value is MISSING else value
+
+        # noinspection protected-member
         self._oh._send_websocket_event(
-            self._command_to_oh.create_event(self._name, new_value, source=source)
+            self._command_to_oh.create_event(self._name, new_value, source=get_source(source))
         )
 
     # For the openhab items HABApp internal commands make not much sense
@@ -95,9 +98,11 @@ class OpenhabItem(BaseValueItem):
         :param value: (optional) value to be posted. If not specified the current item value will be used.
         :param source: (optional) source where this update comes from
         """
-        new_value = self.value if value is MISSING else value
+        new_value: Final = self.value if value is MISSING else value
+
+        # noinspection protected-member
         self._oh._send_websocket_event(
-            self._update_to_oh.create_event(self._name, new_value, source=source)
+            self._update_to_oh.create_event(self._name, new_value, source=get_source(source))
         )
 
     def oh_post_update_if(self, new_value, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,

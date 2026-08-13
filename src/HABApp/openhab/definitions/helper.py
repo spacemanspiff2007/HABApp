@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import BaseModel
 from whenever import Instant, OffsetDateTime, PlainDateTime, ZonedDateTime
 
+from HABApp.core.internals.context import get_current_context_or_none
 from HABApp.core.types import HSB, RGB
 from HABApp.openhab.definitions.websockets.item_value_types import RawTypeModel
 
@@ -49,3 +50,15 @@ def map_null_str(value: str | None) -> str | None:
     if value in ('NULL', 'UNDEF'):
         return None
     return value
+
+
+def get_source(source: str | None) -> str | None:
+    if source is not None:
+        # use source from user
+        return source
+
+    # try building it automatically through the rule context
+    if (ctx := get_current_context_or_none()) is None:
+        return None
+
+    return ctx.rule.rule_name

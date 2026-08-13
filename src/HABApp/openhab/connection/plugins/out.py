@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, Final
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.logger import log_error
 from HABApp.openhab.connection.connection import OhHttpQueue, OpenhabConnection
-from HABApp.openhab.connection.handler import OhClientSession
 
 
 if TYPE_CHECKING:
     from HABApp.core.lib.asyncio import AsyncioProvider
+    from HABApp.openhab.connection.handler import OhClientSession
 
 
 class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
@@ -43,7 +43,7 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
         while True:
             try:
                 while True:
-                    item, state, is_cmd = await queue.get()
+                    item, state, is_cmd, source = await queue.get()
 
                     # this check should never be hit
                     if not isinstance(state, str):
@@ -53,9 +53,11 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
                         )
                         continue
 
+                    src = 'HABApp' if source is None else f'HABApp.{source:s}'
+
                     if is_cmd:
-                        await post(f'/rest/items/{item:s}', data=state)
+                        await post(f'/rest/items/{item:s}', data=state, params=(('source', src), ))
                     else:
-                        await put(f'/rest/items/{item:s}/state', data=state)
+                        await put(f'/rest/items/{item:s}/state', data=state, params=(('source', src), ))
             except Exception as e:  # noqa: PERF203
                 self.plugin_connection.process_exception(e, 'Outgoing queue worker')
