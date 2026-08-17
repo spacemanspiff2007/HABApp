@@ -9,13 +9,10 @@ from aiohttp import ClientError, ClientWebSocketResponse, WSMsgType
 from pydantic import ValidationError
 
 import HABApp
-from HABApp.config.models.openhab import OpenhabConfig
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.const.log import TOPIC_EVENTS
-from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.logger import HABAppError, HABAppWarning
 from HABApp.openhab.connection.connection import OhWebsocketQueue, OpenhabConnection, OpenhabContext
-from HABApp.openhab.connection.handler import OhClientSession
 from HABApp.openhab.definitions.helpers import get_discriminator_values_from_union
 from HABApp.openhab.definitions.websockets import (
     OPENHAB_EVENT_TYPE_ADAPTER,
@@ -27,6 +24,9 @@ from HABApp.openhab.definitions.websockets import (
 
 
 if TYPE_CHECKING:
+    from HABApp.config.models.openhab import OpenhabConfig
+    from HABApp.core.lib.asyncio import AsyncioProvider
+    from HABApp.openhab.connection.handler import OhClientSession
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
     from HABApp.openhab.event_handler import OhEventHandler
 
@@ -51,12 +51,17 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         self._sent_events: Final[dict[str, BaseOutEvent]] = {}
 
+    def cfg_updated(self) -> None:
+        self._queue.set_open(not self._config.general.listen_only)
+
     async def on_connected(self, context: OpenhabContext) -> None:
-        self._queue.set_open(True)
+        self.cfg_updated()  # open the queue if we are not read only
+
         self.task.start()
 
     async def on_disconnected(self) -> None:
-        self._queue.set_open(False)
+        self._queue.set_open(False)  # Always close queue unconditionally
+
         await self.task.cancel_wait()
         self._sent_events.clear()
 

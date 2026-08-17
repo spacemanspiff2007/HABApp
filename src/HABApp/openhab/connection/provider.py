@@ -142,13 +142,14 @@ async def setup_openhab_connection(  # noqa: PLR0913
     connection.register_plugin(handler)
 
     connection.register_plugin(WaitForStartlevelPlugin(interface=interface), 0)
-    connection.register_plugin(
-        OutgoingCommandsPlugin(
-            'OutgoingCommandsPlugin', asyncio_provider=asyncio_provider, http_queue=http_queue,
-            oh_connection=oh_connection
-        ),
-        10
+
+    http_out: Final = OutgoingCommandsPlugin(
+        'OutgoingCommandsPlugin', asyncio_provider=asyncio_provider, http_queue=http_queue,
+        oh_connection=oh_connection, config=config.openhab.general
     )
+    connection.register_plugin(http_out, 10)
+    config.openhab.general.subscribe_for_changes(http_out.cfg_updated)
+
     connection.register_plugin(
         LoadOpenhabItemsPlugin(
             'LoadItemsAndThings',
@@ -157,13 +158,14 @@ async def setup_openhab_connection(  # noqa: PLR0913
         ),
         20
     )
-    connection.register_plugin(
-        WebsocketPlugin(
-            event_handler=event_handler, asyncio_provider=asyncio_provider,
-            ws_queue=websocket_queue, session=oh_connection, config=config.openhab
-        ),
-        30
+
+    ws_plugin: Final = WebsocketPlugin(
+        event_handler=event_handler, asyncio_provider=asyncio_provider,
+        ws_queue=websocket_queue, session=oh_connection, config=config.openhab
     )
+    connection.register_plugin(ws_plugin, 30)
+    config.openhab.general.subscribe_for_changes(ws_plugin.cfg_updated)
+
     connection.register_plugin(
         LoadOpenhabItemsPlugin(
             'SyncItemsAndThings',
@@ -172,7 +174,9 @@ async def setup_openhab_connection(  # noqa: PLR0913
         ),
         40
     )
+
     connection.register_plugin(LoadTransformationsPlugin(interface=interface), 50)
+
     connection.register_plugin(
         PingPlugin(
             item_registry=item_registry, event_bus=event_bus,
@@ -180,9 +184,13 @@ async def setup_openhab_connection(  # noqa: PLR0913
         ),
         100
     )
+
     connection.register_plugin(WaitForPersistenceRestore(item_registry=item_registry), 110)
+
     connection.register_plugin(ThingOverviewPlugin(interface=interface), 500_000)
+
     connection.register_plugin(BrokenLinksPlugin(item_registry=item_registry, interface=interface), 500_001)
 
     connection.register_plugin(ConnectionStateToEventBusPlugin(event_bus=event_bus))
+
     connection.register_plugin(AutoReconnectPlugin())

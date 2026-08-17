@@ -8,6 +8,7 @@ from HABApp.openhab.connection.connection import OhHttpQueue, OpenhabConnection
 
 
 if TYPE_CHECKING:
+    from HABApp.config.models.openhab import General as OhGeneralConfig
     from HABApp.core.lib.asyncio import AsyncioProvider
     from HABApp.openhab.connection.handler import OhClientSession
 
@@ -15,7 +16,8 @@ if TYPE_CHECKING:
 class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
     def __init__(self, name: str | None = None, *,
-                 asyncio_provider: AsyncioProvider, http_queue: OhHttpQueue, oh_connection: OhClientSession) -> None:
+                 asyncio_provider: AsyncioProvider, http_queue: OhHttpQueue, oh_connection: OhClientSession,
+                 config: OhGeneralConfig) -> None:
         super().__init__(name)
 
         self.http_queue: Final[OhHttpQueue] = http_queue
@@ -23,14 +25,18 @@ class OutgoingCommandsPlugin(BaseConnectionPlugin[OpenhabConnection]):
             self.http_queue_worker, 'OhHttpQueueWorker'
         )
         self._oh: Final = oh_connection
+        self._cfg: Final = config
+
+    def cfg_updated(self) -> None:
+        self.http_queue.set_open(not self._cfg.listen_only)
 
     async def on_connected(self) -> None:
-        self.http_queue.set_open(True)
+        self.cfg_updated()  # open the queue if we are not read only
 
         self.task_http_worker.start()
 
     async def on_disconnected(self) -> None:
-        self.http_queue.set_open(False)
+        self.http_queue.set_open(False)     # Always close queue unconditionally
 
         await self.task_http_worker.cancel_wait()
 
