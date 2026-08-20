@@ -1,13 +1,25 @@
 from __future__ import annotations
 
 from threading import Lock
+from typing import Final
 
-from .limiter import Limiter
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.util.rate_limiter.limiter import Limiter
 
 
-LOCK = Lock()
+class RateLimiterRegistry:
+    __slots__ = ('_limiters', '_lock')
 
-_LIMITERS: dict[str, Limiter] = {}
+    def __init__(self) -> None:
+        self._lock = Lock()
+        self._limiters: Final[dict[str, Limiter]] = {}
+
+    def get_limiter(self, name: str) -> Limiter:
+        key = name.lower()
+        with self._lock:
+            if (obj := self._limiters.get(key)) is None:
+                self._limiters[key] = obj = Limiter(name)
+        return obj
 
 
 def RateLimiter(name: str) -> Limiter:  # noqa: N802
@@ -16,11 +28,4 @@ def RateLimiter(name: str) -> Limiter:  # noqa: N802
     :param name: case-insensitive name of limiter
     :return: Rate limiter object
     """
-
-    key = name.lower()
-
-    with LOCK:
-        if (obj := _LIMITERS.get(key)) is None:
-            _LIMITERS[key] = obj = Limiter(name)
-
-    return obj
+    return HABAPP_PROVIDER.get_existing(RateLimiterRegistry).get_limiter(name)

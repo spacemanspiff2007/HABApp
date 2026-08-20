@@ -38,7 +38,6 @@ class LeakyBucketLimit(BaseRateLimit):
                 break
 
     do_allow = do_test_allow
-    do_deny = None
 
     @override
     def info(self) -> LeakyBucketLimitInfo:

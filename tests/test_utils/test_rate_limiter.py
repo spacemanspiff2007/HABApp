@@ -195,11 +195,12 @@ def test_leaky_bucket_info(time) -> None:
 
 
 def test_registry(monkeypatch) -> None:
-    monkeypatch.setattr(registry_module, '_LIMITERS', {})
 
-    obj = registry_module.RateLimiter('Test')
-    assert obj is registry_module.RateLimiter('TEST')
-    assert obj is registry_module.RateLimiter('test')
+    reg = registry_module.RateLimiterRegistry()
+
+    obj = reg.get_limiter('TEST')
+    assert obj is reg.get_limiter('TeSt')
+    assert obj is reg.get_limiter('test')
 
 
 def test_limiter(time) -> None:

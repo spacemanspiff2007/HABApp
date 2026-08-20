@@ -22,6 +22,7 @@ from HABApp.mqtt.connection.connection import MqttConnection
 from HABApp.openhab.connection import setup_openhab_connection
 from HABApp.openhab.connection.connection import OpenhabConnection
 from HABApp.rule_manager import RuleManager
+from HABApp.util.rate_limiter.registry import RateLimiterRegistry
 
 
 log = logging.getLogger('HABApp.Warnings')
@@ -50,6 +51,10 @@ class Runtime:
             ir = await HABAPP_PROVIDER.get(HABApp.core.internals.ItemRegistry)
             eb = await HABAPP_PROVIDER.get(HABApp.core.internals.EventBus)
             await HABAPP_PROVIDER.get(HABApp.core.files.FileManager)
+
+            # setup rate limiter
+            HABAPP_PROVIDER.register(RateLimiterRegistry)
+            await HABAPP_PROVIDER.get(RateLimiterRegistry)
 
             # Load config
             await HABApp.config.setup_habapp_configuration(config_folder)

@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from HABApp.openhab.connection.connection import OpenhabConnection
 
 
-
 # noinspection PyProtectedMember
 class OhClientSession:
     # no slots because otherwise we can't monkeypatch the session for testing

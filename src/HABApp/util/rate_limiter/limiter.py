@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Final, Literal, TypeAlias, get_args
+from threading import Lock
+from typing import Any, Final, Literal, TypeAlias, get_args
 
 from HABApp.util.rate_limiter.limits import (
     BaseRateLimit,
@@ -17,8 +18,8 @@ _LITERAL_FIXED_WINDOW_ELASTIC_EXPIRY = Literal['fixed_window_elastic_expiry']
 LIMITER_ALGORITHM_HINT: TypeAlias = Literal[_LITERAL_LEAKY_BUCKET, _LITERAL_FIXED_WINDOW_ELASTIC_EXPIRY]
 
 
-def _check_arg(name: str, value, allow_0=False):
-    if not isinstance(value, int) or ((value <= 0) if not allow_0 else (value < 0)):
+def _check_arg(name: str, value: Any, allow_0=False) -> None:
+    if isinstance(value, bool) or not isinstance(value, int) or ((value <= 0) if not allow_0 else (value < 0)):
         msg = f'Parameter {name:s} must be an int >{"=" if allow_0 else ""} 0, is {value} ({type(value)})'
         raise ValueError(msg)
 
@@ -26,6 +27,7 @@ def _check_arg(name: str, value, allow_0=False):
 class Limiter:
     def __init__(self, name: str) -> None:
         self._name: Final = name
+        self._lock: Final = Lock()
         self._limits: tuple[BaseRateLimit, ...] = ()
         self._skips: int = 0
         self._skips_total: int = 0
@@ -63,13 +65,14 @@ class Limiter:
             msg = f'Unknown algorithm "{algorithm}"'
             raise ValueError(msg)
 
-        # Check if we have already added an algorithm with these parameters
-        for window in self._limits:
-            if isinstance(window, cls) and window.allowed == allowed and window.interval == interval:
-                return self
+        with self._lock:
+            # Check if we have already added an algorithm with these parameters
+            for window in self._limits:
+                if isinstance(window, cls) and window.allowed == allowed and window.interval == interval:
+                    return self
 
-        limit = cls(allowed, interval, hits=initial_hits)
-        self._limits = tuple(sorted([*self._limits, limit], key=lambda x: x.interval))
+            limit = cls(allowed, interval, hits=initial_hits)
+            self._limits = tuple(sorted([*self._limits, limit], key=lambda x: x.interval))
         return self
 
     def parse_limits(self, *text: str,
@@ -91,26 +94,33 @@ class Limiter:
 
         :return: ``True`` if allowed, ``False`` if forbidden
         """
-        if not self._limits:
-            msg = 'No limits defined!'
-            raise ValueError(msg)
+        with self._lock:
+            if not self._limits:
+                msg = 'No limits defined!'
+                raise ValueError(msg)
 
-        clear_skipped = True
+            # Test all limits without mutating any of them. Only if every single limit
+            # allows the hit do we commit it. This avoids a limit being "consumed"
+            # even though the overall call gets rejected because of a longer limit.
+            for limit in self._limits:
+                if not limit.test_allow():
+                    self._skips += 1
+                    self._skips_total += 1
+                    return False
 
-        for limit in self._limits:
-            if not limit.allow():
-                self._skips += 1
-                self._skips_total += 1
-                return False
+            # Commit the hit on every limit
+            clear_skipped = True
+            for limit in self._limits:
+                limit.allow()
 
-            # allow increments hits, if it's now 1 it was 0 before
-            if limit.hits != 1:
-                clear_skipped = False
+                # allow increments hits, if it's now 1 it was 0 before
+                if limit.hits != 1:
+                    clear_skipped = False
 
-        if clear_skipped:
-            self._skips = 0
+            if clear_skipped:
+                self._skips = 0
 
-        return True
+            return True
 
     def test_allow(self) -> bool:
         """Test the limit(s) without hitting it. Calling this will not increase the hit counter.
@@ -118,35 +128,38 @@ class Limiter:
         :return: ``True`` if allowed, ``False`` if forbidden
         """
 
-        if not self._limits:
-            msg = 'No limits defined!'
-            raise ValueError(msg)
+        with self._lock:
+            if not self._limits:
+                msg = 'No limits defined!'
+                raise ValueError(msg)
 
-        clear_skipped = True
+            clear_skipped = True
 
-        for limit in self._limits:
-            if not limit.test_allow():
-                return False
+            for limit in self._limits:
+                if not limit.test_allow():
+                    return False
 
-            if limit.hits != 0:
-                clear_skipped = False
+                if limit.hits != 0:
+                    clear_skipped = False
 
-        if clear_skipped:
-            self._skips = 0
-        return True
+            if clear_skipped:
+                self._skips = 0
+            return True
 
     def info(self) -> 'LimiterInfo':
         """Get some info about the limiter and the defined windows
         """
 
-        return LimiterInfo(
-            skips=self._skips, total_skips=self._skips_total,
-            limits=[limit.info() for limit in self._limits]
-        )
+        with self._lock:
+            return LimiterInfo(
+                skips=self._skips, total_skips=self._skips_total,
+                limits=[limit.info() for limit in self._limits]
+            )
 
     def reset(self) -> 'Limiter':
         """Reset the skip counter"""
-        self._skips_total = 0
+        with self._lock:
+            self._skips_total = 0
         return self
 
 
