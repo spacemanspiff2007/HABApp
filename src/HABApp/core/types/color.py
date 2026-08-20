@@ -147,7 +147,7 @@ class RGB16(RGB):
 
 
 class RGB24(RGB):
-    _RGB_MAX: int = 2 ** 32 - 1
+    _RGB_MAX: int = 2 ** 24 - 1
 
 
 class RGB32(RGB):

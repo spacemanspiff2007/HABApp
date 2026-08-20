@@ -50,6 +50,10 @@ class RawType:
                 data_type = 'png'
             elif data.startswith(b'\x47\x49\x46\x38'):
                 data_type = 'gif'
+            elif data.startswith(b'\x42\x4D'):
+                data_type = 'bmp'
+            elif data.startswith(b'\x52\x49\x46\x46'):
+                data_type = 'webp'
             else:
                 msg = f'Unknown image type! File Signature: {data[:10].hex()}'
                 raise ValueError(msg)
