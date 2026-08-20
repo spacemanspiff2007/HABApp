@@ -17,6 +17,10 @@ class SingleConsumerQueue[T]:
         self._is_open: bool = True
         self._getter: Future[None] | None = None
 
+    @property
+    def is_open(self) -> bool:
+        return self._is_open
+
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(is_open={self._is_open}, queue_size={len(self._queue)})'
 
