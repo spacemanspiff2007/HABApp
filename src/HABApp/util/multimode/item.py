@@ -1,5 +1,5 @@
 from threading import Lock
-from typing import Any
+from typing import Any, Final
 
 from HABApp.core.const import MISSING
 from HABApp.core.internals import EventBus
@@ -8,7 +8,7 @@ from HABApp.core.items import Item
 from .mode_base import BaseMode
 
 
-LOCK = Lock()
+LOCK: Final = Lock()
 
 
 class MultiModeItem(Item):
@@ -16,7 +16,7 @@ class MultiModeItem(Item):
     """
 
     @classmethod
-    def get_create_item(cls, name: str, initial_value: Any =None, default_value: Any = MISSING) -> 'MultiModeItem':
+    def get_create_item(cls, name: str, initial_value: Any = None, default_value: Any = MISSING) -> 'MultiModeItem':
         """Creates a new item in HABApp and returns it or returns the already existing one with the given name
 
         :param name: item name
@@ -56,7 +56,7 @@ class MultiModeItem(Item):
         msg = f'Mode {name} is missing!'
         raise RuntimeError(msg)
 
-    def __sort_modes(self):
+    def __sort_modes(self) -> None:
         # sort by priority and make lower prio known to the mode
         modes = sorted(self.__values_by_prio.items())
         self.__values_by_prio.clear()
@@ -85,7 +85,7 @@ class MultiModeItem(Item):
     def add_mode(self, priority: int, mode: BaseMode) -> 'MultiModeItem':
         """Add a new mode to the item, if it already exists it will be overwritten
 
-        :param priority: priority of the mode
+        :param priority: priority of the mode (a higher priority takes precedence over a lower one)
         :param mode: instance of the MultiMode class
         """
         assert isinstance(priority, int), type(priority)
@@ -96,6 +96,11 @@ class MultiModeItem(Item):
         with LOCK:
             # remove old mode
             self.__remove_mode(name)
+
+            # make sure the priority is not already used by a different mode
+            if (existing := self.__values_by_prio.get(priority)) is not None:
+                msg = f'Priority {priority} is already used by mode "{existing.name}"!'
+                raise ValueError(msg)
 
             # add new mode
             self.__values_by_prio[priority] = mode
