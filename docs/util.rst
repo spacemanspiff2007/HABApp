@@ -104,42 +104,49 @@ Example
 
 .. exec_code::
 
-    from HABApp.util import RateLimiter
+    # ------------ hide: start ------------
+    async def run(provider):
+        # ------------ hide: stop -------------
 
-    # Create or get existing, name is case insensitive
-    limiter = RateLimiter('MyRateLimiterName')
+        from HABApp.util import RateLimiter
 
-    # define limits, duplicate limits of the same algorithm will only be added once
-    # These lines all define the same limit so it'll result in only one limiter added
-    limiter.add_limit(5, 60)   # add limits explicitly
-    limiter.parse_limits('5 per minute').parse_limits('5 in 60s', '5/60seconds')  # add limits through text
+        # Create or get existing, name is case insensitive
+        limiter = RateLimiter('MyRateLimiterName')
 
-    # add additional limit with leaky bucket algorithm
-    limiter.add_limit(10, 100, algorithm='leaky_bucket')
+        # define limits, duplicate limits of the same algorithm will only be added once
+        # These lines all define the same limit so it'll result in only one limiter added
+        limiter.add_limit(5, 60)   # add limits explicitly
+        limiter.parse_limits('5 per minute').parse_limits('5 in 60s', '5/60seconds')  # add limits through text
 
-    # add additional limit with fixed window elastic expiry algorithm
-    limiter.add_limit(10, 100, algorithm='fixed_window_elastic_expiry')
+        # add additional limit with leaky bucket algorithm
+        limiter.add_limit(10, 100, algorithm='leaky_bucket')
 
-    # Test the limit without increasing the hits
-    for _ in range(100):
-        assert limiter.test_allow()
+        # add additional limit with fixed window elastic expiry algorithm
+        limiter.add_limit(10, 100, algorithm='fixed_window_elastic_expiry')
 
-    # the limiter will allow 5 calls ...
-    for _ in range(5):
-        assert limiter.allow()
+        # Test the limit without increasing the hits
+        for _ in range(100):
+            assert limiter.test_allow()
 
-    # and reject the 6th
-    assert not limiter.allow()
+        # the limiter will allow 5 calls ...
+        for _ in range(5):
+            assert limiter.allow()
 
-    # It's possible to get statistics about the limiter and the corresponding windows
-    print(limiter.info())
+        # and reject the 6th
+        assert not limiter.allow()
 
-    # There is a counter that keeps track of the total skips that can be reset
-    print('Counter:')
-    print(limiter.total_skips)
-    limiter.reset()     # Can be reset
-    print(limiter.total_skips)
+        # It's possible to get statistics about the limiter and the corresponding windows
+        print(limiter.info())
 
+        # There is a counter that keeps track of the total skips that can be reset
+        print('Counter:')
+        print(limiter.total_skips)
+        limiter.reset()     # Can be reset
+        print(limiter.total_skips)
+
+    # ------------ hide: start ------------
+    import doc_runner
+    doc_runner.run(run)
 
 Recommendation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,12 +159,19 @@ that's why it's more suited for larger intervals.
 
 .. exec_code::
 
-    from HABApp.util import RateLimiter
+    # ------------ hide: start ------------
+    async def run(provider):
+        # ------------ hide: stop -------------
 
-    limiter = RateLimiter('MyNotifications')
-    limiter.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
-    limiter.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+        from HABApp.util import RateLimiter
 
+        limiter = RateLimiter('MyNotifications')
+        limiter.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
+        limiter.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+
+    # ------------ hide: start ------------
+    import doc_runner
+    doc_runner.run(run)
 
 Documentation
 ^^^^^^^^^^^^^^^^^^
