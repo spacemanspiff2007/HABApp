@@ -32,7 +32,7 @@ from HABApp.testing.executor import TestingExecutorFactory
 from HABApp.testing.inspect_habapp import find_in_modules
 from HABApp.testing.items import TestingItemFactory, TestingItems
 from HABApp.testing.mqtt import MqttLoopbackQueue
-from HABApp.testing.oh import OhWebsocketLoopbackQueue
+from HABApp.testing.oh import OhHttpLoopbackQueue, OhWebsocketLoopbackQueue, SentOhEventHistory
 from HABApp.testing.rules import RuleRegistry
 from HABApp.testing.scheduler import TestingScheduler, get_holiday, get_location
 from HABApp.testing.time import AsyncioTestingProvider, PatchedTimeHelper, TestingStartTimeOptions, UserTimeControl
@@ -190,16 +190,28 @@ def interface_oh(interface_oh_async: OpenHabAsyncInterface) -> OpenHabSyncInterf
 
 
 @pytest.fixture
-def oh_ws_loopbackqueue(event_bus: EventBus, item_registry: ItemRegistry) -> OhWebsocketLoopbackQueue:
-    return OhWebsocketLoopbackQueue(event_bus=event_bus, item_registry=item_registry)
+def oh_sent_events() -> SentOhEventHistory:
+    return SentOhEventHistory()
 
 
 @pytest.fixture
-def interface_oh_async(oh_ws_loopbackqueue: OhWebsocketLoopbackQueue,
+def oh_ws_loopbackqueue(event_bus: EventBus, item_registry: ItemRegistry,
+                        oh_sent_events: SentOhEventHistory) -> OhWebsocketLoopbackQueue:
+    return OhWebsocketLoopbackQueue(event_bus=event_bus, item_registry=item_registry, history=oh_sent_events)
+
+
+@pytest.fixture
+def oh_http_loopbackqueue(event_bus: EventBus, item_registry: ItemRegistry,
+                          oh_sent_events: SentOhEventHistory) -> OhHttpLoopbackQueue:
+    return OhHttpLoopbackQueue(event_bus=event_bus, item_registry=item_registry, history=oh_sent_events)
+
+
+@pytest.fixture
+def interface_oh_async(oh_ws_loopbackqueue: OhWebsocketLoopbackQueue, oh_http_loopbackqueue: OhHttpLoopbackQueue,
                        item_registry: ItemRegistry) -> OpenHabAsyncInterface:
 
     return OpenHabAsyncInterface(
-        websocket_queue=oh_ws_loopbackqueue, http_queue=Mock(), client=Mock(), ir=item_registry
+        websocket_queue=oh_ws_loopbackqueue, http_queue=oh_http_loopbackqueue, client=Mock(), ir=item_registry
     )
 
 
@@ -279,10 +291,10 @@ async def rule_hook(
     hook = HABAppRuleHook(
         rule_registry.register_rule,
         rule_registry.suggest_rule_name,
-        Mock(),
-        None,
-        None,
-        None,
+        rule_registry,
+        rule_file=None,
+        loop=None,
+        async_http_client=None,
         item_registry=item_registry,
         event_bus=event_bus,
         executor_factory=testing_executor_factory,
@@ -321,6 +333,8 @@ __all__ = (
     'item_times_backup',
     'mqtt_loopback_queue',
     'mqtt_msg_handler',
+    'oh_sent_events',
+    'oh_http_loopbackqueue',
     'oh_item_registry_handler',
     'oh_ws_loopbackqueue',
     'patch_current_time',
