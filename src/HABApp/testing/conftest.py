@@ -36,6 +36,7 @@ from HABApp.testing.oh import OhHttpLoopbackQueue, OhWebsocketLoopbackQueue, Sen
 from HABApp.testing.rules import RuleRegistry
 from HABApp.testing.scheduler import TestingScheduler, get_holiday, get_location
 from HABApp.testing.time import AsyncioTestingProvider, PatchedTimeHelper, TestingStartTimeOptions, UserTimeControl
+from HABApp.util.rate_limiter.registry import RateLimiterRegistry
 
 
 # Environment variable names which control testing
@@ -143,13 +144,17 @@ def habapp_provider_modules() -> tuple[tuple[ModuleType, str, Any], ...]:
 def debounced_call_registry(asyncio_provider: AsyncioTestingProvider) -> DebouncedCallRegistry:
     return DebouncedCallRegistry(asyncio_provider)
 
+@pytest.fixture
+def habapp_rate_limiter_registry() -> RateLimiterRegistry:
+    return RateLimiterRegistry()
 
 @pytest.fixture(autouse=True)
 async def habapp_provider(  # noqa: PLR0913
         monkeypatch: pytest.MonkeyPatch, habapp_provider_modules: tuple[tuple[ModuleType, str, Any], ...],
         item_registry: ItemRegistry, event_bus: EventBus, item_times_backup: ItemTimesBackup,
         asyncio_provider: AsyncioTestingProvider, debounced_call_registry: DebouncedCallRegistry,
-        interface_mqtt: MqttInterface, testing_executor_factory: TestingExecutorFactory
+        interface_mqtt: MqttInterface, testing_executor_factory: TestingExecutorFactory,
+        habapp_rate_limiter_registry: RateLimiterRegistry
 ) -> AsyncGenerator[HabAppObjProvider, Any]:
 
     provider: Final = HabAppObjProvider()
@@ -164,6 +169,7 @@ async def habapp_provider(  # noqa: PLR0913
     provider.add_object(debounced_call_registry, DebouncedCallRegistry)
     provider.add_object(interface_mqtt, MqttInterface)
     provider.add_object(testing_executor_factory, ExecutorFactory)
+    provider.add_object(habapp_rate_limiter_registry, RateLimiterRegistry )
 
     async with provider:
         yield provider
@@ -325,6 +331,7 @@ __all__ = (
     'habapp_config',
     'habapp_provider',
     'habapp_provider_modules',
+    'habapp_rate_limiter_registry',
     'interface_mqtt',
     'interface_mqtt_async',
     'interface_oh',
