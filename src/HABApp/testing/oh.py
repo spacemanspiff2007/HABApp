@@ -28,7 +28,7 @@ class SentOpenHABEvent:
     name: str
     value: Any
     source: str | None = None
-    datetime: Instant = field(default_factory=Instant.now)
+    instant: Instant = field(default_factory=Instant.now)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
