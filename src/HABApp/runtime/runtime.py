@@ -8,12 +8,10 @@ import eascheduler
 import HABApp
 import HABApp.config
 import HABApp.core
-import HABApp.parameters.parameter_files
+import HABApp.parameters
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.config.models import ApplicationConfig
 from HABApp.core.connections import ConnectionManager
-from HABApp.core.files import FileManager
 from HABApp.core.items.base_item_times_data import ItemTimesBackup
 from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.shutdown import ShutdownInfo
@@ -21,6 +19,7 @@ from HABApp.core.wrapper import process_exception
 from HABApp.mqtt.connection.connection import MqttConnection
 from HABApp.openhab.connection import setup_openhab_connection
 from HABApp.openhab.connection.connection import OpenhabConnection
+from HABApp.parameters.registry import ParameterRegistry
 from HABApp.rule_manager import RuleManager
 from HABApp.util.rate_limiter.registry import RateLimiterRegistry
 
@@ -66,11 +65,8 @@ class Runtime:
             await HABAPP_PROVIDER.get(MqttConnection)
 
             # File loader setup
-            # Parameter Files
-            await HABApp.parameters.parameter_files.setup_param_files(
-                await HABAPP_PROVIDER.get(ApplicationConfig),
-                await HABAPP_PROVIDER.get(FileManager)
-            )
+            # Parameter Files - has to be available before the rules are loaded
+            await HABAPP_PROVIDER.get(ParameterRegistry)
 
             # Rule engine
             rule_manager = await HABAPP_PROVIDER.get(RuleManager)
