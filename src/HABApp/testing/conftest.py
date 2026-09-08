@@ -2,7 +2,7 @@
 
 import os
 from collections.abc import AsyncGenerator, Generator
-from pathlib import Path
+from pathlib import Path, PurePath
 from types import ModuleType
 from typing import Any, Final, Literal
 from unittest.mock import Mock
@@ -27,6 +27,8 @@ from HABApp.mqtt.connection.messages import MessagesHandler
 from HABApp.mqtt.connection.messages import MessagesHandler as MqttMessagesHandler
 from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
+from HABApp.parameters import registry as parameter_registry_module
+from HABApp.parameters.registry import ParameterFile, ParameterRegistry
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.testing.executor import TestingExecutorFactory
 from HABApp.testing.inspect_habapp import find_in_modules
@@ -144,17 +146,19 @@ def habapp_provider_modules() -> tuple[tuple[ModuleType, str, Any], ...]:
 def debounced_call_registry(asyncio_provider: AsyncioTestingProvider) -> DebouncedCallRegistry:
     return DebouncedCallRegistry(asyncio_provider)
 
+
 @pytest.fixture
 def habapp_rate_limiter_registry() -> RateLimiterRegistry:
     return RateLimiterRegistry()
 
+
 @pytest.fixture(autouse=True)
-async def habapp_provider(  # noqa: PLR0913
+async def habapp_provider(  # noqa: PLR0913, PLR0917
         monkeypatch: pytest.MonkeyPatch, habapp_provider_modules: tuple[tuple[ModuleType, str, Any], ...],
         item_registry: ItemRegistry, event_bus: EventBus, item_times_backup: ItemTimesBackup,
         asyncio_provider: AsyncioTestingProvider, debounced_call_registry: DebouncedCallRegistry,
         interface_mqtt: MqttInterface, testing_executor_factory: TestingExecutorFactory,
-        habapp_rate_limiter_registry: RateLimiterRegistry
+        habapp_rate_limiter_registry: RateLimiterRegistry, parameter_registry: ParameterRegistry
 ) -> AsyncGenerator[HabAppObjProvider, Any]:
 
     provider: Final = HabAppObjProvider()
@@ -170,6 +174,7 @@ async def habapp_provider(  # noqa: PLR0913
     provider.add_object(interface_mqtt, MqttInterface)
     provider.add_object(testing_executor_factory, ExecutorFactory)
     provider.add_object(habapp_rate_limiter_registry, RateLimiterRegistry )
+    provider.add_object(parameter_registry, ParameterRegistry)
 
     async with provider:
         yield provider
@@ -178,6 +183,30 @@ async def habapp_provider(  # noqa: PLR0913
 @pytest.fixture
 def rule_registry() -> RuleRegistry:
     return RuleRegistry()
+
+
+@pytest.fixture
+def parameter_registry(habapp_config: ApplicationConfig | None, event_bus: EventBus,
+                       monkeypatch: pytest.MonkeyPatch) -> ParameterRegistry:
+
+    if habapp_config is None or habapp_config.directories.params is None:
+
+        # Testing implementation which prevents writing to disk, so parameters work
+        # even though no params folder is configured/existing.
+        class TestingParameterFile(ParameterFile):
+            def save(self) -> None:
+                pass
+
+        monkeypatch.setattr(parameter_registry_module, 'ParameterFile', TestingParameterFile)
+
+        cfg: Final = ApplicationConfig()
+        cfg.directories.params = PurePath('<CONFIG_OR_PATH_NOT_SET>')
+        return ParameterRegistry(config=cfg, event_bus=event_bus)
+
+    registry: Final = ParameterRegistry(config=habapp_config, event_bus=event_bus)
+
+    # todo: implement file load
+    return registry
 
 
 @pytest.fixture
@@ -344,6 +373,7 @@ __all__ = (
     'oh_item_registry_handler',
     'oh_sent_events',
     'oh_ws_loopbackqueue',
+    'parameter_registry',
     'patch_current_time',
     'patched_time_helper',
     'rule_hook',
