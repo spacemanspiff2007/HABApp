@@ -229,7 +229,11 @@ python_use_unqualified_type_names = True
 
 # -- nitpick configuration -------------------------------------------------
 nitpick_ignore = [
-    ('py:data', 'Ellipsis')
+    ('py:data', 'Ellipsis'),
+
+    # PEP 695 generic type parameter (e.g. HABApp.parameters.Parameter[T])
+    # sphinx tries to resolve the bare type parameter name as a class, which does not exist as a documentable object
+    ('py:class', 'T'),
 ]
 
 nitpick_ignore_regex = [
