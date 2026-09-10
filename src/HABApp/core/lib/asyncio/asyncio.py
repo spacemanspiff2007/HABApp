@@ -34,9 +34,9 @@ class AsyncioProvider:
 
         match target:
             case Instant():
-                delay: Final[float] = (target - Instant.now()).in_seconds()
+                delay: Final[float] = (target - Instant.now()).total('seconds')
             case TimeDelta():
-                delay: Final[float] = target.in_seconds()
+                delay: Final[float] = target.total('seconds')
             case _:
                 delay: Final[float] = target
 

@@ -15,7 +15,7 @@ type TimeDeltaLike = float | TimeDelta | timedelta
 def _get_secs_from_delta(diff: TimeDeltaLike) -> float:
     match diff:
         case TimeDelta():
-            secs: Final = diff.in_seconds()
+            secs: Final = diff.total('seconds')
         case timedelta():
             secs: Final = diff.total_seconds()
         case int() | float():
@@ -44,7 +44,7 @@ class PatchedTimeHelper:
 
     def advance_to(self, target: Instant) -> None:
         return self.advance(
-            (target - Instant.now()).in_seconds()
+            (target - Instant.now()).total('seconds')
         )
 
 
@@ -67,7 +67,7 @@ class AsyncioTestingProvider(AsyncioProvider):
             case Instant():
                 due_in: Final = target
             case TimeDelta():
-                due_in: Final = Instant.now().add(seconds=target.in_seconds())
+                due_in: Final = Instant.now().add(seconds=target.total('seconds'))
             case _:
                 due_in: Final = Instant.now().add(seconds=target)
 
