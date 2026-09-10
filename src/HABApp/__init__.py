@@ -22,6 +22,7 @@ import HABApp.rule_ctx
 # Import the rest
 import HABApp.mqtt
 import HABApp.openhab
+import HABApp.parameters
 import HABApp.rule
 import HABApp.runtime
 import HABApp.util
@@ -30,11 +31,29 @@ import HABApp.util
 # isort: split
 
 from HABApp.config import CONFIG as CONFIG
-from HABApp.parameters import BaseModelParameter as BaseModelParameter
-from HABApp.parameters import DictParameter as DictParameter
-from HABApp.parameters import FloatParameter as FloatParameter
-from HABApp.parameters import IntParameter as IntParameter
-from HABApp.parameters import NumberParameter as NumberParameter
-from HABApp.parameters import Parameter as Parameter
-from HABApp.parameters import StrParameter as StrParameter
 from HABApp.rule import Rule as Rule
+
+
+# isort: split
+
+# Deprecated imports - kept for backwards compatibility
+import typing
+import warnings
+
+
+if typing.TYPE_CHECKING:
+    from HABApp.parameters import DictParameter as DictParameter
+    from HABApp.parameters import Parameter as Parameter
+
+
+def __getattr__(name: str) -> typing.Any:
+    if name in ('Parameter', 'DictParameter'):
+        warnings.warn(
+            f'HABApp.{name} is deprecated, use HABApp.parameters.{name} instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return getattr(HABApp.parameters, name)
+
+    msg = f'module {__name__!r} has no attribute {name!r}'
+    raise AttributeError(msg)

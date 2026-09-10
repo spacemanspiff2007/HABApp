@@ -3,7 +3,7 @@ import typing
 import pytest
 from tests.conftest import params
 
-from HABApp import FloatParameter, IntParameter, NumberParameter, Parameter, StrParameter
+from HABApp.parameters import FloatParameter, IntParameter, NumberParameter, Parameter, StrParameter
 from HABApp.parameters.registry import ParameterRegistry
 
 

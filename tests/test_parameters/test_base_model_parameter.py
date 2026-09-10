@@ -4,7 +4,7 @@ import pytest
 from pydantic import BaseModel, ValidationError
 from tests.conftest import params
 
-from HABApp import BaseModelParameter
+from HABApp.parameters import BaseModelParameter
 from HABApp.parameters.registry import ParameterRegistry
 
 
