@@ -31,7 +31,8 @@ Available parameter classes:
 
     # ------------ hide: stop -------------
 
-        from HABApp import Rule, Parameter
+        from HABApp import Rule
+        from HABApp.parameters import Parameter
         from HABApp.core.events import ValueChangeEventFilter
 
         class MyRuleWithParameters(Rule):
@@ -122,7 +123,7 @@ Just add the "reloads on" entry to the file.
                 print(f'{k}: {v}')
 
 
-        cfg = HABApp.DictParameter('my_param')    # this will get the file content
+        cfg = HABApp.parameters.DictParameter('my_param')    # this will get the file content
         for k, v in cfg.items():
             MyRule(k, v)
 
@@ -178,7 +179,7 @@ of a single key changes independently of the rest of the file.
 .. code-block:: python
 
     from pydantic import BaseModel
-    from HABApp import BaseModelParameter
+    from HABApp.parameters import BaseModelParameter
 
     class SubModel(BaseModel):
         subkey2: list[str]

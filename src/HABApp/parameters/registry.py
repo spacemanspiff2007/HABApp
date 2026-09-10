@@ -222,7 +222,7 @@ class ParameterRegistry:
 
 @HABAPP_PROVIDER.register
 async def _provide_registry(config: ApplicationConfig, file_manager: FileManager,
-                             event_bus: EventBus) -> ParameterRegistry:
+                            event_bus: EventBus) -> ParameterRegistry:
     obj = ParameterRegistry(config, event_bus)
     obj.setup(file_manager)
     return obj
