@@ -128,12 +128,14 @@ MyOpenhabRule()
 
 # Changelog
 
-#### 26.XX.X (2026-XX-XX)
+#### 26.09.0 (2026-09-26)
+- Reworked many internals
 - Breaking: Requires at least Python 3.12
-- Breaking: ``Rule.get_items()`` is not a staticmethod anymore
+- Breaking: ``Rule.get_items()`` is not a staticmethod anymore -> must always be ``self.get_items()``
 - Fixed a bug with the scheduler and sun azimuth
 - Breaking: ``MqttPublishOptions(...)`` needs to be replaced with ``self.mqtt.publish_options(...)`` in rules
 - Instead of HABApp.Parameter use HABApp.parameters.Parameter
+- Fixed an issue where a Rule was not properly unloaded
 
 #### 25.12.0 (2025-12-08)
 - Breaking: Requires at least Python 3.11
