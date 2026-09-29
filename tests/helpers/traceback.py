@@ -14,7 +14,7 @@ def remove_dyn_parts_from_traceback(traceback: str) -> str:
 
     # Line nrs
     traceback = re.sub(r'line\s+(\d+)', 'line x', traceback)
-    traceback = re.sub(r'^(-->|\s{3})\s{2}\d+ \|', '\g<1>  x |', traceback, flags=re.MULTILINE)
+    traceback = re.sub(r'^(-->|\s{3})\s{2}\d+ \|', r'\g<1>  x |', traceback, flags=re.MULTILINE)
 
     return traceback
 

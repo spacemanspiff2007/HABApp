@@ -1,11 +1,12 @@
 import asyncio
+from typing import Final
 
 from HABAppTests import EventWaiter, TestBaseRule, get_random_string
 
-import HABApp
-from HABApp.core.connections import Connections, ConnectionStatus
+from HABApp.core.connections import ConnectionManager, ConnectionStatus
 from HABApp.core.events import ValueUpdateEventFilter
-from HABApp.mqtt import interface_async
+from HABApp.core.internals import ItemRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 class TestMQTTConnection(TestBaseRule):
@@ -44,16 +45,18 @@ class TestMQTTConnection(TestBaseRule):
             await waiter.async_wait_for_event(value=data)
 
     async def test_mqtt_async_subscribe(self) -> None:
-        await interface_async.async_subscribe(self.topic_async)
+        self.async_mqtt.subscribe(self.topic_async)
         await self.test_async_subscribed_event()
 
     async def test_mqtt_item_creation(self) -> None:
+        items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+
         topic = 'mqtt/item/creation'
-        assert HABApp.core.Items.item_exists(topic) is False
+        assert items.item_exists(topic) is False
 
         self.mqtt.publish(topic, 'asdf')
         await asyncio.sleep(0.1)
-        assert HABApp.core.Items.item_exists(topic) is False
+        assert items.item_exists(topic) is False
 
         # We create the item only on retain
         self.mqtt.publish(topic, 'asdf', retain=True)
@@ -62,16 +65,19 @@ class TestMQTTConnection(TestBaseRule):
         await self.trigger_reconnect()
 
         await asyncio.sleep(0.2)
-        connection = Connections.get('mqtt')
+
+        manager = await HABAPP_PROVIDER.get(ConnectionManager)
+        connection = manager.get('mqtt')
         while not connection.is_online:
             await asyncio.sleep(0.2)
 
-        assert HABApp.core.Items.item_exists(topic) is True
+        assert items.item_exists(topic) is True
 
-        HABApp.core.Items.pop_item(topic)
+        items.pop_item(topic)
 
     async def trigger_reconnect(self) -> None:
-        connection = Connections.get('mqtt')
+        manager = await HABAPP_PROVIDER.get(ConnectionManager)
+        connection = manager.get('mqtt')
         connection.status._set_manual(ConnectionStatus.DISCONNECTED)
         connection.advance_status_task.start_if_not_running()
 

@@ -104,42 +104,49 @@ Example
 
 .. exec_code::
 
-    from HABApp.util import RateLimiter
+    # ------------ hide: start ------------
+    async def run(provider):
+        # ------------ hide: stop -------------
 
-    # Create or get existing, name is case insensitive
-    limiter = RateLimiter('MyRateLimiterName')
+        from HABApp.util import RateLimiter
 
-    # define limits, duplicate limits of the same algorithm will only be added once
-    # These lines all define the same limit so it'll result in only one limiter added
-    limiter.add_limit(5, 60)   # add limits explicitly
-    limiter.parse_limits('5 per minute').parse_limits('5 in 60s', '5/60seconds')  # add limits through text
+        # Create or get existing, name is case insensitive
+        limiter = RateLimiter('MyRateLimiterName')
 
-    # add additional limit with leaky bucket algorithm
-    limiter.add_limit(10, 100, algorithm='leaky_bucket')
+        # define limits, duplicate limits of the same algorithm will only be added once
+        # These lines all define the same limit so it'll result in only one limiter added
+        limiter.add_limit(5, 60)   # add limits explicitly
+        limiter.parse_limits('5 per minute').parse_limits('5 in 60s', '5/60seconds')  # add limits through text
 
-    # add additional limit with fixed window elastic expiry algorithm
-    limiter.add_limit(10, 100, algorithm='fixed_window_elastic_expiry')
+        # add additional limit with leaky bucket algorithm
+        limiter.add_limit(10, 100, algorithm='leaky_bucket')
 
-    # Test the limit without increasing the hits
-    for _ in range(100):
-        assert limiter.test_allow()
+        # add additional limit with fixed window elastic expiry algorithm
+        limiter.add_limit(10, 100, algorithm='fixed_window_elastic_expiry')
 
-    # the limiter will allow 5 calls ...
-    for _ in range(5):
-        assert limiter.allow()
+        # Test the limit without increasing the hits
+        for _ in range(100):
+            assert limiter.test_allow()
 
-    # and reject the 6th
-    assert not limiter.allow()
+        # the limiter will allow 5 calls ...
+        for _ in range(5):
+            assert limiter.allow()
 
-    # It's possible to get statistics about the limiter and the corresponding windows
-    print(limiter.info())
+        # and reject the 6th
+        assert not limiter.allow()
 
-    # There is a counter that keeps track of the total skips that can be reset
-    print('Counter:')
-    print(limiter.total_skips)
-    limiter.reset()     # Can be reset
-    print(limiter.total_skips)
+        # It's possible to get statistics about the limiter and the corresponding windows
+        print(limiter.info())
 
+        # There is a counter that keeps track of the total skips that can be reset
+        print('Counter:')
+        print(limiter.total_skips)
+        limiter.reset()     # Can be reset
+        print(limiter.total_skips)
+
+    # ------------ hide: start ------------
+    import doc_runner
+    doc_runner.run(run)
 
 Recommendation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,12 +159,19 @@ that's why it's more suited for larger intervals.
 
 .. exec_code::
 
-    from HABApp.util import RateLimiter
+    # ------------ hide: start ------------
+    async def run(provider):
+        # ------------ hide: stop -------------
 
-    limiter = RateLimiter('MyNotifications')
-    limiter.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
-    limiter.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+        from HABApp.util import RateLimiter
 
+        limiter = RateLimiter('MyNotifications')
+        limiter.parse_limits('5 in 1 minute', algorithm='fixed_window_elastic_expiry')
+        limiter.parse_limits("20 in 1 hour", algorithm='leaky_bucket')
+
+    # ------------ hide: start ------------
+    import doc_runner
+    doc_runner.run(run)
 
 Documentation
 ^^^^^^^^^^^^^^^^^^
@@ -347,10 +361,10 @@ This example shows how to fade a Dimmer from 0 to 100 in 30 secs
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-
-        import HABApp
-        HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('DimmerItem', 'Dimmer1')
         # ------------ hide: stop -------------
 
         from HABApp import Rule
@@ -373,8 +387,8 @@ This example shows how to fade a Dimmer from 0 to 100 in 30 secs
         FadeExample()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run(), process_events=False)
+    import doc_runner
+    doc_runner.run(run)
 
 This example shows how to fade three values together (e.g. for an RGB strip)
 
@@ -382,9 +396,10 @@ This example shows how to fade three values together (e.g. for an RGB strip)
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-        import HABApp
-        HABApp.core.Items.add_item(HABApp.openhab.items.DimmerItem('Dimmer1'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('DimmerItem', 'Dimmer1')
     # ------------ hide: stop -------------
 
         from HABApp import Rule
@@ -411,8 +426,8 @@ This example shows how to fade three values together (e.g. for an RGB strip)
         Fade3Example()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run(), process_events=False)
+    import doc_runner
+    doc_runner.run(run)
 
 
 Documentation
@@ -435,11 +450,12 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-        import HABApp
-        HABApp.core.Items.add_item(HABApp.openhab.items.SwitchItem('RoomLights'))
-        HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor1'))
-        HABApp.core.Items.add_item(HABApp.openhab.items.NumberItem('MovementSensor2'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('Switch', 'RoomLights')
+        await factory.create('Number', 'MovementSensor1')
+        await factory.create('Number', 'MovementSensor2')
     # ------------ hide: stop -------------
         from datetime import time
 
@@ -476,8 +492,8 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
         EventListenerGroupExample()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Documentation
@@ -496,7 +512,7 @@ Basic Example
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
     # ------------ hide: stop -------------
         import HABApp
         from HABApp.core.events import ValueUpdateEventFilter
@@ -535,8 +551,8 @@ Basic Example
         MyMultiModeItemTestRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 
@@ -556,7 +572,7 @@ Advanced Example
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-    async def run():
+    async def run(provider):
     # ------------ hide: stop -------------
         import logging
         import HABApp
@@ -622,8 +638,8 @@ Advanced Example
         MyMultiModeItemTestRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Example SwitchItemValueMode
@@ -634,11 +650,10 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
 .. exec_code::
 
     # ------------ hide: start ------------
-    async def run():
-        import HABApp
-
-        from HABApp.openhab.items import SwitchItem
-        HABApp.core.Items.add_item(SwitchItem('Automatic_Enabled', initial_value='ON'))
+    async def run(provider):
+        from HABApp.testing import TestingItemFactory
+        factory = await provider.get(TestingItemFactory)
+        await factory.create('Switch', 'Automatic_Enabled', value='ON')
     # ------------ hide: stop -------------
         import HABApp
         from HABApp.openhab.items import SwitchItem
@@ -673,8 +688,8 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
         MyMultiModeItemTestRule()
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 
 Documentation

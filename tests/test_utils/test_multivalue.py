@@ -3,12 +3,13 @@ from unittest.mock import Mock
 import pytest
 
 from HABApp.core.const import MISSING
+from HABApp.core.internals import EventBus
 from HABApp.util.multimode import BaseMode, MultiModeItem, ValueMode
 from tests.helpers.parent_rule import DummyRule
 
 
 def test_diff_prio(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('TestItem')
+    p = MultiModeItem('TestItem', event_bus=Mock(EventBus))
     p1 = ValueMode('modea', '1234')
     p2 = ValueMode('modeb', '4567')
     p.add_mode(1, p1).add_mode(2, p2)
@@ -75,7 +76,7 @@ def test_only_on_change_diff_value(parent_rule: DummyRule, enabled, enable_on_va
 
 
 def test_calculate_lower_priority_value(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('TestItem', default_value=99)
+    p = MultiModeItem('TestItem', default_value=99, event_bus=Mock(EventBus))
     m1 = ValueMode('modea', '1234')
     m2 = ValueMode('modeb', '4567')
     p.add_mode(1, m1).add_mode(2, m2)
@@ -89,7 +90,7 @@ def test_calculate_lower_priority_value(parent_rule: DummyRule) -> None:
 
 
 def test_auto_disable_1(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('TestItem')
+    p = MultiModeItem('TestItem', event_bus=Mock(EventBus))
     m1 = ValueMode('modea', 50)
     m2 = ValueMode('modeb', 60, auto_disable_func= lambda lower, o: lower > o)
     p.add_mode(1, m1).add_mode(2, m2)
@@ -106,7 +107,7 @@ def test_auto_disable_1(parent_rule: DummyRule) -> None:
 
 
 def test_auto_disable_func(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('TestItem')
+    p = MultiModeItem('TestItem', event_bus=Mock(EventBus))
     m1 = ValueMode('modea', 50)
     m2 = ValueMode('modeb', 60, auto_disable_func=lambda low, s: low == 40)
     p.add_mode(1, m1).add_mode(2, m2)
@@ -126,7 +127,7 @@ def test_auto_disable_func(parent_rule: DummyRule) -> None:
 
 
 def test_unknown(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('asdf')
+    p = MultiModeItem('asdf', event_bus=Mock(EventBus))
     with pytest.raises(KeyError):
         p.get_mode('asdf')
 
@@ -136,7 +137,7 @@ def test_unknown(parent_rule: DummyRule) -> None:
 
 
 def test_remove(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('asdf')
+    p = MultiModeItem('asdf', event_bus=Mock(EventBus))
     m1 = BaseMode('m1')
     m2 = BaseMode('m2')
 
@@ -149,7 +150,7 @@ def test_remove(parent_rule: DummyRule) -> None:
 
 
 def test_overwrite(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('asdf')
+    p = MultiModeItem('asdf', event_bus=Mock(EventBus))
     m1 = BaseMode('m1')
     m2 = BaseMode('m1')
     m3 = BaseMode('m3')
@@ -160,7 +161,7 @@ def test_overwrite(parent_rule: DummyRule) -> None:
 
 
 def test_order(parent_rule: DummyRule) -> None:
-    p = MultiModeItem('asdf')
+    p = MultiModeItem('asdf', event_bus=Mock(EventBus))
     m1 = BaseMode('m1')
     m2 = BaseMode('m2')
     m3 = BaseMode('m3')
@@ -176,7 +177,7 @@ def test_disable_no_default(parent_rule: DummyRule) -> None:
 
     # No default_value is set -> we don't send anything if all modes are disabled
     p1 = ValueMode('modea', '1234')
-    p = MultiModeItem('TestItem').add_mode(1, p1)
+    p = MultiModeItem('TestItem', event_bus=Mock(EventBus)).add_mode(1, p1)
 
     p1.set_enabled(True)
     assert p.value == '1234'
@@ -188,7 +189,7 @@ def test_disable_with_default(parent_rule: DummyRule) -> None:
 
     # We have default_value set -> send it when all modes are disabled
     a1 = ValueMode('modea', '1234')
-    a = MultiModeItem('TestItem', default_value=None).add_mode(1, a1)
+    a = MultiModeItem('TestItem', default_value=None, event_bus=Mock(EventBus)).add_mode(1, a1)
 
     a1.set_enabled(True)
     assert a.value == '1234'

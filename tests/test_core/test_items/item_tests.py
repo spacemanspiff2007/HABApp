@@ -1,10 +1,10 @@
 import time
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 from whenever import Instant, patch_current_time
 
 from HABApp.core.events import NoEventFilter, ValueCommandEvent
-from HABApp.core.internals import ItemRegistry
+from HABApp.core.internals import EventBus
 from HABApp.core.items import Item
 from tests.helpers import TestEventBus
 
@@ -13,11 +13,8 @@ class ItemTests:
     ITEM_CLASS: type[Item] | None = None
     ITEM_VALUES: tuple | None = None
 
-    def get_item(self) -> Item:
-        return self.ITEM_CLASS('test_name')
-
-    def get_create_item(self) -> Item:
-        return self.ITEM_CLASS.get_create_item(name='test_name')
+    def get_item(self, event_bus: EventBus | None = None) -> Item:
+        return self.ITEM_CLASS('test_name', event_bus=Mock(EventBus) if event_bus is None else event_bus)
 
     def test_item_params(self) -> None:
         assert self.ITEM_CLASS is not None
@@ -27,15 +24,6 @@ class ItemTests:
         item = self.get_item()
         assert repr(item)
         assert str(item)
-
-    def test_factories(self, ir: ItemRegistry) -> None:
-        assert not ir.item_exists(self.get_item())
-
-        obj = self.get_create_item()
-        assert isinstance(obj, self.ITEM_CLASS)
-
-        obj2 = self.ITEM_CLASS.get_item(name=obj.name)
-        assert obj is obj2
 
     def test_var_names(self) -> None:
         values = self.ITEM_VALUES
@@ -103,7 +91,7 @@ class ItemTests:
         assert not i.post_value_if(1, eq=0)
 
     def test_post_command(self, sync_worker, eb: TestEventBus) -> None:
-        i = self.get_item()
+        i = self.get_item(eb)
 
         mock = MagicMock()
         eb.listen_events(i.name, mock, NoEventFilter())

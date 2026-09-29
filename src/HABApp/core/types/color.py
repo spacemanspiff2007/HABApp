@@ -19,9 +19,9 @@ class RGB(ColorType):
         if not 0 <= r <= max_value or not 0 <= g <= max_value or not 0 <= b <= max_value:
             raise ValueError()
 
-        self._r: int = r
-        self._g: int = g
-        self._b: int = b
+        self._r: Final = r
+        self._g: Final = g
+        self._b: Final = b
 
     @property
     def red(self) -> int:
@@ -147,7 +147,7 @@ class RGB16(RGB):
 
 
 class RGB24(RGB):
-    _RGB_MAX: int = 2 ** 32 - 1
+    _RGB_MAX: int = 2 ** 24 - 1
 
 
 class RGB32(RGB):
@@ -165,9 +165,9 @@ class HSB(ColorType):
         if not 0 <= hue <= HUE_FACTOR or not 0 <= saturation <= PERCENT_FACTOR or not 0 <= brightness <= PERCENT_FACTOR:
             raise ValueError()
 
-        self._hue: float = hue
-        self._saturation: float = saturation
-        self._brightness: float = brightness
+        self._hue: Final = hue
+        self._saturation: Final = saturation
+        self._brightness: Final = brightness
 
     @property
     def hue(self) -> float:

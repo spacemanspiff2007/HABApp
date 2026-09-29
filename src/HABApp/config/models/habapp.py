@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Self
 
 from easyconfig import BaseModel
-from pydantic import Field, conint, model_validator
+from pydantic import Field, model_validator
 
 
 class ThreadPoolConfig(BaseModel):
@@ -11,7 +11,7 @@ class ThreadPoolConfig(BaseModel):
     Use only if you have experience developing asyncio applications!
     If the thread pool is disabled using blocking calls in functions can and will break HABApp'''
 
-    threads: conint(ge=1, le=32) = 10
+    threads: int = Field(10, ge=1, le=32)
     '''Amount of threads to use for the executor'''
 
 
@@ -62,11 +62,14 @@ class WatchEventLoopConfig(BaseModel):
 class DebugConfig(BaseModel):
     """Debugging options for HABApp"""
 
-    periodic_traceback: PeriodicTracebackDumpConfig = Field(
-        alias='periodic traceback', default_factory=PeriodicTracebackDumpConfig)
+    dump_threads: PeriodicTracebackDumpConfig = Field(
+        alias='dump threads', default_factory=PeriodicTracebackDumpConfig)
 
-    traceback_on_shutdown_signal: bool = Field(
-        False, alias='traceback on shutdown signal',
+    dump_tasks: PeriodicTracebackDumpConfig = Field(
+        alias='dump tasks', default_factory=PeriodicTracebackDumpConfig)
+
+    dump_threads_on_shutdown_signal: bool = Field(
+        False, alias='dump threads on shutdown signal',
         description='Dump the traceback of all currently running threads into a file when receiving a shutdown signal. '
                     'Not available on Windows!'
     )

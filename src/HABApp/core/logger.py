@@ -4,11 +4,9 @@ from typing import Self
 from HABApp.core.const.topics import TOPIC_ERRORS as _T_ERRORS
 from HABApp.core.const.topics import TOPIC_INFOS as _T_INFOS
 from HABApp.core.const.topics import TOPIC_WARNINGS as _T_WARNINGS
-from HABApp.core.internals import uses_post_event
+from HABApp.core.internals import EventBus
 from HABApp.core.lib import format_exception
-
-
-post_event = uses_post_event()
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 def log_error(logger: logging.Logger, text: str) -> None:
@@ -18,7 +16,7 @@ def log_error(logger: logging.Logger, text: str) -> None:
     else:
         logger.error(text)
 
-    post_event(
+    HABAPP_PROVIDER.get_existing(EventBus).post_event(
         _T_ERRORS, text
     )
 
@@ -30,7 +28,7 @@ def log_warning(logger: logging.Logger, text: str) -> None:
     else:
         logger.warning(text)
 
-    post_event(
+    HABAPP_PROVIDER.get_existing(EventBus).post_event(
         _T_WARNINGS, text
     )
 
@@ -42,7 +40,7 @@ def log_info(logger: logging.Logger, text: str) -> None:
     else:
         logger.info(text)
 
-    post_event(
+    HABAPP_PROVIDER.get_existing(EventBus).post_event(
         _T_INFOS, text
     )
 
@@ -75,7 +73,7 @@ class HABAppLogger:
             for line in self.lines:
                 self.logger._log(self._LEVEL, line, ())
 
-        post_event(
+        HABAPP_PROVIDER.get_existing(EventBus).post_event(
             self._TOPIC, '\n'.join(self.lines)
         )
         self.lines.clear()

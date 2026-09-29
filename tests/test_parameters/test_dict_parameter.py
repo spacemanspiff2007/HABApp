@@ -3,16 +3,16 @@ import typing
 import pytest
 from tests.conftest import params
 
-import HABApp
 from HABApp import DictParameter
+from HABApp.parameters.registry import ParameterRegistry
 
 
 if typing.TYPE_CHECKING:
     params = params
 
 
-def test_operators(params: HABApp.parameters.parameters) -> None:
-    params.set_parameter_file('file', {'key': {1: 2, 3: 4}})
+def test_operators(params: ParameterRegistry) -> None:
+    params._get_or_create_file('file').data = {'key': {1: 2, 3: 4}}
     p = DictParameter('file', 'key')
     assert p == {1: 2, 3: 4}
     assert p != {1: 2, 3: 5}
@@ -24,11 +24,11 @@ def test_operators(params: HABApp.parameters.parameters) -> None:
     assert p[1] == 2
     assert p[3] == 4
 
-    assert [k for k in p] == [1, 3]
+    assert list(p) == [1, 3]
 
 
-def test_funcs(params: HABApp.parameters.parameters) -> None:
-    params.set_parameter_file('file', {'key': {1: 2, 3: 4}})
+def test_funcs(params: ParameterRegistry) -> None:
+    params._get_or_create_file('file').data = {'key': {1: 2, 3: 4}}
     p = DictParameter('file', 'key')
 
     assert len(p) == 2
@@ -41,11 +41,11 @@ def test_funcs(params: HABApp.parameters.parameters) -> None:
     assert p.get(5, 'asdf') == 'asdf'
 
 
-def test_exception(params: HABApp.parameters.parameters) -> None:
-    params.set_parameter_file('file', {'key': 'value'})
+def test_exception(params: ParameterRegistry) -> None:
+    params._get_or_create_file('file').data = {'key': 'value'}
     p = DictParameter('file', 'key')
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         _ = p.value
 
     assert str(e.value) == 'Value "value" for DictParameter is not a dict! (<class \'str\'>)'

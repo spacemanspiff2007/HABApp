@@ -58,7 +58,7 @@ Mqtt items have an additional publish method which make interaction with the mqt
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
         import HABApp
         from unittest.mock import MagicMock
         HABApp.mqtt.items.mqtt_item.publish = MagicMock()
@@ -80,8 +80,8 @@ Mqtt items have an additional publish method which make interaction with the mqt
             pass # do something
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 MqttItem
 """"""""""""""""""""""""""""""""""""""
@@ -103,7 +103,7 @@ It is created on the topic that reports the state from the device.
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
         import HABApp
         from unittest.mock import MagicMock
         HABApp.mqtt.items.mqtt_pair_item.publish = MagicMock()
@@ -118,8 +118,8 @@ It is created on the topic that reports the state from the device.
         mqtt = MqttPairItem.get_create_item("zigbee2mqtt/my_bulb/brightness", write_topic="zigbee2mqtt/my_bulb/set/brightness")
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+    import doc_runner
+    doc_runner.run(run)
 
 .. inheritance-diagram:: HABApp.mqtt.items.MqttPairItem
    :parts: 1
@@ -175,32 +175,38 @@ MqttPublishOptions
    :inherited-members:
    :member-order: groupwise
 
+
 .. exec_code::
     :hide_output:
 
     # ------------ hide: start ------------
-    async def run():
+    async def run(provider):
 
         import HABApp
         from unittest.mock import MagicMock
         HABApp.mqtt.util.publish_options.publish = MagicMock()
     # ------------ hide: stop -------------
+        from HABApp import Rule
 
-        from HABApp.mqtt.util import MqttPublishOptions
 
-        topic = MqttPublishOptions('my/output/only/topic')
-        topic.publish('new_value')
+        class MyMqttRule(Rule):
+            def __init__(self):
+                super().__init__()
 
-        topic_qos = MqttPublishOptions('my/output/only/topic', qos=2)
-        topic_qos.publish('new_value')
+                topic = self.mqtt.publish_options('my/output/only/topic')
 
-        # create new through replace command wich will use qos=2 and retain=True
-        topic_qos_retain = topic_qos.replace(retain=True)
-        topic_qos_retain.publish('new_value')
+                topic_qos = self.mqtt.publish_options('my/output/only/topic', qos=2)
+                topic_qos.publish('new_value')
+
+                # create new through replace command wich will use qos=2 and retain=True
+                topic_qos_retain = topic_qos.replace(retain=True)
+                topic_qos_retain.publish('new_value')
 
     # ------------ hide: start ------------
-    from rule_runner import SimpleRuleRunner
-    SimpleRuleRunner().run(run())
+        MyMqttRule()
+
+    import doc_runner
+    doc_runner.run(run)
 
 Example MQTT rule
 --------------------------------------

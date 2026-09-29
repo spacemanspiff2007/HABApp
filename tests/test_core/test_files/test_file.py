@@ -63,3 +63,39 @@ def test_circ(test_logs: LogCollector, files, file_manager) -> None:
     with pytest.raises(CircularReferenceError) as e:
         f3._check_circ_refs((f3.name,), 'depends_on', file_manager)
     assert e.value.stack == ('name3', 'name1', 'name2', 'name3', )
+
+
+def test_reloads_on_state_transition(files, file_manager) -> None:
+    """A dependent file must transition correctly when a reloads_on target changes,
+    and a second cascade must not overwrite UNLOAD_PENDING (regression, see race condition)."""
+
+    files['dep'] = dep = HABAppFile('dep', Path('dep'), b'ch', FileProperties())
+    files['rule'] = rule = HABAppFile('rule', Path('rule'), b'ch', FileProperties(reloads_on=['dep']))
+
+    # 1) First cascade: a LOADED dependent must go to UNLOAD_PENDING
+    rule._state = FileState.LOADED
+    rule.file_state_changed(dep, file_manager)
+    assert rule._state is FileState.UNLOAD_PENDING
+
+    # 2) A second cascade while UNLOAD_PENDING must NOT overwrite it with PENDING,
+    #    otherwise the unload handler would be skipped and the old instance orphaned.
+    rule.file_state_changed(dep, file_manager)
+    assert rule._state is FileState.UNLOAD_PENDING
+
+    # 3) Pre-load states are re-evaluated -> PENDING
+    for state in (FileState.DEPENDENCIES_OK, FileState.DEPENDENCIES_MISSING, FileState.DEPENDENCIES_ERROR):
+        rule._state = state
+        rule.file_state_changed(dep, file_manager)
+        assert rule._state is FileState.PENDING
+
+    # 4) States that must be left untouched by a reload cascade
+    for state in (FileState.PENDING, FileState.FAILED, FileState.REMOVED, FileState.PROPERTIES_INVALID):
+        rule._state = state
+        rule.file_state_changed(dep, file_manager)
+        assert rule._state is state
+
+    # 5) A file that does not reload on 'dep' is never affected
+    files['other'] = other = HABAppFile('other', Path('other'), b'ch', FileProperties())
+    other._state = FileState.LOADED
+    other.file_state_changed(dep, file_manager)
+    assert other._state is FileState.LOADED

@@ -1,12 +1,12 @@
 import pytest
-from whenever import SystemDateTime, patch_current_time
+from whenever import PlainDateTime, patch_current_time
 
 from HABApp.util import ExpiringCache
 
 
 @pytest.fixture
 def clock():
-    with patch_current_time(SystemDateTime(2025, 1, 1, 12).to_instant(), keep_ticking=False) as t:
+    with patch_current_time(PlainDateTime(2025, 1, 1, 12).assume_system_tz().to_instant(), keep_ticking=False) as t:
         yield t
 
 

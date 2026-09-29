@@ -1,16 +1,16 @@
 import datetime
 from collections.abc import Callable, Mapping
-from typing import Any, NamedTuple
+from typing import Any, Final, NamedTuple, Self, override
 
 from immutables import Map
 from pydantic import ValidationError
-from typing_extensions import override
 
 from HABApp.core.const import MISSING
+from HABApp.core.internals import EventBus
 from HABApp.core.items import BaseValueItem
 from HABApp.core.lib.funcs import compare as _compare
-from HABApp.openhab.connection.plugins import send_websocket_event
-from HABApp.openhab.interface_sync import get_persistence_data
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
+from HABApp.openhab.definitions.helper import get_source
 from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
 
 
@@ -36,14 +36,19 @@ class OpenhabItem(BaseValueItem):
 
     def __init__(self, name: str, initial_value: Any = None, last_value: Any = None,
                  label: str | None = None, tags: frozenset[str] = frozenset(), groups: frozenset[str] = frozenset(),
-                 metadata: Mapping[str, MetaData] = Map()) -> None:
-        super().__init__(name, initial_value=initial_value, last_value=last_value)
+                 metadata: Mapping[str, MetaData] = Map(), *,
+                 event_bus: EventBus, interface: OpenHabSyncInterface) -> None:
+
+        super().__init__(name, initial_value=initial_value, last_value=last_value, event_bus=event_bus)
+
         self.label: str | None = label
         self.tags: frozenset[str] = tags
         self.groups: frozenset[str] = groups
         self.metadata: Mapping[str, MetaData] = metadata
 
-    def _update_item_definition(self, item: 'OpenhabItem') -> None:
+        self._oh: Final = interface
+
+    def _update_item_definition(self, item: Self) -> None:
         self.label = item.label
         self.tags = item.tags
         self.groups = item.groups
@@ -64,13 +69,18 @@ class OpenhabItem(BaseValueItem):
                 log_func(f'Invalid value for {cls.__name__:s} {name:s}: "{value}"! Using None instead')
             return None
 
-    def oh_send_command(self, value: Any = MISSING) -> None:
+    def oh_send_command(self, value: Any = MISSING, *, source: str | None = None) -> None:
         """Send a command to the openHAB item
 
         :param value: (optional) value to be sent. If not specified the current item value will be used.
+        :param source: (optional) source where this command comes from
         """
-        new_value = self.value if value is MISSING else value
-        send_websocket_event(self._command_to_oh.create_event(self._name, new_value))
+        new_value: Final = self.value if value is MISSING else value
+
+        # noinspection protected-member
+        self._oh._send_websocket_event(
+            self._command_to_oh.create_event(self._name, new_value, source=get_source(source))
+        )
 
     # For the openhab items HABApp internal commands make not much sense
     # so we send the commands to openHAB
@@ -82,18 +92,24 @@ class OpenhabItem(BaseValueItem):
         """
         self.oh_send_command(value)
 
-    def oh_post_update(self, value: Any = MISSING) -> None:
+    def oh_post_update(self, value: Any = MISSING, *, source: str | None = None) -> None:
         """Post an update to the openHAB item
 
         :param value: (optional) value to be posted. If not specified the current item value will be used.
+        :param source: (optional) source where this update comes from
         """
-        new_value = self.value if value is MISSING else value
-        send_websocket_event(self._update_to_oh.create_event(self._name, new_value))
+        new_value: Final = self.value if value is MISSING else value
+
+        # noinspection protected-member
+        self._oh._send_websocket_event(
+            self._update_to_oh.create_event(self._name, new_value, source=get_source(source))
+        )
 
     def oh_post_update_if(self, new_value, *, equal=MISSING, eq=MISSING, not_equal=MISSING, ne=MISSING,
                           lower_than=MISSING, lt=MISSING, lower_equal=MISSING, le=MISSING,
                           greater_than=MISSING, gt=MISSING, greater_equal=MISSING, ge=MISSING,
-                          is_=MISSING, is_not=MISSING) -> bool:
+                          is_=MISSING, is_not=MISSING,
+                          source: str | None = None) -> bool:
         """
         Post a value depending on the current state of the item. If one of the comparisons is true the new state
         will be posted.
@@ -113,6 +129,7 @@ class OpenhabItem(BaseValueItem):
         :param ge: item state has to be greater equal the passed value
         :param is_: item state has to be the same object as the passt value (e.g. None)
         :param is_not: item state has to be not the same object as the passt value (e.g. None)
+        :param source: (optional) source where this update comes from
 
         :return: `True` if the new value was posted else `False`
         """
@@ -120,7 +137,7 @@ class OpenhabItem(BaseValueItem):
         if _compare(self.value, equal=equal, eq=eq, not_equal=not_equal, ne=ne,
                     lower_than=lower_than, lt=lt, lower_equal=lower_equal, le=le,
                     greater_than=greater_than, gt=gt, greater_equal=greater_equal, ge=ge, is_=is_, is_not=is_not):
-            self.oh_post_update(new_value)
+            self.oh_post_update(new_value, source=source)
             return True
         return False
 
@@ -134,9 +151,6 @@ class OpenhabItem(BaseValueItem):
         :param end_time: return only items which are older than this
         """
 
-        return get_persistence_data(
+        return self._oh.get_persistence_data(
             self._name, persistence, start_time, end_time
         )
-
-
-HINT_TYPE_OPENHAB_ITEM = type[OpenhabItem]

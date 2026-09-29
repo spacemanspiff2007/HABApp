@@ -35,6 +35,10 @@ class StatusTransitions:
         assert self.status == ConnectionStatus.SETUP
         self._set_manual(ConnectionStatus.DISABLED)
 
+    def from_startup_to_disabled(self) -> None:
+        assert self.status == ConnectionStatus.STARTUP
+        self._set_manual(ConnectionStatus.DISABLED)
+
     def from_connected_to_disconnected(self) -> None:
         assert self.status == ConnectionStatus.CONNECTED
         self._set_manual(ConnectionStatus.DISCONNECTED)

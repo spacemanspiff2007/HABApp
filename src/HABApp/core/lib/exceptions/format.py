@@ -44,7 +44,7 @@ def format_exception(e: HINT_EXCEPTION) -> list[str]:
         all_frames = tuple(FrameInfo.stack_data(e[2] if isinstance(e, tuple) else e.__traceback__, DEFAULT_OPTIONS))
         last_frame = len(all_frames) - 1
 
-        added = True
+        added: bool = True
         for i, frame_info in enumerate(all_frames):
             if isinstance(frame_info, FrameInfo):
                 added = format_frame_info(tb, frame_info, is_last=i == last_frame)

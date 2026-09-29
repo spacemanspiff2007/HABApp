@@ -1,19 +1,24 @@
 import asyncio
 import functools
 import logging
-import typing
+from collections.abc import Generator
 from inspect import iscoroutinefunction
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
 
 import HABApp
 from HABApp.core.files import FileManager
-from HABApp.core.internals import EventBus, ItemRegistry, setup_internals
+from HABApp.core.internals import EventBus, ItemRegistry
+from HABApp.core.items.base_item_times_data import ItemTimesBackup
+from HABApp.core.lib.asyncio import AsyncioProvider
+from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers import LogCollector, eb, get_dummy_cfg, params, parent_rule, sync_worker
 from tests.helpers.log.log_matcher import AsyncDebugWarningMatcher, LogLevelMatcher
 
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     parent_rule = parent_rule
     params = params
     sync_worker = sync_worker
@@ -43,6 +48,19 @@ def show_errors(monkeypatch) -> None:
 
 
 @pytest.fixture(autouse=True)
+def item_times_backup() -> Generator[Mock, Any, None]:
+    b = Mock(ItemTimesBackup)
+
+    # ToDo: rework the item registry events so we don't have to do this
+    if HABAPP_PROVIDER.has_factory(ItemTimesBackup):
+        HABAPP_PROVIDER.remove_factory(ItemTimesBackup)
+
+    HABAPP_PROVIDER.add_object(b, ItemTimesBackup)
+    yield b
+    HABAPP_PROVIDER._created.pop(ItemTimesBackup, None)
+
+
+@pytest.fixture(autouse=True)
 def use_dummy_cfg(monkeypatch):
     cfg = get_dummy_cfg()
     monkeypatch.setattr(HABApp, 'CONFIG', cfg)
@@ -51,38 +69,24 @@ def use_dummy_cfg(monkeypatch):
     return cfg
 
 
-@pytest.fixture(autouse=True, scope='session')
-def event_loop():
-    yield HABApp.core.const.loop
+@pytest.fixture
+def ir() -> Generator[ItemRegistry, Any, None]:
+    ir = ItemRegistry()
 
-
-@pytest.fixture()
-def ir():
-    return ItemRegistry()
-
-
-@pytest.fixture()
-def file_manager():
-    return FileManager(None)
+    # ToDo: rework so we don't have to add it to HABAPP_PROVIDER
+    HABAPP_PROVIDER.add_object(ir, ItemRegistry)
+    yield ir
+    HABAPP_PROVIDER._created.pop(ItemRegistry, None)
 
 
 @pytest.fixture(autouse=True)
-def clean_objs(ir: ItemRegistry, eb: EventBus, file_manager: FileManager, request):
-    markers = request.node.own_markers
-    for marker in markers:
-        if marker.name == 'no_internals':
-            yield None
-            return None
+async def asyncio_provider():
+    return AsyncioProvider()
 
-    restore = setup_internals(ir, eb, file_manager, final=False)
 
-    yield
-
-    for name in ir.get_item_names():
-        ir.pop_item(name)
-
-    for r in restore:
-        r.restore()
+@pytest.fixture
+def file_manager(eb: EventBus, asyncio_provider: AsyncioProvider) -> FileManager:
+    return FileManager(None, eb, asyncio_provider)
 
 
 @pytest.fixture(autouse=True)

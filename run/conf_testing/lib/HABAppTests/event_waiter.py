@@ -11,7 +11,6 @@ from HABApp.core.internals import (
     EventBusListener,
     EventFilterBase,
     get_current_context,
-    wrap_func,
 )
 from HABApp.core.items import BaseValueItem
 from HABAppTests.errors import TestCaseFailed
@@ -34,9 +33,11 @@ class EventWaiter:
         self._event_filter = event_filter
         self._timeout = timeout
 
+        context = get_current_context()
+
         self._event_listener = EventBusListener(
             self._name,
-            wrap_func(self.__process_event),
+            context.executor_factory.create(self.__process_event),
             self._event_filter
         )
 

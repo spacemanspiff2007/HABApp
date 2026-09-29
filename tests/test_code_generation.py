@@ -1,7 +1,7 @@
 import HABApp.openhab.definitions.websockets.all_events as all_events_module
 import HABApp.openhab.definitions.websockets.item_value_types as item_value_types_module
+from HABApp.testing.inspect_habapp import habapp_modules
 from tests.helpers.code_gen import run_code_generator
-from tests.helpers.inspect.habapp import habapp_modules
 
 
 def test_run_code_generator() -> None:

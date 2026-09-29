@@ -1,7 +1,7 @@
 
 from HABAppTests import TestBaseRule
 
-from HABApp.core.asyncio import _in_thread
+from HABApp.core.asyncio import _is_in_thread
 
 
 class TestInThread(TestBaseRule):
@@ -12,7 +12,7 @@ class TestInThread(TestBaseRule):
         self.add_test('LoadInThread', self.set_result)
 
         # thread check must happen in __init__ because the test is run with the scheduler
-        self.in_thread = _in_thread()
+        self.in_thread = _is_in_thread()
 
     def set_result(self) -> None:
         if not self.in_thread:

@@ -7,7 +7,7 @@ from HABApp.core.lib.timeout import Timeout, TimeoutNotRunningError
 from tests.helpers import MockedMonotonic
 
 
-@pytest.fixture()
+@pytest.fixture
 def time(monkeypatch) -> MockedMonotonic:
     m = MockedMonotonic()
     monkeypatch.setattr(timeout_module, 'monotonic', m.get_time)

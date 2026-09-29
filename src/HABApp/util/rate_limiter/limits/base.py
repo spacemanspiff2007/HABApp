@@ -42,7 +42,11 @@ class BaseRateLimit:
         raise NotImplementedError()
 
     def do_deny(self) -> None:
-        raise NotImplementedError()
+        """Called when a hit gets denied because the limit has been reached.
+        The default implementation does nothing - override in a subclass if the
+        algorithm needs to react to a denied hit (e.g. to extend a window).
+        """
+        return
 
     def info(self) -> BaseRateLimitInfo:
         raise NotImplementedError()
@@ -61,8 +65,7 @@ class BaseRateLimit:
         self.skips += 1
         self.hits = self.allowed
 
-        if self.do_deny:
-            self.do_deny()
+        self.do_deny()
         return False
 
     def test_allow(self, weight: int = 1) -> bool:

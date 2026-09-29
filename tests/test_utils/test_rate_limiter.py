@@ -17,7 +17,7 @@ from HABApp.util.rate_limiter.parser import LIMIT_REGEX
 from tests.helpers import MockedMonotonic
 
 
-@pytest.fixture()
+@pytest.fixture
 def time(monkeypatch) -> MockedMonotonic:
     m = MockedMonotonic()
     monkeypatch.setattr(fixed_window_module, 'monotonic', m.get_time)
@@ -195,11 +195,12 @@ def test_leaky_bucket_info(time) -> None:
 
 
 def test_registry(monkeypatch) -> None:
-    monkeypatch.setattr(registry_module, '_LIMITERS', {})
 
-    obj = registry_module.RateLimiter('Test')
-    assert obj is registry_module.RateLimiter('TEST')
-    assert obj is registry_module.RateLimiter('test')
+    reg = registry_module.RateLimiterRegistry()
+
+    obj = reg.get_limiter('TEST')
+    assert obj is reg.get_limiter('TeSt')
+    assert obj is reg.get_limiter('test')
 
 
 def test_limiter(time) -> None:

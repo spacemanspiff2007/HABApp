@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, Final, Literal
 
 from HABApp.core.errors import InvalidItemValueError
 from HABApp.openhab.definitions.websockets.item_value_types import OpenClosedTypeModel
-from HABApp.openhab.interface_sync import post_update
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
 
 if TYPE_CHECKING:
@@ -49,11 +49,11 @@ class ContactItem(OpenhabItem):
 
     def open(self) -> None:
         """Post an update to the item with the open value"""
-        return post_update(self.name, 'OPEN')
+        return self._oh.post_update(self.name, 'OPEN')
 
     def closed(self) -> None:
         """Post an update to the item with the closed value"""
-        return post_update(self.name, 'CLOSED')
+        return self._oh.post_update(self.name, 'CLOSED')
 
     def __str__(self) -> str:
         return str(self.value)

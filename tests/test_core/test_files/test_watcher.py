@@ -1,12 +1,11 @@
 import logging
 import os
 from pathlib import PurePath
-from typing import Self
+from typing import Any, Self
 
 import pytest
 from watchfiles import Change
 
-from HABApp.core.const.const import PYTHON_312
 from HABApp.core.files import HABAppFileWatcher
 from HABApp.core.files import watcher as watcher_module
 
@@ -33,14 +32,17 @@ class MyPath(PurePath):
         return self
 
 
-@pytest.mark.skipif(not PYTHON_312, reason='Subclassing Path requires Python 3.12!')
 async def test_watcher(monkeypatch, test_logs) -> None:
     logging.getLogger('HABApp.file.events').setLevel(0)
     test_logs.set_min_level(0)
 
     f = HABAppFileWatcher()
     f._watcher_task = lambda: 'ReplacedTask'
-    monkeypatch.setattr(watcher_module, 'create_task_from_async', lambda x: x)
+
+    def _create_task_from_async(obj: Any, name: str | None = None):
+        return obj
+
+    monkeypatch.setattr(watcher_module, 'create_task_from_async', _create_task_from_async)
 
     with pytest.raises(FileNotFoundError) as e:
         f._add_path(MyPath('a/b/c'))

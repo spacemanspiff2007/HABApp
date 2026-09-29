@@ -3,6 +3,7 @@ import ctypes
 import os
 import sys
 import time
+from collections.abc import Sequence
 from pathlib import Path
 
 
@@ -27,7 +28,7 @@ def get_uptime() -> float:
     raise NotImplementedError(msg)
 
 
-def parse_args(passed_args=None) -> argparse.Namespace:
+def parse_args(passed_args: Sequence[str] | None = None) -> argparse.Namespace:
     global DO_BENCH, DO_DEBUG
 
     parser = argparse.ArgumentParser(description='Start HABApp')

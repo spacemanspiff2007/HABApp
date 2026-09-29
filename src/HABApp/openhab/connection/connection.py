@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING
 
 import aiohttp
 
-import HABApp
-from HABApp.core.connections import AutoReconnectPlugin, BaseConnection, Connections, ConnectionStateToEventBusPlugin
+from HABApp.core.connections import BaseConnection
 
 
 if TYPE_CHECKING:
-    from asyncio import Queue
-
-    from HABApp.core.lib import InstantView
+    from HABApp.core.lib import InstantView, WatchedSingleConsumerQueue
+    from HABApp.core.lib.asyncio import AsyncioProvider
     from HABApp.openhab.definitions.websockets.base import BaseOutEvent
     from HABApp.openhab.items import OpenhabItem, Thing
 
@@ -28,80 +26,31 @@ class OpenhabContext:
     created_items: dict[str, tuple[OpenhabItem, InstantView]]
     created_things: dict[str, tuple[Thing, InstantView]]
 
-    session: aiohttp.ClientSession
-    session_options: dict[str, Any]
-
-    out_queue: Queue[BaseOutEvent]
-
     @classmethod
-    def new_context(cls, *, version: tuple[int, int, int],
-                    session: aiohttp.ClientSession, session_options: dict[str, Any],
-                    out_queue: Queue[BaseOutEvent]) -> OpenhabContext:
+    def new_context(cls, *, version: tuple[int, int, int]) -> OpenhabContext:
+
         return cls(
             version=version, is_oh41=version >= (4, 1),
             waited_for_openhab=False,
             created_items={}, created_things={},
-            session=session, session_options=session_options,
-            out_queue=out_queue
         )
 
 
-CONTEXT_TYPE: TypeAlias = OpenhabContext | None
+type CONTEXT_TYPE = OpenhabContext | None
 
-
-def setup() -> None:
-    config = HABApp.config.CONFIG.openhab
-
-    from HABApp.openhab.connection.handler import HANDLER as CONNECTION_HANDLER
-    from HABApp.openhab.connection.plugins import (
-        OUTGOING_PLUGIN,
-        BrokenLinksPlugin,
-        LoadOpenhabItemsPlugin,
-        LoadTransformationsPlugin,
-        PingPlugin,
-        TextualThingConfigPlugin,
-        ThingOverviewPlugin,
-        WaitForPersistenceRestore,
-        WaitForStartlevelPlugin,
-        WebsocketPlugin,
-    )
-
-    connection = Connections.add(OpenhabConnection())
-    connection.register_plugin(CONNECTION_HANDLER)
-
-    connection.register_plugin(WaitForStartlevelPlugin(), 0)
-    connection.register_plugin(OUTGOING_PLUGIN, 10)
-    connection.register_plugin(LoadOpenhabItemsPlugin('LoadItemsAndThings'), 20)
-    connection.register_plugin(WebsocketPlugin(), 30)
-    connection.register_plugin(LoadOpenhabItemsPlugin('SyncItemsAndThings'), 40)
-    connection.register_plugin(LoadTransformationsPlugin(), 50)
-    connection.register_plugin(PingPlugin(), 100)
-    connection.register_plugin(WaitForPersistenceRestore(), 110)
-    connection.register_plugin(TextualThingConfigPlugin(), 120)
-    connection.register_plugin(ThingOverviewPlugin(), 500_000)
-    connection.register_plugin(BrokenLinksPlugin(), 500_001)
-
-    connection.register_plugin(ConnectionStateToEventBusPlugin())
-    connection.register_plugin(AutoReconnectPlugin())
-
-    # config changes
-    config.general.subscribe_for_changes(CONNECTION_HANDLER.update_cfg_general)
+type OhWebsocketQueue = WatchedSingleConsumerQueue[BaseOutEvent]
+type OhHttpQueue = WatchedSingleConsumerQueue[tuple[str, str, bool, str | None]]
 
 
 class OpenhabConnection(BaseConnection):
-    def __init__(self) -> None:
-        super().__init__('openhab')
+    def __init__(self, asyncio_provider: AsyncioProvider) -> None:
+        super().__init__('openhab', asyncio_provider=asyncio_provider)
         self.context: CONTEXT_TYPE = None
 
     def is_silent_exception(self, e: Exception) -> bool:
-        from HABApp.openhab.connection.plugins.websockets import WebSocketClosedError
-
         return isinstance(e, (
             # https://docs.aiohttp.org/en/stable/client_reference.html#client-exceptions
             aiohttp.ClientError,
-
-            # Websocket exceptions
-            WebSocketClosedError,
 
             # aiohttp_sse_client Exceptions
             ConnectionRefusedError, ConnectionError, ConnectionAbortedError)

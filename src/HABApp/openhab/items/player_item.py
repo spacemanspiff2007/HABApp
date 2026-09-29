@@ -6,7 +6,8 @@ from HABApp.openhab.definitions.websockets.item_value_types import (
     RewindFastforwardTypeModel,
     StringTypeModel,
 )
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 
 
 if TYPE_CHECKING:

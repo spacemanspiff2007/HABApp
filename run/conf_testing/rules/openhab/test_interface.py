@@ -10,6 +10,7 @@
 #
 # ----------------------------------------------------------------------------------------------------------------------
 import time
+from typing import Final
 
 from HABAppTests import (
     EventWaiter,
@@ -23,6 +24,8 @@ from HABAppTests import (
 )
 
 import HABApp
+from HABApp.core.internals import ItemRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.events import ItemCommandEventFilter
 
 
@@ -71,6 +74,8 @@ class TestOpenhabInterface(TestBaseRule):
             assert not self.openhab.item_exists(item_name)
 
     def test_item_change_type(self) -> None:
+        items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+
         test_item = get_random_name('String')
         assert not self.openhab.item_exists(test_item)
 
@@ -87,7 +92,7 @@ class TestOpenhabInterface(TestBaseRule):
                 HABApp.openhab.items.NumberItem.get_item(test_item)
                 break
 
-            if isinstance(HABApp.core.Items.get_item(test_item), HABApp.openhab.items.NumberItem):
+            if isinstance(items.get_item(test_item), HABApp.openhab.items.NumberItem):
                 break
 
         self.openhab.remove_item(test_item)

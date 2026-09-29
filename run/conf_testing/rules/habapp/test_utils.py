@@ -2,9 +2,11 @@ import logging
 
 from HABAppTests import ItemWaiter, OpenhabTmpItem, TestBaseRule, get_random_name
 
-import HABApp
+from HABApp.core.internals import ItemRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.openhab.items import OpenhabItem
 from HABApp.util.multimode import MultiModeItem, SwitchItemValueMode
+from HABApp.util.rate_limiter import RateLimiter
 
 
 log = logging.getLogger('HABApp.Tests.MultiMode')
@@ -42,7 +44,7 @@ class TestSwitchMode(TestBaseRule):
             mode.set_value(0)
             assert mode.enabled is False, mode.enabled
 
-        HABApp.core.Items.pop_item(mm.name)
+        HABAPP_PROVIDER.get_existing(ItemRegistry).pop_item(mm.name)
 
     def test_sw_mode_inverted(self) -> None:
         mm = MultiModeItem.get_create_item(get_random_name('HABApp'))
@@ -65,7 +67,23 @@ class TestSwitchMode(TestBaseRule):
             waiter.wait_for_state('OFF')
             assert mode.enabled is True, mode.enabled
 
-        HABApp.core.Items.pop_item(mm.name)
+        HABAPP_PROVIDER.get_existing(ItemRegistry).pop_item(mm.name)
 
 
 TestSwitchMode()
+
+
+class TestRateLimiter(TestBaseRule):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.add_test('TestRateLimiter', self.test_rate_limiter)
+
+    def test_rate_limiter(self) -> None:
+        r = RateLimiter('test_limiter')
+        r.parse_limits('5 in 60s')
+        assert r.test_allow()
+        assert r.allow()
+
+
+TestRateLimiter()

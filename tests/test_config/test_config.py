@@ -1,11 +1,6 @@
-import logging
 import re
 
-from easyconfig.yaml import yaml_safe
-from tests.helpers import LogCollector
-
 from HABApp import CONFIG
-from HABApp.config.models.mqtt import Subscribe
 
 
 def test_default_file() -> None:
@@ -60,30 +55,3 @@ openhab:
     item: HABApp_Ping  # Name of the Numberitem
     interval: 10       # Seconds between two pings
 '''
-
-
-def test_migrate(test_logs: LogCollector) -> None:
-    text = (
-        '\n'
-        '  subscribe:\n'
-        '    qos: 0   # Default QoS for subscribing\n'
-        '    topics:\n'
-        "    - - '#'\n"
-        '      - \n'
-        '  publish:\n'
-    )
-
-    obj = yaml_safe.load(text)
-    Subscribe.model_validate(obj['subscribe'])
-
-    test_logs.add_expected(
-        'HABApp.Config', logging.WARNING,
-        [
-            'Empty QoS is not longer allowed for subscribing to topics.',
-            'Specify QOS or remove empty entry, e.g from',
-            '  - - #',
-            '    - ',
-            'to',
-            '  - #',
-        ]
-    )

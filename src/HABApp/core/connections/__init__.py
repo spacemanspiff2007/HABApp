@@ -10,7 +10,7 @@ from HABApp.core.connections.plugin_callback import PluginCallbackHandler
 
 # isort: split
 
-from HABApp.core.connections.manager import connection_manager as Connections
+from HABApp.core.connections.manager import ConnectionManager
 
 
 # isort: split

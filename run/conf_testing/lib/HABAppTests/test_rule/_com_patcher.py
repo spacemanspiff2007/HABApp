@@ -2,17 +2,21 @@ import json
 import logging
 import pprint
 from collections.abc import Callable
-from types import ModuleType, TracebackType
+from types import TracebackType
 from typing import Any, Final
 
-from pytest import MonkeyPatch
+from pytest import MonkeyPatch  # noqa: PT013
 
 import HABApp.mqtt.connection.publish
 import HABApp.mqtt.connection.subscribe
 import HABApp.openhab.connection.handler
-import HABApp.openhab.connection.handler.func_async
-import HABApp.openhab.process_events
+import HABApp.openhab.event_handler
 from HABApp.config import CONFIG
+from HABApp.core.connections import ConnectionManager
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.mqtt.connection import MqttConnection
+from HABApp.mqtt.connection.messages import MessagesHandler
+from HABApp.openhab.connection.handler import OhClientSession
 
 
 class PatcherName:
@@ -38,8 +42,8 @@ class BasePatcher:
             self.name.logged = True
         self._log.debug(msg)
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
-                 exc_tb: TracebackType | None) -> bool:
+    async def __aexit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
+                        exc_tb: TracebackType | None) -> bool:
 
         self.monkeypatch.undo()
         return False
@@ -98,19 +102,11 @@ class RestPatcher(BasePatcher):
             return resp
         return resp_wrap
 
-    def __enter__(self) -> None:
-        m = self.monkeypatch
-
-        # http functions
-        to_patch: Final[tuple[tuple[ModuleType, tuple[str, ...]]], ...] = (
-            (HABApp.openhab.connection.handler, ('get', 'put', 'post', 'delete')),
-            (HABApp.openhab.connection.handler.func_async, ('get', 'put', 'post', 'delete')),
-            (HABApp.openhab.connection.plugins.out, ('put', 'post')),
-        )
-
-        for module, methods in to_patch:
-            for name in methods:
-                m.setattr(module, name, self.wrap_http(getattr(module, name)))
+    async def __aenter__(self) -> None:
+        session = HABAPP_PROVIDER.get_existing(OhClientSession)
+        name: Final = '_request'
+        obj: Final = session.aiohttp_session
+        self.monkeypatch.setattr(obj, name, self.wrap_http(getattr(obj, name)))
 
 
 class WebsocketPatcher(BasePatcher):
@@ -118,7 +114,7 @@ class WebsocketPatcher(BasePatcher):
     def __init__(self, name: str) -> None:
         super().__init__(name, 'Wsocket')
 
-    def __enter__(self) -> None:
+    async def __aenter__(self) -> None:
 
         def prettify(text: str) -> str:
             # try to prettyfy the input so it's not the json in json event
@@ -130,15 +126,14 @@ class WebsocketPatcher(BasePatcher):
             except ValueError:
                 return text
 
-        class WrappedAdapter:
-            @staticmethod
-            def validate_json(validate_input) -> Any:
-                self.log(f'{"IN":^6s} {prettify(validate_input):s}')
-                return adapter.validate_json(validate_input)
+        def validate_json(validate_input: str) -> Any:
+            self.log(f'{"IN":^6s} {prettify(validate_input):s}')
+            return original_validate_json(validate_input)
 
         module = HABApp.openhab.connection.plugins.websockets
-        adapter = module.OPENHAB_EVENT_TYPE_ADAPTER
-        self.monkeypatch.setattr(module, 'OPENHAB_EVENT_TYPE_ADAPTER', WrappedAdapter)
+        adapter: Final = module.OPENHAB_EVENT_TYPE_ADAPTER
+        original_validate_json: Final = adapter.validate_json
+        self.monkeypatch.setattr(adapter, 'validate_json', validate_json)
 
         def log_send(func):
             async def _sender(text):
@@ -146,7 +141,8 @@ class WebsocketPatcher(BasePatcher):
                 return await func(text)
             return _sender
 
-        conn = HABApp.core.connections.Connections.get('openhab')
+        mgr = await HABAPP_PROVIDER.get(ConnectionManager)
+        conn = mgr.get('openhab')
         for p in conn.plugins:
             if isinstance(p, module.WebsocketPlugin):
                 if p._websocket is not None:
@@ -155,7 +151,6 @@ class WebsocketPatcher(BasePatcher):
         else:
             msg = f'No websocket plugin found in {conn.plugins!r}'
             raise ValueError(msg)
-
 
 
 class MqttPatcher(BasePatcher):
@@ -175,11 +170,17 @@ class MqttPatcher(BasePatcher):
             return await func(topic, payload, qos, retain)
         return wrapped_publish
 
-    def __enter__(self) -> None:
+    async def __aenter__(self) -> None:
         m = self.monkeypatch
 
-        module = HABApp.mqtt.connection.subscribe
-        m.setattr(module, 'msg_to_event', self.wrap_msg(module.msg_to_event))
+        mqtt_connection: Final = HABAPP_PROVIDER.get_existing(MqttConnection)
+        mqtt_client: Final = mqtt_connection.context
 
-        obj = HABApp.mqtt.connection.publish.PUBLISH_HANDLER.plugin_connection.context
-        m.setattr(obj, 'publish', self.pub_msg(obj.publish))
+        for plugin in mqtt_connection.plugins:
+            if isinstance(plugin, MessagesHandler):
+                m.setattr(plugin, 'msg_to_event', self.wrap_msg(plugin.msg_to_event))
+                break
+        else:
+            raise RuntimeError()
+
+        m.setattr(mqtt_client, 'publish', self.pub_msg(mqtt_client.publish))

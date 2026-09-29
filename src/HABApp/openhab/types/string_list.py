@@ -4,7 +4,7 @@ from typing import Self
 
 
 class StringList(tuple[str, ...]):
-    """A frozen list where all entries are of type str"""
+    """A frozen list / tuple where all entries are of type str"""
 
     __slots__ = ()
 

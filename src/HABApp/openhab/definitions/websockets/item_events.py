@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal, Self
+from typing import Annotated, Literal, Self, override
 
 from pydantic import Field, Json
-from typing_extensions import override
 
 from HABApp.openhab.events.item_events import GroupStateChangedEvent as TargetGroupStateChangedEvent
 from HABApp.openhab.events.item_events import GroupStateUpdatedEvent as TargetGroupStateUpdatedEvent
@@ -17,7 +16,12 @@ from HABApp.openhab.events.item_events import ItemStateUpdatedEvent as TargetIte
 from HABApp.openhab.events.item_events import ItemUpdatedEvent as TargetItemUpdatedEvent
 
 from .base import SERIALIZE_TO_JSON_STR, BaseEvent, BaseModel, BaseOutEvent
-from .item_value_types import OPENHAB_VALUE_TYPE_ADAPTER, OpenHabValueType
+from .item_value_types import (
+    OPENHAB_EVENT_VALUE_LAST_CHANGE_TYPE_ADAPTER,
+    OPENHAB_VALUE_TYPE_ADAPTER,
+    OpenHabEventValueLastUpdateType,
+    OpenHabValueType,
+)
 
 
 class ValueChangedPayload(BaseModel):
@@ -41,25 +45,15 @@ class ItemStateEvent(BaseEvent):
 
 class ItemStateUpdatedEvent(BaseEvent):
     type: Literal['ItemStateUpdatedEvent']
-    payload: Json[OpenHabValueType]
+    payload: Json[OpenHabEventValueLastUpdateType]
 
     @override
     def to_event(self) -> TargetItemStateUpdatedEvent:
         payload = self.payload
         return TargetItemStateUpdatedEvent(
-            name=self.topic[14:-13], value=payload.get_value()
-        )
-
-
-class Oh4ItemStateUpdatedEvent(BaseEvent):
-    type: Literal['ItemStateUpdatedEvent']
-    payload: Json[OpenHabValueType]
-
-    @override
-    def to_event(self) -> TargetItemStateUpdatedEvent:
-        payload = self.payload
-        return TargetItemStateUpdatedEvent(
-            name=self.topic[14:-13], value=payload.get_value()
+            name=self.topic[14:-13], value=payload.get_value(),
+            last_state_update=None,  # payload.last_update.to_instant() if payload.last_update else None,
+            source=self.source
         )
 
 
@@ -70,28 +64,17 @@ class ItemStateChangedEvent(BaseEvent):
     @override
     def to_event(self) -> TargetItemStateChangedEvent:
         payload = self.payload
-        old = OPENHAB_VALUE_TYPE_ADAPTER.validate_python({'type': payload.pop('oldType'), 'value': payload.pop('oldValue')})
-        new = OPENHAB_VALUE_TYPE_ADAPTER.validate_python(payload)
-        return TargetItemStateChangedEvent(
-            name=self.topic[14:-13],
-            value=new.get_value(),
-            old_value=old.get_value()
+        old = OPENHAB_VALUE_TYPE_ADAPTER.validate_python(
+            {'type': payload.pop('oldType'), 'value': payload.pop('oldValue')}
         )
-
-
-class Oh4ItemStateChangedEvent(BaseEvent):
-    type: Literal['ItemStateChangedEvent']
-    payload: Json[ValueChangedPayload]
-
-    @override
-    def to_event(self) -> TargetItemStateChangedEvent:
-        payload = self.payload
-        new = (ta := OPENHAB_VALUE_TYPE_ADAPTER).validate_python({'type': payload.type, 'value': payload.value})
-        old = ta.validate_python({'type': payload.old_type, 'value': payload.old_value})
+        new = OPENHAB_EVENT_VALUE_LAST_CHANGE_TYPE_ADAPTER.validate_python(payload)
         return TargetItemStateChangedEvent(
             name=self.topic[14:-13],
             value=new.get_value(),
-            old_value=old.get_value()
+            old_value=old.get_value(),
+            last_state_change=None,  # new.last_change.to_instant() if new.last_change else None,
+            last_state_update=None,  # new.last_update.to_instant() if new.last_update else None,
+            source=self.source
         )
 
 
@@ -103,7 +86,7 @@ class ItemCommandEvent(BaseEvent):
     def to_event(self) -> TargetItemCommandEvent:
         payload = self.payload
         return TargetItemCommandEvent(
-            name=self.topic[14:-8], value=payload.get_value()
+            name=self.topic[14:-8], value=payload.get_value(), source=self.source
         )
 
 
@@ -178,7 +161,7 @@ class GroupItemDtoModel(ItemDtoModel):
     group_function: GroupFunctionDTOModel | None = Field(default=None, alias='function')
 
 
-# https://github.com/openhab/openhab-core/blob/ce374252fa2c821103da888302f930c1c127f73c/bundles/org.openhab.core/src/main/java/org/openhab/core/items/events/ItemAddedEvent.java
+# https://github.com/openhab/openhab-core/blob/main/bundles/org.openhab.core/src/main/java/org/openhab/core/items/events/ItemAddedEvent.java
 class ItemAddedEvent(BaseEvent):
     type: Literal['ItemAddedEvent']
     payload: Json[GroupItemDtoModel]
@@ -224,9 +207,10 @@ class ItemStateSendEvent(BaseOutEvent):
     payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
 
     @classmethod
-    def create(cls, name: str, payload: OpenHabValueType) -> Self:
+    def create(cls, name: str, payload: OpenHabValueType, *, source: str | None = None) -> Self:
+        src = 'HABApp' if source is None else f'HABApp.{source:s}'
         return cls(
-            type='ItemStateEvent', topic=f'openhab/items/{name:s}/state', payload=payload
+            type='ItemStateEvent', topic=f'openhab/items/{name:s}/state', payload=payload, source=src
         )
 
 
@@ -236,7 +220,8 @@ class ItemCommandSendEvent(BaseOutEvent):
     payload: Annotated[OpenHabValueType, SERIALIZE_TO_JSON_STR]
 
     @classmethod
-    def create(cls, name: str, payload: OpenHabValueType) -> Self:
+    def create(cls, name: str, payload: OpenHabValueType, *, source: str | None = None) -> Self:
+        src = 'HABApp' if source is None else f'HABApp.{source:s}'
         return cls(
-            type='ItemCommandEvent', topic=f'openhab/items/{name:s}/command', payload=payload
+            type='ItemCommandEvent', topic=f'openhab/items/{name:s}/command', payload=payload, source=src
         )

@@ -1,6 +1,4 @@
-from typing import Self
-
-from typing_extensions import override
+from typing import Final, Self, override
 
 from HABApp.core.errors import (
     InvalidItemValueError,
@@ -9,12 +7,10 @@ from HABApp.core.errors import (
     ItemValueIsNoneError,
     WrongItemTypeError,
 )
-from HABApp.core.internals import uses_item_registry
+from HABApp.core.internals import EventBus, ItemRegistry
 from HABApp.core.items import BaseValueItem
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.types import HSB, RGB
-
-
-item_registry = uses_item_registry()
 
 
 class ColorItem(BaseValueItem):
@@ -109,10 +105,13 @@ class ColorItem(BaseValueItem):
         if not isinstance(name, str):
             raise ItemNameNotOfTypeStrError.from_value(name)
 
+        item_registry: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+        event_bus: Final = HABAPP_PROVIDER.get_existing(EventBus)
+
         try:
             item = item_registry.get_item(name)
         except ItemNotFoundException:
-            item = item_registry.add_item(cls(name, initial_value, last_value))
+            item = item_registry.add_item(cls(name, initial_value, last_value, event_bus=event_bus))
 
         if not isinstance(item, cls):
             raise WrongItemTypeError.from_item(item, cls)

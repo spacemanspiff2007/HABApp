@@ -1,11 +1,11 @@
 from collections.abc import Mapping
-from typing import Final, NoReturn, TypeAlias
+from typing import Final, NoReturn
 
 from HABApp.openhab.errors import MapTransformationError
 
 
-MapKeyType: TypeAlias = int | str
-MapValueType: TypeAlias = int | str
+type MapKeyType = int | str
+type MapValueType = int | str
 
 
 class MapTransformation(dict[MapKeyType, MapValueType]):

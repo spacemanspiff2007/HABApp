@@ -49,7 +49,6 @@ class ValueMode(BaseMode):
         # do not call callback for initial value
         if initial_value is not None:
             self.__enabled = True
-            self.__value = initial_value
         if enabled is not None:
             assert enabled in (True, False), enabled
             self.__enabled = enabled

@@ -3,15 +3,15 @@ import contextlib
 import logging
 import re
 from asyncio import Event, Task
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from pathlib import Path
 from re import Pattern
-from typing import Any, Final
+from typing import Any, Final, override
 
-from typing_extensions import override
 from watchfiles import Change, DefaultFilter, awatch
 
 from HABApp.core.asyncio import create_task_from_async
+from HABApp.core.provider import HABAPP_PROVIDER
 from HABApp.core.wrapper import process_exception
 
 
@@ -117,7 +117,7 @@ class HABAppFileWatcher:
 
     def __notify_task(self) -> None:
         if self._files_task is None:
-            self._files_task = create_task_from_async(self._watcher_task())
+            self._files_task = create_task_from_async(self._watcher_task(), name='FileSystemWatcher')
         else:
             self._stop_event.set()
 
@@ -158,6 +158,8 @@ class HABAppFileWatcher:
                       dispatchers: list[FileWatcherDispatcherBase] | None = None) -> bool:
         if not DEFAULT_FILTER(change, path):
             return False
+
+        path = Path(path).as_posix()
 
         if dispatchers is not None:
             return any(dispatcher.allow(change, path) for dispatcher in dispatchers)
@@ -259,3 +261,10 @@ class HABAppFileWatcher:
             for dispatcher in self._dispatchers:
                 if dispatcher.allow(None, file):
                     await dispatcher.dispatch(file)
+
+
+@HABAPP_PROVIDER.register
+async def __get_file_watcher() -> AsyncGenerator[HABAppFileWatcher, Any]:
+    obj = HABAppFileWatcher()
+    yield obj
+    await obj.shutdown()

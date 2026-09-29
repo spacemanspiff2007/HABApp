@@ -22,7 +22,7 @@ def get_plugin_callbacks(obj: BaseConnectionPlugin) -> list[tuple[ConnectionStat
     name_regex = re.compile(f'on_({"|".join(name_to_status)})')
 
     ret = []
-    for m_name, member in getmembers(obj, predicate=lambda x: callable(x)):
+    for m_name, member in getmembers(obj, predicate=callable):
         if not m_name.lower().startswith('on_'):
             continue
 

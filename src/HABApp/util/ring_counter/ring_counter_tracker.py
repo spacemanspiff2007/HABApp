@@ -113,20 +113,59 @@ class RingCounterTracker:
         return (f'{self.__class__.__name__:s}(value={value}, '
                 f'min={self._min_value:d}, max={self._max_value:d}, ignore={self._ignore:d})')
 
-    def __eq__(self, other: int) -> bool:
-        return self._last_value == other
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, self.__class__):
+            return self._last_value == other._last_value
 
-    def __ne__(self, other: float) -> bool:
-        return self._last_value != other
+        if isinstance(other, (int, float)):
+            return self._last_value == other
+
+        return NotImplemented
+
+    def __ne__(self, other: object) -> bool:
+        if isinstance(other, self.__class__):
+            return self._last_value != other._last_value
+
+        if isinstance(other, (int, float)):
+            return self._last_value != other
+
+        return NotImplemented
 
     def __ge__(self, other: float) -> bool:
-        return self._last_value >= other
+        if isinstance(other, self.__class__):
+            return self._last_value >= other._last_value
+
+        if isinstance(other, (int, float)):
+            return self._last_value >= other
+
+        return NotImplemented
 
     def __gt__(self, other: float) -> bool:
-        return self._last_value > other
+        if isinstance(other, self.__class__):
+            return self._last_value > other._last_value
+
+        if isinstance(other, (int, float)):
+            return self._last_value > other
+
+        return NotImplemented
 
     def __le__(self, other: float) -> bool:
-        return self._last_value <= other
+        if isinstance(other, self.__class__):
+            return self._last_value <= other._last_value
+
+        if isinstance(other, (int, float)):
+            return self._last_value < other
+
+        return NotImplemented
 
     def __lt__(self, other: float) -> bool:
-        return self._last_value < other
+        if isinstance(other, self.__class__):
+            return self._last_value < other._last_value
+
+        if isinstance(other, (int, float)):
+            return self._last_value < other
+
+        return NotImplemented
+
+    # Instances are mutable. Mutable objects must not be hashable
+    __hash__ = None

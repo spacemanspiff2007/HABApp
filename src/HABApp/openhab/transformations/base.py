@@ -1,13 +1,11 @@
 import logging
-from typing import Any, Final, Generic, TypeVar
+from typing import Any, Final
 
-
-T = TypeVar('T')
 
 log = logging.getLogger('HABApp.openhab.transform')
 
 
-class TransformationFactoryBase(Generic[T]):
+class TransformationFactoryBase[T]:
     def __init__(self, registry: 'TransformationRegistryBase') -> None:
         self._registry: Final = registry
 

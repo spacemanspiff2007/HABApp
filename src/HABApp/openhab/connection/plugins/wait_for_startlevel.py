@@ -8,17 +8,19 @@ import HABApp
 import HABApp.core
 import HABApp.openhab.events
 from HABApp.config.models.openhab import General as OpenHABGeneralConfig
-from HABApp.core import shutdown
 from HABApp.core.connections import BaseConnectionPlugin
 from HABApp.core.lib import Timeout, ValueChange
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.core.shutdown import ShutdownInfo
 from HABApp.openhab.connection.connection import OpenhabConnection, OpenhabContext
-from HABApp.openhab.connection.handler.func_async import async_get_system_info
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 
 
 class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
-    def __init__(self, name: str | None = None) -> None:
+    def __init__(self, *, name: str | None = None, interface: OpenHabAsyncInterface) -> None:
         super().__init__(name)
+        self._interface = interface
 
     async def on_connected(self, context: OpenhabContext, connection: OpenhabConnection) -> None:
         if not context.is_oh41:
@@ -31,7 +33,7 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
         oh_general = HABApp.CONFIG.openhab.general
         start_level_reached_timeout: Final = 10 * 60
 
-        if (system_info := await async_get_system_info()) is not None:
+        if (system_info := await self._interface.get_system_info_or_none()) is not None:
             # If openHAB is already running we have a fast exit path here
 
             uptime_skip_always = 2 * (oh_general.min_uptime + start_level_reached_timeout)
@@ -69,11 +71,14 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
 
         sleep_secs = 1
 
+        # todo: Implement this properly
+        shutdown = await HABAPP_PROVIDER.get(ShutdownInfo)
+
         while not shutdown.is_requested():
             await asyncio.sleep(sleep_secs)
             sleep_secs = 1
 
-            if (system_info := await async_get_system_info()) is None:
+            if (system_info := await self._interface.get_system_info_or_none()) is None:
                 if level_change.set_missing().changed:
                     log.debug('Start level: not received!')
                 continue
@@ -109,10 +114,11 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
         if shutdown.is_requested():
             return None
         log.info('openHAB startup complete')
+        return None
 
-    async def __on_connected_old(self, context: OpenhabContext, connection: OpenhabConnection):
+    async def __on_connected_old(self, context: OpenhabContext, connection: OpenhabConnection) -> None:
 
-        level_reached, level = await _start_level_reached()
+        level_reached, level = await self._start_level_reached()
 
         if level_reached:
             context.waited_for_openhab = False
@@ -131,7 +137,7 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
         while not level_reached:
             await asyncio.sleep(1)
 
-            level_reached, level = await _start_level_reached()
+            level_reached, level = await self._start_level_reached()
 
             # show start level change
             if last_level != level:
@@ -158,14 +164,14 @@ class WaitForStartlevelPlugin(BaseConnectionPlugin[OpenhabConnection]):
             last_level = level
 
         log.info('openHAB startup complete')
+        return None
 
+    async def _start_level_reached(self) -> tuple[bool, None | int]:
+        start_level_min = HABApp.CONFIG.openhab.general.min_start_level
 
-async def _start_level_reached() -> tuple[bool, None | int]:
-    start_level_min = HABApp.CONFIG.openhab.general.min_start_level
+        if (system_info := await self._interface.get_system_info_or_none()) is None:
+            return False, None
 
-    if (system_info := await async_get_system_info()) is None:
-        return False, None
+        start_level_is = system_info.start_level
 
-    start_level_is = system_info.start_level
-
-    return start_level_is >= start_level_min, start_level_is
+        return start_level_is >= start_level_min, start_level_is

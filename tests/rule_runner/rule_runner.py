@@ -1,14 +1,14 @@
-import logging
+import asyncio
 import warnings
-from collections.abc import Awaitable, Callable, Coroutine
-from concurrent.futures import Future
+from asyncio import get_event_loop
+from collections.abc import Awaitable
 from types import TracebackType
-from typing import Any, Final, Self
+from typing import Self
+from unittest.mock import Mock
 
 from astral import Observer
 from eascheduler.producers import prod_sun as prod_sun_module
 from pytest import MonkeyPatch  # noqa: PT013
-from typing_extensions import override
 
 import HABApp
 import HABApp.core.lib.exceptions.format
@@ -16,16 +16,15 @@ import HABApp.rule.rule as rule_module
 import HABApp.rule.scheduler.job_builder as job_builder_module
 from HABApp.core.const.topics import TOPIC_ERRORS, TOPIC_WARNINGS
 from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.files import FileManager
-from HABApp.core.internals import Context, EventBus, ItemRegistry, setup_internals
-from HABApp.core.internals.event_bus import EventBusBaseListener
-from HABApp.core.internals.proxy import ConstProxyObj
-from HABApp.core.internals.wrapped_function import wrapped_thread, wrapper
-from HABApp.core.internals.wrapped_function.base import P, R, WrappedFunctionBase
-from HABApp.core.internals.wrapped_function.wrapped_thread import WrappedThreadFunction
+from HABApp.core.internals import EventBus, ItemRegistry
+from HABApp.core.internals.event_bus import EventBusListenerBase
+from HABApp.core.lib.asyncio import AsyncioProvider
 from HABApp.core.lib.exceptions.format import fallback_format
+from HABApp.mqtt import MqttAsyncInterface, MqttInterface
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.rule.rule_hook import HABAppRuleHook
 from HABApp.runtime import Runtime
+from HABApp.testing.executor import TestingExecutorFactory
 
 
 def suggest_rule_name(obj: object) -> str:
@@ -68,35 +67,7 @@ def raising_fallback_format(e: Exception, existing_traceback: list[str]) -> list
     raise
 
 
-class SyncPool:
-    def submit(self, callback, *args, **kwargs) -> Future:
-        # This executes the callback so we can not ignore exceptions
-        res = callback(*args, **kwargs)
-
-        f = Future()
-        f.set_result(res)
-        return f
-
-
-class AsyncFunc(WrappedFunctionBase):
-    def __init__(self, coro: Callable[P, Coroutine[Any, Any, R]],
-                 name: str | None = None,
-                 logger: logging.Logger | None = None,
-                 context: Context | None = None) -> None:
-
-        super().__init__(name=name, func=coro, logger=logger, context=context)
-        self.coro: Final = coro
-
-    @override
-    def run(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        raise NotImplementedError()
-
-    @override
-    async def async_run(self, *args: P.args, **kwargs: P.kwargs) -> R | None:
-        return await self.coro(*args, **kwargs)
-
-
-class AppendListener(EventBusBaseListener):
+class AppendListener(EventBusListenerBase):
     def __init__(self, topic: str, obj: list) -> None:
         super().__init__(topic)
         self.obj = obj
@@ -142,14 +113,10 @@ class SimpleRuleRunner:
         self._ignored_exceptions = exceptions
 
     async def set_up(self) -> None:
-        # ensure that we call setup only once!
-        assert isinstance(HABApp.core.Items, ConstProxyObj)
-        assert isinstance(HABApp.core.EventBus, ConstProxyObj)
 
         ir = ItemRegistry()
         eb = EventBus()
-        file_manager = FileManager(None)
-        self.restore = setup_internals(ir, eb, file_manager, final=False)
+        async_provider = AsyncioProvider()
 
         # setup so we capture errors / warnings
         eb.add_listener(AppendListener(TOPIC_WARNINGS, self._warnings))
@@ -158,18 +125,14 @@ class SimpleRuleRunner:
         # Scheduler
         self.monkeypatch.setattr(prod_sun_module, 'OBSERVER', Observer(52.51870523376821, 13.376072914752532, 10))
 
-        # Overwrite
-        self.monkeypatch.setattr(HABApp.core, 'EventBus', eb)
-        self.monkeypatch.setattr(HABApp.core, 'Items', ir)
-
         # Patch the hook so we can instantiate the rules
-        hook = HABAppRuleHook(self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None)
+        hook = HABAppRuleHook(
+            self.loaded_rules.append, suggest_rule_name, DummyRuntime(), None, get_event_loop(), None,
+            item_registry=ir, event_bus=eb, executor_factory=TestingExecutorFactory(eb),
+            oh_interface_sync=Mock(OpenHabSyncInterface), oh_interface_async=Mock(OpenHabAsyncInterface),
+            mqtt_interface_sync=Mock(MqttInterface), mqtt_interface_async=Mock(MqttAsyncInterface),
+        )
         self.monkeypatch.setattr(rule_module, '_get_rule_hook', lambda: hook)
-
-        # patch worker with a synchronous worker
-        self.monkeypatch.setattr(wrapped_thread, 'POOL', SyncPool())
-        self.monkeypatch.setattr(wrapper, 'WrappedAsyncFunction', AsyncFunc)
-        self.monkeypatch.setattr(wrapper, 'SYNC_CLS', WrappedThreadFunction, raising=False)
 
         # raise exceptions during error formatting
         self.monkeypatch.setattr(HABApp.core.lib.exceptions.format, 'fallback_format', raising_fallback_format)
@@ -250,4 +213,4 @@ class SimpleRuleRunner:
                 if process_events:
                     obj.process_events()
 
-        HABApp.core.asyncio.loop.run_until_complete(_run())
+        asyncio.run(_run())

@@ -19,7 +19,8 @@ def test_class_annotations() -> None:
         'ItemCommandEventFilter')
     for cls in get_module_classes('HABApp.openhab.events', exclude).values():
         check_class_annotations(
-            cls, init_alias={'initial_value': 'value', 'group_names': 'groups', 'thing_type': 'type'}
+            cls,
+            init_alias={'initial_value': 'value', 'group_names': 'groups', 'thing_type': 'type'},
         )
 
 

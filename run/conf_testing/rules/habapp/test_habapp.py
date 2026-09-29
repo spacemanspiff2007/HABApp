@@ -10,7 +10,9 @@ from HABApp.core.events import (
     ValueUpdateEvent,
     ValueUpdateEventFilter,
 )
+from HABApp.core.internals import ItemRegistry
 from HABApp.core.items import Item
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 class TestItemEvents(TestBaseRule):
@@ -38,8 +40,10 @@ class TestItemEvents(TestBaseRule):
         try:
             self._run(values, filter)
 
-            HABApp.core.Items.pop_item(item_name)
-            assert not HABApp.core.Items.item_exists(item_name)
+            items = HABAPP_PROVIDER.get_existing(ItemRegistry)
+
+            items.pop_item(item_name)
+            assert not items.item_exists(item_name)
 
             time.sleep(0.5)
 
@@ -79,7 +83,8 @@ class TestItemEventRestore(TestBaseRule):
         (item.watch_change if change else item.watch_update)(timeout)
         filter = EventFilter(ItemNoUpdateEvent) if not change else EventFilter(ItemNoChangeEvent)
 
-        HABApp.core.Items.pop_item(item.name)
+        items = HABAPP_PROVIDER.get_existing(ItemRegistry)
+        items.pop_item(item.name)
         time.sleep(0.1)
 
         new_item = HABApp.core.items.Item.get_create_item(item.name)

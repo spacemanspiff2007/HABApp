@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Final, Literal
 import HABApp
 from HABApp.core.connections._definitions import ConnectionStatus, connection_log
 from HABApp.core.connections.status_transitions import StatusTransitions
-from HABApp.core.lib import PriorityList, SingleTask
-
-from ..wrapper import process_exception
+from HABApp.core.lib import PriorityList
+from HABApp.core.lib.asyncio import AsyncioProvider
+from HABApp.core.wrapper import process_exception
 
 
 if TYPE_CHECKING:
@@ -43,7 +43,7 @@ class HandleExceptionInConnection:
 
 
 class BaseConnection:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, *, asyncio_provider: AsyncioProvider) -> None:
         self.name: Final = name
         self.log: Final = connection_log.getChild(name)
         self.status: Final = StatusTransitions()
@@ -57,8 +57,10 @@ class BaseConnection:
             name: PriorityList() for name in ConnectionStatus}
 
         # Tasks
-        self.plugin_task: Final = SingleTask(self._task_plugin, f'{name.title():s}PluginTask')
-        self.advance_status_task: Final = SingleTask(self._task_next_status, f'{name.title():s}AdvanceStatusTask')
+        self.plugin_task: Final = asyncio_provider.create_single_task(
+            self._task_plugin, f'{name.title():s}PluginTask')
+        self.advance_status_task: Final = asyncio_provider.create_single_task(
+            self._task_next_status, f'{name.title():s}AdvanceStatusTask')
 
     @property
     def is_online(self) -> bool:
@@ -102,7 +104,7 @@ class BaseConnection:
         else:
             if func is None:
                 func = f'{self.name} connection'
-            process_exception(func, e, self.log)
+            process_exception(func, e, logger=self.log)
 
     def register_plugin(self, obj: BaseConnectionPlugin, priority: int | Literal['first', 'last'] | None = None):
         from .plugin_callback import get_plugin_callbacks
@@ -204,6 +206,10 @@ class BaseConnection:
         self.status.from_setup_to_disabled()
         self.advance_status_task.start_if_not_running()
 
+    def status_from_startup_to_disabled(self) -> None:
+        self.status.from_startup_to_disabled()
+        self.advance_status_task.start_if_not_running()
+
     def status_from_connected_to_disconnected(self) -> None:
         self.status.from_connected_to_disconnected()
         self.advance_status_task.start_if_not_running()
@@ -224,6 +230,7 @@ class BaseConnection:
             p.on_application_shutdown()
 
         self.advance_status_task.start_if_not_running()
+        return None
 
     def application_startup_complete(self) -> None:
         self.log.debug('Overview')
@@ -241,5 +248,6 @@ class BaseConnection:
 
             self.log.debug(f' - {status}: {", ".join(coros)}')
 
-        self.status.setup = True
+        if self.status.status != self.status.status.DISABLED:
+            self.status.setup = True
         self.advance_status_task.start_if_not_running()

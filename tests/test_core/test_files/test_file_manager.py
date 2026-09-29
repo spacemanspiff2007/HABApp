@@ -4,7 +4,6 @@ from unittest.mock import Mock, call
 
 import pytest
 
-import HABApp
 from HABApp.core.const.topics import TOPIC_FILES
 from HABApp.core.events.habapp_events import RequestFileLoadEvent, RequestFileUnloadEvent
 from HABApp.core.files import FileManager
@@ -16,15 +15,16 @@ from HABApp.core.internals import EventBus
 from tests.helpers import LogCollector
 
 
-async def test_file_watcher_event(monkeypatch, file_manager, test_logs: LogCollector) -> None:
+async def test_file_watcher_event(monkeypatch, file_manager, test_logs: LogCollector, asyncio_provider) -> None:
     test_logs.set_min_level(0)
-
-    file_manager.add_folder('tests-', Path('tests/'), name='d', priority=1)
 
     eb = Mock(EventBus)
     eb.post_event = Mock()
     eb.post_event.assert_not_called()
-    monkeypatch.setattr(HABApp.core, 'EventBus', eb, raising=False)
+
+    file_manager = FileManager(None, eb, asyncio_provider)
+
+    file_manager.add_folder('tests-', Path('tests/'), name='d', priority=1)
 
     path_instance = Mock()
     path_instance.is_dir = Mock(return_value=False)

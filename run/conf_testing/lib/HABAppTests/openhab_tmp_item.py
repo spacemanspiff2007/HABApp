@@ -4,10 +4,13 @@ from collections.abc import Generator
 from functools import wraps
 from time import monotonic
 from types import TracebackType
-from typing import Any, NotRequired, Self, TypedDict, Unpack
+from typing import Any, Final, NotRequired, Self, TypedDict, Unpack
 
 import HABApp
 from HABApp.core.asyncio import AsyncContextError, thread_context
+from HABApp.core.internals import ItemRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
 from HABApp.openhab.definitions.topics import TOPIC_ITEMS
 from HABApp.openhab.items import OpenhabItem
 
@@ -44,9 +47,10 @@ class OpenhabTmpItemBase:
         return self._name
 
     def _wait_until_item_exists(self) -> Generator[float, Any, Any]:
+        items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
         # wait max 1 sec for the item to be created
         stop = monotonic() + 1.5
-        while not HABApp.core.Items.item_exists(self.name):
+        while not items.item_exists(self.name):
             if monotonic() > stop:
                 msg = f'Item {self.name} was not found!'
                 raise TimeoutError(msg)
@@ -93,14 +97,14 @@ class OpenhabTmpItem(OpenhabTmpItemBase):
     def remove(self) -> None:
         if thread_context.get(None) is None:
             raise AsyncContextError(self.remove)
-        HABApp.openhab.interface_sync.remove_item(self.name)
+
+        HABAPP_PROVIDER.get_existing(OpenHabSyncInterface).remove_item(self.name)
 
     def _create(self, **kwargs: Unpack[ItemApiKwargs]) -> None:
         if thread_context.get(None) is None:
             raise AsyncContextError(self._create)
 
-        interface = HABApp.openhab.interface_sync
-        interface.create_item(self._type, self._name, **kwargs)
+        HABAPP_PROVIDER.get_existing(OpenHabSyncInterface).create_item(self._type, self._name, **kwargs)
 
     def create_item(self, **kwargs: Unpack[ItemApiKwargs]) -> OpenhabItem:
 
@@ -153,11 +157,10 @@ class AsyncOpenhabTmpItem(OpenhabTmpItemBase):
         return False
 
     async def remove(self) -> None:
-        await HABApp.openhab.interface_async.async_remove_item(self.name)
+        await HABAPP_PROVIDER.get_existing(OpenHabAsyncInterface).remove_item(self.name)
 
     async def _create(self, **kwargs: Unpack[ItemApiKwargs]) -> None:
-        interface = HABApp.openhab.interface_async
-        await interface.async_create_item(self._type, self._name, **kwargs)
+        await HABAPP_PROVIDER.get_existing(OpenHabAsyncInterface).create_item(self._type, self._name, **kwargs)
 
     async def create_item(self, **kwargs: Unpack[ItemApiKwargs]) -> OpenhabItem:
 

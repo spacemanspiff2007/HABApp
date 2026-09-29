@@ -1,17 +1,30 @@
-from collections.abc import Callable
-from typing import Any, Optional, TypeVar
+from __future__ import annotations
+
+from contextvars import ContextVar
+from functools import wraps
+from inspect import getmembers_static, iscoroutinefunction, isfunction
+from typing import TYPE_CHECKING, Any, Final
 
 from HABApp.core.errors import ContextBoundObjectIsAlreadyLinkedError, ContextBoundObjectIsAlreadyUnlinkedError
 
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from HABApp.rule_ctx import HABAppRuleContext
+
+
+_HABAPP_RULE_CTX: Final[ContextVar[HABAppRuleContext | None]] = ContextVar('_habapp_rule_ctx', default=None)
+
+
 class ContextBoundObj:
-    def __init__(self, parent_ctx: Optional['Context'], **kwargs: Any) -> None:
+    def __init__(self, parent_ctx: Context | None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self._parent_ctx = parent_ctx
+        self._parent_ctx: Context | None = parent_ctx
         if parent_ctx is not None:
             parent_ctx.add_obj(self)
 
-    def _ctx_link(self, parent_ctx: 'Context'):
+    def _ctx_link(self, parent_ctx: Context) -> None:
         assert isinstance(parent_ctx, Context)
         if self._parent_ctx is not None:
             raise ContextBoundObjectIsAlreadyLinkedError()
@@ -19,15 +32,12 @@ class ContextBoundObj:
         self._parent_ctx = parent_ctx
         parent_ctx.add_obj(self)
 
-    def _ctx_unlink(self):
-        if self._parent_ctx is None:
+    def _ctx_unlink(self) -> None:
+        if (parent := self._parent_ctx) is None:
             raise ContextBoundObjectIsAlreadyUnlinkedError()
 
-        self._parent_ctx.remove_obj(self)
         self._parent_ctx = None
-
-
-HINT_CONTEXT_BOUND_OBJ = TypeVar('HINT_CONTEXT_BOUND_OBJ', bound=ContextBoundObj)
+        parent.remove_obj(self)
 
 
 class Context:
@@ -42,7 +52,7 @@ class Context:
         assert isinstance(obj, ContextBoundObj)
         self.objs.remove(obj)
 
-    def link(self, obj: HINT_CONTEXT_BOUND_OBJ) -> HINT_CONTEXT_BOUND_OBJ:
+    def link[O: ContextBoundObj](self, obj: O) -> O:
         assert isinstance(obj, ContextBoundObj)
         # noinspection PyProtectedMember
         obj._ctx_link(self)
@@ -53,6 +63,56 @@ class Context:
 
 
 class ContextProvidingObj:
+    __slots__ = ('_habapp_ctx', )
+
     def __init__(self, context: Context | None = None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._habapp_ctx: Context = context
+
+
+def _wrap_with_rule_context[**P, R](func: Callable[P, R]) -> Callable[P, R]:
+    """Wrap a function so that ``_HABAPP_RULE_CTX`` is set while the function is running.
+
+    If the context is already set to the correct value (e.g. because we are already
+    running inside a method of the same rule) we don't set the context again
+    """
+
+    if iscoroutinefunction(func):
+        @wraps(func)
+        async def async_wrapper(self, *args: P.args, **kwargs: P.kwargs) -> R:
+            ctx: Final = getattr(self, '_habapp_ctx', None)
+            if _HABAPP_RULE_CTX.get() is ctx:
+                return await func(self, *args, **kwargs)
+
+            token: Final = _HABAPP_RULE_CTX.set(ctx)
+            try:
+                return await func(self, *args, **kwargs)
+            finally:
+                _HABAPP_RULE_CTX.reset(token)
+
+        async_wrapper._habapp_ctx_wrapper = True
+        return async_wrapper
+
+    @wraps(func)
+    def wrapper(self, *args: P.args, **kwargs: P.kwargs) -> R:
+        ctx: Final = getattr(self, '_habapp_ctx', None)
+        if _HABAPP_RULE_CTX.get() is ctx:
+            return func(self, *args, **kwargs)
+
+        token: Final = _HABAPP_RULE_CTX.set(ctx)
+        try:
+            return func(self, *args, **kwargs)
+        finally:
+            _HABAPP_RULE_CTX.reset(token)
+
+    wrapper._habapp_ctx_wrapper = True
+    return wrapper
+
+
+def wrap_methods_with_cls_context(cls: type) -> None:
+    # Wrap every function except ``__init__`` and functions that were already wrapped
+    # use getmembers_static because it skips staticmethod/classmethod
+    for name, value in getmembers_static(cls, predicate=isfunction):
+        if name == '__init__' or getattr(value, '_habapp_ctx_wrapper', False):
+            continue
+        setattr(cls, name, _wrap_with_rule_context(value))

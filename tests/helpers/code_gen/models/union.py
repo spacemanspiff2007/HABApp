@@ -1,11 +1,9 @@
 import re
+from typing import override
 
-from typing_extensions import override
-
+from tests.helpers.code_gen.models._base import BaseModel, BaseOperation
+from tests.helpers.code_gen.models._select import SelectInputType
 from tests.helpers.code_gen.module_context import ModuleContext
-
-from . import SelectInputType
-from ._base import BaseModel, BaseOperation
 
 
 ADAPTER_NAME_REGEX = re.compile('(?<=[a-z])([A-Z])')
@@ -36,7 +34,7 @@ class UnionOperation(BaseOperation):
         else:
             seps[-1] = ''
 
-        ret = [f'{union.name}: Final = {"Annotated[" if discriminator else "("}']
+        ret = [f'type {union.name} = {"Annotated[" if discriminator else "("}']
 
         for name, sep in zip(names, seps, strict=True):
             ret.append(f'    {name:s}{sep:s}')

@@ -1,22 +1,25 @@
+from unittest.mock import Mock
+
 from immutables import Map
 
+from HABApp.core.internals import EventBus
 from HABApp.core.types import Point
+from HABApp.openhab.item_factory import OhItemFactory
 from HABApp.openhab.items import CallItem, LocationItem
-from HABApp.openhab.map_items import map_item
 
 
-def test_call_set_value() -> None:
-    call = CallItem('my_call_item')
+def test_call_set_value(oh_interface) -> None:
+    call = CallItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value(('03,018', '2722720'))
     assert call.value == ('03,018', '2722720')
 
-    call = CallItem('my_call_item')
+    call = CallItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value(('a', 'b'))
     assert call.value == ('a', 'b')
 
 
-def test_call_post_update(websocket_events) -> None:
-    call = CallItem('my_call_item')
+def test_call_post_update(websocket_events, oh_interface) -> None:
+    call = CallItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
 
     call.oh_post_update(('asdf', ))
     websocket_events.assert_called_once('StringList', 'asdf', event='update')
@@ -28,8 +31,8 @@ def test_call_post_update(websocket_events) -> None:
     websocket_events.assert_called_once('StringList', r'a,0\,1', event='update')
 
 
-def test_call_map() -> None:
-    call = map_item(
+def test_call_map(item_factory: OhItemFactory) -> None:
+    call = item_factory.create_item(
         'my_call_item', 'Call', 'my_value', last_value='my_last_value',
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
@@ -42,7 +45,7 @@ def test_call_map() -> None:
     assert call.groups == frozenset()
     assert call.metadata == Map()
 
-    i = map_item(
+    i = item_factory.create_item(
         'my_call_item', 'Call', '03018,2722720', last_value=None,
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
@@ -55,18 +58,18 @@ def test_call_map() -> None:
     assert call.metadata == Map()
 
 
-def test_location_set_value() -> None:
-    call = LocationItem('my_location_item')
+def test_location_set_value(oh_interface) -> None:
+    call = LocationItem('my_location_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value((-10, 20))
     assert call.value == Point(-10, 20, None)
 
-    call = LocationItem('my_location_item')
+    call = LocationItem('my_location_item', event_bus=Mock(EventBus), interface=oh_interface)
     call.set_value((1, 2, 3.3))
     assert call.value == Point(1, 2, 3.3)
 
 
-def test_location_post_update(websocket_events) -> None:
-    call = LocationItem('my_call_item')
+def test_location_post_update(websocket_events, oh_interface) -> None:
+    call = LocationItem('my_call_item', event_bus=Mock(EventBus), interface=oh_interface)
 
     call.oh_post_update((45, -60))
     websocket_events.assert_called_once('Point', '45,-60', event='update')
@@ -75,8 +78,8 @@ def test_location_post_update(websocket_events) -> None:
     websocket_events.assert_called_once('Point', '-30,179,78.901', event='update')
 
 
-def test_location_map() -> None:
-    call = map_item(
+def test_location_map(item_factory: OhItemFactory) -> None:
+    call = item_factory.create_item(
         'my_call_item', 'Location', '52.518705,13.376072', last_value='52.5,13.3',
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
@@ -89,7 +92,7 @@ def test_location_map() -> None:
     assert call.groups == frozenset()
     assert call.metadata == Map()
 
-    i = map_item(
+    i = item_factory.create_item(
         'my_call_item', 'Location', '52.518705,13.376072,43', last_value=None,
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )

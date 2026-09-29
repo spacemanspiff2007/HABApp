@@ -1,8 +1,8 @@
-from .helper import convert_to_oh_str, map_null_str
+from ._connection import OhClientSession
+from .interface_async import OpenHabAsyncInterface
+from .interface_sync import OpenHabSyncInterface
 
 
 # isort: split
 
-from .handler import HANDLER, delete, get, post, put
-
-# isort: split
+from .handler import ConnectionHandler

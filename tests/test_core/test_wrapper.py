@@ -6,16 +6,21 @@ import aiohttp
 import pytest
 
 import HABApp
+from HABApp.core.internals import EventBus
+from HABApp.core.provider import HabAppObjProvider
 from HABApp.core.wrapper import ExceptionToHABApp, ignore_exception
 
 
 log = Mock()
 
 
-@pytest.fixture()
+@pytest.fixture
 def p_mock(monkeypatch):
-    m = Mock()
-    monkeypatch.setattr(HABApp.core.wrapper, 'post_event', m)
+    eb_mock = Mock(EventBus)
+    eb_mock.post_event = m = Mock()
+    provider = Mock(HabAppObjProvider)
+    provider.get_existing = Mock(return_value=eb_mock)
+    monkeypatch.setattr(HABApp.core.wrapper, 'HABAPP_PROVIDER', provider)
     return m
 
 

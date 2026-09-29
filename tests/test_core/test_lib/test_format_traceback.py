@@ -1,15 +1,19 @@
 import logging
 from pathlib import Path
+from typing import Final
 
 import pytest
 from easyconfig import create_app_config
 from pydantic import BaseModel
 
 import HABApp
-from HABApp.core.const.const import PYTHON_312, PYTHON_313
+from HABApp.core.const.const import PYTHON_313, PYTHON_314
 from HABApp.core.const.json import dump_json, load_json
+from HABApp.core.internals.item_registry import ItemRegistry
+from HABApp.core.items import Item
 from HABApp.core.lib import format_exception
 from HABApp.core.lib.exceptions.format_frame import SUPPRESSED_HABAPP_PATHS, is_suppressed_habapp_file
+from HABApp.core.provider import HABAPP_PROVIDER
 from tests.helpers.traceback import remove_dyn_parts_from_traceback
 
 
@@ -64,9 +68,7 @@ def func_test_assert_none(a: str | None = None, b: str | None = None, c: str | i
     print(CONFIGURATION)
 
 
-@pytest.mark.skipif(
-    PYTHON_313 or (not PYTHON_312 and not PYTHON_313),
-    reason='New traceback from python 3.11 and 3.12')
+@pytest.mark.skipif(PYTHON_313 or PYTHON_314, reason='New traceback from python 3.12')
 def test_exception_expression_remove_py_311_312() -> None:
     log.setLevel(logging.WARNING)
     msg = exec_func(func_test_assert_none)
@@ -162,31 +164,18 @@ ZeroDivisionError: division by zero'''
 
 
 def func_ir() -> None:
-
-    from HABApp.core.items import Item
-    Items = HABApp.core.Items
-
-    Items.add_item(Item('asdf'))
-    Items.get_item('1234')
-
-
-@pytest.fixture
-def _setup_ir(clean_objs, monkeypatch, ir, eb):
-
-    from HABApp.core.internals.proxy import ConstProxyObj
-    assert isinstance(HABApp.core.Items, ConstProxyObj)
-    assert isinstance(HABApp.core.EventBus, ConstProxyObj)
-
-    monkeypatch.setattr(HABApp.core, 'Items', ir)
-    monkeypatch.setattr(HABApp.core, 'EventBus', eb)
-
-    yield
+    items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+    items.get_item('1234')
 
 
 @pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
-def test_skip_objs(_setup_ir) -> None:
+def test_skip_objs(ir) -> None:
+    """Checks that the dict with all the items is not shown in the traceback"""
     log.setLevel(logging.WARNING)
     msg = exec_func(func_ir)
+    print('\n\n-')
+    print(msg)
+    print('\n\n')
     assert msg == r'''
 File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 --------------------------------------------------------------------------------
@@ -202,10 +191,12 @@ File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 File "test_core/test_lib/test_format_traceback.py", line x in func_ir
 --------------------------------------------------------------------------------
      x | def func_ir() -> None:
-     x |     from HABApp.core.items import Item
-     x |     Items = HABApp.core.Items
-     x |     Items.add_item(Item('asdf'))
--->  x |     Items.get_item('1234')
+     x |     items: Final = HABAPP_PROVIDER.get_existing(ItemRegistry)
+-->  x |     items.get_item('1234')
+   ------------------------------------------------------------
+     HABAPP_PROVIDER = <HABApp.core.provider.provider.HabAppObjProvider object at 0xAAAAAAAAAAAAAAAA>
+     items = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
 
 File "internals/item_registry/item_registry.py", line x in get_item
 --------------------------------------------------------------------------------
@@ -216,6 +207,7 @@ File "internals/item_registry/item_registry.py", line x in get_item
 -->  x |         raise ItemNotFoundException(name) from None
    ------------------------------------------------------------
      name = '1234'
+     self = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
    ------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -224,7 +216,7 @@ Traceback (most recent call last):
     func()
     ~~~~^^
   File "test_core/test_lib/test_format_traceback.py", line x, in func_ir
-    Items.get_item('1234')
+    items.get_item('1234')
     ~~~~~~~~~~~~~~^^^^^^^^
   File "internals/item_registry/item_registry.py", line x, in get_item
     raise ItemNotFoundException(name) from None
@@ -255,7 +247,9 @@ def test_multiple_statements() -> None:
     print('\n\n-')
     print(msg)
     print('\n\n')
-    assert msg == r'''
+    assert (
+        msg
+        == r'''
 File "test_core/test_lib/test_format_traceback.py", line x in exec_func
 --------------------------------------------------------------------------------
      x | def exec_func(func) -> str:
@@ -301,6 +295,70 @@ Traceback (most recent call last):
   File "test_core/test_lib/test_format_traceback.py", line x, in multiline_obj_name
     raise ValueError()
 ValueError'''
+    )
+
+
+def _test_item_registry() -> None:
+
+    ir = ItemRegistry()
+    ir.add_item(Item('asdf', event_bus=None))
+    ir.add_item(Item('1324', event_bus=None))
+    ir.get_item('45678')
+
+
+@pytest.mark.skipif(not PYTHON_313, reason='New traceback from python 3.13')
+def test_omit_items(ir) -> None:
+    log.setLevel(logging.WARNING)
+    msg = exec_func(_test_item_registry)
+    print('\n\n-')
+    print(msg)
+    print('\n\n')
+    assert msg == r'''
+File "test_core/test_lib/test_format_traceback.py", line x in exec_func
+--------------------------------------------------------------------------------
+     x | def exec_func(func) -> str:
+     x |     try:
+-->  x |         func()
+     x |     except Exception as e:
+   ------------------------------------------------------------
+     e = ItemNotFoundException('Item 45678 does not exist!')
+     func = <function _test_item_registry at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "test_core/test_lib/test_format_traceback.py", line x in _test_item_registry
+--------------------------------------------------------------------------------
+     x | def _test_item_registry() -> None:
+     x |     ir = ItemRegistry()
+     x |     ir.add_item(Item('asdf', event_bus=None))
+     x |     ir.add_item(Item('1324', event_bus=None))
+-->  x |     ir.get_item('45678')
+   ------------------------------------------------------------
+     ir = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+File "internals/item_registry/item_registry.py", line x in get_item
+--------------------------------------------------------------------------------
+     x | def get_item(self, name: str) -> ItemRegistryItem:
+     x |     try:
+     x |         return self._items[name]
+     x |     except KeyError:
+-->  x |         raise ItemNotFoundException(name) from None
+   ------------------------------------------------------------
+     name = '45678'
+     self = <HABApp.core.internals.item_registry.item_registry.ItemRegistry object at 0xAAAAAAAAAAAAAAAA>
+   ------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_core/test_lib/test_format_traceback.py", line x, in exec_func
+    func()
+    ~~~~^^
+  File "test_core/test_lib/test_format_traceback.py", line x, in _test_item_registry
+    ir.get_item('45678')
+    ~~~~~~~~~~~^^^^^^^^^
+  File "internals/item_registry/item_registry.py", line x, in get_item
+    raise ItemNotFoundException(name) from None
+HABApp.core.errors.ItemNotFoundException: Item 45678 does not exist!'''
 
 
 def test_habapp_regex(pytestconfig):

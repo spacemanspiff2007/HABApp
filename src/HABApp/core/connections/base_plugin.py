@@ -1,19 +1,17 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any, Final, Generic, TypeVar
-
-from HABApp.core.lib import SingleTask
+from typing import TYPE_CHECKING, Any, Final
 
 
 if TYPE_CHECKING:
-    from .base_connection import BaseConnection
-    from .plugin_callback import PluginCallbackHandler
+    from collections.abc import Callable, Coroutine
 
-T = TypeVar('T', bound='BaseConnection')
+    from HABApp.core.connections.base_connection import BaseConnection
+    from HABApp.core.connections.plugin_callback import PluginCallbackHandler
+    from HABApp.core.lib.asyncio import AsyncioProvider
 
 
-class BaseConnectionPlugin(Generic[T]):
+class BaseConnectionPlugin[T: BaseConnection]:
     def __init__(self, name: str | None = None) -> None:
         super().__init__()
 
@@ -30,11 +28,11 @@ class BaseConnectionPlugin(Generic[T]):
         pass
 
 
-class BaseConnectionPluginConnectedTask(BaseConnectionPlugin[T]):
-    def __init__(self, task_coro: Callable[[], Awaitable[Any]],
-                 task_name: str, name: str | None = None) -> None:
+class BaseConnectionPluginConnectedTask[T: BaseConnection](BaseConnectionPlugin[T]):
+    def __init__(self, task_coro: Callable[[], Coroutine[Any, Any, Any]], *,
+                 task_name: str, name: str | None = None, asyncio_provider: AsyncioProvider) -> None:
         super().__init__(name)
-        self.task: Final = SingleTask(task_coro, name=task_name)
+        self.task: Final = asyncio_provider.create_single_task(task_coro, name=task_name)
 
     async def on_connected(self) -> None:
         self.task.start()

@@ -1,10 +1,11 @@
-from typing import Literal
+from collections.abc import Generator
+from typing import Any, Literal
 
 import pytest
 
-from HABApp.openhab import items as items_module
 from HABApp.openhab.definitions.websockets import ItemCommandSendEvent, ItemStateSendEvent
 from HABApp.openhab.definitions.websockets import base as websocket_base_module
+from HABApp.openhab.item_factory import OhItemFactory
 
 
 class ValueCollector:
@@ -26,20 +27,19 @@ class ValueCollector:
 
 
 @pytest.fixture
-def websocket_events(monkeypatch) -> ValueCollector:
+def websocket_events(oh_interface) -> Generator[ValueCollector, Any, None]:
 
-    patched_name = 'send_websocket_event'
-    c = ValueCollector()
-
-    for name in dir(items_module):
-        if name.endswith('_item'):
-            _module = getattr(items_module, name)
-            if hasattr(_module, patched_name):
-                monkeypatch.setattr(_module, patched_name, c)
-
-    return c
+    v = ValueCollector()
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(oh_interface, '_send_websocket_event', v)
+        yield v
 
 
 @pytest.fixture(autouse=True)
 def patch_event_id(monkeypatch) -> None:
     monkeypatch.setattr(websocket_base_module, 'MSG_CTR', 1)
+
+
+@pytest.fixture
+def item_factory() -> OhItemFactory:
+    return OhItemFactory(None, None, None)

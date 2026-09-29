@@ -1,22 +1,20 @@
 from __future__ import annotations
 
 import logging
-import threading
-from typing import Final, TypeVar, overload
+from typing import Final, overload
 
+from HABApp.core.const.log import TOPIC_ITEMS
 from HABApp.core.errors import ItemAlreadyExistsError, ItemNotFoundException
 from HABApp.core.internals.item_registry import ItemRegistryItem
 
 
-ITEM_TYPE = TypeVar('ITEM_TYPE', bound=ItemRegistryItem)
-
-log = logging.getLogger('HABApp.Items')
+log: Final = logging.getLogger(TOPIC_ITEMS)
 
 
-# noinspection PyProtectedMember
 class ItemRegistry:
+    __slots__ = ('_items', )
+
     def __init__(self) -> None:
-        self._lock = threading.Lock()
         self._items: Final[dict[str, ItemRegistryItem]] = {}
 
     def item_exists(self, name: str | ItemRegistryItem) -> bool:
@@ -36,31 +34,33 @@ class ItemRegistry:
     def get_item_names(self) -> tuple[str, ...]:
         return tuple(self._items.keys())
 
-    def add_item(self, item: ITEM_TYPE) -> ITEM_TYPE:
+    def add_item[I: ItemRegistryItem](self, item: I) -> I:
         if not isinstance(item, ItemRegistryItem):
             msg = f'Item must be of type {ItemRegistryItem.__name__} not {type(item)}'
             raise TypeError(msg)
 
         name = item.name
 
-        with self._lock:
-            existing = self._items.get(name)
-            if existing is not None:
-                # adding the same item multiple times will not cause an exception
-                if existing is item:
-                    return item
+        existing = self._items.get(name)
+        if existing is not None:
+            # adding the same item multiple times will not cause an exception
+            if existing is item:
+                return item
 
-                # adding a new item with the same name raises an exception
-                raise ItemAlreadyExistsError(name)
+            # adding a new item with the same name raises an exception
+            raise ItemAlreadyExistsError(name)
 
-            self._items[name] = item
+        self._items[name] = item
 
         log.debug(f'Added {name} ({item.__class__.__name__})')
+
+        # noinspection PyProtectedMember
         item._on_item_added()
+
         return item
 
     @overload
-    def pop_item(self, name: ITEM_TYPE) -> ITEM_TYPE:
+    def pop_item[I: ItemRegistryItem](self, name: I) -> I:
         ...
 
     @overload
@@ -71,14 +71,16 @@ class ItemRegistry:
         if not isinstance(name, str):
             name = name.name
 
-        with self._lock:
-            try:
-                item = self._items.pop(name)
-            except KeyError:
-                raise ItemNotFoundException(name) from None
+        try:
+            item = self._items.pop(name)
+        except KeyError:
+            raise ItemNotFoundException(name) from None
 
         log.debug(f'Removed {name} ({item.__class__.__name__})')
+
+        # noinspection PyProtectedMember
         item._on_item_removed()
+
         return item
 
     def __bool__(self) -> bool:

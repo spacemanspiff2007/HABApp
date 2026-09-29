@@ -10,7 +10,7 @@ from easyconfig.yaml import yaml_safe as _yaml_safe
 from HABApp.config.config import CONFIG
 from HABApp.config.errors import AbsolutePathExpected
 from HABApp.config.logging import rotate_file
-from HABApp.core.const.const import PYTHON_312, PYTHON_313
+from HABApp.core.const.const import PYTHON_313, PYTHON_314
 from HABApp.core.const.log import TOPIC_EVENTS
 
 from .buffered_logger import BufferedLogger
@@ -84,7 +84,13 @@ def load_logging_file(path: Path) -> dict[str, Any] | None:
 
 
 def rotate_handler_files(handlers_cfg: dict) -> None:
-    for cfg in handlers_cfg.values():
+    for name, cfg in handlers_cfg.items():
+
+        # close handler so we can rotate the file without issues
+        handler: logging.Handler | None = logging._handlers.get(name)
+        if handler is not None:
+            handler.close()
+
         if (filename := cfg.get('filename')) is None:
             continue
         if (backup_count := cfg.get('backupCount')) is None:
@@ -131,12 +137,12 @@ def inject_queue_handler(handlers_cfg: dict, loggers_cfg: dict, log: BufferedLog
 
     for handler_name, buffered_handler_name in buffered_handlers.items():
         # https://github.com/python/cpython/issues/124653
-        if PYTHON_313:
-            q: SimpleQueue = SimpleQueue() if sys.version_info[:3] > (3, 13, 0) else Queue()
-        elif PYTHON_312:
-            q = SimpleQueue() if sys.version_info[:3] > (3, 12, 7) else Queue()
-        else:
+        if PYTHON_314:
             q: SimpleQueue = SimpleQueue()
+        elif PYTHON_313:
+            q: SimpleQueue = SimpleQueue() if sys.version_info[:3] > (3, 13, 0) else Queue()
+        else:
+            q = SimpleQueue() if sys.version_info[:3] > (3, 12, 7) else Queue()
         handlers_cfg[buffered_handler_name] = {'class': 'logging.handlers.QueueHandler', 'queue': q}
 
         qh = HABAppQueueHandler(q, handler_name, f'LogBuffer{handler_name:s}')

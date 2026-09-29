@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Final
 
 from HABAppTests import ItemWaiter, TestBaseRule
 
-from HABApp.core.connections import Connections
 from HABApp.openhab.items import NumberItem
 
 
@@ -79,11 +78,7 @@ class TestInMemory(TestPersistenceBase):
 
     def __init__(self) -> None:
         super().__init__('inmemory', 'InMemoryItem')
-
-        if Connections.get('openhab').context.version >= (4, 1):
-            self.add_test('InMemory', self.test_in_memory)
-        else:
-            print('Skip "TestInMemory" because of no InMemoryDb')
+        self.add_test('InMemory', self.test_in_memory)
 
     def test_in_memory(self) -> None:
         now = datetime.now().replace(microsecond=0) + timedelta(seconds=1)

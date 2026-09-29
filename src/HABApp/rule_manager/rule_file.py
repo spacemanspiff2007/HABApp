@@ -3,10 +3,15 @@ from __future__ import annotations
 import collections
 import logging
 import runpy
+from asyncio import AbstractEventLoop, get_event_loop
 from typing import TYPE_CHECKING
 
 import HABApp
-from HABApp.core.internals import get_current_context, wrap_func
+from HABApp.core.internals import EventBus, ExecutorFactory, ItemRegistry
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.mqtt import MqttAsyncInterface, MqttInterface
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface, OpenHabSyncInterface
+from HABApp.rule.interfaces.http_client import HABAppHttpClient
 from HABApp.rule.rule_hook import HABAppRuleHook
 
 
@@ -44,7 +49,7 @@ class RuleFile:
 
     async def check_all_rules(self) -> None:
         for rule in self.rules.values():
-            await get_current_context(rule).check_rule()
+            await rule._habapp_ctx.check_rule()
 
     async def unload(self) -> None:
 
@@ -54,7 +59,7 @@ class RuleFile:
 
         # unload all registered callbacks
         for rule in self.rules.values():
-            await get_current_context(rule).unload_rule()
+            await rule._habapp_ctx.unload_rule()
 
         log.debug(f'File {self.name} successfully unloaded!')
         return None
@@ -63,9 +68,21 @@ class RuleFile:
         tb.insert(0, f'Could not load {self.path}!')
         return [line.replace('<module>', self.path.name) for line in tb]
 
-    def create_rules(self, created_rules: list) -> None:
+    def create_rules(self, created_rules: list,  # noqa: PLR0913
+                     loop: AbstractEventLoop, async_http_client: HABAppHttpClient,
+                     item_registry: ItemRegistry, event_bus: EventBus,
+                     executor_factory: ExecutorFactory,
+                     mqtt_interface_sync: MqttInterface, mqtt_interface_async: MqttAsyncInterface,
+                     oh_interface_sync: OpenHabSyncInterface, oh_interface_async: OpenHabAsyncInterface
+                     ) -> None:
 
-        rule_hook = HABAppRuleHook(created_rules.append, self.suggest_rule_name, self.rule_manager.runtime, self)
+        rule_hook = HABAppRuleHook(
+            created_rules.append, self.suggest_rule_name,
+            self.rule_manager, self, loop=loop, async_http_client=async_http_client,
+            item_registry=item_registry, event_bus=event_bus, executor_factory=executor_factory,
+            mqtt_interface_sync=mqtt_interface_sync, mqtt_interface_async=mqtt_interface_async,
+            oh_interface_sync=oh_interface_sync, oh_interface_async=oh_interface_async
+        )
 
         # It seems like python 3.8 doesn't allow path like objects anymore:
         # https://github.com/spacemanspiff2007/HABApp/issues/111
@@ -79,15 +96,26 @@ class RuleFile:
         ign = HABApp.core.wrapper.ExceptionToHABApp(logger=log)
         ign.proc_tb = self.__process_tc
 
+        executor_factory = await HABAPP_PROVIDER.get(ExecutorFactory)
+
         with ign:
-            await wrap_func(self.create_rules).async_run(created_rules)
+            await executor_factory.create(self.create_rules).execute(
+                created_rules,
+                loop=get_event_loop(), async_http_client=await HABAPP_PROVIDER.get(HABAppHttpClient),
+                item_registry=await HABAPP_PROVIDER.get(ItemRegistry), event_bus=await HABAPP_PROVIDER.get(EventBus),
+                executor_factory=executor_factory,
+                oh_interface_sync=await HABAPP_PROVIDER.get(OpenHabSyncInterface),
+                oh_interface_async=await HABAPP_PROVIDER.get(OpenHabAsyncInterface),
+                mqtt_interface_sync=await HABAPP_PROVIDER.get(MqttInterface),
+                mqtt_interface_async=await HABAPP_PROVIDER.get(MqttAsyncInterface),
+            )
 
         if ign.raised_exception:
             # unload all rule instances which might have already been created otherwise they might
             # still listen to events and do stuff
             for rule in created_rules:
                 with ign:
-                    await get_current_context(rule).unload_rule()
+                    await rule._habapp_ctx.unload_rule()
             return False
 
         if not created_rules:
@@ -112,7 +140,7 @@ class RuleFile:
             # still listen to events and do stuff
             for rule in created_rules:
                 with ign:
-                    await get_current_context(rule).unload_rule()
+                    await rule._habapp_ctx.unload_rule()
             return False
 
         return True

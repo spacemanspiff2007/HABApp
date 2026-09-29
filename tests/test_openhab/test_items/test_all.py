@@ -1,10 +1,15 @@
+import inspect
 from datetime import datetime
 from typing import Any, Literal
+from unittest.mock import Mock
 
 import pytest
 
+from HABApp.core.internals import EventBus
 from HABApp.core.items import Item
 from HABApp.core.types import HSB, Point
+from HABApp.openhab.item_factory import OhItemFactory
+from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.openhab.items import (
     CallItem,
     ColorItem,
@@ -22,51 +27,66 @@ from HABApp.openhab.items import (
     Thing,
 )
 from HABApp.openhab.items.base_item import OpenhabItem
-from HABApp.openhab.map_items import _items as item_dict
 from HABApp.openhab.types import RawType, StringList
 from tests.helpers.inspect import assert_same_signature, check_class_annotations, get_ivars_from_docstring
 
 
-@pytest.mark.parametrize('cls', tuple(c for c in item_dict.values()) + (Thing, ))
-def test_set_name(cls) -> None:
-
-    # test that we can set the name properly
-    c = cls('asdf')
-    assert c.name == 'asdf'
-
-    # this test ensures that all openHAB items inherit from OpenhabItem
-    if cls is not Thing:
-        assert isinstance(c, OpenhabItem)
+def _get_oh_classes() -> tuple[type[OpenhabItem], ...]:
+    return tuple(c for c in OhItemFactory(None, None, None)._items.values())
 
 
-@pytest.mark.parametrize('cls', (c for c in item_dict.values()))
+@pytest.fixture(params=_get_oh_classes())
+def cls(request):
+    return request.param
+
+
+@pytest.fixture
+def cls_instance(cls, eb, oh_interface):
+    kwargs = {'event_bus': eb, 'interface': oh_interface}
+    if issubclass(cls, GroupItem):
+        kwargs['registry_handler'] = Mock(OhItemRegistryHandler)
+    return cls('item_name', **kwargs)
+
+
+def test_name(cls_instance) -> None:
+    assert cls_instance.name == 'item_name'
+
+
+def test_thing_name(oh_interface) -> None:
+    t = Thing('thing_name', interface=oh_interface)
+    assert t.name == 'thing_name'
+
+
+def test_inheritance(cls_instance) -> None:
+    # all items must inherit from OpenhabItem
+    assert isinstance(cls_instance, OpenhabItem)
+
+
 def test_conditional_function_call_signature(cls) -> None:
-    assert_same_signature(Item.post_value_if, cls.post_value_if)
-    assert_same_signature(Item.post_value_if, cls.oh_post_update_if)
+    p = [inspect.Parameter('source', inspect.Parameter.KEYWORD_ONLY, default=None, annotation=str | None)]
+
+    assert_same_signature(Item.post_value_if, cls.post_value_if, drop_params=p)
+    assert_same_signature(Item.post_value_if, cls.oh_post_update_if, drop_params=p)
 
 
-@pytest.mark.parametrize('cls', item_dict.values())
-def test_refresh_command(cls: type[OpenhabItem], websocket_events) -> None:
-    cls('name').oh_send_command('REFRESH')
+def test_refresh_command(cls_instance: OpenhabItem, websocket_events) -> None:
+    cls_instance.oh_send_command('REFRESH')
     websocket_events.assert_called_once('Refresh', 'REFRESH', event='command')
-    cls('name').command_value('REFRESH')
+    cls_instance.command_value('REFRESH')
     websocket_events.assert_called_once('Refresh', 'REFRESH', event='command')
 
 
-@pytest.mark.parametrize('cls', item_dict.values())
-def test_null_update(cls: type[OpenhabItem], websocket_events) -> None:
-    cls('name').oh_post_update(None)
+def test_null_update(cls_instance: OpenhabItem, websocket_events) -> None:
+    cls_instance.oh_post_update(None)
     websocket_events.assert_called_once('UnDef', 'NULL', event='update')
 
 
-@pytest.mark.parametrize('cls', item_dict.values())
 def test_item_name_set_in_oh_value(cls: type[OpenhabItem]) -> None:
     assert cls._update_to_oh._name == cls.__name__
     assert cls._command_to_oh._name == cls.__name__
 
 
-@pytest.mark.parametrize('cls', (c for c in item_dict.values()))
-def test_doc_ivar(cls) -> None:
+def test_doc_ivar(cls, oh_interface) -> None:
 
     correct_hints = {
         StringItem: {'value': str},
@@ -105,16 +125,23 @@ def test_doc_ivar(cls) -> None:
     class_vars = check_class_annotations(
         cls, correct_hints.get(cls),
         init_alias=init_alias.get(cls), init_missing=init_missing.get(cls, []),
-        annotations_missing=True, ignore=('_update_to_oh', '_command_to_oh', '_state_from_oh_str')
+        annotations_missing=True,
+        ignore=(
+            '_update_to_oh', '_command_to_oh', '_state_from_oh_str',
+            # class specific
+            'registry_handler', 'event_bus', 'interface',
+        )
     )
 
     # test that the class has the corresponding attribute
-    create_with = {'name': 'test'}
+    create_with = {'name': 'test', 'event_bus': Mock(EventBus), 'interface': oh_interface}
 
     if cls is ColorItem:
         create_with['initial_value'] = HSB(0, 0, 0)
     if cls is ImageItem:
         create_with['initial_value'] = RawType.create('image/png', b'\x01')
+    if cls is GroupItem:
+        create_with['registry_handler'] = Mock(OhItemRegistryHandler)
 
     obj = cls(**create_with)
     for name in class_vars:
@@ -130,4 +157,5 @@ def test_doc_ivar(cls) -> None:
     target_vars = get_ivars_from_docstring(OpenhabItem)
     target_vars.pop('value')
     target_vars.pop('last_value')
+
     assert target_vars == class_vars

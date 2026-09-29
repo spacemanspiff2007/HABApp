@@ -1,27 +1,25 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Final, TypeVar
+from typing import TYPE_CHECKING, Any, Final
 
 import HABApp
 from HABApp.core.connections import BaseConnection
 from HABApp.core.connections._definitions import connection_log
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
-
-T = TypeVar('T', bound=BaseConnection)
+    from collections.abc import AsyncGenerator, Generator
 
 
 class ConnectionManager:
     def __init__(self) -> None:
         self.connections: dict[str, BaseConnection] = {}
 
-    def add(self, connection: T) -> T:
+    def add[T: BaseConnection](self, connection: T) -> T:
         if connection.name in self.connections:
-            msg = f'Connection {connection.name:s} already exists!'
+            msg = f'Connection {connection.name:s} does already exist!'
             raise ValueError(msg)
 
         self.connections[connection.name] = connection
@@ -56,4 +54,8 @@ class ConnectionManager:
         return f'<{self.__class__.__name__}>'
 
 
-connection_manager: Final = ConnectionManager()
+@HABAPP_PROVIDER.register
+async def provide_manager() -> AsyncGenerator[ConnectionManager, Any]:
+    obj: Final = ConnectionManager()
+    yield obj
+    await obj.on_application_shutdown()

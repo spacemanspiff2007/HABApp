@@ -1,14 +1,12 @@
 
 from types import ModuleType
-from typing import Any
+from typing import Any, override
 
 from pydantic import model_validator
-from typing_extensions import override
 
+from tests.helpers.code_gen.models._base import BaseOperation
+from tests.helpers.code_gen.models._select import SelectInputType
 from tests.helpers.code_gen.module_context import ModuleContext
-
-from . import SelectInputType
-from ._base import BaseOperation
 
 
 class AllModel(BaseOperation):

@@ -1,0 +1,123 @@
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING, Any, Final
+
+from immutables import Map
+from whenever import Instant
+
+from HABApp.core.internals import EventBus
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.core.wrapper import process_exception
+from HABApp.openhab.connection.handler import OpenHabSyncInterface
+from HABApp.openhab.items import (
+    CallItem,
+    ColorItem,
+    ContactItem,
+    DatetimeItem,
+    DimmerItem,
+    GroupItem,
+    ImageItem,
+    LocationItem,
+    NumberItem,
+    PlayerItem,
+    RollershutterItem,
+    StringItem,
+    SwitchItem,
+    Thing,
+)
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
+
+
+if TYPE_CHECKING:
+    from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
+
+
+log: Final = logging.getLogger('HABApp.openhab.items')
+
+
+@HABAPP_PROVIDER.register
+class OhItemFactory:
+    __slots__ = ('_event_bus', '_interface', '_items', '_registry_handler')
+
+    def __init__(self, registry_handler: OhItemRegistryHandler, interface: OpenHabSyncInterface,
+                 event_bus: EventBus) -> None:
+
+        self._registry_handler: Final = registry_handler
+        self._event_bus: Final = event_bus
+        self._interface: Final = interface
+
+        self._items: Final[dict[str, type[OpenhabItem]]] = {
+            'String': StringItem,
+            'Number': NumberItem,
+            'Switch': SwitchItem,
+            'Contact': ContactItem,
+            'Rollershutter': RollershutterItem,
+            'Dimmer': DimmerItem,
+            'DateTime': DatetimeItem,
+            'Color': ColorItem,
+            'Image': ImageItem,
+            'Group': GroupItem,
+            'Player': PlayerItem,
+            'Location': LocationItem,
+            'Call': CallItem,
+        }
+
+    def create_item(self, name: str, type: str, value: str | None, last_value: str | None,
+                    label: str | None, tags: frozenset[str],
+                    groups: frozenset[str], metadata: dict[str, dict[str, Any]] | None,
+                    last_state_update: int | None = None, last_state_change: int | None = None
+                    ) -> OpenhabItem | None:
+        try:
+            assert isinstance(type, str)
+            assert value is None or isinstance(value, str)
+
+            kwargs = {'event_bus': self._event_bus, 'interface': self._interface}
+
+            # map Metadata
+            if metadata is not None:
+                meta = Map({k: MetaData(v['value'], Map(v.get('config', {}))) for k, v in metadata.items()})
+            else:
+                meta = Map()
+
+            # Quantity types are like this: Number:Temperature and have a unit set: "12.3 °C".
+            # We have to remove the dimension from the type and remove the unit from the value
+            if type.startswith('Number:'):
+                type, dimension = type.split(':')
+                kwargs['dimension'] = dimension
+
+                # Show warning
+                # https://github.com/spacemanspiff2007/HABApp/issues/383
+                if 'unit' not in meta:
+                    log.warning(f'Item {name:s} is a UoM item but "unit" is not found in item metadata')
+
+            if (cls := self._items.get(type)) is None:
+                msg = f'Unknown openHAB type: {type} for {name}'
+                raise ValueError(msg)  # noqa: TRY301
+
+            # Group items need the registry handler
+            if type.startswith('Group'):
+                kwargs['registry_handler'] = self._registry_handler
+
+            if value is not None:
+                value = cls._state_from_oh_str_or_none(name, value, log.warning)
+            if last_value is not None:
+                last_value = cls._state_from_oh_str_or_none(name, last_value, log.warning)
+
+            obj: Final = cls(
+                name, initial_value=value, last_value=last_value,
+                label=label, tags=tags, groups=groups, metadata=meta, **kwargs
+            )
+
+            if last_state_update is not None:
+                obj._last_update.set(Instant.from_timestamp_millis(last_state_update), events=False)
+            if last_state_change is not None:
+                obj._last_change.set(Instant.from_timestamp_millis(last_state_change), events=False)
+        except Exception as e:
+            process_exception(self.create_item, e, logger=log)
+            return None
+
+        return obj
+
+    def create_thing(self, name: str) -> Thing:
+        return Thing(name, interface=self._interface)

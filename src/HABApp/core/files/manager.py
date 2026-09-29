@@ -5,7 +5,7 @@ import logging
 from asyncio import sleep
 from pathlib import Path
 from time import monotonic
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from pydantic import ValidationError
 
@@ -14,16 +14,17 @@ from HABApp.core.const.topics import TOPIC_FILES
 from HABApp.core.files.file import HABAppFile
 from HABApp.core.files.file_properties import get_file_properties
 from HABApp.core.files.name_builder import FileNameBuilder
-from HABApp.core.lib import SingleTask
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
+    from collections.abc import AsyncGenerator, Awaitable, Callable
     from re import Pattern
 
     from HABApp.core.events.habapp_events import RequestFileLoadEvent, RequestFileUnloadEvent
     from HABApp.core.files.watcher import HABAppFileWatcher
-
+    from HABApp.core.internals import EventBus, ExecutorFactory
+    from HABApp.core.lib.asyncio import AsyncioProvider
 
 log = logging.getLogger('HABApp.files')
 
@@ -56,7 +57,10 @@ class FileTypeHandler:
 
 
 class FileManager:
-    def __init__(self, watcher: HABAppFileWatcher | None) -> None:
+    def __init__(self, watcher: HABAppFileWatcher, event_bus: EventBus, asyncio_provider: AsyncioProvider) -> None:
+        self._watcher: Final = watcher
+        self._event_bus: Final = event_bus
+
         self._lock = asyncio.Lock()
         self._files: Final[dict[str, HABAppFile]] = {}
 
@@ -66,8 +70,7 @@ class FileManager:
         self._file_names: Final = FileNameBuilder()
         self._file_handlers: tuple[FileTypeHandler, ...] = ()
 
-        self._task: Final = SingleTask(self._load_file_task, name='file load worker')
-        self._watcher: Final = watcher
+        self._task: Final = asyncio_provider.create_single_task(self._load_file_task, name='file load worker')
 
         self._event_received: bool = False
 
@@ -256,7 +259,7 @@ class FileManager:
             return None
 
         if not obj.is_file():
-            HABApp.core.EventBus.post_event(TOPIC_FILES, HABApp.core.events.habapp_events.RequestFileUnloadEvent(name))
+            self._event_bus.post_event(TOPIC_FILES, HABApp.core.events.habapp_events.RequestFileUnloadEvent(name))
             return None
 
         if existing := self.get_file(name):
@@ -265,20 +268,34 @@ class FileManager:
                 log.debug(f'Skip file system event because file {name:s} did not change')
                 return None
 
-        HABApp.core.EventBus.post_event(TOPIC_FILES, HABApp.core.events.habapp_events.RequestFileLoadEvent(name))
+        self._event_bus.post_event(TOPIC_FILES, HABApp.core.events.habapp_events.RequestFileLoadEvent(name))
         return None
 
-    def setup(self) -> None:
-        HABApp.core.EventBus.add_listener(
+    async def shutdown(self) -> None:
+        await self._task.wait()
+
+    def setup(self, executor_factory: ExecutorFactory) -> None:
+        self._event_bus.add_listener(
             HABApp.core.internals.EventBusListener(
-                TOPIC_FILES, HABApp.core.internals.wrap_func(self.event_load),
+                TOPIC_FILES, executor_factory.create(self.event_load),
                 HABApp.core.events.EventFilter(HABApp.core.events.habapp_events.RequestFileLoadEvent)
             )
         )
 
-        HABApp.core.EventBus.add_listener(
+        self._event_bus.add_listener(
             HABApp.core.internals.EventBusListener(
-                TOPIC_FILES, HABApp.core.internals.wrap_func(self.event_unload),
+                TOPIC_FILES, executor_factory.create(self.event_unload),
                 HABApp.core.events.EventFilter(HABApp.core.events.habapp_events.RequestFileUnloadEvent)
             )
         )
+
+
+@HABAPP_PROVIDER.register
+async def __get_file_manager(asyncio_provider: AsyncioProvider, event_bus: EventBus, watcher: HABAppFileWatcher,
+                             executor_factory: ExecutorFactory) -> AsyncGenerator[FileManager, Any]:
+    obj = FileManager(watcher, event_bus, asyncio_provider=asyncio_provider)
+    obj.setup(executor_factory)
+
+    yield obj
+
+    await obj.shutdown()

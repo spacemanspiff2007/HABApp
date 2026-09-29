@@ -55,7 +55,7 @@ class ConfigPlaceholder:
 
         p = Path(new_value)
         if not p.is_absolute():
-            p = CONFIG.loaded_file_path.parent / p
+            p = CONFIG.config_file_path.parent / p
         return p.resolve()
 
     def get_folder_path(self, value: str, *, must_exist: bool = True, add_as: str | None = None) -> Path:

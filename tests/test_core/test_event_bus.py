@@ -1,6 +1,6 @@
 from HABApp.core.events import ValueUpdateEvent
 from HABApp.core.events.filter import EventFilter, NoEventFilter, OrFilterGroup
-from HABApp.core.internals import EventBus, EventBusListener, wrap_func
+from HABApp.core.internals import EventBus, EventBusListener
 
 
 class TestEvent:
@@ -8,7 +8,7 @@ class TestEvent:
 
 
 def test_repr(sync_worker) -> None:
-    f = wrap_func(lambda x: x)
+    f = sync_worker.create(lambda x: x)
 
     listener = EventBusListener('test_name', f, NoEventFilter())
     assert listener.describe() == '"test_name" (filter=NoEventFilter())'
@@ -25,11 +25,11 @@ def test_str_event(sync_worker) -> None:
 
     def append_event(event) -> None:
         event_history1.append(event)
-    func1 = wrap_func(append_event)
+    func1 = sync_worker.create(append_event)
 
     def append_event2(event) -> None:
         event_history2.append(event)
-    func2 = wrap_func(append_event2)
+    func2 = sync_worker.create(append_event2)
 
     listener1 = EventBusListener('str_test', func1, NoEventFilter())
     eb.add_listener(listener1)
@@ -55,7 +55,7 @@ def test_multiple_events(sync_worker) -> None:
         event_history.append(event)
 
     listener = EventBusListener(
-        'test', wrap_func(append_event),
+        'test', sync_worker.create(append_event),
         OrFilterGroup(EventFilter(str), EventFilter(TestEvent)))
     eb.add_listener(listener)
 

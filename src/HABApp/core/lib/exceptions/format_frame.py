@@ -13,11 +13,16 @@ SUPPRESSED_HABAPP_PATHS = (
     # Wrapper which usually generates this traceback
     re.compile(r'[/\\]HABApp[/\\]core[/\\]wrapper.py'),
 
+    re.compile(r'[/\\]HABApp[/\\]testing[/\\]executor.py'),
+
     # Rule file loader
     re.compile(r'[/\\]HABApp[/\\]rule_manager[/\\]'),
 
     # Worker functions
-    re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]wrapped_function[/\\]'),
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]function_executor[/\\]'),
+
+    # context wrapper
+    re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]context[/\\]context.py'),
 
     # Item registry
     re.compile(r'[/\\]HABApp[/\\]core[/\\]internals[/\\]item_registry[/\\]'),
@@ -41,7 +46,7 @@ def is_lib_file(name: str) -> bool:
     return bool(name.startswith(PYTHON_INSTALLATION_PATHS))
 
 
-def format_frame_info(tb: list[str], frame_info: FrameInfo, is_last=False) -> bool:
+def format_frame_info(tb: list[str], frame_info: FrameInfo, *, is_last: bool = False) -> bool:
     filename = frame_info.filename
 
     # always skip system and python libraries

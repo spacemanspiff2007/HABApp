@@ -1,8 +1,12 @@
+from typing import Final
+
+import whenever
 from HABAppTests import EventWaiter, ItemWaiter, OpenhabTmpItem, TestBaseRule
 from immutables import Map
 
 from HABApp.core.events import ValueUpdateEventFilter
-from HABApp.openhab.interface_async import async_get_items
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.openhab.connection.handler import OpenHabAsyncInterface
 from HABApp.openhab.items import GroupItem, NumberItem, StringItem
 
 
@@ -20,6 +24,7 @@ class OpenhabItems(TestBaseRule):
 
         self.add_test('TestSmallValues', self.test_small_float_values)
         self.add_test('TestLastValue', self.test_last_value)
+        self.add_test('TestOhTimestampIsUsed', self.test_oh_timestamp_is_used)
 
         self.item_number = OpenhabTmpItem('Number')
         self.item_switch = OpenhabTmpItem('Switch')
@@ -65,7 +70,7 @@ class OpenhabItems(TestBaseRule):
         self.openhab.get_item(self.item_group.name)
 
     async def test_api_async(self) -> None:
-        await async_get_items()
+        await HABAPP_PROVIDER.get_existing(OpenHabAsyncInterface).get_items()
 
     def test_small_float_values(self) -> None:
         # https://github.com/spacemanspiff2007/HABApp/issues/425
@@ -99,29 +104,42 @@ class OpenhabItems(TestBaseRule):
         oh_item.modify()
         assert item.tags == set()
 
-    @OpenhabTmpItem.use('String', arg_name='oh_item')
+    @OpenhabTmpItem.use('String', arg_name='oh_item1')
+    @OpenhabTmpItem.use('String', arg_name='oh_item2')
     @OpenhabTmpItem.create('Group', 'group1')
     @OpenhabTmpItem.create('Group', 'group2')
-    def test_groups(self, oh_item: OpenhabTmpItem) -> None:
+    def test_groups(self, oh_item1: OpenhabTmpItem, oh_item2: OpenhabTmpItem) -> None:
         grp1 = GroupItem.get_item('group1')
         grp2 = GroupItem.get_item('group2')
 
         assert grp1.members == ()
         assert grp2.members == ()
 
-        oh_item.create_item(groups=['group1'])
+        oh_item1.create_item(groups=['group1'])
 
-        item = StringItem.get_item(oh_item.name)
-        assert item.groups == {'group1'}
-        assert grp1.members == (item, )
+        item1 = StringItem.get_item(oh_item1.name)
+        assert item1.groups == {'group1'}
+        assert grp1.members == (item1, )
 
-        oh_item.modify(groups=['group1', 'group2'])
-        assert item.groups == {'group1', 'group2'}
-        assert grp1.members == (item, )
-        assert grp2.members == (item, )
+        oh_item1.modify(groups=['group1', 'group2'])
+        assert item1.groups == {'group1', 'group2'}
+        assert grp1.members == (item1, )
+        assert grp2.members == (item1, )
 
-        oh_item.modify()
-        assert item.groups == set()
+        oh_item2.create_item(groups=['group1'])
+
+        item2 = StringItem.get_item(oh_item2.name)
+        assert item2.groups == {'group1', }
+        assert grp1.members == (item1, item2)
+        assert grp2.members == (item1, )
+
+        oh_item2.modify()
+        assert item2.groups == set()
+        assert grp1.members == (item1, )
+        assert grp2.members == (item1, )
+
+        oh_item1.modify()
+        assert item1.groups == set()
         assert grp1.members == ()
         assert grp2.members == ()
 
@@ -170,6 +188,33 @@ class OpenhabItems(TestBaseRule):
 
             for _ in range(3):
                 _send_and_check(3, None)
+
+    @OpenhabTmpItem.create('Number', arg_name='tmp_item')
+    def test_oh_timestamp_is_used(self, tmp_item: OpenhabTmpItem) -> None:
+        """This rule tests that the timestamp from openHAB is used to set the item time"""
+        item = NumberItem.get_item(tmp_item.name)
+
+        # we need a value, if we update from NULL the timestamps are missing
+        item.oh_post_update(0)
+        with ItemWaiter(item) as w:
+            w.wait_for_state(0)
+
+        # openHAB timestamps are ~20ms off so we have to round
+        ts_now: Final = whenever.Instant.now().round(
+            'millisecond', increment=10, mode='floor').subtract(milliseconds=10)
+        ts_past: Final = ts_now.subtract(hours=1)
+
+        with whenever.patch_current_time(ts_past, keep_ticking=False):
+            item.post_value(1)
+            assert item.last_update._instant == ts_past
+            assert item.last_change._instant == ts_past
+
+            item.oh_post_update(2)
+            with ItemWaiter(item) as w:
+                w.wait_for_state(2)
+
+            assert item.last_update._instant > ts_now
+            assert item.last_change._instant > ts_now
 
 
 OpenhabItems()

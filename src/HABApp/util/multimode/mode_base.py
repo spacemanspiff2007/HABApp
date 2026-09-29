@@ -20,7 +20,7 @@ class BaseMode(AutoContextBoundObj):
 
     def _set_mode_lower_prio(self, mode_lower_prio: BaseMode | None) -> None:
         assert isinstance(mode_lower_prio, BaseMode) or mode_lower_prio is None, type(mode_lower_prio)
-        self._lower_priority_mode = mode_lower_prio
+        self._mode_lower_prio = mode_lower_prio
 
     def calculate_value(self, lower_prio_value: Any) -> Any:
         raise NotImplementedError()

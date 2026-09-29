@@ -1,13 +1,12 @@
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Final
-
-from typing_extensions import override
+from typing import TYPE_CHECKING, Final, override
 
 from HABApp.core.const import MISSING
 from HABApp.core.const.const import _MissingType
 from HABApp.core.errors import InvalidItemValueError
 from HABApp.openhab.definitions.websockets.item_value_types import StringListTypeModel
-from HABApp.openhab.items.base_item import MetaData, OpenhabItem, OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items._event_builder import OutgoingCommandEvent, OutgoingStateEvent
+from HABApp.openhab.items.base_item import MetaData, OpenhabItem
 from HABApp.openhab.types import StringList
 
 
@@ -50,10 +49,10 @@ class CallItem(OpenhabItem):
         raise InvalidItemValueError.from_item(self, new_value)
 
     @override
-    def oh_post_update(self,
-                       value: tuple[str, ...] | list[str] | StringList | None | _MissingType = MISSING) -> None:
+    def oh_post_update(self, value: tuple[str, ...] | list[str] | StringList | _MissingType | None = MISSING, *,
+                       source: str | None = None) -> None:
 
         if isinstance(value, (tuple, list)):
-            return super().oh_post_update(StringList(value))
+            return super().oh_post_update(StringList(value), source=source)
 
-        return super().oh_post_update(value)
+        return super().oh_post_update(value, source=source)

@@ -1,24 +1,26 @@
 from datetime import datetime
 from functools import partial
+from typing import Final
 
 import pytest
 from immutables import Map
-from whenever import SystemDateTime
+from whenever import Instant
 
+from HABApp.openhab.item_factory import OhItemFactory
 from HABApp.openhab.items import DatetimeItem, NumberItem
 from HABApp.openhab.items.base_item import MetaData
-from HABApp.openhab.map_items import map_item
 from tests.helpers import TestEventBus
+from tests.helpers.timezone import get_timezone_str
 
 
 @pytest.mark.ignore_log_errors
-def test_exception(eb: TestEventBus) -> None:
+def test_exception(eb: TestEventBus, item_factory: OhItemFactory) -> None:
     eb.allow_errors = True
-    assert map_item('test', 'Number', 'asdf', None, 'my_label', frozenset(), frozenset(), {}) is None
+    assert item_factory.create_item('test', 'Number', 'asdf', None, 'my_label', frozenset(), frozenset(), {}) is None
 
 
-def test_metadata() -> None:
-    make_number = partial(map_item, 'test', 'Number', None, None, 'my_label', frozenset(), frozenset())
+def test_metadata(item_factory: OhItemFactory) -> None:
+    make_number = partial(item_factory.create_item, 'test', 'Number', None, None, 'my_label', frozenset(), frozenset())
 
     item = make_number({'ns1': {'value': 'v1'}})
     assert isinstance(item.metadata, Map)
@@ -38,28 +40,30 @@ def test_metadata() -> None:
     assert item.metadata['ns2'].config == Map()
 
 
-def test_number_unit_of_measurement() -> None:
+def test_number_unit_of_measurement(item_factory: OhItemFactory) -> None:
     make_item = partial(
-        map_item, last_value=None, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}}
+        item_factory.create_item,
+        last_value=None, label='l', tags=frozenset(), groups=frozenset(), metadata={'unit': {'value': '°C'}}
     )
-    metadata = Map(unit=MetaData('°C'))
-    assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, metadata=metadata)
-    assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2, metadata=metadata)
-    assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3, metadata=metadata)
-    assert make_item('test4', 'Number:Speed', '4.0 km/h', ) == NumberItem('test', 4, metadata=metadata)
-    assert make_item('test5', 'Number:Intensity', '5.0 W/m2', ) == NumberItem('test', 5, metadata=metadata)
-    assert make_item('test6', 'Number:Dimensionless', '6.0', ) == NumberItem('test', 6, metadata=metadata)
-    assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7, metadata=metadata)
+
+    kwargs = {'metadata': Map(unit=MetaData('°C')), 'event_bus': None, 'interface': item_factory._interface}
+    assert make_item('test1', 'Number:Length', '1.0 m', ) == NumberItem('test', 1, **kwargs)
+    assert make_item('test2', 'Number:Temperature', '2.0 °C', ) == NumberItem('test', 2, **kwargs)
+    assert make_item('test3', 'Number:Pressure', '3.0 hPa', ) == NumberItem('test', 3, **kwargs)
+    assert make_item('test4', 'Number:Speed', '4.0 km/h', ) == NumberItem('test', 4, **kwargs)
+    assert make_item('test5', 'Number:Intensity', '5.0 W/m2', ) == NumberItem('test', 5, **kwargs)
+    assert make_item('test6', 'Number:Dimensionless', '6.0', ) == NumberItem('test', 6, **kwargs)
+    assert make_item('test7', 'Number:Angle', '7.0 °', ) == NumberItem('test', 7, **kwargs)
 
 
-def test_datetime() -> None:
+def test_datetime(item_factory: OhItemFactory) -> None:
 
     # We have to build the offset str dynamically otherwise we will fail during CI because it's in another timezone
-    offset_str = SystemDateTime(2022, 6, 15).format_common_iso()[-6:].replace(':', '')
+    offset_str = get_timezone_str(with_sign=True)
 
     def get_dt(value: str):
         assert value.startswith('2022-06-15')   # Date must match with offset_str
-        return map_item(
+        return item_factory.create_item(
             'test1', 'DateTime', f'{value}{offset_str}',
             label='', tags=frozenset(), groups=frozenset(), metadata={}, last_value=None
             )
@@ -70,3 +74,25 @@ def test_datetime() -> None:
 
     offset_str = '-0400'
     assert isinstance(get_dt('2022-06-15T09:21:43.754673068'), DatetimeItem)
+
+
+def test_update_item_times(item_factory: OhItemFactory) -> None:
+
+    timestamp_ms: Final = 1781352888123
+    instant: Final = Instant.from_utc(2026, 6, 13, 12, 14, 48, nanosecond=123_000_000)
+
+    obj = item_factory.create_item(
+        'test1',
+        'String',
+        value='test_str',
+        label='',
+        tags=frozenset(),
+        groups=frozenset(),
+        metadata={},
+        last_value=None,
+        last_state_change=timestamp_ms,
+        last_state_update=timestamp_ms + 1_000
+    )
+
+    assert obj.last_change == instant
+    assert obj.last_update == instant.add(seconds=1)

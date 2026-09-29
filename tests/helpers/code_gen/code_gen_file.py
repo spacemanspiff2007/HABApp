@@ -1,3 +1,4 @@
+import difflib
 import re
 from collections.abc import Sequence
 from pathlib import Path
@@ -146,11 +147,18 @@ class CodeGenFile:
             raise ValueError()
 
         if new_text == self._text:
-            return None
+            return self
 
         self._path.write_text(new_text)
-        pytest.exit('New code generated')
-        return self
+
+        diff = difflib.unified_diff(
+            self._text.splitlines(keepends=True),
+            new_text.splitlines(keepends=True),
+            fromfile=str(self._path) + '  (old)',
+            tofile=str(self._path) + '  (new)',
+        )
+
+        pytest.exit(f'New code generated: {self._path}\n\n' + ''.join(diff) + '\n')
 
 
 def generate_code(module: ModuleContext, instructions: InstructionTypeList) -> str:

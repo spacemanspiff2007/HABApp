@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import warnings
 from pathlib import Path
 
 import eascheduler
@@ -6,71 +8,77 @@ import eascheduler
 import HABApp
 import HABApp.config
 import HABApp.core
-import HABApp.mqtt.connection as mqtt_connection
-import HABApp.parameters.parameter_files
-import HABApp.rule.interfaces._http
+import HABApp.parameters
 import HABApp.rule_manager
 import HABApp.util
-from HABApp.core import Connections, shutdown
-from HABApp.core.internals import setup_internals
-from HABApp.core.internals.proxy import ConstProxyObj
+from HABApp.core.connections import ConnectionManager
+from HABApp.core.items.base_item_times_data import ItemTimesBackup
+from HABApp.core.provider import HABAPP_PROVIDER
+from HABApp.core.shutdown import ShutdownInfo
 from HABApp.core.wrapper import process_exception
-from HABApp.openhab import connection as openhab_connection
+from HABApp.mqtt.connection.connection import MqttConnection
+from HABApp.openhab.connection import setup_openhab_connection
+from HABApp.openhab.connection.connection import OpenhabConnection
+from HABApp.parameters.registry import ParameterRegistry
+from HABApp.rule_manager import RuleManager
+from HABApp.util.rate_limiter.registry import RateLimiterRegistry
+
+
+log = logging.getLogger('HABApp.Warnings')
+
+
+# Func to log deprecation warnings
+def send_warnings_to_log(message, category, filename, lineno, file=None, line=None) -> None:  # noqa: PLR0913
+    log.warning(f'{filename}:{lineno}: {category.__name__}: {message}')
+    return
+
+
+# Setup deprecation warnings
+warnings.simplefilter('default')
+warnings.showwarning = send_warnings_to_log
 
 
 class Runtime:
 
-    def __init__(self) -> None:
-        # Rule engine
-        self.rule_manager: HABApp.rule_manager.RuleManager = None
-
-    async def start(self, config_folder: Path) -> None:
+    async def start(self, config_folder: Path, shutdown: ShutdownInfo) -> None:
         try:
-            # shutdown setup
-            shutdown.register(Connections.on_application_shutdown, msg='Shutting down connections')
 
             # setup exception handler for the scheduler
             eascheduler.set_exception_handler(lambda x: process_exception('HABApp.scheduler', x))
 
-            file_watcher = HABApp.core.files.HABAppFileWatcher()
-            shutdown.register(file_watcher.shutdown, msg='Shutdown file watcher')
+            await HABAPP_PROVIDER.get(ItemTimesBackup)
+            ir = await HABAPP_PROVIDER.get(HABApp.core.internals.ItemRegistry)
+            eb = await HABAPP_PROVIDER.get(HABApp.core.internals.EventBus)
+            await HABAPP_PROVIDER.get(HABApp.core.files.FileManager)
 
-            # replace proxy objects
-            ir = HABApp.core.internals.ItemRegistry()
-            eb = HABApp.core.internals.EventBus()
-            file_manager = HABApp.core.files.FileManager(file_watcher)
-
-            setup_internals(ir, eb, file_manager)
-            assert isinstance(HABApp.core.Items, ConstProxyObj)
-            HABApp.core.Items = ir
-            assert isinstance(HABApp.core.EventBus, ConstProxyObj)
-            HABApp.core.EventBus = eb
-
-            file_manager.setup()
+            # setup rate limiter
+            HABAPP_PROVIDER.register(RateLimiterRegistry)
+            await HABAPP_PROVIDER.get(RateLimiterRegistry)
 
             # Load config
-            HABApp.config.setup_habapp_configuration(config_folder)
-
-            # generic HTTP
-            await HABApp.rule.interfaces._http.create_client()
+            await HABApp.config.setup_habapp_configuration(config_folder)
 
             # Connection setup
-            openhab_connection.setup()
-            mqtt_connection.setup()
+            await HABAPP_PROVIDER.get(OpenhabConnection)
+            await HABAPP_PROVIDER.call(setup_openhab_connection)
+
+            await HABAPP_PROVIDER.get(MqttConnection)
 
             # File loader setup
-            # Parameter Files
-            await HABApp.parameters.parameter_files.setup_param_files()
+            # Parameter Files - has to be available before the rules are loaded
+            await HABAPP_PROVIDER.get(ParameterRegistry)
 
             # Rule engine
-            self.rule_manager = HABApp.rule_manager.RuleManager(self)
-            await self.rule_manager.setup()
+            rule_manager = await HABAPP_PROVIDER.get(RuleManager)
 
-            Connections.application_startup_complete()
+            mgr = await HABAPP_PROVIDER.get(ConnectionManager)
+            mgr.application_startup_complete()
+
+            await rule_manager.load_rules_on_startup()
 
         except HABApp.config.InvalidConfigError:
-            shutdown.request()
+            shutdown.request_shutdown()
         except Exception as e:
             process_exception('Runtime.start', e)
             await asyncio.sleep(1)  # Sleep so we can do a graceful shutdown
-            shutdown.request()
+            shutdown.request_shutdown()

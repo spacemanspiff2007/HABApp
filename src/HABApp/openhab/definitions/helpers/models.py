@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from inspect import isclass
 from types import UnionType
-from typing import Annotated, Literal, Union, get_args, get_origin
+from typing import Annotated, Literal, TypeAliasType, Union, get_args, get_origin
 
 from pydantic import BaseModel as _BaseModel
 
@@ -44,13 +44,18 @@ def get_discriminator_values_from_union(union: type[_BaseModel], *,
     while type_hints:
         type_hint = type_hints.pop(0)
 
+        # It's a type alias which we have to unpack
+        if isinstance(type_hint, TypeAliasType):
+            type_hints.append(type_hint.__value__)
+            continue
+
         # Unpack Annotated
-        if get_origin(type_hint) is Annotated:
+        if (origin := get_origin(type_hint)) is Annotated:
             type_hints.append(get_args(type_hint)[0])
             continue
 
         # Unpack Union
-        if get_origin(type_hint) in (Union, UnionType):
+        if origin in (Union, UnionType):
             type_hints.extend(get_args(type_hint))
             continue
 

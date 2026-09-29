@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from easyconfig.models import BaseModel, Field
 from pydantic import AnyHttpUrl, ByteSize, TypeAdapter, field_validator
@@ -34,7 +34,7 @@ class General(BaseModel):
     )
 
 
-class EventTypeFilterEnum(str, Enum):
+class EventTypeFilterEnum(StrEnum):
     OFF = 'OFF'
     AUTO = 'AUTO'
     CONFIG = 'CONFIG'
@@ -102,13 +102,14 @@ class Connection(BaseModel):
     )
 
     @field_validator('url')
-    def validate_url(cls, value: str):
+    def validate_url(cls, value: str) -> str:
         if value:
             TypeAdapter(AnyHttpUrl).validate_python(value)
         return value
 
 
 class OpenhabConfig(BaseModel):
+    """Configuration for openHAB. Changes in these sections are typically applied without a restart"""
     connection: Connection = Field(default_factory=Connection)
     general: General = Field(default_factory=General)
     ping: Ping = Field(default_factory=Ping)

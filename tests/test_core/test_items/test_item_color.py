@@ -1,23 +1,28 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
 from HABApp.core.events import NoEventFilter, ValueChangeEvent, ValueUpdateEvent
+from HABApp.core.internals import EventBus
 from HABApp.core.items import ColorItem
 from HABApp.core.types import HSB, RGB
 from tests.helpers import TestEventBus
 
 
+def _get_item(value) -> ColorItem:
+    return ColorItem('test', value, event_bus=Mock(EventBus))
+
+
 def test_repr() -> None:
-    str(ColorItem('test'))
+    str(_get_item(None))
 
 
 def test_init() -> None:
     v = HSB(0, 1, 2)
-    assert ColorItem('', v).hue == 0
-    assert ColorItem('', v).saturation == 1
-    assert ColorItem('', v).brightness == 2
-    assert ColorItem('', v).value == HSB(0, 1, 2)
+    assert _get_item(v).hue == 0
+    assert _get_item(v).saturation == 1
+    assert _get_item(v).brightness == 2
+    assert _get_item(v).value == HSB(0, 1, 2)
 
 @pytest.mark.parametrize('func_name', ['set_value', 'post_value'])
 @pytest.mark.parametrize(
@@ -28,7 +33,7 @@ def test_init() -> None:
     ]
 )
 def test_set_func_vals(func_name, test_vals) -> None:
-    i = ColorItem('test', HSB(hue=11.11, saturation=22.22, brightness=33.33))
+    i = _get_item(HSB(hue=11.11, saturation=22.22, brightness=33.33))
     assert i.hue == 11.11
     assert i.saturation == 22.22
     assert i.brightness == 33.33
@@ -45,7 +50,7 @@ def test_set_func_vals(func_name, test_vals) -> None:
 
 
 def test_set_func_tuple() -> None:
-    i = ColorItem('test', HSB(0, 0, 0))
+    i = _get_item(HSB(0, 0, 0))
     assert i.hue == 0
     assert i.saturation == 0
     assert i.brightness == 0
@@ -59,7 +64,7 @@ def test_set_func_tuple() -> None:
 
 
 def test_rgb_to_hsv() -> None:
-    i = ColorItem('test')
+    i = _get_item(None)
     i.set_value(RGB(193, 25, 99))
 
     assert int(i.hue) == 333
@@ -69,12 +74,12 @@ def test_rgb_to_hsv() -> None:
 
 
 def test_hsv_to_rgb() -> None:
-    i = ColorItem('test', HSB(23, 44, 66))
+    i = _get_item(HSB(23, 44, 66))
     assert i.get_rgb() == RGB(168, 123, 94)
 
 
 def test_post_update(sync_worker, eb: TestEventBus) -> None:
-    i = ColorItem('test', HSB(23, 44, 66))
+    i = ColorItem('test', HSB(23, 44, 66), event_bus=eb)
 
     mock = MagicMock()
     eb.listen_events(i.name, mock, NoEventFilter())

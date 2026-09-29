@@ -1,2 +1,2 @@
 class OpenhabEvent:
-    pass
+    __slots__ = ()

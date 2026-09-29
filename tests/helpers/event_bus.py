@@ -1,10 +1,13 @@
+from collections.abc import Generator
 from typing import Any
 
 import pytest
 
 from HABApp.core.const.topics import TOPIC_ERRORS
 from HABApp.core.events.habapp_events import HABAppException
-from HABApp.core.internals import EventBus, EventBusListener, EventFilterBase, wrap_func
+from HABApp.core.internals import EventBus, EventBusListener, EventFilterBase
+from HABApp.core.internals.function_executor.factory import ExecutorFactory
+from HABApp.core.provider import HABAPP_PROVIDER
 
 
 class TestEventBus(EventBus):
@@ -14,9 +17,13 @@ class TestEventBus(EventBus):
         super().__init__()
         self.allow_errors = False
         self.errors = []
+        self.worker_factory: ExecutorFactory | None = None
 
     def listen_events(self, name: str, cb, filter: EventFilterBase) -> None:
-        listener = EventBusListener(name, wrap_func(cb, name=f'TestFunc for {name}'), filter)
+        assert self.worker_factory is not None
+        func = self.worker_factory.create(cb, name=f'TestFunc for {name}')
+
+        listener = EventBusListener(name, func, filter)
         self.add_listener(listener)
 
     def post_event(self, topic: str, event: Any) -> None:
@@ -26,10 +33,15 @@ class TestEventBus(EventBus):
         super().post_event(topic, event)
 
 
-@pytest.yield_fixture(scope='function')
-def eb():
+@pytest.fixture
+def eb() -> Generator[TestEventBus, Any, None]:
     eb = TestEventBus()
+
+    # ToDo: rework so we don't have to add it to HABAPP_PROVIDER
+    HABAPP_PROVIDER.add_object(eb, EventBus)
     yield eb
+    HABAPP_PROVIDER._created.pop(EventBus, None)
+
     eb.remove_all_listeners()
 
     for event in eb.errors:
