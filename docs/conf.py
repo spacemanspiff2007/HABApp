@@ -80,6 +80,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinxcontrib.autodoc_pydantic',
     'sphinx_copybutton',
+    'sphinx_llm.txt',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -87,9 +88,10 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
-source_suffix = {'.rst': 'restructuredtext'}
+source_suffix = {
+    '.md': 'markdown',
+    '.rst': 'restructuredtext'
+}
 
 # The master toctree document.
 master_doc = 'index'
@@ -207,27 +209,18 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-# -- Options for Epub output -------------------------------------------------
-
-# Bibliographic Dublin Core info.
-epub_title = project
-
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#
-# epub_identifier = ''
-
-# A unique identification for the text.
-#
-# epub_uid = ''
-
-# A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
-
 add_module_names = False
 python_use_unqualified_type_names = True
 
+# -- Options for sphinx-llm -------------------------------------------------
+# https://github.com/NVIDIA/sphinx-llm
+# -- Options for sphinx-llm -------------------------------------------------
+
+llms_txt_suffix_mode = 'replace'
+llms_txt_suppress_unknown_node_warnings = True
+
 # -- nitpick configuration -------------------------------------------------
+
 nitpick_ignore = [
     ('py:data', 'Ellipsis'),
 
