@@ -1,5 +1,8 @@
+from base64 import b64encode
 from enum import StrEnum
+from typing import Final, Literal
 
+import aiohttp
 from easyconfig.models import BaseModel, Field
 from pydantic import AnyHttpUrl, ByteSize, TypeAdapter, field_validator
 
@@ -89,11 +92,14 @@ class Websocket(BaseModel):
         raise ValueError(msg)
 
 
+_OH_TOKEN_PREFIX: Final = 'oh.'
+
+
 class Connection(BaseModel):
     url: str = Field(
         'http://localhost:8080', description='Connect to this url. Empty string ("") disables the connection.')
-    user: str = ''
-    password: str = ''
+    user: str = Field('', description='Username or openHAB access token (starts with "oh.")')
+    password: str = Field('', description='Password for basic authentication or empty when using access token')
     verify_ssl: bool = Field(True, description='Check certificates when using https')
 
     websocket: Websocket = Field(
@@ -102,10 +108,37 @@ class Connection(BaseModel):
     )
 
     @field_validator('url')
+    @classmethod
     def validate_url(cls, value: str) -> str:
         if value:
             TypeAdapter(AnyHttpUrl).validate_python(value)
         return value
+
+    @field_validator('password')
+    @classmethod
+    def _validate_password(cls, value: str) -> str:
+        if value.startswith(_OH_TOKEN_PREFIX):
+            msg: Final = (f'OpenHAB access token detected in "password" field ({_OH_TOKEN_PREFIX:s} prefix), '
+                          f'please move it to the "user" field in the configuration file.')
+            raise ValueError(msg)
+        return value
+
+    def auth_complete(self) -> bool:
+        return bool(self.is_token() or (self.user and self.password))
+
+    def is_token(self) -> bool:
+        return self.user.startswith(_OH_TOKEN_PREFIX)
+
+    def build_url_token(self) -> str:
+        # we use token as auth
+        if self.is_token():
+            return self.user
+
+        # basic auth
+        return b64encode(f'{self.user}:{self.password}'.encode()).decode()
+
+    def build_basic_auth_header(self) -> tuple[tuple[Literal['Authorization'], str]]:
+        return (('Authorization', aiohttp.encode_basic_auth(self.user, self.password)), )
 
 
 class OpenhabConfig(BaseModel):
