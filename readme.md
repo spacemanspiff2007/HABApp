@@ -128,6 +128,10 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 26.10.0 (2026-10-05)
+- Updated dependencies to fix an issue during installation
+- Updated docs for access token
+
 #### 26.09.0 (2026-09-26)
 - Reworked many internals
 - Breaking: Requires at least Python 3.12

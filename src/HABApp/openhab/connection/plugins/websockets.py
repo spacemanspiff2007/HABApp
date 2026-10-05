@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from asyncio import TaskGroup, sleep
-from base64 import b64encode
 from typing import TYPE_CHECKING, Final
 
 from aiohttp import ClientError, ClientWebSocketResponse, WSMsgType
@@ -65,18 +64,6 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
         await self.task.cancel_wait()
         self._sent_events.clear()
 
-    def _build_token(self) -> str:
-        login: Final = self._config.connection.user
-        password: Final = self._config.connection.password
-
-        # we use token as auth
-        for v in (login, password):
-            if v.startswith('oh.'):
-                return v
-
-        # basic auth
-        return b64encode(f'{login}:{password}'.encode()).decode()
-
     async def _websocket_sender(self, ws: ClientWebSocketResponse) -> None:
         queue: Final = self._queue
 
@@ -133,14 +120,16 @@ class WebsocketPlugin(BaseConnectionPlugin[OpenhabConnection]):
     async def websockets_task(self) -> None:
         try:
             session: Final = self._session.aiohttp_session
-            token: Final = self._build_token()
 
             ws_cfg = HABApp.CONFIG.openhab.connection.websocket
             max_msg_size = int(ws_cfg.max_msg_size)
             ping_interval = ws_cfg.ping_interval
 
             async with session.ws_connect(
-                    f'/ws?accessToken={token:s}', autoping=False, max_msg_size=max_msg_size) as ws:
+                    url=f'/ws?accessToken={self._config.connection.build_url_token():s}',
+                    autoping=False,
+                    max_msg_size=max_msg_size
+            ) as ws:
 
                 self._websocket = ws
                 try:

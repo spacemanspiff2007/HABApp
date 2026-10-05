@@ -44,8 +44,8 @@ mqtt:
 openhab:
   connection:
     url: http://localhost:8080   # Connect to this url. Empty string ("") disables the connection.
-    user: ''
-    password: ''
+    user: ''                     # Username or openHAB access token (starts with "oh.")
+    password: ''                 # Password for basic authentication or empty when using access token
     verify_ssl: true             # Check certificates when using https
   general:
     listen_only: false      # If True HABApp does not change anything on the openHAB instance.

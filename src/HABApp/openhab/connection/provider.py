@@ -93,10 +93,7 @@ async def provide_client_session(app_config: ApplicationConfig,
                                  connection: OpenhabConnection) -> AsyncGenerator[OhClientSession, Any]:
     log: Final = connection.log
     config: Final = app_config.openhab.connection
-
     url: Final = config.url
-    user: Final = config.user
-    password: Final = config.password
 
     # do not run without an url
     if not url:
@@ -107,8 +104,7 @@ async def provide_client_session(app_config: ApplicationConfig,
         return
 
     # do not run without user/pw - since OH3 mandatory
-    is_token = user.startswith('oh.') or password.startswith('oh.')
-    if not is_token and (not user or not password):
+    if not config.auth_complete():
         msg: Final = 'Connection disabled (user/password missing)!'
         log.info(msg)
         connection.status_from_startup_to_disabled()
@@ -118,12 +114,16 @@ async def provide_client_session(app_config: ApplicationConfig,
     if not config.verify_ssl:
         log.info('Verify ssl set to False!')
 
-    headers: Final = (('Authorization', aiohttp.encode_basic_auth(user, password)), )
+    async with aiohttp.ClientSession(
+            base_url=url,
+            timeout=aiohttp.ClientTimeout(total=None),
+            json_serialize=dump_json,
+            headers=config.build_basic_auth_header()
+    ) as client:
 
-    async with aiohttp.ClientSession(base_url=url, timeout=aiohttp.ClientTimeout(total=None),
-                                     json_serialize=dump_json, headers=headers) as client:
         session = OhClientSession(session=client, ssl=config.verify_ssl, connection=connection)
         session.update_cfg(app_config.openhab.general)
+
         yield session
 
 
