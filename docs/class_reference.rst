@@ -91,6 +91,10 @@ Types
    :members:
    :member-order: groupwise
 
+.. autoclass:: HABApp.openhab.types.EventSourceComponent
+   :members:
+   :member-order: groupwise
+
 .. autoclass:: HABApp.openhab.items.base_item.MetaData
    :members:
    :member-order: groupwise
