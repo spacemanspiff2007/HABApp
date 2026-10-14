@@ -360,6 +360,46 @@ GroupStateChangedEvent
    :member-order: groupwise
 
 
+Event source
+--------------------------------------
+Item events that were created through an update or a command can have a ``source`` which describes what
+(or who) caused the event. The value is a :class:`~HABApp.openhab.types.EventSourceStr` or ``None``.
+
+HABApp uses a fixed notation (``HABApp.<RULE_NAME>``) when it creates the source itself.
+The openHAB runtime uses its own convention, as described in the
+`openHAB docs <https://www.openhab.org/docs/developer/utils/events.html#event-source>`_: ``<bundle>$<actor>``,
+optionally with a (delegated) chain of multiple entries separated by ``=>``.
+
+Example:
+
+.. exec_code::
+
+    # ------------ hide: start ------------
+    from HABApp.openhab.types import EventSourceStr
+    # ------------ hide: stop -------------
+    from HABApp.openhab.events import ItemStateUpdatedEvent
+
+
+    def item_updated(self, event: ItemStateUpdatedEvent):
+        source = event.source
+        print(event.source)
+        print(f'bundle: {source.bundle}, actor: {source.actor}')
+
+    # ------------ hide: start ------------
+    # HABApp notation: "HABApp.<rule name>"
+    item_updated(
+        None, ItemStateUpdatedEvent('MyItem', 'ON', last_state_update=None, source=EventSourceStr('HABApp.MyRule'))
+    )
+
+    # openHAB notation: "<bundle>$<actor>"
+    item_updated(
+        None, ItemStateUpdatedEvent(
+            'MyItem', 'ON', last_state_update=None, source=EventSourceStr('org.openhab.ui.basic$default:03')
+        )
+    )
+    # ------------ hide: stop  -------------
+
+
 Channel events
 ======================================
 

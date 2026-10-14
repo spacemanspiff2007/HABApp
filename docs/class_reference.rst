@@ -87,6 +87,9 @@ Types
    :inherited-members:
    :member-order: groupwise
 
+.. autoclass:: HABApp.openhab.types.EventSourceStr
+   :members:
+   :member-order: groupwise
 
 .. autoclass:: HABApp.openhab.items.base_item.MetaData
    :members:

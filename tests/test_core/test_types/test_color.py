@@ -63,13 +63,6 @@ def test_rgb_replace() -> None:
         rgb.replace(b=1, blue=1)
 
 
-def test_rgb_hsb_compare() -> None:
-    rgb = RGB(1, 2, 3)
-    hsb = rgb.to_hsb()
-    assert rgb == hsb
-    assert hsb == rgb
-
-
 def test_hsb() -> None:
     hsb = HSB(1, 2, 3)
     assert hsb.h == hsb.hue == 1

@@ -84,8 +84,8 @@ def test_location_map(item_factory: OhItemFactory) -> None:
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
     assert isinstance(call, LocationItem)
-    assert call.value == (52.518705, 13.376072, None)
-    assert call.last_value == (52.5, 13.3, None)
+    assert call.value == Point(52.518705, 13.376072, None)
+    assert call.last_value == Point(52.5, 13.3, None)
 
     assert call.label == 'l'
     assert call.tags == frozenset()
@@ -97,7 +97,7 @@ def test_location_map(item_factory: OhItemFactory) -> None:
         label='l', tags=frozenset(), groups=frozenset(), metadata=None,
     )
     assert isinstance(i, LocationItem)
-    assert i.value == (52.518705, 13.376072, 43)
+    assert i.value == Point(52.518705, 13.376072, 43)
 
     assert call.label == 'l'
     assert call.tags == frozenset()

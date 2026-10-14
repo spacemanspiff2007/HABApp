@@ -5,6 +5,7 @@ from pydantic import ConfigDict, Field, PlainSerializer
 from pydantic_core import to_json
 
 from HABApp.openhab.events import OpenhabEvent
+from HABApp.openhab.types import EventSourceStr
 
 
 class BaseModel(_BaseModel):
@@ -15,7 +16,7 @@ class BaseModel(_BaseModel):
 class BaseEvent(BaseModel):
     topic: str
 
-    source: str | None = None
+    source: EventSourceStr | None = None
     event_id: str | None = Field(None, alias='eventId')
 
     def to_event(self) -> OpenhabEvent:
