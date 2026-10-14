@@ -521,6 +521,17 @@ ItemCommandEventFilter
    :inherited-members:
    :member-order: groupwise
 
+
+EventSourceFilter
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.EventSourceFilter
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.EventSourceFilter
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
 **************************************
 Transformations
 **************************************

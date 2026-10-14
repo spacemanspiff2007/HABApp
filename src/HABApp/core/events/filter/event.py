@@ -1,5 +1,5 @@
 from inspect import isclass
-from typing import Final
+from typing import Final, override
 from typing import get_type_hints as typing_get_type_hints
 
 from HABApp.core.const import MISSING
@@ -42,6 +42,7 @@ class EventFilter(EventFilterBase):
                 msg = 'Not implemented for more than 2 values!'
                 raise ValueError(msg)
 
+    @override
     def trigger(self, event) -> bool:
         if not isinstance(event, self.event_class):
             return False
@@ -57,6 +58,7 @@ class EventFilter(EventFilterBase):
 
         return True
 
+    @override
     def describe(self) -> str:
 
         values = ''
@@ -71,6 +73,7 @@ class EventFilter(EventFilterBase):
 class TypeBoundEventFilter(EventFilter):
     """Class to inherit from if the filter criteria always is a hardcoded instance check"""
 
+    @override
     def describe(self) -> str:
 
         values = ''

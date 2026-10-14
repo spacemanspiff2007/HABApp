@@ -29,6 +29,7 @@ from .thing_events import (
 # isort: split
 
 from .event_filters import (
+    EventSourceFilter,
     ItemCommandEventFilter,
     ItemStateChangedEventFilter,
     ItemStateEventFilter,
@@ -44,6 +45,7 @@ from .event_filters import (
 __all__ = (
     'ChannelDescriptionChangedEvent',
     'ChannelTriggeredEvent',
+    'EventSourceFilter',
     'GroupStateChangedEvent',
     'GroupStateUpdatedEvent',
     'ItemAddedEvent',
