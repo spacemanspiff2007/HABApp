@@ -22,7 +22,7 @@ class ChannelTriggeredEvent(OpenhabEvent):
         self.channel: str = channel
 
     @classmethod
-    def from_dict(cls, topic: str, payload: dict):
+    def from_dict(cls, topic: str, payload: dict[str, str]) -> 'ChannelTriggeredEvent':
         return cls(topic[17:-10], payload['event'], payload['channel'])
 
     def __repr__(self) -> str:
@@ -50,7 +50,7 @@ class ChannelDescriptionChangedEvent(OpenhabEvent):
         self.value: str = value
 
     @classmethod
-    def from_dict(cls, topic: str, payload: dict):
+    def from_dict(cls, topic: str, payload: dict[str, str]) -> 'ChannelDescriptionChangedEvent':
         return cls(topic[17:-19], payload['field'], payload['value'])
 
     def __repr__(self) -> str:

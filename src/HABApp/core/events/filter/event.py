@@ -1,5 +1,5 @@
 from inspect import isclass
-from typing import Final, override
+from typing import Any, Final, override
 from typing import get_type_hints as typing_get_type_hints
 
 from HABApp.core.const import MISSING
@@ -12,7 +12,7 @@ class EventFilter(EventFilterBase):
 
     __slots__ = ('attr_name1', 'attr_name2', 'attr_value1', 'attr_value2', 'event_class')
 
-    def __init__(self, event_class: TYPE_ANY_CLASS_TYPE, **kwargs) -> None:
+    def __init__(self, event_class: TYPE_ANY_CLASS_TYPE, **kwargs: Any) -> None:
         assert len(kwargs) < 3, 'EventFilter only allows up to two args that will be used to filter'
         assert isclass(event_class), f'Class for event required! Passed {event_class} ({type(event_class)})'
 
@@ -45,7 +45,7 @@ class EventFilter(EventFilterBase):
                 raise ValueError(msg)
 
     @override
-    def trigger(self, event) -> bool:
+    def trigger(self, event: Any) -> bool:
         if not isinstance(event, self.event_class):
             return False
 

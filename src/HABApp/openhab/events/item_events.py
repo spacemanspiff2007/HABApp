@@ -1,4 +1,4 @@
-from typing import Any, Final
+from typing import Any, Final, override
 
 from whenever import Instant
 
@@ -12,6 +12,7 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
     __slots__ = ()
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
@@ -34,6 +35,7 @@ class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
         self.last_state_update: Final = last_state_update
         self.source: Final = source
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
@@ -61,6 +63,7 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
         self.last_state_change: Final = last_state_change
         self.source: Final = source
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         old_value = f() if (f := getattr(old_value := self.old_value, '_value_str', None)) is not None \
@@ -81,6 +84,7 @@ class ItemCommandEvent(OpenhabEvent, HABApp.core.events.ValueCommandEvent):
         super().__init__(name, value)
         self.source: Final = source
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
@@ -226,6 +230,7 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
         super().__init__(name, value)
         self.item: Final = item
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, item: {self.item}, value: {value}>'
@@ -250,6 +255,7 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
         super().__init__(name, value, old_value)
         self.item: Final = item
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         old_value = f() if (f := getattr(old_value := self.old_value, '_value_str', None)) is not None \

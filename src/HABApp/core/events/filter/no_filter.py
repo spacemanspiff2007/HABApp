@@ -1,3 +1,5 @@
+from typing import Any, override
+
 from HABApp.core.internals import EventFilterBase
 
 
@@ -6,8 +8,10 @@ class NoEventFilter(EventFilterBase):
 
     __slots__ = ()
 
-    def trigger(self, event) -> bool:
+    @override
+    def trigger(self, event: Any) -> bool:
         return True
 
+    @override
     def describe(self) -> str:
         return f'{self.__class__.__name__}()'
