@@ -6,10 +6,14 @@ from HABApp.mqtt.events import MqttValueChangeEvent, MqttValueUpdateEvent
 
 
 class MqttValueUpdateEventFilter(TypeBoundEventFilter):
+    __slots__ = ()
+
     def __init__(self, value: Any = MISSING) -> None:
         super().__init__(MqttValueUpdateEvent, value=value)
 
 
 class MqttValueChangeEventFilter(TypeBoundEventFilter):
+    __slots__ = ()
+
     def __init__(self, value: Any = MISSING, old_value: Any = MISSING) -> None:
         super().__init__(MqttValueChangeEvent, value=value, old_value=old_value)

@@ -13,21 +13,29 @@ from HABApp.openhab.events.item_events import (
 
 # TODO: Drop this when we go OH4.0 only
 class ItemStateEventFilter(TypeBoundEventFilter):
+    __slots__ = ()
+
     def __init__(self, value: Any = MISSING) -> None:
         super().__init__(ItemStateEvent, value=value)
 
 
 class ItemStateUpdatedEventFilter(TypeBoundEventFilter):
+    __slots__ = ()
+
     def __init__(self, value: Any = MISSING) -> None:
         super().__init__(ItemStateUpdatedEvent, value=value)
 
 
 class ItemStateChangedEventFilter(TypeBoundEventFilter):
+    __slots__ = ()
+
     def __init__(self, value: Any = MISSING, old_value: Any = MISSING) -> None:
         super().__init__(ItemStateChangedEvent, value=value, old_value=old_value)
 
 
 class ItemCommandEventFilter(TypeBoundEventFilter):
+    __slots__ = ()
+
     def __init__(self, value: Any = MISSING) -> None:
         super().__init__(ItemCommandEvent, value=value)
 
@@ -40,6 +48,8 @@ class EventSourceFilter(EventFilterBase):
     ``source`` attribute, or whose source is empty/``None``, will never trigger.
 
     """
+
+    __slots__ = ('actor', 'bundle')
 
     def __init__(self, bundle: str | MISSING_TYPE = MISSING, actor: str | MISSING_TYPE = MISSING) -> None:
         if bundle is MISSING and actor is MISSING:

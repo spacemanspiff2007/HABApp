@@ -4,6 +4,8 @@ from HABApp.core.internals import EventFilterBase
 
 
 class EventFilterBaseGroup(EventFilterBase):
+    __slots__ = ('filters', )
+
     def __init__(self, *args: EventFilterBase) -> None:
         self.filters: tuple[EventFilterBase, ...] = args
 
@@ -17,6 +19,8 @@ class EventFilterBaseGroup(EventFilterBase):
 class OrFilterGroup(EventFilterBaseGroup):
     """Only one child filter has to match"""
 
+    __slots__ = ()
+
     def trigger(self, event: Any) -> bool:
         return any(f.trigger(event) for f in self.filters)
 
@@ -27,6 +31,8 @@ class OrFilterGroup(EventFilterBaseGroup):
 
 class AndFilterGroup(EventFilterBaseGroup):
     """All child filters have to match"""
+
+    __slots__ = ()
 
     def trigger(self, event: Any) -> bool:
         return all(f.trigger(event) for f in self.filters)

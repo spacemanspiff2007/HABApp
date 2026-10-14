@@ -4,6 +4,8 @@ from HABApp.core.internals import EventFilterBase
 class NoEventFilter(EventFilterBase):
     """Triggers on all events"""
 
+    __slots__ = ()
+
     def trigger(self, event) -> bool:
         return True
 

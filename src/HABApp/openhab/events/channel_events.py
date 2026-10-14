@@ -7,6 +7,9 @@ class ChannelTriggeredEvent(OpenhabEvent):
     :ivar str event:
     :ivar str channel:
     """
+
+    __slots__ = ('channel', 'event', 'name')
+
     name: str
     event: str
     channel: str
@@ -32,6 +35,9 @@ class ChannelDescriptionChangedEvent(OpenhabEvent):
     :ivar str field:
     :ivar str value:
     """
+
+    __slots__ = ('field', 'name', 'value')
+
     name: str
     field: str
     value: str

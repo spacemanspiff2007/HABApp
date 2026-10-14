@@ -10,6 +10,8 @@ from .base_event import OpenhabEvent
 
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
+    __slots__ = ()
+
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
@@ -92,6 +94,9 @@ class ItemAddedEvent(OpenhabEvent):
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
     """
+
+    __slots__ = ('groups', 'label', 'name', 'tags', 'type')
+
     name: str
     type: str
     label: str | None
@@ -122,6 +127,9 @@ class ItemUpdatedEvent(OpenhabEvent):
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
     """
+
+    __slots__ = ('groups', 'label', 'name', 'tags', 'type')
+
     name: str
     type: str
     label: str | None
@@ -152,6 +160,9 @@ class ItemRemovedEvent(OpenhabEvent):
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
     """
+
+    __slots__ = ('groups', 'label', 'name', 'tags', 'type')
+
     name: str
     type: str
     label: str | None
@@ -180,6 +191,9 @@ class ItemStatePredictedEvent(OpenhabEvent):
     :ivar Any value:
     :ivar bool is_confirmation:
     """
+
+    __slots__ = ('is_confirmation', 'name', 'value')
+
     name: str
     value: Any
     is_confirmation: bool
@@ -201,6 +215,9 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     :ivar str item: Group item that caused the update
     :ivar Any value:
     """
+
+    __slots__ = ('item', )
+
     name: str
     item: str
     value: Any
@@ -221,6 +238,9 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     :ivar Any value:
     :ivar Any old_value:
     """
+
+    __slots__ = ('item', )
+
     name: str
     item: str
     value: Any
