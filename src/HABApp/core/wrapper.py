@@ -151,7 +151,7 @@ class ExceptionToHABApp:
         self.raised_exception = False
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
-                 exc_tb: TracebackType | None):
+                 exc_tb: TracebackType | None) -> bool:
 
         # no exception -> we exit gracefully
         if exc_type is None and exc_val is None:

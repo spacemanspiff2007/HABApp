@@ -92,9 +92,10 @@ class RGB(ColorType):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return self._r == other._r and self._g == other._g and self._b == other._b
-        if isinstance(other, HSB):
-            return self == self.__class__.from_hsb(other)
         return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash((self._r, self._g, self._b))
 
     def __getitem__(self, item: int | str) -> int:
         if isinstance(item, int):
@@ -120,12 +121,19 @@ class RGB(ColorType):
     # ------------------------------------------------------------------------------------------------------------------
     # Conversions
     # ------------------------------------------------------------------------------------------------------------------
+    def to_tuple(self) -> tuple[int, int, int]:
+        """Create a new tuple with the values from this object
+
+        :return: New tuple object
+        """
+        return self._r, self._g, self._b
+
     def to_hsb(self) -> HSB:
         """Create a new HSB object from this object
 
         :return: New HSB object
         """
-        max_value = self._RGB_MAX
+        max_value: Final = self._RGB_MAX
         h, s, v = _rgb_to_hsv(self._r / max_value, self._g / max_value, self._b / max_value)
         return HSB(h * HUE_FACTOR, s * PERCENT_FACTOR, v * PERCENT_FACTOR)
 
@@ -136,7 +144,7 @@ class RGB(ColorType):
         :param obj: HSB object or tuple with HSB values
         :return: new RGB object
         """
-        max_value = cls._RGB_MAX
+        max_value: Final = cls._RGB_MAX
         h, s, b = (obj._hue, obj._saturation, obj._brightness) if isinstance(obj, HSB) else obj
         r, g, b = _hsv_to_rgb(h / HUE_FACTOR, s / PERCENT_FACTOR, b / PERCENT_FACTOR)
         return cls(round(r * max_value), round(g * max_value), round(b * max_value))
@@ -238,10 +246,13 @@ class HSB(ColorType):
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
-            return self._hue == other._hue and \
-                self._saturation == other._saturation and \
-                self._brightness == other._brightness
+            return (self._hue == other._hue and self._saturation == other._saturation
+                    and self._brightness == other._brightness)
+
         return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash((self._hue, self._saturation, self._brightness))
 
     def __getitem__(self, item: int | str) -> float:
         if isinstance(item, int):
@@ -267,6 +278,13 @@ class HSB(ColorType):
     # ------------------------------------------------------------------------------------------------------------------
     # Conversions
     # ------------------------------------------------------------------------------------------------------------------
+    def to_tuple(self) -> tuple[float, float, float]:
+        """Create a new tuple with the values from this object
+
+        :return: New tuple object
+        """
+        return self._hue, self._saturation, self._brightness
+
     def to_rgb(self) -> RGB:
         """Create an RGB object from this object
 
@@ -283,4 +301,5 @@ class HSB(ColorType):
         """
         if not isinstance(obj, RGB):
             obj = RGB(*obj)
-        return obj.to_hsb()
+        hsb: Final = obj.to_hsb()
+        return cls(hsb.hue, hsb.saturation, hsb.brightness)
