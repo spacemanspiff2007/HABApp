@@ -266,15 +266,15 @@ there is an explanation for the various events.
 Item events
 ======================================
 
-ItemStateEvent
+ItemStateUpdatedEvent
 --------------------------------------
 Since this event inherits from :class:`~HABApp.core.events.ValueUpdateEvent` you can listen to :class:`~HABApp.core.events.ValueUpdateEvent`
 and it will also trigger for :class:`~HABApp.openhab.events.ItemStateEvent`.
 
-.. inheritance-diagram:: HABApp.openhab.events.ItemStateEvent
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateUpdatedEvent
    :parts: 1
 
-.. autoclass:: HABApp.openhab.events.ItemStateEvent
+.. autoclass:: HABApp.openhab.events.ItemStateUpdatedEvent
    :members:
    :inherited-members:
    :member-order: groupwise
