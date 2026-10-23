@@ -1,4 +1,5 @@
 import asyncio
+import warnings
 from threading import Thread
 from unittest.mock import Mock
 
@@ -33,7 +34,9 @@ async def run_in_thread(func: callable) -> None:
 
 
 async def test_thread(caplog, eb: EventBus, monkeypatch) -> None:
-    monkeypatch.setattr(HABApp.core, 'EventBus', eb)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', DeprecationWarning)
+        monkeypatch.setattr(HABApp.core, 'EventBus', eb)
 
     m = Mock()
     errors = []

@@ -3,7 +3,7 @@ import typing
 import pytest
 from tests.conftest import params
 
-from HABApp import Parameter
+from HABApp.parameters import Parameter
 from HABApp.parameters.registry import PARAMS_PREFIX, PARAMS_SUFFIX, ParameterRegistry, get_user_name
 
 
