@@ -24,4 +24,8 @@ def __getattr__(name: str) -> typing.Any:
         warnings.warn('HABApp.openhab.interface_sync is deprecated!', DeprecationWarning, stacklevel=2)
         return HABAPP_PROVIDER.get_existing(OpenHabSyncInterface)
 
-    return globals()[name]
+    try:
+        return globals()[name]
+    except KeyError:
+        msg = f'module {__name__!r} has no attribute {name!r}'
+        raise AttributeError(msg) from None

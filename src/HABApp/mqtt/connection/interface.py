@@ -13,8 +13,7 @@ from HABApp.mqtt.util import MqttPublishOptions
 
 
 type MqttUserPayload = (
-    str | bytes | bytearray | int | float | None |
-    BaseModel | dict | list | set | frozenset
+    str | bytes | bytearray | int | float | BaseModel | dict | list | set | frozenset | None
 )
 
 

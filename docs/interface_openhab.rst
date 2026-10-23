@@ -400,6 +400,15 @@ Example:
     # ------------ hide: stop  -------------
 
 
+.. autoclass:: HABApp.openhab.types.EventSourceStr
+   :members:
+   :member-order: groupwise
+
+.. autoclass:: HABApp.openhab.types.EventSourceComponent
+   :members:
+   :member-order: groupwise
+
+
 Channel events
 ======================================
 

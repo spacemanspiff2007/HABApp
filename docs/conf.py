@@ -227,6 +227,12 @@ nitpick_ignore = [
     # PEP 695 generic type parameter (e.g. HABApp.parameters.Parameter[T])
     # sphinx tries to resolve the bare type parameter name as a class, which does not exist as a documentable object
     ('py:class', 'T'),
+
+    # sphinx_autodoc_typehints renders bool values of a Literal (e.g. Literal[True]) as a cross-reference to the
+    # "True"/"False" entries of the python docs. These only resolve through intersphinx which is only active
+    # for the RTD build (see below)
+    ('py:data', 'True'),
+    ('py:data', 'False'),
 ]
 
 nitpick_ignore_regex = [
@@ -353,7 +359,9 @@ else:
         (re.compile(r'py:class'), re.compile(r'^(typing|collections|re|datetime).*$')),
 
         # external libraries
-        (re.compile(r'py:class'), re.compile(r'^(whenever|eascheduler|pydantic|holidays)\..+$')),
+        # any domain (py:class, py:meth, py:attr, ...) because e.g. sphinx_autodoc_typehints adds an
+        # ":Overrides:" field for @override methods which points to the (externally documented) base class method
+        (re.compile(r'.+'), re.compile(r'^(whenever|eascheduler|pydantic|holidays)\..+$')),
         # external library types
         (re.compile(r'py:class'), re.compile(r'^Instant$')),
 
