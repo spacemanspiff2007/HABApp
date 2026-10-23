@@ -8,10 +8,8 @@ from HABApp.__debug_info__ import print_debug_info
 
 def get_dependencies() -> list[str]:
     return [
-        'aiohttp-sse-client',
         'aiohttp',
         'aiomqtt',
-        'bidict',
         'colorama',
         'eascheduler',
         'easyconfig',
@@ -35,7 +33,6 @@ def check_dependency_packages() -> None:
 
     # Package aliases (if the import name differs from the package name)
     alias = {
-        'aiohttp-sse-client': 'aiohttp_sse_client',
         'paho-mqtt': 'paho.mqtt',
         'typing-extensions': 'typing_extensions',
     }
