@@ -11,7 +11,9 @@ def setup_logging() -> None:
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(0)
     handler.setFormatter(
-        logging.Formatter('[{asctime:s}] [{name:11s}] {levelname:8s} | {message:s}', style='{')
+        logging.Formatter(
+            '[{asctime:s}] [{name:11s}] {levelname:8s} | {message:s}', style='{', datefmt='%H:%M:%S'
+        )
     )
 
     root_logger = logging.getLogger()
