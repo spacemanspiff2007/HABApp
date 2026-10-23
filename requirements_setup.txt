@@ -4,7 +4,7 @@ watchfiles  == 1.3.0
 ujson       == 6.0.0
 aiomqtt     == 2.5.1
 
-eascheduler == 0.2.10
+eascheduler == 0.2.11
 
 immutables  == 0.21
 easyconfig  == 0.4.6
