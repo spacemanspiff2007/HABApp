@@ -7,7 +7,7 @@ aiomqtt     == 2.5.1
 eascheduler == 0.2.10
 
 immutables  == 0.21
-easyconfig  == 0.4.5
+easyconfig  == 0.4.6
 stack_data  == 0.6.3
 colorama    == 0.4.6
 fastnumbers == 5.2.0
