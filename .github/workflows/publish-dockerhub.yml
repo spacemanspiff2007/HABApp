@@ -33,14 +33,14 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build and push release
+      - name: Build and push stable (release)
         id: docker_build_release
         uses: docker/build-push-action@v6
         with:
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: |
-            spacemanspiff2007/habapp:latest
+            spacemanspiff2007/habapp:stable
             spacemanspiff2007/habapp:${{ github.ref_name }}
         if: github.ref_type == 'tag'
 
@@ -51,7 +51,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: |
-            spacemanspiff2007/habapp:master
+            spacemanspiff2007/habapp:latest
         if: github.ref_type == 'branch'
 
       - name: Image digest

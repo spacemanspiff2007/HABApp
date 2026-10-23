@@ -179,11 +179,25 @@ Docker
 Image installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is available:
+Installation through `docker <https://hub.docker.com/r/spacemanspiff2007/habapp>`_ is available.
+Similar to the behavior on readthedocs there are different tags available:
+
+.. list-table::
+    :widths: 25 75
+    :header-rows: 1
+
+    * - Tag
+      - Description
+    * - ``stable``
+      - The most recently released (stable) version. This corresponds to the "stable" version on readthedocs.
+    * - ``latest``
+      - The current development version build from the ``master`` branch. This corresponds to the "latest" version on readthedocs.
+    * - ``<version>`` (e.g. ``24.10.1``)
+      - A specific, pinned release version.
 
 .. code-block:: bash
 
-    docker pull spacemanspiff2007/habapp:latest
+    docker pull spacemanspiff2007/habapp:stable
 
 The image supports the following environment variables.
 
@@ -213,7 +227,7 @@ Running image from command line
         -e TZ=Europe/Berlin \
         -e USER_ID=9001 \
         -e GROUP_ID=9001 \
-        spacemanspiff2007/habapp:latest
+        spacemanspiff2007/habapp:stable
 
 Parameters explained
 
@@ -235,7 +249,7 @@ Parameters explained
       - Set environment variable with wser id at which HABApp will run (Optional, default: 9001)
     * - ``-e GROUP_ID=9001``
       - Set environment variable with group id at which HABApp will run (Optional, default: USER_ID)
-    * - ``spacemanspiff2007/habapp:latest``
+    * - ``spacemanspiff2007/habapp:stable``
       - Name of the image that will be run
 
 Updating image from command line
@@ -245,14 +259,14 @@ Updating image from command line
 
     docker stop habapp
 
-    docker pull spacemanspiff2007/habapp:latest
+    docker pull spacemanspiff2007/habapp:stable
 
 
 Updating image on Synology
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To update your HABApp docker within Synology NAS, you just have to do the following:
 
-On the Synology NAS just select "Download" with tag "latest" to download the new image.
+On the Synology NAS just select "Download" with tag "stable" to download the new image.
 It will overwrite the old one on the NAS.
 Then stop the container. After selecting "Action" -> "Clear" on the HABapp container, the container is there, but without any content.
 After starting the container again, everything should immediately work again.
