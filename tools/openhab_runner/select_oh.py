@@ -41,11 +41,15 @@ def select_openhab_version() -> InstallationConfig:
 def create_task(obj: TaskModel, placeholder: ConfigPlaceholder, env: dict[str, str]) -> TaskModel:
     ret = {}
     for name, value in obj.model_dump(exclude_unset=True).items():
+
         match value:
             case str():
                 new_value = placeholder(value)
             case dict():
-                new_value = {placeholder(k): placeholder(v) for k, v in value.items()}
+                if name == 'env':
+                    new_value = {placeholder(k): placeholder.replace_env(v) for k, v in value.items()}
+                else:
+                    new_value = {placeholder(k): placeholder(v) for k, v in value.items()}
             case list():
                 new_value = [placeholder(v) for v in value]
             case int() | float() | bool() | None:

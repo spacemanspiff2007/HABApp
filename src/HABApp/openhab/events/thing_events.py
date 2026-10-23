@@ -13,6 +13,9 @@ class ThingStatusInfoEvent(OpenhabEvent):
     :ivar ThingStatusDetailEnum detail:
     :ivar str description:
     """
+
+    __slots__ = ('description', 'detail', 'name', 'status')
+
     name: str
     status: ThingStatusEnum
     detail: ThingStatusDetailEnum
@@ -46,6 +49,9 @@ class ThingStatusInfoChangedEvent(OpenhabEvent):
     :ivar ThingStatusDetailEnum old_detail:
     :ivar str old_description:
     """
+
+    __slots__ = ('description', 'detail', 'name', 'old_description', 'old_detail', 'old_status', 'status')
+
     name: str
     status: ThingStatusEnum
     detail: ThingStatusDetailEnum
@@ -85,6 +91,9 @@ class ThingConfigStatusInfoEvent(OpenhabEvent):
     :ivar str name:
     :ivar dict[str, str] config_messages:
     """
+
+    __slots__ = ('config_messages', 'name')
+
     name: str
     config_messages: dict[str, str]
 
@@ -103,6 +112,9 @@ class ThingFirmwareStatusInfoEvent(OpenhabEvent):
     :ivar str name:
     :ivar str status:
     """
+
+    __slots__ = ('name', 'status')
+
     name: str
     status: str
 
@@ -125,6 +137,9 @@ class ThingRegistryBaseEvent(OpenhabEvent):
     :ivar dict[str, Any] configuration:
     :ivar dict[str, str] properties:
     """
+
+    __slots__ = ('channels', 'configuration', 'label', 'location', 'name', 'properties', 'type')
+
     name: str
     type: str
     label: str
@@ -154,12 +169,12 @@ class ThingRegistryBaseEvent(OpenhabEvent):
 
 
 class ThingAddedEvent(ThingRegistryBaseEvent):
-    pass
+    __slots__ = ()
 
 
 class ThingRemovedEvent(ThingRegistryBaseEvent):
-    pass
+    __slots__ = ()
 
 
 class ThingUpdatedEvent(ThingRegistryBaseEvent):
-    pass
+    __slots__ = ()

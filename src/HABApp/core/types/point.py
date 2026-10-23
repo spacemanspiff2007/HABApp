@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Final, Literal, Self
+from typing import Final, Literal
 
 from geopy.distance import distance
 
@@ -9,11 +9,11 @@ class Point:
     __slots__ = ('_latitude', '_longitude', '_elevation')  # noqa: RUF023
 
     def __init__(self, latitude: float, longitude: float, elevation: float | None = None) -> None:
-        if not -90 <= latitude <= 90:
+        if not -90 <= latitude <= 90:  # noqa: PLR2004
             msg = 'Latitude must be between -90 and 90'
             raise ValueError(msg)
 
-        if not -180 <= longitude <= 180:
+        if not -180 <= longitude <= 180:  # noqa: PLR2004
             msg = 'Longitude must be between -180 and 180'
             raise ValueError(msg)
 
@@ -61,22 +61,38 @@ class Point:
 
         raise ValueError()
 
-    def __eq__(self, other: Self | tuple[float, float, float | None] | tuple[float, float]) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return (self._latitude == other._latitude and self._longitude == other._longitude and
                     self._elevation == other._elevation)
 
-        if isinstance(other, tuple):
-            # compare directly with tuple so we don't raise and exception
-            match len(other):
-                case 2:
-                    lat, long = other
-                    return self._latitude == lat and self._longitude == long and self._elevation is None
-                case 3:
-                    lat, long, elev = other
-                    return self._latitude == lat and self._longitude == long and self._elevation == elev
-
         return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash((self._latitude, self._longitude, self._elevation))
+
+    def is_same_point(self, other: Point | tuple[float, float, float | None] | tuple[float, float], *,
+                      force_elevation_check: bool = False) -> bool:
+        """Check if two points are the same.
+        If one of the elevations is None only latitude and longitude is checked.
+
+        :param other: Other point or tuple with latitude, longitude and elevation
+        :param force_elevation_check: If True, elevation will always be checked even if it is None
+        :return: True if the points are the same, False otherwise
+        """
+
+        try:
+            other_point: Final = other if isinstance(other, Point) else Point(*other)
+        except (TypeError, ValueError):
+            return False
+
+        if not force_elevation_check and (self._elevation is None or other_point._elevation is None):
+            return self._latitude == other_point._latitude and self._longitude == other_point._longitude
+
+        return (
+            self._latitude == other_point._latitude and self._longitude == other_point._longitude
+            and self._elevation == other_point._elevation
+        )
 
     def __getitem__(self, item: int | str) -> float:
         if isinstance(item, int):
@@ -98,3 +114,13 @@ class Point:
             raise KeyError()
 
         raise TypeError()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Conversions
+    # ------------------------------------------------------------------------------------------------------------------
+    def to_tuple(self) -> tuple[float, float, float | None]:
+        """Create a new tuple with the values from this object
+
+        :return: New tuple object
+        """
+        return self._latitude, self._longitude, self._elevation

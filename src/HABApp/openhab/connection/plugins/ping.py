@@ -63,7 +63,7 @@ class PingPlugin(BaseConnectionPlugin[OpenhabConnection]):
             self.listener = None
             listener.cancel()
 
-    async def ping_received(self, event: HABApp.openhab.events.ItemStateEvent) -> None:
+    async def ping_received(self, event: HABApp.openhab.events.ItemStateUpdatedEvent) -> None:
         value = event.value
         if value != self.sent_value:
             return None

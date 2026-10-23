@@ -13,6 +13,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Docs
+build_docs/
+build_docs_test/
+
 # Distribution / packaging
 .Python
 build/

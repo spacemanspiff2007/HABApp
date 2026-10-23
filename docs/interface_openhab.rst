@@ -266,15 +266,15 @@ there is an explanation for the various events.
 Item events
 ======================================
 
-ItemStateEvent
+ItemStateUpdatedEvent
 --------------------------------------
 Since this event inherits from :class:`~HABApp.core.events.ValueUpdateEvent` you can listen to :class:`~HABApp.core.events.ValueUpdateEvent`
-and it will also trigger for :class:`~HABApp.openhab.events.ItemStateEvent`.
+and it will also trigger for :class:`~HABApp.openhab.events.ItemStateUpdatedEvent`.
 
-.. inheritance-diagram:: HABApp.openhab.events.ItemStateEvent
+.. inheritance-diagram:: HABApp.openhab.events.ItemStateUpdatedEvent
    :parts: 1
 
-.. autoclass:: HABApp.openhab.events.ItemStateEvent
+.. autoclass:: HABApp.openhab.events.ItemStateUpdatedEvent
    :members:
    :inherited-members:
    :member-order: groupwise
@@ -357,6 +357,55 @@ GroupStateChangedEvent
 .. autoclass:: HABApp.openhab.events.GroupStateChangedEvent
    :members:
    :inherited-members:
+   :member-order: groupwise
+
+
+Event source
+--------------------------------------
+Item events that were created through an update or a command can have a ``source`` which describes what
+(or who) caused the event. The value is a :class:`~HABApp.openhab.types.EventSourceStr` or ``None``.
+
+HABApp uses a fixed notation (``HABApp.<RULE_NAME>``) when it creates the source itself.
+The openHAB runtime uses its own convention, as described in the
+`openHAB docs <https://www.openhab.org/docs/developer/utils/events.html#event-source>`_: ``<bundle>$<actor>``,
+optionally with a (delegated) chain of multiple entries separated by ``=>``.
+
+Example:
+
+.. exec_code::
+
+    # ------------ hide: start ------------
+    from HABApp.openhab.types import EventSourceStr
+    # ------------ hide: stop -------------
+    from HABApp.openhab.events import ItemStateUpdatedEvent
+
+
+    def item_updated(self, event: ItemStateUpdatedEvent):
+        source = event.source
+        print(event.source)
+        print(f'bundle: {source.bundle}, actor: {source.actor}')
+
+    # ------------ hide: start ------------
+    # HABApp notation: "HABApp.<rule name>"
+    item_updated(
+        None, ItemStateUpdatedEvent('MyItem', 'ON', last_state_update=None, source=EventSourceStr('HABApp.MyRule'))
+    )
+
+    # openHAB notation: "<bundle>$<actor>"
+    item_updated(
+        None, ItemStateUpdatedEvent(
+            'MyItem', 'ON', last_state_update=None, source=EventSourceStr('org.openhab.ui.basic$default:03')
+        )
+    )
+    # ------------ hide: stop  -------------
+
+
+.. autoclass:: HABApp.openhab.types.EventSourceStr
+   :members:
+   :member-order: groupwise
+
+.. autoclass:: HABApp.openhab.types.EventSourceComponent
+   :members:
    :member-order: groupwise
 
 
@@ -477,6 +526,17 @@ ItemCommandEventFilter
    :parts: 1
 
 .. autoclass:: HABApp.openhab.events.ItemCommandEventFilter
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
+EventSourceFilter
+--------------------------------------
+.. inheritance-diagram:: HABApp.openhab.events.EventSourceFilter
+   :parts: 1
+
+.. autoclass:: HABApp.openhab.events.EventSourceFilter
    :members:
    :inherited-members:
    :member-order: groupwise

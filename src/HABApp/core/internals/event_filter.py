@@ -2,6 +2,8 @@ from typing import Any
 
 
 class EventFilterBase:
+    __slots__ = ()
+
     def trigger(self, event: Any) -> bool:
         raise NotImplementedError()
 

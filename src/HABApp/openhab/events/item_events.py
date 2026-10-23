@@ -1,14 +1,18 @@
-from typing import Any, Final
+from typing import Any, Final, override
 
 from whenever import Instant
 
 import HABApp.core
+from HABApp.openhab.types import EventSourceStr
 
 from .base_event import OpenhabEvent
 
 
 class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 
+    __slots__ = ()
+
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
@@ -17,19 +21,21 @@ class ItemStateEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
 class ItemStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     """
     :ivar Instant | None last_state_update: Optional timestamp of the state update
-    :ivar str | None source: Optional source of the update
+    :ivar EventSourceStr | None source: Optional source of the update
     """
     __slots__ = ('last_state_update', 'source')
 
     last_state_update: Instant | None
-    source: str | None
+    source: EventSourceStr | None
 
-    def __init__(self, name: str, value: Any, *, last_state_update: Instant | None, source: str | None = None) -> None:
+    def __init__(self, name: str, value: Any, *, last_state_update: Instant | None,
+                 source: EventSourceStr | None = None) -> None:
         super().__init__(name, value)
 
         self.last_state_update: Final = last_state_update
         self.source: Final = source
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
@@ -39,24 +45,25 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     """
     :ivar Instant | None last_state_update: Optional timestamp of the state update
     :ivar Instant | None last_state_change: Optional timestamp of the state change
-    :ivar str | None source: Optional source of the update
+    :ivar EventSourceStr | None source: Optional source of the update
     """
 
     __slots__ = ('last_state_change', 'last_state_update', 'source')
 
     last_state_update: Instant | None
     last_state_change: Instant | None
-    source: str | None
+    source: EventSourceStr | None
 
     def __init__(self, name: str, value: Any, old_value: Any, *,
                  last_state_update: Instant | None, last_state_change: Instant | None,
-                 source: str | None = None) -> None:
+                 source: EventSourceStr | None = None) -> None:
         super().__init__(name, value, old_value)
 
         self.last_state_update: Final = last_state_update
         self.last_state_change: Final = last_state_change
         self.source: Final = source
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         old_value = f() if (f := getattr(old_value := self.old_value, '_value_str', None)) is not None \
@@ -66,17 +73,18 @@ class ItemStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
 
 class ItemCommandEvent(OpenhabEvent, HABApp.core.events.ValueCommandEvent):
     """
-    :ivar str | None source: Optional source of the update
+    :ivar EventSourceStr | None source: Optional source of the update
     """
 
     __slots__ = ('source', )
 
-    source: str | None
+    source: EventSourceStr | None
 
-    def __init__(self, name: str, value: Any, *, source: str | None = None) -> None:
+    def __init__(self, name: str, value: Any, *, source: EventSourceStr | None = None) -> None:
         super().__init__(name, value)
         self.source: Final = source
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, value: {value}>'
@@ -90,6 +98,9 @@ class ItemAddedEvent(OpenhabEvent):
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
     """
+
+    __slots__ = ('groups', 'label', 'name', 'tags', 'type')
+
     name: str
     type: str
     label: str | None
@@ -120,6 +131,9 @@ class ItemUpdatedEvent(OpenhabEvent):
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
     """
+
+    __slots__ = ('groups', 'label', 'name', 'tags', 'type')
+
     name: str
     type: str
     label: str | None
@@ -150,6 +164,9 @@ class ItemRemovedEvent(OpenhabEvent):
     :ivar frozenset[str] tags:
     :ivar frozenset[str] groups:
     """
+
+    __slots__ = ('groups', 'label', 'name', 'tags', 'type')
+
     name: str
     type: str
     label: str | None
@@ -178,6 +195,9 @@ class ItemStatePredictedEvent(OpenhabEvent):
     :ivar Any value:
     :ivar bool is_confirmation:
     """
+
+    __slots__ = ('is_confirmation', 'name', 'value')
+
     name: str
     value: Any
     is_confirmation: bool
@@ -199,6 +219,9 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
     :ivar str item: Group item that caused the update
     :ivar Any value:
     """
+
+    __slots__ = ('item', )
+
     name: str
     item: str
     value: Any
@@ -207,6 +230,7 @@ class GroupStateUpdatedEvent(OpenhabEvent, HABApp.core.events.ValueUpdateEvent):
         super().__init__(name, value)
         self.item: Final = item
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         return f'<{self.__class__.__name__} name: {self.name}, item: {self.item}, value: {value}>'
@@ -219,6 +243,9 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
     :ivar Any value:
     :ivar Any old_value:
     """
+
+    __slots__ = ('item', )
+
     name: str
     item: str
     value: Any
@@ -228,6 +255,7 @@ class GroupStateChangedEvent(OpenhabEvent, HABApp.core.events.ValueChangeEvent):
         super().__init__(name, value, old_value)
         self.item: Final = item
 
+    @override
     def __repr__(self) -> str:
         value = f() if (f := getattr(value := self.value, '_value_str', None)) is not None else str(value)
         old_value = f() if (f := getattr(old_value := self.old_value, '_value_str', None)) is not None \

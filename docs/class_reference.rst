@@ -36,6 +36,12 @@ Items
    :member-order: groupwise
 
 
+.. autoclass:: HABApp.core.items.base_valueitem.BaseValueItem
+   :members:
+   :inherited-members:
+   :member-order: groupwise
+
+
 .. autoclass:: HABApp.openhab.items.base_item.OpenhabItem
    :members:
    :inherited-members:
@@ -86,7 +92,6 @@ Types
    :members:
    :inherited-members:
    :member-order: groupwise
-
 
 .. autoclass:: HABApp.openhab.items.base_item.MetaData
    :members:

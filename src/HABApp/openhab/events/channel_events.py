@@ -7,6 +7,9 @@ class ChannelTriggeredEvent(OpenhabEvent):
     :ivar str event:
     :ivar str channel:
     """
+
+    __slots__ = ('channel', 'event', 'name')
+
     name: str
     event: str
     channel: str
@@ -19,7 +22,7 @@ class ChannelTriggeredEvent(OpenhabEvent):
         self.channel: str = channel
 
     @classmethod
-    def from_dict(cls, topic: str, payload: dict):
+    def from_dict(cls, topic: str, payload: dict[str, str]) -> 'ChannelTriggeredEvent':
         return cls(topic[17:-10], payload['event'], payload['channel'])
 
     def __repr__(self) -> str:
@@ -32,6 +35,9 @@ class ChannelDescriptionChangedEvent(OpenhabEvent):
     :ivar str field:
     :ivar str value:
     """
+
+    __slots__ = ('field', 'name', 'value')
+
     name: str
     field: str
     value: str
@@ -44,7 +50,7 @@ class ChannelDescriptionChangedEvent(OpenhabEvent):
         self.value: str = value
 
     @classmethod
-    def from_dict(cls, topic: str, payload: dict):
+    def from_dict(cls, topic: str, payload: dict[str, str]) -> 'ChannelDescriptionChangedEvent':
         return cls(topic[17:-19], payload['field'], payload['value'])
 
     def __repr__(self) -> str:

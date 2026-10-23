@@ -128,6 +128,15 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 26.10.1 (2026-10-23)
+- Added EventSourceStr as an easy way to access the ``event.source`` parts
+- Added ``EventSourceFilter`` to filter openHAB events based on the ``bundle`` and/or ``actor`` of their source
+- Point, HSB and RGB only compare to themselves and not to tuples anymore.
+  Use ``obj.to_tuple()`` to get the tuple values
+- Events use __slots__
+- Updated dependencies
+
+
 #### 26.10.0 (2026-10-05)
 - Updated dependencies to fix an issue during installation
 - Updated docs for access token

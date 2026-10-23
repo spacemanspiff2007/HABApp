@@ -36,16 +36,24 @@ def test_access() -> None:
     assert a != Point(1, 2, 0)
     assert a != Point(1, 2, 3)
 
-    assert a == (1, 2)
-    assert a != (1, 2, 0)
-    assert a != (1, 2, 3)
-
     a = Point(1, 2, 3)
     assert a == Point(1, 2, 3)
     assert a != Point(1, 2)
 
-    assert a == (1, 2, 3)
-    assert a != (1, 2)
+
+def test_is_same() -> None:
+    assert Point(1, 2).is_same_point(Point(1, 2, 3))
+    assert Point(1, 2, 3).is_same_point(Point(1, 2))
+
+    assert not Point(1, 2).is_same_point(Point(1, 2, 3), force_elevation_check=True)
+    assert not Point(1, 2, 3).is_same_point(Point(1, 2), force_elevation_check=True)
+
+    # tuple
+    assert Point(1, 2).is_same_point((1, 2, 3))
+    assert Point(1, 2, 3).is_same_point((1, 2))
+    assert not Point(1, 2).is_same_point((1, 2, 3), force_elevation_check=True)
+    assert not Point(1, 2, 3).is_same_point((1, 2), force_elevation_check=True)
+
 
 
 def test_point_create() -> None:

@@ -1,7 +1,9 @@
 import argparse
 import logging
+import traceback
 from collections.abc import Sequence
 from pathlib import Path
+from time import sleep
 
 from openhab_runner.const import setup_logging
 from openhab_runner.models import CONFIG
@@ -63,4 +65,8 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        traceback.print_exception(e)
+        sleep(5)

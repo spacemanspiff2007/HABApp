@@ -2,6 +2,8 @@ from typing import Final
 
 
 class __FileEventBase:
+    __slots__ = ('name', )
+
     def __init__(self, name: str) -> None:
         self.name: str = name
 
@@ -18,12 +20,16 @@ class RequestFileLoadEvent(__FileEventBase):
     :ivar str filename: relative filename
     """
 
+    __slots__ = ()
+
 
 class RequestFileUnloadEvent(__FileEventBase):
     """Request unloading of the specified file
 
     :ivar str filename: relative filename
     """
+
+    __slots__ = ()
 
 
 class HABAppException:
@@ -33,6 +39,9 @@ class HABAppException:
     :ivar str traceback: traceback
     :ivar Exception exception: Exception
     """
+
+    __slots__ = ('exception', 'func_name', 'traceback')
+
     def __init__(self, func_name: str, exception: Exception, traceback: str) -> None:
         self.func_name: str = func_name
         self.exception: Exception = exception
@@ -52,6 +61,9 @@ class HABAppConnectionStateEvent:
     :ivar str connection: name of the connection
     :ivar str state: state of the connection
     """
+
+    __slots__ = ('connection', 'state')
+
     def __init__(self, connection: str, state: str) -> None:
         self.connection: Final = connection
         self.state: Final = state

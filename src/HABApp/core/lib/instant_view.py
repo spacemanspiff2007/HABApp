@@ -84,7 +84,7 @@ class InstantView:
 
         :param now: optional instant to compare to
         """
-        return self.delta_now(now).py_timedelta()
+        return self.delta_now(now).to_stdlib()
 
     def py_datetime(self) -> dt_datetime:
         """Return the datetime of the instant"""
