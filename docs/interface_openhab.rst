@@ -382,10 +382,12 @@ Example:
 
     def item_updated(self, event: ItemStateUpdatedEvent):
         source = event.source
-        print(event.source)
-        print(f'bundle: {source.bundle}, actor: {source.actor}')
+        print(f'source: {event.source}')
+        print(f' - bundle: {source.bundle}')
+        print(f' - actor : {source.actor}')
 
     # ------------ hide: start ------------
+
     # HABApp notation: "HABApp.<rule name>"
     item_updated(
         None, ItemStateUpdatedEvent('MyItem', 'ON', last_state_update=None, source=EventSourceStr('HABApp.MyRule'))
