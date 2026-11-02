@@ -48,7 +48,7 @@ class PatchedTimeHelper:
         )
 
 
-class AsyncioTestingProvider(AsyncioProvider):
+class HABAppTestingAsyncioProvider(AsyncioProvider):
     __slots__ = ('_patched_time', '_pending')
 
     def __init__(self, patched_time: PatchedTimeHelper) -> None:
@@ -98,13 +98,13 @@ class AsyncioTestingProvider(AsyncioProvider):
             await asyncio.sleep(0.05)
 
 
-class TestingStartTimeOptions(NamedTuple):
+class UserStartTimeOptions(NamedTuple):
     start: Instant | ZonedDateTime | OffsetDateTime
     keep_ticking: bool = False
 
 
 class UserTimeControl:
-    def __init__(self, asyncio: AsyncioTestingProvider) -> None:
+    def __init__(self, asyncio: HABAppTestingAsyncioProvider) -> None:
         self._asyncio: Final = asyncio
 
     async def sleep(self) -> None:

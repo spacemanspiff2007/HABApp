@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from HABApp.testing.executor import TestingExecutorFactory
+from HABApp.testing.executor import HABAppTestingExecutorFactory
 
 
 if TYPE_CHECKING:
@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-async def sync_worker(eb: TestEventBus) -> AsyncGenerator[TestingExecutorFactory, Any]:
+async def sync_worker(eb: TestEventBus) -> AsyncGenerator[HABAppTestingExecutorFactory, Any]:
 
-    factory = TestingExecutorFactory(eb)
+    factory = HABAppTestingExecutorFactory(eb)
     eb.worker_factory = factory
     yield factory
 

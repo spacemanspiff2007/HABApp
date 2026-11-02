@@ -62,8 +62,8 @@ Example:
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('ContactItem', 'MyContact', value='OPEN')
         await factory.create('SwitchItem', 'MySwitch', value='OFF')
         # ------------ hide: stop -------------
@@ -604,8 +604,8 @@ for 60 seconds.
     # ------------ hide: start ------------
     async def run(provider):
 
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         thing_item = await factory.create('Thing', 'my:thing:uid')
     # ------------ hide: stop -------------
 

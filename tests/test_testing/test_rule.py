@@ -10,9 +10,9 @@ from HABApp.core.provider import HabAppObjProvider
 from HABApp.mqtt.items import MqttItem
 from HABApp.openhab.definitions.websockets.item_events import ItemCommandEvent
 from HABApp.openhab.items import NumberItem, SwitchItem
-from HABApp.testing import TestingStartTimeOptions, UserTimeControl
+from HABApp.testing import UserStartTimeOptions, UserTimeControl
 from HABApp.testing.conftest import *  # noqa: F403
-from HABApp.testing.items import TestingItems
+from HABApp.testing.items import UserItems
 
 
 class TimestampRule(Rule):
@@ -29,8 +29,8 @@ class TimestampRule(Rule):
 
 
 @pytest.fixture
-def testing_start_time() -> TestingStartTimeOptions:
-    return TestingStartTimeOptions(start=Instant.from_utc(2024, 4, 30, 10, 32))
+def testing_start_time() -> UserStartTimeOptions:
+    return UserStartTimeOptions(start=Instant.from_utc(2024, 4, 30, 10, 32))
 
 
 async def test_timestamp_rule(capsys, habapp_provider: HabAppObjProvider, time_control: UserTimeControl, rule_hook) -> None:
@@ -101,8 +101,8 @@ async def test_item_const_rule(capsys, time_control: UserTimeControl, rule_hook,
 
 
 @pytest.fixture
-def testing_items() -> TestingItems:
-    return TestingItems().add(SwitchItem, 'test_sw_item', value='OFF').add(NumberItem, 'test_nr_item')
+def testing_items() -> UserItems:
+    return UserItems().add(SwitchItem, 'test_sw_item', value='OFF').add(NumberItem, 'test_nr_item')
 
 
 class OhItemRule(Rule):

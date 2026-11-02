@@ -3,13 +3,13 @@ import pytest
 from whenever import TimeDelta
 
 from HABApp.openhab.items import NumberItem, StringItem
-from HABApp.testing import TestingItems, UserTimeControl
+from HABApp.testing import UserItems, UserTimeControl
 from tests_user.rules.rule_a import RuleA
 
 
 @pytest.fixture
-def testing_items() -> TestingItems:
-    items = TestingItems()
+def testing_items() -> UserItems:
+    items = UserItems()
     items.add('Number', 'nr_test_item')
     items.add('String', 'str_test_item')
     return items

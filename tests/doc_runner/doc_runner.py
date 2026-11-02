@@ -11,9 +11,9 @@ from whenever import PlainDateTime, ZonedDateTime
 
 from HABApp.core.provider import HabAppObjProvider
 from HABApp.core.provider.provider import T
-from HABApp.testing import TestingStartTimeOptions
+from HABApp.testing import UserStartTimeOptions
 from HABApp.testing import conftest as conftest_module
-from HABApp.testing.executor import TestingExecutorFactory
+from HABApp.testing.executor import HABAppTestingExecutorFactory
 
 
 class DocHabAppObjProvider(HabAppObjProvider):
@@ -43,8 +43,8 @@ async def main(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
                start_time: ZonedDateTime, keep_ticking: bool,
                ignore_errors: tuple[type[Exception], ...]):
 
-    def testing_start_time() -> TestingStartTimeOptions:
-        return TestingStartTimeOptions(start=start_time, keep_ticking=keep_ticking)
+    def testing_start_time() -> UserStartTimeOptions:
+        return UserStartTimeOptions(start=start_time, keep_ticking=keep_ticking)
 
     overrides: Final = (testing_start_time, )
     override_names: Final = tuple(f.__name__ for f in overrides)
@@ -62,7 +62,7 @@ async def main(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
     for obj in overrides:
         provider.register(obj)
 
-    executor_factory: Final = await provider.get(TestingExecutorFactory)
+    executor_factory: Final = await provider.get(HABAppTestingExecutorFactory)
 
     async with asyncio.timeout(10):
         await provider.create_all()

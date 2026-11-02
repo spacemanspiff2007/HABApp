@@ -5,7 +5,7 @@ import pytest
 from HABApp import Rule
 from HABApp.testing import UserTimeControl
 from HABApp.testing.conftest import *  # noqa: F403
-from HABApp.testing.executor import TestingExecutorFactory
+from HABApp.testing.executor import HABAppTestingExecutorFactory
 
 
 class SyncErrorRule(Rule):
@@ -28,7 +28,7 @@ class AsyncErrorRule(Rule):
 
 @pytest.mark.ignore_log_errors
 async def test_error_sync(
-        capsys, time_control: UserTimeControl, rule_hook, testing_executor_factory: TestingExecutorFactory) -> None:
+        capsys, time_control: UserTimeControl, rule_hook, testing_executor_factory: HABAppTestingExecutorFactory) -> None:
 
     SyncErrorRule()
 
@@ -39,7 +39,7 @@ async def test_error_sync(
 
 @pytest.mark.ignore_log_errors
 async def test_error_async(
-        capsys, time_control: UserTimeControl, rule_hook, testing_executor_factory: TestingExecutorFactory) -> None:
+        capsys, time_control: UserTimeControl, rule_hook, testing_executor_factory: HABAppTestingExecutorFactory) -> None:
 
     AsyncErrorRule()
 

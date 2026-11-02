@@ -42,7 +42,7 @@ type OhItemTypeLiteral = Literal[
 ]
 
 
-class TestingItems:
+class UserItems:
     def __init__(self) -> None:
         self._items: Final[list[dict[str, Any]]] = []
 
@@ -74,7 +74,7 @@ class TestingItems:
 
 
 # noinspection PyShadowingBuiltins
-class TestingItemFactory:
+class UserItemFactory:
     def __init__(self, event_bus: EventBus, oh_registry_handler: OhItemRegistryHandler,
                  if_oh: OpenHabSyncInterface, if_mqtt: MqttInterface, item_registry: ItemRegistry) -> None:
         self._eb: Final = event_bus

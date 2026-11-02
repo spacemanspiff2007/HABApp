@@ -304,8 +304,8 @@ Trigger an event when an item is constant
 
    # ------------ hide: start ------------
    async def run(provider):
-       from HABApp.testing import TestingItemFactory
-       f = await provider.get(TestingItemFactory)
+       from HABApp.testing import UserItemFactory
+       f = await provider.get(UserItemFactory)
        await f.create('Item', 'test_watch')
        # ------------ hide: stop -------------
 
@@ -356,8 +356,8 @@ Something similar is available for openHAB items (``oh_post_update_if``)
 
     # ------------ hide: start ------------
     async def run(provider):
-       from HABApp.testing import TestingItemFactory
-       f = await provider.get(TestingItemFactory)
+       from HABApp.testing import UserItemFactory
+       f = await provider.get(UserItemFactory)
        await f.create('Item', 'Item_Name')
     # ------------ hide: stop -------------
 

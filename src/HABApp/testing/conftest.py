@@ -30,14 +30,14 @@ from HABApp.openhab.item_registry_handler import OhItemRegistryHandler
 from HABApp.parameters import registry as parameter_registry_module
 from HABApp.parameters.registry import ParameterFile, ParameterRegistry
 from HABApp.rule.rule_hook import HABAppRuleHook
-from HABApp.testing.executor import TestingExecutorFactory
+from HABApp.testing.executor import HABAppTestingExecutorFactory
 from HABApp.testing.inspect_habapp import find_in_modules
-from HABApp.testing.items import TestingItemFactory, TestingItems
+from HABApp.testing.items import UserItemFactory, UserItems
 from HABApp.testing.mqtt import MqttLoopbackQueue
 from HABApp.testing.oh import OhHttpLoopbackQueue, OhWebsocketLoopbackQueue, SentOhEventHistory
 from HABApp.testing.rules import RuleRegistry
-from HABApp.testing.scheduler import TestingScheduler, get_holiday, get_location
-from HABApp.testing.time import AsyncioTestingProvider, PatchedTimeHelper, TestingStartTimeOptions, UserTimeControl
+from HABApp.testing.scheduler import HABAppTestingScheduler, get_holiday, get_location
+from HABApp.testing.time import HABAppTestingAsyncioProvider, PatchedTimeHelper, UserStartTimeOptions, UserTimeControl
 from HABApp.util.rate_limiter.registry import RateLimiterRegistry
 
 
@@ -74,12 +74,12 @@ def set_scheduler_config(habapp_config: ApplicationConfig | None) -> Literal['se
 
 
 @pytest.fixture
-def testing_start_time() -> TestingStartTimeOptions:
-    return TestingStartTimeOptions(start=Instant.now().round('hour', mode='floor'), keep_ticking=False)
+def testing_start_time() -> UserStartTimeOptions:
+    return UserStartTimeOptions(start=Instant.now().round('hour', mode='floor'), keep_ticking=False)
 
 
 @pytest.fixture
-def patch_current_time(testing_start_time: TestingStartTimeOptions) -> Generator[_TimePatch, None, None]:
+def patch_current_time(testing_start_time: UserStartTimeOptions) -> Generator[_TimePatch, None, None]:
     with _patch_current_time(testing_start_time.start, keep_ticking=testing_start_time.keep_ticking) as p:
         yield p
 
@@ -90,9 +90,9 @@ def patched_time_helper(patch_current_time: _TimePatch) -> PatchedTimeHelper:
 
 
 @pytest.fixture
-async def asyncio_provider(patched_time_helper: PatchedTimeHelper) -> AsyncGenerator[AsyncioTestingProvider, Any]:
+async def asyncio_provider(patched_time_helper: PatchedTimeHelper) -> AsyncGenerator[HABAppTestingAsyncioProvider, Any]:
 
-    asyncio: Final = AsyncioTestingProvider(patched_time_helper)
+    asyncio: Final = HABAppTestingAsyncioProvider(patched_time_helper)
 
     yield asyncio
 
@@ -102,7 +102,7 @@ async def asyncio_provider(patched_time_helper: PatchedTimeHelper) -> AsyncGener
 
 
 @pytest.fixture
-def time_control(asyncio_provider: AsyncioTestingProvider) -> UserTimeControl:
+def time_control(asyncio_provider: HABAppTestingAsyncioProvider) -> UserTimeControl:
     return UserTimeControl(asyncio_provider)
 
 
@@ -123,11 +123,11 @@ def item_times_backup() -> ItemTimesBackup:
 
 @pytest.fixture(autouse=True)
 def testing_scheduler(monkeypatch: pytest.MonkeyPatch,
-                      asyncio_provider: AsyncioTestingProvider) -> Generator[TestingScheduler, Any, None]:
+                      asyncio_provider: HABAppTestingAsyncioProvider) -> Generator[HABAppTestingScheduler, Any, None]:
 
-    scheduler: Final = TestingScheduler(asyncio_provider)
+    scheduler: Final = HABAppTestingScheduler(asyncio_provider)
 
-    def func(event_loop: Any, enabled: Any = None) -> TestingScheduler:
+    def func(event_loop: Any, enabled: Any = None) -> HABAppTestingScheduler:
         return scheduler
 
     monkeypatch.setattr('HABApp.rule.scheduler.job_builder.AsyncHABAppScheduler', func)
@@ -143,7 +143,7 @@ def habapp_provider_modules() -> tuple[tuple[ModuleType, str, Any], ...]:
 
 
 @pytest.fixture
-def debounced_call_registry(asyncio_provider: AsyncioTestingProvider) -> DebouncedCallRegistry:
+def debounced_call_registry(asyncio_provider: HABAppTestingAsyncioProvider) -> DebouncedCallRegistry:
     return DebouncedCallRegistry(asyncio_provider)
 
 
@@ -156,8 +156,8 @@ def habapp_rate_limiter_registry() -> RateLimiterRegistry:
 async def habapp_provider(  # noqa: PLR0913, PLR0917
         monkeypatch: pytest.MonkeyPatch, habapp_provider_modules: tuple[tuple[ModuleType, str, Any], ...],
         item_registry: ItemRegistry, event_bus: EventBus, item_times_backup: ItemTimesBackup,
-        asyncio_provider: AsyncioTestingProvider, debounced_call_registry: DebouncedCallRegistry,
-        interface_mqtt: MqttInterface, testing_executor_factory: TestingExecutorFactory,
+        asyncio_provider: HABAppTestingAsyncioProvider, debounced_call_registry: DebouncedCallRegistry,
+        interface_mqtt: MqttInterface, testing_executor_factory: HABAppTestingExecutorFactory,
         habapp_rate_limiter_registry: RateLimiterRegistry, parameter_registry: ParameterRegistry
 ) -> AsyncGenerator[HabAppObjProvider, Any]:
 
@@ -210,8 +210,8 @@ def parameter_registry(habapp_config: ApplicationConfig | None, event_bus: Event
 
 
 @pytest.fixture
-def testing_items() -> TestingItems:
-    return TestingItems()
+def testing_items() -> UserItems:
+    return UserItems()
 
 
 @pytest.fixture
@@ -252,7 +252,7 @@ def interface_oh_async(oh_ws_loopbackqueue: OhWebsocketLoopbackQueue, oh_http_lo
 
 @pytest.fixture
 def mqtt_msg_handler(event_bus: EventBus, item_registry: ItemRegistry,
-                     asyncio_provider: AsyncioTestingProvider) -> MessagesHandler:
+                     asyncio_provider: HABAppTestingAsyncioProvider) -> MessagesHandler:
     return MqttMessagesHandler(None, event_bus, item_registry, asyncio_provider)
 
 
@@ -286,15 +286,15 @@ def interface_mqtt(interface_mqtt_async: MqttAsyncInterface, mqtt_msg_handler: M
 @pytest.fixture
 def testing_item_factory(event_bus: EventBus, item_registry: ItemRegistry,
                          oh_item_registry_handler: OhItemRegistryHandler,
-                         interface_oh: OpenHabSyncInterface, interface_mqtt: MqttInterface) -> TestingItemFactory:
-    return TestingItemFactory(
+                         interface_oh: OpenHabSyncInterface, interface_mqtt: MqttInterface) -> UserItemFactory:
+    return UserItemFactory(
         event_bus=event_bus, item_registry=item_registry,
         oh_registry_handler=oh_item_registry_handler, if_oh=interface_oh, if_mqtt=interface_mqtt
     )
 
 
 @pytest.fixture(autouse=True)
-async def create_testing_items(testing_items: TestingItems, testing_item_factory: TestingItemFactory,
+async def create_testing_items(testing_items: UserItems, testing_item_factory: UserItemFactory,
                                habapp_provider: HabAppObjProvider) -> Literal['create_testing_items']:
 
     # noinspection PyProtectedMember
@@ -304,9 +304,9 @@ async def create_testing_items(testing_items: TestingItems, testing_item_factory
 
 
 @pytest.fixture
-async def testing_executor_factory(event_bus: EventBus) -> AsyncGenerator[TestingExecutorFactory, Any]:
+async def testing_executor_factory(event_bus: EventBus) -> AsyncGenerator[HABAppTestingExecutorFactory, Any]:
 
-    f: Final = TestingExecutorFactory(event_bus)
+    f: Final = HABAppTestingExecutorFactory(event_bus)
 
     yield f
 
@@ -319,7 +319,7 @@ async def rule_hook(
         event_bus: EventBus, rule_registry: RuleRegistry,
         interface_oh: OpenHabSyncInterface, interface_oh_async: OpenHabAsyncInterface,
         interface_mqtt: MqttInterface, interface_mqtt_async: MqttAsyncInterface,
-        testing_executor_factory: TestingExecutorFactory
+        testing_executor_factory: HABAppTestingExecutorFactory
 ) -> AsyncGenerator[HABAppRuleHook, Any]:
 
     # Patch the hook so we can instantiate the rules
