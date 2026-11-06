@@ -16,7 +16,7 @@ def user_items() -> UserItems:
 
 
 @pytest.fixture
-def rule_a(testing_rules) -> RuleA:
+def rule_a(rule_testing) -> RuleA:
     return RuleA('test_item')
 
 

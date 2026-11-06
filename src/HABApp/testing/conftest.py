@@ -350,7 +350,7 @@ async def rule_hook(
 
 
 @pytest.fixture
-async def testing_rules(rule_hook: HABAppRuleHook) -> None:
+async def rule_testing(rule_hook: HABAppRuleHook) -> None:
     return None
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -384,9 +384,9 @@ __all__ = (
     'patched_time_helper',
     'rule_hook',
     'rule_registry',
+    'rule_testing',
     'set_scheduler_config',
     'testing_executor_factory',
-    'testing_rules',
     'testing_scheduler',
     'time_control',
     'user_item_factory',
