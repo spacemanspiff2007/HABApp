@@ -74,13 +74,13 @@ def set_scheduler_config(habapp_config: ApplicationConfig | None) -> Literal['se
 
 
 @pytest.fixture
-def testing_start_time() -> UserStartTimeOptions:
+def user_start_time() -> UserStartTimeOptions:
     return UserStartTimeOptions(start=Instant.now().round('hour', mode='floor'), keep_ticking=False)
 
 
 @pytest.fixture
-def patch_current_time(testing_start_time: UserStartTimeOptions) -> Generator[_TimePatch, None, None]:
-    with _patch_current_time(testing_start_time.start, keep_ticking=testing_start_time.keep_ticking) as p:
+def patch_current_time(user_start_time: UserStartTimeOptions) -> Generator[_TimePatch, None, None]:
+    with _patch_current_time(user_start_time.start, keep_ticking=user_start_time.keep_ticking) as p:
         yield p
 
 
@@ -210,7 +210,7 @@ def parameter_registry(habapp_config: ApplicationConfig | None, event_bus: Event
 
 
 @pytest.fixture
-def testing_items() -> UserItems:
+def user_items() -> UserItems:
     return UserItems()
 
 
@@ -284,9 +284,9 @@ def interface_mqtt(interface_mqtt_async: MqttAsyncInterface, mqtt_msg_handler: M
 
 
 @pytest.fixture
-def testing_item_factory(event_bus: EventBus, item_registry: ItemRegistry,
-                         oh_item_registry_handler: OhItemRegistryHandler,
-                         interface_oh: OpenHabSyncInterface, interface_mqtt: MqttInterface) -> UserItemFactory:
+def user_item_factory(event_bus: EventBus, item_registry: ItemRegistry,
+                      oh_item_registry_handler: OhItemRegistryHandler,
+                      interface_oh: OpenHabSyncInterface, interface_mqtt: MqttInterface) -> UserItemFactory:
     return UserItemFactory(
         event_bus=event_bus, item_registry=item_registry,
         oh_registry_handler=oh_item_registry_handler, if_oh=interface_oh, if_mqtt=interface_mqtt
@@ -294,10 +294,10 @@ def testing_item_factory(event_bus: EventBus, item_registry: ItemRegistry,
 
 
 @pytest.fixture(autouse=True)
-async def create_testing_items(testing_items: UserItems, testing_item_factory: UserItemFactory,
+async def create_testing_items(user_items: UserItems, user_item_factory: UserItemFactory,
                                habapp_provider: HabAppObjProvider) -> Literal['create_testing_items']:
 
-    await testing_item_factory.create_items(testing_items)
+    await user_item_factory.create_items(user_items)
 
     return 'create_testing_items'
 
@@ -386,10 +386,10 @@ __all__ = (
     'rule_registry',
     'set_scheduler_config',
     'testing_executor_factory',
-    'testing_item_factory',
-    'testing_items',
     'testing_rules',
     'testing_scheduler',
-    'testing_start_time',
     'time_control',
+    'user_item_factory',
+    'user_items',
+    'user_start_time',
 )

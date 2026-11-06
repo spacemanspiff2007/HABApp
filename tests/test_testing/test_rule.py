@@ -29,7 +29,7 @@ class TimestampRule(Rule):
 
 
 @pytest.fixture
-def testing_start_time() -> UserStartTimeOptions:
+def user_start_time() -> UserStartTimeOptions:
     return UserStartTimeOptions(start=Instant.from_utc(2024, 4, 30, 10, 32))
 
 
@@ -101,7 +101,7 @@ async def test_item_const_rule(capsys, time_control: UserTimeControl, rule_hook,
 
 
 @pytest.fixture
-def testing_items() -> UserItems:
+def user_items() -> UserItems:
     return UserItems().add(SwitchItem, 'test_sw_item', value='OFF').add(NumberItem, 'test_nr_item')
 
 

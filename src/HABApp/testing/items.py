@@ -71,7 +71,7 @@ class UserItems:
         if self._created:
             msg = (
                 'Items have already been created and new items can no longer be added. '
-                'Add all items through the "testing_items" fixture before the test body runs.'
+                'Add all items through the "user_items" fixture before the test body runs.'
             )
             raise RuntimeError(msg)
 

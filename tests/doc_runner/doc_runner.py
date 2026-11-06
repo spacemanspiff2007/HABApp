@@ -43,10 +43,10 @@ async def main(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
                start_time: ZonedDateTime, keep_ticking: bool,
                ignore_errors: tuple[type[Exception], ...]):
 
-    def testing_start_time() -> UserStartTimeOptions:
+    def user_start_time() -> UserStartTimeOptions:
         return UserStartTimeOptions(start=start_time, keep_ticking=keep_ticking)
 
-    overrides: Final = (testing_start_time, )
+    overrides: Final = (user_start_time, )
     override_names: Final = tuple(f.__name__ for f in overrides)
 
     provider: Final = DocHabAppObjProvider()

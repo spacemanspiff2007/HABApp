@@ -8,7 +8,7 @@ from tests_user.rules.rule_a import RuleA
 
 
 @pytest.fixture
-def testing_items() -> UserItems:
+def user_items() -> UserItems:
     items = UserItems()
     items.add('Number', 'nr_test_item')
     items.add('String', 'str_test_item')
