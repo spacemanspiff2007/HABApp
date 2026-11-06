@@ -310,7 +310,14 @@ async def testing_executor_factory(event_bus: EventBus) -> AsyncGenerator[HABApp
 
     yield f
 
-    assert not f.errors
+    if f.errors:
+        count: Final = len(f.errors)
+        kinds: Final = ', '.join(type(e).__name__ for e in f.errors)
+        msg: Final = (
+            f'{count} unhandled exception{"" if count == 1 else "s"} occurred in rule callbacks during the test: '
+            f'{kinds} (see the captured log for details)'
+        )
+        pytest.fail(msg)
 
 
 @pytest.fixture
