@@ -33,7 +33,7 @@ async def test_nr_item_part(rule_a: RuleA, time_control: UserTimeControl) -> Non
     assert nr.value == 3
 
 
-async def test_str_item_part(rule_a: RuleA, time_control: UserTimeControl, capsys) -> None:
+async def test_str_item_part(rule_a: RuleA, time_control: UserTimeControl) -> None:
     str_item = StringItem.get_item('str_test_item')
     str_item.oh_post_update('Initial')
 
