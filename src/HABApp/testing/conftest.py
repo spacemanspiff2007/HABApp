@@ -297,8 +297,7 @@ def testing_item_factory(event_bus: EventBus, item_registry: ItemRegistry,
 async def create_testing_items(testing_items: UserItems, testing_item_factory: UserItemFactory,
                                habapp_provider: HabAppObjProvider) -> Literal['create_testing_items']:
 
-    # noinspection PyProtectedMember
-    await testing_item_factory.create_items(testing_items._items)
+    await testing_item_factory.create_items(testing_items)
 
     return 'create_testing_items'
 
