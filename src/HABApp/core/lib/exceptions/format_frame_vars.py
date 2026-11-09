@@ -21,7 +21,7 @@ SKIPPED_TYPES: Final = (
     Map, Path,
     whenever.Instant,
     whenever.PlainDateTime, whenever.ZonedDateTime, whenever.OffsetDateTime,
-    whenever.TimeDelta, whenever.DateDelta, whenever.DateTimeDelta
+    whenever.TimeDelta, whenever.ItemizedDateDelta, whenever.ItemizedDelta
 )
 
 

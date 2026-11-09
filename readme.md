@@ -130,6 +130,7 @@ MyOpenhabRule()
 #### 26.10.2-DEV1 (2026-10-23)
 - Breaking: Docker images now use ``stable`` for the latest release and ``latest`` for the development build
   (``master`` branch). Please update your docker-compose file accordingly (e.g. change from ``latest`` to ``stable``).
+- Updated whenever to 0.11 (breaking for whenever usage in rules)
 
 #### 26.10.1 (2026-10-23)
 - Added EventSourceStr as an easy way to access the ``event.source`` parts
