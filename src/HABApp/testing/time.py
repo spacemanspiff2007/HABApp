@@ -77,6 +77,7 @@ class HABAppTestingAsyncioProvider(AsyncioProvider):
         await f
 
     async def advance_to(self, target: Instant) -> None:
+        # go to target timestamp and wake all pending futures at the proper timestamp
         while self._pending and self._pending[0][0] <= target:
             due: Instant = self._pending[0][0]
 
@@ -96,6 +97,9 @@ class HABAppTestingAsyncioProvider(AsyncioProvider):
                     f.set_result(None)
 
             await asyncio.sleep(0.05)
+
+        # finally we reach the target time
+        self._patched_time.advance_to(target)
 
 
 class UserStartTimeOptions(NamedTuple):

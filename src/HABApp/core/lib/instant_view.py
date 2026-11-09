@@ -4,7 +4,7 @@ from operator import gt, lt
 from typing import TYPE_CHECKING, Final, Self, TypeAlias, overload
 
 from eascheduler.builder.helper import HINT_TIMEDELTA, get_timedelta
-from whenever import Instant, TimeDelta
+from whenever import SYSTEM_TZ, Instant, TimeDelta
 
 
 if TYPE_CHECKING:
@@ -88,10 +88,10 @@ class InstantView:
 
     def py_datetime(self) -> dt_datetime:
         """Return the datetime of the instant"""
-        return self._instant.to_system_tz().to_plain().to_stdlib()
+        return self._instant.to_tz(SYSTEM_TZ).to_plain().to_stdlib()
 
     def __repr__(self) -> str:
-        return f'InstantView({self._instant.to_system_tz()})'
+        return f'InstantView({self._instant.to_tz(SYSTEM_TZ)})'
 
     def _cmp(self, op: Callable[[Instant, Instant], bool], obj: HINT_OBJ | None, *,
              delta_kwargs: dict[str, float] | None = None) -> bool:

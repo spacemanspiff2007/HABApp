@@ -7,7 +7,7 @@ from typing import Any, Final
 import pytest
 from _pytest.fixtures import FixtureFunctionDefinition
 from pytest import MonkeyPatch  # noqa: PT013
-from whenever import PlainDateTime, ZonedDateTime
+from whenever import Instant, PlainDateTime, ZonedDateTime
 
 from HABApp.core.provider import HabAppObjProvider
 from HABApp.core.provider.provider import T
@@ -26,11 +26,16 @@ class DocHabAppObjProvider(HabAppObjProvider):
 
 
 def run(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
-        start_time: datetime | None = None, keep_ticking: bool = False,
+        start_time: Instant | datetime | None = None, keep_ticking: bool = False,
         ignore_errors: tuple[type[Exception], ...] = ()) -> None:
 
+    time_obj: Instant | ZonedDateTime
+
     if start_time is not None:
-        time_obj = PlainDateTime.from_py_datetime(start_time).assume_tz('Europe/Berlin', disambiguate='raise')
+        if isinstance(start_time, Instant):
+            time_obj = start_time
+        elif isinstance(start_time, datetime):
+            time_obj = PlainDateTime(start_time).assume_tz('Europe/Berlin', disambiguate='raise')
     else:
         time_obj = ZonedDateTime.now('Europe/Berlin').replace(
             month=1, day=15, hour=14, minute=0, second=0, nanosecond=0
@@ -40,7 +45,7 @@ def run(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
 
 
 async def main(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
-               start_time: ZonedDateTime, keep_ticking: bool,
+               start_time: Instant | ZonedDateTime, keep_ticking: bool,
                ignore_errors: tuple[type[Exception], ...]):
 
     def user_start_time() -> UserStartTimeOptions:
