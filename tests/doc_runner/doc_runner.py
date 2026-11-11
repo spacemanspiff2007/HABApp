@@ -35,7 +35,9 @@ def run(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
         if isinstance(start_time, Instant):
             time_obj = start_time
         elif isinstance(start_time, datetime):
-            time_obj = PlainDateTime(start_time).assume_tz('Europe/Berlin', disambiguate='raise')
+            time_obj = PlainDateTime(start_time).assume_tz('Europe/Berlin', disambiguation='raise')
+        else:
+            raise TypeError()
     else:
         time_obj = ZonedDateTime.now('Europe/Berlin').replace(
             month=1, day=15, hour=14, minute=0, second=0, nanosecond=0

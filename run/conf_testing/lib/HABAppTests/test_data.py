@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Final, Literal, get_args, get_origin
 
 from HABApp.core.const import MISSING
-from HABApp.core.types import HSB, RGB
+from HABApp.core.types import HSB, RGB, Point
 from HABApp.openhab import items as items_module
 from HABApp.openhab.definitions.websockets.item_value_types import UnDefTypeModel
 from HABApp.openhab.items import OpenhabItem, Thing
@@ -192,7 +192,8 @@ ITEM_STATES = _get_from_class(
         ('+49', '30', '2270'), ('+49 030 227 0', ), ('+49,30,2270', )
     ),
     Location=(
-        ValuePair((52.518705, 13.376072), (52.518705, 13.376072, None)), (52.518705, 13.376072, 43)
+        ValuePair((52.518705, 13.376072), Point(52.518705, 13.376072, None)),
+        ValuePair((52.518705, 13.376072, 43), Point(52.518705, 13.376072, 43)),
     ),
     Image=(ValuePair(img_byte, RawType('png', img_byte)), ValuePair(RawType.create('png', img_byte)))
 )

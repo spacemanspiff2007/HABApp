@@ -27,7 +27,7 @@ class EventSourceComponent(NamedTuple):
     def __str__(self) -> str:
         if self.actor is None:
             return self.bundle
-        return f'{self.bundle}${self.actor}'
+        return f'{self.bundle}{"$" if self.bundle != "HABApp" else "."}{self.actor}'
 
 
 def _parse_component(value: str) -> tuple[str, str | None]:

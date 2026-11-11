@@ -153,6 +153,17 @@ def test_event_source_str_repr() -> None:
     assert str(EventSourceComponent('bundle', 'actor')) == 'bundle$actor'
 
 
+def test_event_source_str_repr_habapp() -> None:
+    # The "HABApp" bundle uses "." instead of "$" as the separator, so round-tripping
+    # through str() has to reproduce the original, HABApp-specific notation
+    assert str(EventSourceComponent('HABApp', None)) == 'HABApp'
+    assert str(EventSourceComponent('HABApp', 'my_rule')) == 'HABApp.my_rule'
+
+    value = 'HABApp.my_rule'
+    s = EventSourceStr(value)
+    assert str(s.origin) == value
+
+
 def test_event_source_is_str() -> None:
     value = 'org.openhab.core.automation'
     s = EventSourceStr(value)

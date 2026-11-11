@@ -38,9 +38,11 @@ class TestItemTimestamps(TestBaseRule):
                 item_data = self.oh.get_item(item)
 
                 if (last_state_update := item_data.last_state_update) is not None:
-                    last_state_update = Instant.from_timestamp_millis(item_data.last_state_update).to_tz(SYSTEM_TZ)
+                    last_state_update = Instant.from_timestamp(
+                        item_data.last_state_update, unit='millisecond').to_tz(SYSTEM_TZ)
                 if (last_state_change := item_data.last_state_change) is not None:
-                    last_state_change = Instant.from_timestamp_millis(item_data.last_state_change).to_tz(SYSTEM_TZ)
+                    last_state_change = Instant.from_timestamp(
+                        item_data.last_state_change, unit='millisecond').to_tz(SYSTEM_TZ)
 
                 log.debug(f' ITEM   last_state_update={last_state_update}, last_state_change={last_state_change}')
 

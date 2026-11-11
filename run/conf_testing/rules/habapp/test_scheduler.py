@@ -61,7 +61,7 @@ class TestScheduler(TestBaseRule):
             assert 0.46 <= diff <= 0.54, diff
 
         sleep(0.1)
-        assert len(self.item_states) == executions - 1
+        assert len(self.item_states) == executions + 1  # 1 on register, 9 updates and 1 on cancel
         assert self.item_states[-1].value is None
 
 
