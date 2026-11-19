@@ -399,7 +399,7 @@ Install a development version of HABApp
 To try out new features or test some functionality it's possible to install a branch directly from github.
 Installation works only in a virtual environment.
 
-New features are typically first available in the ``Develop`` branch.
+New features are typically first available in the ``master`` branch.
 
 #. Navigate to the folder where the virtual environment was created::
 
@@ -421,9 +421,9 @@ New features are typically first available in the ``Develop`` branch.
 
     python3 -m pip uninstall habapp
 
-#. Install HABApp from the github branch (here ``Develop``)::
+#. Install HABApp from the github branch (here ``master``)::
 
-    python3 -m pip install git+https://github.com/spacemanspiff2007/HABApp.git@Develop
+    python3 -m pip install git+https://github.com/spacemanspiff2007/HABApp.git@master
 
 
 #. Run HABApp as usual (e.g. through ``systemctl``) or manually with::
