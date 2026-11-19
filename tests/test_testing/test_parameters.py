@@ -9,6 +9,6 @@ class RuleWithParameter(HABApp.Rule):
         self.value = HABApp.parameters.Parameter('tests_user_param_file', 'key', default_value=123)
 
 
-def test_parameter_in_rule(testing_rules) -> None:
+def test_parameter_in_rule(rule_testing) -> None:
     rule = RuleWithParameter()
     assert rule.value == 123

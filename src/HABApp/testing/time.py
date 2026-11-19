@@ -48,7 +48,7 @@ class PatchedTimeHelper:
         )
 
 
-class AsyncioTestingProvider(AsyncioProvider):
+class HABAppTestingAsyncioProvider(AsyncioProvider):
     __slots__ = ('_patched_time', '_pending')
 
     def __init__(self, patched_time: PatchedTimeHelper) -> None:
@@ -77,6 +77,7 @@ class AsyncioTestingProvider(AsyncioProvider):
         await f
 
     async def advance_to(self, target: Instant) -> None:
+        # go to target timestamp and wake all pending futures at the proper timestamp
         while self._pending and self._pending[0][0] <= target:
             due: Instant = self._pending[0][0]
 
@@ -97,14 +98,17 @@ class AsyncioTestingProvider(AsyncioProvider):
 
             await asyncio.sleep(0.05)
 
+        # finally we reach the target time
+        self._patched_time.advance_to(target)
 
-class TestingStartTimeOptions(NamedTuple):
+
+class UserStartTimeOptions(NamedTuple):
     start: Instant | ZonedDateTime | OffsetDateTime
     keep_ticking: bool = False
 
 
 class UserTimeControl:
-    def __init__(self, asyncio: AsyncioTestingProvider) -> None:
+    def __init__(self, asyncio: HABAppTestingAsyncioProvider) -> None:
         self._asyncio: Final = asyncio
 
     async def sleep(self) -> None:

@@ -7,13 +7,13 @@ from typing import Any, Final
 import pytest
 from _pytest.fixtures import FixtureFunctionDefinition
 from pytest import MonkeyPatch  # noqa: PT013
-from whenever import PlainDateTime, ZonedDateTime
+from whenever import Instant, PlainDateTime, ZonedDateTime
 
 from HABApp.core.provider import HabAppObjProvider
 from HABApp.core.provider.provider import T
-from HABApp.testing import TestingStartTimeOptions
+from HABApp.testing import UserStartTimeOptions
 from HABApp.testing import conftest as conftest_module
-from HABApp.testing.executor import TestingExecutorFactory
+from HABApp.testing.executor import HABAppTestingExecutorFactory
 
 
 class DocHabAppObjProvider(HabAppObjProvider):
@@ -26,11 +26,18 @@ class DocHabAppObjProvider(HabAppObjProvider):
 
 
 def run(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
-        start_time: datetime | None = None, keep_ticking: bool = False,
+        start_time: Instant | datetime | None = None, keep_ticking: bool = False,
         ignore_errors: tuple[type[Exception], ...] = ()) -> None:
 
+    time_obj: Instant | ZonedDateTime
+
     if start_time is not None:
-        time_obj = PlainDateTime.from_py_datetime(start_time).assume_tz('Europe/Berlin', disambiguate='raise')
+        if isinstance(start_time, Instant):
+            time_obj = start_time
+        elif isinstance(start_time, datetime):
+            time_obj = PlainDateTime(start_time).assume_tz('Europe/Berlin', disambiguation='raise')
+        else:
+            raise TypeError()
     else:
         time_obj = ZonedDateTime.now('Europe/Berlin').replace(
             month=1, day=15, hour=14, minute=0, second=0, nanosecond=0
@@ -40,13 +47,13 @@ def run(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
 
 
 async def main(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
-               start_time: ZonedDateTime, keep_ticking: bool,
+               start_time: Instant | ZonedDateTime, keep_ticking: bool,
                ignore_errors: tuple[type[Exception], ...]):
 
-    def testing_start_time() -> TestingStartTimeOptions:
-        return TestingStartTimeOptions(start=start_time, keep_ticking=keep_ticking)
+    def user_start_time() -> UserStartTimeOptions:
+        return UserStartTimeOptions(start=start_time, keep_ticking=keep_ticking)
 
-    overrides: Final = (testing_start_time, )
+    overrides: Final = (user_start_time, )
     override_names: Final = tuple(f.__name__ for f in overrides)
 
     provider: Final = DocHabAppObjProvider()
@@ -62,7 +69,7 @@ async def main(doc_func: Callable[[HabAppObjProvider], Awaitable[Any]], *,
     for obj in overrides:
         provider.register(obj)
 
-    executor_factory: Final = await provider.get(TestingExecutorFactory)
+    executor_factory: Final = await provider.get(HABAppTestingExecutorFactory)
 
     async with asyncio.timeout(10):
         await provider.create_all()

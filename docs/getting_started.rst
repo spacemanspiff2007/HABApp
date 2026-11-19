@@ -182,6 +182,7 @@ The deltas for :class:`~HABApp.core.lib.InstantView` can be specified as
 .. exec_code::
 
     # ------------ hide: start ------------
+    from datetime import datetime
     from whenever import Instant, patch_current_time
 
     async def run(provider):
@@ -193,8 +194,7 @@ The deltas for :class:`~HABApp.core.lib.InstantView` can be specified as
        item._last_change.instant = Instant.from_utc(2024, 4, 30, 10, 30)
        item._last_update.instant = Instant.from_utc(2024, 4, 30, 10, 31)
 
-       p = patch_current_time(item._last_update.instant.add(minutes=1), keep_ticking=False)
-       p.__enter__()
+       await time_control.advance_to(item._last_update.instant.add(minutes=1))
 
        # ------------ hide: stop -------------
        import HABApp
@@ -236,7 +236,7 @@ The deltas for :class:`~HABApp.core.lib.InstantView` can be specified as
        await time_control.advance(1)
 
     import doc_runner
-    doc_runner.run(run)
+    doc_runner.run(run, start_time=datetime(2024, 4, 30))
 
 
 
@@ -304,8 +304,8 @@ Trigger an event when an item is constant
 
    # ------------ hide: start ------------
    async def run(provider):
-       from HABApp.testing import TestingItemFactory
-       f = await provider.get(TestingItemFactory)
+       from HABApp.testing import UserItemFactory
+       f = await provider.get(UserItemFactory)
        await f.create('Item', 'test_watch')
        # ------------ hide: stop -------------
 
@@ -356,8 +356,8 @@ Something similar is available for openHAB items (``oh_post_update_if``)
 
     # ------------ hide: start ------------
     async def run(provider):
-       from HABApp.testing import TestingItemFactory
-       f = await provider.get(TestingItemFactory)
+       from HABApp.testing import UserItemFactory
+       f = await provider.get(UserItemFactory)
        await f.create('Item', 'Item_Name')
     # ------------ hide: stop -------------
 

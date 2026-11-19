@@ -3,20 +3,20 @@ import pytest
 from whenever import TimeDelta
 
 from HABApp.openhab.items import NumberItem, StringItem
-from HABApp.testing import TestingItems, UserTimeControl
+from HABApp.testing import UserItems, UserTimeControl
 from tests_user.rules.rule_a import RuleA
 
 
 @pytest.fixture
-def testing_items() -> TestingItems:
-    items = TestingItems()
+def user_items() -> UserItems:
+    items = UserItems()
     items.add('Number', 'nr_test_item')
     items.add('String', 'str_test_item')
     return items
 
 
 @pytest.fixture
-def rule_a(testing_rules) -> RuleA:
+def rule_a(rule_testing) -> RuleA:
     return RuleA('test_item')
 
 
@@ -33,7 +33,7 @@ async def test_nr_item_part(rule_a: RuleA, time_control: UserTimeControl) -> Non
     assert nr.value == 3
 
 
-async def test_str_item_part(rule_a: RuleA, time_control: UserTimeControl, capsys) -> None:
+async def test_str_item_part(rule_a: RuleA, time_control: UserTimeControl) -> None:
     str_item = StringItem.get_item('str_test_item')
     str_item.oh_post_update('Initial')
 

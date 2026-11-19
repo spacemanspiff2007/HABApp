@@ -110,9 +110,9 @@ class OhItemFactory:
             )
 
             if last_state_update is not None:
-                obj._last_update.set(Instant.from_timestamp_millis(last_state_update), events=False)
+                obj._last_update.set(Instant.from_timestamp(last_state_update, unit='millisecond'), events=False)
             if last_state_change is not None:
-                obj._last_change.set(Instant.from_timestamp_millis(last_state_change), events=False)
+                obj._last_change.set(Instant.from_timestamp(last_state_change, unit='millisecond'), events=False)
         except Exception as e:
             process_exception(self.create_item, e, logger=log)
             return None

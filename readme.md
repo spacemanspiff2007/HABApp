@@ -128,6 +128,11 @@ MyOpenhabRule()
 
 # Changelog
 
+#### 26.11.0 (2026-11-19)
+- Breaking: Docker images now use ``stable`` for the latest release and ``latest`` for the development build
+  (``master`` branch). Please update your docker-compose file accordingly (e.g. change from ``latest`` to ``stable``).
+- Updated whenever to 0.11 (breaking for whenever usage in rules)
+
 #### 26.10.1 (2026-10-23)
 - Added EventSourceStr as an easy way to access the ``event.source`` parts
 - Added ``EventSourceFilter`` to filter openHAB events based on the ``bundle`` and/or ``actor`` of their source
@@ -135,7 +140,6 @@ MyOpenhabRule()
   Use ``obj.to_tuple()`` to get the tuple values
 - Events use __slots__
 - Updated dependencies
-
 
 #### 26.10.0 (2026-10-05)
 - Updated dependencies to fix an issue during installation

@@ -4,20 +4,20 @@ from eascheduler.schedulers.async_scheduler import AsyncScheduler
 from whenever import Instant
 
 from HABApp.config import ApplicationConfig
-from HABApp.testing.time import AsyncioTestingProvider
+from HABApp.testing.time import HABAppTestingAsyncioProvider
 
 
 if TYPE_CHECKING:
     from asyncio import Task
 
 
-class TestingScheduler(AsyncScheduler):
-    """Scheduler for testing that uses AsyncioTestingProvider for time keeping.
+class HABAppTestingScheduler(AsyncScheduler):
+    """Scheduler for testing that uses HABAppTestingAsyncioProvider for time keeping.
 
     Jobs are triggered through the testing provider's sleep mechanism, enabling deterministic time-travel.
     """
 
-    def __init__(self, asyncio_provider: AsyncioTestingProvider) -> None:
+    def __init__(self, asyncio_provider: HABAppTestingAsyncioProvider) -> None:
         super().__init__(event_loop=asyncio_provider.loop)
         self._asyncio: Final = asyncio_provider
         self._task: Task | None = None
@@ -39,7 +39,7 @@ class TestingScheduler(AsyncScheduler):
             self.run_jobs()
         else:
             self._task = self._asyncio.create_task(
-                self._wait_and_run(next_run), name='TestingScheduler._wait_and_run'
+                self._wait_and_run(next_run), name='HABAppTestingScheduler._wait_and_run'
             )
         return None
 

@@ -21,8 +21,8 @@ Get an even when the item is constant for 5 and for 10 seconds.
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('Item', 'test_watch')
         # ------------ hide: stop -------------
         import HABApp

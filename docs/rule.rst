@@ -94,8 +94,8 @@ An overview over the events can be found on :ref:`the HABApp event section <HABA
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('Item', 'MyItem')
         # ------------ hide: stop -------------
         from HABApp import Rule
@@ -175,8 +175,8 @@ Example
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('Item', 'MyItem')
         # ------------ hide: stop -------------
         from HABApp import Rule

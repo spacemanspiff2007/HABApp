@@ -42,9 +42,10 @@ type OhItemTypeLiteral = Literal[
 ]
 
 
-class TestingItems:
+class UserItems:
     def __init__(self) -> None:
         self._items: Final[list[dict[str, Any]]] = []
+        self._created: bool = False
 
     @overload
     def add(self, type: Literal['Item'] | type[Item], name: str, value: Any = None, *,
@@ -67,14 +68,27 @@ class TestingItems:
     def add(self, type: Literal['Thing'] | type[Thing], name: str) -> Self: ...
 
     def add(self, type: Any, name: str, value: Any = None, **kwargs: Any) -> Self:
+        if self._created:
+            msg = (
+                'Items have already been created and new items can no longer be added. '
+                'Add all items through the "user_items" fixture before the test body runs.'
+            )
+            raise RuntimeError(msg)
+
         result: dict[str, Any] = {'type': type, 'name': name, 'value': value}
         result.update(kwargs)
         self._items.append(result)
         return self
 
+    def _close(self) -> tuple[dict[str, Any], ...]:
+        self._created = True
+        objs: Final = tuple(self._items)
+        self._items.clear()
+        return objs
+
 
 # noinspection PyShadowingBuiltins
-class TestingItemFactory:
+class UserItemFactory:
     def __init__(self, event_bus: EventBus, oh_registry_handler: OhItemRegistryHandler,
                  if_oh: OpenHabSyncInterface, if_mqtt: MqttInterface, item_registry: ItemRegistry) -> None:
         self._eb: Final = event_bus
@@ -83,10 +97,9 @@ class TestingItemFactory:
         self._if_oh: Final = if_oh
         self._if_mqtt: Final = if_mqtt
 
-    async def create_items(self, cfgs: list[dict[str, Any]]) -> None:
-        for cfg in cfgs:
+    async def create_items(self, items: UserItems) -> None:
+        for cfg in items._close():
             await self.create(**cfg)
-        cfgs.clear()
         return None
 
     @overload

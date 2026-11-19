@@ -362,8 +362,8 @@ This example shows how to fade a Dimmer from 0 to 100 in 30 secs
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('DimmerItem', 'Dimmer1')
         # ------------ hide: stop -------------
 
@@ -397,8 +397,8 @@ This example shows how to fade three values together (e.g. for an RGB strip)
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('DimmerItem', 'Dimmer1')
     # ------------ hide: stop -------------
 
@@ -451,8 +451,8 @@ The lights will only turn on after 4 and before 8 and two movement sensors are u
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('Switch', 'RoomLights')
         await factory.create('Number', 'MovementSensor1')
         await factory.create('Number', 'MovementSensor2')
@@ -651,8 +651,8 @@ The SwitchItemMode is same as ValueMode but enabled/disabled of the mode is cont
 
     # ------------ hide: start ------------
     async def run(provider):
-        from HABApp.testing import TestingItemFactory
-        factory = await provider.get(TestingItemFactory)
+        from HABApp.testing import UserItemFactory
+        factory = await provider.get(UserItemFactory)
         await factory.create('Switch', 'Automatic_Enabled', value='ON')
     # ------------ hide: stop -------------
         import HABApp
