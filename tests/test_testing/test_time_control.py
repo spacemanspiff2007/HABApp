@@ -35,14 +35,9 @@ async def create_task_tracked() -> AsyncGenerator[Callable[[Coroutine], None], N
             await t
 
 
-async def test_single_sleep_is_not_enough_to_drain_a_multi_hop_task_chain(
+async def test_sleep_works_for_multiple_tasks(
         time_control: UserTimeControl, create_task_tracked: Callable[[Coroutine], None]
 ) -> None:
-    """Reproduces why a single ``time_control.sleep()`` call is not enough to settle a chain of
-    reactive hops: it only does one extra event-loop turn, which lets exactly one already
-    scheduled task run. If that task schedules a *new* task (the next hop), the new task only
-    gets a chance to run on the *next* turn - so this test fails as long as ``chain_length > 1``.
-    """
     chain_length: Final = 10_000
     ran_steps: list[int] = []
 
@@ -53,6 +48,7 @@ async def test_single_sleep_is_not_enough_to_drain_a_multi_hop_task_chain(
 
     create_task_tracked(hop(0))
 
+    # ensure that this single sleep processes all the scheduled tasks
     await time_control.sleep()
 
     assert ran_steps == list(range(chain_length))
@@ -62,12 +58,6 @@ async def test_advance_drains_a_scheduled_multi_hop_task_chain_repeatedly(
         time_control: UserTimeControl, testing_scheduler: HABAppTestingScheduler,
         create_task_tracked: Callable[[Coroutine], None]
 ) -> None:
-    """A job is scheduled through the (eascheduler based) scheduler to run 2 seconds in the future.
-    Once it runs it starts a chain of 200 reactive hops (same pattern as above, chained via
-    ``create_task``). ``time_control.advance(2)`` has to both move the clock forward to the point
-    where the job fires *and* fully drain the resulting 200-hop chain. This is repeated a second
-    time with a newly scheduled job to make sure the mechanism works deterministically more than once.
-    """
     job_builder: Final = JobBuilder(testing_scheduler, AsyncExecutor)
     chain_length: Final = 10_000
 
@@ -84,13 +74,14 @@ async def test_advance_drains_a_scheduled_multi_hop_task_chain_repeatedly(
     # Nothing has been scheduled yet
     assert ran_steps == []
 
-    # Schedule the first chain 2 seconds in the future
+    # Schedule the chains
     job_builder.once(2, start_chain, 0)
     job_builder.once(4, start_chain, chain_length)
 
+    # ensure that after advance everything is processed
     await time_control.advance(2)
     assert ran_steps == list(range(chain_length))
 
-    # Schedule a second chain 2 more seconds in the future
+    # ensure that after a second advance everything is processed
     await time_control.advance(2)
     assert ran_steps == list(range(2 * chain_length))
