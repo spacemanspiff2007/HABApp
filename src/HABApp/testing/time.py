@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import Future
+from asyncio import Future, Task
 from datetime import timedelta
 from typing import Final, NamedTuple, override
 
@@ -60,6 +60,20 @@ class HABAppTestingAsyncioProvider(AsyncioProvider):
     def _pending_sort(obj: tuple[Instant, Future]) -> Instant:
         return obj[0]
 
+    @staticmethod
+    async def _wait_for_tasks() -> None:
+        sleep_count: Final = 250
+
+        seen: set[Task] = set()
+        while True:
+            new: set[Task] = asyncio.all_tasks()
+            if new == seen:
+                break
+            seen = new
+
+            for _ in range(sleep_count):
+                await asyncio.sleep(0)
+
     @override
     async def sleep(self, target: Instant | TimeDelta | float) -> None:
 
@@ -77,6 +91,10 @@ class HABAppTestingAsyncioProvider(AsyncioProvider):
         await f
 
     async def advance_to(self, target: Instant) -> None:
+
+        # Make sure the pending Futures can be properly populated, e.g. if we schedule a task
+        await self._wait_for_tasks()
+
         # go to target timestamp and wake all pending futures at the proper timestamp
         while self._pending and self._pending[0][0] <= target:
             due: Instant = self._pending[0][0]
@@ -96,10 +114,11 @@ class HABAppTestingAsyncioProvider(AsyncioProvider):
                 if not f.cancelled():
                     f.set_result(None)
 
-            await asyncio.sleep(0.05)
+            await self._wait_for_tasks()
 
         # finally we reach the target time
         self._patched_time.advance_to(target)
+        await self._wait_for_tasks()
 
 
 class UserStartTimeOptions(NamedTuple):
@@ -123,8 +142,5 @@ class UserTimeControl:
         if target < Instant.now():
             msg = 'Can only go into the future, not backwards in time'
             raise ValueError(msg)
-
-        # if we created a task we need some time for it to start and get ready
-        await asyncio.sleep(0)
 
         return await self._asyncio.advance_to(target)
