@@ -12,6 +12,7 @@ from HABApp.runtime.debug_traceback import DebugTraceback
 
 
 async def async_main() -> int | str:
+    asyncio.current_task().set_name('HABAppMainTask')
 
     loop = asyncio.get_event_loop()
     loop.slow_callback_duration = 0.02
